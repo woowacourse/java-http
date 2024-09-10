@@ -15,10 +15,10 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public String process(String uri) {
+    public HttpResponse process(String uri) {
         if (EMPTY_URI.equals(uri)) {
-            return DEFAULT_URI;
+            return HttpResponse.of("static" + DEFAULT_URI, HttpStatusCode.OK);
         }
-        return uri;
+        return HttpResponse.of("static" + uri, HttpStatusCode.OK);
     }
 }

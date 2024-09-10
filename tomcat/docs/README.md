@@ -28,8 +28,8 @@ Connection: keep-alive
 
 ### 2단계 기능 요구 사항
 
-- [ ] 로그인 성공 시 응답 헤더에 http status code를 302로 반환하고, `/index.html`로 리다이렉트하는 기능 구현
-- [ ] 로그인 실패 시 `401.html`로 리다이렉트
+- [x] 로그인 성공 시 응답 헤더에 http status code를 302로 반환하고, `/index.html`로 리다이렉트하는 기능 구현
+- [x] 로그인 실패 시 `401.html`로 리다이렉트
 
 - [ ] `http://localhost:8080/register` 접속 시 회원가입 페이지(register.html) 응답 기능 구현
     - [ ] 회원가입 페이지를 보여줄 때는 HTTP method GET 사용

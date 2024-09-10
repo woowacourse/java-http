@@ -3,17 +3,28 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class StaticResourceControllerTest {
 
     @Test
-    @DisplayName("빈 요청이 왔을 때 기본 파일이름을 반환한다.")
-    void process() {
+    @DisplayName("빈 요청이 왔을 때 기본 파일이름을 통해 결과를 반환한다.")
+    void process() throws IOException {
         Controller controller = StaticResourceController.getInstance();
 
-        String result = controller.process("/");
+        HttpResponse httpResponse = controller.process("/");
 
-        assertThat(result).isEqualTo("/index.html");
+        URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(httpResponse.getResponse()).isEqualTo(expected);
     }
 }

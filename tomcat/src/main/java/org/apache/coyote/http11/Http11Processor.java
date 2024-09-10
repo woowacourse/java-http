@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.domain.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private HttpStatusCode httpStatusCode;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.httpStatusCode = HttpStatusCode.OK;
     }
 
     @Override
@@ -43,15 +46,18 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = getPathFromUrl(url);
             responseBody = updateResponseBody(path, responseBody);
-
-            String extension = path.split("\\.")[1];
             String contentType = "text/html";
-            if(extension.equals("css")) {
-                contentType = "text/css";
+
+
+            if(!path.equals("/")) {
+                String extension = path.split("\\.")[1];
+                if (extension.equals("css")) {
+                    contentType = "text/css";
+                }
             }
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getName() + " ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
@@ -65,40 +71,43 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String updateResponseBody(String path, String responseBody) throws IOException {
-        if(!path.equals("/")) {
-            URL resource = getClass().getClassLoader().getResource("static" + path);;
+        if (!path.equals("/")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
             final Path filePath = new File(resource.getPath()).toPath();
             responseBody = Files.readString(filePath);
         }
         return responseBody;
     }
 
-    private static String getPathFromUrl(String path) {
-        String url = path;
-        if(path.contains("/login")) {
-            url = separateQueryString(path, url);
+    private String getPathFromUrl(String url) {
+        String path = url;
+        if (url.contains("/login")) {
+            path = separateQueryString(url, path);
         }
-        return url;
+        return path;
     }
 
-    private static String separateQueryString(String path, String url) {
-        if(path.contains("?")) {
-            int index = path.indexOf("?");
-            String queryString = path.substring(index + 1);
-            url = path.substring(0, index) + ".html";
-            validateAccount(queryString);
+    private String separateQueryString(String url, String path) {
+        if (url.contains("?")) {
+            int index = url.indexOf("?");
+            String queryString = url.substring(index + 1);
+            path = validateAccount(queryString);
         }
-        return url;
+        return path + ".html";
     }
 
-    private static void validateAccount(String queryString) {
+    private String validateAccount(String queryString) {
         String[] params = queryString.split("&");
         String account = params[0].split("=")[1];
         String password = params[1].split("=")[1];
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        if(user.checkPassword(password)) {
-            log.info(user.toString());
+        if (!user.checkPassword(password)) {
+            httpStatusCode = HttpStatusCode.UNAUTHORIZED;
+            return "/401";
         }
+        httpStatusCode = HttpStatusCode.FOUND;
+        log.info(user.toString());
+        return "/index";
     }
 }

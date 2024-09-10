@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MediaType;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
@@ -36,14 +37,14 @@ public class HttpResponse {
 
     public void setContentType(HttpRequest httpRequest) {
         if (httpRequest.matchesFileExtension(".css")) {
-            this.httpResponseHeader.add("Content-Type", "text/css");
+            this.httpResponseHeader.add("Content-Type", MediaType.TEXT_CSS.getValue());
             return;
         }
         if (httpRequest.matchesFileExtension(".js")) {
-            this.httpResponseHeader.add("Content-Type", "application/javascript");
+            this.httpResponseHeader.add("Content-Type", MediaType.APPLICATION_JAVASCRIPT.getValue());
             return;
         }
-        this.httpResponseHeader.add("Content-Type", "text/html;charset=utf-8");
+        this.httpResponseHeader.add("Content-Type", MediaType.TEXT_HTML.getValue());
     }
 
     public void setHttpResponseBody(String resourceName) throws IOException {

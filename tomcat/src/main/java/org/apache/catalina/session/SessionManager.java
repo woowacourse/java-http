@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SessionManager {
-    private static final SessionManager SESSION_MANAGER = new SessionManager(new HashMap<>());
+    private static final SessionManager sessionManager = new SessionManager(new HashMap<>());
 
     private Map<String, Session> sessions;
 
@@ -14,7 +14,7 @@ public class SessionManager {
     }
 
     public static SessionManager getInstance() {
-        return SESSION_MANAGER;
+        return sessionManager;
     }
 
     public Session findSessionById(String sessionId) {

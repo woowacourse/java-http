@@ -7,6 +7,7 @@ import org.apache.coyote.http11.StaticResourceLoader;
 public class StaticResourceReturnValueResolver implements ReturnValueResolver {
 
     private static final String REDIRECT_PREFIX = "redirect:";
+    private static final String EXTENSION_SEPARATOR = ".";
 
     @Override
     public boolean supportsReturnType(Class<?> returnType) {
@@ -22,7 +23,7 @@ public class StaticResourceReturnValueResolver implements ReturnValueResolver {
                     .build();
         }
         byte[] resource = StaticResourceLoader.load(path);
-        String extension = path.substring(path.lastIndexOf(".") + 1);
+        String extension = path.substring(path.lastIndexOf(EXTENSION_SEPARATOR) + 1);
         String responseBody = new String(resource);
         return HttpResponse.builder()
                 .ok()

@@ -1,9 +1,30 @@
 handlebars:
   suffix: .html
 
+#server:
+#  tomcat:
+#    accept-count: 1
+#    max-connections: 1
+#    threads:
+#      max: 2
+
+#server:
+#  tomcat:
+#    accept-count: 100
+#    max-connections: 200
+#    threads:
+#      max: 50
+
 server:
-  tomcat:
-    accept-count: 1
-    max-connections: 1
-    threads:
-      max: 2
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 0
+
+spring:
+  resources:
+    static:
+      cache:
+        cachecontrol:
+          max-age: 365d
+          public: true

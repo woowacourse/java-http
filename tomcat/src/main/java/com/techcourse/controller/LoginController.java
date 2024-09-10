@@ -17,6 +17,7 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final SessionManager sessionManager = new SessionManager();
+    private static final String JSESSIONID = "JSESSIONID=";
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -39,7 +40,7 @@ public class LoginController extends AbstractController {
             response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
             response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addHeader(HttpHeaders.LOCATION, "/index.html");
-            response.addHeader(HttpHeaders.SET_COOKIE, "JSESSIONID=" + jSessionId);
+            response.addHeader(HttpHeaders.SET_COOKIE, JSESSIONID + jSessionId);
             response.addBody(responseBody);
 
         } else {
@@ -57,7 +58,7 @@ public class LoginController extends AbstractController {
         Map<String, String> headers = request.getHeaders();
         String responseBody = new String(request.toHttpResponseBody());
         if (headers.containsKey(HttpHeaders.COOKIE) &&
-                headers.get(HttpHeaders.COOKIE).startsWith("JSESSIONID=")) {
+                headers.get(HttpHeaders.COOKIE).startsWith(JSESSIONID)) {
             String jSessionId = headers.get(HttpHeaders.COOKIE).split("=")[1];
             Session session = sessionManager.findSession(jSessionId);
 

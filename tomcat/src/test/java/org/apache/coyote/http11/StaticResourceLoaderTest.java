@@ -12,7 +12,7 @@ public class StaticResourceLoaderTest {
     void loadStaticResource() {
         // given
         String path = "/someResource.txt";
-        String expected = "hello test";
+        String expected = "hello test\n";
         StaticResourceLoader loader = new StaticResourceLoader();
 
         // when
@@ -27,7 +27,7 @@ public class StaticResourceLoaderTest {
     void loadStaticResourceWithoutExtension() {
         // given
         String path = "/register";
-        String expected = "register content";
+        String expected = "register content\n";
         StaticResourceLoader loader = new StaticResourceLoader();
 
         // when

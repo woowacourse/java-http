@@ -13,7 +13,6 @@ public class ServletRequestHandler {
     private static final String SUCCESS_STATUS_CODE = "200 OK";
     private static final String FOUND_STATUS_CODE = "302 Found";
     private static final String UNAUTHORIZED_STATUS_CODE = "401 Unauthorized";
-    private static final String STATIC_PATH_PREFIX = "static";
     private static final String DEFAULT_HTML_PATH = ".html";
 
     private final ViewResolver viewResolver;
@@ -64,13 +63,13 @@ public class ServletRequestHandler {
     }
 
     private Http11Response handleGetLoginSuccess() {
-        final String path = parseStaticPath("/index.html");
+        final String path = "/index.html";
         final String body = viewResolver.resolve(path);
         return createResponse(FOUND_STATUS_CODE, path, body);
     }
 
     private Http11Response handleGetLoginFailed() {
-        final String path = parseStaticPath("/401.html");
+        final String path = "/401.html";
         final String body = viewResolver.resolve(path);
         return createResponse(UNAUTHORIZED_STATUS_CODE, path, body);
     }
@@ -81,17 +80,12 @@ public class ServletRequestHandler {
     }
 
     private Http11Response handleGetStatic(String requestURI) {
-        final String path = parseStaticPath(requestURI);
-        final String body = viewResolver.resolve(path);
-        return createResponse(SUCCESS_STATUS_CODE, path, body);
+        final String body = viewResolver.resolve(requestURI);
+        return createResponse(SUCCESS_STATUS_CODE, requestURI, body);
     }
 
     private Http11Response createResponse(String statusCode, String path, String body) {
         final String contentType = Http11ContentTypeParser.parse(path);
         return new Http11Response(statusCode, contentType, body);
-    }
-
-    private String parseStaticPath(String filePath) {
-        return STATIC_PATH_PREFIX + filePath;
     }
 }

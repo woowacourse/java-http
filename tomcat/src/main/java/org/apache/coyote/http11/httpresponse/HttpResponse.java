@@ -1,8 +1,15 @@
 package org.apache.coyote.http11.httpresponse;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaderName;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class HttpResponse {
 
@@ -18,6 +25,18 @@ public class HttpResponse {
         this.httpStatusLine = httpStatusLine;
         this.httpResponseHeader = httpResponseHeader;
         this.httpResponseBody = httpResponseBody;
+    }
+
+    public static Builder ok(HttpRequest httpRequest) {
+        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK));
+    }
+
+    public static Builder found(HttpRequest httpRequest) {
+        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND));
+    }
+
+    public static Builder unauthorized(HttpRequest httpRequest) {
+        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED));
     }
 
     public byte[] getBytes() {
@@ -78,6 +97,22 @@ public class HttpResponse {
 
         public Builder setCookie(String setCookie) {
             headers.put(HttpHeaderName.SET_COOKIE, setCookie);
+            return this;
+        }
+
+        public Builder staticResource(String path) throws IOException, URISyntaxException {
+            String fileName = "static" + path;
+            var resourceUrl = getClass().getClassLoader().getResource(fileName);
+            if (resourceUrl == null) {
+                throw new NotFoundException("존재하지 않는 경로입니다.");
+            }
+            Path filePath = Path.of(resourceUrl.toURI());
+            String responseBody = new String(Files.readAllBytes(filePath));
+
+            contentType(Files.probeContentType(filePath) + ";charset=utf-8");
+            contentLength(String.valueOf(responseBody.getBytes().length));
+            this.httpResponseBody = new HttpResponseBody(responseBody);
+
             return this;
         }
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.config.UnauthorizedInterceptor;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class RequestMapping {
@@ -25,9 +26,7 @@ public class RequestMapping {
         if (controllers.containsKey(path)) {
             return controllers.get(path);
         }
-        if (getClass().getClassLoader().getResource("static" + path) == null) {
-            return new NotFoundController();
-        }
-        return new DefaultController();
+
+        throw new NotFoundException("존재하지 않는 경로입니다.");
     }
 }

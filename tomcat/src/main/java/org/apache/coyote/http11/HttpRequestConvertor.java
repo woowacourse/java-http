@@ -13,29 +13,25 @@ public class HttpRequestConvertor {
 
     private static final String HEADER_DELIMITER = ":";
 
-    public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) {
-        try {
-            String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                throw new IllegalArgumentException("요청이 비어 있습니다.");
-            }
-
-            HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
-
-            Map<String, String> headers = getHeaders(bufferedReader);
-
-            HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
-
-            if (httpRequestHeader.containsKey("Content-Length")) {
-                HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
-
-                return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
-            }
-
-            return new HttpRequest(httpRequestLine, httpRequestHeader);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+    public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        if (requestLine == null) {
+            throw new IllegalArgumentException("요청이 비어 있습니다.");
         }
+
+        HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
+
+        Map<String, String> headers = getHeaders(bufferedReader);
+
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
+
+        if (httpRequestHeader.containsKey("Content-Length")) {
+            HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
+
+            return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+        }
+
+        return new HttpRequest(httpRequestLine, httpRequestHeader);
     }
 
     private static HttpRequestBody getHttpRequestBody(

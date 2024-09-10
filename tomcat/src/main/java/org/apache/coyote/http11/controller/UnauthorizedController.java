@@ -21,11 +21,10 @@ public class UnauthorizedController extends AbstractController {
         try {
             String fileName = "static/401.html";
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
-            HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
 
-            return new HttpResponse.Builder(httpStatusLine)
+            return HttpResponse.unauthorized(httpRequest)
                     .contentType(Files.probeContentType(filePath) + ";charset=utf-8")
                     .contentLength(String.valueOf(responseBody.getBytes().length))
                     .responseBody(responseBody)

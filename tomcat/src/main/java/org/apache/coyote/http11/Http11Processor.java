@@ -130,10 +130,10 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         }
         if (httpRequest.getMethod().equals("POST")) {
-            Map<String, List<String>> queryParams = httpRequest.getQueryParams();
-            String account = queryParams.get("account").getFirst();
-            String password = queryParams.get("password").getFirst();
-            String email = queryParams.get("email").getFirst();
+            Map<String, List<String>> body = httpRequest.getBody();
+            String account = body.get("account").getFirst();
+            String password = body.get("password").getFirst();
+            String email = body.get("email").getFirst();
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             processFilesWithStatus(outputStream, "/index.html", "html", 200, "OK");
@@ -175,6 +175,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (user.checkPassword(body.get("password").getFirst())) {
+                log.info("user : {}", user);
                 Session session = Session.createRandomSession();
                 session.setAttribute("user", user);
                 Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());

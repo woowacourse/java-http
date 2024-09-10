@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 public class ResponseBody {
     private final String body;
 
-    public ResponseBody(String body) throws IOException {
+    public ResponseBody(String body) {
         this.body = body;
     }
 

@@ -51,7 +51,7 @@ public class HttpResponse {
         return stringBuilder;
     }
 
-    private String getBody() {
+    public String getBody() {
         return new String(responseBody);
     }
 

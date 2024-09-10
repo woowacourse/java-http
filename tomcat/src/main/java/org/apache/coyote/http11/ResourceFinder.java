@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.NoSuchElementException;
 
 class ResourceFinder {
 
@@ -19,7 +20,7 @@ class ResourceFinder {
     public static byte[] readResource(String resourceName, ClassLoader classLoader) {
         URL resourcePath = classLoader.getResource(String.format(RESOURCE_PATH_FORMAT, resourceName));
         if (resourcePath == null) {
-            throw new RuntimeException();
+            throw new NoSuchElementException("존재하지 않는 리소스입니다.");
         }
 
         try (InputStream inputStream = new FileInputStream(resourcePath.getPath())) {

@@ -32,6 +32,10 @@ public class HttpRequest {
         return requestLine.getQueryParameter();
     }
 
+    public boolean hasJSessionCookie() {
+        return headers.hasJSessionCookie();
+    }
+
     public String getUri() {
         return requestLine.getUri();
     }

@@ -38,7 +38,7 @@ Connection: keep-alive
 
 - [x] 로그인 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경
 
-- [ ] Cookie에 JSESSIONID 값 저장
+- [x] Cookie에 JSESSIONID 값 저장
 - [ ] Session 구현
     - [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크
     - [ ] 로그인된 상태에서 /login 페이지에 접근 시 index.html 페이지로 리다이렉트 처리

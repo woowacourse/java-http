@@ -10,6 +10,8 @@ import org.apache.coyote.http11.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
@@ -28,7 +30,13 @@ public class LoginController implements Controller {
 
             User user = findUserByAccountAndPassword(account, password);
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
-            return HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+
+            HttpResponse httpResponse = HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+            if (!request.hasJSessionCookie()) {
+                String uuid = UUID.randomUUID().toString();
+                httpResponse.setJSessionCookie(uuid);
+            }
+            return httpResponse;
         } catch (IllegalArgumentException e) {
             log.info("로그인 실패 : {}", e.getMessage(), e);
             return HttpResponse.of("/401.html", HttpStatusCode.FOUND);

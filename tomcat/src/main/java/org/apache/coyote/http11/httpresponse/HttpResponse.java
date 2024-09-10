@@ -36,4 +36,8 @@ public class HttpResponse {
                 "",
                 body);
     }
+
+    public void setJSessionCookie(String value) {
+        headers.setCookie("Set-Cookie", "JSESSIONID=" + value);
+    }
 }

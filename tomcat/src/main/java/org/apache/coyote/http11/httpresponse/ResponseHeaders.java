@@ -22,4 +22,8 @@ public class ResponseHeaders {
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));
     }
+
+    public void setCookie(String key, String value) {
+        headers.put(key, value);
+    }
 }

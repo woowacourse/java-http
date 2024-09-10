@@ -25,6 +25,17 @@ public class RequestHeaders {
         return headers;
     }
 
+    public boolean hasJSessionCookie() {
+        if (headers.containsKey("Cookie")) {
+            return headers.get("Cookie").contains("JSESSIONID");
+        }
+        return false;
+    }
+
+    public boolean hasCookie() {
+        return headers.containsKey("Cookie");
+    }
+
     public int getContentLength() {
         String contentLength = headers.get("Content-Length");
         if (contentLength == null) {

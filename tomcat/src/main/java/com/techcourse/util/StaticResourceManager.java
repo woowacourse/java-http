@@ -1,24 +1,27 @@
 package com.techcourse.util;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class StaticResourceManager {
-    private static final String CRLF = "\r\n";
-
+    
     private StaticResourceManager() {
     }
 
     public static boolean isExist(String filePath) {
         URL resource = ClassLoader.getSystemClassLoader().getResource(filePath);
-        return resource != null;
+        try {
+            File file = new File(Objects.requireNonNull(resource).toURI());
+            return file.exists() && file.isFile();
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
     public static String read(String filePath) {
@@ -36,9 +39,7 @@ public class StaticResourceManager {
                     .map(Path::of)
                     .orElseThrow(() -> new RuntimeException(filePath + " not found"));
 
-            StringBuilder sb = new StringBuilder();
-            Files.readAllLines(path).forEach(line -> sb.append(line).append("\n"));
-            return sb.toString();
+            return new String(Files.readAllBytes(path));
         } catch (IOException e) {
             throw new RuntimeException();
         }

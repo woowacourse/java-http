@@ -7,10 +7,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
+    private static final GreetingController greetingController = new GreetingController();
     private static final LoginController loginController = new LoginController();
     private static final RegisterController registerController = new RegisterController();
 
     private static final Map<String, Controller> controllers = Map.of(
+            "/", greetingController,
             "/login", loginController,
             "/register", registerController
     );

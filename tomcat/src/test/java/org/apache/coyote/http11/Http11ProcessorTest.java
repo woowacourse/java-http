@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 import java.io.File;
@@ -12,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    @DisplayName("HTTP/1.1 요청을 처리한다.")
     @Test
     void process() {
         // given
@@ -23,39 +29,77 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Length: 12",
+                "Content-Type: text/html;charset=utf-8",
                 "",
                 "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Test
-    void index() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+    @DisplayName("정적 파일 응답 테스트")
+    @Nested
+    class StaticResourceTest {
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        @DisplayName("HTML 파일을 응답한다.")
+        @ParameterizedTest
+        @ValueSource(strings = {"/login.html", "/register.html"})
+        void htmlFile(String requestPath) throws IOException {
+            // given
+            String httpRequest = String.join("\r\n",
+                    "GET " + requestPath + " HTTP/1.1 ",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "\r\n"
+            );
 
-        // when
-        processor.process(socket);
+            // when
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
+            processor.process(socket);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Length: 5564\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            // then
+            String responseBody = readFileContent(requestPath);
+            int contentLength = responseBody.getBytes().length;
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK\r\n",
+                    "Content-Length: " + contentLength + "\r\n",
+                    "Content-Type: text/html;charset=utf-8\r\n",
+                    responseBody
+            );
+        }
 
-        assertThat(socket.output()).isEqualTo(expected);
+        @DisplayName("CSS 파일을 응답한다.")
+        @Test
+        void cssFile() throws IOException {
+            // given
+            String httpRequest = String.join("\r\n",
+                    "GET /css/styles.css HTTP/1.1 ",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "\r\n"
+            );
+
+            // when
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
+            processor.process(socket);
+
+            // then
+            String responseBody = readFileContent("/css/styles.css");
+            int contentLength = responseBody.getBytes().length;
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK\r\n",
+                    "Content-Length: " + contentLength + "\r\n",
+                    "Content-Type: text/css;charset=utf-8\r\n",
+                    responseBody
+            );
+        }
+
+        private String readFileContent(String fileName) throws IOException {
+            URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+            return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+        }
     }
 }

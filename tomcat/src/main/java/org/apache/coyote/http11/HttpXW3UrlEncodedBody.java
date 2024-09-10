@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class HttpXW3UrlEncodedBody implements HttpBody {
+class HttpXW3UrlEncodedBody implements HttpBody {
 
     private static final String PAIR_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";

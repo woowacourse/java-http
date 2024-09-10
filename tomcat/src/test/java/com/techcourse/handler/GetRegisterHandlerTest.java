@@ -1,8 +1,8 @@
 package com.techcourse.handler;
 
 import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.HttpBodyFactory;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpXW3UrlEncodedBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +31,6 @@ class GetRegisterHandlerTest {
     }
 
     private HttpRequest createHttpRequest(String startLine) {
-        return HttpRequest.createHttp11Message(startLine, Header.empty(), new HttpXW3UrlEncodedBody(null));
+        return HttpRequest.createHttp11Message(startLine, Header.empty(), HttpBodyFactory.generateDefault(null));
     }
 }

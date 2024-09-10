@@ -22,8 +22,7 @@ public class DefaultServlet implements Servlet {
     );
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws IOException {
-
+    public void service(HttpRequest request, HttpResponse response) {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI());
 
         String fileContent = getFileContent(resource);

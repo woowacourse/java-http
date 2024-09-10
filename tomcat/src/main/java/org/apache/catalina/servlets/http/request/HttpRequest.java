@@ -17,7 +17,6 @@ import org.apache.catalina.servlets.http.SessionManager;
 public class HttpRequest {
 
     private static final String SP = " ";
-    private static final String CRLF = "\n";
 
     private HttpMethod method;
     private String path;
@@ -49,11 +48,11 @@ public class HttpRequest {
     }
 
     private String parseStartLine(String request) {
-        return request.split("\n")[0];
+        return request.split("\r\n")[0];
     }
 
     private Map<String, String> parseHeaders(String request) {
-        String[] startLineAndHeaders = request.split(CRLF+CRLF)[0].split(CRLF);
+        String[] startLineAndHeaders = request.split("\r\n\r\n")[0].split("\r\n");
         String[] headers = Arrays.copyOfRange(startLineAndHeaders, 1, startLineAndHeaders.length);
         return Arrays.stream(headers)
                 .map(header -> header.split(": ", 2))
@@ -61,7 +60,7 @@ public class HttpRequest {
     }
 
     private String parseBody(String request) {
-        String[] split = request.split("\n\n");
+        String[] split = request.split("\r\n\r\n");
         if (split.length > 1) {
             return split[1];
         }

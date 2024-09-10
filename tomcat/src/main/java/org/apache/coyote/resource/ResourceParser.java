@@ -14,6 +14,14 @@ public class ResourceParser {
         }
     }
 
+    public static File getRequestFile(String filePath) {
+        try {
+            return getFile(filePath);
+        } catch (NullPointerException exception) {
+            return getFile("/404.html");
+        }
+    }
+
     private static File getFile(String filePath) throws NullPointerException {
         String resourcePath = "static" + filePath;
         URL resource = ResourceParser.class.getClassLoader().getResource(resourcePath);

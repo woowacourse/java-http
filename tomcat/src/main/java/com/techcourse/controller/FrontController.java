@@ -21,6 +21,7 @@ public class FrontController {
 
     static {
         controllerMap.put("/", new WelcomeController());
+        controllerMap.put("/index", new IndexController());
         controllerMap.put("/login", new LoginController());
     }
 

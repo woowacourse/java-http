@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -23,31 +24,28 @@ public class LoginController implements Controller {
     @Override
     public void service(HttpRequest req, HttpResponse resp) {
         if (req.getMethod().equals(HttpMethod.GET)) {
-            try {
-                File requestFile = ResourceParser.getRequestFile(req);
+            if (req.getQueries().isEmpty()) {
+                File requestFile = ResourceParser.getRequestFile("/login.html");
                 resp.setResponse("200 OK", requestFile);
-            } catch (IOException e) {
-                log.warn("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(req.getPath()));
+                return;
             }
 
-            Map<String, String> requestQueries = req.getQueries();
+            String account = req.getQueryValue(ACCOUNT);
+            String password = req.getQueryValue(PASSWORD);
 
-            String account = "";
-            String password = "";
-            for (Entry<String, String> entry : requestQueries.entrySet()) {
-                if (entry.getKey().equals(ACCOUNT)) {
-                    account = entry.getValue();
-                } else if (entry.getKey().equals(PASSWORD)) {
-                    password = entry.getValue();
-                }
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                log.error("찾으시는 유저가 존재하지 않습니다. (Account: {})", account);
+                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
+                return;
+            }
+            if (!user.get().checkPassword(password)) {
+                log.error("찾으시는 유저 정보가 잘못되었습니다. (Account: {}, Password: {})", account, password);
+                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
+                return;
             }
 
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("찾으시는 유저가 존재하지 않습니다."));
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("찾으시는 유저가 존재하지 않습니다.");
-            }
-
+            resp.setRedirect("302 Found", "/index.html");
             log.info(user.toString());
 
         } else {

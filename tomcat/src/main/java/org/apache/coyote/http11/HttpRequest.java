@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
@@ -82,15 +83,12 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public boolean hasFilePath() {
-        if (path.contains(".")) {
-            int extensionIndex = path.lastIndexOf(".");
-            if (path.substring(extensionIndex).length() > 1) {
-                return true;
-            }
-        }
-
-        return false;
+    public String getQueryValue(String key) {
+        return queries.entrySet().stream()
+                .filter(queryKey -> queryKey.getKey().equals(key))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Key(%s) 값이 존재하지 않습니다.".formatted(key)))
+                .getValue();
     }
 
     public HttpMethod getMethod() {

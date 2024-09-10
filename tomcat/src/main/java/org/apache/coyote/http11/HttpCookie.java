@@ -5,6 +5,9 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_NAME_VALUE_DELIMITER = "=";
+
     private final Map<String, String> cookie;
 
     public HttpCookie() {
@@ -12,9 +15,9 @@ public class HttpCookie {
     }
 
     public void setCookie(String value) {
-        for (String cookiePair : value.split("; ")) {
-            String cookieName = cookiePair.split("=")[0];
-            String cookieValue = cookiePair.split("=")[1];
+        for (String cookiePair : value.split(COOKIE_DELIMITER)) {
+            String cookieName = cookiePair.split(COOKIE_NAME_VALUE_DELIMITER)[0];
+            String cookieValue = cookiePair.split(COOKIE_NAME_VALUE_DELIMITER)[1];
             cookie.put(cookieName, cookieValue);
         }
     }

@@ -43,11 +43,12 @@ public class LoginRequestHandler implements RequestHandler {
         if (account == null) {
             return false;
         }
-        Optional<User> verifiedUser = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-        if (verifiedUser.isPresent()) {
-            log.info("Verified user: {}", verifiedUser);
-        }
-        return verifiedUser.isPresent();
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
+        foundUser.filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> log.info("Verified user: {}", user),
+                        () -> log.info("Invalid user")
+                );
+        return foundUser.isPresent();
     }
 }

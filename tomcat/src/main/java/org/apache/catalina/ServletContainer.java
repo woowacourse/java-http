@@ -1,5 +1,6 @@
 package org.apache.catalina;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class ServletContainer {
         this.servletMapping = servletsMapping;
     }
 
-    public HttpResponse dispatch(HttpRequest request) throws Exception {
+    public HttpResponse dispatch(HttpRequest request) throws IOException {
         String requestUrl = request.getRequestUrl();
         HttpResponse response = new HttpResponse();
 
@@ -65,7 +66,7 @@ public class ServletContainer {
             try {
                 servletMapping.get(mappingUrl).service(request, response);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e.getMessage());
             }
         };
     }

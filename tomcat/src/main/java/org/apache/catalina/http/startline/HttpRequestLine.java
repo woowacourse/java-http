@@ -2,12 +2,8 @@ package org.apache.catalina.http.startline;
 
 import java.nio.file.Path;
 import org.apache.catalina.exception.CatalinaException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpRequestLine {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
@@ -36,9 +32,7 @@ public class HttpRequestLine {
         if (values.length == 3) {
             return values;
         }
-        RuntimeException exception = new CatalinaException("Invalid start line: " + startLine);
-        log.error(exception.getMessage(), exception);
-        throw exception;
+        throw new CatalinaException("Invalid start line: " + startLine);
     }
 
     public boolean isTargetStatic() {

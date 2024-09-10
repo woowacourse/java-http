@@ -7,13 +7,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.apache.catalina.exception.CatalinaException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpHeaders {
 
     public static final String COOKIE_HEADER = "Cookie: ";
-    private static final Logger log = LoggerFactory.getLogger(HttpHeaders.class);
     private static final String SEPARATOR = ": ";
 
     private final Map<String, String> headers;
@@ -50,9 +47,7 @@ public class HttpHeaders {
         if (keyAndValue.length == 2) {
             return keyAndValue;
         }
-        RuntimeException exception = new CatalinaException("Invalid header: " + header);
-        log.error(exception.getMessage(), exception);
-        throw exception;
+        throw new CatalinaException("Invalid header: " + header);
     }
 
     public String get(HttpHeader header) {

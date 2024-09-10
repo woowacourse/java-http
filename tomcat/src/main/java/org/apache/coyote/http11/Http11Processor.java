@@ -1,12 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.handler.GetLoginHandler;
-import com.techcourse.handler.GetRegisterHandler;
-import com.techcourse.handler.HelloHandler;
-import com.techcourse.handler.NotFoundHandler;
-import com.techcourse.handler.PostLoginHandler;
-import com.techcourse.handler.PostRegisterHandler;
+import com.techcourse.handler.HelloController;
+import com.techcourse.handler.LoginController;
+import com.techcourse.handler.NotFoundController;
+import com.techcourse.handler.RegisterController;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -19,7 +16,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,10 +26,21 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Manager sessionManager;
+    private final ResourceProcessor resourceProcessor;
 
     public Http11Processor(Socket connection, Manager sessionManager) {
         this.connection = connection;
         this.sessionManager = sessionManager;
+        this.resourceProcessor = new ResourceProcessor(createRequestMapping());
+    }
+
+    private RequestMapping createRequestMapping() {
+        Map<String, Controller> mapping = new HashMap<>();
+        mapping.put("/", new HelloController());
+        mapping.put("/login", new LoginController());
+        mapping.put("/register", new RegisterController());
+
+        return new RequestMapping(mapping, new NotFoundController());
     }
 
     @Override
@@ -44,10 +54,10 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = createHttpRequest(inputStream);
-            HttpResponse httpResponse = respondResource(httpRequest);
+            HttpResponse httpResponse = resourceProcessor.processResponse(httpRequest);
             outputStream.write(httpResponse.serialize());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -58,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
         Header header = createHeader(bufferedReader);
         HttpBody body = createRequestBody(bufferedReader, header);
 
-        return HttpRequest.createHttp11Message(requestLine, header, body);
+        return HttpRequest.createHttp11Request(requestLine, header, body, sessionManager);
     }
 
     private Header createHeader(BufferedReader bufferedReader) throws IOException {
@@ -79,30 +89,5 @@ public class Http11Processor implements Runnable, Processor {
         bufferedReader.read(requestBody);
 
         return HttpBodyFactory.generateHttpBody(ContentType.from(contentType), requestBody);
-    }
-
-    private HttpResponse respondResource(HttpRequest httpRequest) throws IOException {
-        AbstractHandler helloHandler = new HelloHandler();
-        AbstractHandler staticResourceHandler = new StaticResourceHandler();
-        AbstractHandler postLoginHandler = new PostLoginHandler();
-        AbstractHandler postRegisterHandler = new PostRegisterHandler();
-        AbstractHandler getLoginHandler = new GetLoginHandler();
-        AbstractHandler getRegisterHandler = new GetRegisterHandler();
-        AbstractHandler notFoundHandler = new NotFoundHandler();
-
-        List<AbstractHandler> handlers = List.of(
-                helloHandler,
-                staticResourceHandler,
-                postLoginHandler,
-                postRegisterHandler,
-                getLoginHandler,
-                getRegisterHandler
-        );
-        AbstractHandler targetHandler = handlers.stream()
-                .filter(it -> it.canHandle(httpRequest))
-                .findFirst()
-                .orElse(notFoundHandler);
-
-        return targetHandler.handle(httpRequest, sessionManager);
     }
 }

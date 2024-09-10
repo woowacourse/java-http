@@ -73,9 +73,13 @@ public class DefaultResourceHandler implements RequestHandler {
     private String registerResponse(Request request) throws IOException {
         if (request.isPost()) {
             QueryParameters methodRequest = QueryParameters.parseFrom(request.getBody());
-            register(methodRequest);
+            User user = register(methodRequest);
+            Session session = request.getSession(true);
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
             return Response.builder()
                     .versionOf(request.getHttpVersion())
+                    .addCookie("JSESSIONID", session.getId())
                     .found("/index.html")
                     .toHttpMessage();
         }
@@ -86,11 +90,14 @@ public class DefaultResourceHandler implements RequestHandler {
                 .toHttpMessage();
     }
 
-    private void register(QueryParameters queryParams) {
-        InMemoryUserRepository.save(new User(
-                queryParams.getParam("account"),
+    private User register(QueryParameters queryParams) {
+        String account = queryParams.getParam("account");
+        User user = new User(
+                account,
                 queryParams.getParam("password"),
                 queryParams.getParam("email")
-        ));
+        );
+        InMemoryUserRepository.save(user);
+        return InMemoryUserRepository.fetchByAccount(account);
     }
 }

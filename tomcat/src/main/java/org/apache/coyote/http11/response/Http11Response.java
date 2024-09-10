@@ -3,10 +3,13 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.Session;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
 public class Http11Response implements HttpResponse {
+
+    private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
 
     private String protocol;
     private int statusCode;
@@ -42,13 +45,23 @@ public class Http11Response implements HttpResponse {
     }
 
     @Override
-    public void setHeader(String key, String value) {
-        this.headers.put(key, value);
+    public void setLocationHeader(String value) {
+        this.headers.put("Location", value);
+    }
+
+    @Override
+    public void setContentTypeHeader(String value) {
+        this.headers.put("Content-Type", value);
+    }
+
+    @Override
+    public void setSessionHeader(Session session) {
+        this.headers.put("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId());
     }
 
     @Override
     public void setBody(String body) {
         this.body = body;
-        setHeader("Content-Length", body.getBytes().length + " ");
+        this.headers.put("Content-Length", body.getBytes().length + " ");
     }
 }

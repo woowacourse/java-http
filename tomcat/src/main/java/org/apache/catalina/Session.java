@@ -1,10 +1,13 @@
 package org.apache.catalina;
 
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class Session {
+
+    private static final String USER_SESSION_NAME = "user";
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
@@ -13,7 +16,7 @@ public class Session {
         this(UUID.randomUUID().toString());
     }
 
-    public Session(final String id) {
+    public Session(String id) {
         this.id = id;
     }
 
@@ -21,19 +24,20 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
+    public Object getAttribute(String name) {
         return values.get(name);
     }
 
-    public void setAttribute(final String name, final Object value) {
+    public User getUserAttribute() {
+        return (User) values.get(USER_SESSION_NAME);
+    }
+
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
-        values.remove(name);
+    public void setUserAttribute(User user) {
+        values.put("user", user);
     }
 
-    public void invalidate() {
-        values.clear();
-    }
 }

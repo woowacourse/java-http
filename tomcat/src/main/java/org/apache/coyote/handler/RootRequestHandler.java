@@ -4,14 +4,17 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class RootRequestHandler extends AbstractRequestHandler {
+
+    private static final String ROOT_RESOURCE = "Hello world!";
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8 ");
-        httpResponse.setBody("Hello world!");
+        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setBody(ROOT_RESOURCE);
 
     }
 

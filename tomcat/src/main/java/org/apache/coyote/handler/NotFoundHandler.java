@@ -5,14 +5,17 @@ import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class NotFoundHandler extends AbstractRequestHandler {
+
+    private static final String NOT_FOUND_RESOURCE = "/404.html";
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.NOT_FOUND);
-        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8 ");
-        httpResponse.setBody(ResourceReader.readFile("/404.html"));
+        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setBody(ResourceReader.readFile(NOT_FOUND_RESOURCE));
     }
 
     @Override

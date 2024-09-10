@@ -54,9 +54,7 @@ public class DefaultResourceHandler implements RequestHandler {
         QueryParameters queryParams = QueryParameters.parseFrom(request.getBody());
         String account = queryParams.getParam("account");
         String password = queryParams.getParam("password");
-        User user = InMemoryUserRepository.findByAccount(account).
-                orElseThrow(() -> new NoSuchUserException(account + " 에 해당하는 유저를 찾을 수 없습니다."));
-
+        User user = InMemoryUserRepository.fetchByAccount(account);
         if (user.checkPassword(password)) {
             Session session = request.getSession(true);
             session.setAttribute("user", user);

@@ -1,10 +1,9 @@
 package cache.com.example.version;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceVersion {

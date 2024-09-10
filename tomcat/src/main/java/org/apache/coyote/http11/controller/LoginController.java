@@ -24,16 +24,16 @@ public class LoginController implements Controller {
     public HttpResponse process(String uri) {
         int index = uri.indexOf(QUERY_STRING_DELIMITER);
         if (index == -1) {
-            return HttpResponse.of("static" + uri + EXTENSION_OF_HTML, HttpStatusCode.OK);
+            return HttpResponse.of(uri + EXTENSION_OF_HTML, HttpStatusCode.OK);
         }
 
         try {
             User user = findUser(uri.substring(index + 1));
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
-            return HttpResponse.of("static" + "/index.html", HttpStatusCode.FOUND);
+            return HttpResponse.of("/index.html", HttpStatusCode.FOUND);
         } catch (IllegalArgumentException e) {
             log.info("로그인 실패 : {}", e.getMessage(), e);
-            return HttpResponse.of("static" + "/401.html", HttpStatusCode.FOUND);
+            return HttpResponse.of("/401.html", HttpStatusCode.FOUND);
         }
     }
 

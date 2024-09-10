@@ -22,7 +22,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = controller.process("/login");
 
         URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String responseBody = FileReader.read("static/login.html");
+        String responseBody = FileReader.read("/login.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " " + "\r\n" +

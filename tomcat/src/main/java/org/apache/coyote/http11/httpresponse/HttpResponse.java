@@ -3,8 +3,6 @@ package org.apache.coyote.http11.httpresponse;
 import org.apache.coyote.http11.FileReader;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class HttpResponse {
 
@@ -16,7 +14,7 @@ public class HttpResponse {
 
     public static HttpResponse of(String location, HttpStatusCode httpStatusCode) {
         try {
-            String contentType = Files.probeContentType(Path.of(location));
+            String contentType = FileReader.probeContentType(location);
             String responseBody = FileReader.read(location);
             String response = createResponse(httpStatusCode.getStatusCodeMessage(), contentType, responseBody);
 

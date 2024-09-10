@@ -8,8 +8,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import com.techcourse.exception.UnsupportedMethodException;
 
 public abstract class Controller {
-    protected static final String POST = "POST";
-    protected static final String GET = "GET";
+    private static final String POST = "POST";
+    private static final String GET = "GET";
 
     protected abstract HttpResponse handle(HttpRequest request) throws IOException;
 

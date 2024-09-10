@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestBody = new String(buffer);
 
         if (method.equals("GET")) {
-            return doGet(path);
+            return doGet(path, requestHeader);
         }
         if (method.equals("POST")) {
             return doPost(path, requestHeader, requestBody);
@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String doGet(String path) throws IOException {
+    private String doGet(String path, Map<String, String> requestHeader) throws IOException {
         if (path.contains(".css")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -118,6 +118,19 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
+        }
+
+        if (path.equals("/login")) {
+            String cookies = requestHeader.getOrDefault("Cookie", "");
+            HttpCookie httpCookie = new HttpCookie(cookies);
+            if (httpCookie.hasKey("JSESSIONID")) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: http://localhost:8080/index.html ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: 0 ",
+                        "");
+            }
         }
 
         if (path.equals("/")) {
@@ -191,13 +204,11 @@ public class Http11Processor implements Runnable, Processor {
             if (loginUser.isPresent()) {
                 final User user = loginUser.get();
                 if (user.checkPassword(password)) {
-                    Session session = new Session(user.getAccount());
-                    session.setAttribute("user", user);
-                    SessionManager.getInstance().add(session);
-
                     log.info("로그인 성공! 아이디: {}", user.getAccount());
+
                     String cookies = requestHeader.getOrDefault("Cookie", "");
-                    if (new HttpCookie(cookies).hasKey("JSESSIONID")) {
+                    HttpCookie httpCookie = new HttpCookie(cookies);
+                    if (httpCookie.hasKey("JSESSIONID")) {
                         return String.join("\r\n",
                                 "HTTP/1.1 302 Found ",
                                 "Location: http://localhost:8080/index.html ",
@@ -205,10 +216,15 @@ public class Http11Processor implements Runnable, Processor {
                                 "Content-Length: 0 ",
                                 "");
                     }
+                    Cookie cookie = CookieManager.setCookie();
+                    Session session = new Session(cookie.getValue());
+                    session.setAttribute("user", user);
+                    SessionManager.getInstance().add(session);
+
                     return String.join("\r\n",
                             "HTTP/1.1 302 Found ",
                             "Location: http://localhost:8080/index.html ",
-                            "Set-Cookie: " + CookieManager.setCookie(),
+                            "Set-Cookie: " + cookie.getKeyValue(),
                             "Content-Type: text/html;charset=utf-8 ",
                             "Content-Length: 0 ",
                             "");

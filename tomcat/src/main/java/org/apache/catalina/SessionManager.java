@@ -13,7 +13,7 @@ public class SessionManager implements Manager {
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);
-        log.info("세션 추가 성공! 아이디: {}", session.getId());
+        log.info("세션 추가 성공! JSESSIONID: {}", session.getId());
     }
 
     @Override

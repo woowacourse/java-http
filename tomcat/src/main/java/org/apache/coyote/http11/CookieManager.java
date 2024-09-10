@@ -9,7 +9,7 @@ public class CookieManager {
     private CookieManager() {
     }
 
-    public static String setCookie() {
-        return TOKEN_NAME + "=" + UUID.randomUUID();
+    public static Cookie setCookie() {
+        return new Cookie(TOKEN_NAME, UUID.randomUUID().toString());
     }
 }

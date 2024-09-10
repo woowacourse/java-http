@@ -9,7 +9,7 @@
     - 사용자가 페이지를 열었을 때 CSS 파일이 호출된다.
 - [x] Query String 파싱
     - [x] ~~http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)가 보여진다.~~
-      - http://localhost:8080/login 접속시 로그인 페이지로 이동한다.
+        - http://localhost:8080/login 접속시 로그인 페이지로 이동한다.
     - [x] ~~로그인 페이지 접속 시, Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.~~
 
 ## 2. 로그인 구현
@@ -26,10 +26,10 @@
 - [x] Cookie에 JSESSIONID 값 저장하기
     - Cookie 클래스를 추가한다.
     - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 Response Header에 Set-Cookie를 반환한다.
-- [ ] Session 구현하기
+- [x] Session 구현하기
     - JSESSIONID의 값으로 로그인 여부를 체크한다.
     - [x] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장한다.
-    - [ ] 로그인된 상태에서 `/login` 페이지에 접근하면, `index.html` 페이지로 리다이렉트 한다.
+    - [x] 로그인된 상태에서 `/login` 페이지에 접근하면, `index.html` 페이지로 리다이렉트 한다.
 
 ---
 

@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -299,11 +299,11 @@ class Http11ProcessorTest {
             assertThat(socket.output()).contains("Set-Cookie: JSESSIONID");
         }
 
-        @DisplayName("로그인 성공 시 Session 객체의 값으로 User 객체를 저장한다.")
+        @DisplayName("로그인 시 Session 객체의 값으로 User 객체를 저장하고, 로그인 페이지 접속 시 index로 리다이렉트 한다.")
         @Test
         void addSession() {
             // given
-            final String httpRequest = String.join("\r\n",
+            final String loginRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Content-Length: 30 ",
@@ -311,16 +311,43 @@ class Http11ProcessorTest {
                     "",
                     "account=gugu&password=password ");
 
-            final var socket = new StubSocket(httpRequest);
+            final var socket = new StubSocket(loginRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            SessionManager sessionManager = SessionManager.getInstance();
-            User user = (User) sessionManager.findSession("gugu").getAttribute("user");
-            assertThat(user.checkPassword("password")).isTrue();
+            String response = socket.output();
+            int index = response.lastIndexOf("JSESSIONID=");
+            String sessionId = response.substring(index + 11, index + 47);
+
+            assertThatCode(() -> SessionManager.getInstance().findSession(sessionId))
+                    .doesNotThrowAnyException();
+
+            // given
+            final String loginPageRequest = String.join("\r\n",
+                    "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Cookie: JSESSIONID=" + sessionId,
+                    "Connection: keep-alive ",
+                    "");
+
+            final var socket2 = new StubSocket(loginPageRequest);
+            final Http11Processor processor2 = new Http11Processor(socket2);
+
+            // when
+            processor2.process(socket2);
+
+            // then
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/index.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+
+            assertThat(socket2.output()).isEqualTo(expected);
         }
     }
 }

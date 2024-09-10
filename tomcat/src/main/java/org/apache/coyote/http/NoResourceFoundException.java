@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http;
 
 public class NoResourceFoundException extends RuntimeException {
     public NoResourceFoundException(String message) {

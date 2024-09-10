@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.http.HttpRequest;
-import org.apache.coyote.http11.http.HttpRequestHandler;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestHandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +29,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()
-        ) {
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream()) {
             final var request = new HttpRequest(inputStream);
-            final var response = HttpRequestHandler.handle(request);
+            final var response = HttpRequestHandlerMapping.handle(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

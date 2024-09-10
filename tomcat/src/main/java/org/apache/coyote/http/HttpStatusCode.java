@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http;
 
 public enum HttpStatusCode {
 
     OK(200, "OK"),
+    CREATED(201, "Created"),
     FOUND(302, "FOUND"),
     UNAUTHORIZED(401, "UNAUTHORIZED"),
     ;
@@ -19,8 +20,7 @@ public enum HttpStatusCode {
         return value;
     }
 
-    @Override
-    public String toString() {
-        return "%s %s".formatted(value, reasonPhrase);
+    public String asString() {
+        return value + " " + reasonPhrase;
     }
 }

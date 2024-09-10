@@ -33,7 +33,7 @@ public class HttpRequestLine {
     }
 
     public boolean isTargetStatic() {
-        return httpMethod.equals(HttpMethod.GET) && requestTarget.getPath() != null;
+        return httpMethod.equals(HttpMethod.GET) && requestTarget.isResource();
     }
 
     public boolean isTargetBlank() {
@@ -42,10 +42,6 @@ public class HttpRequestLine {
 
     public boolean targetStartsWith(String startsWith) {
         return requestTarget.startsWith(startsWith);
-    }
-
-    public boolean targetEqualTo(String target) {
-        return requestTarget.isEqualTo(target);
     }
 
     public Path getTargetPath() {

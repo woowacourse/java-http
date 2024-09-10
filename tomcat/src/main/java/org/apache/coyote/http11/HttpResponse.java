@@ -53,6 +53,6 @@ public class HttpResponse {
     }
 
     public boolean isValid() {
-        return httpResponseLine.isValid() && httpHeaders.contains(HttpHeader.CONTENT_LENGTH);
+        return httpResponseLine.isValid();
     }
 }

@@ -16,19 +16,10 @@ public class RequestTarget {
         return value.startsWith(startsWith);
     }
 
-    public boolean isEqualTo(String target) {
-        return value.equals(target);
-    }
-
     public Path getPath() {
-        String path = value;
-        if (!path.contains(".")) {
-            path = path + ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + path);
+        URL resource = getResource();
         if (resource == null) {
-            throw new IllegalArgumentException("Could not find resource " + path);
+            throw new IllegalArgumentException("could not find resource " + value);
         }
 
         try {
@@ -36,6 +27,19 @@ public class RequestTarget {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("cannot convert to URI: " + resource);
         }
+    }
+
+    private URL getResource() {
+        String path = value;
+        if (!path.contains(".")) {
+            path = path + ".html";
+        }
+
+        return getClass().getClassLoader().getResource("static" + path);
+    }
+
+    public boolean isResource() {
+        return getResource() != null;
     }
 
     public boolean isBlank() {

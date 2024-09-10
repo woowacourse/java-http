@@ -62,14 +62,6 @@ public class HttpRequest {
         return httpRequestLine.targetStartsWith(startsWith);
     }
 
-    public boolean targetEqualTo(String target) {
-        return httpRequestLine.targetEqualTo(target);
-    }
-
-    public boolean containsBody() {
-        return httpRequestBody.isNotEmpty();
-    }
-
     public Optional<String> getSessionFromCookie() {
         return httpHeaders.getSessionFromCookie();
     }

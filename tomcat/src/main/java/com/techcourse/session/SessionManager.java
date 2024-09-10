@@ -18,8 +18,4 @@ public class SessionManager {
         sessions.put(session.getId(), session);
         return session.getId();
     }
-
-    public static Session findSession(String id) {
-        return sessions.get(id);
-    }
 }

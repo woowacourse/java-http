@@ -25,10 +25,6 @@ public class HttpRequestBody {
         return new HttpRequestBody(new HashMap<>());
     }
 
-    public boolean isNotEmpty() {
-        return !body.isEmpty();
-    }
-
     public String get(String key) {
         String value = body.get(key);
         if (value == null) {

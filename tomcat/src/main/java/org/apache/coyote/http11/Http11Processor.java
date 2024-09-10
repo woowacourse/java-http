@@ -4,6 +4,7 @@ import com.techcourse.controller.Controller;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.servlet.RequestMapper;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +14,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Controller controller;
+    private final RequestMapper requestMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.controller = new Controller();
+        this.requestMapper = new RequestMapper();
     }
 
     @Override
@@ -32,7 +33,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
             HttpResponse response = new HttpResponse(request.getHttpVersion());
+
+            Controller controller = requestMapper.getController(request);
             boolean isResponseValid = controller.service(request, response);
+
             if (!isResponseValid) {
                 throw new IllegalArgumentException("response not valid: \r\n" + response);
             }

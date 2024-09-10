@@ -61,10 +61,6 @@ public class HttpHeaders {
         headers.put(header.getValue(), value);
     }
 
-    public boolean contains(HttpHeader header) {
-        return headers.containsKey(header.getValue());
-    }
-
     public Optional<String> getSessionFromCookie() {
         return cookies.getSession();
     }

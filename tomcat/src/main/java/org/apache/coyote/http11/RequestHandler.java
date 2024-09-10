@@ -71,12 +71,12 @@ public class RequestHandler {
         Optional<Map<String, String>> parsed = parseQueryString(body);
         Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
         if (login(queryPairs)) {
-            return generate302Response("/index.html");
+            return HttpCookie.setCookie(generate302Response("/index.html"));
         }
         return generate302Response("/401.html");
     }
 
-    boolean login(Map<String, String> parsed) {
+    private boolean login(Map<String, String> parsed) {
         Optional<User> account = InMemoryUserRepository.findByAccount(parsed.get("account"));
         if (account.isPresent() && account.get().checkPassword(parsed.get("password"))) {
             log.info("로그인 성공! 아이디 : {}", account.get().getAccount());

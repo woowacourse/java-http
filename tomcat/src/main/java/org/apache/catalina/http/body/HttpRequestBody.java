@@ -12,6 +12,10 @@ public class HttpRequestBody {
         this.body = body;
     }
 
+    public HttpRequestBody() {
+        this(new HashMap<>());
+    }
+
     public static HttpRequestBody parseUrlEncoded(String urlEncoded) {
         Map<String, String> body = new HashMap<>();
         String[] keyAndValues = urlEncoded.split("&");
@@ -20,10 +24,6 @@ public class HttpRequestBody {
             body.put(keyValue[0], keyValue[1]);
         }
         return new HttpRequestBody(body);
-    }
-
-    public static HttpRequestBody empty() {
-        return new HttpRequestBody(new HashMap<>());
     }
 
     public String get(String key) {

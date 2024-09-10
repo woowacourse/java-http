@@ -10,15 +10,19 @@ public class HttpResponseLine {
         this.httpStatus = HttpStatus.OK;
     }
 
-    public void setStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
     public boolean isValid() {
         return httpVersion != null && httpStatus != null;
     }
 
     public String stringify() {
         return httpVersion.getValue() + " " + httpStatus.getValue();
+    }
+
+    public HttpStatus getStatus() {
+        return httpStatus;
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 }

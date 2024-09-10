@@ -18,4 +18,8 @@ public class SessionManager {
         sessions.put(session.getId(), session);
         return session.getId();
     }
+
+    public static boolean contains(String session) {
+        return sessions.containsKey(session);
+    }
 }

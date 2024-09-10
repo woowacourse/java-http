@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.session.Session;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.body.HttpResponseBody;
 import org.apache.catalina.http.header.HttpHeader;
@@ -90,7 +91,7 @@ public class HttpResponseTest {
         response.addSessionToCookies("session");
 
         // then
-        assertThat(header.getSessionFromCookie()).get().isEqualTo("session");
+        assertThat(header.getFromCookies(Session.KEY)).get().isEqualTo("session");
     }
 
     @DisplayName("응답이 반환하기 유효하면 true를 반환한다.")

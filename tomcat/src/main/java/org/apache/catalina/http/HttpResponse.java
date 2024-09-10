@@ -1,5 +1,6 @@
 package org.apache.catalina.http;
 
+import com.techcourse.session.Session;
 import java.util.StringJoiner;
 import org.apache.catalina.http.body.HttpResponseBody;
 import org.apache.catalina.http.header.HttpHeader;
@@ -49,7 +50,7 @@ public class HttpResponse {
     }
 
     public void addSessionToCookies(String session) {
-        httpHeaders.addSessionToCookies(session);
+        httpHeaders.addToCookies(Session.KEY, session);
     }
 
     public boolean isValid() {

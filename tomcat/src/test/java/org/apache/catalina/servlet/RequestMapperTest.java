@@ -23,12 +23,12 @@ class RequestMapperTest {
         HttpRequest requestLogin = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
         HttpRequest requestRegister = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/register"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when

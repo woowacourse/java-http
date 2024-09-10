@@ -10,8 +10,6 @@ public class HttpCookies {
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
-    private static final String SESSION_KEY = "JSESSIONID";
-
     private final Map<String, String> cookies;
 
     public HttpCookies() {
@@ -41,11 +39,11 @@ public class HttpCookies {
         return joiner.toString();
     }
 
-    public void addSession(String session) {
-        cookies.put(SESSION_KEY, session);
+    public void add(String key, String value) {
+        cookies.put(key, value);
     }
 
-    public Optional<String> getSession() {
-        return Optional.ofNullable(cookies.get(SESSION_KEY));
+    public Optional<String> get(String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 }

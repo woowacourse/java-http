@@ -10,8 +10,8 @@ import org.apache.catalina.exception.CatalinaException;
 
 public class HttpHeaders {
 
-    public static final String COOKIE_HEADER = "Cookie: ";
     private static final String SEPARATOR = ": ";
+    public static final String COOKIE_HEADER = HttpHeader.COOKIE + SEPARATOR;
 
     private final Map<String, String> headers;
     private final HttpCookies cookies;
@@ -62,12 +62,12 @@ public class HttpHeaders {
         headers.put(header.getValue(), value);
     }
 
-    public Optional<String> getSessionFromCookie() {
-        return cookies.getSession();
+    public void addToCookies(String key, String value) {
+        cookies.add(key, value);
     }
 
-    public void addSessionToCookies(String session) {
-        cookies.addSession(session);
+    public Optional<String> getFromCookies(String key) {
+        return cookies.get(key);
     }
 
     public String stringify(String delimiter) {

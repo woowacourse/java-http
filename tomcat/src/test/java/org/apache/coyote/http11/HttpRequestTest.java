@@ -32,7 +32,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -46,7 +46,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -60,7 +60,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.GET, new RequestUri(""), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -74,7 +74,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -88,7 +88,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -98,16 +98,16 @@ class HttpRequestTest {
 
     @DisplayName("쿠키에서 세션을 가져온다.")
     @Test
-    void getSessionFromCookie() {
+    void getSessionFromCookies() {
         // given
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(new HashMap<>(), new HttpCookies(Map.of("JSESSIONID", "session"))),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.getSessionFromCookie()).get().isEqualTo("session");
+        assertThat(request.getSessionFromCookies()).get().isEqualTo("session");
     }
 
     @DisplayName("쿠키에서 세션이 존재하지 않으면 Optional.empty()를 반환한다.")
@@ -117,11 +117,11 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.getSessionFromCookie()).isEmpty();
+        assertThat(request.getSessionFromCookies()).isEmpty();
     }
 
     @DisplayName("요청의 HTTP 메서드를 반환한다.")
@@ -131,7 +131,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -145,7 +145,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -160,7 +160,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.GET, new RequestUri("/invalidUrl"), HttpVersion.HTTP11),
                 new HttpHeaders(),
-                HttpRequestBody.empty()
+                new HttpRequestBody()
         );
 
         // when&then
@@ -237,7 +237,7 @@ class HttpRequestTest {
                 () -> assertThat(parsedRequest.isTargetStatic()).isFalse(),
                 () -> assertThat(parsedRequest.uriStartsWith("/login")).isTrue(),
                 () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP11),
-                () -> assertThat(parsedRequest.getSessionFromCookie()).get().isEqualTo("session"),
+                () -> assertThat(parsedRequest.getSessionFromCookies()).get().isEqualTo("session"),
                 () -> assertThat(parsedRequest.getFromBody("account")).isEqualTo("gugu"),
                 () -> assertThat(parsedRequest.getFromBody("password")).isEqualTo("password")
         );

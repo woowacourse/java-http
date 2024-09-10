@@ -15,7 +15,8 @@ public class LoginController extends RestController {
 
     @Override
     protected boolean doGet(HttpRequest request, HttpResponse response) {
-        return request.getSessionFromCookie()
+        return request.getSessionFromCookies()
+                .filter(SessionManager::contains)
                 .map(session -> redirectTo(response, "/index"))
                 .orElseGet(() -> responseResource(response, request.getTargetPath()));
     }

@@ -1,5 +1,6 @@
 package org.apache.catalina.http;
 
+import com.techcourse.session.Session;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +43,7 @@ public class HttpRequest {
         HttpHeaders httpHeaders = HttpHeaders.parse(headers);
 
         if (!httpRequestReader.ready()) {
-            return new HttpRequest(startLine, httpHeaders, HttpRequestBody.empty());
+            return new HttpRequest(startLine, httpHeaders, new HttpRequestBody());
         }
         int contentLength = Integer.parseInt(httpHeaders.get(HttpHeader.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
@@ -63,8 +64,8 @@ public class HttpRequest {
         return httpRequestLine.uriStartsWith(startsWith);
     }
 
-    public Optional<String> getSessionFromCookie() {
-        return httpHeaders.getSessionFromCookie();
+    public Optional<String> getSessionFromCookies() {
+        return httpHeaders.getFromCookies(Session.KEY);
     }
 
     public HttpMethod getHttpMethod() {

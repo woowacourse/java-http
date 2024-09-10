@@ -11,8 +11,6 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String COOKIE_KEY = "Cookie";
-    private static final String JSESSIONID_KEY = "JSESSIONID";
 
     private HttpRequestLine httpRequestLine;
     private HttpRequestHeader httpRequestHeader;
@@ -73,15 +71,6 @@ public class HttpRequest {
             String[] tokens = splitByDelimiter(line, KEY_VALUE_DELIMITER, 2);
             httpRequestBody.add(tokens[0], tokens[1]);
         }
-    }
-
-    public boolean hasCookie() {
-        return this.httpRequestHeader.containsKey(COOKIE_KEY);
-    }
-
-    public boolean hasJSessionId() {
-        String cookie = this.httpRequestHeader.findBy(COOKIE_KEY);
-        return cookie != null && cookie.contains(JSESSIONID_KEY);
     }
 
     public boolean matchesMethod(String method) {

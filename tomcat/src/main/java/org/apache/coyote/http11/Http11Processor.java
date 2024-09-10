@@ -10,6 +10,7 @@ import org.apache.controller.HandlerContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.exception.HandlerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +50,11 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    private void handle(Http11Request request, Http11Response response) throws IOException {
+    private void handle(Http11Request request, Http11Response response) {
         try {
             Controller handler = findHandler(request);
             handler.service(request, response);
-        } catch (IllegalArgumentException e) {
+        } catch (HandlerNotFoundException e) {
             response.sendRedirect("/404.html");
         } catch (Exception e) {
             response.sendRedirect("/500.html");
@@ -64,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         return HandlerContainer.getHandlers().stream()
                 .filter(controller -> controller.isMatch(request.getStartLine()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핸들러입니다."));
+                .orElseThrow(() -> new HandlerNotFoundException("존재하지 않는 핸들러입니다."));
     }
 
     private void sendResponse(OutputStream outputStream, Http11Response response) throws IOException {

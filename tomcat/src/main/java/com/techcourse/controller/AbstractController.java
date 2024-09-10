@@ -1,13 +1,15 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public non-sealed abstract class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
 
     protected static final Manager SESSION_MANAGER = new SessionManager();
 

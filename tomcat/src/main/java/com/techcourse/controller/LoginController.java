@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;

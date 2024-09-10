@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import java.nio.file.Path;
-import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.Http11ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

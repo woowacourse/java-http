@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+    private static final String COOKIE_DELIMITER = "; ";
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -17,7 +18,7 @@ public class HttpCookie {
 
     public static HttpCookie parseFrom(String cookiesLine) {
         HashMap<String, String> cookies = new HashMap<>();
-        for (String cookie : cookiesLine.split("; ")) {
+        for (String cookie : cookiesLine.split(COOKIE_DELIMITER)) {
             System.out.println(cookie);
             String[] token = cookie.split("=");
             cookies.put(token[0], token[1]);
@@ -44,6 +45,6 @@ public class HttpCookie {
     public String toHttpMessage() {
         return cookies.entrySet().stream()
                 .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining(";"));
+                .collect(Collectors.joining(COOKIE_DELIMITER));
     }
 }

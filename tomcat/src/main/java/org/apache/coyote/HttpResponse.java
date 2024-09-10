@@ -1,20 +1,20 @@
 package org.apache.coyote;
 
 import org.apache.catalina.Session;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 
 public interface HttpResponse {
 
     String getResponseMessage();
 
-    void setStatus(HttpStatus status);
+    void ok(MimeType mimeType, String body);
 
-    void setLocationHeader(String value);
+    void found(String path);
 
-    void setContentTypeHeader(MimeType mimeType);
+    void notFound(String body);
 
-    void setSessionHeader(Session session);
 
-    void setBody(String body);
+    void setSession(Session session);
+
+
 }

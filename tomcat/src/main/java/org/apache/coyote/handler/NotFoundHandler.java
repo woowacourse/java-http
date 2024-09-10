@@ -4,8 +4,6 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.MimeType;
 
 public class NotFoundHandler extends AbstractRequestHandler {
 
@@ -13,9 +11,8 @@ public class NotFoundHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatus(HttpStatus.NOT_FOUND);
-        httpResponse.setContentTypeHeader(MimeType.HTML);
-        httpResponse.setBody(ResourceReader.readFile(NOT_FOUND_RESOURCE));
+        String body = ResourceReader.readFile(NOT_FOUND_RESOURCE);
+        httpResponse.notFound(body);
     }
 
     @Override

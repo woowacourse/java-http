@@ -9,7 +9,6 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +27,11 @@ public class LoginRequestHandler extends AbstractRequestHandler {
             Session session = httpRequest.getSession();
             User user = session.getUserAttribute();
             log.info("세션 로그인 : " + user);
-            httpResponse.setStatus(HttpStatus.FOUND);
-            httpResponse.setLocationHeader(SUCCESS_LOGIN_REDIRECT_PATH);
+            httpResponse.found(SUCCESS_LOGIN_REDIRECT_PATH);
             return;
         }
-        httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(MimeType.HTML);
-        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
+        String body = ResourceReader.readFile(httpRequest.getRequestURI());
+        httpResponse.ok(MimeType.HTML, body);
     }
 
     @Override
@@ -42,16 +39,14 @@ public class LoginRequestHandler extends AbstractRequestHandler {
         Map<String, String> param = httpRequest.getParsedBody();
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(param.get(ACCOUNT_KEY));
         if (userOptional.isPresent() && userOptional.get().checkPassword(param.get(PASSWORD_KEY))) {
-            log.info("로그인 성공 : " + userOptional);
+            log.info("로그인 성공 : " + userOptional.get());
             Session session = httpRequest.getSession();
             session.setUserAttribute(userOptional.get());
             SessionManager.getInstance().add(session);
-            httpResponse.setStatus(HttpStatus.FOUND);
-            httpResponse.setSessionHeader(session);
-            httpResponse.setLocationHeader(SUCCESS_LOGIN_REDIRECT_PATH);
+            httpResponse.setSession(session);
+            httpResponse.found(SUCCESS_LOGIN_REDIRECT_PATH);
             return;
         }
-        httpResponse.setStatus(HttpStatus.FOUND);
-        httpResponse.setLocationHeader(UNAUTHORIZED_PATH);
+        httpResponse.found(UNAUTHORIZED_PATH);
     }
 }

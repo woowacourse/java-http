@@ -4,16 +4,14 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 
 public class StaticResourceRequestHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(getContentType(httpRequest));
-        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
+        String body = ResourceReader.readFile(httpRequest.getRequestURI());
+        httpResponse.ok(getContentType(httpRequest), body);
     }
 
     private MimeType getContentType(HttpRequest httpRequest) {

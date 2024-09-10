@@ -9,7 +9,6 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 
 public class SignupRequestHandler extends AbstractRequestHandler {
@@ -21,9 +20,8 @@ public class SignupRequestHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(MimeType.HTML);
-        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
+        String body = ResourceReader.readFile(httpRequest.getRequestURI());
+        httpResponse.ok(MimeType.HTML, body);
     }
 
     @Override
@@ -36,14 +34,12 @@ public class SignupRequestHandler extends AbstractRequestHandler {
         session.setUserAttribute(newUser);
         SessionManager.getInstance().add(session);
 
-        httpResponse.setStatus(HttpStatus.FOUND);
-        httpResponse.setSessionHeader(session);
-        httpResponse.setLocationHeader(REDIRECTION_PATH);
-        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
+        httpResponse.setSession(session);
+        httpResponse.found(REDIRECTION_PATH);
     }
 
     private void validateExists(User user) {
-        if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
+        if (InMemoryUserRepository.existsUser(user)) {
             throw new UncheckedServletException(new IllegalStateException("이미 존재하는 아이디 입니다."));
         }
     }

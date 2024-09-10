@@ -11,6 +11,10 @@ import org.apache.coyote.http11.MimeType;
 public class Http11Response implements HttpResponse {
 
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE_NAME_VALUE_DELIMITER = "=";
 
     private String protocol;
     private int statusCode;
@@ -59,7 +63,7 @@ public class Http11Response implements HttpResponse {
 
     @Override
     public void setSession(Session session) {
-        this.headers.put("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId());
+        this.headers.put(SET_COOKIE, SESSION_ID_COOKIE_NAME + COOKIE_NAME_VALUE_DELIMITER + session.getId());
     }
 
     private void setStatus(HttpStatus status) {
@@ -69,7 +73,7 @@ public class Http11Response implements HttpResponse {
 
     private void setBody(MimeType mimeType, String body) {
         this.body = body;
-        this.headers.put("Content-Type", mimeType.value());
-        this.headers.put("Content-Length", body.getBytes().length + " ");
+        this.headers.put(CONTENT_TYPE, mimeType.value());
+        this.headers.put(CONTENT_LENGTH, body.getBytes().length + " ");
     }
 }

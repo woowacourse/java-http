@@ -23,7 +23,7 @@ public class LoginRequestHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.isExistsSession()) {
+        if (httpRequest.existsSession()) {
             Session session = httpRequest.getSession();
             User user = session.getUserAttribute();
             log.info("세션 로그인 : " + user);

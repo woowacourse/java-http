@@ -13,7 +13,9 @@ public interface HttpRequest {
 
     String getPath();
 
-    boolean isExistsSession();
+    boolean existsSession();
+
+    boolean existsAccept();
 
     String getHeader(String header);
 

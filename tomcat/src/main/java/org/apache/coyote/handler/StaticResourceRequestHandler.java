@@ -15,7 +15,7 @@ public class StaticResourceRequestHandler extends AbstractRequestHandler {
     }
 
     private MimeType getContentType(HttpRequest httpRequest) {
-        if (httpRequest.getHeader("Accept") == null) {
+        if (!httpRequest.existsAccept()) {
             return MimeType.fromFileName(httpRequest.getRequestURI());
         }
         return httpRequest.getAcceptMimeType();

@@ -119,7 +119,10 @@ public class Http11Processor implements Runnable, Processor {
         }
         int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
+        int charsRead = bufferedReader.read(buffer, 0, contentLength);
+        if (charsRead == -1) {
+            return "";
+        }
         return new String(buffer);
     }
 

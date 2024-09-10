@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.ResourceReader;
 import org.apache.catalina.Session;
@@ -21,7 +22,7 @@ public class SignupRequestHandler extends AbstractRequestHandler {
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         String body = ResourceReader.readFile(httpRequest.getRequestURI());
-        httpResponse.ok(MimeType.HTML, body);
+        httpResponse.ok(MimeType.HTML, body, StandardCharsets.UTF_8);
     }
 
     @Override

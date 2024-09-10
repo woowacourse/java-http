@@ -1,6 +1,7 @@
 package org.apache.coyote.handler;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.MimeType;
@@ -11,7 +12,7 @@ public class RootRequestHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.ok(MimeType.HTML, ROOT_RESOURCE);
+        httpResponse.ok(MimeType.HTML, ROOT_RESOURCE, StandardCharsets.UTF_8);
     }
 
     @Override

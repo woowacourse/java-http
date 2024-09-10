@@ -98,8 +98,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HashMap<String, String> parseRequestBody(final HttpHeaders httpHeaders,
-                                                     final BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> parseRequestBody(final HttpHeaders httpHeaders,
+                                                 final BufferedReader bufferedReader) throws IOException {
         final int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
@@ -115,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private HashMap<String, String> parsingBody(final String requestBody) {
+    private Map<String, String> parsingBody(final String requestBody) {
         final var body = new HashMap<String, String>();
         final var params = requestBody.split("&");
         for (final var param : params) {
@@ -127,19 +127,19 @@ public class Http11Processor implements Runnable, Processor {
     private void generateOKResponse(final Response response, final Path path, final String result) {
         response.setSc("OK");
         response.setStatusCode(200);
-        response.setContentType1(ContentType.from(path));
-        response.setContentLength(result.getBytes().length);
         response.setSourceCode(result);
+        response.putHeader("Content-Length", result.getBytes().length);
+        response.putHeader("Content-Type", ContentType.from(path).toResponseText());
     }
 
     private void redirectLocation(final Response response, final Path path, final String result,
                                   final String location) {
         response.setStatusCode(302);
         response.setSc("FOUND");
-        response.setContentType1(ContentType.from(path));
-        response.setContentLength(result.getBytes().length);
-        response.setLocation(location);
         response.setSourceCode(result);
+        response.putHeader("Content-Length", result.getBytes().length);
+        response.putHeader("Content-Type", ContentType.from(path).toResponseText());
+        response.putHeader("Location", location);
     }
 
     private User createResponse(final Map<String, String> queryString, final Path request, final Response response,
@@ -155,7 +155,8 @@ public class Http11Processor implements Runnable, Processor {
             }
             redirectLocation(response, request, result, "index.html");
             final var uuid = UUID.randomUUID();
-            response.setCookie("JSESSIONID=" + uuid);
+            response.putHeader("Set-Cookie", "JSESSIONID=" + uuid);
+
             final var session = new Session(uuid.toString());
             session.setAttribute("user", user);
             sessionManager.add(session);

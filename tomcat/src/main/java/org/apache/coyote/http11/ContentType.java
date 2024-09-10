@@ -14,14 +14,14 @@ public enum ContentType {
     IMAGE_ICON("image", "ico");
 
     private static final Map<String, ContentType> SUIT_CASE = Arrays.stream(ContentType.values())
-            .collect(Collectors.toMap(ContentType::getValue, Function.identity()));
+            .collect(Collectors.toMap(ContentType::getType, Function.identity()));
 
     private final String category;
-    private final String value;
+    private final String type;
 
-    ContentType(final String category, final String value) {
+    ContentType(final String category, final String type) {
         this.category = category;
-        this.value = value;
+        this.type = type;
     }
 
     public static ContentType from(final Path path) {
@@ -34,15 +34,19 @@ public enum ContentType {
     }
 
     public String getResponseText() {
-        return "Content-Type: " + category + "/" + value;
+        return "Content-Type: " + category + "/" + type;
     }
 
     public String getResponseText(final Charset charset) {
-        return "Content-Type: " + category + "/" + value + "; charset=" + charset.name;
+        return "Content-Type: " + category + "/" + type + "; charset=" + charset.name;
     }
 
-    public String getValue() {
-        return value;
+    public String toResponseText() {
+        return category + "/" + type;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public enum Charset {

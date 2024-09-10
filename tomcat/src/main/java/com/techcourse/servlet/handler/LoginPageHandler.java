@@ -1,8 +1,10 @@
 package com.techcourse.servlet.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import com.techcourse.servlet.Handler;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.view.View;
@@ -43,7 +45,14 @@ public class LoginPageHandler implements Handler {
 
     private View handle(String account, String password) {
         return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .map(user -> View.redirect("/index.html"))
+                .map(this::handleLoginSuccess)
                 .orElse(View.redirect("/401.html"));
+    }
+
+    private View handleLoginSuccess(User user) {
+        return View.redirectBuilder()
+                .addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID())
+                .location("/index.html")
+                .build();
     }
 }

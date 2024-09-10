@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response.view;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.util.StaticFileUtils;
@@ -8,10 +8,12 @@ import org.apache.coyote.http11.util.StaticFileUtils;
 public class HtmlView implements View {
 
     private final HttpStatus status;
+    private final Map<String, String> addedHeaders;
     private final String body;
 
-    public HtmlView(HttpStatus status, String body) {
+    public HtmlView(HttpStatus status, Map<String, String> addedHeaders, String body) {
         this.status = status;
+        this.addedHeaders = Map.copyOf(addedHeaders);
         this.body = body;
     }
 
@@ -21,12 +23,12 @@ public class HtmlView implements View {
 
     @Override
     public HttpStatus getStatus() {
-        return HttpStatus.OK;
+        return status;
     }
 
     @Override
     public Map<String, String> getAddedHeaders() {
-        return Collections.EMPTY_MAP;
+        return addedHeaders;
     }
 
     @Override
@@ -42,15 +44,22 @@ public class HtmlView implements View {
     public static class Builder {
 
         private HttpStatus status;
+        private Map<String, String> addedHeaders;
         private String content;
 
         public Builder() {
             this.status = HttpStatus.OK;
+            this.addedHeaders = new HashMap<>();
             this.content = "";
         }
 
         public Builder status(HttpStatus status) {
             this.status = status;
+            return this;
+        }
+
+        public Builder addHeader(String key, String value) {
+            addedHeaders.put(key, value);
             return this;
         }
 
@@ -65,7 +74,7 @@ public class HtmlView implements View {
         }
 
         public HtmlView build() {
-            return new HtmlView(status, content);
+            return new HtmlView(status, addedHeaders, content);
         }
     }
 }

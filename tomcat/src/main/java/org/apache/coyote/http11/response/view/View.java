@@ -22,4 +22,8 @@ public interface View {
                 .location(location)
                 .build();
     }
+
+    static RedirectView.Builder redirectBuilder() {
+        return RedirectView.builder();
+    }
 }

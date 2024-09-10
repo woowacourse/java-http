@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import com.techcourse.servlet.Handler;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.view.View;
@@ -30,7 +31,10 @@ public class RegisterHandler implements Handler {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        return View.redirect("/index.html");
+        return View.redirectBuilder()
+                .addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID())
+                .location("/index.html")
+                .build();
     }
 
     private Map<String, String> parsedFormData(String body) {

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response.view;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -8,9 +9,11 @@ public class RedirectView implements View {
     private static final String CONTENT = "";
 
     private final String location;
+    private final Map<String, String> addedHeaders;
 
-    public RedirectView(String location) {
+    public RedirectView(String location, Map<String, String> addedHeaders) {
         this.location = location;
+        this.addedHeaders = new HashMap<>(addedHeaders);
     }
 
     public static Builder builder() {
@@ -24,7 +27,9 @@ public class RedirectView implements View {
 
     @Override
     public Map<String, String> getAddedHeaders() {
-        return Map.of("Location", location);
+        Map<String, String> headers = new HashMap<>(addedHeaders);
+        headers.put("Location", location);
+        return headers;
     }
 
     @Override
@@ -40,14 +45,24 @@ public class RedirectView implements View {
     public static class Builder {
 
         private String location;
+        private Map<String, String> addedHeaders;
+
+        private Builder() {
+            this.addedHeaders = new HashMap<>();
+        }
 
         public Builder location(String location) {
             this.location = location;
             return this;
         }
 
+        public Builder addHeader(String key, String value) {
+            addedHeaders.put(key, value);
+            return this;
+        }
+
         public RedirectView build() {
-            return new RedirectView(location);
+            return new RedirectView(location, addedHeaders);
         }
     }
 }

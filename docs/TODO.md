@@ -68,3 +68,14 @@
 - POST /register (Content-Type : application/x-www-form-urlencoded) 요청 시
   - `InMemoryUserRepository`에 회원 가입 실시
   - 회원 가입이 완료되면 /index.html로 리다이렉트
+
+
+### 3. Cookie에 JSESSIONID 값 저장하기
+- 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지하기
+  - GET /login 에서 로그인 성공 시, UUID 값을 쿠키로 발급한다.
+  - POST /register 에서 로그인 성공 시, UUID 값을 쿠키로 발급한다.
+- 쿠키 발급 방법
+  - Response Header에 `Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46` 형식으로 추가
+  - `UUID uuid = UUID.randomUUID()`로 UUID를 발급한다.
+  - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
+- 

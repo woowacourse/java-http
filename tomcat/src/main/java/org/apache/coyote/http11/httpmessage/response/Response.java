@@ -23,13 +23,14 @@ public class Response {
     }
 
     public static class ResponseBuilder {
+        private final HttpCookie httpCookie;
+        private final HttpHeaders headers;
         private String ProtocolVersion;
-        private HttpCookie httpCookie;
-        private HttpHeaders headers = new HttpHeaders();
 
         private ResponseBuilder() {
             ProtocolVersion = "HTTP/1.1";
             httpCookie = new HttpCookie();
+            headers = new HttpHeaders();
         }
 
         public ResponseBuilder versionOf(String protocolVersion) {

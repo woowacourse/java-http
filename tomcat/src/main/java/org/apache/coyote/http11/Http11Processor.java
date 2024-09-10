@@ -64,13 +64,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headerMap = new HashMap<>();
-        String line = bufferedReader.readLine();
-        while (!line.isEmpty()) {
+        String line;
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
             StringTokenizer tokenizer = new StringTokenizer(line, ":");
             String key = tokenizer.nextToken().trim();
             String value = tokenizer.nextToken(":").trim();
             headerMap.put(key, value);
-            line = bufferedReader.readLine();
         }
         return headerMap;
     }

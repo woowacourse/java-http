@@ -15,6 +15,14 @@ public class RequestLine {
         this.httpVersion = parts[2];
     }
 
+    public boolean isGetMethod() {
+        return "GET".equals(httpMethod);
+    }
+
+    public boolean isPostMethod() {
+        return "POST".equals(httpMethod);
+    }
+
     public String getPath() {
         int index = uri.indexOf("?");
         if (index == -1) {

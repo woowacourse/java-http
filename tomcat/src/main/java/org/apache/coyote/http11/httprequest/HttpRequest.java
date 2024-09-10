@@ -16,11 +16,23 @@ public class HttpRequest {
         this.body = new RequestBody(inputReader.readBody(headers.getContentLength()));
     }
 
+    public boolean isGetMethod() {
+        return requestLine.isGetMethod();
+    }
+
+    public boolean isPostMethod() {
+        return requestLine.isPostMethod();
+    }
+
     public String getUri() {
         return requestLine.getUri();
     }
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public String getBody() {
+        return body.getValue();
     }
 }

@@ -31,10 +31,10 @@ Connection: keep-alive
 - [x] 로그인 성공 시 응답 헤더에 http status code를 302로 반환하고, `/index.html`로 리다이렉트하는 기능 구현
 - [x] 로그인 실패 시 `401.html`로 리다이렉트
 
-- [ ] `http://localhost:8080/register` 접속 시 회원가입 페이지(register.html) 응답 기능 구현
-    - [ ] 회원가입 페이지를 보여줄 때는 HTTP method GET 사용
-    - [ ] 회원가입을 버튼을 누르면 HTTP method POST 사용
-    - [ ] 회원가입을 완료하면 index.html로 리다이렉트
+- [x] `http://localhost:8080/register` 접속 시 회원가입 페이지(register.html) 응답 기능 구현
+    - [x] 회원가입 페이지를 보여줄 때는 HTTP method GET 사용
+    - [x] 회원가입을 버튼을 누르면 HTTP method POST 사용
+    - [x] 회원가입을 완료하면 index.html로 리다이렉트
 
 - [ ] 로그인 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경
 

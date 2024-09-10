@@ -14,7 +14,11 @@ public enum HttpStatusCode {
         this.message = message;
     }
 
-    public String getStatusCodeMessage() {
-        return code + " " + message;
+    public int getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

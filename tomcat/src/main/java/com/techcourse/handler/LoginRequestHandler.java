@@ -25,7 +25,7 @@ public class LoginRequestHandler implements RequestHandler {
         String password = request.getParameter("password");
         if (account == null || password == null) {
             return HttpResponse.builder()
-                    .found("login.html")
+                    .found("401.html")
                     .build();
         }
         logUser(account, password);

@@ -27,4 +27,8 @@ public class HttpResponse {
     public String getContent() {
         return body.getContent();
     }
+
+    public String getHeader(String name) {
+        return String.valueOf(headers.get(name));
+    }
 }

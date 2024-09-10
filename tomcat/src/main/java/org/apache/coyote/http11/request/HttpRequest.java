@@ -2,48 +2,55 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.http11.HttpMethod;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
 
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String uri;
-    private final RequestHeader header;
-    private RequestBody body;
+    private final RequestLine requestLine;
+    private final RequestHeaders headers;
+    private final RequestBody body;
 
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header, RequestBody body) {
-        this.method = method;
-        this.uri = uri;
-        this.header = header;
+    private HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
         this.body = body;
     }
 
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header) {
-        this(method, uri, header, null);
+    public static HttpRequest of(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        RequestLine requestLine = new RequestLine(reader.readLine());
+
+        List<String> headers = reader.lines()
+                .takeWhile(s -> !s.isBlank())
+                .toList();
+        RequestHeaders requestHeaders = new RequestHeaders(headers);
+
+        if (requestLine.isPost()) {
+            return new HttpRequest(requestLine, requestHeaders, parseRequestBody(reader, requestHeaders.getContentLength()));
+        }
+
+        return new HttpRequest(requestLine, requestHeaders, null);
     }
 
-    public static HttpRequest of(final String requestLine, final BufferedReader reader) throws IOException {
-        final var parts = requestLine.split(" ");
-        final var method = HttpMethod.valueOf(parts[0]);
-        final var uri = parts[1];
-        final var header = RequestParser.getRequestHeader(reader);
-        if (method.isPost()) {
-            final var body = RequestParser.getRequestBody(reader, header.getContentLength());
-            return new HttpRequest(method, uri, header, body);
-        }
-        return new HttpRequest(method, uri, header);
+    private static RequestBody parseRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new RequestBody(new String(buffer));
     }
 
     public boolean isGet() {
-        return method.isGet();
+        return requestLine.isGet();
     }
 
     public boolean isPost() {
-        return method.isPost();
+        return requestLine.isPost();
     }
 
     public boolean isSameUri(final String uri) {
-        return this.uri.equals(uri);
+        return this.requestLine.isSamePath(uri);
     }
 
     public String findBodyValueByKey(final String key) {
@@ -51,14 +58,14 @@ public class HttpRequest {
     }
 
     public String getCookie() {
-        return getHeader("Cookie");
+        return getHeader("Cookie"); // TODO: 상수 처리하기
     }
 
     public String getHeader(final String name) {
-        return header.findHeader(name);
+        return headers.findHeader(name);
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return requestLine.getPath();
     }
 }

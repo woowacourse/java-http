@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
@@ -37,11 +37,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
-            final var response = generateResponse(reader);
+            final var response = generateResponse(inputStream);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -50,12 +49,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String generateResponse(final BufferedReader reader) throws IOException {
-        final var request = HttpRequest.of(reader.readLine(), reader);
+    private String generateResponse(InputStream inputStream) throws IOException {
+        HttpRequest request = HttpRequest.of(inputStream);
         if (request.isGet() && request.isSameUri("/")) {
             return renderDefaultPage();
         }
-        if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getUri())) {
+        if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getPath())) {
             return renderStaticResource(request);
         }
         if (request.isSameUri("/login")) {
@@ -73,13 +72,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String renderStaticResource(HttpRequest request) throws IOException {
-        final var responseBody = ResourceLoader.loadStaticResource(request.getUri());
+        final var responseBody = ResourceLoader.loadStaticResource(request.getPath());
         final var response = new HttpResponse(HttpStatus.OK, responseBody);
         return response.getResponse();
     }
 
     private String renderHtmlPage(HttpRequest request) throws IOException {
-        final var response = new HttpResponse(HttpStatus.OK, ResourceLoader.loadHtmlResource(request.getUri()));
+        final var response = new HttpResponse(HttpStatus.OK, ResourceLoader.loadHtmlResource(request.getPath()));
         return response.getResponse();
     }
 

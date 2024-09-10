@@ -10,12 +10,12 @@ public enum HttpMethod {
 
     public static HttpMethod getHttpMethod(String name) {
         return Arrays.stream(values())
-                .filter(httpMethod -> httpMethod.isMethod(name))
+                .filter(httpMethod -> httpMethod.name().equals(name))
                 .findAny()
                 .orElseThrow();
     }
 
-    public boolean isMethod(String name) {
-        return name().equals(name);
+    public boolean isMethod(HttpMethod method) {
+        return this.equals(method);
     }
 }

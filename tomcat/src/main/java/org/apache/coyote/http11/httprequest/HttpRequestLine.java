@@ -17,8 +17,8 @@ public class HttpRequestLine {
         this.version = headerFirstLine[2];
     }
 
-    public boolean isMethod(String name) {
-        return method.isMethod(name);
+    public boolean isMethod(HttpMethod method) {
+        return method.isMethod(method);
     }
 
     public boolean isPath(String path) {

@@ -1,6 +1,5 @@
-package com.techcourse.executor;
+package com.techcourse.controller;
 
-import com.techcourse.controller.AbstractController;
 import org.apache.coyote.file.ResourcesReader;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.ResourceToResponseConverter;

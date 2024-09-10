@@ -1,6 +1,5 @@
-package com.techcourse.executor;
+package com.techcourse.controller;
 
-import com.techcourse.controller.AbstractController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.file.ResourcesReader;

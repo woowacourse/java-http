@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.executor;
 
 import com.techcourse.controller.Controller;
-import com.techcourse.executor.ResourceController;
+import com.techcourse.controller.ResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.response.HttpResponse;

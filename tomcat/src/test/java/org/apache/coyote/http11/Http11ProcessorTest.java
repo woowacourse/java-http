@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.executor.LoginController;
-import com.techcourse.executor.RegisterController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.executor.RequestExecutors;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;

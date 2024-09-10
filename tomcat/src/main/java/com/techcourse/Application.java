@@ -1,7 +1,7 @@
 package com.techcourse;
 
-import com.techcourse.executor.LoginController;
-import com.techcourse.executor.RegisterController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.executor.RequestExecutors;

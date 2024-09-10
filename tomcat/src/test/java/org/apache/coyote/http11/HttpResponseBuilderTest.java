@@ -21,7 +21,7 @@ class HttpResponseBuilderTest {
                 () -> assertThat(actual.getStatusCode()).isEqualTo(StatusCode.OK),
                 () -> assertThat(actual.getContent()).isEqualTo("Hello, world!"),
                 () -> assertThat(actual.getHeaders().get("Content-Type")).isEqualTo("text/plain"),
-                () -> assertThat(actual.getHeaders().get("Content-Length")).isEqualTo(13L)
+                () -> assertThat(actual.getHeaders().get("Content-Length")).isEqualTo("13")
         );
     }
 

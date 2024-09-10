@@ -13,7 +13,7 @@ public class HttpHeaders {
     private static final String HEADER_DELIMITER = ":";
     private static final int SPLIT_LIMIT = 2;
 
-    private final Map<String, Object> fields = new HashMap<>();
+    private final Map<String, String> fields = new HashMap<>();
 
     public HttpHeaders(Collection<String> headerLines) {
         headerLines.stream()
@@ -26,7 +26,7 @@ public class HttpHeaders {
         this(Collections.emptyList());
     }
 
-    public void put(String name, Object value) {
+    public void put(String name, String value) {
         fields.put(name, value);
     }
 
@@ -43,14 +43,18 @@ public class HttpHeaders {
     }
 
     public void setContentLength(long contentLength) {
-        fields.put(CONTENT_LENGTH, contentLength);
+        fields.put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public long getContentLength() {
-        return (long) fields.getOrDefault(CONTENT_LENGTH, 0L);
+        String contentLength = fields.get(CONTENT_LENGTH);
+        if (contentLength == null) {
+            return 0L;
+        }
+        return Long.parseLong(contentLength);
     }
 
-    public Map<String, Object> getFields() {
+    public Map<String, String> getFields() {
         return Collections.unmodifiableMap(fields);
     }
 

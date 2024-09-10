@@ -18,7 +18,7 @@ public class HttpResponseWriter {
         StringBuilder builder = new StringBuilder();
         builder.append("%s %s %s".formatted(HTTP_VERSION, statusCode.getCode(), statusCode.getMessage()));
         builder.append(CRLF);
-        for (Entry<String, Object> entry : headers.getFields().entrySet()) {
+        for (Entry<String, String> entry : headers.getFields().entrySet()) {
             builder.append("%s: %s".formatted(entry.getKey(), entry.getValue()));
             builder.append(CRLF);
         }

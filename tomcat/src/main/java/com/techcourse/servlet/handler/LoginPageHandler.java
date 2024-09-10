@@ -5,6 +5,8 @@ import com.techcourse.model.User;
 import com.techcourse.servlet.Handler;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.view.View;
@@ -16,6 +18,12 @@ public class LoginPageHandler implements Handler {
 
     private static final HttpMethod METHOD = HttpMethod.GET;
     private static final String PATH = "/login";
+
+    private final SessionManager sessionManager;
+
+    public LoginPageHandler() {
+        this.sessionManager = SessionManager.getInstance();
+    }
 
     @Override
     public boolean support(HttpRequest request) {
@@ -50,8 +58,12 @@ public class LoginPageHandler implements Handler {
     }
 
     private View handleLoginSuccess(User user) {
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+
         return View.redirectBuilder()
-                .addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID())
+                .addHeader("Set-Cookie", "JSESSIONID=" + session.getId())
                 .location("/index.html")
                 .build();
     }

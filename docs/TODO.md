@@ -78,4 +78,8 @@
   - Response Header에 `Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46` 형식으로 추가
   - `UUID uuid = UUID.randomUUID()`로 UUID를 발급한다.
   - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
-- 
+
+### 4. Session 구현하기
+- 로그인에 성공하면 SessionStorege에 Session 객체의 값으로 User 객체를 저장
+- JSESSIONID의 값으로 로그인 여부를 체크
+- GET /login 로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.catalina.cookie.Cookie;
 
 public class HttpRequest {
 
@@ -34,18 +35,14 @@ public class HttpRequest {
         return startLine.getQueryParameter(key);
     }
 
-    public Optional<String> getHeader(String key) {
-        return headers.getHeader(key);
-    }
-
     public boolean matchHeader(String key, String expectedValue) {
         return headers.getHeader(key)
                 .map(value -> value.equals(expectedValue))
                 .orElse(false);
     }
 
-    public HttpRequestHeaders getHeaders() {
-        return headers;
+    public Cookie getCookie() {
+        return headers.getCookie();
     }
 
     public String getBody() {

@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.catalina.cookie.Cookie;
+import org.apache.catalina.cookie.CookieCreator;
 
 public class HttpRequestHeaders {
 
@@ -15,6 +17,12 @@ public class HttpRequestHeaders {
 
     public Optional<String> getHeader(String key) {
         return Optional.ofNullable(headers.get(key));
+    }
+
+    public Cookie getCookie() {
+        return getHeader("Cookie")
+                .map(CookieCreator::create)
+                .orElse(new Cookie());
     }
 
     @Override

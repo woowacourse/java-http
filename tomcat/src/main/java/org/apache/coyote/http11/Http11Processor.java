@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String USER_SESSION_NAME = "user";
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -88,65 +87,60 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handle(HttpRequest request) {
-        HttpCookie cookie = request.getCookie();
-        RequestBody requestBody = request.getRequestBody();
-
         if (request.pointsTo(GET, "/")) {
             return HttpResponse.ofContent("Hello world!")
                     .build();
         }
 
         if (request.pointsTo(GET, "/login")) {
-            return getLoginPage(cookie);
+            return getLoginPage(request);
         }
 
         if (request.pointsTo(POST, "/login")) {
-            return login(cookie, requestBody);
+            return login(request);
         }
 
         if (request.pointsTo(POST, "/register")) {
-            return saveUser(cookie, requestBody);
+            return saveUser(request);
         }
 
         return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK)
-                .cookie(cookie)
                 .build();
     }
 
-    private String getLoginPage(HttpCookie cookie) {
-        if (cookie.hasSession() && sessionManager.hasId(cookie.getSession())) {
+    private String getLoginPage(HttpRequest request) {
+        if (request.hasSession() && sessionManager.hasId(request.getSession())) {
+            return HttpResponse.redirectTo("/index.html").build();
+        }
+
+        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK).build();
+    }
+
+    private String login(HttpRequest request) {
+        RequestBody requestBody = request.getRequestBody();
+
+        if (!requestBody.containsAll("account", "password")) {
+            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+        }
+
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+
+        if (InMemoryUserRepository.exists(account, password)) {
+            User user = InMemoryUserRepository.getByAccount(account);
+            String sessionId = saveSessionAndGetId(user);
+            sessionManager.add(sessionId, Session.ofUser(user));
             return HttpResponse.redirectTo("/index.html")
-                    .cookie(cookie)
+                    .setCookie(HttpCookie.ofSessionId(sessionId))
                     .build();
         }
 
-        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK)
-                .cookie(cookie)
-                .build();
+        return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED).build();
     }
 
-    private String login(HttpCookie cookie, RequestBody requestBody) {
-        if (requestBody.containsAll("account", "password")) {
-            String account = requestBody.get("account");
-            String password = requestBody.get("password");
+    private String saveUser(HttpRequest request) {
+        RequestBody requestBody = request.getRequestBody();
 
-            if (InMemoryUserRepository.exists(account, password)) {
-                User user = InMemoryUserRepository.getByAccount(account);
-                saveSession(cookie, user);
-                return HttpResponse.redirectTo("/index.html")
-                        .cookie(cookie)
-                        .build();
-            }
-
-            return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED)
-                    .cookie(cookie)
-                    .build();
-        }
-
-        throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
-    }
-
-    private String saveUser(HttpCookie cookie, RequestBody requestBody) {
         if (requestBody.containsAll("account", "email", "password")) {
             String account = requestBody.get("account");
             String email = requestBody.get("email");
@@ -155,9 +149,9 @@ public class Http11Processor implements Runnable, Processor {
             if (!InMemoryUserRepository.existsByAccount(account)) {
                 User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
-                saveSession(cookie, user);
+                String sessionId = saveSessionAndGetId(user);
                 return HttpResponse.redirectTo("/index.html")
-                        .cookie(cookie)
+                        .setCookie(HttpCookie.ofSessionId(sessionId))
                         .build();
             }
 
@@ -167,9 +161,9 @@ public class Http11Processor implements Runnable, Processor {
         throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
     }
 
-    private void saveSession(HttpCookie cookie, User user) {
-        Session session = new Session();
-        session.setAttribute(USER_SESSION_NAME, user);
-        sessionManager.add(cookie.getSession(), session);
+    private String saveSessionAndGetId(User user) {
+        String sessionId = sessionManager.generateId();
+        sessionManager.add(sessionId, Session.ofUser(user));
+        return sessionId;
     }
 }

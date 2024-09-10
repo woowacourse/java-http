@@ -16,6 +16,12 @@ public class HttpCookie {
         this.cookies = new HashMap<>();
     }
 
+    public static HttpCookie ofSessionId(String sessionId) {
+        HttpCookie cookie = new HttpCookie();
+        cookie.setSession(sessionId);
+        return cookie;
+    }
+
     public HttpCookie(String rawCookies) {
         this.cookies = parse(rawCookies);
     }

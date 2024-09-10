@@ -3,6 +3,7 @@ package org.apache.catalina.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -36,5 +37,9 @@ public class SessionManager implements Manager {
 
     public boolean hasId(String id) {
         return sessions.containsKey(id);
+    }
+
+    public String generateId() {
+        return UUID.randomUUID().toString();
     }
 }

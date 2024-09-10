@@ -3,7 +3,6 @@ package org.apache.coyote.response;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.util.FileReader;
@@ -53,15 +52,6 @@ public class HttpResponse {
         return response;
     }
 
-    public HttpResponse cookie(HttpCookie cookie) {
-        if (!cookie.hasSession()) {
-            HttpCookie httpCookie = new HttpCookie();
-            httpCookie.setSession(UUID.randomUUID().toString());
-            this.addHeader(HttpHeaders.SET_COOKIE.getName(), httpCookie.buildMessage());
-        }
-        return this;
-    }
-
     private HttpHeader buildInitialHeaders(String responseBody, ContentType contentType) {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.CONTENT_LENGTH.getName(), responseBody.getBytes().length + " ");
@@ -71,6 +61,11 @@ public class HttpResponse {
 
     public void addHeader(String name, String value) {
         responseHeader.add(name, value);
+    }
+
+    public HttpResponse setCookie(HttpCookie cookie) {
+        responseHeader.add(HttpHeaders.SET_COOKIE.getName(), cookie.buildMessage());
+        return this;
     }
 
     public String build() {

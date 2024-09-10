@@ -32,4 +32,12 @@ public class HttpRequest {
     public HttpCookie getCookie() {
         return new HttpCookie(httpHeader.get(HttpHeaders.COOKIE.getName()));
     }
+
+    public boolean hasSession() {
+        return getCookie().hasSession();
+    }
+
+    public String getSession() {
+        return getCookie().getSession();
+    }
 }

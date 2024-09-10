@@ -19,7 +19,16 @@ public class RequestMapping {
     private final StaticResourceController staticResourceController;
     private final Map<String, Controller> controllers;
 
-    public RequestMapping() {
+    private static class RequestMappingHolder {
+
+        private static final RequestMapping INSTANCE = new RequestMapping();
+    }
+
+    public static RequestMapping getInstance() {
+        return RequestMappingHolder.INSTANCE;
+    }
+
+    private RequestMapping() {
         this.staticResourceController = new StaticResourceController();
         this.controllers = initControllers();
     }

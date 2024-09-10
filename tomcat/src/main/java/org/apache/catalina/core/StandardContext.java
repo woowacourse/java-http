@@ -10,7 +10,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -101,16 +101,15 @@ public class StandardContext {
 
     private static String probeContentType(String url) {
         try {
-            return Files.probeContentType(Paths.get(Objects.requireNonNull(StandardContext.class.getClassLoader()
-                    .getResource("static" + url)).toURI()));
-        } catch (URISyntaxException | IOException e) {
+            return Files.probeContentType(Path.of(getStaticResourceURL(url).toURI()));
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static String findStaticFile(String url) {
         try {
-            URL resource = StandardContext.class.getClassLoader().getResource("static" + url);
+            URL resource = getStaticResourceURL(url);
             if (Objects.isNull(resource)) {
                 return StringUtils.EMPTY;
             }
@@ -118,6 +117,12 @@ public class StandardContext {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static URL getStaticResourceURL(String url) {
+        return StandardContext.class
+                .getClassLoader()
+                .getResource("static" + url);
     }
 
     private static void login(Map<String, String> headers, String body, HttpResponse response) {

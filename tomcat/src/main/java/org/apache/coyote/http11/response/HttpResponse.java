@@ -23,6 +23,10 @@ public class HttpResponse {
         this(null, new HashMap<>(), "");
     }
 
+    public HttpResponse(HttpStatus httpStatus) {
+        this(httpStatus, new HashMap<>(), "");
+    }
+
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers) {
         this(httpStatus, headers, "");
     }

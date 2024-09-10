@@ -59,7 +59,7 @@ public class HttpResponse {
     }
 
     public void setResource(final Resource resource) {
-        headers.put(ResponseHeader.CONTENT_TYPE, getContentType(resource.getExtension()));
+        headers.put(ResponseHeader.CONTENT_TYPE, setContentType(resource.getExtension()));
         headers.put(ResponseHeader.CONTENT_LENGTH, String.valueOf(resource.length()));
         body = resource.getBytes();
     }
@@ -68,7 +68,7 @@ public class HttpResponse {
         this.version = version;
     }
 
-    private static String getContentType(final FileExtension extension) {
+    private static String setContentType(final FileExtension extension) {
         return switch (extension) {
             case CSS -> combineContentAndCharset(CSS, UTF_8);
             case HTML -> combineContentAndCharset(HTML, UTF_8);

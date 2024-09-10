@@ -24,10 +24,6 @@ public class TestServer {
         start(tomcat);
     }
 
-    public static void serverStart(final Tomcat tomcat) {
-        start(tomcat);
-    }
-
     public static String getHost() {
         return HOST;
     }

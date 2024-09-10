@@ -1,6 +1,10 @@
 handlebars:
   suffix: .html
 
+spring:
+  main:
+    web-application-type: none
+
 server:
   tomcat:
     accept-count: 1 # 스레드별 작업 대기열 큐 대기 갯수

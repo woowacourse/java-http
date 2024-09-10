@@ -84,10 +84,12 @@ public class HttpRequest {
     }
 
     public String getSessionIdFromCookie() {
-        String[] cookies = headers.get("Cookie").split("; ");
-        for (String cookie : cookies) {
-            if (cookie.startsWith("JSESSIONID=")) {
-                return cookie.substring("JSESSIONID=".length());
+        if (headers.get("Cookie") != null) {
+            String[] cookies = headers.get("Cookie").split("; ");
+            for (String cookie : cookies) {
+                if (cookie.startsWith("JSESSIONID=")) {
+                    return cookie.substring("JSESSIONID=".length());
+                }
             }
         }
         return null;

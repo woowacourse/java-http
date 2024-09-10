@@ -2,6 +2,7 @@ package org.apache;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class HttpResponse {
@@ -74,6 +75,14 @@ public class HttpResponse {
         headers.add("Set-Cookie: " + key + "=" + value + ";");
     }
 
+    public List<String> getHeaders() {
+        return Collections.unmodifiableList(headers);
+    }
+
+    public String getResponseBody() {
+        return new String(responseBody,StandardCharsets.UTF_8);
+    }
+
     public byte[] getBytes() {
         String headerString = String.join("\r\n", headers) + "\r\n" + "\r\n";
         byte[] headerBytes = headerString.getBytes(StandardCharsets.UTF_8);
@@ -83,5 +92,12 @@ public class HttpResponse {
         System.arraycopy(responseBody, 0, fullResponse, headerBytes.length, responseBody.length);
 
         return fullResponse;
+    }
+
+    @Override
+    public String toString() {
+        String headersString = String.join("\r\n", headers);
+        String bodyString = new String(responseBody, StandardCharsets.UTF_8);
+        return headersString + "\r\n\r\n" + bodyString;
     }
 }

@@ -64,35 +64,43 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
-            HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
-
-            if (httpRequest.containsKey("Cookie")) {
-                HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getValue("Cookie"));
-                if (httpCookie.containsKey("JSESSIONID")) {
-                    String jsessionid = httpCookie.getValue("JSESSIONID");
-                    if (session.containsUser(jsessionid)) {
-                        User user = session.getUser(jsessionid);
-                        log.info(user.toString());
-                        httpStatusLine = new HttpStatusLine(httpStatusLine.getVersion(), HttpStatusCode.FOUND);
-                        return new HttpResponse.Builder(httpStatusLine)
-                                .setCookie("JSESSIONID=" + jsessionid)
-                                .location("/index.html")
-                                .build();
-                    }
-                }
+            if (!httpRequest.containsKey("Cookie")) {
+                return redirectLoginPage(httpRequest);
             }
 
-            var resourceUrl = getClass().getClassLoader().getResource(LOGIN_PATH);
-            Path filePath = Path.of(resourceUrl.toURI());
-            String responseBody = new String(Files.readAllBytes(filePath));
+            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getValue("Cookie"));
+            if (!httpCookie.containsKey("JSESSIONID")) {
+                return redirectLoginPage(httpRequest);
+            }
 
+            String jsessionid = httpCookie.getValue("JSESSIONID");
+            if (!session.containsUser(jsessionid)) {
+                return redirectLoginPage(httpRequest);
+            }
+
+            User user = session.getUser(jsessionid);
+            log.info(user.toString());
+            HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
             return new HttpResponse.Builder(httpStatusLine)
-                    .contentType(Files.probeContentType(filePath) + ";charset=utf-8")
-                    .contentLength(String.valueOf(responseBody.getBytes().length))
-                    .responseBody(responseBody)
+                    .setCookie("JSESSIONID=" + jsessionid)
+                    .location("/index.html")
                     .build();
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private HttpResponse redirectLoginPage(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
+
+        var resourceUrl = getClass().getClassLoader().getResource(LOGIN_PATH);
+        Path filePath = Path.of(resourceUrl.toURI());
+        String responseBody = new String(Files.readAllBytes(filePath));
+
+        return new HttpResponse.Builder(httpStatusLine)
+                .contentType(Files.probeContentType(filePath) + ";charset=utf-8")
+                .contentLength(String.valueOf(responseBody.getBytes().length))
+                .responseBody(responseBody)
+                .build();
     }
 }

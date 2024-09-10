@@ -48,7 +48,9 @@ class LoginRequestHandlerTest {
         Http11RequestBody requestBody = new Http11RequestBody("");
         HttpRequest request = new Http11Request(requestLine, headers, requestBody);
         HttpResponse response = new Http11Response();
+
         handler.handle(request, response);
+        
         String actual = response.getResponseMessage();
         String expectedResponseLine = "HTTP/1.1 302 Found";
         String expectedLocation = "/index.html";

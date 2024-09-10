@@ -4,10 +4,7 @@ import com.techcourse.dto.LoginRequestDto;
 import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.MimeType;
-import org.apache.coyote.http.Session;
-import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.*;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
@@ -35,7 +32,7 @@ public class LoginController extends AbstractController {
         }
         try {
             Path path = request.getPath();
-            generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
+            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
         } catch (NullPointerException e) {
             new NotFoundController().doGet(request, response);
         } catch (IOException e) {
@@ -51,10 +48,10 @@ public class LoginController extends AbstractController {
         try {
             Path path = request.getPath();
             if (login(request, response)) {
-                generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+                HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
                 return;
             }
-            generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED, response);
+            HttpMessageGenerator.generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED, response);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             doGet(request, response);
@@ -68,7 +65,7 @@ public class LoginController extends AbstractController {
     private void alreadyLoggedIn(HttpRequest request, HttpResponse response) throws IOException, NullPointerException {
         Path path = request.getPath();
 
-        generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+        HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
         response.setRedirectLocation(REDIRECT_LOCATION);
     }
 

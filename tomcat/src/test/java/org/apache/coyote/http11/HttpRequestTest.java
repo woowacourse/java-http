@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ class HttpRequestTest {
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(httpRequest.getUri()).hasToString("/ping"),
+                () -> assertThat(httpRequest.getUri()).extracting(URI::getPath).isEqualTo("/ping"),
                 () -> assertThat(httpRequest.getContent()).isEqualTo("This is Body\nHello, World!\n")
         );
     }

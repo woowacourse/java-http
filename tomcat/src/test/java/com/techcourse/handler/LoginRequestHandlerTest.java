@@ -1,15 +1,12 @@
 package com.techcourse.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.StatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -30,7 +27,7 @@ class LoginRequestHandlerTest {
     }
 
     @Test
-    @DisplayName("로그인에 실패하는 경우 401.html로 redirect한다.")
+    @DisplayName("로그인에 실패하는 경우 401.html을 리턴한다.")
     void failLogin() {
         LoginRequestHandler loginRequestHandler = new LoginRequestHandler();
         byte[] bytes = """
@@ -38,15 +35,12 @@ class LoginRequestHandlerTest {
                 Host: localhost:8080\r
                 """.getBytes();
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
-        HttpResponse response = loginRequestHandler.handle(request);
-        assertAll(
-                () -> assertThat(response.getStatusCode()).isEqualTo(StatusCode.FOUND),
-                () -> assertThat(response.getHeader("Location")).isEqualTo("401.html")
-        );
+        String actual = loginRequestHandler.handle(request);
+        assertThat(actual).isEqualTo("redirect:/401.html");
     }
 
     @Test
-    @DisplayName("로그인에 성공하는 경우 index.html로 redirect한다.")
+    @DisplayName("로그인에 성공하는 경우 index.html을 반환한다.")
     void successLogin() {
         LoginRequestHandler loginRequestHandler = new LoginRequestHandler();
         MockedStatic<InMemoryUserRepository> repository = Mockito.mockStatic(InMemoryUserRepository.class);
@@ -59,11 +53,8 @@ class LoginRequestHandlerTest {
                 """.getBytes();
 
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
-        HttpResponse response = loginRequestHandler.handle(request);
-        assertAll(
-                () -> assertThat(response.getStatusCode()).isEqualTo(StatusCode.FOUND),
-                () -> assertThat(response.getHeader("Location")).isEqualTo("index.html")
-        );
+        String actual = loginRequestHandler.handle(request);
+        assertThat(actual).isEqualTo("redirect:/index.html");
         repository.close();
     }
 }

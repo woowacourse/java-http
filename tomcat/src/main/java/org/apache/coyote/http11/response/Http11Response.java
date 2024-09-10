@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.HttpResponse;
 
-public class Http11Response {
+public class Http11Response implements HttpResponse {
 
     private Http11ResponseStartLine startLine;
     private Http11ResponseHeaders headers;
@@ -23,11 +24,13 @@ public class Http11Response {
         return new Http11Response(startLine, new Http11ResponseHeaders(), null);
     }
 
+    @Override
     public void sendRedirect(String url) {
         this.startLine = new Http11ResponseStartLine(HttpStatusCode.FOUND);
         addHeader("Location", url);
     }
 
+    @Override
     public void addStaticBody(String name) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + name);
         if (resource == null) {
@@ -39,14 +42,17 @@ public class Http11Response {
         addContentType(contentType);
     }
 
+    @Override
     public void addCookie(String key, String value) {
         addHeader("Set-Cookie", key + "=" + value);
     }
 
+    @Override
     public void addContentType(String accept) {
         addHeader("Content-Type", accept + ";charset=utf-8");
     }
 
+    @Override
     public void addBody(String body) {
         this.body = body;
         addHeader("Content-Length", String.valueOf(body.getBytes().length));

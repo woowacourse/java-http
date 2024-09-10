@@ -1,11 +1,11 @@
 package org.apache.controller;
 
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 
 public interface Controller {
 
-    void service(Http11Request request, Http11Response response) throws Exception;
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 
     boolean isMatch(String endPoint);
 }

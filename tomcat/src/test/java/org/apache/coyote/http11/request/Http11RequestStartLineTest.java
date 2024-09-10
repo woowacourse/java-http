@@ -25,7 +25,7 @@ class Http11RequestStartLineTest {
         Http11RequestStartLine http11StartLine = Http11RequestStartLine.from("GET /index.html HTTP/1.1");
 
         assertAll(
-                () -> Assertions.assertThat(http11StartLine.getMethod()).isEqualTo(Http11Method.GET),
+                () -> Assertions.assertThat(http11StartLine.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> Assertions.assertThat(http11StartLine.getRequestTarget().getEndPoint()).isEqualTo("/index.html")
         );
     }

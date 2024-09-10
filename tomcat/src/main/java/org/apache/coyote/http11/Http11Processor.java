@@ -8,7 +8,7 @@ import java.net.Socket;
 import org.apache.controller.Controller;
 import org.apache.controller.HandlerContainer;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Http11Method;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestStartLine;
 import org.apache.coyote.http11.response.Http11Response;
@@ -76,6 +76,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isStaticResourceRequest(Http11RequestStartLine startLine) {
-        return startLine.getMethod() == Http11Method.GET && startLine.getEndPoint().contains(".");
+        return startLine.getMethod() == HttpMethod.GET && startLine.getEndPoint().contains(".");
     }
 }

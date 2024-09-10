@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Http11Request {
+public class Http11Request implements HttpRequest {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
@@ -82,26 +83,32 @@ public class Http11Request {
         return new String(buffer);
     }
 
-    public Http11Method getMethod() {
+    @Override
+    public HttpMethod getMethod() {
         return startLine.getMethod();
     }
 
+    @Override
     public String getEndpoint() {
         return startLine.getEndPoint();
     }
 
+    @Override
     public Http11RequestStartLine getStartLine() {
         return startLine;
     }
 
+    @Override
     public Http11RequestHeader getHeaders() {
         return headers;
     }
 
+    @Override
     public String getBody() {
         return body;
     }
 
+    @Override
     public Session getSession() {
         return session;
     }

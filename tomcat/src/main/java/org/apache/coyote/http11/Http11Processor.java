@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,49 +40,50 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var requestLine = RequestLine.from(bufferedReader.readLine());
 
-            final var httpHeaders = HttpHeaders.parse(bufferedReader);
+            final var httpRequest = HttpRequest.from(bufferedReader);
 
-            log.info("요청 = {}", requestLine);
+            log.info("요청 = {}", httpRequest.getRequestLine());
 
-            final var result = getFile(requestLine.getPath());
+            //TODO refactor
+            final var result = getFile(httpRequest.getRequestLine().getPath());
             final var response = new Response();
 
-            if (HttpMethod.GET.equals(requestLine.getHttpMethod())) {
-                if (requestLine.getPath().isEqualPath("/login")) {
-                    final var cookie = httpHeaders.get("Cookie");
+            if (httpRequest.hasMethod(HttpMethod.GET)) {
+                if (httpRequest.getRequestLine().getPath().isEqualPath("/login")) {
+                    final var cookie = httpRequest.getHeaders().get("Cookie");
                     final var httpCookie = HttpCookie.parse(cookie);
                     if (httpCookie.containsKey("JSESSIONID")) {
                         final var jSessionId = httpCookie.get("JSESSIONID");
                         final var session = sessionManager.findSession(jSessionId);
                         if (session == null) {
                             log.warn("유효하지 않은 세션입니다.");
-                            redirectLocation(response, requestLine.getPath(), result, "401.html");
+                            redirectLocation(response, httpRequest, result, "401.html");
                         } else {
                             final var sessionUser = (User) session.getAttribute("user");
                             log.info("이미 로그인 유저 = {}", sessionUser);
-                            redirectLocation(response, requestLine.getPath(), result, "index.html");
+                            redirectLocation(response, httpRequest, result, "index.html");
                         }
                     } else {
-                        generateOKResponse(response, requestLine.getPath(), result);
+                        generateOKResponse(response, httpRequest, result);
                     }
                 } else {
-                    generateOKResponse(response, requestLine.getPath(), result);
+                    generateOKResponse(response, httpRequest, result);
                 }
             }
 
-            if (HttpMethod.POST.equals(requestLine.getHttpMethod())) {
-                final var body = parseRequestBody(httpHeaders, bufferedReader);
+            if (httpRequest.hasMethod(HttpMethod.POST)) {
 
-                if (requestLine.getPath().isEqualPath("/login")) {
-                    final var user = createResponse(body, requestLine.getPath(), response, result);
+                final var body = httpRequest.getBody();
+
+                if (httpRequest.getRequestLine().getPath().isEqualPath("/login")) {
+                    final var user = createResponse(body, httpRequest, response, result);
 
                     log.info("user login = {}", user);
-                } else if (requestLine.getPath().isEqualPath("/register")) {
+                } else if (httpRequest.getRequestLine().getPath().isEqualPath("/register")) {
                     final var user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    redirectLocation(response, requestLine.getPath(), result, "index.html");
+                    redirectLocation(response, httpRequest, result, "index.html");
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -98,15 +98,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseRequestBody(final HttpHeaders httpHeaders,
-                                                 final BufferedReader bufferedReader) throws IOException {
-        final int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        final var requestBody = new String(buffer);
-        return parsingBody(requestBody);
-    }
-
     private String getFile(final Path path) throws IOException {
         final var resource = path.getAbsolutePath();
         if (resource == null) {
@@ -115,39 +106,31 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private Map<String, String> parsingBody(final String requestBody) {
-        final var body = new HashMap<String, String>();
-        final var params = requestBody.split("&");
-        for (final var param : params) {
-            body.put(param.split("=")[0], param.split("=")[1]);
-        }
-        return body;
-    }
-
-    private void generateOKResponse(final Response response, final Path path, final String result) {
+    private void generateOKResponse(final Response response, final HttpRequest request, final String result) {
         response.setHttpStatusCode(HttpStatusCode.OK);
         response.setSourceCode(result);
         response.putHeader("Content-Length", result.getBytes().length);
-        response.putHeader("Content-Type", ContentType.from(path).toResponseText());
+        response.putHeader("Content-Type", request.getContentTypeToResponseText());
     }
 
-    private void redirectLocation(final Response response, final Path path, final String result,
+    private void redirectLocation(final Response response, final HttpRequest request, final String result,
                                   final String location) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setSourceCode(result);
         response.putHeader("Content-Length", result.getBytes().length);
-        response.putHeader("Content-Type", ContentType.from(path).toResponseText());
+        response.putHeader("Content-Type", request.getContentTypeToResponseText());
         response.putHeader("Location", location);
     }
 
-    private User createResponse(final Map<String, String> queryString, final Path request, final Response response,
+    private User createResponse(final Map<String, String> body, final HttpRequest request,
+                                final Response response,
                                 final String result) {
-        final var account = queryString.get("account");
+        final var account = body.get("account");
         log.info("account = {}", account);
         try {
             final var user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-            final var password = queryString.get("password");
+            final var password = body.get("password");
             if (!user.checkPassword(password)) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }

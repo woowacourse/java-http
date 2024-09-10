@@ -28,6 +28,10 @@ public class HttpHeaders {
         return new HttpHeaders(httpRequestHeaders);
     }
 
+    public boolean contains(final String name) {
+        return headers.containsKey(name);
+    }
+
     public String get(final String key) {
         return headers.get(key);
     }

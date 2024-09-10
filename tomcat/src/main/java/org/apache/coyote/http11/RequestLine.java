@@ -2,6 +2,10 @@ package org.apache.coyote.http11;
 
 public class RequestLine {
 
+    private static final int METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final String REQUEST_SEPARATOR = " ";
+
     private final HttpMethod httpMethod;
     private final Path path;
 
@@ -11,10 +15,14 @@ public class RequestLine {
     }
 
     public static RequestLine from(final String line) {
-        final var texts = line.split(" ");
-        final var method = HttpMethod.fromName(texts[0]);
-        final var path = new Path(texts[1]);
+        final var texts = line.split(REQUEST_SEPARATOR);
+        final var method = HttpMethod.fromName(texts[METHOD_INDEX]);
+        final var path = new Path(texts[PATH_INDEX]);
         return new RequestLine(method, path);
+    }
+
+    public boolean isEqualHttpMethod(final HttpMethod target) {
+        return httpMethod == target;
     }
 
     public HttpMethod getHttpMethod() {

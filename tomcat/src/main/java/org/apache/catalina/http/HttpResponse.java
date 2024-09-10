@@ -1,12 +1,12 @@
 package org.apache.catalina.http;
 
-import com.techcourse.session.Session;
 import java.util.StringJoiner;
 import org.apache.catalina.http.body.HttpResponseBody;
 import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.session.Session;
 
 public class HttpResponse {
 

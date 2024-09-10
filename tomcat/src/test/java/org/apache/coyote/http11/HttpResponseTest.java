@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.session.Session;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.body.HttpResponseBody;
 import org.apache.catalina.http.header.HttpHeader;
@@ -10,6 +9,7 @@ import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
 import org.apache.catalina.http.startline.HttpVersion;
+import org.apache.catalina.session.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

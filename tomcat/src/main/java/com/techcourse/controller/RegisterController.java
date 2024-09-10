@@ -2,11 +2,11 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.session.SessionManager;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.servlet.RestController;
+import org.apache.catalina.session.SessionManager;
 
 @RequestMapping("/register")
 public class RegisterController extends RestController {

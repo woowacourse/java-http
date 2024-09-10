@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
-import com.techcourse.session.SessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

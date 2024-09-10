@@ -1,9 +1,9 @@
 package com.techcourse.controller;
 
-import com.techcourse.session.Session;
 import java.util.Map;
 import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.session.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.RestAssured;

@@ -1,6 +1,5 @@
 package org.apache.catalina.http;
 
-import com.techcourse.session.Session;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +14,7 @@ import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
 import org.apache.catalina.http.startline.HttpVersion;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
 

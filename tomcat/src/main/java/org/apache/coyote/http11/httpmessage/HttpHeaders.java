@@ -38,7 +38,7 @@ public class HttpHeaders {
 
     public int getContentLength() {
         return Integer.parseInt(
-                Optional.ofNullable(headers.get("Content-Length"))
+                Optional.ofNullable(headers.get(CONTENT_LENGTH))
                         .orElse("0")
         );
     }

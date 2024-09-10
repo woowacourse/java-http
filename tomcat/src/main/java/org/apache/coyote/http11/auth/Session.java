@@ -5,13 +5,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Session {
-    private static final IdGenerator idGenerator = new IdGenerator();
-
     private final String id;
     private final Map<String, Object> attributes;
 
     public Session() {
-        this.id = idGenerator.generate();
+        this.id = IdGenerator.generate();
         this.attributes = new HashMap<>();
     }
 

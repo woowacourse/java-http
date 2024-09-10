@@ -16,7 +16,6 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 
 class UserServiceTest {
-
     private User user;
     private UserService userService;
 

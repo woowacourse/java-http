@@ -63,4 +63,3 @@ public class RegisterController extends Controller {
         return response;
     }
 }
-

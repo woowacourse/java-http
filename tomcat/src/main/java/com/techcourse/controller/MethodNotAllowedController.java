@@ -60,4 +60,3 @@ public class MethodNotAllowedController extends Controller {
         return getClass().getClassLoader().getResource("static/" + fileName);
     }
 }
-

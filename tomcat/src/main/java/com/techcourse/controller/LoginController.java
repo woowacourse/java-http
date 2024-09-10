@@ -77,4 +77,3 @@ public class LoginController extends Controller {
         return response;
     }
 }
-

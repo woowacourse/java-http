@@ -1,7 +1,6 @@
 package com.techcourse.util;
 
 public enum FileExtension {
-
     HTML("html"),
     CSS("css"),
     JS("js"),

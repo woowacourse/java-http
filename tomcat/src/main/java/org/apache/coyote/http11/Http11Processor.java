@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.controller.FrontController;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;

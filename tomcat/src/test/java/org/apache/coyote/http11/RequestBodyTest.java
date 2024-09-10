@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestBodyTest {
-
     @DisplayName("application/x-www-form-urlencoded형의 body를 파싱한다.")
     @Test
     void parseRequestBody() {

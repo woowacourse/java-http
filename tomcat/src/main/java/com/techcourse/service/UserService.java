@@ -8,7 +8,6 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 
 public class UserService {
-
     public User login(String account, String password) {
         if (Objects.isNull(account) || Objects.isNull(password)) {
             throw new UnauthorizedException("Values for authorization is missing.");

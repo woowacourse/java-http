@@ -60,4 +60,3 @@ public class NotFoundController extends Controller {
         return getClass().getClassLoader().getResource("static/" + fileName);
     }
 }
-

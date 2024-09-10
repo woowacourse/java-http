@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
-
     @DisplayName("주어진 요청을 HttpRequest로 바꾼다.")
     @Test
     void extractRequestBody() throws IOException {

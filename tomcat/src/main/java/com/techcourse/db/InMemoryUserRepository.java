@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.techcourse.model.User;
 
 public class InMemoryUserRepository {
-
     private static final AtomicLong idCounter = new AtomicLong(1L);
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 

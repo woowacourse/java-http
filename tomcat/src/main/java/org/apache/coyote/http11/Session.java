@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Session {
-
     private final String id;
     private final Map<String, String> values;
 

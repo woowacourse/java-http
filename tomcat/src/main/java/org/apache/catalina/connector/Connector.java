@@ -10,7 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Connector implements Runnable {
-
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;

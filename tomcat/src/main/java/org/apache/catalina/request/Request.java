@@ -14,7 +14,6 @@ public class Request {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private Map<String, String> body = new HashMap<>();
-    private Map<String, String> queryParam = new HashMap<>();
     private final String fileType;
 
     public Request(String requestLine, Map<String, String> headers) {
@@ -32,7 +31,7 @@ public class Request {
     }
 
     public boolean checkQueryParamIsEmpty() {
-        return queryParam.isEmpty();
+        return requestLine.checkQueryParamIsEmpty();
     }
 
     public void setBody(Map<String, String> body) {
@@ -40,7 +39,7 @@ public class Request {
     }
 
     public void setQueryParam(Map<String, String> queryParam) {
-        this.queryParam = new HashMap<>(queryParam);
+        requestLine.setQueryParam(queryParam);
     }
 
     public Map<String, String> getBody() {
@@ -48,7 +47,7 @@ public class Request {
     }
 
     public Map<String, String> getQueryParam() {
-        return queryParam;
+        return requestLine.getQueryParam();
     }
 
     public String getHttpMethod() {

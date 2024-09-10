@@ -1,11 +1,15 @@
 package org.apache.catalina.request;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RequestLine {
     private static final String SPACE = " ";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
     private final HttpMethod httpMethod;
     private final String path;
     private final VersionOfProtocol versionOfProtocol;
+    private Map<String, String> queryParam = new HashMap<>();
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(SPACE);
@@ -15,6 +19,14 @@ public class RequestLine {
         this.httpMethod = HttpMethod.of(parts[0]);
         this.path = parts[1];
         this.versionOfProtocol = new VersionOfProtocol(parts[2]);
+    }
+
+    public boolean checkQueryParamIsEmpty() {
+        return queryParam.isEmpty();
+    }
+
+    public void setQueryParam(Map<String, String> queryParam) {
+        this.queryParam = new HashMap<>(queryParam);
     }
 
     public HttpMethod getHttpMethod() {
@@ -35,5 +47,9 @@ public class RequestLine {
 
     public String getHttpVersion() {
         return versionOfProtocol.getHttpVersion();
+    }
+
+    public Map<String, String> getQueryParam() {
+        return new HashMap<>(queryParam);
     }
 }

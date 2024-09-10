@@ -24,6 +24,12 @@ public class ResponseHeaders {
         return new ResponseHeaders(headers);
     }
 
+    public static ResponseHeaders of(HttpHeader header, String value) {
+        LinkedHashMap<HttpHeader, String> headers = new LinkedHashMap<>();
+        headers.put(header, value);
+        return new ResponseHeaders(headers);
+    }
+
     public void addHeader(HttpHeader name, String value) {
         headers.put(name, value);
     }

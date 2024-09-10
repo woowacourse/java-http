@@ -50,9 +50,8 @@ public class LoginHandler extends Handler {
     }
 
     private String processLoginPostRequest(final HttpRequest httpRequest) {
-        final String[] params = httpRequest.getBody().split("&");
-        final String account = params[0].split("=")[1];
-        final String password = params[1].split("=")[1];
+        final String account = httpRequest.getFormBody("account");
+        final String password = httpRequest.getFormBody("password");
 
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {

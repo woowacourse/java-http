@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.http.HttpCookie;
-import org.apache.http.header.HttpHeader;
 import org.apache.http.HttpMethod;
+import org.apache.http.header.HttpHeader;
 
 public class HttpRequest {
     private final HttpMethod method;
@@ -31,6 +31,17 @@ public class HttpRequest {
                         .findFirst()
                         .map(header -> HttpCookie.of(header.getValue())))
                 .orElse(null);
+    }
+
+    public String getFormBody(String key) {
+        final String[] params = this.body.split("&");
+        for (int i = 0; i < params.length; i++) {
+            String[] keyAndValue = params[i].split("=");
+            if (keyAndValue[0].equals(key)) {
+                return keyAndValue[1];
+            }
+        }
+        return null;
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {

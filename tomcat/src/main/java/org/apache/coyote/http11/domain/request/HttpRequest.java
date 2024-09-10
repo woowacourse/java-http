@@ -9,6 +9,8 @@ import org.apache.coyote.http11.domain.session.SessionManager;
 
 public class HttpRequest {
 
+    private static final String SESSION_ID_KEY = "JSESSIONID";
+    
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
@@ -60,7 +62,7 @@ public class HttpRequest {
         if (cookie == null) {
             return null;
         }
-        String sessionId = cookie.getValue("JSESSIONID");
+        String sessionId = cookie.getValue(SESSION_ID_KEY);
         SessionManager sessionManager = SessionManager.getInstance();
         return sessionManager.findSession(sessionId);
     }

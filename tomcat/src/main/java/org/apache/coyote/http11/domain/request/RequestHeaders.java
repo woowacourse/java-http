@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
+    private static final String COOKIE_HEADER_KEY = "Cookie";
+
     private final Map<String, String> headers;
 
     public RequestHeaders(List<String> headerLines) {
@@ -31,6 +33,6 @@ public class RequestHeaders {
     }
 
     public String getCookieString() {
-        return getHeader("Cookie");
+        return getHeader(COOKIE_HEADER_KEY);
     }
 }

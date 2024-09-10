@@ -6,6 +6,9 @@ import org.apache.coyote.http11.domain.cookie.Cookie;
 public class HttpResponse {
 
     private static final String LOCATION_HEADER_KEY = "location";
+    private static final String SET_COOKIE_HEADER_KEY = "Set-Cookie";
+    private static final String CONTENT_TYPE_HEADER_KEY = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER_KEY = "Content-Length";
 
     private final Map<String, String> responseHeaders;
     private HttpStatus httpStatus;
@@ -43,7 +46,7 @@ public class HttpResponse {
 
     public void setMessageBody(String body) {
         this.messageBody = body;
-        responseHeaders.put("Content-Length", String.valueOf(body.getBytes().length));
+        responseHeaders.put(CONTENT_LENGTH_HEADER_KEY, String.valueOf(body.getBytes().length));
     }
 
     public void setStatus(HttpStatus status) {
@@ -51,7 +54,7 @@ public class HttpResponse {
     }
 
     public void setContentType(String contentType) {
-        responseHeaders.put("Content-Type", contentType);
+        responseHeaders.put(CONTENT_TYPE_HEADER_KEY, contentType);
     }
 
     public void setRedirect(String location) {
@@ -60,6 +63,6 @@ public class HttpResponse {
     }
 
     public void setCookie(Cookie cookie) {
-        responseHeaders.put("Set-Cookie", cookie.toCookieString());
+        responseHeaders.put(SET_COOKIE_HEADER_KEY, cookie.toCookieString());
     }
 }

@@ -3,7 +3,8 @@ package org.apache.coyote.http11.httprequest;
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String QUERY_PARAMETER_DELIMITER = "\\?";
+    private static final String QUERY_PARAMETER_DELIMITER = "?";
+    private static final String QUERY_PARAMETER_REGEX = "\\?";
 
     private final HttpMethod httpMethod;
     private final String uri;
@@ -29,12 +30,12 @@ public class RequestLine {
     }
 
     public QueryParameter getQueryParameter() {
-        String queryParameter = uri.split(QUERY_PARAMETER_DELIMITER)[1];
+        String queryParameter = uri.split(QUERY_PARAMETER_REGEX)[1];
         return new QueryParameter(queryParameter);
     }
 
     public String getPath() {
-        return uri.split(QUERY_PARAMETER_DELIMITER)[0];
+        return uri.split(QUERY_PARAMETER_REGEX)[0];
     }
 
     public String getUri() {

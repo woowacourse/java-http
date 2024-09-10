@@ -7,8 +7,12 @@ import org.apache.coyote.http11.httprequest.QueryParameter;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 import org.apache.coyote.http11.utils.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegisterController implements Controller {
+
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
     public HttpResponse process(HttpRequest request) {
@@ -17,8 +21,11 @@ public class RegisterController implements Controller {
             return HttpResponse.of(location, HttpStatusCode.OK);
         }
         if (request.isPostMethod()) {
-            User user = findUser(request.getQueryParameter());
+            QueryParameter queryParameter = new QueryParameter(request.getBody());
+            User user = findUser(queryParameter);
+
             InMemoryUserRepository.save(user);
+            log.info("회원가입 완료! 아이디: {}", user.getAccount());
 
             return HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.OK);
         }

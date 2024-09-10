@@ -8,7 +8,7 @@ public class HomeRequestHandler implements RequestHandler {
 
 	@Override
 	public boolean canHandle(HttpRequest request) {
-		return (request.getMethod().equals("GET") && request.getUri().equals(URI_PATTERN));
+		return (request.getMethod().equals("GET") && URI_PATTERN.equals(request.getUri()));
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class RegisterRequestHandler implements RequestHandler {
 
 	@Override
 	public boolean canHandle(HttpRequest request) {
-		return request.getUri().equals(URI_PATTERN);
+		return URI_PATTERN.equals(request.getUri());
 	}
 
 	@Override

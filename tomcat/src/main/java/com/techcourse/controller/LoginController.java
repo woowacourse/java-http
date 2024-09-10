@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.dto.LoginRequestDto;
 import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
@@ -11,6 +12,7 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
+import org.apache.coyote.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +74,8 @@ public class LoginController extends AbstractController {
 
     private boolean login(HttpRequest request, HttpResponse response) {
         try {
-            User user = loginService.login(request.getBody());
+            LoginRequestDto loginRequestDto = LoginRequestDto.of(StringUtils.separateKeyValue(request.getBody()));
+            User user = loginService.login(loginRequestDto);
             response.setRedirectLocation(REDIRECT_LOCATION);
             HttpCookie cookie = getHttpCookie(user);
             response.setCookie(cookie.toCookieResponse());

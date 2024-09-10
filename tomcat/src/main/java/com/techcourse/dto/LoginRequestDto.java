@@ -1,9 +1,18 @@
 package com.techcourse.dto;
 
-public record LoginInfo(String account, String password) {
+import java.util.Map;
 
-    public LoginInfo {
+public record LoginRequestDto(String account, String password) {
+
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
+
+    public LoginRequestDto {
         validate(account, password);
+    }
+
+    public static LoginRequestDto of(Map<String, String> loginInfos) {
+        return new LoginRequestDto(loginInfos.get(ACCOUNT_KEY), loginInfos.get(PASSWORD_KEY));
     }
 
     private void validate(String account, String password) {

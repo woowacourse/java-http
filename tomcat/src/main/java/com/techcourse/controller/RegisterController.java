@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.dto.RegisterRequestDto;
 import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.MimeType;
@@ -7,6 +8,7 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
+import org.apache.coyote.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,8 @@ public class RegisterController extends AbstractController {
             generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
             response.setRedirectLocation(REDIRECT_LOCATION);
 
-            loginService.register(request.getBody());
+            RegisterRequestDto registerRequestDto = RegisterRequestDto.of(StringUtils.separateKeyValue(request.getBody()));
+            loginService.register(registerRequestDto);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             doGet(request, response);

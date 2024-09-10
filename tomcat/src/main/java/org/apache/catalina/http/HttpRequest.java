@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,11 +8,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.apache.coyote.http11.body.HttpRequestBody;
-import org.apache.coyote.http11.header.HttpHeader;
-import org.apache.coyote.http11.header.HttpHeaders;
-import org.apache.coyote.http11.startline.HttpMethod;
-import org.apache.coyote.http11.startline.HttpRequestLine;
+import org.apache.catalina.http.body.HttpRequestBody;
+import org.apache.catalina.http.header.HttpHeader;
+import org.apache.catalina.http.header.HttpHeaders;
+import org.apache.catalina.http.startline.HttpMethod;
+import org.apache.catalina.http.startline.HttpRequestLine;
 
 public class HttpRequest {
 

@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.body.HttpRequestBody;
-import org.apache.coyote.http11.header.HttpHeaders;
-import org.apache.coyote.http11.startline.HttpMethod;
-import org.apache.coyote.http11.startline.HttpRequestLine;
-import org.apache.coyote.http11.startline.RequestUri;
+import org.apache.catalina.http.HttpRequest;
+import org.apache.catalina.http.body.HttpRequestBody;
+import org.apache.catalina.http.header.HttpHeaders;
+import org.apache.catalina.http.startline.HttpMethod;
+import org.apache.catalina.http.startline.HttpRequestLine;
+import org.apache.catalina.http.startline.RequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

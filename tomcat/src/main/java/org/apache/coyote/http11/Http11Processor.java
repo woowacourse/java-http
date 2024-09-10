@@ -3,12 +3,14 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.http.HttpRequest;
+import org.apache.catalina.http.HttpResponse;
+import org.apache.catalina.http.body.HttpResponseBody;
+import org.apache.catalina.http.header.HttpHeaders;
+import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.RequestMapper;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.body.HttpResponseBody;
-import org.apache.coyote.http11.header.HttpHeaders;
-import org.apache.coyote.http11.startline.HttpResponseLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

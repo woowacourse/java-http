@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.startline;
+package org.apache.catalina.http.startline;
 
 import java.net.URISyntaxException;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.header;
+package org.apache.catalina.http.header;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.body;
+package org.apache.catalina.http.body;
 
 import java.util.HashMap;
 import java.util.Map;

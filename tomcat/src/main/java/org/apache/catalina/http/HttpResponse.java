@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.http;
 
 import java.util.StringJoiner;
-import org.apache.coyote.http11.body.HttpResponseBody;
-import org.apache.coyote.http11.header.HttpHeader;
-import org.apache.coyote.http11.header.HttpHeaders;
-import org.apache.coyote.http11.startline.HttpResponseLine;
-import org.apache.coyote.http11.startline.HttpStatus;
+import org.apache.catalina.http.body.HttpResponseBody;
+import org.apache.catalina.http.header.HttpHeader;
+import org.apache.catalina.http.header.HttpHeaders;
+import org.apache.catalina.http.startline.HttpResponseLine;
+import org.apache.catalina.http.startline.HttpStatus;
 
 public class HttpResponse {
 

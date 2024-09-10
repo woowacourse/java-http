@@ -6,11 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.header.HttpHeader;
-import org.apache.coyote.http11.startline.HttpStatus;
-import org.apache.coyote.http11.startline.RequestUri;
+import org.apache.catalina.http.HttpRequest;
+import org.apache.catalina.http.HttpResponse;
+import org.apache.catalina.http.header.HttpHeader;
+import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.http.startline.RequestUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

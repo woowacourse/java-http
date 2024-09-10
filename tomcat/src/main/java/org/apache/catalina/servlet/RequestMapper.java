@@ -3,7 +3,7 @@ package org.apache.catalina.servlet;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.Set;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.catalina.http.HttpRequest;
 
 public class RequestMapper {
 

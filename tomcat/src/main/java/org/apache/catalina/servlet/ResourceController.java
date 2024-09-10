@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.catalina.http.HttpRequest;
+import org.apache.catalina.http.HttpResponse;
+import org.apache.catalina.http.header.HttpHeader;
 
 public class ResourceController extends Controller {
 

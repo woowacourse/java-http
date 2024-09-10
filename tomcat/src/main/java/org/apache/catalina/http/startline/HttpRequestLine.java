@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.startline;
+package org.apache.catalina.http.startline;
 
 import java.nio.file.Path;
 import org.slf4j.Logger;

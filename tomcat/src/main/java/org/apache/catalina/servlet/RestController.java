@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.catalina.http.HttpRequest;
+import org.apache.catalina.http.HttpResponse;
+import org.apache.catalina.http.header.HttpHeader;
 
 public abstract class RestController extends Controller {
 
@@ -24,6 +24,6 @@ public abstract class RestController extends Controller {
     protected boolean doGet(HttpRequest request, HttpResponse response) {
         return responseResource(response, request.getTargetPath());
     }
-    
+
     protected abstract boolean doPost(HttpRequest request, HttpResponse response);
 }

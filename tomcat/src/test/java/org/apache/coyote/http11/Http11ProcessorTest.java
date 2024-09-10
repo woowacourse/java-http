@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.GlobalExceptionHandler;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.controller.ControllerRegistry;
@@ -45,7 +46,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
+            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator(), new GlobalExceptionHandler());
 
             processor.process(socket);
 
@@ -71,7 +72,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
+            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator(), new GlobalExceptionHandler());
 
             processor.process(socket);
 
@@ -128,7 +129,7 @@ class Http11ProcessorTest {
                     body);
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
+            Http11Processor processor = new Http11Processor(socket, () -> session, new GlobalExceptionHandler());
 
             processor.process(socket);
 
@@ -153,7 +154,7 @@ class Http11ProcessorTest {
                     body);
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
+            Http11Processor processor = new Http11Processor(socket, () -> session, new GlobalExceptionHandler());
 
             processor.process(socket);
 
@@ -180,7 +181,7 @@ class Http11ProcessorTest {
                     body);
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
+            Http11Processor processor = new Http11Processor(socket, () -> session, new GlobalExceptionHandler());
 
             processor.process(socket);
 
@@ -217,7 +218,7 @@ class Http11ProcessorTest {
                     body);
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
+            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator(), new GlobalExceptionHandler());
 
             processor.process(socket);
 

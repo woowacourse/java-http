@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.controller.ExceptionHandler;
 import org.apache.catalina.session.UuidSessionGenerator;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -18,15 +19,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final ExceptionHandler exceptionHandler;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(ExceptionHandler exceptionHandler) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, exceptionHandler);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(int port, int acceptCount, ExceptionHandler exceptionHandler) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.exceptionHandler = exceptionHandler;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -63,12 +66,12 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(Socket connection) {
         if (connection == null) {
             return;
         }
 
-        var processor = new Http11Processor(connection, new UuidSessionGenerator());
+        var processor = new Http11Processor(connection, new UuidSessionGenerator(), exceptionHandler);
         new Thread(processor).start();
     }
 

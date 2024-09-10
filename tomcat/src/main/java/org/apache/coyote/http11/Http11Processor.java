@@ -1,16 +1,15 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ExceptionHandler;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionGenerator;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
-import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -28,10 +27,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final SessionGenerator sessionGenerator;
+    private final ExceptionHandler exceptionHandler;
 
-    public Http11Processor(Socket connection, SessionGenerator sessionGenerator) {
+    public Http11Processor(Socket connection, SessionGenerator sessionGenerator, ExceptionHandler exceptionHandler) {
         this.connection = connection;
         this.sessionGenerator = sessionGenerator;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -53,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(formattedResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -65,15 +66,10 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request, response);
 
             return response;
-        } catch (UnauthorizedException unauthorizedException) {
-            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return HttpResponse.createTextResponse(HttpStatus.BAD_REQUEST, illegalArgumentException.getMessage());
         } catch (FileNotFoundException fileNotFoundException) {
             return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/404.html");
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return HttpResponse.createTextResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 발생했습니다.");
+            return exceptionHandler.handle(e);
         }
     }
 }

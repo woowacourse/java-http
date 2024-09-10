@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.ApiRouter;
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.util.StaticResourceManager;
 import java.io.BufferedReader;
@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
 import org.apache.coyote.Processor;
@@ -40,7 +41,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = readRequest(inputStream);
-            HttpResponse response = createResponse(request);
+            HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+            createResponse(request, response);
+
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -72,14 +75,16 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private HttpResponse createResponse(HttpRequest request) {
+    private void createResponse(HttpRequest request, HttpResponse response) {
         if (StaticResourceManager.isExist("static" + request.getPath())) {
-            return createStaticResourceResponse(request);
+            createStaticResourceResponse(request, response);
+            return;
         }
-        return ApiRouter.route(request.getMethod(), request.getPath(), request);
+        Controller controller = RequestMapping.getController(request);
+        controller.service(request, response);
     }
 
-    private HttpResponse createStaticResourceResponse(HttpRequest request) {
+    private void createStaticResourceResponse(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
         int extensionSeparatorIndex = path.lastIndexOf(".");
         String requestedExtension = extensionSeparatorIndex == -1 ? "" : path.substring(extensionSeparatorIndex + 1);
@@ -87,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("Requested MediaType: {}", mediaType);
 
         String responseBody = StaticResourceManager.read("static" + request.getPath());
-        return new HttpResponse(HttpStatusCode.OK)
+        response.setStatus(HttpStatusCode.OK)
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(responseBody);
     }

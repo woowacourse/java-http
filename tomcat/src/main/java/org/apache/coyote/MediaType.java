@@ -22,7 +22,7 @@ public enum MediaType {
     }
 
     public String getValue() {
-        return type.getValue() + "/" + subType.getValue();
+        return type.getValue() + "/" + subType.getValue() + ";charset=utf-8";
     }
 
     public static MediaType fromAcceptHeader(String header) {

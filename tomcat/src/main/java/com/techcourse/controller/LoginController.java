@@ -7,21 +7,21 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.MediaType;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String STATIC_RESOURCE_PATH = "static/login.html";
-    private static final SessionManager sessionManager = new SessionManager();
 
-    public HttpResponse doGet(HttpRequest request) {
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
 
         // 로그인한 경우 index.html로 리다이렉트
@@ -29,15 +29,16 @@ public class LoginController {
         boolean isLogin = session.map(s -> s.getAttribute("user") != null)
                 .orElse(false);
         if (isLogin) {
-            return HttpResponse.redirect("index.html");
+            response.sendRedirect("index.html");
+            return;
         }
-
-        return new HttpResponse(HttpStatusCode.OK)
+        response.setStatus(HttpStatusCode.OK)
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
 
-    public HttpResponse doPost(HttpRequest request) {
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) {
         log.info("Query Parameters: {}", request.parseFormBody());
 
         Optional<String> userAccount = request.getFormValue("account");
@@ -49,7 +50,8 @@ public class LoginController {
                 .orElse(null);
 
         if (user == null || !user.checkPassword(userPassword.get())) {
-            return HttpResponse.redirect("401.html");
+            response.sendRedirect("401.html");
+            return;
         }
 
         // 세션이 있으면 세션에 유저 정보를 넣어주고, 없다면 생성해서 넣어줌
@@ -58,6 +60,7 @@ public class LoginController {
         httpSession.setAttribute("user", user);
         sessionManager.add(httpSession);
 
-        return HttpResponse.redirect("index.html").addCookie("JSESSIONID", httpSession.getId());
+        response.sendRedirect("index.html")
+                .addCookie("JSESSIONID", httpSession.getId());
     }
 }

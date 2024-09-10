@@ -1,5 +1,6 @@
 package com.techcourse.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -34,8 +35,10 @@ public class StaticResourceManager {
                     })
                     .map(Path::of)
                     .orElseThrow(() -> new RuntimeException(filePath + " not found"));
-            List<String> strings = Files.readAllLines(path);
-            return String.join(CRLF, strings);
+
+            StringBuilder sb = new StringBuilder();
+            Files.readAllLines(path).forEach(line -> sb.append(line).append("\n"));
+            return sb.toString();
         } catch (IOException e) {
             throw new RuntimeException();
         }

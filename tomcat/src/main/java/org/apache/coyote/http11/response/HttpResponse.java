@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -27,13 +26,7 @@ public class HttpResponse {
         this.responseLine = new ResponseLine("HTTP/" + VERSION, statusCode);
         this.headers = headers;
         this.body = new ResponseBody(body);
-        headers.headers().put("Content-Length", String.valueOf(this.body.size()));
-    }
-
-    public static HttpResponse redirect(String location) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Location", location);
-        return new HttpResponse(HttpStatusCode.FOUND, new HttpHeader(headers), null);
+        headers.headers().put("Content-Length", String.valueOf(this.body.getBody().length));
     }
 
     public HttpResponse addHeader(String key, String value) {
@@ -56,12 +49,23 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse setStatus(HttpStatusCode statusCode) {
+        responseLine.setStatusCode(statusCode);
+        return this;
+    }
+
+    public HttpResponse sendRedirect(String location) {
+        setStatus(HttpStatusCode.FOUND);
+        addHeader("Location", location);
+        return this;
+    }
+
     public String toHttpMessage() {
         StringJoiner joiner = new StringJoiner(CRLF);
         joiner.add(responseLine.toResponseString());
         joiner.add(headers.toString());
         joiner.add("");
-        joiner.add(new String(body.body()));
+        joiner.add(new String(body.getBody()));
         return joiner.toString();
     }
 

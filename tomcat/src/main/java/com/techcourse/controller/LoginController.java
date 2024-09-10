@@ -25,12 +25,13 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
         String resource = ensureHtmlExtension(request.getPath());
         String responseBody = loadResourceContent(resource);
-        if (request.containsCookie()) {
-            HttpCookie httpCookie = new HttpCookie(request.getCookie());
+        boolean containsCookie = request.containsHeaders("Cookie");
+        if (containsCookie) {
+            HttpCookie httpCookie = new HttpCookie(request.getHeader("Cookie"));
             handleCookieRequest(httpCookie, responseBody, response);
         }
 
-        if (!request.containsCookie()) {
+        if (!containsCookie) {
             buildOkResponse(responseBody, response);
         }
     }

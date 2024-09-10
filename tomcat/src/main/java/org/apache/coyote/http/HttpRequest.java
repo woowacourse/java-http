@@ -49,8 +49,8 @@ public class HttpRequest {
         return "";
     }
 
-    public boolean containsCookie() {
-        return headers.containsKey("Cookie");
+    public boolean containsHeaders(String header) {
+        return headers.containsKey(header);
     }
 
     public RequestMethod getMethod() {
@@ -61,8 +61,8 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getCookie() {
-        return headers.get("Cookie");
+    public String getHeader(String header) {
+        return headers.get(header);
     }
 
     public String getRequestBody() {

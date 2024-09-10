@@ -24,6 +24,14 @@ public class HttpRequest {
         return requestLine.isPostMethod();
     }
 
+    public boolean hasQueryParameter() {
+        return requestLine.hasQueryParameter();
+    }
+
+    public QueryParameter getQueryParameter() {
+        return requestLine.getQueryParameter();
+    }
+
     public String getUri() {
         return requestLine.getUri();
     }

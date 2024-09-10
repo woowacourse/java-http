@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(Socket connection, Manager sessionManager) {
         this.connection = connection;
         this.sessionManager = sessionManager;
-        this.resourceProcessor = new ResourceProcessor(createRequestMapping());
+        this.resourceProcessor = new ResourceProcessor(createRequestMapping(), new StaticResourceController());
     }
 
     private RequestMapping createRequestMapping() {

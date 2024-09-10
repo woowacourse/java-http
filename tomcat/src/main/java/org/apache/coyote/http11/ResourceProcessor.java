@@ -3,31 +3,33 @@ package org.apache.coyote.http11;
 class ResourceProcessor {
 
     private final RequestMapping requestMapping;
+    private final StaticResourceController staticResourceController;
 
-    public ResourceProcessor(RequestMapping requestMapping) {
+    public ResourceProcessor(RequestMapping requestMapping, StaticResourceController staticResourceController) {
         this.requestMapping = requestMapping;
+        this.staticResourceController = staticResourceController;
     }
 
-    public HttpResponse processResponse(HttpRequest httpRequest) throws Exception {
-        HttpResponse httpResponse = HttpResponse.createHttp11Response();
-        boolean hasResource = ResourceFinder.hasResource(httpRequest.getPath(), getClass().getClassLoader());
+    public HttpResponse processResponse(HttpRequest request) throws Exception {
+        HttpResponse response = HttpResponse.createHttp11Response();
+        boolean hasResource = ResourceFinder.hasResource(request.getPath(), getClass().getClassLoader());
         if (hasResource) {
-            processStaticResource(httpRequest, httpResponse);
-            return httpResponse;
+            return processStaticResource(request, response);
         }
 
-        return processDynamicResource(httpRequest, httpResponse);
+        return processDynamicResource(request, response);
     }
 
-    private void processStaticResource(HttpRequest request, HttpResponse response) throws Exception {
-        StaticResourceController staticResourceController = new StaticResourceController();
+    private HttpResponse processStaticResource(HttpRequest request, HttpResponse response) throws Exception {
         staticResourceController.service(request, response);
+
+        return response;
     }
 
-    private HttpResponse processDynamicResource(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        Controller targetController = requestMapping.getController(httpRequest);
-        targetController.service(httpRequest, httpResponse);
+    private HttpResponse processDynamicResource(HttpRequest request, HttpResponse response) throws Exception {
+        Controller targetController = requestMapping.getController(request);
+        targetController.service(request, response);
 
-        return httpResponse;
+        return response;
     }
 }

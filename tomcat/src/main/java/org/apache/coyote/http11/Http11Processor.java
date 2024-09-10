@@ -18,6 +18,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
+import org.apache.coyote.response.HttpHeaders;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;
@@ -27,8 +28,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String USER_SESSION_NAME = "user";
 
@@ -86,8 +85,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private RequestBody readRequestBody(BufferedReader reader, HttpHeader httpHeader) {
         try {
-            if (httpHeader.contains(CONTENT_LENGTH)) {
-                int contentLength = Integer.parseInt(httpHeader.get(CONTENT_LENGTH));
+            if (httpHeader.contains(HttpHeaders.CONTENT_LENGTH.getName())) {
+                int contentLength = Integer.parseInt(httpHeader.get(HttpHeaders.CONTENT_LENGTH.getName()));
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
                 return new RequestBody(new String(buffer));
@@ -99,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handle(HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
+        HttpCookie cookie = new HttpCookie(request.getHeader(HttpHeaders.COOKIE.getName()));
         RequestBody requestBody = request.getRequestBody();
 
         if (request.pointsTo(GET, "/")) {

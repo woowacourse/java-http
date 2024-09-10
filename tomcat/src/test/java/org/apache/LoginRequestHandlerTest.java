@@ -70,4 +70,18 @@ class LoginRequestHandlerTest {
 		assertThat(response.getHeaders())
 			.anyMatch(header -> header.startsWith("Set-Cookie: "));
 	}
+
+	@DisplayName("로그인 POST 요청시 세션을 생성하여 Cookie header 에 전달한다.")
+	@Test
+	void handle_POST_withInvalidPassword() throws IOException {
+		// given
+		LoginRequestHandler handler = new LoginRequestHandler(SessionManager.getInstance());
+		HttpRequest request = HttpRequestFixture.createLoginPostMethodWithInvalidPassword();
+
+		// when
+		HttpResponse response = handler.handle(request);
+
+		// then
+		assertThat(response.getHeaders()).contains("Location: /401.html");
+	}
 }

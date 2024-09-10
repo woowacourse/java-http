@@ -70,9 +70,16 @@ public class LoginRequestHandler implements RequestHandler {
 	private User login(String account, String password) {
 		Optional<User> user = InMemoryUserRepository.findByAccount(account);
 		if (user.isPresent()) {
+			validateUser(user.get(), password);
 			log.info(user.get().getAccount());
 			return user.get();
 		}
 		throw new IllegalArgumentException("login fail");
+	}
+
+	private void validateUser(User user, String password) {
+		if (!user.checkPassword(password)) {
+			throw new IllegalArgumentException("invalid password");
+		}
 	}
 }

@@ -3,8 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.file.ResourcesReader;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.ResourceToResponseConverter;
 import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -13,33 +11,38 @@ import org.apache.coyote.http11.session.Session;
 
 public class LoginController extends AbstractController {
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
-        return ResourceToResponseConverter.convert(HttpStatusCode.OK, ResourcesReader.read(Path.from("login.html")));
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setResource(ResourcesReader.read(Path.from("login.html")));
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         if (request.existSessionAttribute("user")) {
-            return movePageResponse();
+            setRedirectIndex(response);
+            return;
         }
         final String account = request.getBodyAttribute("account");
         final String password = request.getBodyAttribute("password");
 
-        return InMemoryUserRepository.findByAccount(account)
+        InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> login(request, user))
-                .orElseGet(() -> ResourceToResponseConverter.redirect(HttpStatusCode.FOUND, Path.from("401.html")));
+                .ifPresentOrElse(user -> login(request, response, user),
+                        () -> setRedirectFail(response));
     }
 
-    private HttpResponse login(final HttpRequest request, final User user) {
+
+    private void login(final HttpRequest request, final HttpResponse response, final User user) {
         final Session session = request.getSession();
         session.setAttribute("user", user);
-        final HttpResponse response = movePageResponse();
         response.addCookie(Cookies.SESSION_ID, session.getId());
-        return response;
+        setRedirectIndex(response);
     }
 
-    private HttpResponse movePageResponse() {
-        return ResourceToResponseConverter.redirect(HttpStatusCode.FOUND, Path.from("index.html"));
+    private void setRedirectFail(final HttpResponse response) {
+        response.setRedirect(Path.from("401.html"));
+    }
+
+    private void setRedirectIndex(final HttpResponse response) {
+        response.setRedirect(Path.from("index.html"));
     }
 }

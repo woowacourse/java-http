@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import org.apache.coyote.http11.executor.RequestExecutors;
+import org.apache.coyote.http11.executor.ControllerExecutor;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    RequestExecutors requestExecutors = new RequestExecutors(
+    ControllerExecutor controllerExecutor = new ControllerExecutor(
             Map.of("/login", new LoginController(),
                     "/register", new RegisterController()));
     SessionManager sessionManager = new SessionManager(150000);
@@ -26,7 +26,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, requestExecutors, sessionManager);
+        final var processor = new Http11Processor(socket, controllerExecutor, sessionManager);
 
         // when
         processor.process(socket);
@@ -53,7 +53,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, requestExecutors, sessionManager);
+        final Http11Processor processor = new Http11Processor(socket, controllerExecutor, sessionManager);
 
         // when
         processor.process(socket);

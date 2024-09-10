@@ -9,19 +9,19 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.util.Map;
 import java.util.Optional;
 
-public class RequestExecutors {
+public class ControllerExecutor {
     private final RequestMapper mapper;
     private final ResourceController resourceController;
 
-    public RequestExecutors(final Map<String, Controller> controllers) {
+    public ControllerExecutor(final Map<String, Controller> controllers) {
         this.mapper = new RequestMapper(controllers);
         this.resourceController = new ResourceController();
     }
 
-    public HttpResponse execute(final HttpRequest req) {
-        return Optional.ofNullable(mapper.mappingWithController(req))
-                .map(controller -> controller.service(req))
-                .orElseGet(() -> resourceController.service(req));
+    public void execute(final HttpRequest req, final HttpResponse res) {
+        Optional.ofNullable(mapper.mappingWithController(req))
+                .ifPresentOrElse(controller -> controller.service(req, res),
+                        () -> resourceController.service(req, res));
     }
 }
 

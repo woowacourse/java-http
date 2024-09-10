@@ -26,7 +26,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String expected = resolveResponse("html", resource);
+        final String expected = resolve200Response("html", resource);
         assertThat(socket.output()).isEqualTo(expected);
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -45,7 +45,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String expected = resolveResponse("html", resource);
+        final String expected = resolve200Response("html", resource);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -62,13 +62,13 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String expected = resolveResponse("css", resource);
+        final String expected = resolve200Response("css", resource);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("GET http://localhost:8080/login?account=gugu&password=password 요청 시 login.html 파일을 반환한다")
+    @DisplayName("로그인 성공 시: 302를 반환하고 /index.html로 리다이렉트한다.")
     @Test
-    void login() throws IOException, URISyntaxException {
+    void loginSuccess() {
         // given
         final String httpRequest = resolveGetRequestByPath("http://localhost:8080/login?account=gugu&password=password");
         final var socket = new StubSocket(httpRequest);
@@ -78,18 +78,84 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final String expected = resolveResponse("html", resource);
+        final String expected = resolve302Response("/index.html");
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @DisplayName("로그인 실패 시: /401.html을 반환한다")
+    @Test
+    void loginFail() throws URISyntaxException, IOException {
+        // given
+        final String httpRequest = resolveGetRequestByPath("http://localhost:8080/login?account=wrong&password=wrongpassword");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final String expected = resolve200Response("html", resource);
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @DisplayName("GET /register 요청 시 register.html 파일을 반환한다")
+    @Test
+    void register() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = resolveGetRequestByPath("/register");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String expected = resolve200Response("html", resource);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private String resolveResponse(String extension, URL url) throws URISyntaxException, IOException {
+    @DisplayName("POST /register 요청으로 새로운 회원을 가입할 시, 가입 완료 후 index.html로 리다이렉트한다")
+    @Test
+    void registerNewUser() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = "POST /register HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Connection: keep-alive\n"
+                + "Content-Length: 80\n"
+                + "Content-Type: application/x-www-form-urlencoded\n"
+                + "Accept: */*\n"
+                + "\n"
+                + "account=gugu&password=password&email=hkkang%40woowahan.com\n";
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = resolve302Response("/index.html");
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    private String resolve200Response(String extension, URL url) throws URISyntaxException, IOException {
         String file = Files.readString(Path.of(url.toURI()));
         return "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/" + extension + ";charset=utf-8 \r\n" +
                 "Content-Length: " + file.getBytes().length + " \r\n" +
                 "\r\n" +
                 file;
+    }
+
+    private String resolve302Response(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location
+        );
     }
 
     private String resolveGetRequestByPath(String path) {

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 // TODO: BufferedReader와 BufferedInputStream 같이 사용했을 때 문제가 발생하지 않는지 확인하기
@@ -31,7 +32,7 @@ public class HttpRequestReader {
         List<String> headerLines = new ArrayList<>();
 
         String headerLine = bufferedReader.readLine();
-        while (!headerLine.isEmpty()) {
+        while (StringUtils.isNotBlank(headerLine)) {
             headerLines.add(headerLine);
             headerLine = bufferedReader.readLine();
         }

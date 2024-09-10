@@ -169,12 +169,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeHttpResponseHeader(Map<String, String> httpResponseHeader, String responseBody) {
         StringBuilder response = new StringBuilder();
-        String statusLine = "HTTP/1.1 " + httpResponseHeader.get("Status") + " \r\n";
+        String statusLine = "HTTP/1.1 " + httpResponseHeader.get("Status") + "\r\n";
         response.append(statusLine);
 
         httpResponseHeader.entrySet().stream()
                 .filter(entry -> !"Status".equals(entry.getKey()))
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r\n")
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + "\r\n")
                 .forEach(response::append);
         response.append("\r\n");
         response.append(responseBody);

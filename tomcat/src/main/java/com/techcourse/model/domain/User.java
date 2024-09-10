@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.model.domain;
 
 public class User {
 

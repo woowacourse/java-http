@@ -1,7 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.model.domain.User;
+import com.techcourse.model.dto.UserInfo;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +119,9 @@ public class Http11Processor implements Runnable, Processor {
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
+                                UserInfo userRegisterInfo = new UserInfo(account, password, email);
+                                User newUser = InMemoryUserRepository.save(userRegisterInfo);
+                                log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
     }
 
     private void doGet(final String requestURL, final OutputStream outputStream) throws IOException {

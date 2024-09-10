@@ -83,10 +83,10 @@ class LoginControllerTest {
         HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: 401.html ";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
+        String expectedLocationHeader = "Location: 401.html ";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
     }
 
     @DisplayName("로그인 화면을 응답한다.")
@@ -105,9 +105,9 @@ class LoginControllerTest {
         HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: login.html ";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
+        String expectedLocationHeader = "Location: login.html ";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
     }
 }

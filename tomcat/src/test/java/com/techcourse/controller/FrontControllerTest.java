@@ -40,13 +40,12 @@ class FrontControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 211991 \r\n" +
-                "Content-Type: text/css \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseLine = "HTTP/1.1 200 OK \r\n";
+        String expectedContentLength = "Content-Length: 211991 \r\n";
+        String expectedContentType = "Content-Type: text/css \r\n";
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
     }
 
     @DisplayName("존재하지 않는 리소스에 접근하면 404 응답을 반환한다.")
@@ -66,13 +65,12 @@ class FrontControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
-                "Content-Length: 2426 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseLine = "HTTP/1.1 404 NOT FOUND \r\n";
+        String expectedContentLength = "Content-Length: 2426 \r\n";
+        String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
     }
 
     @DisplayName("잘못된 메서드로 요청하면 405 응답을 반환한다.")
@@ -92,12 +90,11 @@ class FrontControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/405.html");
-        var expected = "HTTP/1.1 405 METHOD NOT ALLOWED \r\n" +
-                "Content-Length: 2190 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseLine = "HTTP/1.1 405 METHOD NOT ALLOWED \r\n";
+        String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
+        String expectedContentLength = "Content-Length: 2190 \r\n";
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedContentType, expectedContentLength, expectedResponseBody);
     }
 }

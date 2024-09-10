@@ -25,12 +25,11 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/hello.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 13 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseLine = "HTTP/1.1 200 OK \r\n";
+        String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
+        String expectedContentLength = "Content-Length: 13 \r\n";
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
     }
 }

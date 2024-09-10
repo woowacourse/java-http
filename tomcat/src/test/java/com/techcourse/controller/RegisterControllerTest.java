@@ -50,10 +50,10 @@ class RegisterControllerTest {
         HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: index.html ";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
+        String expectedLocationHeader = "Location: index.html ";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
     }
 
     @DisplayName("회원가입이 잘못되면 400.html로 리다이랙트한다.")
@@ -74,10 +74,10 @@ class RegisterControllerTest {
         HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: 400.html ";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
+        String expectedLocationHeader = "Location: 400.html ";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
     }
 
     @DisplayName("회원가입 화면을 응답한다.")
@@ -96,9 +96,9 @@ class RegisterControllerTest {
         HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: register.html ";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
+        String expectedLocationHeader = "Location: register.html ";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
     }
 }

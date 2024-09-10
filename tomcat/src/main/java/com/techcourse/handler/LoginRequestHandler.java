@@ -16,8 +16,7 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.getMethod() == HttpMethod.GET &&
-               request.getUri().toString().equals("/login");
+        return request.hasMethod(HttpMethod.GET) && request.hasUri("/login");
     }
 
     @Override

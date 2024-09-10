@@ -53,8 +53,16 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
+    public boolean hasUri(String uri) {
+        return requestLine.hasUri(uri);
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return requestLine.hasMethod(httpMethod);
     }
 
     public String getParameter(String name) {

@@ -23,6 +23,11 @@ public class RequestLine {
         this.version = tokens[2];
     }
 
+    public boolean hasUri(String uri) {
+        String requestUri = this.uri.toString();
+        return requestUri.equals(uri);
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -37,6 +42,10 @@ public class RequestLine {
 
     public String getVersion() {
         return version;
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return method == httpMethod;
     }
 
     @Override

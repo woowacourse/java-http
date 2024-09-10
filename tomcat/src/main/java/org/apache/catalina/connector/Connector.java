@@ -1,7 +1,8 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.config.TomcatConfig;
 import org.apache.catalina.controller.ExceptionHandler;
-import org.apache.catalina.session.UuidSessionGenerator;
+import org.apache.catalina.session.SessionGenerator;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +20,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final ExceptionHandler exceptionHandler;
+    private final TomcatConfig tomcatConfig;
     private boolean stopped;
 
-    public Connector(ExceptionHandler exceptionHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, exceptionHandler);
+    public Connector(TomcatConfig tomcatConfig) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, tomcatConfig);
     }
 
-    public Connector(int port, int acceptCount, ExceptionHandler exceptionHandler) {
+    public Connector(int port, int acceptCount, TomcatConfig tomcatConfig) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.exceptionHandler = exceptionHandler;
+        this.tomcatConfig = tomcatConfig;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -71,7 +72,9 @@ public class Connector implements Runnable {
             return;
         }
 
-        var processor = new Http11Processor(connection, new UuidSessionGenerator(), exceptionHandler);
+        SessionGenerator sessionGenerator = tomcatConfig.sessionGenerator();
+        ExceptionHandler exceptionHandler = tomcatConfig.exceptionHandler();
+        var processor = new Http11Processor(connection, sessionGenerator, exceptionHandler);
         new Thread(processor).start();
     }
 

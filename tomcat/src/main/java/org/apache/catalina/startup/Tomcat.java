@@ -1,7 +1,8 @@
 package org.apache.catalina.startup;
 
+import org.apache.catalina.config.DefaultTomcatConfig;
+import org.apache.catalina.config.TomcatConfig;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.controller.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,18 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start(ExceptionHandler exceptionHandler) {
-        var connector = new Connector(exceptionHandler);
+    private final TomcatConfig tomcatConfig;
+
+    public Tomcat() {
+        this.tomcatConfig = new DefaultTomcatConfig();
+    }
+
+    public Tomcat(TomcatConfig tomcatConfig) {
+        this.tomcatConfig = tomcatConfig;
+    }
+
+    public void start() {
+        var connector = new Connector(tomcatConfig);
         connector.start();
 
         try {

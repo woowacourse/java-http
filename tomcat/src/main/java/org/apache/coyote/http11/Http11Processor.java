@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import org.apache.catalina.config.TomcatConfig;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.ExceptionHandler;
 import org.apache.catalina.controller.RequestMapping;
@@ -23,16 +24,31 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping REQUEST_MAPPING = RequestMapping.getInstance();
 
     private final Socket connection;
     private final SessionGenerator sessionGenerator;
     private final ExceptionHandler exceptionHandler;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(Socket connection, SessionGenerator sessionGenerator, ExceptionHandler exceptionHandler) {
+    public Http11Processor(
+            Socket connection,
+            SessionGenerator sessionGenerator,
+            ExceptionHandler exceptionHandler,
+            RequestMapping requestMapping
+    ) {
         this.connection = connection;
         this.sessionGenerator = sessionGenerator;
         this.exceptionHandler = exceptionHandler;
+        this.requestMapping = requestMapping;
+    }
+
+    public static Http11Processor of(Socket connection, TomcatConfig tomcatConfig) {
+        return new Http11Processor(
+                connection,
+                tomcatConfig.sessionGenerator(),
+                tomcatConfig.exceptionHandler(),
+                tomcatConfig.requestMapping()
+        );
     }
 
     @Override
@@ -62,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse getResponse(HttpRequest request) throws IOException {
         try {
             HttpResponse response = new HttpResponse();
-            Controller controller = REQUEST_MAPPING.getController(request);
+            Controller controller = requestMapping.getController(request);
             controller.service(request, response);
 
             return response;

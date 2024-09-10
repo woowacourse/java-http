@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.controller.ControllerRegistry;
-import org.apache.catalina.controller.DefaultExceptionHandler;
-import org.apache.catalina.session.UuidSessionGenerator;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.catalina.config.DefaultTomcatConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,11 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    @BeforeEach
-    void setUp() {
-        ControllerRegistry.registerControllers("com.techcourse.controller");
-    }
-
     @Nested
     class ResourceFileTest {
         @DisplayName("HTML 파일을 반환한다.")
@@ -39,7 +31,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator(), new DefaultExceptionHandler());
+            Http11Processor processor = Http11Processor.of(socket, new DefaultTomcatConfig());
 
             processor.process(socket);
 
@@ -65,7 +57,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator(), new DefaultExceptionHandler());
+            Http11Processor processor = Http11Processor.of(socket, new DefaultTomcatConfig());
 
             processor.process(socket);
 

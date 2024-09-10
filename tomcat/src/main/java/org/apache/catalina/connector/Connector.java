@@ -1,8 +1,6 @@
 package org.apache.catalina.connector;
 
 import org.apache.catalina.config.TomcatConfig;
-import org.apache.catalina.controller.ExceptionHandler;
-import org.apache.catalina.session.SessionGenerator;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +70,7 @@ public class Connector implements Runnable {
             return;
         }
 
-        SessionGenerator sessionGenerator = tomcatConfig.sessionGenerator();
-        ExceptionHandler exceptionHandler = tomcatConfig.exceptionHandler();
-        var processor = new Http11Processor(connection, sessionGenerator, exceptionHandler);
+        var processor = Http11Processor.of(connection, tomcatConfig);
         new Thread(processor).start();
     }
 

@@ -15,7 +15,7 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.BaseHttpTest;
@@ -24,8 +24,8 @@ class LoginControllerTest extends BaseHttpTest {
 
     private final LoginController controller = LoginController.getInstance();
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         InMemoryUserRepository.clear();
     }
 
@@ -60,7 +60,7 @@ class LoginControllerTest extends BaseHttpTest {
 
     @DisplayName("유저의 로그인 체크 후, /index.html로 리다이렉트한다")
     @Test
-    void checkLogin() throws URISyntaxException, IOException {
+    void checkLogin() {
         User user = new User("testAccount", "testPassword", "testEmail");
         InMemoryUserRepository.save(user);
 
@@ -89,7 +89,6 @@ class LoginControllerTest extends BaseHttpTest {
                 Optional.empty()
         );
         HttpResponse response = new HttpResponse();
-
 
         assertThatThrownBy(() -> controller.checkLogin(validLoginRequest, response))
                 .isInstanceOf(SecurityException.class);

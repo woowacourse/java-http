@@ -6,7 +6,7 @@ import org.apache.coyote.util.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ErrorController implements Controller {
+public class ErrorController {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorController.class);
 

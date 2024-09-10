@@ -10,7 +10,7 @@ public class InternalServerErrorController extends AbstractController {
     private static final String INTERNAL_SERVER_ERROR_LOCATION = "/500.html";
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
-        return generateStaticResponse(INTERNAL_SERVER_ERROR_LOCATION, HttpStatus.INTERNAL_SERVER_ERROR);
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        generateStaticResponse(INTERNAL_SERVER_ERROR_LOCATION, HttpStatus.INTERNAL_SERVER_ERROR, response);
     }
 }

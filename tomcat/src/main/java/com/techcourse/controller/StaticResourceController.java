@@ -11,14 +11,14 @@ import java.io.IOException;
 public class StaticResourceController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         try {
             Path path = request.getPath();
-            return generateStaticResponse(path.getUri(), HttpStatus.OK);
+            generateStaticResponse(path.getUri(), HttpStatus.OK, response);
         } catch (NullPointerException e) {
-            return new NotFoundController().doGet(request);
+            new NotFoundController().doGet(request, response);
         } catch (IOException e) {
-            return new InternalServerErrorController().doGet(request);
+            new InternalServerErrorController().doGet(request, response);
         }
     }
 }

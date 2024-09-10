@@ -10,7 +10,7 @@ public class NotFoundController extends AbstractController {
     private static final String NOT_FOUND_LOCATION = "/404.html";
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
-        return generateStaticResponse(NOT_FOUND_LOCATION, HttpStatus.NOT_FOUND);
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        generateStaticResponse(NOT_FOUND_LOCATION, HttpStatus.NOT_FOUND, response);
     }
 }

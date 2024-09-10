@@ -6,11 +6,17 @@ public class HttpResponse {
 
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 
-    private final StatusLine statusLine;
-    private final ResponseHeader headers;
-    private final String body;
+    private StatusLine statusLine;
+    private ResponseHeader headers;
+    private String body;
 
-    public HttpResponse(StatusLine statusLine, ResponseHeader headers, String body) {
+    public HttpResponse() {
+        this.statusLine = new StatusLine(HttpStatus.OK);
+        this.headers = new ResponseHeader();
+        this.body = "";
+    }
+
+    public void setResponse(StatusLine statusLine, ResponseHeader headers, String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -32,27 +38,21 @@ public class HttpResponse {
                 "", body);
     }
 
-    public static HttpResponse basicResponse() {
-        return new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                ResponseHeader.basicResponseHeader(BASIC_RESPONSE_BODY.getBytes().length),
-                BASIC_RESPONSE_BODY
-        );
+    public void basicResponse() {
+        this.statusLine = new StatusLine(HttpStatus.OK);
+        this.headers = ResponseHeader.basicResponseHeader(BASIC_RESPONSE_BODY.getBytes().length);
+        this.body = BASIC_RESPONSE_BODY;
     }
 
-    public static HttpResponse notFoundResponses() {
-        return new HttpResponse(
-                new StatusLine(HttpStatus.NOT_FOUND),
-                ResponseHeader.basicResponseHeader(0),
-                ""
-        );
+    public void notFoundResponses() {
+        this.statusLine = new StatusLine(HttpStatus.NOT_FOUND);
+        this.headers = ResponseHeader.basicResponseHeader(0);
+        this.body = "";
     }
 
-    public static HttpResponse serverErrorResponses() {
-        return new HttpResponse(
-                new StatusLine(HttpStatus.INTERNAL_SERVER_ERROR),
-                ResponseHeader.basicResponseHeader(0),
-                ""
-        );
+    public void serverErrorResponses() {
+        this.statusLine = new StatusLine(HttpStatus.INTERNAL_SERVER_ERROR);
+        this.headers = ResponseHeader.basicResponseHeader(0);
+        this.body = "";
     }
 }

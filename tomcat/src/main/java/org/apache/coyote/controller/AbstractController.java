@@ -18,26 +18,26 @@ import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         HttpMethod method = request.getMethod();
         if (method.equals(HttpMethod.GET)) {
-            return doGet(request);
+            doGet(request, response);
         }
         if (method.equals(HttpMethod.POST)) {
-            return doPost(request);
+            doPost(request, response);
         }
         throw new UnsupportedOperationException(method.getMethod());
     }
 
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         throw new UnsupportedOperationException(request.getMethod().getMethod());
     }
 
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new UnsupportedOperationException(request.getMethod().getMethod());
     }
 
-    protected HttpResponse generateStaticResponse(String path, HttpStatus status) throws IOException, NullPointerException {
+    protected void generateStaticResponse(String path, HttpStatus status, HttpResponse response) throws IOException, NullPointerException {
         final URL resource = HttpResponse.class.getClassLoader().getResource(STATIC_RESOURCE_LOCATION + path);
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -47,6 +47,6 @@ public abstract class AbstractController implements Controller {
         header.setContentType(MimeType.getContentTypeFromExtension(path));
         header.setContentLength(responseBody.getBytes().length);
 
-        return new HttpResponse(statusLine, header, responseBody);
+        response.setResponse(statusLine, header, responseBody);
     }
 }

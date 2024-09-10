@@ -7,7 +7,7 @@ import org.apache.coyote.http.response.HttpResponse;
 public class BasicController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
-        return HttpResponse.basicResponse();
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response.basicResponse();
     }
 }

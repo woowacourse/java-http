@@ -5,6 +5,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http.Dispatcher;
 import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +49,12 @@ public class Http11Processor implements Runnable, Processor {
                 getRequestBody(bufferedReader, request);
             }
 
-            final var response = dispatcher.dispatch(request);
+            HttpResponse response = new HttpResponse();
+
+            dispatcher.dispatch(request, response);
             log.info("\nresponse: {}", response);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);

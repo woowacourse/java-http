@@ -26,17 +26,17 @@ public class Dispatcher {
         controllers.put("/register", new RegisterController());
     }
 
-    public String dispatch(HttpRequest request) {
+    public void dispatch(HttpRequest request, HttpResponse response) {
         try {
             Controller controller = getController(request.getPath());
             log.info("controller: {}", controller.getClass());
-            return controller.service(request).toResponse();
+            controller.service(request, response);
         } catch (NullPointerException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.notFoundResponses().toResponse();
+            response.notFoundResponses();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.serverErrorResponses().toResponse();
+            response.serverErrorResponses();
         }
     }
 

@@ -20,34 +20,32 @@ public class RegisterController extends AbstractController {
     private final LoginService loginService = new LoginService();
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         try {
             Path path = request.getPath();
-            return generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK);
+            generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
         } catch (NullPointerException e) {
-            return new NotFoundController().doGet(request);
+            new NotFoundController().doGet(request, response);
         } catch (IOException e) {
-            return new InternalServerErrorController().doGet(request);
+            new InternalServerErrorController().doGet(request, response);
         }
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         try {
             Path path = request.getPath();
-            HttpResponse response = generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
+            generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
             response.setRedirectLocation(REDIRECT_LOCATION);
 
             loginService.register(request.getBody());
-
-            return response;
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
-            return doGet(request);
+            doGet(request, response);
         } catch (NullPointerException e) {
-            return new NotFoundController().doGet(request);
+            new NotFoundController().doGet(request, response);
         } catch (IOException e) {
-            return new InternalServerErrorController().doGet(request);
+            new InternalServerErrorController().doGet(request, response);
         }
     }
 }

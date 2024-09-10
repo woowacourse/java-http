@@ -60,8 +60,6 @@ public class Response {
         if (statusLine == null) {
             throw new NotCompleteResponseException("응답이 완성되지 않았습니다.");
         }
-        System.out.println("statusLine.toHttpMessage() = " + statusLine.toHttpMessage());
-        System.out.println("headers.toHttpMessage() = " + headers.toHttpMessage());
         return String.join("\r\n",
                 statusLine.toHttpMessage(),
                 headers.toHttpMessage(),

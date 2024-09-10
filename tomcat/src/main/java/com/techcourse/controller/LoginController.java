@@ -37,7 +37,7 @@ public class LoginController extends RestController {
     }
 
     private boolean responsePage401(HttpResponse response) {
-        String path = "static/401.html";
+        String path = "/401.html";
         response.setStatus(HttpStatus.UNAUTHORIZED);
 
         return responseResource(response, path);

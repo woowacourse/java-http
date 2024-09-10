@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.exception.CatalinaException;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.body.HttpResponseBody;
@@ -45,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             boolean isResponseValid = controller.service(request, response);
 
             if (!isResponseValid) {
-                throw new IllegalArgumentException("response not valid: \r\n" + response);
+                throw new CatalinaException("Response not valid: \n" + response);
             }
             outputStream.write(response.getBytes());
             outputStream.flush();

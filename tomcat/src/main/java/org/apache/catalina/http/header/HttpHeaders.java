@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import org.apache.catalina.exception.CatalinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class HttpHeaders {
         if (keyAndValue.length == 2) {
             return keyAndValue;
         }
-        RuntimeException exception = new IllegalArgumentException("Invalid header: " + header);
+        RuntimeException exception = new CatalinaException("Invalid header: " + header);
         log.error(exception.getMessage(), exception);
         throw exception;
     }
@@ -57,7 +58,7 @@ public class HttpHeaders {
     public String get(HttpHeader header) {
         String value = headers.get(header.getValue());
         if (value == null) {
-            throw new IllegalArgumentException("Header " + header.getValue() + " not found");
+            throw new CatalinaException("Header " + header.getValue() + " not found");
         }
         return value;
     }

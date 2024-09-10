@@ -1,6 +1,7 @@
 package org.apache.catalina.http.startline;
 
 import java.nio.file.Path;
+import org.apache.catalina.exception.CatalinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +11,9 @@ public class HttpRequestLine {
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    public HttpRequestLine(HttpMethod httpMethod, RequestUri requestUri, String httpVersion) {
+    public HttpRequestLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -23,7 +24,7 @@ public class HttpRequestLine {
         return new HttpRequestLine(
                 HttpMethod.valueOf(separatedStartLine[0]),
                 new RequestUri(separatedStartLine[1]),
-                separatedStartLine[2]
+                HttpVersion.parse(separatedStartLine[2])
         );
     }
 
@@ -35,7 +36,7 @@ public class HttpRequestLine {
         if (values.length == 3) {
             return values;
         }
-        RuntimeException exception = new IllegalArgumentException("Invalid start line: " + startLine);
+        RuntimeException exception = new CatalinaException("Invalid start line: " + startLine);
         log.error(exception.getMessage(), exception);
         throw exception;
     }
@@ -60,7 +61,7 @@ public class HttpRequestLine {
         return httpMethod;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 }

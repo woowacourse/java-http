@@ -11,12 +11,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.exception.CatalinaException;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.body.HttpRequestBody;
 import org.apache.catalina.http.header.HttpCookies;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
+import org.apache.catalina.http.startline.HttpVersion;
 import org.apache.catalina.http.startline.RequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,7 @@ class HttpRequestTest {
     void isTargetStatic_true() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -42,7 +44,7 @@ class HttpRequestTest {
     void isTargetStatic_false() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -56,7 +58,7 @@ class HttpRequestTest {
     void isTargetBlank_true() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri(""), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.GET, new RequestUri(""), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -70,7 +72,7 @@ class HttpRequestTest {
     void isTargetBlank_false() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -84,7 +86,7 @@ class HttpRequestTest {
     void uriStartsWith() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -99,7 +101,7 @@ class HttpRequestTest {
     void getSessionFromCookie() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(new HashMap<>(), new HttpCookies(Map.of("JSESSIONID", "session"))),
                 HttpRequestBody.empty()
         );
@@ -113,7 +115,7 @@ class HttpRequestTest {
     void getSessionFromCookie_noSession() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -127,7 +129,7 @@ class HttpRequestTest {
     void getHttpMethod() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -141,7 +143,7 @@ class HttpRequestTest {
     void getTargetPath() throws URISyntaxException {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
@@ -156,14 +158,14 @@ class HttpRequestTest {
     void getTargetPath_targetNotFound() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/invalidUrl"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/invalidUrl"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
 
         // when&then
         assertThatThrownBy(request::getTargetPath)
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(CatalinaException.class);
     }
 
     @DisplayName("요청 body에서 특정 값을 꺼내온다.")
@@ -171,7 +173,7 @@ class HttpRequestTest {
     void getFromBody() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
@@ -186,27 +188,27 @@ class HttpRequestTest {
     void getFromBody_keyNotFound() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
 
         // when&then
         assertThatThrownBy(() -> request.getFromBody("notKey"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(CatalinaException.class);
     }
 
     @DisplayName("요청의 HTTP 버전을 가져온다.")
     @Test
     void getHttpVersion() {
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
 
         // when&then
-        assertThat(request.getHttpVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.getHttpVersion()).isEqualTo(HttpVersion.HTTP11);
     }
 
     @DisplayName("InputStream을 request 형식으로 정상적으로 파싱한다.")
@@ -234,7 +236,7 @@ class HttpRequestTest {
                 () -> assertThat(parsedRequest.isTargetBlank()).isFalse(),
                 () -> assertThat(parsedRequest.isTargetStatic()).isFalse(),
                 () -> assertThat(parsedRequest.uriStartsWith("/login")).isTrue(),
-                () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP11),
                 () -> assertThat(parsedRequest.getSessionFromCookie()).get().isEqualTo("session"),
                 () -> assertThat(parsedRequest.getFromBody("account")).isEqualTo("gugu"),
                 () -> assertThat(parsedRequest.getFromBody("password")).isEqualTo("password")

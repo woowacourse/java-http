@@ -3,6 +3,7 @@ package org.apache.catalina.http.startline;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import org.apache.catalina.exception.CatalinaException;
 
 public class RequestUri {
 
@@ -19,13 +20,13 @@ public class RequestUri {
     public Path getPath() {
         URL resource = getResource();
         if (resource == null) {
-            throw new IllegalArgumentException("could not find resource " + value);
+            throw new CatalinaException("Could not find resource: " + value);
         }
 
         try {
             return Path.of(resource.toURI());
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("cannot convert to URI: " + resource);
+            throw new CatalinaException("Cannot convert to URI: " + resource);
         }
     }
 

@@ -9,6 +9,7 @@ import org.apache.catalina.http.body.HttpRequestBody;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
+import org.apache.catalina.http.startline.HttpVersion;
 import org.apache.catalina.http.startline.RequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,12 @@ class RequestMapperTest {
     void getController_dynamic() {
         // given
         HttpRequest requestLogin = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );
         HttpRequest requestRegister = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/register"), "HTTP/1.1"),
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/register"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 HttpRequestBody.empty()
         );

@@ -13,6 +13,7 @@ import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
+import org.apache.catalina.http.startline.HttpVersion;
 
 public class HttpRequest {
 
@@ -78,7 +79,7 @@ public class HttpRequest {
         return httpRequestBody.get(key);
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpRequestLine.getHttpVersion();
     }
 }

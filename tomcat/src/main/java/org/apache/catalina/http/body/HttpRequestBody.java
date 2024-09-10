@@ -2,6 +2,7 @@ package org.apache.catalina.http.body;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.exception.CatalinaException;
 
 public class HttpRequestBody {
 
@@ -28,7 +29,7 @@ public class HttpRequestBody {
     public String get(String key) {
         String value = body.get(key);
         if (value == null) {
-            throw new IllegalArgumentException("key " + key + " not found");
+            throw new CatalinaException("Key " + key + " not found");
         }
         return value;
     }

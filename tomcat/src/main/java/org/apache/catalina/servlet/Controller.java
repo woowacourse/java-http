@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.StringJoiner;
+import org.apache.catalina.exception.CatalinaException;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.header.HttpHeader;
@@ -42,7 +43,7 @@ public abstract class Controller {
             return response.isValid();
         } catch (NullPointerException | IOException e) {
             log.error(e.getMessage());
-            throw new IllegalArgumentException("invalid path: " + path.toString());
+            throw new CatalinaException("Invalid path: " + path.toString());
         }
     }
 

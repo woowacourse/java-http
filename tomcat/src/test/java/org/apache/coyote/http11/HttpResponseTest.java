@@ -8,6 +8,7 @@ import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.http.startline.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,7 @@ public class HttpResponseTest {
         // given
         HttpHeaders header = new HttpHeaders();
         HttpResponse response = new HttpResponse(
-                new HttpResponseLine("HTTP/1.1"),
+                new HttpResponseLine(HttpVersion.HTTP11),
                 header,
                 new HttpResponseBody()
         );
@@ -39,7 +40,7 @@ public class HttpResponseTest {
     @Test
     void setStatus() {
         // given
-        HttpResponseLine responseLine = new HttpResponseLine("HTTP/1.1");
+        HttpResponseLine responseLine = new HttpResponseLine(HttpVersion.HTTP11);
         HttpResponse response = new HttpResponse(
                 responseLine,
                 new HttpHeaders(),
@@ -60,7 +61,7 @@ public class HttpResponseTest {
         HttpHeaders header = new HttpHeaders();
         HttpResponseBody responseBody = new HttpResponseBody();
         HttpResponse response = new HttpResponse(
-                new HttpResponseLine("HTTP/1.1"),
+                new HttpResponseLine(HttpVersion.HTTP11),
                 header,
                 responseBody
         );
@@ -80,7 +81,7 @@ public class HttpResponseTest {
         // given
         HttpHeaders header = new HttpHeaders();
         HttpResponse response = new HttpResponse(
-                new HttpResponseLine("HTTP/1.1"),
+                new HttpResponseLine(HttpVersion.HTTP11),
                 header,
                 new HttpResponseBody()
         );
@@ -96,7 +97,7 @@ public class HttpResponseTest {
     @Test
     void isValid_true() {
         // given
-        HttpResponseLine responseLine = new HttpResponseLine("HTTP/1.1");
+        HttpResponseLine responseLine = new HttpResponseLine(HttpVersion.HTTP11);
         HttpResponse response = new HttpResponse(
                 responseLine,
                 new HttpHeaders(),
@@ -111,7 +112,7 @@ public class HttpResponseTest {
     @Test
     void isValid_false() {
         // given
-        HttpResponseLine responseLine = new HttpResponseLine("HTTP/1.1");
+        HttpResponseLine responseLine = new HttpResponseLine(HttpVersion.HTTP11);
         responseLine.setStatus(HttpStatus.UNAUTHORIZED);
         HttpResponse response = new HttpResponse(
                 responseLine,

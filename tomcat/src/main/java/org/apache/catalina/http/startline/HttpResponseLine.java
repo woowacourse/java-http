@@ -2,10 +2,10 @@ package org.apache.catalina.http.startline;
 
 public class HttpResponseLine {
 
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
     private HttpStatus httpStatus;
 
-    public HttpResponseLine(String httpVersion) {
+    public HttpResponseLine(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
         this.httpStatus = HttpStatus.OK;
     }
@@ -19,6 +19,6 @@ public class HttpResponseLine {
     }
 
     public String stringify() {
-        return httpVersion + " " + httpStatus.getValue();
+        return httpVersion.getValue() + " " + httpStatus.getValue();
     }
 }

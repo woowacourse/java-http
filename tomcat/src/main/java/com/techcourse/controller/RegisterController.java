@@ -4,7 +4,7 @@ import com.techcourse.controller.dto.RegisterRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
-    private static final ResponseFile registerPage = StaticResourceManager.read("/register.html");
+    private static final ResponseFile registerPage = StaticResourceReader.read("/register.html");
 
     @Override
     public String matchedPath() {

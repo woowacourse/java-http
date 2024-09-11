@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.controller.Controller;
-import org.apache.catalina.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             response.setStatus(HttpStatusCode.INTERNAL_SERVER_ERROR)
-                    .setBody(StaticResourceManager.read(DEFAULT_ERROR_PAGE));
+                    .setBody(StaticResourceReader.read(DEFAULT_ERROR_PAGE));
         }
     }
 

@@ -6,11 +6,11 @@ import java.net.URL;
 import java.util.Objects;
 import org.apache.coyote.http11.response.ResponseFile;
 
-public class StaticResourceManager {
+public class StaticResourceReader {
 
     private static final String STATIC_RESOURCE_PREFIX = "static";
 
-    private StaticResourceManager() {
+    private StaticResourceReader() {
     }
 
     public static ResponseFile read(String filePath) {

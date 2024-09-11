@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import org.apache.catalina.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,7 +15,7 @@ public class StaticResourceController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         log.info("Requested File Path: {}", request.getPath());
-        ResponseFile file = StaticResourceManager.read(request.getPath());
+        ResponseFile file = StaticResourceReader.read(request.getPath());
         response.setStatus(HttpStatusCode.OK)
                 .setBody(file);
     }

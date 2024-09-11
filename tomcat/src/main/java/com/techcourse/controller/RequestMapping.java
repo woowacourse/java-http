@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
-import org.apache.catalina.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class RequestMapping {
         HttpMethod method = request.getMethod();
         String path = request.getPath();
 
-        if (StaticResourceManager.isExist(path)) {
+        if (StaticResourceReader.isExist(path)) {
             return staticResourceController;
         }
 

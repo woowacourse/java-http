@@ -2,7 +2,6 @@ package org.apache.coyote.http11.response;
 
 import java.util.StringJoiner;
 import org.apache.coyote.HttpStatusCode;
-import org.apache.coyote.HttpVersion;
 
 public class HttpResponse {
 
@@ -18,7 +17,7 @@ public class HttpResponse {
     }
 
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header, byte[] body) {
-        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, statusCode);
+        this.statusLine = StatusLine.ofHTTP11(statusCode);
         this.header = header;
         this.body = new ResponseBody(body);
         header.setContentLength(String.valueOf(this.body.getBodyLength()));

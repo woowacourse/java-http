@@ -18,7 +18,12 @@ public class RequestLine {
     private final Map<String, String> queryParams;
 
     public RequestLine(
-            HttpMethod method, String path, String url, HttpVersion version, Map<String, String> queryParams) {
+            HttpMethod method,
+            String path,
+            String url,
+            HttpVersion version,
+            Map<String, String> queryParams
+    ) {
         this.method = method;
         this.path = path;
         this.url = url;

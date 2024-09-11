@@ -11,7 +11,8 @@ public record HttpHeader(Map<String, String> headers) {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String SET_COOKIE = "Set-Cookie";
-    private static final String JSESSIONID = "JSSESSIONID";
+    private static final String COOKIE = "Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_DELIMITER = ": ";
     private static final String MULTIPLE_HEADER_KEY_DELIMITER = ",";
     private static final String MULTIPLE_COOKIE_DELIMITER = "; ";
@@ -50,6 +51,12 @@ public record HttpHeader(Map<String, String> headers) {
         headers.put(CONTENT_TYPE, contentType);
     }
 
+    public Optional<String> getCookie(String cookieName) {
+        return Optional.ofNullable(headers.get(COOKIE))
+                .map(CookieNameValuePairs::new)
+                .flatMap(cookiePairs -> cookiePairs.get(cookieName));
+    }
+
     public void addSetCookie(String key, String value) {
         String newCookie = String.join(COOKIE_KEY_VALUE_DELIMITER, key, value);
         headers.compute(SET_COOKIE,
@@ -57,7 +64,7 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public Optional<String> getSessionId() {
-        return Optional.ofNullable(headers.get(JSESSIONID));
+        return getCookie(JSESSIONID);
     }
 
     public String toString() {

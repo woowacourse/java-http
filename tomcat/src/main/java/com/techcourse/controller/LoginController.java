@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String STATIC_RESOURCE_PATH = "/login.html";
+    private static final ResponseFile loginPage = StaticResourceManager.read("/login.html");
 
     @Override
     public String matchedPath() {
@@ -37,23 +37,22 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        ResponseFile file = StaticResourceManager.read(STATIC_RESOURCE_PATH);
         response.setStatus(HttpStatusCode.OK)
-                .setBody(file);
+                .setBody(loginPage);
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         LoginRequest loginRequest = LoginRequest.of(request.getBody());
-        log.info("Request Body: {}", loginRequest);
-
         String userAccount = loginRequest.account();
         String userPassword = loginRequest.password();
+        log.info("로그인 요청 -  id: {}, password: {}", userAccount, userPassword);
+
         User user = InMemoryUserRepository.findByAccount(userAccount)
                 .orElse(null);
 
         if (user == null || !user.checkPassword(userPassword)) {
-            response.sendRedirect("401.html");
+            response.sendRedirect("/401.html");
             return;
         }
 
@@ -63,7 +62,7 @@ public class LoginController extends AbstractController {
         httpSession.setAttribute("user", user);
         sessionManager.add(httpSession);
 
-        response.sendRedirect("index.html")
+        response.sendRedirect("/index.html")
                 .setCookie("JSESSIONID", httpSession.getId());
     }
 }

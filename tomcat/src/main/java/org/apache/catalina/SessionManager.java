@@ -8,6 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
+    public SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        return SessionManagerHolder.INSTANCE;
+    }
+
+    private static class SessionManagerHolder {
+        private static final SessionManager INSTANCE = new SessionManager();
+    }
+
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override

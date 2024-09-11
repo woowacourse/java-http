@@ -40,7 +40,7 @@ public class HttpResponse {
     }
 
     public String getStatusLine() {
-        return String.join(" ", version.getVersion(), statusCode.getCodeString(), statusCode.getReasonPhrase()) + " ";
+        return "%s %s %s".formatted(version.getVersion(), statusCode.getCodeString(), statusCode.getReasonPhrase()) + " ";
     }
 
     public Headers getHeaders() {

@@ -9,6 +9,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 
 public class LoginController extends AbstractController {
+    private static final String USER_SESSION_ATTRIBUTE = "user";
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setResource("login.html");
@@ -16,7 +17,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        if (request.existSessionAttribute("user")) {
+        if (request.existSessionAttribute(USER_SESSION_ATTRIBUTE)) {
             setRedirectIndex(response);
             return;
         }
@@ -34,7 +35,7 @@ public class LoginController extends AbstractController {
 
     private void login(final HttpRequest request, final HttpResponse response, final User user) {
         final Session session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute(USER_SESSION_ATTRIBUTE, user);
         response.addCookie(Cookies.SESSION_ID, session.getId());
         setRedirectIndex(response);
     }

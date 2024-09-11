@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Objects;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
@@ -52,7 +53,11 @@ public class LoginController extends AbstractController {
 
     private boolean userLoggedIn(HttpRequest request) {
         Session session = request.getSession();
-        Object userSession = session.getAttribute(USER_FIELD);
-        return userSession != null;
+        Object user = session.getAttribute(USER_FIELD);
+        if (user == null) {
+            return false;
+        }
+        return InMemoryUserRepository.findByAccount(((User) user).getAccount())
+                .isPresent();
     }
 }

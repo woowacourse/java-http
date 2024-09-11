@@ -18,6 +18,6 @@ public enum HttpStatusCode {
     }
 
     public String buildMessage() {
-        return "HTTP/1.1 " + statusCode + " " + statusMessage;
+        return statusCode + " " + statusMessage;
     }
 }

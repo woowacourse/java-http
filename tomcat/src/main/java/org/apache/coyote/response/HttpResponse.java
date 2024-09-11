@@ -19,6 +19,7 @@ public class HttpResponse {
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String EMPTY_BODY = "";
     private static final String EMPTY_LINE = "";
+    private static final String HTTP_1_1 = "HTTP/1.1";
 
     private final HttpStatusCode httpStatusCode;
     private final HttpHeader responseHeader;
@@ -86,7 +87,7 @@ public class HttpResponse {
 
     private String build() {
         return String.join(CRLF,
-                httpStatusCode.buildMessage(),
+                HTTP_1_1 + " " + httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),
                 EMPTY_LINE,
                 responseBody

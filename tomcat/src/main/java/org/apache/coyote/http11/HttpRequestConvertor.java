@@ -32,9 +32,7 @@ public class HttpRequestConvertor {
         Map<String, String> headers = getHeaders(bufferedReader);
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
-        if (httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH)
-                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals(BODY_FORM_CONTENT_TYPE)
-        ) {
+        if (isExistRequestBody(httpRequestHeader)) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
         }
@@ -83,5 +81,10 @@ public class HttpRequestConvertor {
                         token -> token[TUPLE_KEY_INDEX],
                         token -> token[TUPLE_VALUE_INDEX]
                 ));
+    }
+
+    private static boolean isExistRequestBody(HttpRequestHeader httpRequestHeader) {
+        return httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH)
+                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals(BODY_FORM_CONTENT_TYPE);
     }
 }

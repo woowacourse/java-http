@@ -2,8 +2,6 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.Session;
@@ -45,42 +43,37 @@ public class LoginController extends AbstractController {
                     .build();
         }
         log.error("비밀번호 불일치");
-        return HttpResponse.found(httpRequest)
-                .location(UNAUTHORIZED_PATH)
-                .build();
+        return redirectPage(httpRequest, UNAUTHORIZED_PATH);
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        try {
-            if (!httpRequest.containsHeader(HttpHeaderName.COOKIE)) {
-                return redirectLoginPage(httpRequest);
-            }
-
-            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getHeaderValue(HttpHeaderName.COOKIE));
-            if (!httpCookie.containsCookie(JSESSIONID)) {
-                return redirectLoginPage(httpRequest);
-            }
-
-            String jsessionid = httpCookie.getCookieValue(JSESSIONID);
-            if (!session.containsUser(jsessionid)) {
-                return redirectLoginPage(httpRequest);
-            }
-
-            User user = session.getUser(jsessionid);
-            log.info(user.toString());
-            return HttpResponse.found(httpRequest)
-                    .setCookie(JSESSIONID + COOKIE_DELIMITER + jsessionid)
-                    .location(INDEX_PATH)
-                    .build();
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
+        if (!httpRequest.containsHeader(HttpHeaderName.COOKIE)) {
+            return redirectPage(httpRequest, LOGIN_PATH);
         }
+
+        HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(
+                httpRequest.getHeaderValue(HttpHeaderName.COOKIE));
+        if (!httpCookie.containsCookie(JSESSIONID)) {
+            return redirectPage(httpRequest, LOGIN_PATH);
+        }
+
+        String jsessionid = httpCookie.getCookieValue(JSESSIONID);
+        if (!session.containsUser(jsessionid)) {
+            return redirectPage(httpRequest,LOGIN_PATH);
+        }
+
+        User user = session.getUser(jsessionid);
+        log.info(user.toString());
+        return HttpResponse.found(httpRequest)
+                .setCookie(JSESSIONID + COOKIE_DELIMITER + jsessionid)
+                .location(INDEX_PATH)
+                .build();
     }
 
-    private HttpResponse redirectLoginPage(HttpRequest httpRequest) throws IOException, URISyntaxException {
-        return HttpResponse.ok(httpRequest)
-                .staticResource(LOGIN_PATH)
+    private HttpResponse redirectPage(HttpRequest httpRequest, String path) {
+        return HttpResponse.found(httpRequest)
+                .location(path)
                 .build();
     }
 }

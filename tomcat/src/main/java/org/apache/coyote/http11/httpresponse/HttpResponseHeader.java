@@ -25,11 +25,11 @@ public class HttpResponseHeader {
                         .append(headers.get(key))
                         .append(RESPONSE_LINE_DELIMITER);
                 size++;
-            } else {
-                stringBuilder.append(key.getName())
-                        .append(HEADER_DELIMITER)
-                        .append(headers.get(key));
+                continue;
             }
+            stringBuilder.append(key.getName())
+                    .append(HEADER_DELIMITER)
+                    .append(headers.get(key));
         }
 
         return stringBuilder.toString();

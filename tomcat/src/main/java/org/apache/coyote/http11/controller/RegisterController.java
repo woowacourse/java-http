@@ -2,8 +2,6 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;
@@ -26,27 +24,24 @@ public class RegisterController extends AbstractController {
 
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
-            return HttpResponse.found(httpRequest)
-                    .location(REGISTER_PATH)
-                    .build();
+            return redirectPage(httpRequest, REGISTER_PATH);
         }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-
-        return HttpResponse.found(httpRequest)
-                .location(INDEX_PATH)
-                .build();
+        return redirectPage(httpRequest, INDEX_PATH);
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        try {
-            return HttpResponse.ok(httpRequest)
-                    .staticResource(httpRequest.getPath())
-                    .build();
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return HttpResponse.ok(httpRequest)
+                .staticResource(httpRequest.getPath())
+                .build();
+    }
+
+    private HttpResponse redirectPage(HttpRequest httpRequest, String path) {
+        return HttpResponse.found(httpRequest)
+                .location(path)
+                .build();
     }
 }

@@ -46,12 +46,12 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse getHttpResponse(HttpRequest httpRequest) {
+    private HttpResponse getHttpResponse(HttpRequest httpRequest) throws IOException, URISyntaxException {
         try {
             if (isStaticResource(httpRequest)) {
                 return HttpResponse.ok(httpRequest)
@@ -59,7 +59,6 @@ public class Http11Processor implements Runnable, Processor {
                         .build();
             }
             RequestMapping requestMapping = new RequestMapping();
-
             Controller controller = requestMapping.getController(httpRequest);
 
             return controller.service(httpRequest);
@@ -67,8 +66,6 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.found(httpRequest)
                     .location(NOT_FOUND_PATH)
                     .build();
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
         }
     }
 

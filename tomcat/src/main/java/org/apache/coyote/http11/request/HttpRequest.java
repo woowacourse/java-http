@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpVersion;
 
@@ -55,11 +55,9 @@ public class HttpRequest {
     }
 
     private String reconstructHeaderValue(String[] headerValues) {
-        StringJoiner stringJoiner = new StringJoiner(HEADER_DELIMITER);
-        for (String value : headerValues) {
-            stringJoiner.add(value.strip());
-        }
-        return stringJoiner.toString();
+        return Arrays.stream(headerValues)
+                .map(String::strip)
+                .collect(Collectors.joining(HEADER_DELIMITER));
     }
 
     public HttpMethod getMethod() {

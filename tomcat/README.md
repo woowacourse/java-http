@@ -31,6 +31,14 @@
     - [x] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장한다.
     - [x] 로그인된 상태에서 `/login` 페이지에 접근하면, `index.html` 페이지로 리다이렉트 한다.
 
+## 3. 리팩터링
+
+- [ ] HttpRequest 클래스 구현하기
+    - RequestLine 클래스 추가
+- [ ] HttpResponse 클래스 구현하기
+- [ ] Controller 인터페이스 추가하기
+    - RequestMapping 클래스 구현
+
 ---
 
 ### 생각해보기 🤔

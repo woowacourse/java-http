@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -53,8 +54,8 @@ public class StaticResourceHandler {
 
     private static Map<String, String> createResponseHeader(HttpRequest request, String body) {
         Map<String, String> header = new HashMap<>();
-        header.put("Content-Type", request.getContentType());
-        header.put("Content-Length", String.valueOf(body.length()));
+        header.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), request.getContentType());
+        header.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), String.valueOf(body.length()));
         return header;
     }
 }

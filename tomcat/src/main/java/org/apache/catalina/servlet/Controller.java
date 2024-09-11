@@ -31,8 +31,8 @@ public abstract class Controller {
     }
 
     protected boolean responseResource(HttpResponse response, String path) {
-        RequestURI requestUri = new RequestURI(path);
-        return responseResource(response, requestUri.getPath());
+        RequestURI requestURI = new RequestURI(path);
+        return responseResource(response, requestURI.getPath());
     }
 
     protected boolean responseResource(HttpResponse response, Path path) {

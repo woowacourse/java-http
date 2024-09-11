@@ -20,7 +20,7 @@ public class RequestMapper {
     public static Controller getController(HttpRequest request) {
         return controllers.stream()
                 .filter(controller ->
-                        request.uriStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
+                        request.URIStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
                 )
                 .findAny()
                 .orElse(resourceController);

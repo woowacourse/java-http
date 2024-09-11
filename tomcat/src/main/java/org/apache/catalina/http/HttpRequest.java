@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.catalina.http.body.HttpRequestBody;
 import org.apache.catalina.http.header.HttpHeader;
@@ -44,7 +45,7 @@ public class HttpRequest {
     private static HttpHeaders getHttpHeaders(BufferedReader httpRequestReader) throws IOException {
         List<String> headers = new ArrayList<>();
         String header;
-        while ((header = httpRequestReader.readLine()) != null && !header.isEmpty()) {
+        while (Objects.nonNull(header = httpRequestReader.readLine()) && !header.isEmpty()) {
             headers.add(header);
         }
         return HttpHeaders.parse(headers);
@@ -66,8 +67,8 @@ public class HttpRequest {
         return httpRequestLine.isURIBlank();
     }
 
-    public boolean uriStartsWith(String startsWith) {
-        return httpRequestLine.uriStartsWith(startsWith);
+    public boolean URIStartsWith(String startsWith) {
+        return httpRequestLine.URIStartsWith(startsWith);
     }
 
     public Optional<String> getSessionFromCookies() {

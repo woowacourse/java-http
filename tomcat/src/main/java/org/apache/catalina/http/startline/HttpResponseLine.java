@@ -1,5 +1,7 @@
 package org.apache.catalina.http.startline;
 
+import java.util.Objects;
+
 public class HttpResponseLine {
 
     private final HttpVersion httpVersion;
@@ -11,7 +13,7 @@ public class HttpResponseLine {
     }
 
     public boolean isValid() {
-        return httpVersion != null && httpStatus != null;
+        return Objects.nonNull(httpVersion) && Objects.nonNull(httpStatus);
     }
 
     public String stringify() {

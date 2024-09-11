@@ -3,6 +3,7 @@ package org.apache.catalina.http.header;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class HttpHeaders {
 
     public String get(HttpHeader header) {
         String value = headers.get(header.getValue());
-        if (value == null) {
+        if (Objects.isNull(value)) {
             throw new CatalinaException("Header " + header.getValue() + " not found");
         }
         return value;

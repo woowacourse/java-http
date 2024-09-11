@@ -3,6 +3,7 @@ package org.apache.catalina.http.body;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.catalina.exception.CatalinaException;
 
@@ -33,7 +34,7 @@ public class HttpRequestBody {
 
     public String get(String key) {
         String value = body.get(key);
-        if (value == null) {
+        if (Objects.isNull(value)) {
             throw new CatalinaException("Key " + key + " not found");
         }
         return value;

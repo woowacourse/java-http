@@ -83,7 +83,7 @@ class HttpRequestTest {
 
     @DisplayName("request uri가 주어진 문자로 시작하는지 아닌지 판별한다.")
     @Test
-    void uriStartsWith() {
+    void URIStartsWith() {
         // given
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestURI("/index"), HttpVersion.HTTP11),
@@ -92,8 +92,8 @@ class HttpRequestTest {
         );
 
         // when&then
-        assertThat(request.uriStartsWith("/ind")).isTrue();
-        assertThat(request.uriStartsWith("/index/")).isFalse();
+        assertThat(request.URIStartsWith("/ind")).isTrue();
+        assertThat(request.URIStartsWith("/index/")).isFalse();
     }
 
     @DisplayName("쿠키에서 세션을 가져온다.")
@@ -235,7 +235,7 @@ class HttpRequestTest {
                 () -> assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(parsedRequest.isURIBlank()).isFalse(),
                 () -> assertThat(parsedRequest.isURIStatic()).isFalse(),
-                () -> assertThat(parsedRequest.uriStartsWith("/login")).isTrue(),
+                () -> assertThat(parsedRequest.URIStartsWith("/login")).isTrue(),
                 () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP11),
                 () -> assertThat(parsedRequest.getSessionFromCookies()).get().isEqualTo("session"),
                 () -> assertThat(parsedRequest.getFromBody("account")).isEqualTo("gugu"),

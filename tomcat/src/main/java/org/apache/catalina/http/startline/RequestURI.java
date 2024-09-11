@@ -3,6 +3,7 @@ package org.apache.catalina.http.startline;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Objects;
 import org.apache.catalina.exception.CatalinaException;
 
 public class RequestURI {
@@ -19,7 +20,7 @@ public class RequestURI {
 
     public Path getPath() {
         URL resource = getResource();
-        if (resource == null) {
+        if (Objects.isNull(resource)) {
             throw new CatalinaException("Could not find resource: " + value);
         }
 
@@ -40,7 +41,7 @@ public class RequestURI {
     }
 
     public boolean isResource() {
-        return getResource() != null;
+        return Objects.nonNull(getResource());
     }
 
     public boolean isBlank() {

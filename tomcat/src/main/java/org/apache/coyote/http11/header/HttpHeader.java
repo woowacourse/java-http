@@ -18,7 +18,7 @@ public class HttpHeader {
         return CONTENT_TYPE.getName() + DELIMITER + fileType.getValue() + ENCODING + BLANK;
     }
 
-    public static String contentLength(final String responseBody) {
+    public static String contentLengthOf(final String responseBody) {
         return CONTENT_LENGTH.getName() + DELIMITER + responseBody.getBytes().length + BLANK;
     }
 

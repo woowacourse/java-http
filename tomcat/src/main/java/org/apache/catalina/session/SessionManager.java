@@ -15,6 +15,10 @@ public class SessionManager {
         return SESSIONS.get(id);
     }
 
+    public static boolean contains(final String id) {
+        return SESSIONS.containsKey(id);
+    }
+
     public static void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }

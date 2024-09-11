@@ -26,12 +26,8 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public boolean contains(final String key) {
-        return cookies.containsKey(key);
-    }
-
-    public String getCookieValue(final String key) {
-        return cookies.get(key);
+    public boolean containsSession() {
+        return cookies.containsKey(SESSION_COOKIE_NAME);
     }
 
     public String parseCookiesToQueryString() {
@@ -39,5 +35,9 @@ public class HttpCookie {
                 .stream()
                 .map(name -> name + COOKIE_TOKEN_DELIMITER + cookies.get(name))
                 .collect(Collectors.joining(COOKIE_DELIMITER));
+    }
+
+    public String getSessionCookie() {
+        return cookies.get(SESSION_COOKIE_NAME);
     }
 }

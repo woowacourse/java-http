@@ -8,11 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
     public static final String HEADER_DELIMITER = ": ";
     public static final String QUERY_STRING_DELIMITER = "&";
     public static final String QUERY_TOKEN_DELIMITER = "=";
+    public static final int NAME_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -31,8 +34,8 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
-    private static RequestLine parseRequestLine(final BufferedReader bufferedReader) throws IOException {
-        return RequestLine.of(bufferedReader.readLine());
+    private static RequestLine parseRequestLine(final BufferedReader reader) throws IOException {
+        return RequestLine.of(reader.readLine());
     }
 
     private static Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
@@ -41,7 +44,7 @@ public class HttpRequest {
 
         while (!"".equals(header)) {
             final var tokens = header.split(HEADER_DELIMITER);
-            headers.put(tokens[0], tokens[1]);
+            headers.put(tokens[NAME_INDEX], tokens[VALUE_INDEX]);
             header = reader.readLine();
         }
 
@@ -58,7 +61,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getRequestMethod() {
+    public HttpMethod getRequestMethod() {
         return requestLine.getMethod();
     }
 
@@ -83,6 +86,6 @@ public class HttpRequest {
 
         return Arrays.stream(params)
                 .map(param -> param.split(QUERY_TOKEN_DELIMITER))
-                .collect(Collectors.toMap(token -> token[0], token -> token[1]));
+                .collect(Collectors.toMap(token -> token[NAME_INDEX], token -> token[VALUE_INDEX]));
     }
 }

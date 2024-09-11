@@ -10,9 +10,9 @@ import java.util.StringJoiner;
 public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private HttpStatus status;
-    private HttpResponseHeaders headers;
-    private String body;
+    private final HttpStatus status;
+    private final HttpResponseHeaders headers;
+    private final String body;
 
     public HttpResponse(HttpStatus status, HttpResponseHeaders headers, String body) {
         this.status = status;

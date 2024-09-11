@@ -16,6 +16,7 @@ public class RequestParser {
     private final String[] requestLine;
     private final Map<String, String> header;
     private final String body;
+    private final HttpCookie httpCookie;
 
     public RequestParser(BufferedReader bufferedReader) throws IOException {
         this.bufferedReader = bufferedReader;
@@ -23,6 +24,7 @@ public class RequestParser {
         log.info("requestLine : {}", line);
         this.requestLine = line.split(" ");
         this.header = extractHeader();
+        this.httpCookie = new HttpCookie(extractCookie());
         this.body = extractBody();
     }
 
@@ -35,6 +37,13 @@ public class RequestParser {
             line = bufferedReader.readLine();
         }
         return Collections.unmodifiableMap(header);
+    }
+
+    private String extractCookie() {
+        if (header.containsKey("Cookie")) {
+            return header.get("Cookie");
+        }
+        return "";
     }
 
     private String extractBody() throws IOException {
@@ -57,5 +66,9 @@ public class RequestParser {
 
     public String getBody() {
         return body;
+    }
+
+    public String getCookie(String cookieName) {
+        return httpCookie.getCookie(cookieName);
     }
 }

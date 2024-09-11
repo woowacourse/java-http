@@ -73,7 +73,8 @@ public class Http11Processor implements Runnable, Processor {
         String path = parsePath(tokens[1]);
         Map<String, String> queryString = parseQueryString(tokens[1]);
         Map<String, String> headers = parseHeaders(bufferedReader);
-        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers);
+        String body = parseBody(bufferedReader, headers);
+        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, body);
     }
 
     private String parsePath(String token) {
@@ -143,5 +144,16 @@ public class Http11Processor implements Runnable, Processor {
             line = bufferedReader.readLine();
         }
         return headers;
+    }
+
+    private String parseBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+        String length = headers.get("Content-Length");
+        if (length == null) {
+            return "";
+        }
+        int contentLength = Integer.parseInt(length);
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

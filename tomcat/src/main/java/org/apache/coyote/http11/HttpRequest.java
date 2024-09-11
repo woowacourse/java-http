@@ -9,14 +9,16 @@ public class HttpRequest {
     private final Map<String, String> queryString;
     private final String protocolVersion;
     private final Map<String, String> headers;
+    private final String body;
 
     public HttpRequest(String method, String path, Map<String, String> queryString, String protocolVersion,
-                       Map<String, String> headers) {
+                       Map<String, String> headers, String body) {
         this.method = method;
         this.path = path;
         this.queryString = queryString;
         this.protocolVersion = protocolVersion;
         this.headers = headers;
+        this.body = body;
     }
 
     public boolean hasQueryString() {
@@ -33,5 +35,9 @@ public class HttpRequest {
 
     public String getMethod() {
         return this.method;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

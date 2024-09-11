@@ -39,22 +39,22 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()) {
-
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            RequestLine requestLine = new RequestLine(reader.readLine());
-            HttpHeader httpHeader = new HttpHeader(readRequestHeaders(reader));
-            RequestBody requestBody = readRequestBody(reader, httpHeader);
-
-            HttpRequest request = new HttpRequest(requestLine, httpHeader, requestBody);
             HttpResponse response = new HttpResponse();
-            handle(request, response);
+            handle(readRequest(new BufferedReader(new InputStreamReader(inputStream))), response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readRequest(BufferedReader reader) throws IOException {
+        return new HttpRequest(
+                new RequestLine(reader.readLine()),
+                new HttpHeader(readRequestHeaders(reader)),
+                readRequestBody(reader, new HttpHeader(readRequestHeaders(reader)))
+        );
     }
 
     private List<String> readRequestHeaders(BufferedReader reader) throws IOException {

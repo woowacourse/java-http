@@ -29,13 +29,10 @@ public class HttpRequestConvertor {
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
-        if (requestLine == null) {
-            throw new IllegalArgumentException("요청이 비어 있습니다.");
-        }
-
+        validateRequestLine(requestLine);
         HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
-        Map<String, String> headers = getHeaders(bufferedReader);
-        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
+
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(getHeaders(bufferedReader));
         Session session = getOrCreateSession(httpRequestHeader);
 
         if (isExistRequestBody(httpRequestHeader)) {
@@ -44,6 +41,12 @@ public class HttpRequestConvertor {
         }
 
         return new HttpRequest(httpRequestLine, httpRequestHeader, session);
+    }
+
+    private static void validateRequestLine(String requestLine) {
+        if (requestLine == null) {
+            throw new IllegalArgumentException("요청이 비어 있습니다.");
+        }
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
@@ -77,6 +80,10 @@ public class HttpRequestConvertor {
             return createSession();
         }
 
+        return getOrCreateSession(httpCookie);
+    }
+
+    private static Session getOrCreateSession(HttpCookie httpCookie) {
         String jsessionid = httpCookie.getCookieValue(JSESSIONID);
         if (!SESSION_MANAGER.containsSession(jsessionid)) {
             return createSession();

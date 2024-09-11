@@ -33,11 +33,10 @@ public class URI {
     }
 
     private String extractQueryParams(String[] uriParts) {
-        String queryParams = null;
         if (uriParts.length == QUERY_PARAMS_EXIST_LENGTH) {
-            queryParams = uriParts[QUERY_PARAMS_INDEX];
+            return uriParts[QUERY_PARAMS_INDEX];
         }
-        return queryParams;
+        return null;
     }
 
     public String getPath() {

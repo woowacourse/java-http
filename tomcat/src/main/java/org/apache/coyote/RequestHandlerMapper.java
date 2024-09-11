@@ -13,7 +13,7 @@ public class RequestHandlerMapper {
 
     public RequestHandlerMapper() {
         this.mapper = new HashMap<>();
-        this.staticResourceHandler = new StaticResourceRequestController();
+        this.staticResourceHandler = new StaticResourceRequestHandler();
     }
 
     public void addController(RequestHandler controller, String path) {

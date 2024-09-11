@@ -15,7 +15,7 @@ public class HttpCookies {
     public HttpCookies(String cookies) {
         this.cookies = Arrays.stream(cookies.split(COOKIE_DELIMITER))
                 .map(cookie -> cookie.split(COOKIE_KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(keyValue -> keyValue[0], keyValue -> keyValue[1]));
+                .collect(Collectors.toMap(keyValue -> keyValue[0], keyValue -> keyValue[1].trim()));
     }
 
     public boolean hasJSESSIONID() {

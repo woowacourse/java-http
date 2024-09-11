@@ -48,7 +48,27 @@ public class LoginController implements Controller {
             resp.setRedirect("302 Found", "/index.html");
             log.info(user.toString());
 
-        } else {
+        } else if (req.getMethod().equals(HttpMethod.POST)) {
+            String account = req.getBodyValue(ACCOUNT);
+            String password = req.getBodyValue(PASSWORD);
+
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                log.error("찾으시는 유저가 존재하지 않습니다. (Account: {})", account);
+                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
+                return;
+            }
+            if (!user.get().checkPassword(password)) {
+                log.error("찾으시는 유저 정보가 잘못되었습니다. (Account: {}, Password: {})", account, password);
+                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
+                return;
+            }
+
+            resp.setRedirect("302 Found", "/index.html");
+            log.info("로그인 성공 (Account: {})", user.get().getAccount());
+
+        }
+        else {
             throw new IllegalArgumentException("%s 요청을 처리할 컨트롤러가 존재하지 않습니다.".formatted(req.getMethod().getValue()));
         }
     }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMessageBody;
 import org.apache.coyote.http11.response.line.ResponseLine;
@@ -23,8 +24,8 @@ public class HttpResponse {
         ResponseLine line = ResponseLine.createOkResponseLine();
         HttpMessageBody body = new HttpMessageBody(responseBody);
         HttpHeaders headers = new HttpHeaders();
-        headers.putHeader("Content-Type", "text/" + contentType + ";charset=utf-8 ");
-        headers.putHeader("Content-Length", body.getBytes().length + " ");
+        headers.putHeader(HttpHeaderName.CONTENT_TYPE, "text/" + contentType + ";charset=utf-8 ");
+        headers.putHeader(HttpHeaderName.CONTENT_LENGTH, body.getBytes().length + " ");
 
         return new HttpResponse(line, headers, body);
     }
@@ -33,8 +34,8 @@ public class HttpResponse {
         ResponseLine line = ResponseLine.createUnauthorizedLine();
         HttpMessageBody body = new HttpMessageBody(responseBody);
         HttpHeaders headers = new HttpHeaders();
-        headers.putHeader("Content-Type", "text/" + contentType + ";charset=utf-8 ");
-        headers.putHeader("Content-Length", body.getBytes().length + " ");
+        headers.putHeader(HttpHeaderName.CONTENT_TYPE, "text/" + contentType + ";charset=utf-8 ");
+        headers.putHeader(HttpHeaderName.CONTENT_LENGTH, body.getBytes().length + " ");
 
         return new HttpResponse(line, headers, body);
     }
@@ -43,7 +44,7 @@ public class HttpResponse {
         ResponseLine line = ResponseLine.createFoundLine();
         HttpMessageBody body = HttpMessageBody.createEmptyBody();
         HttpHeaders headers = new HttpHeaders();
-        headers.putHeader("Location", uri);
+        headers.putHeader(HttpHeaderName.LOCATION, uri);
         return new HttpResponse(line, headers, body);
     }
 
@@ -61,6 +62,6 @@ public class HttpResponse {
     }
 
     public void setJsessionCookie(UUID uuid) {
-        httpHeaders.putHeader("Set-Cookie", "JSESSIONID=" + uuid);
+        httpHeaders.putHeader(HttpHeaderName.SET_COOKIE, "JSESSIONID=" + uuid);
     }
 }

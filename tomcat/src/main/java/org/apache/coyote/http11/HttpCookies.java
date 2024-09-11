@@ -14,11 +14,11 @@ public class HttpCookies {
     public static HttpCookies from(HttpHeaders httpHeaders) {
         HttpCookies httpCookies = new HttpCookies();
 
-        String headerValue = httpHeaders.getHeaderValue(COOKIE);
+        String headerValue = httpHeaders.getHeaderValue(HttpHeaderName.COOKIE);
         if (headerValue == null) {
             return httpCookies;
         }
-        
+
         String[] headerCookies = headerValue.split(COOKIE_DELIMETER);
         for (String cookie : headerCookies) {
             String[] cookieParts = cookie.split(COOKIE_KEY_VALUE_DELIMETER);

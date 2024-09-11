@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpMessageBody readMessageBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
-        String lengthValue = httpHeaders.getHeaderValue("Content-Length");
+        String lengthValue = httpHeaders.getHeaderValue(HttpHeaderName.CONTENT_LENGTH);
         if (lengthValue == null) {
             return HttpMessageBody.createEmptyBody();
         }

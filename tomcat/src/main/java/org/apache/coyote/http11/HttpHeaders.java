@@ -7,28 +7,30 @@ public class HttpHeaders {
 
     private static final String HEADER_DELIMETER = ": ";
 
-    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final Map<HttpHeaderName, String> headers = new LinkedHashMap<>();
 
     public HttpHeaders() {
     }
 
-    public void putHeader(String key, String value) {
+    public void putHeader(HttpHeaderName key, String value) {
         headers.put(key, value);
     }
 
     public void putHeader(String headerLine) {
         String[] headerParts = headerLine.split(HEADER_DELIMETER);
-        headers.put(headerParts[0].trim(), headerParts[1].trim());
+        HttpHeaderName headerName = HttpHeaderName.from(headerParts[0].trim());
+        String headerValue = headerParts[1].trim();
+        headers.put(headerName, headerValue);
     }
 
-    public String getHeaderValue(String key) {
-        return headers.get(key);
+    public String getHeaderValue(HttpHeaderName headerName) {
+        return headers.get(headerName);
     }
 
     public String resolveHeadersMessage() {
         StringBuilder headersMessage = new StringBuilder();
-        for (String key : headers.keySet()) {
-            String headerLine = String.join(HEADER_DELIMETER, key, headers.get(key));
+        for (HttpHeaderName key : headers.keySet()) {
+            String headerLine = String.join(HEADER_DELIMETER, key.getValue(), headers.get(key));
             headersMessage.append(headerLine);
             headersMessage.append("\r\n");
         }

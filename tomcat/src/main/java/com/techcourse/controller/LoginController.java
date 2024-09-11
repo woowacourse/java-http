@@ -66,6 +66,6 @@ public class LoginController extends AbstractController {
         sessionManager.add(httpSession);
 
         response.sendRedirect("index.html")
-                .addCookie("JSESSIONID", httpSession.getId());
+                .setCookie("JSESSIONID", httpSession.getId());
     }
 }

@@ -34,12 +34,8 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addCookie(String key, String value) {
-        if (headers.headers().containsKey("Set-Cookie")) {
-            headers.headers().put("Set-Cookie", headers.headers().get("Set-Cookie") + "; " + key + "=" + value);
-            return this;
-        }
-        headers.headers().put("Set-Cookie", key + "=" + value);
+    public HttpResponse setCookie(String key, String value) {
+        headers.addSetCookie(key, value);
         return this;
     }
 

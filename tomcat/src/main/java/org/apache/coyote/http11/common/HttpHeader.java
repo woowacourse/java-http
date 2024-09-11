@@ -15,6 +15,8 @@ public record HttpHeader(Map<String, String> headers) {
     private static final String COOKIE = "Cookie";
     private static final String HEADER_DELIMITER = ": ";
     private static final String MULTIPLE_HEADER_KEY_DELIMITER = ",";
+    private static final String MULTIPLE_COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
 
     public static HttpHeader empty() {
         return new HttpHeader(new HashMap<>());
@@ -40,8 +42,8 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public void add(String key, String value) {
-        headers.computeIfPresent(key, (k, v) -> String.join(MULTIPLE_HEADER_KEY_DELIMITER, v, value));
-        headers.putIfAbsent(key, value);
+        headers.compute(key,
+                (k, prev) -> prev == null ? value : String.join(MULTIPLE_HEADER_KEY_DELIMITER, prev, value));
     }
 
     public void setContentLength(int length) {
@@ -50,6 +52,12 @@ public record HttpHeader(Map<String, String> headers) {
 
     public void setContentType(String contentType) {
         headers.put(CONTENT_TYPE, contentType);
+    }
+
+    public void addSetCookie(String key, String value) {
+        String newCookie = String.join(COOKIE_KEY_VALUE_DELIMITER, key, value);
+        headers.compute(COOKIE,
+                (k, prev) -> prev == null ? newCookie : String.join(MULTIPLE_COOKIE_DELIMITER, prev, newCookie));
     }
 
     public String toString() {

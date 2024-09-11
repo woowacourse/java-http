@@ -68,16 +68,14 @@
   - [x] Request Line 분석
     - [x] Method 클래스 (enum)
     - [x] Path 클래스
-    - [x] Version 클래스
-    - [x] Protocol 클래스 (enum)
+    - [x] VersionOfProtocol 클래스
   - [x] Headers 분석
   - [x] body 클래스
 
 - [ ] HttpResponse 클래스 구현
-  - [ ] Status-Line 분석
-    - [ ] Version 클래스 (enum)
-    - [ ] Protocol 클래스 (enum)
-    - [ ] StatusCode 클래스 (enum) [code + message]
+  - [x] Status-Line 분석
+    - [x] VersionOfProtocol 클래스
+    - [x] StatusCode 클래스 (enum) [code + message]
   - [ ] headers 분석
 
 - Controller 인터페이스 추가

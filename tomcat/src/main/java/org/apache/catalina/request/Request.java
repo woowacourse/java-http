@@ -3,6 +3,7 @@ package org.apache.catalina.request;
 import java.util.Map;
 
 import org.apache.catalina.auth.HttpCookie;
+import org.apache.catalina.http.VersionOfProtocol;
 
 public class Request {
     private final RequestLine requestLine;
@@ -21,6 +22,10 @@ public class Request {
 
     public boolean isSameHttpMethod(HttpMethod httpMethod) {
         return requestLine.isSameHttpMethod(httpMethod);
+    }
+
+    public VersionOfProtocol getVersionOfProtocol() {
+        return requestLine.getVersionOfProtocol();
     }
 
     public String getPathWithoutQuery() {

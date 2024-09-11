@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 
-import org.apache.catalina.http.HttpProtocol;
+import org.apache.catalina.http.VersionOfProtocol;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,8 +22,7 @@ class RequestLineTest {
 
             assertAll(
                     () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                    () -> assertThat(requestLine.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP),
-                    () -> assertThat(requestLine.getHttpVersion()).isEqualTo("1.1")
+                    () -> assertThat(requestLine.getVersionOfProtocol()).isEqualTo(new VersionOfProtocol("HTTP/1.1"))
             );
         }
 

@@ -20,12 +20,8 @@ public enum HttpStatus {
         return value;
     }
 
-    public String getReasonPhrase() {
-        return reasonPhrase;
-    }
-
     @Override
     public String toString() {
-        return this.value + " " + name();
+        return this.value + " " + reasonPhrase;
     }
 }

@@ -3,7 +3,6 @@ package org.apache.catalina.request;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.catalina.http.HttpProtocol;
 import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.io.RequestParser;
 
@@ -52,12 +51,8 @@ public class RequestLine {
         return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
     }
 
-    public HttpProtocol getHttpProtocol() {
-        return versionOfProtocol.getHttpProtocol();
-    }
-
-    public String getHttpVersion() {
-        return versionOfProtocol.getHttpVersion();
+    public VersionOfProtocol getVersionOfProtocol() {
+        return versionOfProtocol;
     }
 
     public Map<String, String> getQueryParam() {

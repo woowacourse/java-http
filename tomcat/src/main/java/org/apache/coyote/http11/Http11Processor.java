@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
+import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.io.FileReader;
 import org.apache.catalina.io.RequestParser;
 import org.apache.catalina.io.RequestReader;
@@ -24,6 +25,7 @@ import org.apache.catalina.request.RequestLine;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponsePage;
+import org.apache.catalina.response.StatusLine;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,14 +93,18 @@ public class Http11Processor implements Runnable, Processor {
             return generateResponseForPostUrl(request).responseToString();
         }
         log.warn("지원되지 않는 HTTP 메서드입니다.");
-        return new HttpResponse(HttpStatus.BAD_REQUEST, "text/html", FileReader.loadFileContent(BAD_REQUEST_PAGE))
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                "text/html",
+                FileReader.loadFileContent(BAD_REQUEST_PAGE))
                 .responseToString();
     }
 
     private HttpResponse generateResponseForUrl(Request request) {
         String accept = request.getFileType();
         if (ROOT_PATH.equals(request.getPathWithoutQuery())) {
-            return new HttpResponse(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
+            return new HttpResponse(
+                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK), accept, DEFAULT_PAGE_CONTENT);
         }
         if (!request.checkQueryParamIsEmpty()) {
             return generateResponseForQueryParam(request);
@@ -108,11 +114,16 @@ public class Http11Processor implements Runnable, Processor {
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             HttpResponse httpResponse = new HttpResponse(
-                    page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
+                    new StatusLine(request.getVersionOfProtocol(), page.getStatus()),
+                    accept,
+                    FileReader.loadFileContent(page.getFileName()));
             httpResponse.addLocation(page.getFileName());
             return httpResponse;
         }
-        return new HttpResponse(HttpStatus.OK, accept, FileReader.loadFileContent(request.getPathWithoutQuery()));
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
+                accept,
+                FileReader.loadFileContent(request.getPathWithoutQuery()));
     }
 
     private HttpResponse generateResponseForQueryParam(Request headers) {
@@ -126,7 +137,10 @@ public class Http11Processor implements Runnable, Processor {
         String accept = request.getFileType();
         Map<String, String> queryParams = request.getQueryParam();
         if (isMissingRequiredParams(request, queryParams)) {
-            return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
+            return new HttpResponse(
+                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                    accept,
+                    FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
 
         Optional<User> user = authenticateUser(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
@@ -138,12 +152,18 @@ public class Http11Processor implements Runnable, Processor {
             String cookie = httpCookie.getCookies(session.getId());
 
             HttpResponse httpResponse
-                    = new HttpResponse(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+                    = new HttpResponse(
+                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
+                    accept,
+                    FileReader.loadFileContent(INDEX_PAGE));
             httpResponse.addHeader("Set-Cookie", cookie);
             httpResponse.addLocation(INDEX_PAGE);
             return httpResponse;
         }
-        return new HttpResponse(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.UNAUTHORIZED),
+                accept,
+                FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 
     private boolean isMissingRequiredParams(Request request, Map<String, String> queryParams) {
@@ -160,25 +180,37 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private HttpResponse generateResponseForPostUrl(Request headers) {
-        String url = headers.getPathWithoutQuery();
-        String accept = headers.getFileType();
+    private HttpResponse generateResponseForPostUrl(Request request) {
+        String url = request.getPathWithoutQuery();
+        String accept = request.getFileType();
         if (REGISTER_PATH.equals(url)) {
-            return handleRegistration(headers.getBody(), accept);
+            return handleRegistration(request.getVersionOfProtocol(), request.getBody(), accept);
         }
-        return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                accept,
+                FileReader.loadFileContent(NOT_FOUND_PAGE));
     }
 
-    private HttpResponse handleRegistration(Map<String, String> bodyParams, String accept) {
+    private HttpResponse handleRegistration(
+            VersionOfProtocol versionOfProtocol,
+            Map<String, String> bodyParams,
+            String accept
+    ) {
         String account = bodyParams.get(ACCOUNT);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
+            return new HttpResponse(
+                    new StatusLine(versionOfProtocol, HttpStatus.BAD_REQUEST),
+                    accept,
+                    FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
-        HttpResponse httpResponse
-                = new HttpResponse(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+        HttpResponse httpResponse = new HttpResponse(
+                new StatusLine(versionOfProtocol, HttpStatus.FOUND),
+                accept,
+                FileReader.loadFileContent(INDEX_PAGE));
         httpResponse.addLocation(INDEX_PAGE);
         return httpResponse;
     }

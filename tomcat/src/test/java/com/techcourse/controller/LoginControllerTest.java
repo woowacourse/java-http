@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Optional;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -101,7 +103,7 @@ class LoginControllerTest {
         );
     }
 
-    @DisplayName("로그인 화면을 응답한다.")
+    @DisplayName("쿠키가 없으면 로그인 화면을 응답한다.")
     @Test
     void loginPage() throws IOException {
         // given
@@ -126,4 +128,37 @@ class LoginControllerTest {
                 expectedLocationHeader
         );
     }
+
+    @DisplayName("쿠키가 있으면 대쉬보드 화면을 응답한다.")
+    @Test
+    void homePage() throws IOException {
+        // given
+        Session session = Session.createRandomSession();
+        session.setAttribute("user", "validUser");
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        final String request = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + session.getId(),
+                "",
+                "");
+
+        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
+
+        // when
+        loginController.handle(httpRequest, httpResponse);
+
+        // then
+        String expectedResponseLine = "HTTP/1.1 302 FOUND";
+        String expectedLocationHeader = "Location: index.html";
+
+        assertThat(httpResponse.serialize()).contains(
+                expectedResponseLine,
+                expectedLocationHeader
+        );
+    }
+
 }

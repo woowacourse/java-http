@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public class Response {
+public class HttpResponse {
 
     private static final String SPACE_AND_LINE_SEPARATOR = " \r\n";
     private static final String LINE_SEPARATOR = "\r\n";
@@ -9,10 +9,10 @@ public class Response {
     private HttpStatusCode httpStatusCode;
     private final HttpHeaders headers = new HttpHeaders();
 
-    public Response() {
+    public HttpResponse() {
     }
 
-    public Response(final HttpStatusCode httpStatusCode) {
+    public HttpResponse(final HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
     }
 

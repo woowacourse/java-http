@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             //TODO refactor
             final var result = getFile(httpRequest.getRequestLine().getPath());
-            final var response = new Response();
+            final var httpResponse = new HttpResponse();
 
             if (httpRequest.hasMethod(HttpMethod.GET)) {
                 if (httpRequest.getRequestLine().getPath().isEqualPath("/login")) {
@@ -58,17 +58,17 @@ public class Http11Processor implements Runnable, Processor {
                         final var session = sessionManager.findSession(jSessionId);
                         if (session == null) {
                             log.warn("유효하지 않은 세션입니다.");
-                            redirectLocation(response, httpRequest, result, "401.html");
+                            redirectLocation(httpResponse, httpRequest, result, "401.html");
                         } else {
                             final var sessionUser = (User) session.getAttribute("user");
                             log.info("이미 로그인 유저 = {}", sessionUser);
-                            redirectLocation(response, httpRequest, result, "index.html");
+                            redirectLocation(httpResponse, httpRequest, result, "index.html");
                         }
                     } else {
-                        generateOKResponse(response, httpRequest, result);
+                        generateOKResponse(httpResponse, httpRequest, result);
                     }
                 } else {
-                    generateOKResponse(response, httpRequest, result);
+                    generateOKResponse(httpResponse, httpRequest, result);
                 }
             }
 
@@ -77,21 +77,21 @@ public class Http11Processor implements Runnable, Processor {
                 final var body = httpRequest.getBody();
 
                 if (httpRequest.getRequestLine().getPath().isEqualPath("/login")) {
-                    final var user = createResponse(body, httpRequest, response, result);
+                    final var user = createResponse(body, httpRequest, httpResponse, result);
 
                     log.info("user login = {}", user);
                 } else if (httpRequest.getRequestLine().getPath().isEqualPath("/register")) {
                     final var user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    redirectLocation(response, httpRequest, result, "index.html");
+                    redirectLocation(httpResponse, httpRequest, result, "index.html");
                 }
 
-                outputStream.write(response.toHttpResponse().getBytes());
+                outputStream.write(httpResponse.toHttpResponse().getBytes());
                 outputStream.flush();
                 return;
             }
 
-            outputStream.write(response.toHttpResponse().getBytes());
+            outputStream.write(httpResponse.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -106,14 +106,14 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private void generateOKResponse(final Response response, final HttpRequest request, final String result) {
+    private void generateOKResponse(final HttpResponse response, final HttpRequest request, final String result) {
         response.setHttpStatusCode(HttpStatusCode.OK);
         response.setSourceCode(result);
         response.putHeader("Content-Length", result.getBytes().length);
         response.putHeader("Content-Type", request.getContentTypeToResponseText());
     }
 
-    private void redirectLocation(final Response response, final HttpRequest request, final String result,
+    private void redirectLocation(final HttpResponse response, final HttpRequest request, final String result,
                                   final String location) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setSourceCode(result);
@@ -123,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private User createResponse(final Map<String, String> body, final HttpRequest request,
-                                final Response response,
+                                final HttpResponse response,
                                 final String result) {
         final var account = body.get("account");
         log.info("account = {}", account);

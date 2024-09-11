@@ -9,6 +9,7 @@ import java.util.Arrays;
 import org.apache.coyote.ForwardResult;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.file.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
@@ -34,8 +35,7 @@ public abstract class AbstractController implements Controller {
         }
 
         try {
-            Path filePath = Paths.get(getClass().getClassLoader().getResource("static/" + result.path()).toURI());
-            byte[] body = Files.readAllBytes(filePath);
+            byte[] body = ResourceReader.read(result.path());
             response.setStatus(HttpStatusCode.OK);
             response.setHeader(header);
             response.setBody(new ResponseBody(Arrays.toString(body).getBytes()));
@@ -46,6 +46,6 @@ public abstract class AbstractController implements Controller {
             response.setBody(new ResponseBody("No File Found".getBytes()));
         }
     }
-    
+
     protected abstract ForwardResult execute(HttpRequest request, HttpResponse response);
 }

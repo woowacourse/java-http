@@ -14,7 +14,7 @@ public class HttpRequestParser {
 
         HttpHeaders headers = new HttpHeaders();
         bufferedReader.lines()
-                .takeWhile(line -> !line.isEmpty())
+                .takeWhile(headerLine -> !headerLine.isEmpty())
                 .forEach(headers::add);
 
         int contentLength = headers.getContentLength();

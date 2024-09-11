@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
-    private final Map<HeaderType, String> fields;
+    private final Map<String, String> fields;
 
     public HttpHeaders() {
         this.fields = new HashMap<>();
@@ -16,22 +16,26 @@ public class HttpHeaders {
 
     public void add(String headerLine) {
         String[] parts = headerLine.split(": ", 2);
-        add(HeaderType.findByName(parts[0]), parts[1]);
+        add(parts[0], parts[1]);
     }
 
-    public void add(HeaderType headerType, String value) {
-        fields.put(headerType, value);
+    public void add(String name, String value) {
+        fields.put(name, value);
     }
 
-    public Optional<String> findByName(HeaderType headerType) {
+    public void add(HeaderKey headerKey, String value) {
+        add(headerKey.getValue(), value);
+    }
+
+    public Optional<String> findByName(HeaderKey headerKey) {
         return fields.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(headerType))
+                .filter(entry -> entry.getKey().equals(headerKey.getValue()))
                 .map(Entry::getValue)
                 .findAny();
     }
 
     public Optional<String> findCookieByName(String name) {
-        Optional<String> rawCookies = findByName(HeaderType.COOKIE);
+        Optional<String> rawCookies = findByName(HeaderKey.COOKIE);
         if (rawCookies.isEmpty()) {
             return Optional.empty();
         }
@@ -41,7 +45,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(findByName(HeaderType.CONTENT_LENGTH).orElse("0"));
+        return Integer.parseInt(findByName(HeaderKey.CONTENT_LENGTH).orElse("0"));
     }
 
     public String build() {

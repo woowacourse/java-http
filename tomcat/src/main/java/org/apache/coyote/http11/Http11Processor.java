@@ -59,29 +59,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleGetRequest(HttpRequest request) {
-        if (hasPath(request)) {
-            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
-            String body = buildResponseBody(request.getPathWithoutQueryString());
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue(request.getPathWithoutQueryString()));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
-            return new HttpResponse(statusLine, headers, body);
-        }
-
         if (request.getPath().equals("/")) {
             StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
             String body = buildResponseBody("/index.html");
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
             return new HttpResponse(statusLine, headers, body);
         }
         if (request.getPath().equals("/register")) {
             StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
             String body = buildResponseBody("/register.html");
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/register.html"));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/register.html"));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
             return new HttpResponse(statusLine, headers, body);
         }
         if (request.getPathWithoutQueryString().equals("/login")) {
@@ -91,19 +82,27 @@ public class Http11Processor implements Runnable, Processor {
                 StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
                 String body = buildResponseBody("/index.html");
                 HttpHeaders headers = new HttpHeaders();
-                headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
-                headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+                headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+                headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
                 return new HttpResponse(statusLine, headers, body);
             }
 
             StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
             String body = buildResponseBody("/login.html");
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/login.html"));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/login.html"));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
             return new HttpResponse(statusLine, headers, body);
         }
 
+        if (hasPath(request)) {
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
+            String body = buildResponseBody(request.getPathWithoutQueryString());
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue(request.getPathWithoutQueryString()));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
+            return new HttpResponse(statusLine, headers, body);
+        }
         throw new IllegalArgumentException("처리할 수 없는 GET 요청입니다.");
     }
 
@@ -120,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         try (BufferedReader bufferedReader = Files.newBufferedReader(buildPath(path))) {
             return bufferedReader.lines()
                     .collect(Collectors.joining("\n")) + "\n";
-        } catch (IOException e) {
+        } catch (IOException exception) {
             return "";
         }
     }
@@ -137,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getResource("/static" + path);
         try {
             return Path.of(resource.toURI());
-        } catch (URISyntaxException exception) {
+        } catch (NullPointerException | URISyntaxException exception) {
             throw new IllegalArgumentException(exception);
         }
     }
@@ -148,6 +147,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void parseQueryString(HttpRequest request) {
         Map<String, String> queryString = request.getQueryString();
+        if (!queryString.containsKey("account") || !queryString.containsKey("password")) {
+            return;
+        }
+
         Optional<User> user = InMemoryUserRepository.findByAccount(queryString.get("account"));
         if (user.isPresent() && user.get().checkPassword(queryString.get("password"))) {
             log.info("user : {}", user.get());
@@ -160,8 +163,7 @@ public class Http11Processor implements Runnable, Processor {
             return false;
         }
         Session session = sessionManager.findSession(jsessionid.get());
-        log.info("user : {}", session.getAttribute("user"));
-        return true;
+        return session != null;
     }
 
     private HttpResponse handlePostRequest(HttpRequest request) {
@@ -171,31 +173,33 @@ public class Http11Processor implements Runnable, Processor {
             StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
             String body = buildResponseBody("/index.html");
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
-            headers.add(HeaderType.LOCATION, buildLocationValue("/index.html"));
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderKey.LOCATION, buildLocationValue("/index.html"));
             return new HttpResponse(statusLine, headers, body);
         }
         if (request.getPath().equals("/login")) {
             Map<String, String> requestBody = request.getBody();
-            Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
-
-            if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
-                StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
-                String body = buildResponseBody("/index.html");
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
-                headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
-                headers.add(HeaderType.LOCATION, buildLocationValue("/index.html"));
-                headers.add(HeaderType.SET_COOKIE, buildSetCookieValue(user.get()));
-                return new HttpResponse(statusLine, headers, body);
+            if (requestBody.containsKey("account") && requestBody.containsKey("password")) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+                if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
+                    StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
+                    String body = buildResponseBody("/index.html");
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HeaderKey.SET_COOKIE, buildSetCookieValue(user.get()));
+                    headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+                    headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
+                    headers.add(HeaderKey.LOCATION, buildLocationValue("/index.html"));
+                    return new HttpResponse(statusLine, headers, "");
+                }
             }
+
             StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
             String body = buildResponseBody("/401.html");
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/401.html"));
-            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
-            headers.add(HeaderType.LOCATION, buildLocationValue("/401.html"));
+            headers.add(HeaderKey.CONTENT_TYPE, buildContentTypeValue("/401.html"));
+            headers.add(HeaderKey.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderKey.LOCATION, buildLocationValue("/401.html"));
             return new HttpResponse(statusLine, headers, body);
         }
 
@@ -218,6 +222,6 @@ public class Http11Processor implements Runnable, Processor {
         Session session = Session.create();
         session.setAttribute("user", user);
         sessionManager.add(session);
-        return "JSESSIONID=" + session.getId();
+        return "new_id=" + session.getId() + "; Max-Age=2592000";
     }
 }

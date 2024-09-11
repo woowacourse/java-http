@@ -53,8 +53,21 @@ public class HttpRequest {
     }
 
     public Map<String, String> getBody() {
+        if (body.isEmpty()) {
+            return Map.of();
+        }
+
         return Arrays.stream(body.split("&"))
                 .map(query -> query.split("=", 2))
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+    }
+
+    public String build() {
+        return requestLine.build() + "\r\n" + headers.build() + "\r\n\r\n" + body;
+    }
+
+    @Override
+    public String toString() {
+        return build();
     }
 }

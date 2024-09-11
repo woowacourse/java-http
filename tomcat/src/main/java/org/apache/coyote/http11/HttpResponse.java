@@ -18,7 +18,7 @@ public class HttpResponse {
     }
 
     public String build() {
-        return statusLine + "\r\n" + headers + "\r\n" + body;
+        return statusLine + "\r\n" + headers + "\r\n\r\n" + body;
     }
 
     @Override

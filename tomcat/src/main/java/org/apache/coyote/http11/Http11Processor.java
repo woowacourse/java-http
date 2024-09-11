@@ -19,7 +19,6 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handle(HttpRequest request) {
         if (request.pointsTo(GET, "/")) {
-            return HttpResponse.ofContent("Hello world!");
+            return HttpResponse.ok("Hello world!");
         }
 
         if (request.pointsTo(GET, "/login")) {
@@ -103,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         try {
-            return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK);
+            return HttpResponse.withStaticFile(request.getPath().substring(1));
         } catch (Exception e) {
             return HttpResponse.notFound();
         }
@@ -114,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.redirectTo("/index.html");
         }
 
-        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK);
+        return HttpResponse.withStaticFile("login.html");
     }
 
     private HttpResponse login(HttpRequest request) {

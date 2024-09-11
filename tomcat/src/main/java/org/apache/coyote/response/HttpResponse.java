@@ -30,16 +30,16 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse ofContent(String content) {
+    public static HttpResponse ok(String content) {
         return new HttpResponse(HttpStatusCode.OK, content, ContentType.TEXT_HTML);
     }
 
-    public static HttpResponse ofStaticFile(String fileName, HttpStatusCode httpStatusCode) {
+    public static HttpResponse withStaticFile(String fileName) {
         if (!fileName.contains(FILE_DOT)) {
             fileName += HTML_SUFFIX;
         }
 
-        return new HttpResponse(httpStatusCode, FILE_READER.read(fileName), ContentType.fromFileName(fileName));
+        return new HttpResponse(HttpStatusCode.OK, FILE_READER.read(fileName), ContentType.fromFileName(fileName));
     }
 
     public static HttpResponse unauthorized() {

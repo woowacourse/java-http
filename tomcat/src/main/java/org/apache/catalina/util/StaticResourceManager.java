@@ -1,13 +1,10 @@
 package org.apache.catalina.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
+import org.apache.coyote.http11.response.ResponseFile;
 
 public class StaticResourceManager {
 
@@ -16,8 +13,16 @@ public class StaticResourceManager {
     private StaticResourceManager() {
     }
 
+    public static ResponseFile read(String filePath) {
+        URL resource = getResource(filePath);
+        if (!isExist(filePath)) {
+            throw new IllegalArgumentException("Resource not found: " + filePath);
+        }
+        return ResponseFile.of(resource);
+    }
+
     public static boolean isExist(String filePath) {
-        URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_RESOURCE_PREFIX + filePath);
+        URL resource = getResource(filePath);
         try {
             File file = new File(Objects.requireNonNull(resource).toURI());
             return file.exists() && file.isFile();
@@ -26,24 +31,7 @@ public class StaticResourceManager {
         }
     }
 
-    public static String read(String filePath) {
-        URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_RESOURCE_PREFIX + filePath);
-
-        try {
-            Path path = Optional.ofNullable(resource)
-                    .map(url -> {
-                        try {
-                            return url.toURI();
-                        } catch (URISyntaxException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .map(Path::of)
-                    .orElseThrow(() -> new RuntimeException(filePath + " not found"));
-
-            return new String(Files.readAllBytes(path));
-        } catch (IOException e) {
-            throw new RuntimeException();
-        }
+    private static URL getResource(String filePath) {
+        return ClassLoader.getSystemClassLoader().getResource(STATIC_RESOURCE_PREFIX + filePath);
     }
 }

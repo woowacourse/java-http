@@ -45,6 +45,12 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse setBody(ResponseFile file) {
+        headers.setContentType(file.getContentType());
+        setBody(file.getContent());
+        return this;
+    }
+
     public HttpResponse setStatus(HttpStatusCode statusCode) {
         responseLine.setStatusCode(statusCode);
         return this;

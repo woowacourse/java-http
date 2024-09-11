@@ -2,15 +2,15 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.util.StaticResourceManager;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.http11.common.HttpStatusCode;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.MediaType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +26,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
+        ResponseFile file = StaticResourceManager.read(STATIC_RESOURCE_PATH);
         response.setStatus(HttpStatusCode.OK)
-                .setContentType(mediaType.getValue())
-                .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+                .setBody(file);
     }
 
     @Override

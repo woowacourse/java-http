@@ -2,16 +2,16 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.util.StaticResourceManager;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.MediaType;
+import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +27,6 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
-
         // 로그인한 경우 index.html로 리다이렉트
         Optional<HttpSession> session = sessionManager.getSession(request.getSessionId());
         boolean isLogin = session.map(s -> s.getAttribute("user") != null)
@@ -37,9 +35,10 @@ public class LoginController extends AbstractController {
             response.sendRedirect("index.html");
             return;
         }
+
+        ResponseFile file = StaticResourceManager.read(STATIC_RESOURCE_PATH);
         response.setStatus(HttpStatusCode.OK)
-                .setContentType(mediaType.getValue())
-                .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+                .setBody(file);
     }
 
     @Override

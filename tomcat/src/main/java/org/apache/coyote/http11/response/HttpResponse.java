@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.file.FileExtension;
 import org.apache.coyote.file.Resource;
+import org.apache.coyote.file.ResourcesReader;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
@@ -62,6 +63,10 @@ public class HttpResponse {
 
     public void setStatus(final HttpStatusCode statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public void setResource(final String resourceName) {
+        setResource(ResourcesReader.read(Path.from(resourceName)));
     }
 
     public void setResource(final Resource resource) {

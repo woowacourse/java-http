@@ -24,6 +24,13 @@ public class StringUtil {
         return str == null ? BLANK : str;
     }
 
+    public static String addSuffixIfNotEndSuffix(final String str, final String suffix) {
+        if (str.endsWith(suffix)) {
+            return str;
+        }
+        return str + suffix;
+    }
+
     private StringUtil() {
     }
 }

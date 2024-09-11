@@ -4,10 +4,9 @@ public class Http11RequestStartLineParser {
 
     public static Http11RequestStartLine parse(String line) {
         String[] startLine = parseStartLine(line);
-        String httpVersion = parseHttpVersion(startLine);
         Http11Method httpMethod = parseHttpMethod(startLine);
         String requestURI = parseRequestURI(startLine);
-        return new Http11RequestStartLine(httpVersion, httpMethod, requestURI);
+        return new Http11RequestStartLine(httpMethod, requestURI);
     }
 
     private static String[] parseStartLine(String line) {
@@ -16,10 +15,6 @@ public class Http11RequestStartLineParser {
             throw new IllegalArgumentException("HttpRequest의 startLine 형식이 잘못되었습니다.");
         }
         return startLine;
-    }
-
-    private static String parseHttpVersion(String[] startLine) {
-        return startLine[2];
     }
 
     private static Http11Method parseHttpMethod(String[] startLine) {

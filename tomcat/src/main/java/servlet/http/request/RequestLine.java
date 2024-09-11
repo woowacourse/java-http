@@ -17,7 +17,7 @@ public class RequestLine {
 
     private final String httpVersion;
 
-    protected RequestLine(String requestLine) {
+    public RequestLine(String requestLine) {
         validateRequestLine(requestLine);
         String[] requestLines = split(requestLine);
         this.httpMethod = HttpMethod.from(requestLines[HTTP_METHOD_INDEX]);

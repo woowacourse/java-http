@@ -23,7 +23,7 @@ public class RequestBody {
         this.body = body;
     }
 
-    protected static RequestBody from(String bodies) {
+    public static RequestBody from(String bodies) {
         if (isEmptyBody(bodies)) {
             return EMPTY;
         }

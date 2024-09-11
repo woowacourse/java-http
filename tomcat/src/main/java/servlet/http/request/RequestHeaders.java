@@ -12,7 +12,7 @@ public class RequestHeaders {
 
     private final RequestCookies cookies;
 
-    protected RequestHeaders(Map<String, String> headers) {
+    public RequestHeaders(Map<String, String> headers) {
         this.headers = headers;
         this.cookies = RequestCookies.from(headers.get(HttpHeader.COOKIE.value()));
     }

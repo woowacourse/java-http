@@ -23,6 +23,7 @@ public class FrontController {
         controllerMap.put("/", new WelcomeController());
         controllerMap.put("/index", new IndexController());
         controllerMap.put("/login", new LoginController());
+        controllerMap.put("/register", new RegisterController());
     }
 
     private FrontController() {

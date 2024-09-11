@@ -15,16 +15,25 @@ public class RegisterController extends AbstractController {
     public static final String EMAIL_PARAM_NAME = "email";
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         final Map<String, String> userInfos = request.parseRequestQuery();
+
+        final String account = userInfos.get(ACCOUNT_PARAM_NAME);
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return;
+        }
+        persistUser(userInfos);
+
+        response.found();
+        response.sendRedirect(INDEX_PAGE);
+    }
+
+    private void persistUser(Map<String, String> userInfos) {
         final User user = new User(userInfos.get(ACCOUNT_PARAM_NAME),
                 userInfos.get(PASSWORD_PARAM_NAME),
                 userInfos.get(EMAIL_PARAM_NAME)
         );
         InMemoryUserRepository.save(user);
-
-        response.found();
-        response.sendRedirect(INDEX_PAGE);
     }
 
     @Override

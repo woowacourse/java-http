@@ -6,6 +6,8 @@ import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
 public class ResourceVersion {
 

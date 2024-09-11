@@ -47,4 +47,8 @@ public class HttpRequest {
         return httpHeader.find(HttpHeaderType.COOKIE.getName())
                 .map(HttpCookie::new);
     }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return requestLine.hasMethod(httpMethod);
+    }
 }

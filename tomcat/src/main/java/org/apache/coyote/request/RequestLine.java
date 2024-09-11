@@ -61,6 +61,10 @@ public class RequestLine {
                 .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
 
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return method == httpMethod;
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

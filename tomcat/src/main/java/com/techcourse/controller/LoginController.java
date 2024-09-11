@@ -3,9 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.file.ResourcesReader;
 import org.apache.coyote.http11.cookie.Cookies;
-import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -13,7 +11,7 @@ import org.apache.coyote.http11.session.Session;
 public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setResource(ResourcesReader.read(Path.from("login.html")));
+        response.setResource("login.html");
     }
 
     @Override
@@ -27,8 +25,10 @@ public class LoginController extends AbstractController {
 
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(user -> login(request, response, user),
-                        () -> setRedirectFail(response));
+                .ifPresentOrElse(
+                        user -> login(request, response, user),
+                        () -> setRedirectFail(response)
+                );
     }
 
 
@@ -40,10 +40,10 @@ public class LoginController extends AbstractController {
     }
 
     private void setRedirectFail(final HttpResponse response) {
-        response.setRedirect(Path.from("401.html"));
+        response.setRedirect("401.html");
     }
 
     private void setRedirectIndex(final HttpResponse response) {
-        response.setRedirect(Path.from("index.html"));
+        response.setRedirect("index.html");
     }
 }

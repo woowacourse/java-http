@@ -24,6 +24,6 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setStatus(HttpStatusCode.OK);
-        response.setResource(ResourcesReader.read(Path.from("register.html")));
+        response.setResource("register.html");
     }
 }

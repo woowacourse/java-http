@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,14 +36,13 @@ public class HttpReader {
     }
 
     private HttpHeader getHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
+        HttpHeader httpHeader = new HttpHeader();
         String line;
         while ((line = bufferedReader.readLine()) != null && !StringUtils.isEmpty(line)) {
             String[] split = line.split(": ");
-            headers.put(split[0], split[1]);
+            httpHeader.putHeader(split[0], split[1]);
         }
-        return new HttpHeader(headers);
+        return httpHeader;
     }
 
     public HttpRequest getHttpRequest() {

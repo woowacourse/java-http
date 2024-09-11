@@ -32,6 +32,10 @@ public class RequestLine {
         return requestUrl.contains(".js");
     }
 
+    public boolean has401() {
+        return requestUrl.contains("401");
+    }
+
     public boolean hasLogin() {
         return requestUrl.contains("login");
     }

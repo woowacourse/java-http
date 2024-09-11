@@ -10,7 +10,7 @@ public class FileReader {
 
     private static final FileReader INSTANCE = new FileReader();
 
-    private static final String STATIC_DIRNAME = "static";
+    private static final String STATIC_DIRECTORY_NAME = "static";
 
     private FileReader() {
     }
@@ -21,7 +21,7 @@ public class FileReader {
 
     public String read(String fileName) {
         try {
-            URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
+            URI uri = getClass().getClassLoader().getResource(STATIC_DIRECTORY_NAME + "/" + fileName).toURI();
             Path path = Paths.get(uri);
             return Files.readString(path);
         } catch (NullPointerException e) {

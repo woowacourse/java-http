@@ -16,7 +16,7 @@ public class StaticResourceReader {
     public static ResponseFile read(String filePath) {
         URL resource = getResource(filePath);
         if (!isExist(filePath)) {
-            throw new IllegalArgumentException("Resource not found: " + filePath);
+            throw new IllegalArgumentException("리소스를 찾을 수 없습니다.: " + filePath);
         }
         return ResponseFile.of(resource);
     }

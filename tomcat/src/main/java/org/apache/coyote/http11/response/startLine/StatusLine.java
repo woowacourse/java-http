@@ -11,6 +11,6 @@ public class StatusLine {
     }
 
     public String toMessage() {
-        return PROTOCOL_VERSION + " " + httpStatus.compose();
+        return PROTOCOL_VERSION + " " + httpStatus.toMessage();
     }
 }

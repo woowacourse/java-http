@@ -13,7 +13,7 @@ public enum HttpStatus {
         this.message = message;
     }
 
-    public String compose() {
+    public String toMessage() {
         return getCode() + " " + getMessage();
     }
 

@@ -3,7 +3,6 @@ package org.apache.coyote.http11.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -39,25 +38,19 @@ public abstract class AbstractController implements Controller {
     }
 
     private String addHtmlExtension(String path) {
-        if (!"/".equals(path) && !path.contains(".")) {
+        if (!path.contains(".")) {
             return path + ".html";
         }
         return path;
     }
 
     private String getStaticFileContent(String path) throws IOException {
-        if (Objects.equals(path, "/")) {
-            return "Hello world!";
-        }
         String staticPath = "static" + path;
         File file = new File(getClass().getClassLoader().getResource(staticPath).getPath());
         return new String(Files.readAllBytes(file.toPath()));
     }
 
     private String getFileExtension(String path) {
-        if (Objects.equals(path, "/")) {
-            return "html";
-        }
         String[] splitPath = path.split("\\.");
         return splitPath[splitPath.length - 1];
     }

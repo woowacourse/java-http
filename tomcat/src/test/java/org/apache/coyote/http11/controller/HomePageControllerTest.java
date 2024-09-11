@@ -11,13 +11,13 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FaviconControllerTest {
+class HomePageControllerTest {
 
-    private final Controller faviconController = FaviconController.getInstance();
+    private final Controller homePageController = HomePageController.getInstance();
 
-    @DisplayName("GET /favicon.ico 요청시 204 상태코드를 응답한다.")
+    @DisplayName("GET / 요청이 오면 Hello world!를 반환한다.")
     @Test
-    void getFaviconIco() throws Exception {
+    void process() throws Exception {
         // given
         String httpRequestMessage = String.join("\r\n",
                 "GET /favicon.ico HTTP/1.1 ",
@@ -32,12 +32,16 @@ class FaviconControllerTest {
         HttpResponse response = new HttpResponse(outputStream);
 
         // when
-        faviconController.service(request, response);
+        homePageController.service(request, response);
 
         // then
-        String expected = "HTTP/1.1 204 No Content \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!",
+                "");
         assertThat(outputStream.toString()).isEqualTo(expected);
         inputStream.close();
         outputStream.close();

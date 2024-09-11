@@ -17,12 +17,12 @@ public class HttpCookie {
         this.header = header;
     }
 
-    public static HttpCookie parse(final String str) {
-        if (str == null || str.isBlank()) {
+    public static HttpCookie parse(final String target) {
+        if (target == null || target.isBlank()) {
             return new HttpCookie(Collections.emptyMap());
         }
         final var header = new HashMap<String, String>();
-        for (final var cookie : str.split(COOKIE_SEPARATOR)) {
+        for (final var cookie : target.split(COOKIE_SEPARATOR)) {
             final var key = cookie.split(KEY_VALUE_SEPARATOR)[KEY_INDEX].strip();
             final var value = cookie.split(KEY_VALUE_SEPARATOR)[VALUE_INDEX].strip();
             header.put(key, value);

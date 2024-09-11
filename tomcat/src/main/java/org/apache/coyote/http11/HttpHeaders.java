@@ -20,10 +20,10 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
-    public static HttpHeaders parse(final BufferedReader bufferedReader) throws IOException {
+    public static HttpHeaders parse(final BufferedReader reader) throws IOException {
         final var httpRequestHeaders = new HashMap<String, String>();
         var line = "";
-        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
             final int index = line.indexOf(HEADER_SEPARATOR);
             httpRequestHeaders.put(line.substring(0, index).strip(), line.substring(index + 1).strip());
         }

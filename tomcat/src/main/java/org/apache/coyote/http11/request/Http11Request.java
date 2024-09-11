@@ -32,22 +32,22 @@ public class Http11Request {
     }
 
     public static Http11Request from(InputStream inputStream) throws IOException {
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-            String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
-            String method = firstLine[0];
-            String uri = firstLine[1];
+        String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
+        String method = firstLine[0];
+        String uri = firstLine[1];
 
-            Http11RequestHeaders headers = parseHeader(br);
-            Http11RequestBody body = parseBody(headers, br);
+        Http11RequestHeaders headers = parseHeader(br);
+        Http11RequestBody body = parseBody(headers, br);
 
-            return new Http11Request(
-                    Http11RequestMethod.from(method),
-                    headers,
-                    uri,
-                    Http11RequestParser.parseQuery(uri),
-                    body);
-        }
+        return new Http11Request(
+                Http11RequestMethod.from(method),
+                headers,
+                uri,
+                Http11RequestParser.parseQuery(uri),
+                body);
+
     }
 
     private static Http11RequestHeaders parseHeader(BufferedReader br) throws IOException {

@@ -90,7 +90,9 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response getStaticResponse(Http11Request request) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try (InputStream stream = loader.getResourceAsStream("static/" + request.getUri())) {
-            assert stream != null;
+            if (stream == null) {
+                return new Http11Response(HttpStatusCode.OK, "", "");
+            }
             String responseBody = new String(stream.readAllBytes());
             return new Http11Response(HttpStatusCode.OK, responseBody, getExtension(request));
         }

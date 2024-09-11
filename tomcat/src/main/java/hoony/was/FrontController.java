@@ -2,6 +2,7 @@ package hoony.was;
 
 import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.handler.RegisterGetRequestHandler;
+import com.techcourse.handler.RegisterPostRequestHandler;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -19,6 +20,7 @@ public class FrontController {
 
     private void registerRequestHandlers() {
         requestHandlerMapper.register(new RegisterGetRequestHandler());
+        requestHandlerMapper.register(new RegisterPostRequestHandler());
         requestHandlerMapper.register(new LoginRequestHandler());
         requestHandlerMapper.register(new StaticResourceRequestHandler());
     }

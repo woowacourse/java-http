@@ -11,13 +11,13 @@ import org.apache.catalina.servlets.http.Cookie;
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
-    private static final String START_LiNE_FORMAT = "%s %s %s ";
+    private static final String STATUS_LINE = "%s %s %s";
     private static final String HEADER_FORMAT_TEMPLATE = "%s: %s " + CRLF;
 
     private final OutputStream outputStream;
 
     private HttpStatus httpStatus;
-    private String protocolVersion;
+    private String version;
     private final Map<String, String> headers;
     private String responseBody;
 
@@ -25,7 +25,7 @@ public class HttpResponse {
 
     public HttpResponse(OutputStream outputStream) {
         this.httpStatus = HttpStatus.OK;
-        this.protocolVersion = "HTTP/1.1";
+        this.version = "HTTP/1.1";
         this.headers = new LinkedHashMap<>();
         this.responseBody = "";
         this.outputStream = outputStream;
@@ -60,8 +60,8 @@ public class HttpResponse {
         return httpStatus;
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
+    public String getVersion() {
+        return version;
     }
 
     public Map<String, String> getHeaders() {
@@ -74,8 +74,8 @@ public class HttpResponse {
 
     public void write() {
         PrintWriter responseWriter = getWriter();
-        responseWriter.write(START_LiNE_FORMAT.formatted(
-                protocolVersion, httpStatus.getStatusCode(), httpStatus.name()
+        responseWriter.write(STATUS_LINE.formatted(
+                version, httpStatus.getStatusCode(), httpStatus.name()
         ));
         responseWriter.write(CRLF);
         headers.forEach((name, value) -> responseWriter.write(HEADER_FORMAT_TEMPLATE.formatted(name, value)));

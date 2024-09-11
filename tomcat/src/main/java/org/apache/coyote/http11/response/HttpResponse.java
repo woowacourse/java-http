@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.ResourceReader;
 import org.apache.coyote.http11.response.body.ResponseBody;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.ResponseHeaders;

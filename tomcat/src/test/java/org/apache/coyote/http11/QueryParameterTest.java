@@ -16,7 +16,7 @@ class QueryParameterTest {
     @Test
     @DisplayName("쿼리 파라미터 문자열은 null이 될 수 있다.")
     void createWithNull() {
-        QueryParameter queryParameter = new QueryParameter((String) null);
+        QueryParameter queryParameter = new QueryParameter(null);
 
         assertThat(queryParameter.isEmpty()).isTrue();
     }

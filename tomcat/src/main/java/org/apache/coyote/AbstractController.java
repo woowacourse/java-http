@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import com.techcourse.exception.UnsupportedHttpMethodException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,12 +19,14 @@ public class AbstractController implements Controller {
             return;
         }
 
-        throw new RuntimeException("지원하지 않는 HTTP 메소드: " + request.getHttpMethod());
+        throw new UnsupportedHttpMethodException(request.getHttpMethod());
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        throw new UnsupportedHttpMethodException(request.getHttpMethod());
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        throw new UnsupportedHttpMethodException(request.getHttpMethod());
     }
 }

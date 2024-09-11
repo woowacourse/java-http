@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.request.HttpMethod.GET;
-import static org.apache.coyote.request.HttpMethod.POST;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -12,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.Controller;
+import org.apache.catalina.RequestMapper;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -28,10 +27,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final SessionManager sessionManager;
+    private final RequestMapper requestMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.sessionManager = SessionManager.getInstance();
+        this.requestMapper = new RequestMapper(sessionManager);
     }
 
     @Override
@@ -51,7 +52,9 @@ public class Http11Processor implements Runnable, Processor {
             HttpHeader httpHeader = new HttpHeader(readRequestHeaders(reader));
             RequestBody requestBody = readRequestBody(reader, httpHeader);
 
-            HttpResponse response = handle(new HttpRequest(requestLine, httpHeader, requestBody));
+            HttpRequest request = new HttpRequest(requestLine, httpHeader, requestBody);
+            HttpResponse response = new HttpResponse();
+            handle(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -84,57 +87,31 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private HttpResponse handle(HttpRequest request) {
-        if (request.pointsTo(GET, "/")) {
-            return HttpResponse.ok("Hello world!");
-        }
+    private void handle(HttpRequest request, HttpResponse response) {
+        Controller controller = requestMapper.getController(request);
+        controller.service(request, response);
 
-        if (request.pointsTo(GET, "/login")) {
-            return getLoginPage(request);
-        }
-
-        if (request.pointsTo(POST, "/login")) {
-            return login(request);
-        }
-
-        if (request.pointsTo(POST, "/register")) {
-            return saveUser(request);
-        }
-
-        try {
-            return HttpResponse.withStaticFile(request.getPath().substring(1));
-        } catch (Exception e) {
-            return HttpResponse.notFound();
-        }
-    }
-
-    private HttpResponse getLoginPage(HttpRequest request) {
-        if (request.hasSession() && sessionManager.hasId(request.getSession())) {
-            return HttpResponse.redirectTo("/index.html");
-        }
-
-        return HttpResponse.withStaticFile("login.html");
-    }
-
-    private HttpResponse login(HttpRequest request) {
-        RequestBody requestBody = request.getRequestBody();
-
-        if (!requestBody.containsExactly("account", "password")) {
-            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
-        }
-
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-
-        if (InMemoryUserRepository.exists(account, password)) {
-            User user = InMemoryUserRepository.getByAccount(account);
-            String sessionId = saveSessionAndGetId(user);
-            sessionManager.add(sessionId, Session.ofUser(user));
-            return HttpResponse.redirectTo("/index.html")
-                    .setCookie(HttpCookie.ofSessionId(sessionId));
-        }
-
-        return HttpResponse.unauthorized();
+//        if (request.pointsTo(GET, "/")) {
+//            return HttpResponse.ok("Hello world!");
+//        }
+//
+//        if (request.pointsTo(GET, "/login")) {
+//            return getLoginPage(request);
+//        }
+//
+//        if (request.pointsTo(POST, "/login")) {
+//            return login(request);
+//        }
+//
+//        if (request.pointsTo(POST, "/register")) {
+//            return saveUser(request);
+//        }
+//
+//        try {
+//            return HttpResponse.withStaticFile(request.getPath().substring(1));
+//        } catch (Exception e) {
+//            return HttpResponse.notFound();
+//        }
     }
 
     private HttpResponse saveUser(HttpRequest request) {

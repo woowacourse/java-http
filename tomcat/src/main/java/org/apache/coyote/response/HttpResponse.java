@@ -14,16 +14,19 @@ public class HttpResponse {
     private static final String UNAUTHORIZED_FILENAME = "401.html";
     private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CRLF = "\r\n";
-    private static final String FILE_DOT = ".";
-    private static final String HTML_SUFFIX = ".html";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String EMPTY_BODY = "";
     private static final String EMPTY_LINE = "";
     private static final String HTTP_1_1 = "HTTP/1.1";
 
-    private final HttpStatusCode httpStatusCode;
     private final HttpHeader responseHeader;
-    private final String responseBody;
+
+    private HttpStatusCode httpStatusCode;
+    private String responseBody;
+
+    public HttpResponse() {
+        responseHeader = new HttpHeader();
+    }
 
     public HttpResponse(HttpStatusCode httpStatusCode, String responseBody, ContentType contentType) {
         this.httpStatusCode = httpStatusCode;
@@ -33,14 +36,6 @@ public class HttpResponse {
 
     public static HttpResponse ok(String content) {
         return new HttpResponse(HttpStatusCode.OK, content, ContentType.TEXT_HTML);
-    }
-
-    public static HttpResponse withStaticFile(String fileName) {
-        if (!fileName.contains(FILE_DOT)) {
-            fileName += HTML_SUFFIX;
-        }
-
-        return new HttpResponse(HttpStatusCode.OK, FILE_READER.read(fileName), ContentType.fromFileName(fileName));
     }
 
     public static HttpResponse unauthorized() {
@@ -92,5 +87,34 @@ public class HttpResponse {
                 EMPTY_LINE,
                 responseBody
         );
+    }
+
+    public void setRedirect(String path) {
+        httpStatusCode = HttpStatusCode.FOUND;
+        responseHeader.add(HttpHeaderType.LOCATION.getName(), path);
+    }
+
+    public void setUnauthorized() {
+        httpStatusCode = HttpStatusCode.UNAUTHORIZED;
+        responseHeader.add(HttpHeaderType.CONTENT_TYPE.getName(), ContentType.TEXT_HTML.getName());
+        responseBody = FILE_READER.read(UNAUTHORIZED_FILENAME);
+    }
+
+    public void setStaticResource(String fileName) {
+        httpStatusCode = HttpStatusCode.OK;
+        setContentType(ContentType.fromFileName(fileName));
+        setResponseBody(FILE_READER.read(fileName));
+    }
+
+    private void setResponseBody(String rawBody) {
+        responseBody = rawBody;
+        responseHeader.add(
+                HttpHeaderType.CONTENT_LENGTH.getName(),
+                String.valueOf(responseBody.getBytes().length)
+        );
+    }
+
+    private void setContentType(ContentType contentType) {
+        responseHeader.add(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName());
     }
 }

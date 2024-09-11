@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +13,10 @@ public class HttpHeader {
     private static final String CRLF = "\r\n";
 
     private final Map<String, String> headers;
+
+    public HttpHeader() {
+        this.headers = new HashMap<>();
+    }
 
     public HttpHeader(Map<String, String> headers) {
         this.headers = headers;

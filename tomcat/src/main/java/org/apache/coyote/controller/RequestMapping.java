@@ -5,6 +5,7 @@ import org.apache.coyote.http.request.HttpRequest;
 
 public enum RequestMapping {
 
+    INDEX("/", new IndexController()),
     LOGIN("/login", new LoginController()),
     REGISTER("/register", new RegisterController()),
     ;
@@ -22,6 +23,6 @@ public enum RequestMapping {
                 .filter(requestMapping -> requestMapping.path.equals(request.getUri()))
                 .map(requestMapping -> requestMapping.controller)
                 .findFirst()
-                .orElse(null);
+                .orElse(StaticResourceController.INSTANCE);
     }
 }

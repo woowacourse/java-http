@@ -14,10 +14,16 @@ public abstract class AbstractController implements Controller {
         if (method.equals("GET")) {
             doGet(request, response);
         }
-        // todo: 맵핑되는 메서드가 없는 경우, 에러 핸들링
+        throw new UnsupportedOperationException();
     }
 
-    abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    }
 
-    abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    }
+
+    protected final byte[] readStaticResource(String path) {
+        return StaticResourceFinder.readResource(getClass().getClassLoader(), path);
+    }
 }

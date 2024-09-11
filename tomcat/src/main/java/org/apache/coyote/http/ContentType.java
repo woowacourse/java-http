@@ -1,6 +1,5 @@
 package org.apache.coyote.http;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -29,7 +28,7 @@ public enum ContentType {
         this.mimeType = mimeType;
     }
 
-    public static ContentType from(File resource) {
+    public static ContentType from(String resource) {
         Objects.requireNonNull(resource, "Resource cannot be null");
         return Arrays.stream(ContentType.values())
                 .filter(type -> isContentTypeMatches(resource, type))
@@ -37,8 +36,8 @@ public enum ContentType {
                 .orElse(PLAIN);
     }
 
-    private static boolean isContentTypeMatches(File resource, ContentType type) {
-        return resource.getName().endsWith(type.fileExtension);
+    private static boolean isContentTypeMatches(String resource, ContentType type) {
+        return resource.endsWith(type.fileExtension);
     }
 
     public String getMimeType() {

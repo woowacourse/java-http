@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.apache.coyote.http.Cookie;
+import org.apache.coyote.http.Header;
 import org.apache.coyote.http.StatusCode;
 
 public class HttpResponse {
@@ -15,8 +16,8 @@ public class HttpResponse {
 
     private final String protocol;
     private StatusCode status;
-    private Map<String, String> headers;
-    private Cookie cookies;
+    private final Map<String, String> headers;
+    private final Cookie cookies;
     private String body;
 
     private HttpResponse(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
@@ -33,6 +34,11 @@ public class HttpResponse {
 
     public static HttpResponse create() {
         return new HttpResponse(StatusCode.OK, new HashMap<>(), "");
+    }
+
+    public byte[] serialize() {
+        this.setHeader(Header.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
+        return this.getBytes();
     }
 
     public void setStatus(StatusCode status) {

@@ -2,34 +2,41 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Map;
 import org.apache.coyote.http.Header;
-import org.apache.coyote.http.StatusCode;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.session.Session;
 
 public class LoginController extends AbstractController {
 
-    public static final String ACCOUNT_FIELD = "account";
-    public static final String PASSWORD_FIELD = "password";
+    private static final String ACCOUNT_FIELD = "account";
+    private static final String PASSWORD_FIELD = "password";
+    private static final String USER_FIELD = "user";
 
     @Override
-    void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         RequestBody requestBody = request.getBody();
         String account = requestBody.getValue(ACCOUNT_FIELD);
         String password = requestBody.getValue(PASSWORD_FIELD);
         User findUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
-        request.getSession().setAttribute("user", findUser);
-        response.setStatus(StatusCode.FOUND);
-        response.setHeaders(Map.of(Header.LOCATION.value(), "/index.html",
-                                   Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()));
+
+        request.getSession().setAttribute(USER_FIELD, findUser);
+        response.setBody(readStaticResource("/index.html"));
+        response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId());
     }
 
     @Override
-    void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        StaticResourceController.getInstance().handle(request, response, StatusCode.UNAUTHORIZED);
+    public void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        Session session = request.getSession();
+        Object userSession = session.getAttribute(USER_FIELD);
+        if (userSession == null) {
+            response.setBody(readStaticResource("/login.html"));
+            return;
+        }
+        response.setBody(readStaticResource("/index.html"));
+        response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId());
     }
 }

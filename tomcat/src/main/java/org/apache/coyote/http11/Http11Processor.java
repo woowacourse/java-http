@@ -9,7 +9,8 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.controller.StaticResourceController;
-import org.apache.coyote.http.StatusCode;
+import org.apache.coyote.controller.StaticResourceFinder;
+import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -40,26 +41,26 @@ public class Http11Processor implements Runnable, Processor {
             final var request = RequestGenerator.accept(requestReader);
             final var response = HttpResponse.create();
             log.info("request: {}", request);
-            try {
-                service(request, response);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                response.setStatus(StatusCode.INTERNAL_SERVER_ERROR);
-            }
+            service(request, response);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.serialize());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void service(HttpRequest request, HttpResponse response) throws Exception {
-        Controller controller = RequestMapping.getController(request);
-        if (controller != null) {
+    private void service(HttpRequest request, HttpResponse response) {
+        try {
+            if (StaticResourceFinder.isStaticResource(request.getUri())) {
+                StaticResourceController.INSTANCE.service(request, response);
+                return;
+            }
+            Controller controller = RequestMapping.getController(request);
             controller.service(request, response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            response.setHeader(Header.LOCATION.value(), "/500.html");
         }
-        // todo: GET 메서드가 아닌 경우 405 Method Not Allowed 응답을 반환
-        StaticResourceController.getInstance().service(request, response);
     }
 }

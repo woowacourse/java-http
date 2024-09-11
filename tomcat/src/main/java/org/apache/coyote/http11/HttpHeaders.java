@@ -4,15 +4,16 @@ public enum HttpHeaders {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location")
     ;
 
-    private final String headerName;
+    private final String name;
 
-    HttpHeaders(String headerName) {
-        this.headerName = headerName;
+    HttpHeaders(String name) {
+        this.name = name;
     }
 
-    public String getHeaderName() {
-        return headerName;
+    public String getName() {
+        return name;
     }
 }

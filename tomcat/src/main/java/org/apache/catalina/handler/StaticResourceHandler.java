@@ -54,8 +54,8 @@ public class StaticResourceHandler {
 
     private static Map<String, String> createResponseHeader(HttpRequest request, String body) {
         Map<String, String> header = new HashMap<>();
-        header.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), request.getContentType());
-        header.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), String.valueOf(body.length()));
+        header.put(HttpHeaders.CONTENT_TYPE.getName(), request.getContentType());
+        header.put(HttpHeaders.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
         return header;
     }
 }

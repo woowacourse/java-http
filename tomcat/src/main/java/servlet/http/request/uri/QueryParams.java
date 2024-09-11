@@ -9,7 +9,12 @@ import java.util.Map;
 
 public class QueryParams {
 
-    protected static final QueryParams EMPTY = new QueryParams(Collections.emptyMap());
+    private static final QueryParams EMPTY = new QueryParams(Collections.emptyMap());
+    private static final String PARAMS_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int LIMIT = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> queryParams;
 
@@ -18,9 +23,12 @@ public class QueryParams {
     }
 
     protected static QueryParams from(String queryParams) {
-        return Arrays.stream(queryParams.split("&"))
-                .map(params -> params.split("=", 2))
-                .collect(collectingAndThen(toMap(p -> p[0], p -> p[1]), QueryParams::new));
+        if (queryParams == null || queryParams.isBlank()) {
+            return EMPTY;
+        }
+        return Arrays.stream(queryParams.split(PARAMS_DELIMITER))
+                .map(params -> params.split(KEY_VALUE_DELIMITER, LIMIT))
+                .collect(collectingAndThen(toMap(p -> p[KEY_INDEX], p -> p[VALUE_INDEX]), QueryParams::new));
     }
 
     protected String get(String key) {
@@ -33,7 +41,7 @@ public class QueryParams {
 
     private void validateNotEmptyParams() {
         if (!existQueryParams()) {
-            throw new IllegalArgumentException("Query parameter가 존재하지 않습니다.");
+            throw new IllegalArgumentException("Query parameter가 비어있습니다.");
         }
     }
 

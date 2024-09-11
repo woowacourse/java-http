@@ -2,23 +2,42 @@ package servlet.http.request.uri;
 
 public class URI {
 
-    private static final int EMPTY_QUERY_PARAMS = 1;
+    private static final String URI_DELIMITER = "\\?";
+    private static final int QUERY_PARAMS_EXIST_LENGTH = 2;
+    private static final int PATH_INDEX = 0;
+    private static final int QUERY_PARAMS_INDEX = 1;
 
     private final Path path;
 
     private final QueryParams queryParams;
 
     public URI(String uri) {
-        String[] uriParts = uri.split("\\?");
-        this.path = new Path(uriParts[0]);
-        this.queryParams = createQueryParams(uriParts);
+        validateUri(uri);
+        String[] uriParts = split(uri);
+        this.path = new Path(uriParts[PATH_INDEX]);
+        this.queryParams = QueryParams.from(extractQueryParams(uriParts));
     }
 
-    private QueryParams createQueryParams(String[] uriParts) {
-        if (uriParts.length == EMPTY_QUERY_PARAMS) {
-            return QueryParams.EMPTY;
+    private void validateUri(String uri) {
+        if (uri == null || uri.isBlank()) {
+            throw new IllegalArgumentException("URI는 필수입니다.");
         }
-        return QueryParams.from(uriParts[1]);
+    }
+
+    private String[] split(String uri) {
+        String[] uriParts = uri.split(URI_DELIMITER);
+        if (uriParts.length > QUERY_PARAMS_EXIST_LENGTH) {
+            throw new IllegalArgumentException("잘못된 URI입니다. uri: %s".formatted(uri));
+        }
+        return uriParts;
+    }
+
+    private String extractQueryParams(String[] uriParts) {
+        String queryParams = null;
+        if (uriParts.length == QUERY_PARAMS_EXIST_LENGTH) {
+            queryParams = uriParts[QUERY_PARAMS_INDEX];
+        }
+        return queryParams;
     }
 
     public String getPath() {

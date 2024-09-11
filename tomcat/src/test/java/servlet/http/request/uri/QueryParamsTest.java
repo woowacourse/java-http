@@ -24,18 +24,18 @@ class QueryParamsTest {
     }
 
     @Test
-    void QueryParam이_비어있을_경우_key를_조회할_때_예외가_발생한다() {
+    void QueryParams가_비어있을_경우_key를_조회할_때_예외가_발생한다() {
         // given
-        QueryParams queryParams = QueryParams.EMPTY;
+        QueryParams queryParams = QueryParams.from(null);
 
         // when & then
         assertThatThrownBy(() -> queryParams.get("any"))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Query parameter가 존재하지 않습니다.");
+            .hasMessageContaining("Query parameter가 비어있습니다.");
     }
 
     @Test
-    void QueryParam에_해당_key가_존재하지_않을_경우_예외가_발생한댜() {
+    void QueryParams에_해당_key가_존재하지_않을_경우_예외가_발생한댜() {
         // given
         String params = "account=prin&password=1q2w3e4r!";
         QueryParams queryParams = QueryParams.from(params);
@@ -47,7 +47,7 @@ class QueryParamsTest {
     }
 
     @Test
-    void QueryParam이_존재하면_true를_반환한다() {
+    void QueryParams가_존재하면_true를_반환한다() {
         // given
         String params = "account=prin&password=1q2w3e4r!";
         QueryParams queryParams = QueryParams.from(params);
@@ -60,9 +60,9 @@ class QueryParamsTest {
     }
 
     @Test
-    void QueryParam이_존재하지_않으면_false를_반환한다() {
+    void QueryParams가_존재하지_않으면_false를_반환한다() {
         // given
-        QueryParams queryParams = QueryParams.EMPTY;
+        QueryParams queryParams = QueryParams.from(null);
 
         // when
         boolean actual = queryParams.existQueryParams();

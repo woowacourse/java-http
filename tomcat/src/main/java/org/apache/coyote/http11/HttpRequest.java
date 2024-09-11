@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.exception.UnexpectQueryParamException;
+import org.apache.coyote.exception.UnexpectedQueryParamException;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 
@@ -96,7 +96,7 @@ public class HttpRequest {
     public String getParams(String paramKey) {
         String paramValue = params.get(paramKey);
         if (paramValue == null) {
-            throw new UnexpectQueryParamException();
+            throw new UnexpectedQueryParamException();
         }
         return paramValue;
     }

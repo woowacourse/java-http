@@ -16,10 +16,17 @@ public class HttpRequestLine {
 
     public static HttpRequestLine toHttpRequestLine(String requestLine) {
         String[] splitLines = requestLine.split(REQUEST_LINE_SEPARATOR);
+        validateRequestLineForm(splitLines);
         MethodType methodType = MethodType.toMethodType(splitLines[0]);
         Path path = new Path(splitLines[1]);
         HttpVersion httpVersion = HttpVersion.toHttpVersion(splitLines[2]);
         return new HttpRequestLine(methodType, path, httpVersion);
+    }
+
+    private static void validateRequestLineForm(String[] splitLines) {
+        if(splitLines.length!=3){
+            throw new IllegalArgumentException("잘못된 RequestLine 형식입니다.");
+        }
     }
 
     public String getPath() {

@@ -19,6 +19,10 @@ public class HttpRequest {
         this.headers = headers;
     }
 
+    public boolean hasQueryString() {
+        return !queryString.isEmpty();
+    }
+
     public String getQueryData(String input) {
         return queryString.get(input);
     }

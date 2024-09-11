@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
 
     OK(200),
-    NOT_MODIFIED(304);
+    FOUND(302),
+    UNAUTHORIZED(401);
 
     private final int statusCode;
 

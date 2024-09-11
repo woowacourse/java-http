@@ -30,8 +30,8 @@ public class SessionManager implements Manager {
         return sessionManager;
     }
 
-    public boolean hasSession(String jsessionid) {
-        return SESSIONS.containsKey(jsessionid);
+    public boolean hasSession(String sessionId) {
+        return SESSIONS.containsKey(sessionId);
     }
 }
 

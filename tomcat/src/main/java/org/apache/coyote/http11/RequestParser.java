@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 public class RequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE = "Cookie";
 
     private final BufferedReader bufferedReader;
     private final String[] requestLine;
@@ -40,15 +42,15 @@ public class RequestParser {
     }
 
     private String extractCookie() {
-        if (header.containsKey("Cookie")) {
-            return header.get("Cookie");
+        if (header.containsKey(COOKIE)) {
+            return header.get(COOKIE);
         }
         return "";
     }
 
     private String extractBody() throws IOException {
-        if (header.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(header.get("Content-Length"));
+        if (header.containsKey(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(header.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             return new String(buffer);

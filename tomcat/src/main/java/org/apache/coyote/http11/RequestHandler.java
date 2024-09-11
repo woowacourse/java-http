@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    public static final String QUERYSTRING_SEPARATOR = "&";
+    public static final String KEY_VALUE_SEPARATOR = "=";
+    public static final int QUERYPARAMETER_KEY_INDEX = 0;
+    public static final int QUERYPARAMETER_VALUE_INDEX = 1;
 
     private final RequestParser requestParser;
     private final String requestUri;
@@ -111,15 +115,15 @@ public class RequestHandler {
     }
 
     private Optional<Map<String, String>> parseQueryString(String queryString) {
-        String[] queryParameters = queryString.split("&");
+        String[] queryParameters = queryString.split(QUERYSTRING_SEPARATOR);
 
         Map<String, String> keyValue = new HashMap<>();
         for (String queryParameter : queryParameters) {
-            if (!queryParameter.contains("=")) {
+            if (!queryParameter.contains(KEY_VALUE_SEPARATOR)) {
                 return Optional.empty();
             }
-            String[] pair = queryParameter.split("=", -1);
-            keyValue.put(pair[0], pair[1]);
+            String[] pair = queryParameter.split(KEY_VALUE_SEPARATOR, -1);
+            keyValue.put(pair[QUERYPARAMETER_KEY_INDEX], pair[QUERYPARAMETER_VALUE_INDEX]);
         }
         return Optional.of(keyValue);
     }

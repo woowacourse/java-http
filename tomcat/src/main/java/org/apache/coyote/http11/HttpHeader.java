@@ -29,4 +29,8 @@ public class HttpHeader {
         }
         return Integer.parseInt(contentLength);
     }
+
+    public String getCookie() {
+        return headers.get("Cookie");
+    }
 }

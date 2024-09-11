@@ -44,8 +44,8 @@ public class RequestLine {
         return requestUrl.contains("register");
     }
 
-    public boolean hasLogin() {
-        return requestUrl.contains("login");
+    public boolean isLogin() {
+        return requestUrl.equals("/login");
     }
 
     public boolean hasQuestion() {

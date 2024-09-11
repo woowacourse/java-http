@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 public class LoginRequestController extends AbstractRequestController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginRequestController.class);
+    private static final String LOGIN_PAGE = "/login.html";
     private static final String SUCCESS_LOGIN_REDIRECTION_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String ACCOUNT_KEY = "account";
@@ -32,8 +33,7 @@ public class LoginRequestController extends AbstractRequestController {
             httpResponse.found(SUCCESS_LOGIN_REDIRECTION_PATH);
             return;
         }
-        String body = ResourceReader.readFile(httpRequest.getRequestURI());
-
+        String body = ResourceReader.readFile(LOGIN_PAGE);
         httpResponse.ok(MimeType.HTML, body, StandardCharsets.UTF_8);
     }
 

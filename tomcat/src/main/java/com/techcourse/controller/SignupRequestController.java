@@ -14,6 +14,7 @@ import org.apache.coyote.http11.MimeType;
 
 public class SignupRequestController extends AbstractRequestController {
 
+    private static final String SIGNUP_PAGE = "/register.html";
     private static final String REDIRECTION_PATH = "/index.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
@@ -22,7 +23,7 @@ public class SignupRequestController extends AbstractRequestController {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        String body = ResourceReader.readFile(httpRequest.getRequestURI());
+        String body = ResourceReader.readFile(SIGNUP_PAGE);
         httpResponse.ok(MimeType.HTML, body, StandardCharsets.UTF_8);
     }
 

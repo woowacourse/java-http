@@ -10,7 +10,6 @@ import java.nio.file.Path;
 public class ResourceReader {
 
     private static final String STATIC_RESOURCE_BASE_URL = "static";
-    private static final String DEFAULT_RESOURCE_EXTENSION = ".html";
 
     private ResourceReader() {
     }
@@ -18,7 +17,7 @@ public class ResourceReader {
     public static boolean canRead(String path) {
         try {
             readFile(path);
-            return true;
+            return toURL(path) != null;
         } catch (Exception e) {
             return false;
         }
@@ -35,11 +34,6 @@ public class ResourceReader {
     }
 
     private static URL toURL(String path) {
-        URL resource = ResourceReader.class.getClassLoader().getResource(STATIC_RESOURCE_BASE_URL + path);
-        if (resource == null) {
-            resource = ResourceReader.class.getClassLoader()
-                    .getResource(STATIC_RESOURCE_BASE_URL + path + DEFAULT_RESOURCE_EXTENSION);
-        }
-        return resource;
+        return ResourceReader.class.getClassLoader().getResource(STATIC_RESOURCE_BASE_URL + path);
     }
 }

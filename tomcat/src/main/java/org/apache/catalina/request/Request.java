@@ -8,8 +8,11 @@ import java.util.stream.Collectors;
 import org.apache.catalina.auth.HttpCookie;
 
 public class Request {
+    public static final String ACCEPT = "Accept";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
+    public static final String TEXT_HTML = "text/html";
+    public static final String COMMA = ",";
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -19,14 +22,14 @@ public class Request {
     public Request(String requestLine, Map<String, String> headers) {
         this.requestLine = new RequestLine(requestLine);
         this.headers = new HashMap<>(headers);
-        this.fileType = extractMainFileType(headers.get("Accept"));
+        this.fileType = extractMainFileType(headers.get(ACCEPT));
     }
 
     private String extractMainFileType(String acceptHeader) {
         if (acceptHeader == null) {
-            return "text/html";
+            return TEXT_HTML;
         }
-        String[] types = acceptHeader.split(",");
+        String[] types = acceptHeader.split(COMMA);
         return types[0].trim();
     }
 

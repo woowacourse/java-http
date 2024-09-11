@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class RequestReader {
     private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
     private static final String PARAM_SEPARATOR = "&";
-    private static final String PARAM_ASSIGNMENT = "=";
+    private static final String QUERY_KEY_VALUE_DELIMITER = "=";
 
     public static Request readHeaders(BufferedReader reader) {
         List<String> headerLines = readHeaderLines(reader);
@@ -69,7 +69,7 @@ public class RequestReader {
 
     private static Map<String, String> getParamValues(String params) {
         return Arrays.stream(params.split(PARAM_SEPARATOR))
-                .map(param -> param.split(PARAM_ASSIGNMENT, 2))
+                .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))
                 .filter(parts -> parts.length == 2 && parts[1] != null)
                 .collect(Collectors.toMap(
                         parts -> parts[0].trim(),

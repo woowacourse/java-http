@@ -22,9 +22,9 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 12 \r\n",
+                "HTTP/1.1 200 OK\r\n",
+                "Content-Type: text/html;charset=utf-8\r\n",
+                "Content-Length: 12\r\n",
                 "Hello world!"
         );
     }
@@ -49,9 +49,9 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 5564 \r\n",
+                "HTTP/1.1 200 OK\r\n",
+                "Content-Type: text/html;charset=utf-8\r\n",
+                "Content-Length: 5564\r\n",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
     }

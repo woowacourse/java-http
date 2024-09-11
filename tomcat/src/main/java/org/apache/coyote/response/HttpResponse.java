@@ -66,8 +66,8 @@ public class HttpResponse {
 
     private HttpHeader buildInitialHeaders(String responseBody, ContentType contentType) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderType.CONTENT_LENGTH.getName(), responseBody.getBytes().length + " ");
-        headers.put(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + CHARSET_UTF_8 + " ");
+        headers.put(HttpHeaderType.CONTENT_LENGTH.getName(), String.valueOf(responseBody.getBytes().length));
+        headers.put(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + CHARSET_UTF_8);
         return new HttpHeader(headers);
     }
 

@@ -1,29 +1,18 @@
 package org.apache.coyote.http11.message;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class HttpHeaders {
 
-    private static final String HEADER_LINE_DELIMITER = ": ";
-    private static final int HEADER_NAME_INDEX = 0;
-    private static final int HEADER_FIELD_INDEX = 1;
+    private final Map<String, List<String>> headers;
 
-    private final Map<String, String> headers;
-
-    public HttpHeaders(Map<String, String> headers) {
+    public HttpHeaders(Map<String, List<String>> headers) {
         this.headers = new HashMap<>(headers);
-    }
-
-    public static HttpHeaders from(List<String> headerLines) {
-        return new HttpHeaders(headerLines.stream()
-                .map(headerLine -> headerLine.split(HEADER_LINE_DELIMITER))
-                .collect(Collectors.toMap(
-                        headerLineElements -> headerLineElements[HEADER_NAME_INDEX],
-                        headerLineElements -> headerLineElements[HEADER_FIELD_INDEX])));
     }
 
     public boolean isHeader(String headerName, String headerValue) {
@@ -31,21 +20,25 @@ public final class HttpHeaders {
     }
 
     public Optional<String> getFieldByHeaderName(String headerName) {
-        return Optional.ofNullable(headers.get(headerName));
-    }
+        List<String> fields = Optional.ofNullable(headers.get(headerName))
+                .orElse(new ArrayList<>());
 
-    public List<String> toHeaderLines() {
-        return headers.entrySet()
-                .stream()
-                .map(this::toHeaderLine)
-                .toList();
-    }
+        if (fields.size() > 1) {
+            throw new IllegalArgumentException("헤더의 필드가 1개보다 많습니다.");
+        }
 
-    private String toHeaderLine(Map.Entry<String, String> headersEntry) {
-        return String.join(HEADER_LINE_DELIMITER, headersEntry.getKey(), headersEntry.getValue());
+        return fields.stream()
+                .findFirst();
     }
 
     public void setHeader(String name, String field) {
-        headers.put(name, field);
+        if (!headers.containsKey(name)) {
+            headers.put(name, new ArrayList<>());
+        }
+        headers.get(name).add(field);
+    }
+
+    public Map<String, List<String>> getHeaders() {
+        return Collections.unmodifiableMap(headers);
     }
 }

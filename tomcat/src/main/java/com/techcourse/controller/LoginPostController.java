@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import org.apache.coyote.http11.handler.HttpHandler;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -35,7 +36,12 @@ public class LoginPostController implements HttpHandler {
 
             // TODO: 빌더로 생성해보기
             HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
+            HttpCookie cookie = HttpCookie.createWithRandomJsessionid();
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+
             response.setHeader("Location", "http://localhost:8080/index.html");
+            response.setCookie(cookie);
 
             return response;
         } catch (UnauthorizedException e) {

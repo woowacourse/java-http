@@ -3,11 +3,13 @@ package org.apache.coyote.http11.message.response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
 
     private static final byte[] EMPTY_BODY = new byte[0];
+
     private HttpStatus status;
     private final HttpHeaders headers;
     private final byte[] body;
@@ -20,7 +22,7 @@ public class HttpResponse {
 
     public static HttpResponse of(HttpStatus status, byte[] body) {
         HttpHeaders headers = new HttpHeaders(Map.of(
-                "Content-Length", String.valueOf(body.length)
+                "Content-Length", List.of(String.valueOf(body.length))
         ));
         return new HttpResponse(status, headers, body);
     }
@@ -38,12 +40,16 @@ public class HttpResponse {
         return body;
     }
 
-    public List<String> getHeaderLines() {
-        return headers.toHeaderLines();
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     public void setHeader(String name, String field) {
         headers.setHeader(name, field);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        headers.setHeader("Set-Cookie", cookie.stringify());
     }
 
     public void setStatus(HttpStatus status) {

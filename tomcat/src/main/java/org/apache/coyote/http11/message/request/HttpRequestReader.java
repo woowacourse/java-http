@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpHeadersParser;
 
 public class HttpRequestReader {
 
@@ -39,7 +40,7 @@ public class HttpRequestReader {
             headerLine = readLine();
         }
 
-        return HttpHeaders.from(headerLines);
+        return HttpHeadersParser.parseToHeaders(headerLines);
     }
 
     private String readLine() throws IOException {

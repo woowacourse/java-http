@@ -3,16 +3,11 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
 import org.apache.catalina.Session;
@@ -42,7 +37,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String response = getResponse(inputStream);
+            HttpRequest request = new HttpRequest(inputStream);
+            log.info("request - {}", request);
+            String response = getResponse(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -50,43 +47,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(InputStream requestStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
-
-        String line = bufferedReader.readLine();
-        String method = "";
-        String path = "";
-        if (line != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line);
-            method = tokenizer.nextToken();
-            path = tokenizer.nextToken();
+    private String getResponse(HttpRequest request) throws IOException {
+        if (request.isGetMethod()) {
+            return doGet(request);
         }
-
-        Map<String, String> requestHeader = new HashMap<>();
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] header = line.split(": ");
-            if (header.length != 2) {
-                throw new IllegalArgumentException("잘못된 header 형식입니다.");
-            }
-            requestHeader.put(header[0].strip(), header[1].strip());
-        }
-
-        String contentLength = requestHeader.getOrDefault("Content-Length", "0");
-        int length = Integer.parseInt(contentLength);
-        char[] buffer = new char[length];
-        bufferedReader.read(buffer, 0, length);
-        String requestBody = new String(buffer);
-
-        if (method.equals("GET")) {
-            return doGet(path, requestHeader);
-        }
-        if (method.equals("POST")) {
-            return doPost(path, requestHeader, requestBody);
+        if (request.isPostMethod()) {
+            return doPost(request);
         }
         return null;
     }
 
-    private String doGet(String path, Map<String, String> requestHeader) throws IOException {
+    private String doGet(HttpRequest request) throws IOException {
+        String path = request.getPath();
+
         if (path.endsWith(".css")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -121,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (path.equals("/login")) {
-            String cookies = requestHeader.getOrDefault("Cookie", "");
+            String cookies = request.getCookies();
             HttpCookie httpCookie = new HttpCookie(cookies);
             if (httpCookie.hasKey("JSESSIONID")) {
                 return String.join("\r\n",
@@ -159,7 +132,10 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String doPost(String path, Map<String, String> requestHeader, String requestBody) {
+    private String doPost(HttpRequest request) {
+        String path = request.getPath();
+        String requestBody = request.getBody();
+
         if (path.equals("/register")) {
             StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
             String account = "";
@@ -206,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
                 if (user.checkPassword(password)) {
                     log.info("로그인 성공! 아이디: {}", user.getAccount());
 
-                    String cookies = requestHeader.getOrDefault("Cookie", "");
+                    String cookies = request.getCookies();
                     HttpCookie httpCookie = new HttpCookie(cookies);
                     if (httpCookie.hasKey("JSESSIONID")) {
                         return String.join("\r\n",

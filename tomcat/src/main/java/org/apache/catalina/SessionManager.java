@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    public SessionManager() {
+    private SessionManager() {
     }
 
     public static SessionManager getInstance() {

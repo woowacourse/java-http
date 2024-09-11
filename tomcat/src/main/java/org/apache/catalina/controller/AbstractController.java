@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
-    protected static final SessionManager sessionManager = new SessionManager();  // TODO: refactor
+    protected static final SessionManager sessionManager = SessionManager.getInstance();  // TODO: refactor
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

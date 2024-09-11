@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.util.Arrays;
+
 public enum HttpStatusCode {
 
     OK(200, "OK"),
@@ -14,6 +16,13 @@ public enum HttpStatusCode {
     HttpStatusCode(int value, String reasonPhrase) {
         this.value = value;
         this.reasonPhrase = reasonPhrase;
+    }
+
+    public static HttpStatusCode from(final String valueAndReasonPhrase) {
+        return Arrays.stream(values())
+                .filter(statusCode -> valueAndReasonPhrase.equals(statusCode.asString()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidFormatException(valueAndReasonPhrase));
     }
 
     public int value() {

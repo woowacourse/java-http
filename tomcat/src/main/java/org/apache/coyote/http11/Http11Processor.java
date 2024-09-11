@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String CRLF = "\r\n";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -76,14 +78,14 @@ public class Http11Processor implements Runnable, Processor {
         collector.add("");
         collector.addAll(parseBody(bufferedReader, contentLength));
 
-        return String.join("\r\n", collector);
+        return String.join(CRLF, collector);
     }
 
     private List<String> parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
         if (contentLength > 0) {
             var buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            return List.of(new String(buffer).split("\r\n"));
+            return List.of(new String(buffer).split(CRLF));
         }
         return List.of();
     }

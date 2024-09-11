@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var plaintext = readLines(bufferedReader);
 
-            final HttpResponse response = convert(plaintext);
+            final HttpResponse response = handleHttp(plaintext);
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
 
@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse convert(final String plaintext) {
+    private HttpResponse handleHttp(final String plaintext) {
         try {
             final var request = new HttpRequest(plaintext);
             final var handler = HandlerMapper.get(request.getPath());

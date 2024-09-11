@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.FileType;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.header.HttpHeader;
@@ -17,8 +18,8 @@ public class HttpResponse {
     private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 Found ";
     private static final String EMPTY_LINE = "";
 
-    private String statusLine;
-    private final List<String> headers = new ArrayList<>();
+    private String statusLine = "";
+    private final List<HttpHeader> headers = new ArrayList<>();
     private String body = "";
 
     public void ok() {
@@ -30,8 +31,18 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        final String headerString = String.join("\r\n", headers);
+        final String headerString = headers.stream()
+                .map(HttpHeader::getHeaderAsString)
+                .collect(Collectors.joining("\r\n"));
         return String.join(DELIMITER, statusLine, headerString, EMPTY_LINE, body).getBytes();
+    }
+
+    public String getStatusLine() {
+        return statusLine;
+    }
+
+    public List<HttpHeader> getHeaders() {
+        return headers;
     }
 
     public void setContentType(final FileType fileType) {

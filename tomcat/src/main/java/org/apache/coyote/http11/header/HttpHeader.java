@@ -14,26 +14,35 @@ public class HttpHeader {
     private static final String BLANK = " ";
     public static final String ENCODING = ";charset=utf-8";
 
-    public static String contentType(final FileType fileType) {
-        return CONTENT_TYPE.getName() + DELIMITER + fileType.getValue() + ENCODING + BLANK;
+    private final HttpHeaderName name;
+    private final String value;
+
+    private HttpHeader(final HttpHeaderName name, final String value) {
+        this.name = name;
+        this.value = value;
     }
 
-    public static String contentLengthOf(final String responseBody) {
-        return CONTENT_LENGTH.getName() + DELIMITER + responseBody.getBytes().length + BLANK;
+    public static HttpHeader contentType(final FileType fileType) {
+        return new HttpHeader(CONTENT_TYPE, fileType.getValue() + ENCODING);
     }
 
-    public static String location(final String location) {
-        return LOCATION.getName() + DELIMITER + location + BLANK;
+    public static HttpHeader contentLengthOf(final String responseBody) {
+        return new HttpHeader(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
     }
 
-    public static String setCookie(final HttpCookie cookie) {
-        return SET_COOKIE.getName() + DELIMITER + cookie.parseCookiesToQueryString() + BLANK;
+    public static HttpHeader location(final String location) {
+        return new HttpHeader(LOCATION, location);
     }
 
-    public static String cookie(final HttpCookie cookie) {
-        return COOKIE.getName() + DELIMITER + cookie.parseCookiesToQueryString() + BLANK;
+    public static HttpHeader setCookie(final HttpCookie cookie) {
+        return new HttpHeader(SET_COOKIE, cookie.parseCookiesToQueryString());
     }
 
-    private HttpHeader() {
+    public static HttpHeader cookie(final HttpCookie cookie) {
+        return new HttpHeader(COOKIE, cookie.parseCookiesToQueryString());
+    }
+
+    public String getHeaderAsString() {
+        return name.getName() + DELIMITER + value + BLANK;
     }
 }

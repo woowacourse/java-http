@@ -1,14 +1,11 @@
 package org.apache.catalina.controller;
 
 
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
-
-    protected static final SessionManager sessionManager = SessionManager.getInstance();  // TODO: refactor
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

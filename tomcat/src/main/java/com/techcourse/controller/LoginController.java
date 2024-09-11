@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.http11.common.HttpStatusCode;
@@ -20,6 +21,11 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final ResponseFile loginPage = StaticResourceManager.read("/login.html");
+    private final SessionManager sessionManager;
+
+    public LoginController() {
+        this.sessionManager = SessionManager.getInstance();
+    }
 
     @Override
     public String matchedPath() {

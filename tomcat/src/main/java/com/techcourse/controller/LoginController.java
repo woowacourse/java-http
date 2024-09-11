@@ -26,7 +26,6 @@ public class LoginController extends AbstractController {
         String password = requestBody.split("&")[1].split("=")[1];
 
         User user = InMemoryUserRepository.findByAccount(account).get();
-        String responseBody = new String(request.toHttpResponseBody());
 
         if (user.checkPassword(password)) {
             log.info("user : {}", user);
@@ -35,54 +34,37 @@ public class LoginController extends AbstractController {
             session.setAttribute("user", user);
             sessionManager.add(session);
 
-            response.addVersion(request.getVersion());
+            response.setResponseFromRequest(request);
             response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-            response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addHeader(HttpHeaders.LOCATION, "/index.html");
             response.addHeader(HttpHeaders.SET_COOKIE, JSESSIONID + jSessionId);
-            response.addBody(responseBody);
 
         } else {
-            response.addVersion(request.getVersion());
+            response.setResponseFromRequest(request);
             response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-            response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addHeader(HttpHeaders.LOCATION, "/401.html");
-            response.addBody(responseBody);
         }
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> headers = request.getHeaders();
-        String responseBody = new String(request.toHttpResponseBody());
         if (headers.containsKey(HttpHeaders.COOKIE) &&
                 headers.get(HttpHeaders.COOKIE).startsWith(JSESSIONID)) {
             String jSessionId = headers.get(HttpHeaders.COOKIE).split("=")[1];
             Session session = sessionManager.findSession(jSessionId);
 
             if (session != null && session.getAttribute("user") != null) {
-
-                response.addVersion(request.getVersion());
+                response.setResponseFromRequest(request);
                 response.addHttpStatus(HttpStatus.FOUND);
-                response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-                response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
                 response.addHeader(HttpHeaders.LOCATION, "/index.html");
-                response.addBody(responseBody);
             } else {
-                response.addVersion(request.getVersion());
+                response.setResponseFromRequest(request);
                 response.addHttpStatus(HttpStatus.OK);
-                response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-                response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
-                response.addBody(responseBody);
             }
         } else {
-            response.addVersion(request.getVersion());
+            response.setResponseFromRequest(request);
             response.addHttpStatus(HttpStatus.OK);
-            response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-            response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
-            response.addBody(responseBody);
         }
     }
 }

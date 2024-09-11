@@ -17,24 +17,15 @@ public class RegisterController extends AbstractController {
         String password = requestBody.split("&")[2].split("=")[1];
 
         InMemoryUserRepository.save(new User(account, password, email));
-        String responseBody = new String(request.toHttpResponseBody());
 
-        response.addVersion(request.getVersion());
+        response.setResponseFromRequest(request);
         response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-        response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
         response.addHeader(HttpHeaders.LOCATION, "/index.html");
-        response.addBody(responseBody);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String responseBody = new String(request.toHttpResponseBody());
-
-        response.addVersion(request.getVersion());
+        response.setResponseFromRequest(request);
         response.addHttpStatus(HttpStatus.OK);
-        response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-        response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
-        response.addBody(responseBody);
     }
 }

@@ -1,8 +1,11 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.HttpStatus;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,19 +17,16 @@ public class HttpResponse {
     private Map<String, Object> headers;
     private String body;
 
-    public HttpResponse(String version, HttpStatus httpStatus, Map<String, Object> headers, String body) {
-        this.version = version;
-        this.httpStatus = httpStatus;
-        this.headers = headers;
-        this.body = body;
-    }
-
     public HttpResponse() {
         headers = new HashMap<>();
     }
 
-    public void addVersion(String version) {
-        this.version = version;
+    public void setResponseFromRequest(HttpRequest request) throws URISyntaxException, IOException {
+        String responseBody = new String(request.toHttpResponseBody());
+        version = request.getVersion();
+        headers.put(HttpHeaders.CONTENT_TYPE, request.getContentType());
+        headers.put(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
+        body = responseBody;
     }
 
     public void addHttpStatus(HttpStatus httpStatus) {
@@ -35,10 +35,6 @@ public class HttpResponse {
 
     public void addHeader(String key, Object value) {
         headers.put(key, value);
-    }
-
-    public void addBody(String body) {
-        this.body = body;
     }
 
     public void send(OutputStream outputStream) {

@@ -20,7 +20,7 @@ public class HttpHeaders {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String UTF_8 = ";charset=utf-8";
 
-    private Map<String, String> store;
+    private final Map<String, String> store;
 
     public HttpHeaders() {
         store = new LinkedHashMap<>();

@@ -3,17 +3,23 @@ package com.techcourse.controller;
 import static org.apache.coyote.http.MediaType.TEXT_HTML;
 
 import org.apache.coyote.http.HttpBody;
+import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpQueryParams;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
+import org.apache.coyote.http.HttpVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class LoginController implements Controller {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
@@ -21,36 +27,52 @@ public class LoginController implements Controller {
     }
 
     private HttpResponseBuilder process(final HttpRequest request) {
-        HttpQueryParams query = request.getQueryParams();
-        if (query.isEmpty()) {
-            return buildResponse(HttpStatusCode.OK, "/login.html", request);
+        HttpMethod method = request.getMethod();
+        if (method == HttpMethod.GET) {
+            return get(request);
         }
-        return processLogin(request, query);
-    }
-
-    private HttpResponseBuilder processLogin(HttpRequest request, HttpQueryParams query) {
-        String account = query.get("account");
-        String password = query.get("password");
-
-        User user = fetchUserByAccount(account);
-        if (user == null || !user.checkPassword(password)) {
-            return buildResponse(HttpStatusCode.UNAUTHORIZED, "/401.html", request);
+        if (method == HttpMethod.POST) {
+            return post(request);
         }
-
-        return buildResponse(HttpStatusCode.FOUND, "/index.html", request);
+        throw new IllegalArgumentException("Unsupported HTTP method: " + method);
     }
 
-    private User fetchUserByAccount(String account) {
-        return InMemoryUserRepository.findByAccount(account).orElse(null);
-    }
-
-    private HttpResponseBuilder buildResponse(HttpStatusCode statusCode, String resourcePath, HttpRequest request) {
-        HttpStatusLine statusLine = new HttpStatusLine(request.getHttpVersion(), statusCode);
-        String resource = StaticResourceHandler.handle(resourcePath);
-        HttpBody body = new HttpBody(resource);
+    private HttpResponseBuilder get(final HttpRequest request) {
+        HttpStatusLine statusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatusCode.OK);
+        String resource = StaticResourceHandler.handle("/login.html");
+        HttpBody responseBody = new HttpBody(resource);
         return HttpResponse.builder()
                 .statusLine(statusLine)
-                .body(body)
+                .body(responseBody)
                 .contentType(TEXT_HTML.defaultCharset());
+    }
+
+    private HttpResponseBuilder post(final HttpRequest request) {
+        if (login(request) != null) {
+            HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.FOUND);
+            return HttpResponse.builder()
+                    .statusLine(statusLine)
+                    .contentType(TEXT_HTML.defaultCharset())
+                    .location("/index.html");
+        }
+        HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.UNAUTHORIZED);
+        return HttpResponse.builder()
+                .statusLine(statusLine)
+                .contentType(TEXT_HTML.defaultCharset())
+                .location("/login.html");
+    }
+
+    private User login(final HttpRequest request) {
+        HttpBody body = request.getBody();
+        String content = body.getContent();
+        HttpQueryParams query = new HttpQueryParams(content);
+        String account = query.get("account");
+        String password = query.get("password");
+        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+        if ((user != null) && user.checkPassword(password)) {
+            log.info("user: {}", user);
+            return user;
+        }
+        return null;
     }
 }

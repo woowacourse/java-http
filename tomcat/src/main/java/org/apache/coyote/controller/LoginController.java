@@ -4,11 +4,11 @@ import java.util.UUID;
 
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.AbstractController;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpHeaderField;
+import org.apache.coyote.component.HttpCookie;
+import org.apache.coyote.component.HttpHeaderField;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.component.HttpStatusCode;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;

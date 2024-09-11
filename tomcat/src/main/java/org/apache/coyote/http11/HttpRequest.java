@@ -7,6 +7,13 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.component.ContentType;
+import org.apache.coyote.component.HttpHeaderField;
+import org.apache.coyote.component.HttpHeaders;
+import org.apache.coyote.component.HttpMethod;
+import org.apache.coyote.component.Path;
+import org.apache.coyote.component.RequestLine;
+
 public class HttpRequest {
 
     private static final String BODY_SEPARATOR = "&";

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.component.HttpHeaders;
+import org.apache.coyote.component.HttpStatusCode;
+
 public class HttpResponse {
 
     private static final String SPACE = " ";

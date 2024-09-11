@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 
 import org.apache.coyote.Controller;
+import org.apache.coyote.component.HttpHeaderField;
+import org.apache.coyote.component.HttpMethod;
 
 public abstract class AbstractController implements Controller {
 

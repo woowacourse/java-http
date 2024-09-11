@@ -2,10 +2,10 @@ package org.apache.coyote.controller;
 
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.AbstractController;
-import org.apache.coyote.http11.HttpHeaderField;
+import org.apache.coyote.component.HttpHeaderField;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.component.HttpStatusCode;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

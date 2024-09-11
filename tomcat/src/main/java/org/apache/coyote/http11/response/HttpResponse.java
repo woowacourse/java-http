@@ -23,8 +23,16 @@ public class HttpResponse {
         header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
-    public void setStatusLine(StatusLine statusLine) {
+    public void addStatusLine(StatusLine statusLine) {
         this.statusLine = statusLine;
+    }
+
+    public void addMimeType() {
+
+    }
+
+    public void addCharSet() {
+
     }
 
     public void setHeader(ResponseHeader header) {

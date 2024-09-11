@@ -17,7 +17,7 @@ class ResponseHeaderTest {
         MimeType mimeType = MimeType.HTML;
         String expected = String.join("\r\n",
                 "Content-Length: 12 ",
-                "Content-Type: " + mimeType.getContentType() + " "
+                "Content-Type: " + mimeType.getMimeType() + " "
         );
         ResponseHeader header = new ResponseHeader();
 

@@ -33,7 +33,7 @@ class Http11ProcessorTest {
         // then
         String output = socket.output();
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.OK.toStatus();
-        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
                 () -> assertThat(output).contains(expectedRequestLine),

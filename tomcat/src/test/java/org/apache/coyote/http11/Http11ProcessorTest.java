@@ -21,7 +21,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -50,7 +50,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -78,7 +78,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -107,7 +107,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
+        final var expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n" +
                 "Content-Length: 0 \r\n" +
                 "\r\n";
@@ -135,7 +135,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
+        final var expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /401.html \r\n" +
                 "Content-Length: 0 \r\n" +
                 "\r\n";
@@ -162,7 +162,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -190,11 +190,39 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 회원가입_성공_시_인덱스_페이지로_리다이렉트된다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=dora&password=password&email=dorachoo%40woowahan.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

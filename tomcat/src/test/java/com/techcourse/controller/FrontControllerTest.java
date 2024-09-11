@@ -45,7 +45,12 @@ class FrontControllerTest {
         String expectedContentType = "Content-Type: text/css \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedContentLength,
+                expectedContentType,
+                expectedResponseBody
+        );
     }
 
     @DisplayName("존재하지 않는 리소스에 접근하면 404 응답을 반환한다.")
@@ -70,7 +75,12 @@ class FrontControllerTest {
         String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedContentLength,
+                expectedContentType,
+                expectedResponseBody
+        );
     }
 
     @DisplayName("잘못된 메서드로 요청하면 405 응답을 반환한다.")
@@ -95,6 +105,11 @@ class FrontControllerTest {
         String expectedContentLength = "Content-Length: 2190 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedContentType, expectedContentLength, expectedResponseBody);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedContentType,
+                expectedContentLength,
+                expectedResponseBody
+        );
     }
 }

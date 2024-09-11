@@ -99,6 +99,9 @@ class RegisterControllerTest {
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: register.html ";
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedLocationHeader
+        );
     }
 }

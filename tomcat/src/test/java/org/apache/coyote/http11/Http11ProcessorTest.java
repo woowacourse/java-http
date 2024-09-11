@@ -30,6 +30,10 @@ class Http11ProcessorTest {
         String expectedContentLength = "Content-Length: 13 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).contains(expectedResponseLine, expectedContentLength, expectedContentType, expectedResponseBody);
+        assertThat(socket.output()).contains(
+                expectedResponseLine,
+                expectedContentLength,
+                expectedContentType,
+                expectedResponseBody);
     }
 }

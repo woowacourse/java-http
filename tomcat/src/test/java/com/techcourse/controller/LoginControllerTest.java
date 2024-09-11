@@ -55,11 +55,15 @@ class LoginControllerTest {
         HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        String responseLine = "HTTP/1.1 302 FOUND";
-        String location = "Location: index.html";
-        String cookie = "Set-Cookie: JSESSIONID=";
+        String expectedResponseLine = "HTTP/1.1 302 FOUND";
+        String expectedLocationHeader = "Location: index.html";
+        String expectedCookie = "Set-Cookie: JSESSIONID=";
 
-        assertThat(response.toString()).contains(responseLine, location, cookie);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedLocationHeader,
+                expectedCookie
+        );
     }
 
     @DisplayName("로그인이 잘못되면 401.html로 리다이랙트한다.")
@@ -86,7 +90,10 @@ class LoginControllerTest {
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: 401.html ";
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedLocationHeader
+        );
     }
 
     @DisplayName("로그인 화면을 응답한다.")
@@ -108,6 +115,9 @@ class LoginControllerTest {
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: login.html ";
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
+        assertThat(response.toString()).contains(
+                expectedResponseLine,
+                expectedLocationHeader
+        );
     }
 }

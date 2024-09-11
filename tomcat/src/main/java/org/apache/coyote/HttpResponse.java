@@ -4,54 +4,52 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private final String statusCode;
-    private final String location;
+    private final HttpResponseStartLine startLine;
     private final HttpResponseHeader header;
-    private final HttpResponseContent content;
+    private final HttpResponseBody body;
 
-    public HttpResponse(String statusCode, String location) {
-        this.statusCode = statusCode;
-        this.location = location;
+    public HttpResponse(HttpStatusCode statusCode) {
+        this.startLine = new HttpResponseStartLine(statusCode);
         this.header = new HttpResponseHeader();
-        this.content = null;
+        this.body = new HttpResponseBody();
     }
 
-    public HttpResponse(String statusCode, HttpResponseContent content) {
-        this.statusCode = statusCode;
-        this.location = null;
-        this.header = new HttpResponseHeader();
-        this.content = content;
+    public void setLocation(String location) {
+        header.setLocation(location);
+        header.setContentLength(0);
     }
 
     public void setCookie(HttpCookie cookie) {
-        header.put("Set-Cookie", cookie.toString());
+        header.setCookie(cookie);
+    }
+
+    public void setContent(String path, String content) {
+        header.setContentType(HttpContentType.findByExtension(path));
+        header.setContentLength(content.getBytes().length);
+        body.setContent(content);
     }
 
     public String getStatusCode() {
-        return statusCode;
-    }
-
-    public String getLocation() {
-        return location;
+        return startLine.getStatusCode();
     }
 
     public Map<String, String> getHeader() {
         return header.getHeaders();
     }
 
-    public HttpResponseContent getContent() {
-        return content;
+    public String getLocation() {
+        return header.getLocation();
     }
 
     public String getContentType() {
-        return content.getContentType(); // TODO: null 검증 처리
+        return header.getContentType();
     }
 
     public int getContentLength() {
-        return content.getContentLength();
+        return header.getContentLength();
     }
 
     public String getBody() {
-        return content.getBody();
+        return body.getContent();
     }
 }

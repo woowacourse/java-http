@@ -8,12 +8,10 @@ import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.HttpResponseContent;
+import org.apache.coyote.HttpStatusCode;
 
 public class ServletRequestHandler {
 
-    private static final String SUCCESS_STATUS_CODE = "200 OK";
-    private static final String FOUND_STATUS_CODE = "302 Found";
     private static final String DEFAULT_HTML_PATH = ".html";
 
     private final ViewResolver viewResolver;
@@ -53,24 +51,32 @@ public class ServletRequestHandler {
     private HttpResponse handleGetLoginPage() {
         final String path = "/login.html";
         final String body = viewResolver.resolve(path);
-        return new HttpResponse(SUCCESS_STATUS_CODE, new HttpResponseContent(path, body));
+        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        response.setContent(path, body);
+        return response;
     }
 
     private HttpResponse handleGetRegisterPage() {
         final String path = "/register.html";
         final String body = viewResolver.resolve(path);
-        return new HttpResponse(SUCCESS_STATUS_CODE, new HttpResponseContent(path, body));
+        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        response.setContent(path, body);
+        return response;
     }
 
     private HttpResponse handleGetRootPage() {
         final String body = "Hello world!";
-        return new HttpResponse(SUCCESS_STATUS_CODE, new HttpResponseContent(DEFAULT_HTML_PATH, body));
+        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        response.setContent(DEFAULT_HTML_PATH, body);
+        return response;
     }
 
     private HttpResponse handleGetStaticPage(String requestURI) {
         final String path = requestURI;
         final String body = viewResolver.resolve(path);
-        return new HttpResponse(SUCCESS_STATUS_CODE, new HttpResponseContent(path, body));
+        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        response.setContent(path, body);
+        return response;
     }
 
     private HttpResponse handlePost(HttpRequest request) {
@@ -98,14 +104,17 @@ public class ServletRequestHandler {
         final String location = "/index.html";
         final String session = UUID.randomUUID().toString();
         final HttpCookie cookie = new HttpCookie("JSESSIONID", session);
-        final HttpResponse response = new HttpResponse(FOUND_STATUS_CODE, location);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        response.setLocation(location);
         response.setCookie(cookie);
-        return response; // TODO: 리팩토링
+        return response;
     }
 
     private HttpResponse handlePostLoginFailed() {
         final String location = "/401.html";
-        return new HttpResponse(FOUND_STATUS_CODE, location);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        response.setLocation(location);
+        return response;
     }
 
     private HttpResponse handlePostRegister(Map<String, String> body) {
@@ -120,6 +129,8 @@ public class ServletRequestHandler {
 
     private HttpResponse handlePostRegisterSuccess() {
         final String location = "/index.html";
-        return new HttpResponse(FOUND_STATUS_CODE, location);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        response.setLocation(location);
+        return response;
     }
 }

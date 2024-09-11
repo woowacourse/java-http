@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Controller {
 
+    private static final String UTF_8_ENCODING = ";charset=utf-8";
+
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
-    private static final String DELIMITER = "\r\n";
     private static final String END_OF_LINE = "";
-    public static final String UTF_8_ENCODING = ";charset=utf-8";
 
     public abstract boolean service(HttpRequest request, HttpResponse response);
 
@@ -54,7 +54,7 @@ public abstract class Controller {
         }
 
         List<String> fileLines = Files.readAllLines(path);
-        StringJoiner joiner = new StringJoiner(DELIMITER);
+        StringJoiner joiner = new StringJoiner(System.lineSeparator());
         for (String fileLine : fileLines) {
             joiner.add(fileLine);
         }

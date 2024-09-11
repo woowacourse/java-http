@@ -23,7 +23,7 @@ class SessionManagerTest {
         Session session = Session.createRandomSession();
 
         HttpRequest request = mock(HttpRequest.class);
-        when(request.getCookie()).thenReturn("JSESSIONID=" + session.getId());
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
 
         // when
         sessionManager.add(session);
@@ -46,7 +46,7 @@ class SessionManagerTest {
         HttpCookie cookie = mock(HttpCookie.class);
         when(cookie.hasJSessionId()).thenReturn(true);
         when(cookie.getJsessionid()).thenReturn(session.getId());
-        when(request.getCookie()).thenReturn("JSESSIONID=" + session.getId());
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
 
         // When
         Optional<Session> result = sessionManager.findSession(request);
@@ -66,7 +66,7 @@ class SessionManagerTest {
         HttpRequest request = mock(HttpRequest.class);
         HttpCookie cookie = mock(HttpCookie.class);
         when(cookie.hasJSessionId()).thenReturn(true);
-        when(request.getCookie()).thenReturn("JSESSIONID=nonExistingSessionId");
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=nonExistingSessionId"));
         when(cookie.getJsessionid()).thenReturn("nonExistingSessionId");
 
         // when
@@ -85,7 +85,7 @@ class SessionManagerTest {
         sessionManager.add(session);
 
         HttpRequest request = mock(HttpRequest.class);
-        when(request.getCookie()).thenReturn("JSESSIONID=" + session.getId());
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
 
         // when
         sessionManager.remove(session);

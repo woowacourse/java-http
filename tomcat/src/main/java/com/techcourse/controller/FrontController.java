@@ -38,14 +38,14 @@ public class FrontController extends Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
         String uri = request.getURI();
         Controller handler = getHandler(uri);
         String fileName = Resource.getFileName(uri);
         if (Objects.isNull(handler) && FileExtension.isFileExtension(fileName)) {
             try {
-                HttpResponse response = getResourceResponse(fileName);
-                return response;
+                getResourceResponse(request, response);
+                return;
             } catch (InvalidResourceException e) {
                 log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
 
@@ -58,24 +58,21 @@ public class FrontController extends Controller {
             handler = NotFoundController.getInstance();
         }
         try {
-            HttpResponse response = handler.handle(request);
-            return response;
+            handler.handle(request, response);
         } catch (UnsupportedMethodException e) {
             log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
 
             handler = MethodNotAllowedController.getInstance();
-            HttpResponse response = handler.handle(request);
-            return response;
+            handler.handle(request, response);
         }
     }
 
-    private HttpResponse getResourceResponse(String fileName) throws IOException {
-        HttpResponse response = new HttpResponse();
+    private void getResourceResponse(HttpRequest request, HttpResponse response) throws IOException {
+        String fileName = Resource.getFileName(request.getURI());
         ResponseBody responseBody = new ResponseBody(Resource.read(fileName));
         response.setStatus(HttpStatus.OK);
         response.setContentType(MimeType.getMimeType(fileName));
         response.setBody(responseBody);
-        return response;
     }
 
     private Controller getHandler(String uri) {
@@ -83,12 +80,12 @@ public class FrontController extends Controller {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         throw new UnsupportedMethodException("Method is not supported: POST");
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         throw new UnsupportedMethodException("Method is not supported: GET");
     }
 }

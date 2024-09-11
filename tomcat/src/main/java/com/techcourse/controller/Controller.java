@@ -9,19 +9,21 @@ import org.apache.coyote.http11.response.HttpResponse;
 import com.techcourse.exception.UnsupportedMethodException;
 
 public abstract class Controller {
-    protected abstract HttpResponse handle(HttpRequest request) throws IOException;
+    protected abstract void handle(HttpRequest request, HttpResponse response) throws IOException;
 
-    protected abstract HttpResponse doPost(HttpRequest request) throws IOException;
+    protected abstract void doPost(HttpRequest request, HttpResponse response) throws IOException;
 
-    protected abstract HttpResponse doGet(HttpRequest request) throws IOException;
+    protected abstract void doGet(HttpRequest request, HttpResponse response) throws IOException;
 
-    protected HttpResponse operate(HttpRequest request) throws IOException {
+    protected void operate(HttpRequest request, HttpResponse response) throws IOException {
         HttpMethod method = request.getHttpMethod();
         if (method.isPost()) {
-            return doPost(request);
+            doPost(request, response);
+            return;
         }
         if (method.isGet()) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
         throw new UnsupportedMethodException("Method is not supported: " + method);
     }

@@ -38,12 +38,12 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = new HttpRequest(bufferedReader);
-            String endpoint = request.getURI();
-            log.info("Requested endpoint: {}, Method: {}", endpoint, request.getHttpMethod());
+            HttpResponse response = new HttpResponse();
+            log.info("Requested endpoint: {}, Method: {}", request.getURI(), request.getHttpMethod());
 
-            HttpResponse response = frontController.handle(request);
+            frontController.handle(request, response);
 
-            outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.write(response.serialize().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

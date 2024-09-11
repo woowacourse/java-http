@@ -46,8 +46,7 @@ public class HttpResponse {
         this.body = body;
     }
 
-    @Override
-    public String toString() {
+    public String serialize() {
         StringJoiner joiner = new StringJoiner(LINE_SEPARATOR);
         joiner.add(version + BLANK_DELIMITER + status.getMessage() + BLANK_DELIMITER);
         for (Entry<String, String> entry : headers.getHeaders().entrySet()) {

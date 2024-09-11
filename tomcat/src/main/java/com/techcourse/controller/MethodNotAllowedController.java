@@ -13,6 +13,7 @@ import com.techcourse.util.Resource;
 
 public class MethodNotAllowedController extends Controller {
     private static final MethodNotAllowedController instance = new MethodNotAllowedController();
+    private static final String METHOD_NOT_ALLOWED_PATH = "405.html";
 
     private MethodNotAllowedController() {
     }
@@ -22,23 +23,20 @@ public class MethodNotAllowedController extends Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpResponse response = new HttpResponse();
-        String fileName = "405.html";
-        ResponseBody responseBody = new ResponseBody(Resource.read(fileName));
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
+        ResponseBody responseBody = new ResponseBody(Resource.read(METHOD_NOT_ALLOWED_PATH));
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
         response.setContentType(MimeType.HTML);
         response.setBody(responseBody);
-        return response;
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         throw new UnsupportedMethodException("Method is not supported: POST");
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         throw new UnsupportedMethodException("Method is not supported: GET");
     }
 }

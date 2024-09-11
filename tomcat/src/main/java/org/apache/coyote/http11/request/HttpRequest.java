@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
@@ -82,8 +83,8 @@ public class HttpRequest {
         return new RequestBody(body.toString());
     }
 
-    public String getCookie() {
-        return headers.getCookie();
+    public HttpCookie getCookie() {
+        return new HttpCookie(headers.getCookie());
     }
 
     public String getURI() {

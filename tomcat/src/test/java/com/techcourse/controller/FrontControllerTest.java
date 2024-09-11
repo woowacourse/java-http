@@ -34,9 +34,10 @@ class FrontControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = frontController.handle(httpRequest);
+        frontController.handle(httpRequest, httpResponse);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
@@ -45,7 +46,7 @@ class FrontControllerTest {
         String expectedContentType = "Content-Type: text/css \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedContentLength,
                 expectedContentType,
@@ -64,9 +65,10 @@ class FrontControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = frontController.handle(httpRequest);
+        frontController.handle(httpRequest, httpResponse);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
@@ -75,7 +77,7 @@ class FrontControllerTest {
         String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedContentLength,
                 expectedContentType,
@@ -94,9 +96,10 @@ class FrontControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = frontController.handle(httpRequest);
+        frontController.handle(httpRequest, httpResponse);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/405.html");
@@ -105,7 +108,7 @@ class FrontControllerTest {
         String expectedContentLength = "Content-Length: 2190 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedContentType,
                 expectedContentLength,

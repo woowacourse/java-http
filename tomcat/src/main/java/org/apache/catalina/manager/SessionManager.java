@@ -28,7 +28,7 @@ public class SessionManager implements Manager {
 
     @Override
     public Optional<Session> findSession(HttpRequest request) throws IOException {
-        HttpCookie cookie = new HttpCookie(request.getCookie());
+        HttpCookie cookie = request.getCookie();
         if (cookie.hasJSessionId()) {
             return Optional.ofNullable(SESSIONS.get(cookie.getJsessionid()));
         }

@@ -26,19 +26,18 @@ public class RegisterController extends Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
         try {
-            HttpResponse response = operate(request);
-            return response;
+            operate(request, response);
         } catch (InvalidRegisterException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            return redirect("400.html");
+            redirect("400.html", response);
         }
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         RequestBody requestBody = request.getBody();
         String account = requestBody.getAttribute("account");
         String password = requestBody.getAttribute("password");
@@ -47,19 +46,16 @@ public class RegisterController extends Controller {
         User user = userService.register(account, password, email);
         log.info("User registered: {}", user);
 
-        return redirect("index.html");
+        redirect("index.html", response);
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws IOException {
-        return redirect("register.html");
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        redirect("register.html", response);
     }
 
-    private static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse();
+    private static void redirect(String location, HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
         response.setLocation(location);
-
-        return response;
     }
 }

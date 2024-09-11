@@ -45,15 +45,16 @@ class RegisterControllerTest {
                 "",
                 requestBody);
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = registerController.handle(httpRequest);
+        registerController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: index.html ";
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
+        assertThat(httpResponse.serialize()).contains(expectedResponseLine, expectedLocationHeader);
     }
 
     @DisplayName("회원가입이 잘못되면 400.html로 리다이랙트한다.")
@@ -69,15 +70,16 @@ class RegisterControllerTest {
                 "",
                 requestBody);
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = registerController.handle(httpRequest);
+        registerController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: 400.html ";
 
-        assertThat(response.toString()).contains(expectedResponseLine, expectedLocationHeader);
+        assertThat(httpResponse.serialize()).contains(expectedResponseLine, expectedLocationHeader);
     }
 
     @DisplayName("회원가입 화면을 응답한다.")
@@ -91,15 +93,16 @@ class RegisterControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = registerController.handle(httpRequest);
+        registerController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: register.html ";
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedLocationHeader
         );

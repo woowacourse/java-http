@@ -46,20 +46,23 @@ class LoginControllerTest {
                 "Content-Length: " + requestBody.length(),
                 "",
                 requestBody);
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
         mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
                 .thenReturn(Optional.of(mockUser));
 
+        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
+
+
         // when
-        HttpResponse response = loginController.handle(httpRequest);
+        loginController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND";
         String expectedLocationHeader = "Location: index.html";
         String expectedCookie = "Set-Cookie: JSESSIONID=";
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedLocationHeader,
                 expectedCookie
@@ -78,19 +81,21 @@ class LoginControllerTest {
                 "Content-Length: " + requestBody.length(),
                 "",
                 requestBody);
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
         mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
                 .thenReturn(Optional.of(mockUser));
 
+        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
+
         // when
-        HttpResponse response = loginController.handle(httpRequest);
+        loginController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: 401.html ";
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedLocationHeader
         );
@@ -107,15 +112,16 @@ class LoginControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse response = loginController.handle(httpRequest);
+        loginController.handle(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
         String expectedLocationHeader = "Location: login.html ";
 
-        assertThat(response.toString()).contains(
+        assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
                 expectedLocationHeader
         );

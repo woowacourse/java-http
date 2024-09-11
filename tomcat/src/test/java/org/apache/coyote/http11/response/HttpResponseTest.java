@@ -22,7 +22,7 @@ class HttpResponseTest {
         httpResponse.setBody(new ResponseBody("hello"));
 
         // when
-        String result = httpResponse.toString();
+        String result = httpResponse.serialize();
 
         // then
         String expectedResponseLine = "HTTP/1.1 200 OK \r\n";

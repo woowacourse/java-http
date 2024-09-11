@@ -34,19 +34,18 @@ public class LoginController extends Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
         try {
-            HttpResponse response = operate(request);
-            return response;
+            operate(request, response);
         } catch (UnauthorizedException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            return redirect("401.html");
+            redirect("401.html", response);
         }
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         RequestBody requestBody = request.getBody();
         String account = requestBody.getAttribute("account");
         String password = requestBody.getAttribute("password");
@@ -54,36 +53,32 @@ public class LoginController extends Controller {
         User user = userService.login(account, password);
         log.info("User found: {}", user);
 
-        HttpResponse response = new HttpResponse();
+        Session session = getSession(request, user);
+        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+
+        redirect("index.html", response);
+    }
+
+    private Session getSession(HttpRequest request, User user) throws IOException {
         Session session = sessionManager.findSession(request).orElse(Session.createRandomSession());
         session.setAttribute(SESSION_ATTRIBUTE, user.getAccount());
         sessionManager.add(session);
-        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
-
-        return redirect("index.html", response);
+        return session;
     }
 
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         Optional<Session> session = sessionManager.findSession(request);
         if (session.isPresent() && Objects.nonNull(session.get().getAttribute(SESSION_ATTRIBUTE))) {
-            return redirect("index.html", new HttpResponse());
+            redirect("index.html", response);
+            return;
         }
-        return redirect("login.html");
+        redirect("login.html", response);
     }
 
-    private static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse();
+    private static void redirect(String location, HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
         response.setLocation(location);
-
-        return response;
-    }
-
-    private static HttpResponse redirect(String location, HttpResponse response) {
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation(location);
-        return response;
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceController;
 import com.techcourse.controller.RootController;
@@ -27,6 +28,6 @@ public class RequestMapper {
             return new ResourceController();
         }
 
-        return handlerMap.get(request.getUri());
+        return handlerMap.getOrDefault(request.getUri(), new NotFoundController());
     }
 }

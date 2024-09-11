@@ -2,8 +2,10 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httprequest.HttpRequestBody;
 import org.apache.coyote.http11.httprequest.HttpRequestHeader;
@@ -66,13 +68,13 @@ public class HttpRequestConvertor {
     }
 
     private static Map<String, String> extractBody(String requestBody) {
-        Map<String, String> body = new HashMap<>();
         String[] tokens = requestBody.split("&");
-        for (String token : tokens) {
-            String key = token.split("=")[0];
-            String value = token.split("=")[1];
-            body.put(key, value);
-        }
-        return body;
+        return Arrays.stream(tokens)
+                .filter(token -> token.split("=").length >= 2)
+                .map(token -> token.split("="))
+                .collect(Collectors.toMap(
+                        token -> token[0],
+                        token -> token[1]
+                ));
     }
 }

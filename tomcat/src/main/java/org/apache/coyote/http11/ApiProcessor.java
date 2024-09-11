@@ -73,7 +73,14 @@ public class ApiProcessor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        pageProcessor.processWithHttpStatus(outputStream, "index", HttpStatus.CREATED);
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + HttpStatus.FOUND.getHeaderForm(),
+                "Location: " + " http://localhost:8080/",
+                "Set-Cookie: JSESSIONID=" + user.getId().toString(),
+                "");
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private Map<String, String> findParameterEntries(String requestPath) {

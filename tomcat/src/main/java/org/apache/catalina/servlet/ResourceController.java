@@ -2,22 +2,15 @@ package org.apache.catalina.servlet;
 
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
-import org.apache.catalina.http.header.HttpHeader;
+import org.apache.catalina.http.startline.HttpStatus;
 
 public class ResourceController extends AbstractController {
 
-    private static final String BASIC_RESPONSE_BODY = "Hello world!";
-
     @Override
-    public boolean service(HttpRequest request, HttpResponse response) {
-        if (request.isURIBlank()) {
-            response.addHeader(HttpHeader.CONTENT_TYPE, "text/html");
-            response.setBody(BASIC_RESPONSE_BODY);
-            return true;
-        }
+    public void service(HttpRequest request, HttpResponse response) {
         if (request.isURIStatic()) {
-            return responseResource(response, request.getTargetPath());
+            response.setStatus(HttpStatus.OK);
+            responseResource(response, request.getTargetPath());
         }
-        return false;
     }
 }

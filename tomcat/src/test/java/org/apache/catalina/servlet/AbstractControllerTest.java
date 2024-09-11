@@ -18,8 +18,7 @@ class AbstractControllerTest {
     private static AbstractController getController() {
         return new AbstractController() {
             @Override
-            public boolean service(HttpRequest request, HttpResponse response) {
-                return false;
+            public void service(HttpRequest request, HttpResponse response) {
             }
         };
     }

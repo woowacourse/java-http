@@ -20,26 +20,24 @@ public abstract class AbstractController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
-    public abstract boolean service(HttpRequest request, HttpResponse response);
+    public abstract void service(HttpRequest request, HttpResponse response);
 
-    protected boolean redirectTo(HttpResponse response, String target) {
+    protected void redirectTo(HttpResponse response, String target) {
         response.setStatus(HttpStatus.FOUND);
         response.addHeader(HttpHeader.LOCATION, target);
-        return response.isValid();
     }
 
-    protected boolean responseResource(HttpResponse response, String path) {
+    protected void responseResource(HttpResponse response, String path) {
         RequestURI requestURI = new RequestURI(path);
-        return responseResource(response, requestURI.getPath());
+        responseResource(response, requestURI.getPath());
     }
 
-    protected boolean responseResource(HttpResponse response, Path path) {
+    protected void responseResource(HttpResponse response, Path path) {
         try {
             String responseBody = ResourceReader.read(path);
             String contentType = Files.probeContentType(path);
             response.addHeader(HttpHeader.CONTENT_TYPE, contentType + UTF_8_ENCODING);
             response.setBody(responseBody);
-            return response.isValid();
         } catch (NullPointerException | IOException e) {
             log.error(e.getMessage());
             throw new CatalinaException("Invalid path: " + path.toString());

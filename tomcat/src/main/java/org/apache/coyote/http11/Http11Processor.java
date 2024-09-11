@@ -39,8 +39,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = createResponse(request);
             AbstractController controller = RequestMapper.getController(request);
 
-            boolean isResponseValid = controller.service(request, response);
-            validateResponse(isResponseValid, response);
+            controller.service(request, response);
+            validateResponse(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -56,8 +56,8 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private void validateResponse(boolean isResponseValid, HttpResponse response) {
-        if (!isResponseValid) {
+    private void validateResponse(HttpResponse response) {
+        if (!response.isValid()) {
             throw new CatalinaException("Response not valid: \n" + response);
         }
     }

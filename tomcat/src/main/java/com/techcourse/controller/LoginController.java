@@ -15,31 +15,40 @@ import org.apache.catalina.session.SessionManager;
 public class LoginController extends RestController {
 
     @Override
-    protected boolean doGet(HttpRequest request, HttpResponse response) {
-        return request.getSessionFromCookies()
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        request.getSessionFromCookies()
                 .filter(SessionManager::contains)
-                .map(session -> redirectTo(response, "/index"))
-                .orElseGet(() -> responseResource(response, request.getTargetPath()));
+                .ifPresentOrElse(
+                        session -> redirectTo(response, "/index"),
+                        () -> responseLoginPage(request, response)
+                );
     }
 
     @Override
-    protected boolean doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Optional<User> nullableUser = InMemoryUserRepository.findByAccount(request.getFromBody("account"));
-        return nullableUser
+        nullableUser
                 .filter(user -> user.checkPassword(request.getFromBody("password")))
-                .map(user -> loginAndRedirectToIndex(response, user))
-                .orElseGet(() -> responsePage401(response));
+                .ifPresentOrElse(
+                        user -> loginAndRedirectToIndex(response, user),
+                        () -> responsePage401(response)
+                );
     }
 
-    private boolean loginAndRedirectToIndex(HttpResponse response, User user) {
+    private void responseLoginPage(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.OK);
+        responseResource(response, request.getTargetPath());
+    }
+
+    private void loginAndRedirectToIndex(HttpResponse response, User user) {
         Session session = SessionManager.add("user", user);
         response.addSessionToCookies(session);
-        return redirectTo(response, "/index");
+        redirectTo(response, "/index");
     }
 
-    private boolean responsePage401(HttpResponse response) {
+    private void responsePage401(HttpResponse response) {
         String path = "/401.html";
         response.setStatus(HttpStatus.UNAUTHORIZED);
-        return responseResource(response, path);
+        responseResource(response, path);
     }
 }

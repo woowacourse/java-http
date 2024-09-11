@@ -47,8 +47,8 @@ public class HttpRequest {
         return body;
     }
 
-    public boolean hasPath(final String target) {
-        return requestLine.getPath().isEqualPath(target);
+    public String getPath() {
+        return requestLine.getPath().getRequestPath();
     }
 
     public int getContentLength() throws IOException {

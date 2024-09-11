@@ -27,9 +27,12 @@ public class RegisterController extends AbstractController {
 
     private void registerNewUser(HttpRequest request) {
         HttpBody body = request.getBody();
-        String account = body.get("account").orElseThrow();
-        String password = body.get("password").orElseThrow();
-        String email = body.get("email").orElseThrow();
+        String account = body.get("account")
+                .orElseThrow(() -> new IllegalArgumentException("account 값은 필수입니다."));
+        String password = body.get("password")
+                .orElseThrow(() -> new IllegalArgumentException("password 값은 필수입니다."));
+        String email = body.get("email")
+                .orElseThrow(() -> new IllegalArgumentException("email 값은 필수입니다."));
 
         InMemoryUserRepository.save(new User(account, password, email));
     }

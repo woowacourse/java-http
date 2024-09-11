@@ -1,5 +1,8 @@
 package servlet.http.request.uri;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 public class URI {
 
     private static final String URI_DELIMITER = "\\?";
@@ -12,16 +15,17 @@ public class URI {
     private final QueryParams queryParams;
 
     public URI(String uri) {
-        validateUri(uri);
-        String[] uriParts = split(uri);
+        String decodedUri = decode(uri);
+        String[] uriParts = split(decodedUri);
         this.path = new Path(uriParts[PATH_INDEX]);
         this.queryParams = QueryParams.from(extractQueryParams(uriParts));
     }
 
-    private void validateUri(String uri) {
+    private String decode(String uri) {
         if (uri == null || uri.isBlank()) {
             throw new IllegalArgumentException("URI는 필수입니다.");
         }
+        return URLDecoder.decode(uri, StandardCharsets.UTF_8);
     }
 
     private String[] split(String uri) {

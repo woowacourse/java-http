@@ -67,4 +67,19 @@ class URITest {
         // then
         assertThat(actual.existQueryParams()).isFalse();
     }
+
+    @Test
+    void URI가_인코딩되어_있을_경우_디코딩해서_객체를_생성한다() {
+        // given
+        String uri = "/%EA%B2%BD%EB%A1%9C%EC%9E%85%EB%8B%88%EB%8B%A4?%EC%9D%B4%EB%A6%84=%ED%94%84%EB%A6%B0";
+
+        // when
+        URI actual = new URI(uri);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(actual.getPath()).isEqualTo("/경로입니다");
+            softly.assertThat(actual.getQueryParamValue("이름")).isEqualTo("프린");
+        });
+    }
 }

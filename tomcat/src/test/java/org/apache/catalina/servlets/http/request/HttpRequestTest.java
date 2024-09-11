@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
+import org.apache.catalina.controller.http.HttpVersion;
 import org.apache.catalina.controller.http.request.HttpMethod;
 import org.apache.catalina.controller.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,7 @@ class HttpRequestTest {
     void parseVersion() {
         HttpRequest httpRequest = new HttpRequest(request);
 
-        assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1");
+        assertThat(httpRequest.getProtocolVersion()).isEqualTo(HttpVersion.HTTP_1_1);
     }
 
     @Test

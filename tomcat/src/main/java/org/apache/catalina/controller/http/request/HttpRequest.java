@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.controller.http.Cookie;
+import org.apache.catalina.controller.http.HttpVersion;
 import org.apache.catalina.controller.http.Session;
 import org.apache.catalina.controller.http.SessionManager;
 
@@ -23,9 +24,7 @@ public class HttpRequest {
     private String body = "";
 
     public HttpRequest(String request) {
-        this.requestLine = new RequestLine(
-                HttpMethod.valueOf(parseHttpMethod(request)), parsePath(request), parseVersion(request)
-        );
+        this.requestLine = new RequestLine(parseHttpMethod(request), parsePath(request), parseVersion(request));
         this.headers = parseHeaders(request);
         this.body = parseBody(request);
     }
@@ -173,7 +172,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getProtocolVersion() {
+    public HttpVersion getProtocolVersion() {
         return requestLine.getVersion();
     }
 

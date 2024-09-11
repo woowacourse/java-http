@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.catalina.controller.http.HttpVersion;
 
 public class RequestLine {
 
@@ -12,12 +13,16 @@ public class RequestLine {
 
     private final HttpMethod method;
     private final String path;
-    private final String version;
+    private final HttpVersion version;
 
-    public RequestLine(HttpMethod method, String path, String version) {
+    public RequestLine(HttpMethod method, String path, HttpVersion version) {
         this.method = method;
         this.path = path;
         this.version = version;
+    }
+
+    public RequestLine(String method, String path, String version) {
+        this(HttpMethod.valueOf(method), path, HttpVersion.of(version));
     }
 
     public String getRequestURI() {
@@ -54,7 +59,7 @@ public class RequestLine {
         return path;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 

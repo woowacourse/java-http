@@ -11,7 +11,7 @@ import org.apache.catalina.controller.http.Cookie;
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
-    private static final String STATUS_LINE = "%s %s %s";
+    private static final String STATUS_LINE = "%s %s %s ";
     private static final String HEADER_FORMAT_TEMPLATE = "%s: %s " + CRLF;
 
     private final OutputStream outputStream;

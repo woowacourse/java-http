@@ -12,7 +12,14 @@ public class InMemoryUserRepository {
     private static final AtomicLong sequence = new AtomicLong(1);
 
     static {
-        final User user = new User(sequence.getAndIncrement(), "gugu", "password", "hkkang@woowahan.com");
+        reset();
+    }
+
+    public static void reset() {
+        database.clear();
+        sequence.set(1);
+
+        User user = new User(sequence.getAndIncrement(), "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 

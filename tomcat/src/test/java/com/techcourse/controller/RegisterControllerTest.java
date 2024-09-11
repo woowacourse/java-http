@@ -2,17 +2,24 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class RegisterControllerTest {
+
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.reset();
+    }
 
     @DisplayName("회원가입 페이지를 호출한다.")
     @Test

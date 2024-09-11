@@ -5,6 +5,8 @@ import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceController;
 import com.techcourse.controller.RootController;
+import com.techcourse.service.RegisterService;
+import com.techcourse.service.UserService;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Controller;
@@ -15,8 +17,8 @@ public class RequestMapper {
     private static final Map<String, Controller> handlerMap = new HashMap<>();
 
     static {
-        handlerMap.put("/login", new LoginController());
-        handlerMap.put("/register", new RegisterController());
+        handlerMap.put("/login", new LoginController(new UserService()));
+        handlerMap.put("/register", new RegisterController(new RegisterService()));
         handlerMap.put("/", new RootController());
     }
 

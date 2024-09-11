@@ -14,7 +14,11 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String USER_SESSION_NAME = "user";
 
-    private final UserService userService = UserService.getInstance();
+    private final UserService userService;
+
+    public LoginController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {

@@ -11,7 +11,11 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
 
-    private final RegisterService registerService = RegisterService.getInstance();
+    private final RegisterService registerService;
+
+    public RegisterController(RegisterService registerService) {
+        this.registerService = registerService;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {

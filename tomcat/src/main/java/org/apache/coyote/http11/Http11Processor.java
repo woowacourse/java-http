@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.DefaultController;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
 import org.slf4j.Logger;
@@ -41,17 +42,14 @@ public class Http11Processor implements Runnable, Processor {
             final var httpResponse = new HttpResponse();
             final var loginController = new LoginController();
             final var registerController = new RegisterController();
+            final var defaultController = new DefaultController();
 
             if (httpRequest.hasPath("/login")) {
                 loginController.service(httpRequest, httpResponse);
             } else if (httpRequest.hasPath("/register")) {
                 registerController.service(httpRequest, httpResponse);
-
             } else {
-                httpResponse.setHttpStatusCode(HttpStatusCode.OK);
-                httpResponse.setSourceCode(httpRequest.getResources());
-                httpResponse.putHeader("Content-Length", httpRequest.getContentLength());
-                httpResponse.putHeader("Content-Type", httpRequest.getContentTypeToResponseText());
+                defaultController.service(httpRequest, httpResponse);
             }
 
             outputStream.write(httpResponse.toHttpResponse().getBytes());

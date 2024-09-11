@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
 
         } catch (final IOException exception) {
-            log.error("[ERROR] : {}", exception.getMessage());
+            log.error("[I/O ERROR] : {}", exception.getMessage());
         }
     }
 
@@ -56,6 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             final var handler = HandlerMapper.get(request.getPath());
             return handler.handle(request);
         } catch (final Exception exception) {
+            log.warn("[KNOWN ERROR] : {}", exception.getMessage());
             final var handler = ExceptionHandlerMapper.get(exception.getClass());
             return handler.handle();
         }

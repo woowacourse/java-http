@@ -37,6 +37,12 @@ public class StaticResourceFinder {
         return new HttpResponse(found, responseHeader, textTypeBody);
     }
 
+    public static HttpResponse renderRedirect(final ResponseHeader header) {
+        final var found = ResponseLine.FOUND;
+        final var textTypeBody = new TextTypeBody("");
+        return new HttpResponse(found, header, textTypeBody);
+    }
+
     private byte[] getBytes() {
         try {
             return Files.readAllBytes(new File(resourcePath.getFile()).toPath());

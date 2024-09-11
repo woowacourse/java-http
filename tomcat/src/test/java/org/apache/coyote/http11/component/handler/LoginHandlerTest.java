@@ -27,10 +27,29 @@ class LoginHandlerTest {
 
         // then
         assertThat(response.getResponseText())
-                .isEqualTo(String.join("\r\n",
+                .startsWith(String.join("\r\n",
                         "HTTP/1.1 302 FOUND ",
-                        "Location: http://localhost:8080/index.html"
-                        , "\r\n"));
+                        "Location: http://localhost:8080/index.html"));
+    }
+
+    @Test
+    @DisplayName("로그인에 성공하면 Session의 아이디 쿠키를 발생한다.")
+    void publish_session_id_to_cookie() {
+        // given
+        final var request = new HttpRequest(
+                String.join("\r\n",
+                        "GET /login?account=gugu&password=password HTTP/1.1 ",
+                        "Host: http://localhost:8080",
+                        "")
+        );
+        final var loginHandler = new LoginHandler("/login");
+
+        // when
+        final var response = loginHandler.handle(request);
+
+        // then
+        assertThat(response.getResponseText())
+                .contains("Set-Cookie: JSESSIONID");
     }
 
     @Test

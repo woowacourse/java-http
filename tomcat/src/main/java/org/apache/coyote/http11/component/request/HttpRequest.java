@@ -8,6 +8,7 @@ import org.apache.coyote.http11.component.common.Method;
 import org.apache.coyote.http11.component.common.body.Body;
 import org.apache.coyote.http11.component.common.body.BodyMapper;
 import org.apache.coyote.http11.component.exception.NotFoundException;
+import org.apache.coyote.http11.component.response.Cookie;
 
 
 public class HttpRequest {
@@ -16,12 +17,14 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final Body body;
+    private final Cookie cookie;
 
     public HttpRequest(final String plaintext) {
         Objects.requireNonNull(plaintext);
         final var lines = List.of(plaintext.split(LINE_DELIMITER));
         this.requestLine = new RequestLine(lines.getFirst());
         this.requestHeaders = new RequestHeaders(extractHeader(lines));
+        this.cookie = new Cookie(requestHeaders.get("Cookie"));
         this.body = BodyMapper.getMapping(requestHeaders.get("Content-Type"))
                 .apply(extractBody(lines));
     }
@@ -68,5 +71,17 @@ public class HttpRequest {
             throw new NotFoundException("바디 값 찾을 수 없음");
         }
         return content;
+    }
+
+    public String getHeaderContent(final String key) {
+        final var content = requestHeaders.get(key);
+        if (content.isBlank()) {
+            throw new NotFoundException("헤더 값 찾을 수 없음");
+        }
+        return content;
+    }
+
+    public String getCookieContent(final String key) {
+        return cookie.get(key);
     }
 }

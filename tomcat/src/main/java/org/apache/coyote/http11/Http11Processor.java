@@ -102,7 +102,11 @@ public class Http11Processor implements Runnable, Processor {
             return saveUser(request);
         }
 
-        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK);
+        try {
+            return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK);
+        } catch (Exception e) {
+            return HttpResponse.notFound();
+        }
     }
 
     private HttpResponse getLoginPage(HttpRequest request) {

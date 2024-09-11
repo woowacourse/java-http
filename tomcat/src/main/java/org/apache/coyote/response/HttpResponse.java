@@ -1,6 +1,5 @@
 package org.apache.coyote.response;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
@@ -39,19 +38,15 @@ public class HttpResponse {
             fileName += HTML_SUFFIX;
         }
 
-        try {
-            return new HttpResponse(
-                    httpStatusCode,
-                    FILE_READER.read(fileName),
-                    ContentType.fromFileName(fileName)
-            );
-        } catch (UncheckedServletException e) {
-            return new HttpResponse(
-                    HttpStatusCode.NOT_FOUND,
-                    FILE_READER.read(NOT_FOUND_FILENAME),
-                    ContentType.fromFileName(fileName)
-            );
-        }
+        return new HttpResponse(httpStatusCode, FILE_READER.read(fileName), ContentType.fromFileName(fileName));
+    }
+
+    public static HttpResponse notFound() {
+        return new HttpResponse(
+                HttpStatusCode.NOT_FOUND,
+                FILE_READER.read(NOT_FOUND_FILENAME),
+                ContentType.TEXT_HTML
+        );
     }
 
     public static HttpResponse redirectTo(String path) {

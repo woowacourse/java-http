@@ -12,12 +12,14 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Dispatcher dispatcher = new Dispatcher();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -37,21 +39,24 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            Dispatcher dispatcher = new Dispatcher();
+            httpProcess(bufferedReader, outputStream);
 
-            HttpRequest request = HttpMessageGenerator.generateRequest(bufferedReader);
-            log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
-                    request.getPath().getUri(), request.getMethodName(), request.getBody());
-
-            HttpResponse response = new HttpResponse();
-
-            dispatcher.dispatch(request, response);
-            log.info("\nresponse: {}", response);
-
-            outputStream.write(response.toResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void httpProcess(BufferedReader bufferedReader, OutputStream outputStream) throws IOException {
+        HttpRequest request = HttpMessageGenerator.generateRequest(bufferedReader);
+        log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
+                request.getPath().getUri(), request.getMethodName(), request.getBody());
+
+        HttpResponse response = new HttpResponse();
+
+        dispatcher.dispatch(request, response);
+        log.info("\nresponse: {}", response);
+
+        outputStream.write(response.toResponse().getBytes());
     }
 }

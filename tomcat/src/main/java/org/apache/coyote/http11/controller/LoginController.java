@@ -2,11 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.UUID;
-import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.httprequest.HttpCookie;
-import org.apache.coyote.http11.httprequest.HttpCookieConvertor;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;
@@ -21,9 +17,8 @@ public class LoginController extends AbstractController {
     private static final String INDEX_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String COOKIE_DELIMITER = "JSESSIONID";
-
-    private final Session session = Session.getInstance();
+    private static final String COOKIE_DELIMITER = "=";
+    private static final String SESSION_USER_NAME = "user";
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
@@ -36,13 +31,13 @@ public class LoginController extends AbstractController {
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
-        UUID uuid = UUID.randomUUID();
 
         if (user.checkPassword(password)) {
-            session.save(uuid.toString(), user);
+            Session session = httpRequest.getSession();
+            session.setAttribute(SESSION_USER_NAME, user);
             log.info(user.toString());
             return HttpResponse.found(httpRequest)
-                    .setCookie(JSESSIONID + COOKIE_DELIMITER + uuid)
+                    .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
                     .location(INDEX_PATH)
                     .build();
         }
@@ -56,25 +51,16 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        if (!httpRequest.containsHeader(HttpHeaderName.COOKIE)) {
-            return redirectPage(httpRequest, LOGIN_PATH);
+        Session session = httpRequest.getSession();
+        if (!session.hasAttribute(SESSION_USER_NAME)) {
+            return HttpResponse.ok(httpRequest)
+                    .staticResource(LOGIN_PATH)
+                    .build();
         }
-
-        HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(
-                httpRequest.getHeaderValue(HttpHeaderName.COOKIE));
-        if (!httpCookie.containsCookie(JSESSIONID)) {
-            return redirectPage(httpRequest, LOGIN_PATH);
-        }
-
-        String jsessionid = httpCookie.getCookieValue(JSESSIONID);
-        if (!session.containsUser(jsessionid)) {
-            return redirectPage(httpRequest,LOGIN_PATH);
-        }
-
-        User user = session.getUser(jsessionid);
+        User user = (User) session.getAttribute(SESSION_USER_NAME);
         log.info(user.toString());
         return HttpResponse.found(httpRequest)
-                .setCookie(JSESSIONID + COOKIE_DELIMITER + jsessionid)
+                .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
                 .location(INDEX_PATH)
                 .build();
     }

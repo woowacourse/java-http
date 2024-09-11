@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.httprequest.HttpCookie;
+import org.apache.coyote.http11.httprequest.HttpCookieConvertor;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httprequest.HttpRequestBody;
 import org.apache.coyote.http11.httprequest.HttpRequestHeader;
@@ -13,6 +16,7 @@ import org.apache.coyote.http11.httprequest.HttpRequestLine;
 
 public class HttpRequestConvertor {
 
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_DELIMITER = ":";
     private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String BODY_DELIMITER = "&";
@@ -21,6 +25,7 @@ public class HttpRequestConvertor {
     private static final int TUPLE_KEY_INDEX = 0;
     private static final int TUPLE_VALUE_INDEX = 1;
     private static final int HEADER_KEY_INDEX = 0;
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
@@ -31,13 +36,14 @@ public class HttpRequestConvertor {
         HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
         Map<String, String> headers = getHeaders(bufferedReader);
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
+        Session session = getOrCreateSession(httpRequestHeader);
 
         if (isExistRequestBody(httpRequestHeader)) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
-            return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+            return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody, session);
         }
 
-        return new HttpRequest(httpRequestLine, httpRequestHeader);
+        return new HttpRequest(httpRequestLine, httpRequestHeader, session);
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
@@ -58,6 +64,30 @@ public class HttpRequestConvertor {
         }
 
         return sb.toString();
+    }
+
+    private static Session getOrCreateSession(HttpRequestHeader httpRequestHeader) {
+        if (!httpRequestHeader.containsHeader(HttpHeaderName.COOKIE)) {
+            return createSession();
+        }
+
+        HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(
+                httpRequestHeader.getHeaderValue(HttpHeaderName.COOKIE));
+        if (!httpCookie.containsCookie(JSESSIONID)) {
+            return createSession();
+        }
+
+        String jsessionid = httpCookie.getCookieValue(JSESSIONID);
+        if (!SESSION_MANAGER.containsSession(jsessionid)) {
+            return createSession();
+        }
+        return SESSION_MANAGER.findSession(jsessionid);
+    }
+
+    private static Session createSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        SESSION_MANAGER.add(session);
+        return session;
     }
 
     private static HttpRequestBody getHttpRequestBody(

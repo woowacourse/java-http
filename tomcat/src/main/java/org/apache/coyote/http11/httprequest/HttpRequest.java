@@ -3,21 +3,29 @@ package org.apache.coyote.http11.httprequest;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.Session;
 
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
+    private final Session session;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+    public HttpRequest(
+            HttpRequestLine httpRequestLine,
+            HttpRequestHeader httpRequestHeader,
+            HttpRequestBody httpRequestBody,
+            Session session
+    ) {
         this.httpRequestLine = httpRequestLine;
         this.httpRequestHeader = httpRequestHeader;
         this.httpRequestBody = httpRequestBody;
+        this.session = session;
     }
 
-    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader) {
-        this(httpRequestLine, httpRequestHeader, null);
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader, Session session) {
+        this(httpRequestLine, httpRequestHeader, null, session);
     }
 
     public boolean isMethod(HttpMethod method) {
@@ -74,5 +82,9 @@ public class HttpRequest {
 
     public HttpRequestBody getHttpRequestBody() {
         return httpRequestBody;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

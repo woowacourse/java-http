@@ -1,36 +1,31 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class Session {
 
-    private static final Session INSTANCE = new Session();
-    private final Map<String, User> userMap;
+    private final String id;
+    private final Map<String, Object> attributes;
 
-    private Session() {
-        this.userMap = new HashMap<>();
+    public Session(String id) {
+        this.id = id;
+        this.attributes = new HashMap<>();
     }
 
-    public static Session getInstance() {
-        return INSTANCE;
+    public boolean hasAttribute(String name) {
+        return attributes.containsKey(name);
     }
 
-    public void save(String uuid, User user) {
-        userMap.put(uuid, user);
+    public Object getAttribute(String name) {
+        return attributes.get(name);
     }
 
-    public boolean containsUser(String uuid) {
-        return userMap.containsKey(uuid);
+    public void setAttribute(String name, Object value) {
+        attributes.put(name, value);
     }
 
-    public User getUser(String uuid) {
-        return userMap.get(uuid);
-    }
-
-    public Set<String> getKeySet() {
-        return userMap.keySet();
+    public String getId() {
+        return id;
     }
 }

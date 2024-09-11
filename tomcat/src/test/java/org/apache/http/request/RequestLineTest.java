@@ -3,6 +3,8 @@ package org.apache.http.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
@@ -31,6 +33,19 @@ class RequestLineTest {
         assertThatThrownBy(() -> RequestLine.from(invalidRawRequestLine))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("RequestLine 형식이 맞지 않습니다. method, path, version으로 구성해주세요.");
+    }
+
+    @Test
+    @DisplayName("동일한 http 메서드인지 반환 성공")
+    void hasSameMethod() {
+        HttpMethod httpMethod = HttpMethod.GET;
+        HttpMethod differenceMethod = HttpMethod.POST;
+        RequestLine requestLine = new RequestLine(httpMethod, "/index.html", HttpVersion.HTTP_1_1);
+
+        assertAll(
+                () -> assertTrue(requestLine.hasSameMethod(httpMethod)),
+                () -> assertFalse(requestLine.hasSameMethod(differenceMethod))
+        );
     }
 
     @Test

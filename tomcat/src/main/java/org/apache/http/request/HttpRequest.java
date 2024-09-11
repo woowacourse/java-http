@@ -5,21 +5,25 @@ import java.util.Optional;
 
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
+import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.header.StandardHttpHeader;
 
 public class HttpRequest {
-    private final HttpMethod method;
-    private final String path;
-    private final String version;
+    private final RequestLine requestLine;
     private final HttpHeader[] headers;
     private final String body;
     private final HttpCookie httpCookie;
 
+    public HttpRequest(RequestLine requestLine, HttpHeader[] headers, String body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
+        this.httpCookie = parseCookie(headers);
+    }
+
     public HttpRequest(String method, String path, String version, HttpHeader[] headers, String body) {
-        this.method = HttpMethod.valueOf(method);
-        this.path = path;
-        this.version = version;
+        this.requestLine = new RequestLine(method, path, version);
         this.headers = headers;
         this.body = body;
         this.httpCookie = parseCookie(headers);
@@ -46,19 +50,19 @@ public class HttpRequest {
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {
-        return this.method == httpMethod;
+        return requestLine.hasSameMethod(httpMethod);
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public String getVersion() {
-        return version;
+    public HttpVersion getVersion() {
+        return requestLine.getVersion();
     }
 
     public HttpHeader[] getHeaders() {

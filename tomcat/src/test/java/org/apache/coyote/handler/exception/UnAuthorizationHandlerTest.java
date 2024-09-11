@@ -12,7 +12,7 @@ class UnAuthorizationHandlerTest {
     @Test
     @DisplayName("모든 요청 처리: 401 응답 반환")
     void handle() {
-        HttpRequest httpRequest = new HttpRequest("GET", null, null, null, null);
+        HttpRequest httpRequest = new HttpRequest("GET", null, "HTTP/1.1", null, null);
         assertThat(UnAuthorizationHandler.getInstance().handle(httpRequest)).isEqualTo(HttpResponseGenerator.getUnauthorizedResponse());
     }
 }

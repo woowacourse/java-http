@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.http.HttpMethod;
+import org.apache.http.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,9 +32,9 @@ class HttpRequestReaderTest {
 
         // then
         assertAll(
-                () -> assertThat(request.getMethod().name()).isEqualTo("GET"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo("/index.html"),
-                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(request.getHeaders()).hasSize(2),
                 () -> assertThat(request.getHeader("Host")).isEqualTo("localhost:8080"),
                 () -> assertThat(request.getBody()).isNull()
@@ -57,9 +59,9 @@ class HttpRequestReaderTest {
 
         // then
         assertAll(
-                () -> assertThat(request.getMethod().name()).isEqualTo("POST"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/login"),
-                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(request.getHeaders()).hasSize(3),
                 () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isEqualTo("username=john&password=pass")
@@ -81,9 +83,9 @@ class HttpRequestReaderTest {
 
         // then
         assertAll(
-                () -> assertThat(request.getMethod().name()).isEqualTo("GET"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo("/"),
-                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(request.getHeaders()).isEmpty(),
                 () -> assertThat(request.getBody()).isNull()
 
@@ -107,9 +109,9 @@ class HttpRequestReaderTest {
 
         // then
         assertAll(
-                () -> assertThat(request.getMethod().name()).isEqualTo("POST"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/hi"),
-                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(request.getHeaders()).hasSize(2),
                 () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isNull()

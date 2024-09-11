@@ -21,14 +21,20 @@ public class RequestLine {
         this.version = version;
     }
 
+    public RequestLine(String method, String path, String version) {
+        this.method = HttpMethod.valueOf(method);
+        this.path = path;
+        this.version = HttpVersion.getHttpVersion(version);
+    }
+
     public static RequestLine from(String requestLine) {
         String[] requestLineParts = requestLine.split(REQUEST_LINE_PART_DELIMITER);
         checkRequestLinePartSize(requestLineParts.length);
 
         return new RequestLine(
-                HttpMethod.valueOf(requestLineParts[HTTP_METHOD_PART_ORDER]),
+                requestLineParts[HTTP_METHOD_PART_ORDER],
                 requestLineParts[HTTP_PATH_PART_ORDER],
-                HttpVersion.getHttpVersion(requestLineParts[HTTP_VERSION_PART_ORDER])
+                requestLineParts[HTTP_VERSION_PART_ORDER]
         );
     }
 
@@ -36,6 +42,10 @@ public class RequestLine {
         if (requestLinePartsSize != REQUEST_LINE_PART_SIZE) {
             throw new IllegalArgumentException("RequestLine 형식이 맞지 않습니다. method, path, version으로 구성해주세요.");
         }
+    }
+
+    public boolean hasSameMethod(HttpMethod httpMethod) {
+        return this.method == httpMethod;
     }
 
     public HttpMethod getMethod() {

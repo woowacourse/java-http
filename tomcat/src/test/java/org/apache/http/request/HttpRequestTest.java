@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
+import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,17 +17,17 @@ class HttpRequestTest {
     @DisplayName("HttpRequest 객체 생성 및 기본 getter 메소드 테스트")
     void createHttpRequest() {
         // given
-        String method = "GET";
+        HttpMethod method = HttpMethod.GET;
         String path = "/index.html";
-        String version = "HTTP/1.1";
+        HttpVersion version = HttpVersion.HTTP_1_1;
         HttpHeader[] headers = new HttpHeader[]{
                 new HttpHeader("Host", "localhost:8080"),
                 new HttpHeader("Connection", "keep-alive")
         };
-        String body = "sample body";
 
         // when
-        HttpRequest request = new HttpRequest(method, path, version, headers, body);
+        RequestLine requestLine = new RequestLine(method, path, version);
+        HttpRequest request = new HttpRequest(requestLine, headers, null);
 
         // then
         assertAll(
@@ -34,7 +35,7 @@ class HttpRequestTest {
                 () -> assertThat(request.getPath()).isEqualTo(path),
                 () -> assertThat(request.getVersion()).isEqualTo(version),
                 () -> assertThat(request.getHeaders()).hasSize(2),
-                () -> assertThat(request.getBody()).isEqualTo(body)
+                () -> assertThat(request.getBody()).isNull()
 
         );
     }
@@ -43,7 +44,8 @@ class HttpRequestTest {
     @DisplayName("isSameMethod 메소드 테스트")
     void iSameMethod() {
         // given
-        HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null, null);
+        RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        HttpRequest request = new HttpRequest(requestLine, null, null);
 
         // then
         assertAll(
@@ -56,11 +58,12 @@ class HttpRequestTest {
     @DisplayName("getHeader 메소드 테스트: 포함되지 않은 헤더인 경우 예외")
     void testGetHeader() {
         // given
+        RequestLine requestLine = new RequestLine(HttpMethod.GET, "/hi", HttpVersion.HTTP_1_1);
         HttpHeader[] headers = new HttpHeader[]{
                 new HttpHeader("Content-Type", "application/json"),
                 new HttpHeader("Authorization", "Bearer token")
         };
-        HttpRequest request = new HttpRequest("GET", "/api", "HTTP/1.1", headers, null);
+        HttpRequest request = new HttpRequest(requestLine, headers, null);
 
         // when & then
         assertAll(
@@ -76,10 +79,11 @@ class HttpRequestTest {
     @DisplayName("HttpCookie 파싱 테스트")
     void testParseCookie() {
         // given
+        RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
         HttpHeader[] headers = new HttpHeader[]{
                 new HttpHeader("Cookie", "sessionId=abc123; userId=john")
         };
-        HttpRequest request = new HttpRequest("GET", "/", "HTTP/1.1", headers, null);
+        HttpRequest request = new HttpRequest(requestLine, headers, null);
 
         // when
         HttpCookie cookie = request.getHttpCookie();
@@ -96,10 +100,11 @@ class HttpRequestTest {
     @DisplayName("Cookie 헤더가 없는 경우 HttpCookie null 테스트")
     void testNoCookie() {
         // given
+        RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
         HttpHeader[] headers = new HttpHeader[]{
                 new HttpHeader("Content-Type", "text/html")
         };
-        HttpRequest request = new HttpRequest("GET", "/", "HTTP/1.1", headers, null);
+        HttpRequest request = new HttpRequest(requestLine, headers, null);
 
         assertThat(request.getHttpCookie()).isNull();
     }

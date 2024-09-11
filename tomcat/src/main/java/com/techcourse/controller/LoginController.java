@@ -2,23 +2,24 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
+import com.techcourse.model.LoginCredentials;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Handler;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseCookie;
 import org.apache.coyote.http11.response.ResponseFile;
 
 public class LoginController extends AbstractController {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String SESSION_KEY = "user";
 
     public LoginController() {
         List<Handler> handlers = List.of(
@@ -29,36 +30,28 @@ public class LoginController extends AbstractController {
     }
 
     private void doLoginPost(HttpRequest request, HttpResponse response) {
-        String account = request.getBodyParameter("account");
-        String password = request.getBodyParameter("password");
-        validateLoginRequest(account, password);
+        LoginCredentials loginCredentials = createLoginCredentials(request);
+        User user = getUser(loginCredentials);
 
         HttpSession session = request.getSession();
-
-        User user = getUser(account, password);
-        session.setAttribute("user", user);
-
-        if (SESSION_MANAGER.findSession(session.getId()) == null) {
-            SESSION_MANAGER.add(session);
-            response.addCookie(ResponseCookie.of(session));
-        }
+        session.setAttribute(SESSION_KEY, user);
 
         response.redirectTo("/index.html");
     }
 
-    private void validateLoginRequest(String account, String password) {
-        if (account == null || account.isEmpty()) {
-            throw new IllegalArgumentException("account는 비어 있을 수 없습니다.");
-        }
-        if (password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("password는 비어 있을 수 없습니다.");
-        }
+    private LoginCredentials createLoginCredentials(HttpRequest request) {
+        String account = request.getBodyParameter(ACCOUNT);
+        String password = request.getBodyParameter(PASSWORD);
+
+        return new LoginCredentials(account, password);
     }
 
-    private static User getUser(String account, String password) {
+    private User getUser(LoginCredentials loginCredentials) {
+        String account = loginCredentials.getAccount();
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자입니다."));
-        if (!user.checkPassword(password)) {
+
+        if (!user.checkPassword(loginCredentials)) {
             throw new UnauthorizedException();
         }
         return user;
@@ -76,7 +69,6 @@ public class LoginController extends AbstractController {
 
     private boolean isLoginUser(HttpRequest request) {
         HttpSession requestSession = request.getSession();
-        HttpSession managedSession = SESSION_MANAGER.findSession(requestSession.getId());
-        return managedSession != null && managedSession.getAttribute("user") != null;
+        return requestSession.getAttribute(SESSION_KEY) != null;
     }
 }

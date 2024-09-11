@@ -1,6 +1,6 @@
-package com.techcourse.servlet;
+package com.techcourse.servlet.mapping;
 
-import jakarta.servlet.http.HttpServletRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 
 public interface HandlerMapping {
 

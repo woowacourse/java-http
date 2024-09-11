@@ -1,11 +1,10 @@
 package cache.com.example;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class GreetingController {
@@ -30,6 +29,11 @@ public class GreetingController {
 
     @GetMapping("/etag")
     public String etag() {
+        return "index";
+    }
+
+    @GetMapping("/no-etag")
+    public String noEtag() {
         return "index";
     }
 

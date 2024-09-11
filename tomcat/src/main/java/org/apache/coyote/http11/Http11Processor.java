@@ -1,12 +1,20 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestMapping;
+import org.apache.coyote.controller.FrontController;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +34,27 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequest.from(reader);
+            HttpResponse httpResponse = new HttpResponse();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            FrontController controller = RequestMapping.getController(httpRequest.getPath());
+            controller.service(httpRequest, httpResponse);
+
+            String response = httpResponse.toString();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

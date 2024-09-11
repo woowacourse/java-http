@@ -1,6 +1,5 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -8,13 +7,11 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        HttpMethod method = request.getMethod();
-
-        if (method.isGet()) {
+        if (request.isGetRequest()) {
             doGet(request, response);
         }
 
-        if (method.isPost()) {
+        if (request.isPostRequest()) {
             doPost(request, response);
         }
     }

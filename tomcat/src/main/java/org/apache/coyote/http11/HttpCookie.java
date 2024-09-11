@@ -16,7 +16,9 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie from(String rawCookies) {
+    public static HttpCookie from(HttpHeader httpHeader) {
+        String rawCookies = httpHeader.getHeader(HttpHeaderName.COOKIE);
+
         if (rawCookies == null) {
             return new HttpCookie(new HashMap<>());
         }

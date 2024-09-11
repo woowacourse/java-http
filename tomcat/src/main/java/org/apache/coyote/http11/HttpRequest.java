@@ -8,17 +8,24 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private static final String QUERY_PARAM_DELIMETER = "&";
-    private static final String QUERY_PARAM_VALUE_DELIMETER = "=";
+    private static final String QUERY_PARAM_DELIMITER = "&";
+    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
+    private static final String REQUEST_LINE_DELIMITER = " ";
+
     private final HttpMethod method;
     private final String requestUrl;
-    private final HttpHeader header;
+    private final HttpHeader headers;
     private final HttpCookie httpCookie;
     private final Map<String, String> body;
 
-    public HttpRequest(HttpHeader header, HttpMethod method, String requestUrl, HttpCookie httpCookie,
-                       Map<String, String> body) {
-        this.header = header;
+    private HttpRequest(
+            HttpHeader header,
+            HttpMethod method,
+            String requestUrl,
+            HttpCookie httpCookie,
+            Map<String, String> body
+    ) {
+        this.headers = header;
         this.method = method;
         this.requestUrl = requestUrl;
         this.httpCookie = httpCookie;
@@ -26,13 +33,13 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(List<String> header, String rawBody) {
-        String[] requestLine = header.getFirst().split(" ");
+        String[] requestLine = header.getFirst().split(REQUEST_LINE_DELIMITER);
         HttpMethod method = HttpMethod.valueOf(requestLine[0]);
         String requestUrl = requestLine[1];
 
-        Map<String, String> body = parseBody(rawBody);
         HttpHeader httpHeader = HttpHeader.from(header);
-        HttpCookie httpCookie = HttpCookie.from(httpHeader.getHeader(HttpHeaderName.COOKIE));
+        HttpCookie httpCookie = HttpCookie.from(httpHeader);
+        Map<String, String> body = parseBody(rawBody);
 
         return new HttpRequest(httpHeader, method, requestUrl, httpCookie, body);
     }
@@ -42,15 +49,19 @@ public class HttpRequest {
             return new HashMap<>();
         }
 
-        return Arrays.stream(rawBody.split(QUERY_PARAM_DELIMETER))
+        return Arrays.stream(rawBody.split(QUERY_PARAM_DELIMITER))
                 .collect(Collectors.toMap(
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMETER)[0],
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMETER)[1])
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[0],
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[1])
                 );
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public boolean isGetRequest() {
+        return method.isGet();
+    }
+
+    public boolean isPostRequest() {
+        return method.isPost();
     }
 
     public String getRequestUrl() {

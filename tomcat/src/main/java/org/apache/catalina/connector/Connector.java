@@ -1,6 +1,5 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private ConnectionListener connectionListener;
     private boolean stopped;
 
     public Connector() {
@@ -29,14 +29,8 @@ public class Connector implements Runnable {
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
-        try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public void setConnectionListener(final ConnectionListener connectionListener) {
+        this.connectionListener = connectionListener;
     }
 
     public void start() {
@@ -67,8 +61,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        connectionListener.onConnection(connection);
     }
 
     public void stop() {
@@ -77,6 +70,16 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (final IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+        try {
+            final int checkedPort = checkPort(port);
+            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            return new ServerSocket(checkedPort, checkedAcceptCount);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

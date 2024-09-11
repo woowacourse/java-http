@@ -2,9 +2,11 @@ package support;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ResourceController;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.controller.ControllerExecutor;
+import org.apache.coyote.adapter.CoyoteAdapter;
+import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.Map;
@@ -19,7 +21,8 @@ public class TestServer {
             return;
         }
         final Tomcat tomcat = new Tomcat(
-                new Connector(11240, 50, CONTROLLER_EXECUTOR, sessionManager)
+                new Connector(11240, 50)
+                , new CoyoteAdapter(CONTROLLER_EXECUTOR, new ResourceController(), sessionManager)
         );
         start(tomcat);
     }
@@ -35,7 +38,7 @@ public class TestServer {
         serverThread.start();
     }
 
-    private static final ControllerExecutor CONTROLLER_EXECUTOR = new ControllerExecutor(
+    private static final RequestMapper CONTROLLER_EXECUTOR = new RequestMapper(
             Map.of("/login", new LoginController(),
                     "/register", new RegisterController())
     );

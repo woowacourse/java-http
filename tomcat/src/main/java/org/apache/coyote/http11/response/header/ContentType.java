@@ -10,7 +10,6 @@ public enum ContentType {
     ICO("image/x-icon", ".ico"),
     APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded", "");
 
-    public static final String HEADER = "Content-Type";
     private static final String CHARSET = ";charset=utf-8";
 
     private final String mediaType;
@@ -19,6 +18,12 @@ public enum ContentType {
     ContentType(String mediaType, String extension) {
         this.mediaType = mediaType;
         this.extension = extension;
+    }
+
+    public static boolean isStaticResource(String path) {
+        return Arrays.stream(values())
+                .filter(contentType -> contentType.getExtension() != null && !contentType.getExtension().isEmpty())
+                .anyMatch(contentType -> path.toLowerCase().endsWith(contentType.getExtension()));
     }
 
     public static ContentType findByExtension(String path) {

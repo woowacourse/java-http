@@ -9,6 +9,16 @@ import org.junit.jupiter.api.Test;
 
 class ContentTypeTest {
 
+    @DisplayName("extension을 통해 정적 리소스인지 판단한다.")
+    @Test
+    void isStaticResourceTest() {
+        assertAll(
+                () -> assertThat(ContentType.isStaticResource("/index.html")).isTrue(),
+                () -> assertThat(ContentType.isStaticResource("/style.css")).isTrue(),
+                () -> assertThat(ContentType.isStaticResource("/login")).isFalse()
+        );
+    }
+
     @DisplayName("extension과 일치하는 ContentType을 반환한다.")
     @Test
     void successFindTest() {

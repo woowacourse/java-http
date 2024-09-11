@@ -64,6 +64,10 @@ public class HttpResponse {
         return header;
     }
 
+    public HttpStatus getStatus() {
+        return httpStatus;
+    }
+
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }

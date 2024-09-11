@@ -63,7 +63,7 @@ class RegisterControllerTest {
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
         String expectedLocation = "Location: /index.html";
-        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
                 () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),

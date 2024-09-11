@@ -5,23 +5,22 @@ import org.apache.coyote.util.FileExtension;
 
 public enum MimeType {
 
-    HTML("text/html", CharsetType.UTF_8, FileExtension.HTML),
-    CSS("text/css", CharsetType.NONE, FileExtension.CSS),
-    JS("text/javascript", CharsetType.NONE, FileExtension.JS),
-    ICO("image/x-ico", CharsetType.NONE, FileExtension.ICO),
-    PNG("image/png", CharsetType.NONE, FileExtension.PNG),
-    JPG("image/jpeg", CharsetType.NONE, FileExtension.JPG),
-    SVG("image/svg+xml", CharsetType.UTF_8, FileExtension.SVG),
-    OTHER("text/plain", CharsetType.NONE, null),
+    HTML("text/html", FileExtension.HTML),
+    CSS("text/css", FileExtension.CSS),
+    JS("text/javascript", FileExtension.JS),
+    ICO("image/x-ico", FileExtension.ICO),
+    PNG("image/png", FileExtension.PNG),
+    JPG("image/jpeg", FileExtension.JPG),
+    SVG("image/svg+xml", FileExtension.SVG),
+    OTHER("text/plain", FileExtension.NONE),
     ;
 
+    private static final String TEXT = "text/";
     private final String mimeType;
-    private final CharsetType charset;
     private final FileExtension extension;
 
-    MimeType(String mimeType, CharsetType charset, FileExtension extension) {
+    MimeType(String mimeType, FileExtension extension) {
         this.mimeType = mimeType;
-        this.charset = charset;
         this.extension = extension;
     }
 
@@ -32,10 +31,11 @@ public enum MimeType {
                 .orElseThrow(() -> new IllegalArgumentException("허용되지 않는 타입입니다. type = " + fileExtension));
     }
 
-    public String getContentType() {
-        if (charset == CharsetType.NONE) {
-            return mimeType;
-        }
-        return mimeType + ";charset=" + charset.getCharset();
+    public boolean isTextBased() {
+        return mimeType.startsWith(TEXT);
+    }
+
+    public String getMimeType() {
+        return mimeType;
     }
 }

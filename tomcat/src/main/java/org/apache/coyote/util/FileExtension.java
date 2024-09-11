@@ -11,6 +11,7 @@ public enum FileExtension {
     PNG("png"),
     JPG("jpeg"),
     SVG("svg"),
+    NONE("")
     ;
 
     private final String extension;

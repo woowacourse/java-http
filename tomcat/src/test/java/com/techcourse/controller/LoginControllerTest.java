@@ -40,7 +40,7 @@ class LoginControllerTest {
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.OK.toStatus();
         String expectedLocationHeader = "Location: " + "/index.html";
-        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
                 () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
@@ -84,7 +84,7 @@ class LoginControllerTest {
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
         String expectedLocationHeader = "Location: " + "/401.html";
-        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
                 () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),

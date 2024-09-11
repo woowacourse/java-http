@@ -3,10 +3,12 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.coyote.CharsetType;
 import org.apache.coyote.MimeType;
 
 public class ResponseHeader {
 
+    private static final String CHARSET = "; charset=";
     private final String LOCATION = "Location";
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_LENGTH = "Content-Length";
@@ -27,7 +29,11 @@ public class ResponseHeader {
     }
 
     public void setContentType(MimeType mimeType) {
-        addHeader(CONTENT_TYPE, mimeType.getContentType());
+        String contentType = mimeType.getMimeType();
+        if (mimeType.isTextBased()) {
+            contentType += CHARSET + CharsetType.UTF_8.getCharset();
+        }
+        addHeader(CONTENT_TYPE, contentType);
     }
 
     public String toHeaderString() {

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.UUID;
-
 public class Cookie {
 
     private final String value;

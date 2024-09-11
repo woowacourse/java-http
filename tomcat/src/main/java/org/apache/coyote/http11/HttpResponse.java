@@ -1,59 +1,49 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
     private final String version;
     private final String httpStatusCode;
+    private final Map<String, String> headers;
     private final String contentType;
-    private final String resource;
-    private final Cookie cookie;
+    private final String body;
 
-    public HttpResponse(final String version,
-                        final String httpStatusCode,
-                        final String contentType,
-                        final String resourceUri) throws IOException {
+    private HttpResponse(final String version,
+                         final String httpStatusCode,
+                         final Map<String, String> headers,
+                         final String contentType,
+                         final String body) {
         this.version = version;
         this.httpStatusCode = httpStatusCode;
+        this.headers = headers;
         this.contentType = contentType;
-        this.resource = makeResource(resourceUri);
-        this.cookie = null;
+        this.body = body;
     }
 
-    public HttpResponse(final String version,
-                        final String httpStatusCode,
-                        final String contentType,
-                        final String resourceUri,
-                        final Cookie cookie) throws IOException {
-        this.version = version;
-        this.httpStatusCode = httpStatusCode;
-        this.contentType = contentType;
-        this.resource = makeResource(resourceUri);
-        this.cookie = cookie;
+    public static HttpResponse of(final String version,
+                                  final String httpStatusCode,
+                                  final String contentType,
+                                  final String body) {
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", contentType + "; charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        return new HttpResponse(version, httpStatusCode, headers, contentType, body);
     }
 
-    private String makeResource(final String resourceUri) throws IOException {
-        final InputStream staticResource = ResponseGenerator.class.getClassLoader()
-                .getResourceAsStream("static" + resourceUri);
-        return new String(staticResource.readAllBytes());
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
-    public String makeResponse() {
-        List<String> responseHeaders = new ArrayList<>();
-        responseHeaders.add(version + " " + httpStatusCode + " ");
+    public String toHttpMessage() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(version).append(" ").append(httpStatusCode).append(" \r\n");
+        headers.forEach((key, value) -> stringBuilder.append(key).append(": ").append(value).append(" \r\n"));
+        stringBuilder.append("\r\n");
+        stringBuilder.append(body);
 
-        if (cookie != null) {
-            responseHeaders.add("Set-Cookie: " + cookie.getValue() + " ");
-        }
-
-        responseHeaders.add("Content-Type: " + contentType + "; charset=utf-8 ");
-        responseHeaders.add("Content-Length: " + resource.getBytes().length + " ");
-        responseHeaders.add("");
-
-        return String.join("\r\n", responseHeaders) + "\r\n" + resource;
+        return stringBuilder.toString();
     }
 }

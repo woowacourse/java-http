@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum MimeType {
+public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),
@@ -16,33 +16,33 @@ public enum MimeType {
     ;
 
     private final String extension;
-    private final String mimeType;
+    private final String contentType;
 
-    MimeType(String extension, String mimeType) {
+    ContentType(String extension, String contentType) {
         this.extension = extension;
-        this.mimeType = mimeType;
+        this.contentType = contentType;
     }
 
     public String getExtension() {
         return extension;
     }
 
-    public String getMimeType() {
-        return mimeType;
+    public String getContentType() {
+        return contentType;
     }
 
-    public static String toMimeType(final String extension) {
-        for (MimeType mimeType : values()) {
-            if (mimeType.getExtension().equalsIgnoreCase(extension)) {
-                return mimeType.getMimeType();
+    public static String toContentType(final String extension) {
+        for (ContentType contentType : values()) {
+            if (contentType.getExtension().equalsIgnoreCase(extension)) {
+                return contentType.getContentType();
             }
         }
-        throw new IllegalArgumentException("Unknown mime type: " + extension);
+        throw new IllegalArgumentException("Unknown content type: " + extension);
     }
 
     public static boolean isValidType(final String uri) {
-        for (MimeType mimeType : values()) {
-            if (uri.endsWith(mimeType.getExtension())) {
+        for (ContentType contentType : values()) {
+            if (uri.endsWith(contentType.getExtension())) {
                 return true;
             }
         }

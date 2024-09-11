@@ -38,10 +38,12 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 httpResponse = ResponseGenerator.generate(httpRequest);
             } catch (Exception e) {
-                httpResponse = new HttpResponse(httpRequest.getVersion(), "500 INTERNATIONAL ERROR", MimeType.HTML.getMimeType(), "/500.html");
+                log.error(e.getMessage());
+                String body = StaticResourceReader.read("/500.html");
+                httpResponse = HttpResponse.of(httpRequest.getVersion(), "500 INTERNATIONAL ERROR", ContentType.HTML.getContentType(), body);
             }
 
-            outputStream.write(httpResponse.makeResponse().getBytes());
+            outputStream.write(httpResponse.toHttpMessage().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

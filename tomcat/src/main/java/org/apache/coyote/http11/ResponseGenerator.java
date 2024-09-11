@@ -18,14 +18,18 @@ public class ResponseGenerator {
         final String requestBody = httpRequest.getBody();
 
         Cookie cookie = httpRequest.getCookie();
+        HttpResponse httpResponse = null;
 
         if (uri.equals("/login")) {
-            if (isLoggedIn(cookie)) {
-                return new HttpResponse(version,"200 OK", MimeType.HTML.getMimeType(), "/index.html");
-            }
-
             if (httpMethod.equals("GET")) {
-                return new HttpResponse(version,"200 OK", MimeType.HTML.getMimeType(), "/login.html");
+                if (isLoggedIn(cookie)) {
+                    String body = StaticResourceReader.read("/index.html");
+                    httpResponse = HttpResponse.of(version, "302 FOUND", ContentType.HTML.getContentType(), body);
+                    httpResponse.addHeader("Location", "/index.html");
+                } else {
+                    String body = StaticResourceReader.read("/login.html");
+                    httpResponse = HttpResponse.of(version, "200 OK", ContentType.HTML.getContentType(), body);
+                }
             }
 
             if (httpMethod.equals("POST")) {
@@ -42,15 +46,21 @@ public class ResponseGenerator {
                     sessionManager.add(session);
 
                     cookie = new Cookie("JSESSIONID=" + session.getId());
-                    return new HttpResponse(version,"302 FOUND", MimeType.HTML.getMimeType(), "/index.html", cookie);
+                    String body = StaticResourceReader.read("/index.html");
+                    httpResponse = HttpResponse.of(version, "302 FOUND", ContentType.HTML.getContentType(), body);
+                    httpResponse.addHeader("Set-Cookie", cookie.getValue());
+                    httpResponse.addHeader("Location", "/index.html");
+                } else {
+                    String body = StaticResourceReader.read("/401.html");
+                    httpResponse = HttpResponse.of(version, "401 UNAUTHORIZED", ContentType.HTML.getContentType(),  body);
+                    httpResponse.addHeader("Location", "/401.html");
                 }
-                return new HttpResponse(version,"401 UNAUTHORIZED", MimeType.HTML.getMimeType(), "/401.html");
             }
-        }
 
-        if (uri.equals("/register")) {
+        } else if (uri.equals("/register")) {
             if (httpMethod.equals("GET")) {
-                return new HttpResponse(version,"200 OK", MimeType.HTML.getMimeType(), "/register.html");
+                String body = StaticResourceReader.read("/register.html");
+                httpResponse = HttpResponse.of(version, "200 OK", ContentType.HTML.getContentType(), body);
             }
 
             if (httpMethod.equals("POST")) {
@@ -61,17 +71,21 @@ public class ResponseGenerator {
 
                 final User user = new User(account, email, password);
                 InMemoryUserRepository.save(user);
-                return new HttpResponse(version,"201 CREATED", MimeType.HTML.getMimeType(), "/index.html");
+                String body = StaticResourceReader.read("/index.html");
+                httpResponse = HttpResponse.of(version, "302 FOUND",  ContentType.HTML.getContentType(), body);
+                httpResponse.addHeader("Location", "/index.html");
             }
-        }
 
-        if (MimeType.isValidType(uri)) {
-            final String fileExtension = resolveFileExtension(uri);
-            final String contentType = resolveContentType(fileExtension, acceptLine);
-            return new HttpResponse(version,"200 OK", contentType, uri);
-        }
+        } else if (ContentType.isValidType(uri)) {
+            String contentType = ContentTypeResolver.resolve(uri, acceptLine);
+            String body = StaticResourceReader.read(uri);
+            httpResponse = HttpResponse.of(version, "200 OK", contentType, body);
 
-        return new HttpResponse(version,"404 NOT FOUND", MimeType.HTML.getMimeType(), "/404.html");
+        } else {
+            String body = StaticResourceReader.read("/404.html");
+            httpResponse = HttpResponse.of(version, "404 NOT FOUND", ContentType.HTML.getContentType(), body);
+        }
+        return httpResponse;
     }
 
     private static boolean isValidUser(Optional<User> user, String password) {
@@ -95,17 +109,5 @@ public class ResponseGenerator {
             return SessionManager.getInstance().hasSession(cookie.getJSessionId());
         }
         return false;
-    }
-
-    private static String resolveFileExtension(final String resourceUri) {
-        final int lastDotIndex = resourceUri.lastIndexOf(".");
-        return resourceUri.substring(lastDotIndex + 1);
-    }
-
-    private static String resolveContentType(final String fileExtension, final String acceptLine) {
-        if (acceptLine != null && acceptLine.contains(fileExtension)) {
-            return MimeType.toMimeType(fileExtension);
-        }
-        return "*/*";
     }
 }

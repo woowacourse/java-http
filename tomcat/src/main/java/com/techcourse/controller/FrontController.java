@@ -41,7 +41,7 @@ public class FrontController extends Controller {
     public HttpResponse handle(HttpRequest request) throws IOException {
         String uri = request.getURI();
         Controller handler = getHandler(uri);
-        String fileName = getFileName(uri);
+        String fileName = Resource.getFileName(uri);
         if (Objects.isNull(handler) && FileExtension.isFileExtension(fileName)) {
             try {
                 HttpResponse response = getResourceResponse(fileName);
@@ -80,19 +80,6 @@ public class FrontController extends Controller {
 
     private Controller getHandler(String uri) {
         return handlerMappings.get(uri);
-    }
-
-    private String getFileName(String endpoint) {
-        int index = endpoint.indexOf("?");
-        String path = endpoint;
-        if (index != -1) {
-            path = path.substring(0, index);
-        }
-        String fileName = path.substring(1);
-        if (fileName.isEmpty()) {
-            fileName = "hello.html";
-        }
-        return fileName;
     }
 
     @Override

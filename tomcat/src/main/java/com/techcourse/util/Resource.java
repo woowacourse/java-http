@@ -11,6 +11,22 @@ import com.techcourse.exception.InvalidResourceException;
 
 public class Resource {
     private static final String BASE_PATH = "static/";
+    private static final String FILE_NAME_DELIMITER = "?";
+    private static final int FILE_NAME_START_POSITION = 1;
+    private static final String DEFAULT_FILE_NAME = "hello.html";
+
+    public static String getFileName(String uri) {
+        int index = uri.indexOf(FILE_NAME_DELIMITER);
+        String path = uri;
+        if (index != -1) {
+            path = path.substring(0, index);
+        }
+        String fileName = path.substring(FILE_NAME_START_POSITION);
+        if (fileName.isEmpty()) {
+            fileName = DEFAULT_FILE_NAME;
+        }
+        return fileName;
+    }
 
     public static String read(String fileName) throws IOException {
         URL resource = findResource(fileName);

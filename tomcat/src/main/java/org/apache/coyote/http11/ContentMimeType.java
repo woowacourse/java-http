@@ -6,7 +6,8 @@ public enum ContentMimeType {
     CSS("css", "text/css"),
     ICO("ico", "image/x-icon"),
     JS("js", "application.javascript"),
-    HTML("html", "text/html");
+    HTML("html", "text/html"),
+    SVG("svg", "image/svg+xml");
 
     private final String extension;
     private final String mime;

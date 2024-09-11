@@ -2,6 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
 
@@ -12,8 +13,8 @@ public class Session {
         this.id = id;
     }
 
-    public String getId() {
-        return id;
+    public Session() {
+        this(UUID.randomUUID().toString());
     }
 
     public Object getAttribute(String name) {
@@ -22,14 +23,9 @@ public class Session {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
-        SessionManager.getInstance().add(this);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
+    public String getId() {
+        return id;
     }
 }

@@ -2,63 +2,90 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.http11.HttpMethod;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import org.apache.coyote.http11.cookie.HttpCookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String uri;
-    private final RequestHeader header;
-    private RequestBody body;
+    private final RequestLine requestLine;
+    private final RequestHeaders headers;
+    private final RequestBody body;
 
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header, RequestBody body) {
-        this.method = method;
-        this.uri = uri;
-        this.header = header;
+    private HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
         this.body = body;
     }
 
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header) {
-        this(method, uri, header, null);
+    public static HttpRequest of(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        RequestLine requestLine = new RequestLine(reader.readLine());
+        RequestHeaders requestHeaders = getRequestHeaders(reader);
+
+        if (requestLine.isPost()) {
+            RequestBody body = parseRequestBody(reader, requestHeaders.getContentLength());
+            return new HttpRequest(requestLine, requestHeaders, body);
+        }
+
+        return new HttpRequest(requestLine, requestHeaders, null);
     }
 
-    public static HttpRequest of(final String requestLine, final BufferedReader reader) throws IOException {
-        final var parts = requestLine.split(" ");
-        final var method = HttpMethod.valueOf(parts[0]);
-        final var uri = parts[1];
-        final var header = RequestParser.getRequestHeader(reader);
-        if (method.isPost()) {
-            final var body = RequestParser.getRequestBody(reader, header.getContentLength());
-            return new HttpRequest(method, uri, header, body);
-        }
-        return new HttpRequest(method, uri, header);
+    private static RequestHeaders getRequestHeaders(BufferedReader reader) {
+        List<String> headers = reader.lines()
+                .takeWhile(s -> !s.isBlank())
+                .toList();
+        return new RequestHeaders(headers);
+    }
+
+    private static RequestBody parseRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new RequestBody(new String(buffer));
     }
 
     public boolean isGet() {
-        return method.isGet();
+        return requestLine.isGet();
     }
 
     public boolean isPost() {
-        return method.isPost();
-    }
-
-    public boolean isSameUri(final String uri) {
-        return this.uri.equals(uri);
+        return requestLine.isPost();
     }
 
     public String findBodyValueByKey(final String key) {
         return body.findByKey(key);
     }
 
-    public String getCookie() {
-        return getHeader("Cookie");
+    public boolean sessionNotExists() {
+        String cookieString = headers.getCookieString();
+
+        if (cookieString == null) {
+            return true;
+        }
+
+        HttpCookies cookies = new HttpCookies(cookieString);
+        return !cookies.hasJSESSIONID();
     }
 
-    public String getHeader(final String name) {
-        return header.findHeader(name);
+    public Session getSession(boolean createIfNotExists) {
+        if (sessionNotExists() && createIfNotExists) {
+            Session session = new Session();
+            SessionManager.getInstance().add(session);
+            return session;
+        }
+
+        if (sessionNotExists()) {
+            return null;
+        }
+
+        HttpCookies cookies = new HttpCookies(headers.getCookieString());
+        return SessionManager.getInstance().findSession(cookies.getJSESSIONID());
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return requestLine.getPath();
     }
 }

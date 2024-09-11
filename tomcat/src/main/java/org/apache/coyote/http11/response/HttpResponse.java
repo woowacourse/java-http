@@ -18,36 +18,10 @@ public final class HttpResponse {
     private final List<Http11Cookie> cookies;
     private byte[] body;
 
-    public HttpResponse(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
-                        byte[] body) {
-        this.statusCode = statusCode;
-        this.headers = headers;
-        this.cookies = cookies;
-        this.body = body;
-    }
-
     public HttpResponse() {
         headers = new ArrayList<>();
         cookies = new ArrayList<>();
         statusCode = Http11StatusCode.OK;
-    }
-
-    public static HttpResponse ok(List<Http11Header> headers, List<Http11Cookie> cookies, Path path)
-            throws IOException {
-        String contentTypes = contentTypeFinder.find(path);
-
-        byte[] responseBody = Files.readAllBytes(path);
-
-        List<Http11Header> copyHeader = new ArrayList<>(List.copyOf(headers));
-        copyHeader.add(new Http11Header("Content-Length", responseBody.length + ""));
-        copyHeader.add(new Http11Header("Content-Type", contentTypes + ";charset=utf-8"));
-
-        return new HttpResponse(Http11StatusCode.OK, copyHeader, cookies, responseBody);
-    }
-
-    public static HttpResponse found(String uri, Http11Cookie... cookies) {
-        List<Http11Header> headers = List.of(new Http11Header("Location", uri));
-        return new HttpResponse(Http11StatusCode.FOUND, headers, List.of(cookies), new byte[0]);
     }
 
     public boolean isHtml() {
@@ -123,18 +97,6 @@ public final class HttpResponse {
         } catch (IOException e) {
             return new byte[0];
         }
-    }
-
-    public Http11StatusCode getStatusCode() {
-        return statusCode;
-    }
-
-    public List<Http11Header> getHeaders() {
-        return headers;
-    }
-
-    public List<Http11Cookie> getCookies() {
-        return cookies;
     }
 
     public byte[] getBody() {

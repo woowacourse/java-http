@@ -6,6 +6,7 @@ import hoony.was.RequestHandler;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class LoginRequestHandler implements RequestHandler {
     }
 
     @Override
-    public String handle(HttpRequest request) {
+    public String handle(HttpRequest request, HttpResponse response) {
         String content = request.getContent();
         QueryParameters queryParameters = new QueryParameters(content);
         String account = queryParameters.get("account");

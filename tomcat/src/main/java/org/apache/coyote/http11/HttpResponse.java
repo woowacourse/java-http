@@ -3,13 +3,18 @@ package org.apache.coyote.http11;
 public class HttpResponse {
 
     private final HttpHeaders headers;
-    private final StatusCode statusCode;
-    private final HttpBody body;
+
+    private StatusCode statusCode;
+    private HttpBody body;
 
     public HttpResponse(HttpHeaders headers, StatusCode statusCode, HttpBody body) {
         this.headers = headers;
         this.statusCode = statusCode;
         this.body = body;
+    }
+
+    public HttpResponse() {
+        this(new HttpHeaders(), null, HttpBody.empty());
     }
 
     public static HttpResponseBuilder builder() {
@@ -30,5 +35,22 @@ public class HttpResponse {
 
     public String getHeader(String name) {
         return String.valueOf(headers.get(name));
+    }
+
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBody(String content) {
+        body = new HttpBody(content);
+        headers.setContentLength(content.getBytes().length);
+    }
+
+    public void setContentType(ContentType contentType) {
+        headers.setContentType(contentType);
+    }
+
+    public void setLocation(String location) {
+        headers.setLocation(location);
     }
 }

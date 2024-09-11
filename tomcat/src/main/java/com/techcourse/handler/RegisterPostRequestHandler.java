@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import hoony.was.RequestHandler;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryParameters;
 
 public class RegisterPostRequestHandler implements RequestHandler {
@@ -15,7 +16,7 @@ public class RegisterPostRequestHandler implements RequestHandler {
     }
 
     @Override
-    public String handle(HttpRequest request) {
+    public String handle(HttpRequest request, HttpResponse response) {
         String content = request.getContent();
         QueryParameters queryParameters = new QueryParameters(content);
         User user = new User(

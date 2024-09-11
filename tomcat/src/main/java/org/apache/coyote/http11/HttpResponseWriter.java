@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map.Entry;
+import java.util.Objects;
 
 public class HttpResponseWriter {
 
@@ -14,6 +15,10 @@ public class HttpResponseWriter {
         StatusCode statusCode = response.getStatusCode();
         HttpHeaders headers = response.getHeaders();
         String content = response.getContent();
+
+        Objects.requireNonNull(statusCode, "StatusCode must not be null.");
+        Objects.requireNonNull(headers, "Headers must not be null.");
+        Objects.requireNonNull(content, "Content must not be null");
 
         StringBuilder builder = new StringBuilder();
         builder.append("%s %s %s".formatted(HTTP_VERSION, statusCode.getCode(), statusCode.getMessage()));

@@ -31,8 +31,9 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
+            HttpResponse response = new HttpResponse();
             log.info("Request: {}", request);
-            HttpResponse response = servlet.service(request);
+            servlet.service(request, response);
             outputStream.write(HttpResponseWriter.write(response).getBytes());
             outputStream.flush();
         } catch (IOException e) {

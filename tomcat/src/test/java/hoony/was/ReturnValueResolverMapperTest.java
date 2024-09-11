@@ -3,6 +3,7 @@ package hoony.was;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,7 @@ class ReturnValueResolverMapperTest {
     @DisplayName("매치되는 Resolver가 존재하지 않는 경우, 예외를 발생한다.")
     void resolverNotFound() {
         ReturnValueResolverMapper returnValueResolverMapper = new ReturnValueResolverMapper();
-        assertThatThrownBy(() -> returnValueResolverMapper.resolve(Object.class))
+        assertThatThrownBy(() -> returnValueResolverMapper.resolve(null, null, Object.class))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("No ReturnValueResolver found for returnType");
     }
@@ -30,14 +31,13 @@ class ReturnValueResolverMapperTest {
             }
 
             @Override
-            public HttpResponse resolve(Object returnValue) {
-                return HttpResponse.builder()
-                        .ok()
-                        .build();
+            public void resolve(HttpRequest request, HttpResponse response, Object returnValue) {
+                response.setStatusCode(StatusCode.OK);
             }
         };
         returnValueResolverMapper.register(resolver);
-        HttpResponse actual = returnValueResolverMapper.resolve("ReturnValueAsString");
-        assertThat(actual.getStatusCode()).isEqualTo(StatusCode.OK);
+        HttpResponse response = new HttpResponse();
+        returnValueResolverMapper.resolve(null, response, "ReturnValueAsString");
+        assertThat(response.getStatusCode()).isEqualTo(StatusCode.OK);
     }
 }

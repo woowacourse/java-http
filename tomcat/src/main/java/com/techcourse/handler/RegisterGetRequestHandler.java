@@ -3,6 +3,7 @@ package com.techcourse.handler;
 import hoony.was.RequestHandler;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class RegisterGetRequestHandler implements RequestHandler {
 
@@ -12,7 +13,7 @@ public class RegisterGetRequestHandler implements RequestHandler {
     }
 
     @Override
-    public String handle(HttpRequest request) {
+    public String handle(HttpRequest request, HttpResponse response) {
         return "register.html";
     }
 }

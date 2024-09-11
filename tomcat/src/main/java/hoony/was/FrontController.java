@@ -35,8 +35,8 @@ public class FrontController {
         returnValueResolverMapper.register(new StaticResourceReturnValueResolver());
     }
 
-    public HttpResponse service(HttpRequest request) {
-        Object returnValue = requestHandlerMapper.handle(request);
-        return returnValueResolverMapper.resolve(returnValue);
+    public void service(HttpRequest request, HttpResponse response) {
+        Object returnValue = requestHandlerMapper.handle(request, response);
+        returnValueResolverMapper.resolve(request, response, returnValue);
     }
 }

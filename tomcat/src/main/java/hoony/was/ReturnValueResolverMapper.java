@@ -2,6 +2,7 @@ package hoony.was;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class ReturnValueResolverMapper {
@@ -16,11 +17,11 @@ public class ReturnValueResolverMapper {
         returnValueResolvers.add(returnValueResolver);
     }
 
-    public HttpResponse resolve(Object returnValue) {
-        return returnValueResolvers.stream()
+    public void resolve(HttpRequest request, HttpResponse response, Object returnValue) {
+        returnValueResolvers.stream()
                 .filter(resolver -> resolver.supportsReturnType(returnValue.getClass()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No ReturnValueResolver found for returnType"))
-                .resolve(returnValue);
+                .resolve(request, response, returnValue);
     }
 }

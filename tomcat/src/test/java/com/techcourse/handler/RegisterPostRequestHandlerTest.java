@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.techcourse.db.InMemoryUserRepository;
 import java.io.ByteArrayInputStream;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,7 @@ class RegisterPostRequestHandlerTest {
                 account=account&password=password&email=email
                 """.getBytes();
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(requestBytes));
-        String actual = handler.handle(request);
+        String actual = handler.handle(request, new HttpResponse());
         assertAll(
                 () -> assertThat(actual).isEqualTo("redirect:/index.html"),
                 () -> assertThat(InMemoryUserRepository.findByAccount("account")).isPresent()

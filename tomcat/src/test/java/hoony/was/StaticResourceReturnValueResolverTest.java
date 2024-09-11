@@ -1,7 +1,7 @@
 package hoony.was;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
@@ -25,10 +25,11 @@ class StaticResourceReturnValueResolverTest {
     void checkRedirectResponse() {
         StaticResourceReturnValueResolver resolver = new StaticResourceReturnValueResolver();
         String redirectPath = "redirect:/index.html";
-        HttpResponse actual = resolver.resolve(redirectPath);
+        HttpResponse response = new HttpResponse();
+        resolver.resolve(null, response, redirectPath);
         assertAll(
-                () -> assertThat(actual.getStatusCode()).isEqualTo(StatusCode.FOUND),
-                () -> assertThat(actual.getHeader("Location")).isEqualTo("/index.html")
+                () -> assertThat(response.getStatusCode()).isEqualTo(StatusCode.FOUND),
+                () -> assertThat(response.getHeader("Location")).isEqualTo("/index.html")
         );
     }
 
@@ -37,10 +38,11 @@ class StaticResourceReturnValueResolverTest {
     void checkStaticResourceResponse() {
         StaticResourceReturnValueResolver resolver = new StaticResourceReturnValueResolver();
         String staticResourcePath = "/index.html";
-        HttpResponse actual = resolver.resolve(staticResourcePath);
+        HttpResponse response = new HttpResponse();
+        resolver.resolve(null, response, staticResourcePath);
         assertAll(
-                () -> assertThat(actual.getStatusCode()).isEqualTo(StatusCode.OK),
-                () -> assertThat(actual.getContent()).contains("<!DOCTYPE html>")
+                () -> assertThat(response.getStatusCode()).isEqualTo(StatusCode.OK),
+                () -> assertThat(response.getContent()).contains("<!DOCTYPE html>")
         );
     }
 }

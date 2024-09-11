@@ -1,8 +1,10 @@
 package hoony.was;
 
 import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StaticResourceLoader;
+import org.apache.coyote.http11.StatusCode;
 
 public class StaticResourceReturnValueResolver implements ReturnValueResolver {
 
@@ -15,20 +17,18 @@ public class StaticResourceReturnValueResolver implements ReturnValueResolver {
     }
 
     @Override
-    public HttpResponse resolve(Object returnValue) {
+    public void resolve(HttpRequest request, HttpResponse response, Object returnValue) {
         String path = String.valueOf(returnValue);
         if (path.startsWith(REDIRECT_PREFIX)) {
-            return HttpResponse.builder()
-                    .found(path.substring(REDIRECT_PREFIX.length()))
-                    .build();
+            response.setStatusCode(StatusCode.FOUND);
+            response.setLocation(path.substring(REDIRECT_PREFIX.length()));
+            return;
         }
         byte[] resource = StaticResourceLoader.load(path);
         String extension = path.substring(path.lastIndexOf(EXTENSION_SEPARATOR) + 1);
         String responseBody = new String(resource);
-        return HttpResponse.builder()
-                .ok()
-                .contentType(ContentType.fromExtension(extension))
-                .body(responseBody)
-                .build();
+        response.setStatusCode(StatusCode.OK);
+        response.setContentType(ContentType.fromExtension(extension));
+        response.setBody(responseBody);
     }
 }

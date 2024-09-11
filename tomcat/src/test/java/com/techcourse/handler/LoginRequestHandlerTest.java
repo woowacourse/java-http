@@ -7,6 +7,7 @@ import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -35,7 +36,7 @@ class LoginRequestHandlerTest {
                 Host: localhost:8080\r
                 """.getBytes();
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
-        String actual = loginRequestHandler.handle(request);
+        String actual = loginRequestHandler.handle(request, new HttpResponse());
         assertThat(actual).isEqualTo("redirect:/401.html");
     }
 
@@ -56,7 +57,7 @@ class LoginRequestHandlerTest {
                 """.getBytes();
 
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
-        String actual = loginRequestHandler.handle(request);
+        String actual = loginRequestHandler.handle(request, new HttpResponse());
         assertThat(actual).isEqualTo("redirect:/index.html");
         repository.close();
     }

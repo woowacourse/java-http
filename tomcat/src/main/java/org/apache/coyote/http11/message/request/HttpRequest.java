@@ -12,16 +12,16 @@ public class HttpRequest {
     private final HttpMethod method;
     private final HttpUrl url;
     private final HttpHeaders headers;
-    private final String body;
+    private final byte[] body;
 
-    public HttpRequest(HttpMethod method, HttpUrl url, HttpHeaders headers, String body) {
+    public HttpRequest(HttpMethod method, HttpUrl url, HttpHeaders headers, byte[] body) {
         this.method = method;
         this.url = url;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest of(String requestLine, HttpHeaders headers, String body) {
+    public static HttpRequest of(String requestLine, HttpHeaders headers, byte[] body) {
         String[] requestLineElements = requestLine.split(REQUEST_LINE_DELIMITER);
         HttpMethod method = HttpMethod.from(requestLineElements[HTTP_METHOD_INDEX]);
         String url = requestLineElements[HTTP_URL_INDEX];
@@ -49,7 +49,7 @@ public class HttpRequest {
         return headers.getFieldByHeaderName(name);
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 

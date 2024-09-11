@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
@@ -20,7 +19,7 @@ public class ResourceReader {
 
         if (url.isPresent()) {
             File file = new File(url.get().getFile());
-            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            return new String(Files.readAllBytes(file.toPath()));
         }
 
         throw new NullPointerException("파일이 존재하지 않습니다.");

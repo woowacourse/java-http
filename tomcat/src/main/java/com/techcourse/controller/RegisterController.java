@@ -1,10 +1,8 @@
 package com.techcourse.controller;
 
+import com.techcourse.controller.dto.RegisterRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.http11.common.HttpStatusCode;
@@ -33,15 +31,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest httpRequest, HttpResponse response) {
-        Map<String, String> body = Arrays.stream(httpRequest.getBody().split("&"))
-                .map(s -> s.split("="))
-                .collect(HashMap::new, (m, e) -> m.put(e[0], e[1]), Map::putAll);
-
-        String account = body.get("account");
-        String password = body.get("password");
-        String email = body.get("email");
-
-        User user = new User(account, password, email);
+        RegisterRequest registerRequest = RegisterRequest.of(httpRequest.getBody());
+        User user = new User(registerRequest.account(), registerRequest.password(), registerRequest.email());
         InMemoryUserRepository.save(user);
 
         response.sendRedirect("index.html");

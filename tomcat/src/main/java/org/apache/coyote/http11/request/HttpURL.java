@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.NameValuePairs;
+import org.apache.coyote.http11.common.QueryParamNameValuePairs;
 
 public record HttpURL(String fullUrl, String path, NameValuePairs queryParameters) {
 

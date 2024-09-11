@@ -1,6 +1,4 @@
-package org.apache.coyote.http11.request;
-
-import org.apache.coyote.http11.common.NameValuePairs;
+package org.apache.coyote.http11.common;
 
 public class QueryParamNameValuePairs extends NameValuePairs {
 

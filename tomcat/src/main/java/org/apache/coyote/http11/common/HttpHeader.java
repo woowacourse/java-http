@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.request.HeaderNameValuePairs;
 
 public record HttpHeader(Map<String, String> headers) {
 

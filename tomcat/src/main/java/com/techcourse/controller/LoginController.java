@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.controller.dto.LoginRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -43,17 +44,15 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        log.info("Query Parameters: {}", request.parseFormBody());
+        LoginRequest loginRequest = LoginRequest.of(request.getBody());
+        log.info("Request Body: {}", loginRequest);
 
-        Optional<String> userAccount = request.getFormValue("account");
-        Optional<String> userPassword = request.getFormValue("password");
-
-        User user = userAccount.map(InMemoryUserRepository::findByAccount)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        String userAccount = loginRequest.account();
+        String userPassword = loginRequest.password();
+        User user = InMemoryUserRepository.findByAccount(userAccount)
                 .orElse(null);
 
-        if (user == null || !user.checkPassword(userPassword.get())) {
+        if (user == null || !user.checkPassword(userPassword)) {
             response.sendRedirect("401.html");
             return;
         }

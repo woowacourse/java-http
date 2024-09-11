@@ -1,7 +1,4 @@
-package org.apache.coyote.http11.request;
-
-import org.apache.coyote.http11.common.Constants;
-import org.apache.coyote.http11.common.NameValuePairs;
+package org.apache.coyote.http11.common;
 
 public class HeaderNameValuePairs extends NameValuePairs {
 

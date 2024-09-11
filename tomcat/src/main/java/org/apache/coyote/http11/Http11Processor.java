@@ -5,10 +5,10 @@ import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestHandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.controller.FrontController;
 import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
@@ -32,7 +32,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final var request = new HttpRequest(inputStream);
-            final var response = HttpRequestHandlerMapping.handle(request);
+            final var controller = new FrontController();
+            final var response = controller.handle(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

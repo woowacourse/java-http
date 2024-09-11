@@ -27,6 +27,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
+        if (validateUserInput(httpRequest)) {
+            log.error("입력하지 않은 항목이 있습니다.");
+            return redirectPage(httpRequest, LOGIN_PATH);
+        }
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
 
@@ -44,6 +48,10 @@ public class LoginController extends AbstractController {
         }
         log.error("비밀번호 불일치");
         return redirectPage(httpRequest, UNAUTHORIZED_PATH);
+    }
+
+    private boolean validateUserInput(HttpRequest httpRequest) {
+        return !httpRequest.containsBody(ACCOUNT) || !httpRequest.containsBody(PASSWORD);
     }
 
     @Override

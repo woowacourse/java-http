@@ -18,6 +18,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
+        if (validateUserInput(httpRequest)) {
+            log.error("입력하지 않은 항목이 있습니다.");
+            return redirectPage(httpRequest, REGISTER_PATH);
+        }
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
         String email = httpRequest.getBodyValue(EMAIL);
@@ -30,6 +34,12 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return redirectPage(httpRequest, INDEX_PATH);
+    }
+
+    private boolean validateUserInput(HttpRequest httpRequest) {
+        return !httpRequest.containsBody(ACCOUNT)
+                || !httpRequest.containsBody(PASSWORD)
+                || !httpRequest.containsBody(EMAIL);
     }
 
     @Override

@@ -18,6 +18,12 @@ public class HttpResponseHeader {
     }
 
     public void add(String name, String value) {
+        if ("Content-Type".equals(name)) {
+            addContentType(value);
+        }
+        if ("Content-Length".equals(name)) {
+            addContentLength(value.getBytes().length);
+        }
         this.values.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
     }
 

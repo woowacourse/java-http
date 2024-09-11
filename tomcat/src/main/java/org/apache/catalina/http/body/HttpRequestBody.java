@@ -25,7 +25,7 @@ public class HttpRequestBody {
 
     public static HttpRequestBody parseUrlEncoded(String urlEncoded) {
         Map<String, String> body = Arrays.stream(urlEncoded.split("&"))
-                .map(parameter -> parameter.split("="))
+                .map(HttpRequestBody::split)
                 .collect(Collectors.toMap(
                         parameter -> parameter[KEY_INDEX],
                         parameter -> parameter[VALUE_INDEX]
@@ -33,7 +33,7 @@ public class HttpRequestBody {
         return new HttpRequestBody(body);
     }
 
-    private String[] split(String parameter) {
+    private static String[] split(String parameter) {
         String[] keyAndValue = parameter.split("=");
         if (keyAndValue.length == COMPONENT_COUNT) {
             return keyAndValue;

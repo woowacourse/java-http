@@ -17,7 +17,7 @@ public class LoginController extends AbstractController {
 
     private final SessionManager sessionManager;
 
-    public LoginController(SessionManager sessionManager) {
+    public LoginController() {
         this.sessionManager = SessionManager.getInstance();
     }
 

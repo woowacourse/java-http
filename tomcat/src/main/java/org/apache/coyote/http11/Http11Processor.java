@@ -11,6 +11,7 @@ import org.apache.coyote.http11.controller.HomePageController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

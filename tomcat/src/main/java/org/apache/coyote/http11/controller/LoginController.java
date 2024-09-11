@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpCookie;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 import com.techcourse.db.InMemoryUserRepository;

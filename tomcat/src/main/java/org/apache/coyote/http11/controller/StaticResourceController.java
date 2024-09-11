@@ -2,7 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import java.io.IOException;
 
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class StaticResourceController extends AbstractController {

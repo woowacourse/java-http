@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +18,8 @@ public class RequestBody {
         for (String pair : pairs) {
             String[] keyValue = pair.split("=");
             if (keyValue.length == 2) {
-                String key = URLDecoder.decode(keyValue[0], Charset.defaultCharset());
-                String value = URLDecoder.decode(keyValue[1], Charset.defaultCharset());
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
                 bodyParams.put(key, value);
             }
         }

@@ -14,7 +14,7 @@ public class StaticResourceController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(StaticResourceController.class);
 
     @Override
-    public String getPath() {
+    public String matchedPath() {
         return Constants.EMPTY_STRING;
     }
 

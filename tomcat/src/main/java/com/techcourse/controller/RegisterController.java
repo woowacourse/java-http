@@ -15,18 +15,17 @@ import org.slf4j.LoggerFactory;
 public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
-    private static final String STATIC_RESOURCE_PATH = "/register.html";
+    private static final ResponseFile registerPage = StaticResourceManager.read("/register.html");
 
     @Override
-    public String getPath() {
+    public String matchedPath() {
         return "/register";
     }
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        ResponseFile file = StaticResourceManager.read(STATIC_RESOURCE_PATH);
         response.setStatus(HttpStatusCode.OK)
-                .setBody(file);
+                .setBody(registerPage);
     }
 
     @Override
@@ -40,6 +39,6 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.sendRedirect("index.html");
+        response.sendRedirect("/index.html");
     }
 }

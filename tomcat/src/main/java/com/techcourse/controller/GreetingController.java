@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class GreetingController extends AbstractController {
 
     @Override
-    public String getPath() {
+    public String matchedPath() {
         return "/";
     }
 

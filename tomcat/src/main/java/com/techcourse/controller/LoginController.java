@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
     private static final String STATIC_RESOURCE_PATH = "/login.html";
 
     @Override
-    public String getPath() {
+    public String matchedPath() {
         return "/login";
     }
 

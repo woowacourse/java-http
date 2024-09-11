@@ -42,7 +42,7 @@ public class RequestMapping {
                         throw new IllegalArgumentException("Failed to instantiate controller: " + clazz, e);
                     }
                 })
-                .collect(HashMap::new, (map, controller) -> map.put(controller.getPath(), controller), HashMap::putAll);
+                .collect(HashMap::new, (map, controller) -> map.put(controller.matchedPath(), controller), HashMap::putAll);
     }
 
     public Controller getController(HttpRequest request) {

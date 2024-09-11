@@ -96,7 +96,7 @@ public class RequestHandler {
             log.info("로그인 성공! 아이디 : {}", optionalUser.get().getAccount());
             final var session = getSession();
             session.setAttribute("user", user);
-            return HttpCookie.setCookie(generate302Response("/index.html"), session.getId());
+            return HttpCookie.appendSetCookieHeader(generate302Response("/index.html"), session.getId());
         }
         return generate302Response("/401.html");
     }

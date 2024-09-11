@@ -11,7 +11,7 @@ public class HttpCookie {
         initialize(cookies);
     }
 
-    public static String setCookie(String response, String sessionId) {
+    public static String appendSetCookieHeader(String response, String sessionId) {
         return String.join("\r\n",
                 response + " ",
                 "Set-Cookie: " + "JSESSIONID" + "=" + sessionId + " "

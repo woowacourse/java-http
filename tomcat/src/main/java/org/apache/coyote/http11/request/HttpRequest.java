@@ -17,8 +17,15 @@ public record HttpRequest(
         ProtocolVersion protocolVersion,
         String body) {
 
+    private static final String DELIMITER_COOKIE = "; ";
+    private static final String DELIMITER_HEADER = ": ";
+    private static final String DELIMITER_SPACE = " ";
+    private static final String DELIMITER_VALUE = "=";
+    private static final String DELIMITER_PARAMETER_KEYSET = "&";
+    private static final String HEADER_NAME_COOKIE = "Cookie";
+
     public static HttpRequest parse(List<String> lines) {
-        String[] startLineParts = lines.getFirst().split(" ");
+        String[] startLineParts = lines.getFirst().split(DELIMITER_SPACE);
         Method method = Method.from(startLineParts[0]);
 
         String path = "";
@@ -32,7 +39,7 @@ public record HttpRequest(
 
         ProtocolVersion protocolVersion = ProtocolVersion.from(startLineParts[2]);
         Map<String, String> headers = extractHeaders(lines);
-        Map<String, String> cookies = extractCookies(headers.get("Cookie"));
+        Map<String, String> cookies = extractCookies(headers.get(HEADER_NAME_COOKIE));
 
         String body = extractBody(lines);
 
@@ -43,9 +50,9 @@ public record HttpRequest(
         Map<String, String> parameters = new HashMap<>();
 
         if (query != null) {
-            String[] pairs = query.split("&");
+            String[] pairs = query.split(DELIMITER_PARAMETER_KEYSET);
             for (String pair : pairs) {
-                String[] keyValue = pair.split("=");
+                String[] keyValue = pair.split(DELIMITER_VALUE);
                 if (keyValue.length == 2) {
                     String key = keyValue[0];
                     String value = URLDecoder.decode(keyValue[1], Charset.defaultCharset());
@@ -61,7 +68,7 @@ public record HttpRequest(
         Map<String, String> headers = new HashMap<>();
 
         for (int i = 1; i < lines.size() - 2; i++) {
-            String[] lineParts = lines.get(i).trim().split(": ");
+            String[] lineParts = lines.get(i).trim().split(DELIMITER_HEADER);
             if (lineParts.length >= 2) {
                 headers.put(lineParts[0], lineParts[1]);
             }
@@ -77,8 +84,8 @@ public record HttpRequest(
 
         Map<String, String> cookies = new HashMap<>();
 
-        for (String entry : cookieMessage.split("; ")) {
-            int delimiterIndex = entry.indexOf("=");
+        for (String entry : cookieMessage.split(DELIMITER_COOKIE)) {
+            int delimiterIndex = entry.indexOf(DELIMITER_VALUE);
             if (delimiterIndex == -1) {
                 continue;
             }

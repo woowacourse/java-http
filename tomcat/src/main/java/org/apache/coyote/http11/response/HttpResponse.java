@@ -12,6 +12,11 @@ public record HttpResponse(ProtocolVersion protocolVersion, Status status,
 
     private static final String CRLF = "\r\n";
     private static final ProtocolVersion DEFAULT_PROTOCOL = ProtocolVersion.HTTP11;
+    private static final String DELIMITER_COOKIE = "; ";
+    private static final String DELIMITER_HEADER = ": ";
+    private static final String DELIMITER_SPACE = " ";
+    private static final String HEADER_NAME_SET_COOKIE = "Set-Cookie: ";
+    private static final String HEADER_NAME_CONTENT_LENGTH = "Content-Length: ";
 
     public static Builder builder() {
         return new Builder().protocolVersion(DEFAULT_PROTOCOL);
@@ -28,24 +33,43 @@ public record HttpResponse(ProtocolVersion protocolVersion, Status status,
 
     public byte[] toMessage() {
         StringBuilder builder = new StringBuilder();
-        builder.append(protocolVersion).append(" ").append(status.getCode()).append(" ").append(status.getMessage())
-                .append(" ");
-        headers.forEach((key, value) -> builder.append(CRLF).append(key).append(": ").append(value).append(" "));
+        buildFirstLine(builder);
+        buildHeaders(builder);
+        buildCookies(builder);
 
+        if (body != null && body.length > 0) {
+            buildBody(builder);
+            return mergeByteArrays(builder.toString().getBytes(), body);
+        }
+        return builder.toString().getBytes();
+    }
+
+    private void buildFirstLine(StringBuilder builder) {
+        builder.append(protocolVersion).append(DELIMITER_SPACE)
+                .append(status.getCode()).append(DELIMITER_SPACE)
+                .append(status.getMessage()).append(DELIMITER_SPACE);
+    }
+
+    private void buildHeaders(StringBuilder builder) {
+        headers.forEach((key, value) -> builder.append(CRLF)
+                .append(key).append(DELIMITER_HEADER)
+                .append(value).append(DELIMITER_SPACE));
+    }
+
+    private void buildCookies(StringBuilder builder) {
         if (!cookies.isEmpty()) {
             String cookiesMessage = cookies.entrySet().stream()
                     .map(Entry::toString)
-                    .collect(Collectors.joining("; "));
-            builder.append(CRLF).append("Set-Cookie: ").append(cookiesMessage).append(" ");
+                    .collect(Collectors.joining(DELIMITER_COOKIE));
+            builder.append(CRLF)
+                    .append(HEADER_NAME_SET_COOKIE).append(cookiesMessage).append(DELIMITER_SPACE);
         }
+    }
 
-        if (body != null && body.length > 0) {
-            builder.append(CRLF).append("Content-Length: ").append(body.length).append(" ");
-            builder.append(CRLF.repeat(2));
-            return mergeByteArrays(builder.toString().getBytes(), body);
-        }
-
-        return builder.toString().getBytes();
+    private void buildBody(StringBuilder builder) {
+        builder.append(CRLF).append(HEADER_NAME_CONTENT_LENGTH).append(body.length).append(DELIMITER_SPACE)
+                .append(CRLF)
+                .append(CRLF);
     }
 
     public static class Builder {

@@ -12,11 +12,7 @@ public enum ContentType {
         if (contentType.equals("application/json")) {
             return APPLICATION_JSON;
         }
-        throw new IllegalArgumentException("존재하지 않는 contentType입니다.");
-    }
-
-    public boolean isJson() {
-        return this == APPLICATION_JSON;
+        throw new IllegalArgumentException("처리되지 않은 contentType입니다.");
     }
 
     public boolean isFromData() {

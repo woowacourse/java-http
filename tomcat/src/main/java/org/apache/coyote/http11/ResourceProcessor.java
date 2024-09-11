@@ -9,10 +9,6 @@ public class ResourceProcessor {
     public void process(Socket connection, String requestPath) throws IOException {
         final var outputStream = connection.getOutputStream();
 
-        if (requestPath.equals("/")) {
-            requestPath = "/index.html";
-        }
-
         String contentType = "";
         String extension = requestPath.split("\\.")[1];
         if (extension.equals("html")) {

@@ -2,15 +2,14 @@ package org.apache.coyote.response;
 
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.util.FileTypeChecker;
 
 public class HttpResponse {
 
     private final HttpResponseStartLine startLine;
-    private final HttpResponseHeaders headers;
+    private final HttpResponseHeader headers;
     private final HttpResponseBody body;
 
-    public HttpResponse(HttpResponseStartLine startLine, HttpResponseHeaders headers, HttpResponseBody body) {
+    private HttpResponse(HttpResponseStartLine startLine, HttpResponseHeader headers, HttpResponseBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -18,24 +17,29 @@ public class HttpResponse {
 
     public static HttpResponse from(HttpRequest httpRequest) {
         HttpResponseStartLine startLine = HttpResponseStartLine.defaultStartLineFrom(httpRequest);
-        return new HttpResponse(startLine, new HttpResponseHeaders(), new HttpResponseBody(null));
+        return new HttpResponse(startLine, new HttpResponseHeader(), new HttpResponseBody(null));
+    }
+
+    public void addCookie(String key, String value) {
+        headers.addCookie(key, value);
     }
 
     public void addContentType(String contentType) {
-        if (FileTypeChecker.isHtml(contentType)) {
-            headers.add("Content-Type", contentType + ";charset=utf-8");
-            return;
-        }
-        headers.add("Content-Type", contentType);
+        headers.addContentType(contentType);
     }
 
     public void addBody(String newBody) {
         this.body.update(newBody);
         if (this.body.hasBody()) {
-            headers.add("Content-Length", String.valueOf(newBody.getBytes().length));
+            headers.addContentLength(newBody.getBytes().length);
             return;
         }
-        headers.add("Content-Length", "0");
+        headers.addContentLength(0);
+    }
+
+    public void sendRedirect(String redirectUri) {
+        startLine.updateStatus(HttpStatus.FOUND);
+        headers.addLocation(redirectUri);
     }
 
     public void updateHttpStatus(HttpStatus newHttpStatus) {
@@ -44,6 +48,10 @@ public class HttpResponse {
 
     public boolean has5xxCode() {
         return startLine.has5xxCode();
+    }
+
+    public HttpStatus getHttpStatus() {
+        return startLine.getHttpStatus();
     }
 
     @Override

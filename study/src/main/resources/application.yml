@@ -13,15 +13,6 @@ server:
       min-spare: 2
       max: 2  #스레드 풀에 대기 상태로 존재하는 최대 스레드 개수
 
-#debug: true
-#
-#logging:
-#  level:
-#    org:
-#      springframework: DEBUG
-#      apache:
-#        catalina: DEBUG
-
   compression:
     enabled: true
     min-response-size: 10

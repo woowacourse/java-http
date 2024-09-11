@@ -7,14 +7,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.QueryParameters;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.FileTypeChecker;
+import org.apache.coyote.util.IdGenerator;
+import org.apache.coyote.util.RequestBodyParser;
+import org.apache.coyote.view.StaticResourceResolver;
+import org.apache.coyote.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -43,8 +46,17 @@ public class Http11Processor implements Runnable, Processor {
             log.info("http request : {}", request);
             HttpResponse response = HttpResponse.from(request);
 
-            handle(request, response);
-
+            try {
+                if (request.getMethod().isGet()) {
+                    resolveGetHttpMethod(request, response);
+                }
+                if (request.getMethod().isPost()) {
+                    resolvePostHttpMethod(request, response);
+                }
+            } catch (Exception exception) {
+                ErrorHandler errorHandler = new ErrorHandler();
+                errorHandler.handle(response, exception);
+            }
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException exception) {
@@ -52,61 +64,91 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handle(HttpRequest request, HttpResponse response) throws IOException {
-        try {
-            HttpMethod method = request.getMethod();
-            String targetPath = request.getTargetPath();
-            QueryParameters queryParameters = request.getTargetQueryParameters();
-            if (method.isGet() && "/".equals(targetPath)) {
-                getView("index.html", response);
-                return;
+    private void resolveGetHttpMethod(HttpRequest request, HttpResponse response) {
+        ViewResolver staticResourceResolver = new StaticResourceResolver();
+        if (request.getTargetPath().equals("/")) {
+            staticResourceResolver.resolve("index.html", response);
+        }
+        if (request.getTargetPath().equals("/login")) {
+            resolveAuthUser(request, response);
+        }
+        if (request.getTargetPath().equals("/register")) {
+            staticResourceResolver.resolve("register.html", response);
+        }
+        resolveStaticResource(request, response);
+    }
+
+    private void resolveAuthUser(HttpRequest request, HttpResponse response) {
+        if (request.hasSession()) {
+            String sessionId = request.getSessionId();
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(sessionId);
+            if (session != null) {
+                session.getUser().ifPresent(user -> redirectHomeAuthUser(response, user));
+            } else {
+                new StaticResourceResolver().resolve("login.html", response);
             }
-            if (method == HttpMethod.GET && "/login".equals(targetPath) && queryParameters.hasParameters()) {
-                login(request, response);
-                return;
-            }
-            if (method == HttpMethod.GET && FileTypeChecker.isSupported(targetPath)) {
-                getView(targetPath, response);
-                return;
-            }
-            if (method == HttpMethod.GET && "/login".equals(targetPath)) {
-                getView("login.html", response);
-                return;
-            }
-        } catch (Exception exception) {
-            log.error("요청을 처리할 수 없습니다. detail : {}", exception.getMessage());
-            getView("/404.html", response);
         }
     }
 
-    private void getView(String fileName, HttpResponse response) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException(fileName + "  파일이 존재하지 않습니다.");
-        }
-        Path path = Path.of(resource.getPath());
-        String contentType = Files.probeContentType(path);
-        response.addContentType(contentType);
-        response.addBody(new String(Files.readAllBytes(path)));
-        response.updateHttpStatus(HttpStatus.OK);
-        if (response.has5xxCode()) {
-            throw new RuntimeException("서버 내부에 오류 발생가 발생했습니다.");
+    private void redirectHomeAuthUser(HttpResponse response, User user) {
+        if (user != null) {
+            response.sendRedirect("/index.html");
         }
     }
 
-    private void login(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getTargetQueryParameters().getValueBy("account");
-        String password = request.getTargetQueryParameters().getValueBy("password");
+    private void resolveStaticResource(HttpRequest request, HttpResponse response) {
+        String targetPath = request.getTargetPath();
+        if (FileTypeChecker.isSupported(targetPath)) {
+            new StaticResourceResolver().resolve(targetPath, response);
+        }
+    }
+
+    private void resolvePostHttpMethod(HttpRequest request, HttpResponse response) {
+        Map<String, String> formData = RequestBodyParser.parseFormData(request.getBody());
+        if (request.getTargetPath().equals("/login")) {
+            resolvePostLogin(request, response, formData);
+        }
+        if (request.getTargetPath().equals("/register")) {
+            User user = new User(formData.get("account"), formData.get("email"), formData.get("password"));
+            InMemoryUserRepository.save(user);
+            log.info("{} - 회원 가입 성공", user);
+            response.sendRedirect("/index.html");
+        }
+    }
+
+    private void resolvePostLogin(HttpRequest request, HttpResponse response, Map<String, String> formData) {
+        String account = formData.get("account");
+        String password = formData.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseGet(() -> {
                     log.debug("{} - 존재하지 않는 회원의 로그인 요청", account);
+                    response.updateHttpStatus(HttpStatus.UNAUTHORIZED);
                     throw new IllegalArgumentException("존재하지 않는 회원 입니다.");
                 });
+        validatePassword(request, response, user, password);
+        log.info("{} - 회원 로그인 성공", user);
+        resolveNotAuthUser(request, response, user);
+        response.sendRedirect("/index.html");
+    }
+
+    private void resolveNotAuthUser(HttpRequest request, HttpResponse response, User user) {
+        if (!request.hasSession()) {
+            String sessionId = IdGenerator.generateUUID();
+            response.addCookie("JSESSIONID", sessionId);
+            Session session = new Session(sessionId);
+            session.setUser(user);
+            SessionManager sessionManager = SessionManager.getInstance();
+            sessionManager.add(session);
+        }
+    }
+
+
+    private void validatePassword(HttpRequest request, HttpResponse response, User user, String password) {
         if (!user.checkPassword(password)) {
             log.debug("회원과 일치하지 않는 비밀번호 - 회원 정보 : {}, 입력한 비밀번호 {}", user, password);
+            response.updateHttpStatus(HttpStatus.UNAUTHORIZED);
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
-        log.info("{} - 회원 로그인 성공", user);
-        getView("index.html", response);
     }
 }

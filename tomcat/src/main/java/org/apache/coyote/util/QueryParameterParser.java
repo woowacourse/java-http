@@ -9,8 +9,8 @@ public class QueryParameterParser {
 
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final int PARAM_KEY_INDEX = 0;
-    private static final int PARAM_VALUE_INDEX = 1;
+    private static final int PARAMETER_KEY_INDEX = 0;
+    private static final int PARAMETER_VALUE_INDEX = 1;
 
     private QueryParameterParser() {
     }
@@ -19,8 +19,8 @@ public class QueryParameterParser {
         return Arrays.stream(queryParameter.split(PARAMETER_DELIMITER))
                 .map(queryString -> queryString.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
-                        query -> query[PARAM_KEY_INDEX],
-                        query -> List.of(query[PARAM_VALUE_INDEX]),
+                        query -> query[PARAMETER_KEY_INDEX],
+                        query -> List.of(query[PARAMETER_VALUE_INDEX]),
                         (existingList, newList) -> {
                             existingList.addAll(newList);
                             return existingList;

@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryParameters {
 
@@ -33,5 +34,12 @@ public class QueryParameters {
 
     public boolean hasParameters() {
         return !values.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return values.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining("&"));
     }
 }

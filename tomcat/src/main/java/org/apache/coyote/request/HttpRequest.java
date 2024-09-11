@@ -8,10 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpVersion;
+import org.apache.coyote.http11.Cookie;
 
 public class HttpRequest {
 
@@ -52,7 +55,8 @@ public class HttpRequest {
     private static String readBody(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         int bytesRead = bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer, 0, bytesRead);
+        String body = new String(buffer, 0, bytesRead);
+        return URLDecoder.decode(body, StandardCharsets.UTF_8);
     }
 
     public HttpMethod getMethod() {
@@ -73,6 +77,22 @@ public class HttpRequest {
 
     public HttpRequestHeader getHeaders() {
         return headers;
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
+    }
+
+    public boolean hasCookie() {
+        return headers.hasCookie();
+    }
+
+    public String getSessionId() {
+        return headers.getCookie().getSessionId();
+    }
+
+    public boolean hasSession() {
+        return headers.hasSession();
     }
 
     public HttpRequestBody getBody() {

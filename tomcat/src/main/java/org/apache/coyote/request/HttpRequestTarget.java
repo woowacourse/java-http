@@ -38,6 +38,9 @@ public class HttpRequestTarget {
 
     @Override
     public String toString() {
-        return String.format("path : %s, queryParameters : %s", path, queryParameters);
+        if (queryParameters.hasParameters()) {
+            return String.format("%s?%s", path, queryParameters);
+        }
+        return path;
     }
 }

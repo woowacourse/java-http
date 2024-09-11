@@ -26,6 +26,10 @@ public class HttpResponseStartLine {
         return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
     @Override
     public String toString() {
         return String.join(

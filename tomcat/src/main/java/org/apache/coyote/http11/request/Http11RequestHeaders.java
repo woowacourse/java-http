@@ -56,6 +56,14 @@ public class Http11RequestHeaders {
         return cookie.getValue(key);
     }
 
+    public String getSession() {
+        return cookie.getSession();
+    }
+
+    public boolean existsSession() {
+        return cookie.existsSession();
+    }
+
     public String getContentLength() {
         return headers.get(CONTENT_LENGTH);
     }

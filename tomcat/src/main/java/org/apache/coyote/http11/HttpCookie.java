@@ -9,6 +9,7 @@ public class HttpCookie {
     private static final String COOKIE_NAME_VALUE_DELIMITER = "=";
     private static final int COOKIE_NAME_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookie;
 
@@ -30,5 +31,13 @@ public class HttpCookie {
 
     public String getValue(String key) {
         return cookie.get(key);
+    }
+
+    public boolean existsSession() {
+        return cookie.containsKey(JSESSIONID);
+    }
+
+    public String getSession() {
+        return cookie.get(JSESSIONID);
     }
 }

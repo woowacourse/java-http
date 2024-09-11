@@ -22,8 +22,6 @@ public interface HttpRequest {
 
     MimeType getAcceptMimeType();
 
-    String getCookie(String cookieName);
-
     Map<String, String> getParsedBody();
 
     Session getSession();

@@ -10,8 +10,6 @@ import org.apache.coyote.http11.MimeType;
 
 public class Http11Request implements HttpRequest {
 
-    private static final String JSESSIONID = "JSESSIONID";
-
     private final Http11RequestLine requestLine;
     private final Http11RequestHeaders headers;
     private final Http11RequestBody body;
@@ -48,7 +46,7 @@ public class Http11Request implements HttpRequest {
 
     @Override
     public boolean existsSession() {
-        return headers.existsCookie(JSESSIONID);
+        return headers.existsSession();
     }
 
     @Override
@@ -70,18 +68,13 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getCookie(String cookieName) {
-        return headers.getCookie(cookieName);
-    }
-
-    @Override
     public Map<String, String> getParsedBody() {
         return body.parseBody();
     }
 
     @Override
     public Session getSession() {
-        Optional<Session> sessionOptional = SessionManager.getInstance().findSession(getCookie(JSESSIONID));
+        Optional<Session> sessionOptional = SessionManager.getInstance().findSession(headers.getSession());
         return sessionOptional.orElseGet(Session::new);
     }
 

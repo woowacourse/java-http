@@ -1,5 +1,8 @@
 package org.apache.coyote.controller;
 
+import com.techcourse.controller.IndexController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.util.Arrays;
 import org.apache.coyote.http.request.HttpRequest;
 

@@ -21,12 +21,13 @@ public class LoginRequestHandler extends AbstractRequestHandler {
     private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.existsSession()) {
             Session session = httpRequest.getSession();
-            User user = session.getUserAttribute();
+            User user = (User) session.getAttribute(USER_SESSION_ATTRIBUTE_NAME);
             log.info("세션 로그인 : " + user);
             httpResponse.found(SUCCESS_LOGIN_REDIRECTION_PATH);
             return;
@@ -40,15 +41,26 @@ public class LoginRequestHandler extends AbstractRequestHandler {
     protected void post(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> param = httpRequest.getParsedBody();
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(param.get(ACCOUNT_KEY));
-        if (userOptional.isPresent() && userOptional.get().checkPassword(param.get(PASSWORD_KEY))) {
-            log.info("로그인 성공 : " + userOptional.get());
-            Session session = httpRequest.getSession();
-            session.setUserAttribute(userOptional.get());
-            SessionManager.getInstance().add(session);
-            httpResponse.setSession(session);
+        if (isUserAuthorized(userOptional, param.get(PASSWORD_KEY))) {
+            User user = userOptional.get();
+            log.info("로그인 성공 : " + user);
+            httpResponse.setSession(getSession(httpRequest, user));
             httpResponse.found(SUCCESS_LOGIN_REDIRECTION_PATH);
             return;
         }
         httpResponse.found(UNAUTHORIZED_PATH);
+    }
+
+    private boolean isUserAuthorized(Optional<User> userOptional, String password) {
+        return userOptional
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
+    }
+
+    private Session getSession(HttpRequest httpRequest, User user) {
+        Session session = httpRequest.getSession();
+        session.setAttribute(USER_SESSION_ATTRIBUTE_NAME, user);
+        SessionManager.getInstance().add(session);
+        return session;
     }
 }

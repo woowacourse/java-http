@@ -18,6 +18,7 @@ public class SignupRequestHandler extends AbstractRequestHandler {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String EMAIL_KEY = "email";
+    private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -31,11 +32,7 @@ public class SignupRequestHandler extends AbstractRequestHandler {
         User newUser = new User(param.get(ACCOUNT_KEY), param.get(PASSWORD_KEY), param.get(EMAIL_KEY));
         validateExists(newUser);
         InMemoryUserRepository.save(newUser);
-        Session session = httpRequest.getSession();
-        session.setUserAttribute(newUser);
-        SessionManager.getInstance().add(session);
-
-        httpResponse.setSession(session);
+        httpResponse.setSession(getSession(httpRequest, newUser));
         httpResponse.found(REDIRECTION_PATH);
     }
 
@@ -43,5 +40,12 @@ public class SignupRequestHandler extends AbstractRequestHandler {
         if (InMemoryUserRepository.existsUser(user)) {
             throw new UncheckedServletException(new IllegalStateException("이미 존재하는 아이디 입니다."));
         }
+    }
+
+    private Session getSession(HttpRequest httpRequest, User newUser) {
+        Session session = httpRequest.getSession();
+        session.setAttribute(USER_SESSION_ATTRIBUTE_NAME, newUser);
+        SessionManager.getInstance().add(session);
+        return session;
     }
 }

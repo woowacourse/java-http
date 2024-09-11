@@ -23,18 +23,6 @@ public class HttpResponse implements HttpComponent {
         return new HttpResponseBuilder();
     }
 
-    public HttpVersion getVersion() {
-        return statusLine.getVersion();
-    }
-
-    public HttpStatusCode getStatusCode() {
-        return statusLine.getStatusCode();
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
     public HttpBody getBody() {
         return body;
     }
@@ -47,8 +35,10 @@ public class HttpResponse implements HttpComponent {
     public String asString() {
         final var result = new StringJoiner(LINE_FEED);
         result.add(statusLine.asString())
-                .add(headers.asString())
-                .add(body.asString());
+                .add(headers.asString());
+        if (body != null) {
+            result.add(body.asString());
+        }
         return result.toString();
     }
 }

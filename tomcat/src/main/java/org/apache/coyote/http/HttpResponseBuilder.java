@@ -13,20 +13,8 @@ public class HttpResponseBuilder {
         headers = new HttpHeaders();
     }
 
-    public HttpResponseBuilder mutate(final HttpResponseBuilder builder) {
-        statusLine = builder.statusLine;
-        headers = builder.headers;
-        body = builder.body;
-        return this;
-    }
-
     public HttpResponseBuilder statusLine(final HttpStatusLine statusLine) {
         this.statusLine = statusLine;
-        return this;
-    }
-
-    public HttpResponseBuilder headers(final HttpHeaders httpHeaders) {
-        this.headers = httpHeaders;
         return this;
     }
 
@@ -42,6 +30,12 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
+        if (statusLine == null) {
+            throw new IllegalStateException("statusLine not set");
+        }
+        if (headers == null) {
+            headers = new HttpHeaders();
+        }
         return new HttpResponse(statusLine, headers, body);
     }
 }

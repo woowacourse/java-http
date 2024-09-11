@@ -1,9 +1,6 @@
 package org.apache.coyote.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.StringJoiner;
 
 public class HttpRequest implements HttpComponent {
@@ -12,12 +9,10 @@ public class HttpRequest implements HttpComponent {
     private final HttpHeaders headers;
     private final HttpBody body;
 
-    public HttpRequest(final InputStream inputStream) throws IOException {
-        final var reader = new InputStreamReader(inputStream);
-        final var buffer = new BufferedReader(reader);
-        this.requestLine = new HttpRequestLine(buffer);
-        this.headers = new HttpHeaders(buffer);
-        this.body = new HttpBody(buffer);
+    public HttpRequest(final String httpRequest) throws IOException {
+        this.requestLine = new HttpRequestLine(httpRequest);
+        this.headers = new HttpHeaders(httpRequest);
+        this.body = new HttpBody(httpRequest);
     }
 
     public HttpMethod getMethod() {

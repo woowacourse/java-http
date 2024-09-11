@@ -1,8 +1,5 @@
 package org.apache.coyote.http;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
 public class HttpRequestLine implements HttpComponent {
 
     private static final int METHOD_INDEX = 0;
@@ -13,8 +10,8 @@ public class HttpRequestLine implements HttpComponent {
     private final HttpRequestUri requestUri;
     private final HttpVersion version;
 
-    public HttpRequestLine(final BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
+    public HttpRequestLine(final String httpRequest) {
+        String requestLine = httpRequest.split(LINE_FEED)[0];
         String[] split = requestLine.split(SPACE);
         this.method = HttpMethod.from(split[METHOD_INDEX]);
         this.requestUri = new HttpRequestUri(split[REQUEST_URI_INDEX]);

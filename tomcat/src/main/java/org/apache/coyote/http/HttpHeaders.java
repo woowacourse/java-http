@@ -1,7 +1,5 @@
 package org.apache.coyote.http;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,11 +20,14 @@ public class HttpHeaders implements HttpComponent {
         headers = new ConcurrentHashMap<>();
     }
 
-    public HttpHeaders(final BufferedReader reader) throws IOException {
-        headers = new ConcurrentHashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            put(line);
+    public HttpHeaders(final String httpRequest) {
+        this();
+        String[] lines = httpRequest.split(LINE_FEED);
+        int i = 1;
+        while ((i < lines.length) && !lines[i].isEmpty()) {
+            String[] headerLine = lines[i].split(SEPARATOR);
+            headers.put(headerLine[NAME_INDEX], headerLine[VALUE_INDEX]);
+            i++;
         }
     }
 
@@ -35,16 +36,6 @@ public class HttpHeaders implements HttpComponent {
             return headers.get(name);
         }
         return null;
-    }
-
-    private void put(final String headerLine) {
-        if (!headerLine.contains(SEPARATOR)) {
-            throw new IllegalArgumentException(headerLine);
-        }
-        String[] split = headerLine.split(SEPARATOR);
-        String name = split[NAME_INDEX];
-        String value = split[VALUE_INDEX];
-        put(name, value);
     }
 
     public void put(final String name, final String value) {
@@ -57,7 +48,7 @@ public class HttpHeaders implements HttpComponent {
         for (String key : headers.keySet()) {
             String value = headers.get(key);
             result.append(key)
-                    .append(": ")
+                    .append(SEPARATOR)
                     .append(value)
                     .append(SPACE)
                     .append(LINE_FEED);

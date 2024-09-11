@@ -1,15 +1,17 @@
 package org.apache.coyote.http.request;
 
+import org.apache.coyote.http.HttpMethod;
+
 public class RequestLine {
 
     private static final String URI_DELIMITER = "?";
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String protocol;
 
     public RequestLine(String method, String path, String protocol) {
-        this.method = method;
+        this.method = HttpMethod.of(method);
         this.uri = parseUri(path);
         this.protocol = protocol;
     }
@@ -22,7 +24,7 @@ public class RequestLine {
         return path;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

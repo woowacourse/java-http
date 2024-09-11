@@ -1,5 +1,6 @@
 package org.apache.coyote.controller;
 
+import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.response.HttpResponse;
@@ -8,11 +9,11 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        String method = request.getMethod();
-        if (method.equals("POST")) {
+        HttpMethod httpMethod = request.getHttpMethod();
+        if (httpMethod.isPost()) {
             doPost(request, response);
         }
-        if (method.equals("GET")) {
+        if (httpMethod.isGet()) {
             doGet(request, response);
         }
     }

@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.HttpRequestBody;
 
 public class Http11RequestBodyParser {
 
-    public static Http11RequestBody parse(String encodedBody) {
+    public static HttpRequestBody parse(String encodedBody) {
         Map<String, String> parameters = new HashMap<>();
         for (String parameter : encodedBody.split("&")) {
             int index = parameter.indexOf("=");
@@ -16,6 +17,6 @@ public class Http11RequestBodyParser {
             String value = parameter.substring(index + 1).trim();
             parameters.put(key, value);
         }
-        return new Http11RequestBody(parameters);
+        return new HttpRequestBody(parameters);
     }
 }

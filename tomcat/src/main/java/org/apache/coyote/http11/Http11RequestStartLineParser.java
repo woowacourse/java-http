@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.HttpMethod;
+import org.apache.coyote.HttpRequestStartLine;
+
 public class Http11RequestStartLineParser {
 
-    public static Http11RequestStartLine parse(String line) {
+    public static HttpRequestStartLine parse(String line) {
         String[] startLine = parseStartLine(line);
-        Http11Method httpMethod = parseHttpMethod(startLine);
+        HttpMethod httpMethod = parseHttpMethod(startLine);
         String requestURI = parseRequestURI(startLine);
-        return new Http11RequestStartLine(httpMethod, requestURI);
+        return new HttpRequestStartLine(httpMethod, requestURI);
     }
 
     private static String[] parseStartLine(String line) {
@@ -17,9 +20,9 @@ public class Http11RequestStartLineParser {
         return startLine;
     }
 
-    private static Http11Method parseHttpMethod(String[] startLine) {
+    private static HttpMethod parseHttpMethod(String[] startLine) {
         String httpMethodName = startLine[0];
-        return Http11Method.findByName(httpMethodName);
+        return HttpMethod.findByName(httpMethodName);
     }
 
     private static String parseRequestURI(String[] startLine) {

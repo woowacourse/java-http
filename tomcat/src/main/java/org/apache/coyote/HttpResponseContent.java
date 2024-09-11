@@ -1,12 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
-public class Http11ResponseContent {
+import org.apache.coyote.http11.Http11ContentTypeParser;
+
+public class HttpResponseContent {
 
     private final String contentType;
     private final int contentLength;
     private final String body;
 
-    public Http11ResponseContent(String path, String body) {
+    public HttpResponseContent(String path, String body) {
         this.contentType = Http11ContentTypeParser.parse(path);
         this.contentLength = body.getBytes().length;
         this.body = body;

@@ -4,19 +4,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpRequestBody;
+import org.apache.coyote.HttpRequestHeader;
+import org.apache.coyote.HttpRequestStartLine;
+import org.apache.coyote.HttpResponse;
 
 public class Http11Parser {
 
     private static final String REQUEST_HEADER_SUFFIX = "";
 
-    public static Http11Request readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final Http11RequestStartLine startLine = readHttpRequestStartLine(bufferedReader);
-        final Http11RequestHeader header = readHttpRequestHeader(bufferedReader);
-        final Http11RequestBody body = readHttpRequestBody(bufferedReader, header);
-        return new Http11Request(startLine, header, body);
+    public static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final HttpRequestStartLine startLine = readHttpRequestStartLine(bufferedReader);
+        final HttpRequestHeader header = readHttpRequestHeader(bufferedReader);
+        final HttpRequestBody body = readHttpRequestBody(bufferedReader, header);
+        return new HttpRequest(startLine, header, body);
     }
 
-    private static Http11RequestStartLine readHttpRequestStartLine(final BufferedReader bufferedReader)
+    private static HttpRequestStartLine readHttpRequestStartLine(final BufferedReader bufferedReader)
             throws IOException {
         final String startLine = bufferedReader.readLine();
         if (startLine == null || startLine.isEmpty()) {
@@ -25,7 +30,7 @@ public class Http11Parser {
         return Http11RequestStartLineParser.parse(startLine);
     }
 
-    private static Http11RequestHeader readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private static HttpRequestHeader readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> lines = new ArrayList<>();
         String line = bufferedReader.readLine();
         while (!REQUEST_HEADER_SUFFIX.equals(line)) {
@@ -35,11 +40,11 @@ public class Http11Parser {
         return Http11RequestHeaderParser.parse(lines);
     }
 
-    private static Http11RequestBody readHttpRequestBody(final BufferedReader bufferedReader,
-                                                         final Http11RequestHeader header) throws IOException {
+    private static HttpRequestBody readHttpRequestBody(final BufferedReader bufferedReader,
+                                                       final HttpRequestHeader header) throws IOException {
         final String contentLengthHeader = header.get("Content-Length");
         if (contentLengthHeader == null) {
-            return new Http11RequestBody();
+            return new HttpRequestBody();
         }
 
         final int contentLength = Integer.parseInt(contentLengthHeader);
@@ -49,7 +54,7 @@ public class Http11Parser {
         return Http11RequestBodyParser.parse(encodedBody);
     }
 
-    public static String writeHttpResponse(final Http11Response response) {
+    public static String writeHttpResponse(final HttpResponse response) {
         final StringBuilder serializedResponse = new StringBuilder();
         serializedResponse.append("HTTP/1.1 ").append(response.getStatusCode()).append(" \r\n");
         if (response.getLocation() != null) {

@@ -1,17 +1,17 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Http11RequestBody {
+public class HttpRequestBody {
 
     private final Map<String, String> body;
 
-    public Http11RequestBody() {
+    public HttpRequestBody() {
         this.body = new HashMap<>();
     }
 
-    public Http11RequestBody(Map<String, String> body) {
+    public HttpRequestBody(Map<String, String> body) {
         this.body = body;
     }
 

@@ -1,18 +1,18 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
-public class Http11Response {
+public class HttpResponse {
 
     private final String statusCode;
     private final String location;
-    private final Http11ResponseContent content;
+    private final HttpResponseContent content;
 
-    public Http11Response(String statusCode, String location) {
+    public HttpResponse(String statusCode, String location) {
         this.statusCode = statusCode;
         this.location = location;
         this.content = null;
     }
 
-    public Http11Response(String statusCode, Http11ResponseContent content) {
+    public HttpResponse(String statusCode, HttpResponseContent content) {
         this.statusCode = statusCode;
         this.location = null;
         this.content = content;
@@ -26,7 +26,7 @@ public class Http11Response {
         return location;
     }
 
-    public Http11ResponseContent getContent() {
+    public HttpResponseContent getContent() {
         return content;
     }
 

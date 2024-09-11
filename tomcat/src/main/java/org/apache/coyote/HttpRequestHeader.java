@@ -1,12 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.Map;
 
-public class Http11RequestHeader {
+public class HttpRequestHeader {
 
     private final Map<String, String> headers;
 
-    public Http11RequestHeader(Map<String, String> headers) {
+    public HttpRequestHeader(Map<String, String> headers) {
         this.headers = headers;
     }
 

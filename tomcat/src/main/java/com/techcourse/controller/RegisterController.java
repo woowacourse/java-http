@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceManager;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

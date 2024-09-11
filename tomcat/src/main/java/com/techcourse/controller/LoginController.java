@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceManager;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,10 +1,11 @@
 package com.techcourse.controller;
 
-import com.techcourse.util.StaticResourceManager;
+import org.apache.catalina.util.StaticResourceManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -20,7 +21,6 @@ public class RequestMapping {
     private final Map<String, Controller> controllers;
 
     private static class RequestMappingHolder {
-
         private static final RequestMapping INSTANCE = new RequestMapping();
     }
 

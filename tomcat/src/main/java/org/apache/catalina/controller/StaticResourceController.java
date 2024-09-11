@@ -1,8 +1,8 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
-import com.techcourse.util.StaticResourceManager;
-import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.MediaType;
+import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,7 +15,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     public String getPath() {
-        return "";
+        return Constants.EMPTY_STRING;
     }
 
     @Override

@@ -5,7 +5,6 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpStatusCode;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -45,8 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+            // TODO: error response
         }
-        log.info("현재 세션: {}", sessionManager.getSessions());
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {

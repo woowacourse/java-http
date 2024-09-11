@@ -75,7 +75,7 @@ public class HttpRequest {
 
     public String getHeader(String key) {
         return Arrays.stream(headers.getHeaders())
-                .filter(httpHeader -> httpHeader.getKey().equals(key))
+                .filter(httpHeader -> httpHeader.getKey().equalsIgnoreCase(key))
                 .map(HttpHeader::getValue)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 Header " + key + "입니다."));

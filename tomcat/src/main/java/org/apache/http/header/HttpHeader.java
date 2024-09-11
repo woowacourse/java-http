@@ -23,7 +23,14 @@ public class HttpHeader {
 
     public static HttpHeader from(String entry) {
         String[] keyAndValue = entry.split(KEY_VALUE_DELIMITER, KEY_VALUE_COUNT);
+        validateValidEntry(keyAndValue.length);
         return new HttpHeader(keyAndValue[KEY_ORDER], keyAndValue[VALUE_ORDER]);
+    }
+
+    private static void validateValidEntry(int entrySize) {
+        if (entrySize != KEY_VALUE_COUNT) {
+            throw new IllegalArgumentException("HttpHeader는 key value 쌍이여야 합니다.");
+        }
     }
 
     public HttpHeaderName getKey() {

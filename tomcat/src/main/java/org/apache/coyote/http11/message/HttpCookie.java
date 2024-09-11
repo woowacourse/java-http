@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.message;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,20 +14,46 @@ public class HttpCookie {
     private static final String DIRECTIVE_DELIMITER = "=";
     private static final String DIRECTIVES_DELIMITER = "; ";
     private static final String HTTP_ONLY_DIRECTIVE = "HttpOnly";
+    private static final int DIRECTIVE_NAME_INDEX = 0;
+    private static final int DIRECTIVE_VALUE_INDEX = 1;
 
     private final Map<String, String> directives;
 
     private boolean isHttpOnly;
 
-    public HttpCookie(Map<String, String> directives) {
+    public HttpCookie(Map<String, String> directives, boolean isHttpOnly) {
         this.directives = directives;
-        this.isHttpOnly = false;
+        this.isHttpOnly = isHttpOnly;
+    }
+
+    public static HttpCookie from(List<String> cookieField) {
+        boolean isHttpOnly = cookieField.contains(HTTP_ONLY_DIRECTIVE);
+        if (isHttpOnly) {
+            cookieField.remove(HTTP_ONLY_DIRECTIVE);
+        }
+
+        Map<String, String> directives = cookieField.stream()
+                .map(HttpCookie::parseDirective)
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        return new HttpCookie(directives, isHttpOnly);
+    }
+
+    private static Map.Entry<String, String> parseDirective(String directiveString) {
+        String[] directiveElements = directiveString.split(DIRECTIVE_DELIMITER);
+        String directiveName = directiveElements[DIRECTIVE_NAME_INDEX];
+        String directiveValue = directiveElements[DIRECTIVE_VALUE_INDEX];
+        return Map.entry(directiveName, directiveValue);
     }
 
     public static HttpCookie createWithRandomJsessionid() {
-        return new HttpCookie(new HashMap<>(Map.of(
+        HashMap<String, String> directives = new HashMap<>(Map.of(
                 "JSESSIONID_NAME", UUID.randomUUID().toString()
-        )));
+        ));
+        return new HttpCookie(directives, false);
+    }
+
+    public boolean hasJsessionid() {
+        return !getJsessionid().isBlank();
     }
 
     public void setHttpOnly(boolean isHttpOnly) {

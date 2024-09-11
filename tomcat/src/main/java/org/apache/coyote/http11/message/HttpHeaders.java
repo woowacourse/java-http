@@ -19,6 +19,10 @@ public final class HttpHeaders {
         return headerValue.equals(getFieldByHeaderName(headerName).orElse(""));
     }
 
+    public boolean hasHeader(String header) {
+        return headers.containsKey(header);
+    }
+
     public Optional<String> getFieldByHeaderName(String headerName) {
         List<String> fields = Optional.ofNullable(headers.get(headerName))
                 .orElse(new ArrayList<>());
@@ -36,6 +40,10 @@ public final class HttpHeaders {
             headers.put(name, new ArrayList<>());
         }
         headers.get(name).add(field);
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(headers.get("Cookie"));
     }
 
     public Map<String, List<String>> getHeaders() {

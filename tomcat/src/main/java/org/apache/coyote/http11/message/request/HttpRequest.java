@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
 import java.util.Optional;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
@@ -35,6 +36,14 @@ public class HttpRequest {
 
     public boolean hasQueryString() {
         return url.hasQueryString();
+    }
+
+    public boolean hasHeader(String header) {
+        return headers.hasHeader(header);
+    }
+
+    public HttpCookie getCookie() {
+        return headers.getCookie();
     }
 
     public String getFormParameter(String key) {

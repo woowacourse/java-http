@@ -36,12 +36,9 @@ public class LoginPostController implements HttpHandler {
 
             // TODO: 빌더로 생성해보기
             HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
-            HttpCookie cookie = HttpCookie.createWithRandomJsessionid();
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
 
             response.setHeader("Location", "http://localhost:8080/index.html");
-            response.setCookie(cookie);
+            setCookie(request, response);
 
             return response;
         } catch (UnauthorizedException e) {
@@ -51,5 +48,21 @@ public class LoginPostController implements HttpHandler {
 
             return response;
         }
+    }
+
+    private void setCookie(HttpRequest request, HttpResponse response) {
+        if (!request.hasHeader("Cookie")) {
+            return;
+        }
+
+        HttpCookie cookie = request.getCookie();
+        if (cookie.hasJsessionid()) {
+            return;
+        }
+
+        HttpCookie responseCookie = HttpCookie.createWithRandomJsessionid();
+        responseCookie.setPath("/");
+        responseCookie.setHttpOnly(true);
+        response.setCookie(responseCookie);
     }
 }

@@ -53,7 +53,6 @@ class Http11ProcessorTest {
                 "GET " + fileName + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "",
                 "");
 
         final var socket = new StubSocket(httpRequest);
@@ -202,36 +201,72 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        @Test
+        @DisplayName("성공 : 로그인 성공으로 index.html로 리다이렉션")
+        void loginSuccess() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /login?account=gugu&password=password HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+            var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: " + bytes.length + " \r\n" +
+                    "Set-Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb" + " \r\n" +
+                    "Location: http://localhost:8080/index.html" + " \r\n" +
+                    "\r\n" +
+                    new String(bytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
     }
 
-    @Test
-    @DisplayName("성공 : 로그인 성공으로 index.html로 리다이렉션")
-    void loginSuccess() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb",
-                "");
+    @Nested
+    @DisplayName("회원가입 요청")
+    class register {
+        @Test
+        @DisplayName("성공 : 회원가입 성공으로 index.html로 리다이렉션")
+        void registerSuccess() throws IOException {
+            // given
+            final String body = "account=kyum&password=password&email=kyum@naver.com";
+            final String httpRequest = String.join("\r\n",
+                    "POST /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: " + body.getBytes().length,
+                    "",
+                    body);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
 
-        // when
-        processor.process(socket);
+            // when
+            processor.process(socket);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + bytes.length + " \r\n" +
-                "Set-Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb" + " \r\n" +
-                "Location: http://localhost:8080/index.html" + " \r\n" +
-                "\r\n" +
-                new String(bytes);
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+            var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: " + bytes.length + " \r\n" +
+                    "Location: http://localhost:8080/index.html" + " \r\n" +
+                    "\r\n" +
+                    new String(bytes);
 
-        assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).isEqualTo(expected);
+        }
     }
 }

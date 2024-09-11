@@ -14,23 +14,21 @@ public class RequestParser {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String COOKIE = "Cookie";
 
-    private final BufferedReader bufferedReader;
     private final String[] requestLine;
     private final Map<String, String> header;
     private final String body;
     private final HttpCookie httpCookie;
 
     public RequestParser(BufferedReader bufferedReader) throws IOException {
-        this.bufferedReader = bufferedReader;
         String line = bufferedReader.readLine();
         log.info("requestLine : {}", line);
         this.requestLine = line.split(" ");
-        this.header = extractHeader();
+        this.header = extractHeader(bufferedReader);
         this.httpCookie = new HttpCookie(extractCookie());
-        this.body = extractBody();
+        this.body = extractBody(bufferedReader);
     }
 
-    private Map<String, String> extractHeader() throws IOException {
+    private Map<String, String> extractHeader(BufferedReader bufferedReader) throws IOException {
         Map<String, String> header = new HashMap<>();
         String line = bufferedReader.readLine();
         while (line != null && !line.isEmpty()) {
@@ -48,7 +46,7 @@ public class RequestParser {
         return "";
     }
 
-    private String extractBody() throws IOException {
+    private String extractBody(BufferedReader bufferedReader) throws IOException {
         if (header.containsKey(CONTENT_LENGTH)) {
             int contentLength = Integer.parseInt(header.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];

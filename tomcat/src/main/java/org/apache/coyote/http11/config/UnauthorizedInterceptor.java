@@ -19,6 +19,6 @@ public class UnauthorizedInterceptor {
     }
 
     public boolean checkPath(HttpRequest httpRequest) {
-        return !httpRequest.containsKey(HttpHeaderName.LOCATION) && unauthorizedPaths.contains(httpRequest.getPath());
+        return !httpRequest.containsHeader(HttpHeaderName.LOCATION) && unauthorizedPaths.contains(httpRequest.getPath());
     }
 }

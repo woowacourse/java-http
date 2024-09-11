@@ -24,16 +24,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        String requestBody = httpRequest.getBody();
-        String[] token = requestBody.split("&");
-        if (checkToken(token)) {
-            log.error("일부 항목이 누락되었습니다.");
-            return HttpResponse.found(httpRequest)
-                    .location(LOGIN_PATH)
-                    .build();
-        }
-        String account = token[0].split("=")[1];
-        String password = token[1].split("=")[1];
+        String account = httpRequest.getBodyValue("account");
+        String password = httpRequest.getBodyValue("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
@@ -60,11 +52,11 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
-            if (!httpRequest.containsKey(HttpHeaderName.COOKIE)) {
+            if (!httpRequest.containsHeader(HttpHeaderName.COOKIE)) {
                 return redirectLoginPage(httpRequest);
             }
 
-            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getValue(HttpHeaderName.COOKIE));
+            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getHeaderValue(HttpHeaderName.COOKIE));
             if (!httpCookie.containsKey("JSESSIONID")) {
                 return redirectLoginPage(httpRequest);
             }

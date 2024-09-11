@@ -23,23 +23,14 @@ public class HttpRequestConvertor {
         Map<String, String> headers = getHeaders(bufferedReader);
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
-        if (httpRequestHeader.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
+        if (httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH)
+                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals("application/x-www-form-urlencoded")
+        ) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
         }
 
         return new HttpRequest(httpRequestLine, httpRequestHeader);
-    }
-
-    private static HttpRequestBody getHttpRequestBody(
-            BufferedReader bufferedReader,
-            HttpRequestHeader httpRequestHeader
-    ) throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeader.getValue(HttpHeaderName.CONTENT_LENGTH));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String body = new String(buffer);
-        return new HttpRequestBody(body);
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
@@ -60,5 +51,28 @@ public class HttpRequestConvertor {
         }
 
         return sb.toString();
+    }
+
+    private static HttpRequestBody getHttpRequestBody(
+            BufferedReader bufferedReader,
+            HttpRequestHeader httpRequestHeader
+    ) throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        Map<String, String> body = extractBody(requestBody);
+        return new HttpRequestBody(body);
+    }
+
+    private static Map<String, String> extractBody(String requestBody) {
+        Map<String, String> body = new HashMap<>();
+        String[] tokens = requestBody.split("&");
+        for (String token : tokens) {
+            String key = token.split("=")[0];
+            String value = token.split("=")[1];
+            body.put(key, value);
+        }
+        return body;
     }
 }

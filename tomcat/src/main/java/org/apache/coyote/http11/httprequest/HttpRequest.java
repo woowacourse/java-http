@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httprequest;
 
+import java.util.Map;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpMethod;
 
@@ -27,20 +28,28 @@ public class HttpRequest {
         return httpRequestLine.isPath(path);
     }
 
-    public boolean containsKey(String key) {
-        return httpRequestHeader.containsKey(key);
+    public boolean containsHeader(String key) {
+        return httpRequestHeader.containsHeader(key);
     }
 
-    public boolean containsKey(HttpHeaderName httpHeaderName) {
-        return httpRequestHeader.containsKey(httpHeaderName);
+    public boolean containsHeader(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.containsHeader(httpHeaderName);
     }
 
-    public String getValue(String key) {
-        return httpRequestHeader.getValue(key);
+    public String getHeaderValue(String key) {
+        return httpRequestHeader.getHeaderValue(key);
     }
 
-    public String getValue(HttpHeaderName httpHeaderName) {
-        return httpRequestHeader.getValue(httpHeaderName);
+    public String getHeaderValue(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.getHeaderValue(httpHeaderName);
+    }
+
+    public boolean containsBody(String key) {
+        return httpRequestBody.containsBody(key);
+    }
+
+    public String getBodyValue(String key) {
+        return httpRequestBody.getBodyValue(key);
     }
 
     public HttpMethod getMethod() {
@@ -55,7 +64,7 @@ public class HttpRequest {
         return httpRequestLine.getVersion();
     }
 
-    public String getBody() {
+    public Map<String, String> getBody() {
         return httpRequestBody.getBody();
     }
 

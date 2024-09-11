@@ -17,16 +17,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        String requestBody = httpRequest.getBody();
-        String[] token = requestBody.split("&");
-        if (checkToken(token)) {
-            log.error("일부 항목이 누락되었습니다.");
-            return HttpResponse.found(httpRequest)
-                    .location(REGISTER_PATH)
-                    .build();
-        }
+        String account = httpRequest.getBodyValue("account");
+        String password = httpRequest.getBodyValue("password");
+        String email = httpRequest.getBodyValue("email");
 
-        String account = token[0].split("=")[1];
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
             return HttpResponse.found(httpRequest)
@@ -34,8 +28,6 @@ public class RegisterController extends AbstractController {
                     .build();
         }
 
-        String email = token[1].split("=")[1];
-        String password = token[2].split("=")[1];
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 

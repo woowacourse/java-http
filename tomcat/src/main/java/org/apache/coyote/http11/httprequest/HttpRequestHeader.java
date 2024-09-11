@@ -11,19 +11,19 @@ public class HttpRequestHeader {
         this.headers = headers;
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsHeader(String key) {
         return headers.containsKey(key);
     }
 
-    public boolean containsKey(HttpHeaderName httpHeaderName) {
+    public boolean containsHeader(HttpHeaderName httpHeaderName) {
         return headers.containsKey(httpHeaderName.getName());
     }
 
-    public String getValue(String key) {
+    public String getHeaderValue(String key) {
         return headers.get(key);
     }
 
-    public String getValue(HttpHeaderName httpHeaderName) {
+    public String getHeaderValue(HttpHeaderName httpHeaderName) {
         return headers.get(httpHeaderName.getName());
     }
 }

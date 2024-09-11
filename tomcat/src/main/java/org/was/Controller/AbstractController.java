@@ -19,9 +19,7 @@ public abstract class AbstractController implements Controller {
         throw new MethodNotAllowedException(method);
     }
 
-    protected ResponseResult doPost(HttpRequest request) {
-    }
+    protected abstract ResponseResult doPost(HttpRequest request);
 
-    protected ResponseResult doGet(HttpRequest request) {
-    }
+    protected abstract ResponseResult doGet(HttpRequest request);
 }

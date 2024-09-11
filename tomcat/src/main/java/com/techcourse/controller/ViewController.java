@@ -1,8 +1,8 @@
 package com.techcourse.controller;
 
 import java.io.IOException;
-import com.techcourse.view.View;
-import com.techcourse.view.ViewResolver;
+import org.was.view.View;
+import org.was.view.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.was.Controller.AbstractController;

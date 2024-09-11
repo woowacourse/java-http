@@ -4,17 +4,28 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
-import com.techcourse.view.View;
-import com.techcourse.view.ViewResolver;
+import org.was.view.View;
+import org.was.view.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.was.Controller.AbstractController;
+import org.was.Controller.ResponseResult;
 
 public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
+    @Override
+    protected ResponseResult doPost(HttpRequest request) {
+        return null;
+    }
+
+    @Override
+    protected ResponseResult doGet(HttpRequest request) {
+        return null;
+    }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {

@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class HttpHeaders {
 
+    private static final String HEADER_SEPARATOR = ":";
     private final Map<String, String> headers;
 
     public HttpHeaders() {
@@ -22,7 +23,7 @@ public class HttpHeaders {
         final var httpRequestHeaders = new HashMap<String, String>();
         var line = "";
         while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
-            final int index = line.indexOf(":");
+            final int index = line.indexOf(HEADER_SEPARATOR);
             httpRequestHeaders.put(line.substring(0, index).strip(), line.substring(index + 1).strip());
         }
         return new HttpHeaders(httpRequestHeaders);

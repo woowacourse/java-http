@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> header;
 
     public HttpCookie(final Map<String, String> header) {
@@ -18,8 +21,8 @@ public class HttpCookie {
         }
         final var header = new HashMap<String, String>();
         for (final var cookie : str.split(";")) {
-            final var key = cookie.split("=")[0].strip();
-            final var value = cookie.split("=")[1].strip();
+            final var key = cookie.split("=")[KEY_INDEX].strip();
+            final var value = cookie.split("=")[VALUE_INDEX].strip();
             header.put(key, value);
         }
         return new HttpCookie(header);

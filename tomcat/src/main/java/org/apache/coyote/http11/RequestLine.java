@@ -11,7 +11,7 @@ public class RequestLine {
     private final HttpMethod httpMethod;
     private final Path path;
 
-    private RequestLine(HttpMethod httpMethod, Path path) {
+    private RequestLine(final HttpMethod httpMethod, final Path path) {
         this.httpMethod = httpMethod;
         this.path = path;
     }

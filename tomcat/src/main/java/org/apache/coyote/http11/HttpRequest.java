@@ -9,6 +9,11 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String BODY_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final Map<String, String> body;
@@ -40,9 +45,11 @@ public class HttpRequest {
 
     private static Map<String, String> generate(final String requestBody) {
         final var body = new HashMap<String, String>();
-        final var params = requestBody.split("&");
+        final var params = requestBody.split(BODY_SEPARATOR);
         for (final var param : params) {
-            body.put(param.split("=")[0].strip(), param.split("=")[1].strip());
+            final var key = param.split(KEY_VALUE_SEPARATOR)[KEY_INDEX];
+            final var value = param.split(KEY_VALUE_SEPARATOR)[VALUE_INDEX];
+            body.put(key.strip(), value.strip());
         }
         return body;
     }

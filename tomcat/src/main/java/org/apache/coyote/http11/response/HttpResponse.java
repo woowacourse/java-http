@@ -10,15 +10,9 @@ public class HttpResponse {
     private ResponseHeader header;
     private ResponseBody body;
 
-    public void setStatusCode(HttpStatusCode statusCode) {
+    public void setResponse(HttpStatusCode statusCode, ResponseHeader header, ResponseBody body) {
         this.statusLine = new StatusLine(HTTP_VERSION, statusCode.getStatusCode(), statusCode.getMessage());
-    }
-
-    public void setHeader(ResponseHeader header) {
         this.header = header;
-    }
-
-    public void setBody(ResponseBody body) {
         this.body = body;
     }
 

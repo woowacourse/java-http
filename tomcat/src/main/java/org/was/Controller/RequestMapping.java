@@ -24,7 +24,7 @@ public class RequestMapping {
     }
 
     public Controller getController(HttpRequest request) {
-        String path = request.getRequestLine().getPath();
+        String path = request.getPath();
         Controller controller = controllerMapping.get(path);
 
         if (controller == null) {

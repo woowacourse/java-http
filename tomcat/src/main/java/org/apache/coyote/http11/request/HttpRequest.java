@@ -15,8 +15,13 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public String getHeader(String key) {
-        return header.getHeader(key);
+    public HttpMethod getMethod() {
+        String method = requestLine.getMethod();
+        return HttpMethod.valueOf(method);
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getContentType() {
@@ -33,11 +38,6 @@ public class HttpRequest {
 
     public boolean hasBodyData() {
         return requestBody != null;
-    }
-
-    public HttpMethod getMethod() {
-        String method = requestLine.getMethod();
-        return HttpMethod.valueOf(method);
     }
 
     public RequestLine getRequestLine() {

@@ -25,6 +25,9 @@ public enum ContentType {
     }
 
     public static ContentType from(final Path path) {
+        if (path.getAbsolutePath() == null) {
+            return TEXT_HTML;
+        }
         final var absolutePath = path.getAbsolutePath().getPath();
         final var extension = absolutePath.substring(absolutePath.lastIndexOf(".") + 1);
         if (SUIT_CASE.containsKey(extension)) {

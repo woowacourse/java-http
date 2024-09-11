@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Path {
 
@@ -44,10 +43,6 @@ public class Path {
         return result;
     }
 
-    public boolean isEqualPath(final String target) {
-        return Objects.equals(requestPath, target);
-    }
-
     public String getRequestPath() {
         return requestPath;
     }
@@ -63,8 +58,9 @@ public class Path {
     @Override
     public String toString() {
         return "Path{" +
-               "value=" + requestPath +
-               ", queryString=" + parameters +
+               "requestPath='" + requestPath + '\'' +
+               ", absolutePath=" + absolutePath +
+               ", parameters=" + parameters +
                '}';
     }
 }

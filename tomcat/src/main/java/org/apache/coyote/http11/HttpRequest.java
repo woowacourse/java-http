@@ -2,10 +2,16 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.Cookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
@@ -16,6 +22,7 @@ public class HttpRequest {
     private String path;
     private Map<String, String> queries;
     private Map<String, String> headers;
+    private Cookies cookies;
     private Map<String, String> body;
 
     public static HttpRequest from(BufferedReader request) {
@@ -30,12 +37,26 @@ public class HttpRequest {
             HttpProtocol httpProtocol = new HttpProtocol(protocol, version);
             Map<String, String> headers = getHttpHeaders(request);
             Map<String, String> body = getHttpBody(request, headers);
+            Cookies cookies = getHttpCookies(headers);
 
-            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers, body);
+            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers, body, cookies);
 
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다.", e);
         }
+    }
+
+    private static Cookies getHttpCookies(Map<String, String> headers) {
+        Cookies cookies = new Cookies();
+        if(headers.containsKey("Cookie")) {
+            String[] cookieLine = headers.get("Cookie").split("; ");
+            for (String cookie : cookieLine) {
+                String[] cookieKeyValue = cookie.split("=");
+                cookies.setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
+            }
+        }
+
+        return cookies;
     }
 
     private static Map<String, String> getQueries(String[] requestFirstLine) {
@@ -102,7 +123,7 @@ public class HttpRequest {
     }
 
     public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path, Map<String, String> queries,
-                       Map<String, String> headers, Map<String, String> body) {
+                       Map<String, String> headers, Map<String, String> body, Cookies cookies) {
         this.method = method;
         this.protocol = protocol;
         this.httpVersion = httpVersion;
@@ -110,6 +131,11 @@ public class HttpRequest {
         this.queries = queries;
         this.headers = headers;
         this.body = body;
+        this.cookies = cookies;
+    }
+
+    public boolean hasCookie(String name) {
+        return cookies.hasName(name);
     }
 
     public String getQueryValue(String key) {

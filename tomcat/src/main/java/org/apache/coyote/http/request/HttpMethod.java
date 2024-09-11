@@ -13,22 +13,22 @@ public enum HttpMethod {
     CONNECT("CONNECT"),
     ;
 
-    private final String method;
+    private final String methodName;
 
-    HttpMethod(String method) {
-        this.method = method;
+    HttpMethod(String methodName) {
+        this.methodName = methodName;
     }
 
-    public String getMethod() {
-        return method;
+    public String getMethodName() {
+        return methodName;
     }
 
     public static boolean isHttpMethod(String method) {
-        return Arrays.stream(HttpMethod.values()).anyMatch(httpMethod -> httpMethod.getMethod().equals(method));
+        return Arrays.stream(HttpMethod.values()).anyMatch(httpMethod -> httpMethod.getMethodName().equals(method));
     }
 
     public static HttpMethod findMethodByMethodName(String name) {
-        return Arrays.stream(HttpMethod.values()).filter(httpMethod -> httpMethod.getMethod().equals(name)).findFirst()
+        return Arrays.stream(HttpMethod.values()).filter(httpMethod -> httpMethod.getMethodName().equals(name)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown http method: " + name));
     }
 }

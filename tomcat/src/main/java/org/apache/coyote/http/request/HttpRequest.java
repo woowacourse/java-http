@@ -34,8 +34,12 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
+    public boolean isMethod(HttpMethod method) {
+        return requestLine.getMethod().equals(method);
+    }
+
+    public String getMethodName() {
+        return requestLine.getMethod().getMethodName();
     }
 
     public Path getPath() {

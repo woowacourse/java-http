@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpMessageGenerator.generateRequest(bufferedReader);
             log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
-                    request.getPath().getUri(), request.getMethod().getMethod(), request.getBody());
+                    request.getPath().getUri(), request.getMethodName(), request.getBody());
 
             HttpResponse response = new HttpResponse();
 

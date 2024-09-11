@@ -8,23 +8,22 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        HttpMethod method = request.getMethod();
-        if (method.equals(HttpMethod.GET)) {
+        if (request.isMethod(HttpMethod.GET)) {
             doGet(request, response);
             return ;
         }
-        if (method.equals(HttpMethod.POST)) {
+        if (request.isMethod(HttpMethod.POST)) {
             doPost(request, response);
             return ;
         }
-        throw new UnsupportedOperationException(method.getMethod());
+        throw new UnsupportedOperationException(request.getMethodName());
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException(request.getMethod().getMethod());
+        throw new UnsupportedOperationException(request.getMethodName());
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException(request.getMethod().getMethod());
+        throw new UnsupportedOperationException(request.getMethodName());
     }
 }

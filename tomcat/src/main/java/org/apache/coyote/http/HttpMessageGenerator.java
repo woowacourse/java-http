@@ -36,7 +36,7 @@ public class HttpMessageGenerator {
     }
 
     private static void getRequestBody(BufferedReader reader, HttpRequest request) throws IOException {
-        if (request.getMethod().equals(HttpMethod.POST)) {
+        if (request.isMethod(HttpMethod.POST)) {
             int contentLength = request.getContentLength();
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);

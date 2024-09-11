@@ -33,7 +33,7 @@ public class HttpCookie {
         if ("".equals(cookies)) {
             return new HttpCookie();
         }
-        return new HttpCookie(cookies);
+        return new HttpCookie(cookies.strip());
     }
 
     public boolean containsSession() {

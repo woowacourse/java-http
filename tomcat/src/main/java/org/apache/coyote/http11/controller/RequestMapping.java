@@ -18,7 +18,7 @@ public class RequestMapping {
     }
 
     public Controller getController(HttpRequest httpRequest) {
-        if (unauthorizedInterceptor.checkPath(httpRequest)) {
+        if (unauthorizedInterceptor.isInterceptPath(httpRequest)) {
             return new UnauthorizedController();
         }
 

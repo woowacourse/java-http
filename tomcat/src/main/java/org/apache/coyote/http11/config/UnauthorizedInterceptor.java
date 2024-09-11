@@ -18,7 +18,7 @@ public class UnauthorizedInterceptor {
         unauthorizedPaths.add("/500.html");
     }
 
-    public boolean checkPath(HttpRequest httpRequest) {
+    public boolean isInterceptPath(HttpRequest httpRequest) {
         return !httpRequest.containsHeader(HttpHeaderName.LOCATION) && unauthorizedPaths.contains(httpRequest.getPath());
     }
 }

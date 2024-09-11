@@ -25,6 +25,17 @@ class RequestLineTest {
     }
 
     @Test
+    void RequestLine이_비어있으면_예외가_발생한다() {
+        // given
+        String requestLine = null;
+
+        // when & then
+        assertThatThrownBy(() -> new RequestLine(requestLine))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Request line은 필수입니다.");
+    }
+
+    @Test
     void split된_RequestLine의_길이가_올바르지_않을_경우_예외가_발생한다() {
         // given
         String requestLine = "GET /index.html";
@@ -32,7 +43,6 @@ class RequestLineTest {
         // when & then
         assertThatThrownBy(() -> new RequestLine(requestLine))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("잘못된 Request line입니다.");
+            .hasMessageContaining("잘못된 Request line입니다. request line: 'GET /index.html'");
     }
-
 }

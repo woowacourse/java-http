@@ -5,8 +5,11 @@ import servlet.http.HttpMethod;
 
 public class RequestLine {
 
-    private static final String DELIMITER = " ";
+    private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int VALID_SPLIT_REQUEST_LINE_LENGTH = 3;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
 
@@ -17,9 +20,9 @@ public class RequestLine {
     protected RequestLine(String requestLine) {
         validateRequestLine(requestLine);
         String[] requestLines = split(requestLine);
-        this.httpMethod = HttpMethod.from(requestLines[0]);
-        this.uri = new URI(requestLines[1]);
-        this.httpVersion = requestLines[2];
+        this.httpMethod = HttpMethod.from(requestLines[HTTP_METHOD_INDEX]);
+        this.uri = new URI(requestLines[URI_INDEX]);
+        this.httpVersion = requestLines[HTTP_VERSION_INDEX];
     }
 
     private void validateRequestLine(String requestLine) {
@@ -29,9 +32,9 @@ public class RequestLine {
     }
 
     private String[] split(String requestLine) {
-        String[] requestLines = requestLine.split(DELIMITER);
+        String[] requestLines = requestLine.split(REQUEST_LINE_DELIMITER);
         if (requestLines.length != VALID_SPLIT_REQUEST_LINE_LENGTH) {
-            throw new IllegalArgumentException("잘못된 Request line입니다.");
+            throw new IllegalArgumentException("잘못된 Request line입니다. request line: '%s'".formatted(requestLine));
         }
         return requestLines;
     }

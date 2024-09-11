@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String EQUAL = "=";
 
     private final String name;
@@ -10,6 +11,10 @@ public class HttpCookie {
     public HttpCookie(String name, String value) {
         this.name = name;
         this.value = value;
+    }
+
+    public static HttpCookie ofJSessionId(String sessionId) {
+        return new HttpCookie(JSESSIONID, sessionId);
     }
 
     public String getName() {

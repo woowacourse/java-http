@@ -14,8 +14,7 @@ import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
 import org.apache.catalina.http.startline.HttpVersion;
 import org.apache.catalina.http.startline.RequestURI;
-import org.apache.catalina.servlet.Controller;
-import org.apache.catalina.servlet.RequestMapper;
+import org.apache.catalina.servlet.ServletContainer;
 import org.assertj.core.api.Assertions;
 
 public class RestAssured {
@@ -113,14 +112,14 @@ public class RestAssured {
 
         public RestAssured then() {
             HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
-            Controller controller = RequestMapper.getController(request);
+            ServletContainer servletContainer = ServletContainer.getInstance();
 
             HttpResponseLine responseLine = new HttpResponseLine(request.getHttpVersion());
             HttpHeaders responseHeaders = new HttpHeaders();
             HttpResponseBody responseBody = new HttpResponseBody();
             HttpResponse response = new HttpResponse(responseLine, responseHeaders, responseBody);
 
-            controller.service(request, response);
+            servletContainer.service(request, response);
             return new RestAssured(responseLine, responseHeaders, responseBody);
         }
     }

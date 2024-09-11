@@ -5,12 +5,12 @@ import com.techcourse.model.User;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.startline.HttpStatus;
-import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.servlet.RestController;
+import org.apache.catalina.servlet.WebServlet;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
-@RequestMapping("/register")
+@WebServlet("/register")
 public class RegisterController extends RestController {
 
     @Override

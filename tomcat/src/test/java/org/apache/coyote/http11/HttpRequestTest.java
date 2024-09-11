@@ -19,7 +19,7 @@ import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
 import org.apache.catalina.http.startline.HttpVersion;
-import org.apache.catalina.http.startline.RequestUri;
+import org.apache.catalina.http.startline.RequestURI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,58 +27,58 @@ class HttpRequestTest {
 
     @DisplayName("요청의 대상이 정적 파일이면 true를 반환한다.")
     @Test
-    void isTargetStatic_true() {
+    void isURIStatic_true() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.GET, new RequestURI("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.isTargetStatic()).isTrue();
+        assertThat(request.isURIStatic()).isTrue();
     }
 
     @DisplayName("요청의 대상이 정적 파일이 아니면 false를 반환한다.")
     @Test
-    void isTargetStatic_false() {
+    void isURIStatic_false() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.isTargetStatic()).isFalse();
+        assertThat(request.isURIStatic()).isFalse();
     }
 
     @DisplayName("요청 대상이 존재하지 않으면 true를 반환한다.")
     @Test
-    void isTargetBlank_true() {
+    void isURIBlank_true() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri(""), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.GET, new RequestURI(""), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.isTargetBlank()).isTrue();
+        assertThat(request.isURIBlank()).isTrue();
     }
 
     @DisplayName("요청 대상이 존재하면 false를 반환한다.")
     @Test
-    void isTargetBlank_false() {
+    void isURIBlank_false() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
 
         // when&then
-        assertThat(request.isTargetBlank()).isFalse();
+        assertThat(request.isURIBlank()).isFalse();
     }
 
     @DisplayName("request uri가 주어진 문자로 시작하는지 아닌지 판별한다.")
@@ -86,7 +86,7 @@ class HttpRequestTest {
     void uriStartsWith() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/index"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -101,7 +101,7 @@ class HttpRequestTest {
     void getSessionFromCookies() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(new HashMap<>(), new HttpCookies(Map.of("JSESSIONID", "session"))),
                 new HttpRequestBody()
         );
@@ -115,7 +115,7 @@ class HttpRequestTest {
     void getSessionFromCookie_noSession() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -129,7 +129,7 @@ class HttpRequestTest {
     void getHttpMethod() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -143,7 +143,7 @@ class HttpRequestTest {
     void getTargetPath() throws URISyntaxException {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.GET, new RequestURI("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -158,7 +158,7 @@ class HttpRequestTest {
     void getTargetPath_targetNotFound() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/invalidUrl"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.GET, new RequestURI("/invalidUrl"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -173,7 +173,7 @@ class HttpRequestTest {
     void getFromBody() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
@@ -188,7 +188,7 @@ class HttpRequestTest {
     void getFromBody_keyNotFound() {
         // given
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
@@ -202,7 +202,7 @@ class HttpRequestTest {
     @Test
     void getHttpVersion() {
         HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
@@ -233,8 +233,8 @@ class HttpRequestTest {
         // then
         assertAll(
                 () -> assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(parsedRequest.isTargetBlank()).isFalse(),
-                () -> assertThat(parsedRequest.isTargetStatic()).isFalse(),
+                () -> assertThat(parsedRequest.isURIBlank()).isFalse(),
+                () -> assertThat(parsedRequest.isURIStatic()).isFalse(),
                 () -> assertThat(parsedRequest.uriStartsWith("/login")).isTrue(),
                 () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP11),
                 () -> assertThat(parsedRequest.getSessionFromCookies()).get().isEqualTo("session"),

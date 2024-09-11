@@ -58,12 +58,12 @@ public class HttpRequest {
         return HttpRequestBody.parseUrlEncoded(new String(buffer));
     }
 
-    public boolean isTargetStatic() {
-        return httpRequestLine.isTargetStatic();
+    public boolean isURIStatic() {
+        return httpRequestLine.isURIStatic();
     }
 
-    public boolean isTargetBlank() {
-        return httpRequestLine.isTargetBlank();
+    public boolean isURIBlank() {
+        return httpRequestLine.isURIBlank();
     }
 
     public boolean uriStartsWith(String startsWith) {

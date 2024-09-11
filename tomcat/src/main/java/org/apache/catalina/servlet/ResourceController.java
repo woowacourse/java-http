@@ -10,12 +10,12 @@ public class ResourceController extends Controller {
 
     @Override
     public boolean service(HttpRequest request, HttpResponse response) {
-        if (request.isTargetBlank()) {
+        if (request.isURIBlank()) {
             response.addHeader(HttpHeader.CONTENT_TYPE, "text/html");
             response.setBody(BASIC_RESPONSE_BODY);
             return true;
         }
-        if (request.isTargetStatic()) {
+        if (request.isURIStatic()) {
             return responseResource(response, request.getTargetPath());
         }
         return false;

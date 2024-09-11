@@ -11,7 +11,7 @@ import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.startline.HttpStatus;
-import org.apache.catalina.http.startline.RequestUri;
+import org.apache.catalina.http.startline.RequestURI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public abstract class Controller {
     }
 
     protected boolean responseResource(HttpResponse response, String path) {
-        RequestUri requestUri = new RequestUri(path);
+        RequestURI requestUri = new RequestURI(path);
         return responseResource(response, requestUri.getPath());
     }
 

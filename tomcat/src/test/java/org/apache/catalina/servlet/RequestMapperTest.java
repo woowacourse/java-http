@@ -10,7 +10,7 @@ import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpMethod;
 import org.apache.catalina.http.startline.HttpRequestLine;
 import org.apache.catalina.http.startline.HttpVersion;
-import org.apache.catalina.http.startline.RequestUri;
+import org.apache.catalina.http.startline.RequestURI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,12 +21,12 @@ class RequestMapperTest {
     void getController() {
         // given
         HttpRequest requestLogin = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
         HttpRequest requestRegister = new HttpRequest(
-                new HttpRequestLine(HttpMethod.POST, new RequestUri("/register"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.POST, new RequestURI("/register"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );
@@ -45,7 +45,7 @@ class RequestMapperTest {
     void getController_noneMatch() {
         // given
         HttpRequest requestResource = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
+                new HttpRequestLine(HttpMethod.GET, new RequestURI("/index"), HttpVersion.HTTP11),
                 new HttpHeaders(),
                 new HttpRequestBody()
         );

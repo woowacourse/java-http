@@ -12,6 +12,8 @@ public class RequestMapper {
             new RegisterController()
     );
 
+    private static final Controller resourceController = new ResourceController();
+
     private RequestMapper() {
     }
 
@@ -21,6 +23,6 @@ public class RequestMapper {
                         request.uriStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
                 )
                 .findAny()
-                .orElse(new ResourceController());
+                .orElse(resourceController);
     }
 }

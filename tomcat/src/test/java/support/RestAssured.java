@@ -13,7 +13,7 @@ import org.apache.catalina.http.startline.HttpRequestLine;
 import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
 import org.apache.catalina.http.startline.HttpVersion;
-import org.apache.catalina.http.startline.RequestUri;
+import org.apache.catalina.http.startline.RequestURI;
 import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.RequestMapper;
 import org.assertj.core.api.Assertions;
@@ -84,12 +84,12 @@ public class RestAssured {
         }
 
         public RestAssuredRequestGenerator post(String uri) {
-            this.requestLine = new HttpRequestLine(HttpMethod.POST, new RequestUri(uri), HttpVersion.HTTP11);
+            this.requestLine = new HttpRequestLine(HttpMethod.POST, new RequestURI(uri), HttpVersion.HTTP11);
             return this;
         }
 
         public RestAssuredRequestGenerator get(String uri) {
-            this.requestLine = new HttpRequestLine(HttpMethod.GET, new RequestUri(uri), HttpVersion.HTTP11);
+            this.requestLine = new HttpRequestLine(HttpMethod.GET, new RequestURI(uri), HttpVersion.HTTP11);
             return this;
         }
 

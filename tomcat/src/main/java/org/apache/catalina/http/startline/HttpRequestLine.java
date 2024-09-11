@@ -6,12 +6,12 @@ import org.apache.catalina.exception.CatalinaException;
 public class HttpRequestLine {
 
     private final HttpMethod httpMethod;
-    private final RequestUri requestUri;
+    private final RequestURI requestURI;
     private final HttpVersion httpVersion;
 
-    public HttpRequestLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
+    public HttpRequestLine(HttpMethod httpMethod, RequestURI requestURI, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
+        this.requestURI = requestURI;
         this.httpVersion = httpVersion;
     }
 
@@ -19,7 +19,7 @@ public class HttpRequestLine {
         String[] separatedStartLine = validateAndSplit(startLine);
         return new HttpRequestLine(
                 HttpMethod.valueOf(separatedStartLine[0]),
-                new RequestUri(separatedStartLine[1]),
+                new RequestURI(separatedStartLine[1]),
                 HttpVersion.parse(separatedStartLine[2])
         );
     }
@@ -35,20 +35,20 @@ public class HttpRequestLine {
         throw new CatalinaException("Invalid start line: " + startLine);
     }
 
-    public boolean isTargetStatic() {
-        return httpMethod.equals(HttpMethod.GET) && requestUri.isResource();
+    public boolean isURIStatic() {
+        return httpMethod.equals(HttpMethod.GET) && requestURI.isResource();
     }
 
-    public boolean isTargetBlank() {
-        return requestUri.isBlank();
+    public boolean isURIBlank() {
+        return requestURI.isBlank();
     }
 
     public boolean uriStartsWith(String startsWith) {
-        return requestUri.startsWith(startsWith);
+        return requestURI.startsWith(startsWith);
     }
 
     public Path getTargetPath() {
-        return requestUri.getPath();
+        return requestURI.getPath();
     }
 
     public HttpMethod getHttpMethod() {

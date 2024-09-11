@@ -9,7 +9,7 @@ public abstract class RestController extends Controller {
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 
     public boolean service(HttpRequest request, HttpResponse response) {
-        if (request.isTargetBlank()) {
+        if (request.isURIBlank()) {
             response.addHeader(HttpHeader.CONTENT_TYPE, "text/html");
             response.setBody(BASIC_RESPONSE_BODY);
             return true;

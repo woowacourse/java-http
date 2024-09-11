@@ -5,11 +5,11 @@ import java.net.URL;
 import java.nio.file.Path;
 import org.apache.catalina.exception.CatalinaException;
 
-public class RequestUri {
+public class RequestURI {
 
     private final String value;
 
-    public RequestUri(String value) {
+    public RequestURI(String value) {
         this.value = value;
     }
 

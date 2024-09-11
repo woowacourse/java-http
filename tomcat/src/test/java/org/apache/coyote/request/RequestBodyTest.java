@@ -28,4 +28,31 @@ class RequestBodyTest {
                 .hasMessage("올바르지 않은 Request Body 형식입니다.");
     }
 
+    @DisplayName("Request Body가 key 값으로 특정 문자열들을 가지고 있는지 여부 정상 반환")
+    @Test
+    void containsAll() {
+        // given
+        RequestBody requestBody = new RequestBody("name=lee&age=20");
+
+        // when & then
+        assertAll(
+                () -> assertThat(requestBody.containsExactly("name", "age")).isTrue(),
+                () -> assertThat(requestBody.containsExactly("name", "a")).isFalse(),
+                () -> assertThat(requestBody.containsExactly("name")).isFalse(),
+                () -> assertThat(requestBody.containsExactly("age")).isFalse()
+        );
+    }
+
+    @DisplayName("Request Body에서 값 조회")
+    @Test
+    void get() {
+        // given
+        RequestBody requestBody = new RequestBody("name=lee&age=20");
+
+        // when & then
+        assertAll(
+                () -> assertThat(requestBody.get("name")).isEqualTo("lee"),
+                () -> assertThat(requestBody.get("age")).isEqualTo("20")
+        );
+    }
 }

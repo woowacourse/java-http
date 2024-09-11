@@ -3,6 +3,7 @@ package org.apache.coyote.request;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RequestBody {
@@ -25,9 +26,11 @@ public class RequestBody {
                 ));
     }
 
-    public boolean containsAll(String... names) {
-        return Arrays.stream(names)
-                .allMatch(requestBody::containsKey);
+    public boolean containsExactly(String... names) {
+        Set<String> nameSet = Set.of(names);
+        Set<String> keySet = requestBody.keySet();
+
+        return nameSet.containsAll(keySet) && keySet.containsAll(nameSet);
     }
 
     public String get(String name) {

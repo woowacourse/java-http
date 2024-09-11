@@ -117,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse login(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
 
-        if (!requestBody.containsAll("account", "password")) {
+        if (!requestBody.containsExactly("account", "password")) {
             throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
         }
 
@@ -138,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse saveUser(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
 
-        if (!requestBody.containsAll("account", "email", "password")) {
+        if (!requestBody.containsExactly("account", "email", "password")) {
             throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
         }
 

@@ -4,7 +4,7 @@ import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.header.HttpHeader;
 
-public abstract class RestController extends Controller {
+public abstract class RestController extends AbstractController {
 
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 

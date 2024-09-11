@@ -9,7 +9,7 @@ import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.body.HttpResponseBody;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpResponseLine;
-import org.apache.catalina.servlet.Controller;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.catalina.servlet.RequestMapper;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
             HttpResponse response = createResponse(request);
-            Controller controller = RequestMapper.getController(request);
+            AbstractController controller = RequestMapper.getController(request);
 
             boolean isResponseValid = controller.service(request, response);
             validateResponse(isResponseValid, response);

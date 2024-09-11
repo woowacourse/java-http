@@ -13,10 +13,10 @@ import org.apache.catalina.http.startline.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ControllerTest {
+class AbstractControllerTest {
 
-    private static Controller getController() {
-        return new Controller() {
+    private static AbstractController getController() {
+        return new AbstractController() {
             @Override
             public boolean service(HttpRequest request, HttpResponse response) {
                 return false;
@@ -33,7 +33,7 @@ class ControllerTest {
         HttpResponseBody responseBody = new HttpResponseBody();
         HttpResponse response = new HttpResponse(responseLine, responseHeaders, responseBody);
 
-        Controller controller = getController();
+        AbstractController controller = getController();
 
         // when
         controller.redirectTo(response, "/index");
@@ -52,7 +52,7 @@ class ControllerTest {
         HttpResponseBody responseBody = new HttpResponseBody();
         HttpResponse response = new HttpResponse(responseLine, responseHeaders, responseBody);
 
-        Controller controller = getController();
+        AbstractController controller = getController();
         // when
         controller.responseResource(response, "/index.html");
 

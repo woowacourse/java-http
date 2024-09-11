@@ -32,8 +32,8 @@ class RequestMapperTest {
         );
 
         // when
-        Controller loginController = RequestMapper.getController(requestLogin);
-        Controller registerController = RequestMapper.getController(requestRegister);
+        AbstractController loginController = RequestMapper.getController(requestLogin);
+        AbstractController registerController = RequestMapper.getController(requestRegister);
 
         // then
         assertThat(loginController.getClass()).isEqualTo(LoginController.class);
@@ -51,7 +51,7 @@ class RequestMapperTest {
         );
 
         // when
-        Controller resourceController = RequestMapper.getController(requestResource);
+        AbstractController resourceController = RequestMapper.getController(requestResource);
 
         // then
         assertThat(resourceController.getClass()).isEqualTo(ResourceController.class);

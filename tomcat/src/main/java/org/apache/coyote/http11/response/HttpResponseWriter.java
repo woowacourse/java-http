@@ -3,19 +3,19 @@ package org.apache.coyote.http11.response;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class HttpResponseConverter {
+public class HttpResponseWriter {
 
-    private static final HttpResponseConverter INSTANCE = new HttpResponseConverter();
+    private static final HttpResponseWriter INSTANCE = new HttpResponseWriter();
     private static final String CRLF = "\r\n";
 
-    private HttpResponseConverter() {
+    private HttpResponseWriter() {
     }
 
-    public static HttpResponseConverter getInstance() {
+    public static HttpResponseWriter getInstance() {
         return INSTANCE;
     }
 
-    public byte[] convert(HttpResponse response) {
+    public byte[] write(HttpResponse response) {
         StringBuilder stringBuilder = new StringBuilder();
         convertStatusLine(stringBuilder, response.getStatusLine());
         convertHeader(stringBuilder, response.getHeader());

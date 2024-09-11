@@ -38,20 +38,20 @@ public class Request {
         this.body = new HashMap<>(body);
     }
 
-    public Map<String, String> getBody() {
-        return body;
-    }
-
-    public Map<String, String> getQueryParam() {
-        return requestLine.getQueryParam();
-    }
-
     public String getHttpMethod() {
         return requestLine.getHttpMethod().name();
     }
 
     public String getPathWithoutQuery() {
         return requestLine.getPathWithoutQuery();
+    }
+
+    public Map<String, String> getQueryParam() {
+        return requestLine.getQueryParam();
+    }
+
+    public Map<String, String> getBody() {
+        return body;
     }
 
     public String getFileType() {

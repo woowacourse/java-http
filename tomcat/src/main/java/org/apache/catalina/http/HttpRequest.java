@@ -32,24 +32,30 @@ public class HttpRequest {
         BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequestLine startLine = HttpRequestLine.parse(httpRequestReader.readLine());
 
-        List<String> headers = new ArrayList<>();
-        while (httpRequestReader.ready()) {
-            String header = httpRequestReader.readLine();
-            if (header.isBlank()) {
-                break;
-            }
-            headers.add(header);
-        }
-        HttpHeaders httpHeaders = HttpHeaders.parse(headers);
+        HttpHeaders httpHeaders = getHttpHeaders(httpRequestReader);
 
         if (!httpRequestReader.ready()) {
             return new HttpRequest(startLine, httpHeaders, new HttpRequestBody());
         }
+        HttpRequestBody requestBody = getRequestBody(httpHeaders, httpRequestReader);
+        return new HttpRequest(startLine, httpHeaders, requestBody);
+    }
+
+    private static HttpHeaders getHttpHeaders(BufferedReader httpRequestReader) throws IOException {
+        List<String> headers = new ArrayList<>();
+        String header;
+        while ((header = httpRequestReader.readLine()) != null && !header.isEmpty()) {
+            headers.add(header);
+        }
+        return HttpHeaders.parse(headers);
+    }
+
+    private static HttpRequestBody getRequestBody(HttpHeaders httpHeaders, BufferedReader httpRequestReader)
+            throws IOException {
         int contentLength = Integer.parseInt(httpHeaders.get(HttpHeader.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         httpRequestReader.read(buffer, 0, contentLength);
-        HttpRequestBody requestBody = HttpRequestBody.parseUrlEncoded(new String(buffer));
-        return new HttpRequest(startLine, httpHeaders, requestBody);
+        return HttpRequestBody.parseUrlEncoded(new String(buffer));
     }
 
     public boolean isTargetStatic() {

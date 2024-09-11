@@ -4,11 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
-import servlet.http.session.Session;
-import servlet.http.session.SessionManager;
-import servlet.http.request.Request;
-import servlet.http.response.Response;
-import servlet.http.StatusCode;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

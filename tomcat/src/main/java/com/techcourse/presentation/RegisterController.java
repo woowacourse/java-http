@@ -2,9 +2,9 @@ package com.techcourse.presentation;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import servlet.http.request.Request;
-import servlet.http.response.Response;
-import servlet.http.StatusCode;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

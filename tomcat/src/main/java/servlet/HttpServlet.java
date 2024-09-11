@@ -11,11 +11,11 @@ import java.util.Objects;
 import servlet.handler.Handler;
 import servlet.handler.ResourceHandler;
 import servlet.handler.WelcomeHandler;
-import servlet.http.HttpMethod;
-import servlet.http.MimeType;
-import servlet.http.StatusCode;
-import servlet.http.request.Request;
-import servlet.http.response.Response;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.MimeType;
+import org.apache.coyote.http.StatusCode;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
 import servlet.resolver.ViewResolver;
 
 public class HttpServlet {

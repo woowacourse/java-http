@@ -1,8 +1,8 @@
 package servlet.handler;
 
-import servlet.http.request.Request;
-import servlet.http.response.Response;
-import servlet.http.StatusCode;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.StatusCode;
 
 public class ResourceHandler implements Handler {
 

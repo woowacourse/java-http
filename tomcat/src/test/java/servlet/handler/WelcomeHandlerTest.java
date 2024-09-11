@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import servlet.http.request.Request;
-import servlet.http.request.RequestBody;
-import servlet.http.request.RequestHeaders;
-import servlet.http.request.RequestLine;
-import servlet.http.response.Response;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeaders;
+import org.apache.coyote.http.request.RequestLine;
+import org.apache.coyote.http.response.Response;
 
 class WelcomeHandlerTest {
 

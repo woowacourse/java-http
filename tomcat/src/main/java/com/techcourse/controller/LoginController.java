@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.apache.catalina.session.JSession;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponse.Builder;
-import org.apache.coyote.http11.Status;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.Builder;
+import org.apache.coyote.http11.response.Status;
 
 public class LoginController extends AbstractController {
 

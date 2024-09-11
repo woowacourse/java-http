@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionManager implements Manager {
 

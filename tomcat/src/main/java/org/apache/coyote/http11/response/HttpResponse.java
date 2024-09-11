@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-public record HttpResponse(String protocolVersion, int statusCode, String statusText,
+public record HttpResponse(ProtocolVersion protocolVersion, Status status,
                            Map<String, String> headers, Map<String, String> cookies, byte[] body) {
 
     private static final String CRLF = "\r\n";
+    private static final ProtocolVersion DEFAULT_PROTOCOL = ProtocolVersion.HTTP11;
 
     public static Builder builder() {
-        return new Builder().protocolVersion("HTTP/1.1");
+        return new Builder().protocolVersion(DEFAULT_PROTOCOL);
     }
 
     private static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
@@ -26,7 +27,8 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
 
     public byte[] toMessage() {
         StringBuilder builder = new StringBuilder();
-        builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" ");
+        builder.append(protocolVersion).append(" ").append(status.getCode()).append(" ").append(status.getMessage())
+                .append(" ");
         headers.forEach((key, value) -> builder.append(CRLF).append(key).append(": ").append(value).append(" "));
 
         if (!cookies.isEmpty()) {
@@ -48,9 +50,8 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
     public static class Builder {
         private final Map<String, String> headers;
         private final Map<String, String> cookies;
-        private String protocolVersion;
-        private int statusCode;
-        private String statusText;
+        private ProtocolVersion protocolVersion;
+        private Status status;
         private byte[] body;
 
         private Builder() {
@@ -58,14 +59,13 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
             cookies = new HashMap<>();
         }
 
-        public Builder protocolVersion(String protocolVersion) {
+        public Builder protocolVersion(ProtocolVersion protocolVersion) {
             this.protocolVersion = protocolVersion;
             return this;
         }
 
         public Builder status(Status status) {
-            this.statusCode = status.getCode();
-            this.statusText = status.getMessage();
+            this.status = status;
             return this;
         }
 
@@ -90,7 +90,7 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
         }
 
         public HttpResponse build() {
-            return new HttpResponse(protocolVersion, statusCode, statusText, headers, cookies, body);
+            return new HttpResponse(protocolVersion, status, headers, cookies, body);
         }
 
         @Override
@@ -98,9 +98,8 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
             return "Builder{" +
                     "headers=" + headers +
                     ", cookies=" + cookies +
-                    ", protocolVersion='" + protocolVersion + '\'' +
-                    ", statusCode=" + statusCode +
-                    ", statusText='" + statusText + '\'' +
+                    ", protocolVersion=" + protocolVersion +
+                    ", status=" + status +
                     ", body=" + Arrays.toString(body) +
                     '}';
         }

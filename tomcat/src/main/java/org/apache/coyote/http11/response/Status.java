@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 public enum Status {
     OK(200, "OK"),
@@ -23,5 +23,13 @@ public enum Status {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "Status{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

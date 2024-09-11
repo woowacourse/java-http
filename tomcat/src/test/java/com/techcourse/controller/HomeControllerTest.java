@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponse.Builder;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

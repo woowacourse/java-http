@@ -33,7 +33,7 @@ public class HttpCookies {
         return new HttpCookies(cookies);
     }
 
-    public String stringify() {
+    public String read() {
         StringJoiner joiner = new StringJoiner(COOKIE_SEPARATOR);
         cookies.forEach((key, value) -> joiner.add(key + KEY_VALUE_SEPARATOR + value));
         return joiner.toString();

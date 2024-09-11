@@ -82,10 +82,10 @@ public class HttpHeaders {
         return cookies.get(key);
     }
 
-    public String stringify(String delimiter) {
+    public String read(String delimiter) {
         StringJoiner joiner = new StringJoiner(delimiter);
         headers.forEach((key, value) -> joiner.add(key + SEPARATOR + value));
-        joiner.add(HttpHeader.SET_COOKIE.getValue() + SEPARATOR + cookies.stringify());
+        joiner.add(HttpHeader.SET_COOKIE.getValue() + SEPARATOR + cookies.read());
         return joiner.toString();
     }
 }

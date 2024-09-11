@@ -21,13 +21,13 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        return stringify().getBytes();
+        return read().getBytes();
     }
 
-    private String stringify() {
+    private String read() {
         StringJoiner joiner = new StringJoiner(System.lineSeparator());
-        joiner.add(httpResponseLine.stringify());
-        joiner.add(httpHeaders.stringify(System.lineSeparator()));
+        joiner.add(httpResponseLine.read());
+        joiner.add(httpHeaders.read(System.lineSeparator()));
         joiner.add("");
         joiner.add(httpResponseBody.getValue());
 

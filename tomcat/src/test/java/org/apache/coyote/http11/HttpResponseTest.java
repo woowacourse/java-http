@@ -52,7 +52,7 @@ public class HttpResponseTest {
         response.setStatus(HttpStatus.UNAUTHORIZED);
 
         // then
-        assertThat(responseLine.stringify()).isEqualTo("HTTP/1.1 401 Unauthorized");
+        assertThat(responseLine.read()).isEqualTo("HTTP/1.1 401 Unauthorized");
     }
 
     @DisplayName("응답의 body를 설정한다.")

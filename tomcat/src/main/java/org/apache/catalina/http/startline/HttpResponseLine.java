@@ -15,7 +15,7 @@ public class HttpResponseLine {
         return Objects.nonNull(httpVersion) && Objects.nonNull(httpStatus);
     }
 
-    public String stringify() {
+    public String read() {
         return httpVersion.getValue() + " " + httpStatus.getValue();
     }
 

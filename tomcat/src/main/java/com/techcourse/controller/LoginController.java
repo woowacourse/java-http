@@ -45,10 +45,7 @@ public class LoginController extends AbstractController {
         try {
             User user = InMemoryUserRepository.findByAccount(request.findRequestBodyBy("account"))
                     .orElseThrow(IllegalArgumentException::new);
-
-            if (!user.checkPassword(request.findRequestBodyBy("password"))) {
-                throw new IllegalArgumentException();
-            }
+            validatePassword(request, user);
 
             UUID sessionId = UUID.randomUUID();
             Session session = new Session(sessionId.toString());
@@ -67,6 +64,12 @@ public class LoginController extends AbstractController {
             response.setHttpStatus(HttpStatus.FOUND);
             response.setContentType(ContentType.TEXT_HTML);
             response.setHttpResponseBody(request.getUrlPath());
+        }
+    }
+
+    private void validatePassword(HttpRequest request, User user) {
+        if (!user.checkPassword(request.findRequestBodyBy("password"))) {
+            throw new IllegalArgumentException();
         }
     }
 }

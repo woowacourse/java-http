@@ -8,14 +8,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeaderName;
 
 public class Http11RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String ACCEPT = "Accept";
     private static final String ACCEPT_HEADER_DELIMITER = ",";
-    private static final String COOKIE = "Cookie";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final int HEADER_LENGTH = 2;
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
@@ -35,7 +33,7 @@ public class Http11RequestHeaders {
     }
 
     private void append(String key, String value) {
-        if (COOKIE.equals(key)) {
+        if (HttpHeaderName.COOKIE.equalsName(key)) {
             cookie.setCookie(value);
             return;
         }
@@ -65,7 +63,7 @@ public class Http11RequestHeaders {
     }
 
     public String getContentLength() {
-        return headers.get(CONTENT_LENGTH);
+        return headers.get(HttpHeaderName.CONTENT_LENGTH.getName());
     }
 
     public boolean existsCookie(String key) {
@@ -73,12 +71,12 @@ public class Http11RequestHeaders {
     }
 
     public boolean existsAccept() {
-        return headers.containsKey(ACCEPT);
+        return headers.containsKey(HttpHeaderName.ACCEPT.getName());
     }
 
     public String getFirstAcceptMimeType() {
         try {
-            return Arrays.stream(getValue(ACCEPT).split(ACCEPT_HEADER_DELIMITER))
+            return Arrays.stream(getValue(HttpHeaderName.ACCEPT.getName()).split(ACCEPT_HEADER_DELIMITER))
                     .toList()
                     .getFirst();
         } catch (NoSuchElementException e) {

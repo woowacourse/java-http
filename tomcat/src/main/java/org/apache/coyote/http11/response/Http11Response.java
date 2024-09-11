@@ -6,16 +6,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.catalina.Session;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 
 public class Http11Response implements HttpResponse {
 
     private static final String VERSION_OF_PROTOCOL = "HTTP/1.1";
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String LOCATION = "Location";
     private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
     private static final String HEADER_FORMAT = "%s: %s";
     private static final String CONTENT_TYPE_FORMAT = "%s;charset=%s ";
@@ -56,7 +53,7 @@ public class Http11Response implements HttpResponse {
     @Override
     public void found(String path) {
         setStatus(HttpStatus.FOUND);
-        this.headers.put(LOCATION, path);
+        this.headers.put(HttpHeaderName.LOCATION.getName(), path);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class Http11Response implements HttpResponse {
 
     @Override
     public void setSession(Session session) {
-        this.headers.put(SET_COOKIE, String.format(SESSION_FORMAT, session.getId()));
+        this.headers.put(HttpHeaderName.SET_COOKIE.getName(), String.format(SESSION_FORMAT, session.getId()));
     }
 
     private void setStatus(HttpStatus status) {
@@ -77,8 +74,8 @@ public class Http11Response implements HttpResponse {
 
     private void setBody(MimeType mimeType, String body, Charset charset) {
         this.body = body;
-        this.headers.put(CONTENT_TYPE,
+        this.headers.put(HttpHeaderName.CONTENT_TYPE.getName(),
                 String.format(CONTENT_TYPE_FORMAT, mimeType.value(), charset.name().toLowerCase()));
-        this.headers.put(CONTENT_LENGTH, body.getBytes().length + " ");
+        this.headers.put(HttpHeaderName.CONTENT_LENGTH.getName(), body.getBytes().length + " ");
     }
 }

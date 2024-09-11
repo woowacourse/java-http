@@ -88,10 +88,11 @@ public class HttpResponseTest {
         );
 
         // when
-        response.addSessionToCookies("session");
+        Session session = new Session();
+        response.addSessionToCookies(session);
 
         // then
-        assertThat(header.getFromCookies(Session.KEY)).get().isEqualTo("session");
+        assertThat(header.getFromCookies(Session.KEY)).get().isEqualTo(session.getId());
     }
 
     @DisplayName("응답이 반환하기 유효하면 true를 반환한다.")

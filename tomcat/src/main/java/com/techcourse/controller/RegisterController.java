@@ -6,6 +6,7 @@ import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.servlet.RestController;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 @RequestMapping("/register")
@@ -25,8 +26,8 @@ public class RegisterController extends RestController {
         );
         InMemoryUserRepository.save(user);
 
-        String jSessionId = SessionManager.add("user", user);
-        response.addSessionToCookies(jSessionId);
+        Session session = SessionManager.add("user", user);
+        response.addSessionToCookies(session);
 
         return redirectTo(response, "/index");
     }

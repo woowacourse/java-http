@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -125,13 +126,13 @@ class Http11ProcessorTest {
     void redirectWhenAlreadyLoggedIn() {
         // given
         User user = new User("account", "password", "mail@mail.com");
-        String jSessionId = SessionManager.add("user", user);
+        Session session = SessionManager.add("user", user);
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Accept: text/html",
                 "Connection: keep-alive",
-                "Cookie: JSESSIONID=" + jSessionId
+                "Cookie: JSESSIONID=" + session.getId()
         );
 
         final var socket = new StubSocket(httpRequest);

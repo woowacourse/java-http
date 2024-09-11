@@ -17,11 +17,13 @@ public class RegisterController implements Controller {
     @Override
     public HttpResponse process(HttpRequest request) {
         if (request.isGetMethod()) {
-            return new HttpResponse(request.getPath() + Constants.EXTENSION_OF_HTML, HttpStatusCode.OK);
+            return new HttpResponse(HttpStatusCode.OK);
         }
         if (request.isPostMethod()) {
             registerUser(request);
-            return new HttpResponse(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+            response.sendRedirect(Constants.DEFAULT_URI);
+            return response;
         }
         throw new IllegalArgumentException("잘못된 요청입니다.");
     }

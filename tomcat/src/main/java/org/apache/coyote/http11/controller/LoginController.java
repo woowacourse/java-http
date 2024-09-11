@@ -21,7 +21,9 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse process(HttpRequest request) {
         if (isLoginUser(request)) {
-            return new HttpResponse(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+            response.sendRedirect(Constants.DEFAULT_URI);
+            return response;
         }
         if (request.isGetMethod()) {
             return doGet(request);
@@ -50,7 +52,7 @@ public class LoginController implements Controller {
         if (request.hasQueryParameter()) {
             printLogIfLoginPossible(request.getQueryParameter());
         }
-        return new HttpResponse(request.getPath() + Constants.EXTENSION_OF_HTML, HttpStatusCode.OK);
+        return new HttpResponse(HttpStatusCode.OK);
     }
 
     private void printLogIfLoginPossible(QueryParameter queryParameter) {
@@ -67,12 +69,15 @@ public class LoginController implements Controller {
             User user = getUser(new QueryParameter(request.getBody()));
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-            HttpResponse response = new HttpResponse(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+            response.sendRedirect(Constants.DEFAULT_URI);
             addSessionCookie(request, response, user);
             return response;
         } catch (IllegalArgumentException e) {
             log.info("로그인 실패 : {}", e.getMessage(), e);
-            return new HttpResponse("/401.html", HttpStatusCode.FOUND);
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+            response.sendRedirect("/401.html");
+            return response;
         }
     }
 

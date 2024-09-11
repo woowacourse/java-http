@@ -6,6 +6,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Controller controller = ControllerMapper.map(request.getPath());
             HttpResponse response = controller.process(request);
-            setResponse(response);
+            setResponse(request, response);
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
@@ -47,12 +48,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void setResponse(HttpResponse response) throws IOException {
-        String contentType = FileReader.probeContentType(response.getLocation());
+    private void setResponse(HttpRequest request, HttpResponse response) throws IOException {
+        String location = getLocation(request, response);
+        String contentType = FileReader.probeContentType(location);
         response.setContentType(contentType);
 
-        String responseBody = FileReader.read(response.getLocation());
+        String responseBody = FileReader.read(location);
         response.setContentLength(responseBody.getBytes().length);
         response.setBody(responseBody);
+    }
+
+    private String getLocation(HttpRequest request, HttpResponse response) {
+        if (response.hasLocation()) {
+            return response.getLocation();
+        }
+        String path = request.getPath();
+        if ("/".equals(path)) {
+            return Constants.DEFAULT_URI;
+        }
+        if (!path.contains(".")) {
+            return path + Constants.EXTENSION_OF_HTML;
+        }
+        return path;
     }
 }

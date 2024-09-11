@@ -6,10 +6,18 @@ public class HttpResponse {
     private final ResponseHeaders headers;
     private String body;
 
-    public HttpResponse(String location, HttpStatusCode httpStatusCode) {
+    public HttpResponse(HttpStatusCode httpStatusCode) {
         this.statusLine = new StatusLine(httpStatusCode);
-        this.headers = new ResponseHeaders(location);
+        this.headers = new ResponseHeaders();
         this.body = null;
+    }
+
+    public boolean hasLocation() {
+        return headers.hasLocation();
+    }
+
+    public void sendRedirect(String location) {
+        headers.setLocation(location);
     }
 
     public void addCookie(String cookie) {

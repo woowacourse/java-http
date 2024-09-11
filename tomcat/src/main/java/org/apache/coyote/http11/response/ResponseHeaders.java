@@ -8,8 +8,8 @@ public class ResponseHeaders {
 
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public ResponseHeaders(String location) {
-        headers.put("Location", location);
+    public boolean hasLocation() {
+        return headers.containsKey("Location");
     }
 
     public String getLocation() {
@@ -26,6 +26,10 @@ public class ResponseHeaders {
             return;
         }
         headers.put("Content-Type", contentType);
+    }
+
+    public void setLocation(String location) {
+        headers.put("Location", location);
     }
 
     public void setContentLength(int length) {

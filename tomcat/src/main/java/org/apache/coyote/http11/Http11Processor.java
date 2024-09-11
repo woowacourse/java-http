@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,26 +132,64 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURL.equals("/register")) {
-            User user = new User(bodys.get("account"), bodys.get("password"), bodys.get("email"));
-            InMemoryUserRepository.save(user);
+            processRegisterRequest(outputStream, bodys);
         }
 
         if (requestURL.equals("/login")) {
-            try {
-                User user = InMemoryUserRepository.findByAccount(bodys.get("account"))
-                        .orElseThrow();
-                if (!user.checkPassword(bodys.get("password"))) {
-                    throw new RuntimeException();
-                }
-                log.debug("user: {}", user);
-            } catch (Exception e) {
-                processGetRequest("/401.html", outputStream);
-            }
+            processLoginRequest(outputStream, bodys, header);
         }
+    }
+
+    private void processRegisterRequest(OutputStream outputStream, Map<String, String> bodys) throws IOException {
+        User user = new User(bodys.get("account"), bodys.get("password"), bodys.get("email"));
+        InMemoryUserRepository.save(user);
 
         final var response = String.join("\r\n",
                 "HTTP/1.1 302 OK ",
                 "Location: /index.html ",
+                "",
+                "");
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void processLoginRequest(OutputStream outputStream, Map<String, String> bodys, Map<String, String> header)
+            throws URISyntaxException, IOException {
+        try {
+            User user = InMemoryUserRepository.findByAccount(bodys.get("account"))
+                    .orElseThrow();
+            if (!user.checkPassword(bodys.get("password"))) {
+                throw new RuntimeException();
+            }
+            log.debug("user: {}", user);
+        } catch (Exception e) {
+            processGetRequest("/401.html", outputStream);
+            return;
+        }
+
+        if (header.containsKey("Cookie")) {
+            HttpCookie cookie = new HttpCookie(header.get("Cookie"));
+
+            if (cookie.hasKey("JSESSIONID")) {
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 302 OK ",
+                        "Location: /index.html ",
+                        "",
+                        "");
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+        }
+
+        UUID uuid = UUID.randomUUID();
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 OK ",
+                "Location: /index.html ",
+                "Set-Cookie: JSESSIONID=" + uuid + " ",
                 "",
                 "");
 

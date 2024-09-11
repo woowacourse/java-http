@@ -1,12 +1,10 @@
 package org.apache.coyote.controller;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -23,20 +21,6 @@ public class LoginController extends AbstractController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final SessionManager sessionManager = new SessionManager();
-
-    @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
-        if (request.hasMethod(HttpMethod.GET)) {
-            doGet(request, response);
-        }
-        if (request.hasMethod(HttpMethod.POST)) {
-            doPost(request, response);
-        }
-
-        response.setSourceCode(request.getResources());
-        response.putHeader("Content-Length", request.getContentLength());
-        response.putHeader("Content-Type", request.getContentTypeToResponseText());
-    }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {

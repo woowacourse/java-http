@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return ;
         }
-        throw new UnsupportedOperationException(request.getMethodName());
+        throw new UnsupportedOperationException("Not allowed method " + request.getMethodName());
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

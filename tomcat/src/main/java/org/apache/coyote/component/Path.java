@@ -12,6 +12,7 @@ public class Path {
     private static final String QUERY_PREFIX = "?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final String EXTENSION_PREFIX = ".";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -19,24 +20,38 @@ public class Path {
     private final URL absolutePath;
     private final Map<String, String> parameters;
 
-    public Path(final String target) {
-        if (target.contains(QUERY_PREFIX)) {
-            this.requestPath = target.substring(0, target.indexOf(QUERY_PREFIX));
-            this.absolutePath = getClass().getClassLoader()
-                    .getResource(STATIC_FILE_PREFIX + target.substring(0, target.indexOf(QUERY_PREFIX))
-                                 + STATIC_FILE_SUFFIX);
-            this.parameters = parseQueryParam(target.substring(target.indexOf(QUERY_PREFIX) + 1));
-            return;
+    private Path(final String requestPath, final URL absolutePath, final Map<String, String> parameters) {
+        this.requestPath = requestPath;
+        this.absolutePath = absolutePath;
+        this.parameters = parameters;
+    }
+
+    private Path(final String requestPath, final URL absolutePath) {
+        this.requestPath = requestPath;
+        this.absolutePath = absolutePath;
+        this.parameters = Collections.emptyMap();
+    }
+
+    public static Path from(final String requestPath) {
+        if (requestPath.contains(QUERY_PREFIX)) {
+            return parsePathWithQuery(requestPath);
         }
-        if (target.contains(".")) {
-            this.requestPath = target;
-            this.absolutePath = getClass().getClassLoader().getResource(STATIC_FILE_PREFIX + target);
-            this.parameters = Map.of();
-            return;
+        if (requestPath.contains(EXTENSION_PREFIX)) {
+            final var absolutePath = Path.class.getClassLoader().getResource(STATIC_FILE_PREFIX + requestPath);
+            return new Path(requestPath, absolutePath);
         }
-        this.requestPath = target;
-        this.absolutePath = getClass().getClassLoader().getResource(STATIC_FILE_PREFIX + target + STATIC_FILE_SUFFIX);
-        this.parameters = Map.of();
+        final var absolutePath = Path.class.getClassLoader()
+                .getResource(STATIC_FILE_PREFIX + requestPath + STATIC_FILE_SUFFIX);
+        return new Path(requestPath, absolutePath);
+    }
+
+    private static Path parsePathWithQuery(final String target) {
+        final var requestPath = target.substring(0, target.indexOf(QUERY_PREFIX));
+        final var absolutePath = Path.class.getClassLoader()
+                .getResource(STATIC_FILE_PREFIX + target.substring(0, target.indexOf(QUERY_PREFIX))
+                             + STATIC_FILE_SUFFIX);
+        final var parameters = parseQueryParam(target.substring(target.indexOf(QUERY_PREFIX) + 1));
+        return new Path(requestPath, absolutePath, parameters);
     }
 
     private static Map<String, String> parseQueryParam(final String query) {

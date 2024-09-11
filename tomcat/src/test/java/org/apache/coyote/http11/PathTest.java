@@ -18,7 +18,7 @@ class PathTest {
     @ValueSource(strings = {"/css/styles.css", "/index.html", "/favicon.ico"})
     void requestUrlWithExtension(final String path) {
         //given
-        final var request = new Path(path);
+        final var request = Path.from(path);
 
         //when && then
         assertAll(
@@ -32,7 +32,7 @@ class PathTest {
     void requestQueryParam() {
         //given
         final var query = "login?account=redddy&password=password";
-        final var request = new Path(query);
+        final var request = Path.from(query);
 
         //when
         final var expected = Map.of("account", "redddy", "password", "password");

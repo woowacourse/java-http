@@ -22,7 +22,7 @@ public class RequestLine {
     public static RequestLine from(final String line) {
         final var texts = line.split(REQUEST_SEPARATOR);
         final var method = HttpMethod.fromName(texts[METHOD_INDEX]);
-        final var path = new Path(texts[PATH_INDEX]);
+        final var path = Path.from(texts[PATH_INDEX]);
         final var protocol = Protocol.from(texts[PROTOCOL_INDEX]);
         return new RequestLine(method, path, protocol);
     }

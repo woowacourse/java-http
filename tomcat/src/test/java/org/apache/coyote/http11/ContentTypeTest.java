@@ -33,9 +33,9 @@ class ContentTypeTest {
 
     static Stream<Arguments> fromParameter() {
         return Stream.of(
-                Arguments.of(new Path("/index.html"), ContentType.TEXT_HTML),
-                Arguments.of(new Path("/login"), ContentType.TEXT_HTML),
-                Arguments.of(new Path("/favicon.ico"), ContentType.IMAGE_ICON)
+                Arguments.of(Path.from("/index.html"), ContentType.TEXT_HTML),
+                Arguments.of(Path.from("/login"), ContentType.TEXT_HTML),
+                Arguments.of(Path.from("/favicon.ico"), ContentType.IMAGE_ICON)
         );
     }
 }

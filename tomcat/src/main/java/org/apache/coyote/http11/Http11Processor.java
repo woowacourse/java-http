@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.controller.Controller;
-import org.apache.controller.HandlerContainer;
+import org.apache.controller.ControllerContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.SessionIdGenerator;
 import org.apache.coyote.http11.request.Http11Request;
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Controller findHandler(Http11Request request) {
-        return HandlerContainer.getHandlers().stream()
+        return ControllerContainer.getHandlers().stream()
                 .filter(controller -> controller.isMatch(request.getStartLine()))
                 .findFirst()
                 .orElseThrow(() -> new HandlerNotFoundException("존재하지 않는 핸들러입니다."));

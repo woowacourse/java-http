@@ -3,7 +3,7 @@ package org.apache.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HandlerContainer {
+public class ControllerContainer {
 
     private static final List<Controller> handlers = new ArrayList<>();
 

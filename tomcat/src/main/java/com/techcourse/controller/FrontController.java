@@ -8,15 +8,11 @@ import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
 import org.apache.coyote.http.HttpVersion;
-import org.apache.coyote.http.StaticResourceHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FrontController implements Controller {
 
     private static FrontController instance;
 
-    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
     private final Map<String, Controller> controllers;
 
     private FrontController() {

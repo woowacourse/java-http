@@ -9,7 +9,6 @@ import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
-import org.apache.coyote.http.StaticResourceHandler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

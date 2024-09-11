@@ -9,7 +9,6 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
-import org.apache.coyote.http.StaticResourceHandler;
 
 public class StaticResourceController implements Controller {
 

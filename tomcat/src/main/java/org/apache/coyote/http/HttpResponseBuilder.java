@@ -3,7 +3,9 @@ package org.apache.coyote.http;
 public class HttpResponseBuilder {
 
     private HttpStatusLine statusLine;
-    private HttpHeaders headers;
+
+    private final HttpHeaders headers;
+    
     private HttpBody body;
 
     HttpResponseBuilder() {

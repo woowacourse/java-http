@@ -1,9 +1,11 @@
-package org.apache.coyote.http;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+
+import org.apache.coyote.http.HttpRequest;
 
 public class StaticResourceHandler {
 

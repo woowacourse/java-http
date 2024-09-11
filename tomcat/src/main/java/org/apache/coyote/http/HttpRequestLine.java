@@ -22,16 +22,8 @@ public class HttpRequestLine implements HttpComponent {
         return method;
     }
 
-    public HttpRequestUri getRequestUri() {
-        return requestUri;
-    }
-
     public String getPath() {
         return requestUri.getPath();
-    }
-
-    public String getQueryString() {
-        return requestUri.getQueryString();
     }
 
     public HttpQueryParams getQueryParams() {

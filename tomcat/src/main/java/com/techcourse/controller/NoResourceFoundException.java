@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package com.techcourse.controller;
 
 public class NoResourceFoundException extends RuntimeException {
     public NoResourceFoundException(String message) {

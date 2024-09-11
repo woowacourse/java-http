@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.util.UUID;
 import org.apache.catalina.session.HttpSession;
 import org.apache.catalina.session.HttpSessionManger;
+import org.apache.catalina.util.ResourceFile;
 import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,9 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        ResourceReader.serveResource("/login.html", response);
+        ResourceFile resourceFile = ResourceReader.readResource("/login.html");
+        response.setBody(resourceFile);
+        response.setStatus(HttpStatus.OK);
     }
 
     private boolean checkAlreadyLogin(HttpCookie httpCookie) {

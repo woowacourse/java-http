@@ -8,9 +8,11 @@ import org.apache.catalina.controller.IndexController;
 import org.apache.catalina.controller.LoginController;
 import org.apache.catalina.controller.RegisterController;
 import org.apache.catalina.controller.WelcomeController;
+import org.apache.catalina.util.ResourceFile;
 import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,9 @@ public class ServletContainer {
         }
 
         if (isStaticResource(requestUrl)) {
-            ResourceReader.serveResource(requestUrl, response);
+            ResourceFile resourceFile = ResourceReader.readResource(requestUrl);
+            response.setBody(resourceFile);
+            response.setStatus(HttpStatus.OK);
             return response;
         }
 

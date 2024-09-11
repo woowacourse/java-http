@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.util.ResourceFile;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeaderName;
+
 public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1 ";
@@ -27,10 +31,10 @@ public class HttpResponse {
         return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "", body);
     }
 
-    public void setBody(String body, String contentType) {
-        httpHeader.addHeader(HttpHeaderName.CONTENT_TYPE, contentType + ";charset=utf-8");
-        httpHeader.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        this.body = body;
+    public void setBody(ResourceFile responseBody) {
+        httpHeader.addHeader(HttpHeaderName.CONTENT_TYPE, responseBody.contentType() + ";charset=utf-8");
+        httpHeader.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(responseBody.body().getBytes().length));
+        this.body = responseBody.body();
     }
 
     public void setRedirect(String redirectUrl) {

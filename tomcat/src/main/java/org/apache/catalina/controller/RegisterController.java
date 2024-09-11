@@ -3,9 +3,11 @@ package org.apache.catalina.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import org.apache.catalina.util.ResourceFile;
 import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        ResourceReader.serveResource("/register.html", response);
+        ResourceFile resourceFile = ResourceReader.readResource("/register.html");
+        response.setBody(resourceFile);
+        response.setStatus(HttpStatus.OK);
     }
 
     @Override

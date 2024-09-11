@@ -1,5 +1,6 @@
 package org.apache.catalina.controller;
 
+import org.apache.catalina.util.ResourceFile;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -13,7 +14,7 @@ public class WelcomeController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.setBody("Hello world!", "text/html");
+        response.setBody(new ResourceFile("text/html", "Hello world!"));
         response.setStatus(HttpStatus.OK);
     }
 }

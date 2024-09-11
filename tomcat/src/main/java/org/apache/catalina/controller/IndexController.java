@@ -1,9 +1,11 @@
 package org.apache.catalina.controller;
 
 import java.io.IOException;
+import org.apache.catalina.util.ResourceFile;
 import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class IndexController extends AbstractController {
 
@@ -14,6 +16,8 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        ResourceReader.serveResource("/index.html", response);
+        ResourceFile resourceFile = ResourceReader.readResource("/index.html");
+        response.setBody(resourceFile);
+        response.setStatus(HttpStatus.OK);
     }
 }

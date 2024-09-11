@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.ServletContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

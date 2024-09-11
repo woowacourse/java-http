@@ -30,12 +30,15 @@ public class FrontController {
 
     public HttpResponse dispatch(HttpRequest request, Manager manager) {
         log(request);
+        HttpResponse response = new HttpResponse();
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
-            return new StaticResourceController().service(request, manager);
+             new StaticResourceController().service(request, response);
+             return response;
         }
         Controller controller = getController(request.getMethod(), path);
-        return controller.service(request, manager);
+        controller.service(request, response);
+        return response;
     }
 
     private void log(HttpRequest request) {

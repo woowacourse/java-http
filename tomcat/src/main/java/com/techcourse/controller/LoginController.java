@@ -15,6 +15,7 @@ import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
 public class LoginController extends AbstractController {
@@ -23,7 +24,7 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public ForwardResult execute(HttpRequest request, Manager manager) {
+    public ForwardResult execute(HttpRequest request, HttpResponse response) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -35,7 +36,7 @@ public class LoginController extends AbstractController {
 
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
             User user = optionalUser.get();
-            addSession(request, manager, user, header);
+//            addSession(request, manager, user, header);
             return new ForwardResult(HttpStatusCode.OK, "index.html", header);
         }
 

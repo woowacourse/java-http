@@ -16,6 +16,10 @@ public class RequestLine {
         return method.equals("GET");
     }
 
+    public boolean isPost() {
+        return method.equals("POST");
+    }
+
     public boolean isRoot() {
         return requestUrl.equals("/");
     }
@@ -32,8 +36,16 @@ public class RequestLine {
         return requestUrl.contains(".js");
     }
 
-    public boolean hasLogin() {
-        return requestUrl.contains("login");
+    public boolean has401() {
+        return requestUrl.contains("401");
+    }
+
+    public boolean hasRegister() {
+        return requestUrl.contains("register");
+    }
+
+    public boolean isLogin() {
+        return requestUrl.equals("/login");
     }
 
     public boolean hasQuestion() {

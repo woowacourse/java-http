@@ -18,16 +18,14 @@ public class HttpRequest {
 
     private static final String SP = " ";
 
-    private HttpMethod method;
-    private String path;
-    private String protocolVersion;
+    private RequestLine requestLine;
     private Map<String, String> headers;
     private String body = "";
 
     public HttpRequest(String request) {
-        this.method = HttpMethod.valueOf(parseHttpMethod(request));
-        this.path = parsePath(request);
-        this.protocolVersion = parseVersion(request);
+        this.requestLine = new RequestLine(
+                HttpMethod.valueOf(parseHttpMethod(request)), parsePath(request), parseVersion(request)
+        );
         this.headers = parseHeaders(request);
         this.body = parseBody(request);
     }
@@ -68,20 +66,7 @@ public class HttpRequest {
     }
 
     public Map<String, String[]> getQueryParameters() {
-        int index = path.lastIndexOf("?");
-        if (index == -1) {
-            return Map.of();
-        }
-
-        String query = path.substring(index + 1);
-        String[] params = query.split("&");
-
-        return Arrays.stream(params)
-                .collect(toMap(
-                        param -> param.split("=", 2)[0],
-                        param -> param.split("=", 2)[1].split(","),
-                        (oldValue, newValue) -> newValue,
-                        LinkedHashMap::new));
+        return requestLine.getQueryParameters();
     }
 
     public String getRequestURL() {
@@ -92,11 +77,7 @@ public class HttpRequest {
     }
 
     public String getRequestURI() {
-        int queryStringIndex = path.indexOf('?');
-        if (queryStringIndex == -1) {
-            return path;
-        }
-        return path.substring(0, queryStringIndex);
+        return requestLine.getRequestURI();
     }
 
     private String getRequestBody() {
@@ -124,12 +105,12 @@ public class HttpRequest {
 
     public Map<String, String[]> getParameters() {
         Map<String, String[]> parameterMap = new LinkedHashMap<>();
-        if (method == HttpMethod.GET) {
+        if (requestLine.getMethod() == HttpMethod.GET) {
             addRequestBodyParam(parameterMap);
             addQueryStringParam(parameterMap);
             return parameterMap;
         }
-        if (method == HttpMethod.POST) {
+        if (requestLine.getMethod() == HttpMethod.POST) {
             addQueryStringParam(parameterMap);
             addRequestBodyParam(parameterMap);
             return parameterMap;
@@ -185,15 +166,15 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public String getProtocolVersion() {
-        return protocolVersion;
+        return requestLine.getVersion();
     }
 
     public String getBody() {

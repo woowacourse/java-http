@@ -74,7 +74,7 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("url의 쿼리 파라미터를 Map 형태로 반환한다.")
-    void getQueryString() {
+    void getQueryParameters() {
         HttpRequest httpRequest = new HttpRequest(request);
 
         assertThat(httpRequest.getQueryParameters())

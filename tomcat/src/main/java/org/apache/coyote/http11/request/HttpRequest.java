@@ -43,6 +43,11 @@ public class HttpRequest {
         return body;
     }
 
+    public String getBodyParameter(String parameterName) {
+        Queries queries = Queries.of(body);
+        return queries.get(parameterName);
+    }
+
     public String getQuery(String key) {
         return requestLine.getQuery(key);
     }

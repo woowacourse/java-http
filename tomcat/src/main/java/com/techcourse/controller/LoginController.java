@@ -9,7 +9,6 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Handler;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Queries;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseCookie;
@@ -30,10 +29,8 @@ public class LoginController extends AbstractController {
     }
 
     private void doLoginPost(HttpRequest request, HttpResponse response) {
-        String requestBody = request.getBody();
-        Queries queries = Queries.of(requestBody);
-        String account = queries.get("account");
-        String password = queries.get("password");
+        String account = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
         validateLoginRequest(account, password);
 
         HttpSession session = request.getSession();

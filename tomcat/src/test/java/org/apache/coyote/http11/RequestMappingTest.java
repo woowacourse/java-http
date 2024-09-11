@@ -31,14 +31,14 @@ class RequestMappingTest {
     void getController() {
         Controller mockController = mock(Controller.class);
         RequestMapping requestMapping = new RequestMapping(Collections.emptyMap(), mockController);
-        HttpRequest httpRequest = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttp11Request(
                 "GET / HTTP/1.1",
                 Header.empty(),
                 mock(HttpBody.class),
                 mock(Manager.class)
         );
 
-        Controller controller = requestMapping.getController(httpRequest);
+        Controller controller = requestMapping.getController(request);
 
         assertThat(controller).isSameAs(mockController);
     }

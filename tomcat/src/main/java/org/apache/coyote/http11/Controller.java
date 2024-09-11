@@ -2,5 +2,5 @@ package org.apache.coyote.http11;
 
 public interface Controller {
 
-    void service(HttpRequest httpRequest, HttpResponse response) throws Exception;
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

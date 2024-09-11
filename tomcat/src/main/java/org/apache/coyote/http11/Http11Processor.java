@@ -53,9 +53,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = createHttpRequest(inputStream);
-            HttpResponse httpResponse = resourceProcessor.processResponse(httpRequest);
-            outputStream.write(httpResponse.serialize());
+            HttpRequest request = createHttpRequest(inputStream);
+            HttpResponse response = resourceProcessor.processResponse(request);
+            outputStream.write(response.serialize());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

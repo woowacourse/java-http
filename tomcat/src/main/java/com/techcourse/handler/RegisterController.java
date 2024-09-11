@@ -25,8 +25,8 @@ public class RegisterController extends AbstractController {
         response.setResponseBody(readResource("index.html"));
     }
 
-    private void registerNewUser(HttpRequest httpRequest) {
-        HttpBody body = httpRequest.getBody();
+    private void registerNewUser(HttpRequest request) {
+        HttpBody body = request.getBody();
         String account = body.get("account").orElseThrow();
         String password = body.get("password").orElseThrow();
         String email = body.get("email").orElseThrow();

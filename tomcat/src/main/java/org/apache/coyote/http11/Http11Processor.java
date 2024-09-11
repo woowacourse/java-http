@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.domain.User;
 import com.techcourse.model.dto.UserInfo;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.cookie.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -59,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestURL = httpRequestLine[1];
 
             if (method.equals("GET")) {
-                doGet(requestURL, outputStream);
+                doGet(httpRequestHeaders, requestURL, outputStream);
             }
 
             if (method.equals("POST")) {
@@ -75,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> httpRequestHeaders = new HashMap<>();
         String line;
 
-        while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] headerLine = line.split(": ");
 
             String key = URLDecoder.decode(headerLine[0]);
@@ -92,12 +94,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestURL.equals("/login")) {
             String path = "/login" + "?" + requestBody;
-            doGet(path, outputStream);
+            doGet(httpRequestHeaders, path, outputStream);
         }
 
         if (requestURL.equals("/register")) {
             String path = register(requestBody);
-            doGet(path, outputStream);
+            doGet(httpRequestHeaders, path, outputStream);
         }
     }
 
@@ -135,12 +137,14 @@ public class Http11Processor implements Runnable, Processor {
         return "/success";
     }
 
-    private void doGet(final String requestURL, final OutputStream outputStream) throws IOException {
+    private void doGet(final Map<String, String> httpRequestHeaders, final String requestURL,
+                       final OutputStream outputStream) throws IOException {
         String[] searchResourcePath = determineResourcePath(requestURL);
         String httpStatus = searchResourcePath[0];
         String resourcePath = searchResourcePath[1];
 
         String contentType = determineContentType(resourcePath);
+        String cookies = httpRequestHeaders.get("Cookie");
         URL resource = getClass().getResource(resourcePath);
 
         if (resource == null) {
@@ -150,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
 
         byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        createHttpResponse(outputStream, httpStatus, contentType, responseBody);
+        createHttpResponse(cookies, outputStream, httpStatus, contentType, responseBody);
     }
 
     private String[] determineResourcePath(String requestURL) {
@@ -277,17 +281,34 @@ public class Http11Processor implements Runnable, Processor {
                 });
     }
 
-    private void createHttpResponse(final OutputStream outputStream, final String httpStatus,
+    private void createHttpResponse(final String cookies, final OutputStream outputStream, final String httpStatus,
                                     final String contentType, final byte[] responseBody) throws IOException {
+
+        String cookie = "";
+
+        if (httpStatus.equals("302 FOUND")) {
+            cookie = setCookie(cookies, cookie);
+        }
+
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.length + " ",
-                "",
+                cookie,
                 "");
 
         outputStream.write(response.getBytes());
         outputStream.write(responseBody);
         outputStream.flush();
+    }
+
+    private static String setCookie(final String cookies, String setCookie) {
+        try {
+            HttpCookie.from(cookies);
+        } catch (IllegalArgumentException e) {
+            setCookie = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + " " + "\r\n"
+                    + "";
+        }
+        return setCookie;
     }
 }

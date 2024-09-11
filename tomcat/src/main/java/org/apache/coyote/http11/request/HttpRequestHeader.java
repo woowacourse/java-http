@@ -21,10 +21,12 @@ public class HttpRequestHeader {
     }
 
     public static HttpRequestHeader from(List<String> lines) {
-        Map<String, String> result = lines.stream()
+        return lines.stream()
                 .map(HttpRequestHeader::parseHeaders)
-                .collect(Collectors.toMap(split -> split[0], split -> split[1]));
-        return new HttpRequestHeader(result);
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(split -> split[0], split -> split[1]),
+                        HttpRequestHeader::new
+                ));
     }
 
     private static String[] parseHeaders(String header) {

@@ -19,7 +19,7 @@ public class HttpResponse {
 
     private String statusLine;
     private final List<String> headers = new ArrayList<>();
-    private String body;
+    private String body = "";
 
     public void ok() {
         statusLine = OK_STATUS_LINE;

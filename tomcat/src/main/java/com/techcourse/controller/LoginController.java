@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
     public static final String ACCOUNT_PARAM_NAME = "account";
     public static final String PASSWORD_PARAM_NAME = "password";
     public static final String ACCESS_DENIED_PAGE = "/401.html";
-    public static final String INDEX_PAGE = "index.html";
+    public static final String INDEX_PAGE = "/index.html";
 
     @Override
     public void doPost(final HttpRequest request, final HttpResponse response) {
@@ -47,6 +47,16 @@ public class LoginController extends AbstractController {
         response.setContentOfResources(path + HTML_SUFFIX);
     }
 
+    private Session createSession(final User user) {
+        final UUID id = UUID.randomUUID();
+        final Session session = new Session(id.toString());
+        session.setAttribute(USER_SESSION_NAME, user);
+        SessionManager.add(session);
+        log.info("user: {}", user);
+
+        return session;
+    }
+
     private boolean isLogin(final HttpRequest request, final HttpResponse response) {
         final var cookies = request.getCookies();
         if (cookies.containsSession() && hasSession(cookies)) {
@@ -68,25 +78,15 @@ public class LoginController extends AbstractController {
         response.sendRedirect(INDEX_PAGE);
     }
 
-    private void buildLoginFailResponse(final HttpResponse response) {
-        response.found();
-        response.sendRedirect(ACCESS_DENIED_PAGE);
-    }
-
-    private Session createSession(final User user) {
-        final UUID id = UUID.randomUUID();
-        final Session session = new Session(id.toString());
-        session.setAttribute(USER_SESSION_NAME, user);
-        SessionManager.add(session);
-        log.info("user: {}", user);
-
-        return session;
-    }
-
     private void addCookieOnResponseHeader(final HttpResponse response, final Session session) {
         HttpCookie cookie = HttpCookie.from(session);
         log.info("cookie: {}", session.getId());
 
         response.addCookies(cookie);
+    }
+
+    private void buildLoginFailResponse(final HttpResponse response) {
+        response.found();
+        response.sendRedirect(ACCESS_DENIED_PAGE);
     }
 }

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class RegisterController extends AbstractController {
     public static final String HTML_SUFFIX = ".html";
     public static final String INDEX_PAGE = "/index.html";
+    public static final String ACCESS_DENIED_PAGE = "/401.html";
     public static final String ACCOUNT_PARAM_NAME = "account";
     public static final String PASSWORD_PARAM_NAME = "password";
     public static final String EMAIL_PARAM_NAME = "email";
@@ -20,6 +21,8 @@ public class RegisterController extends AbstractController {
 
         final String account = userInfos.get(ACCOUNT_PARAM_NAME);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            response.found();
+            response.sendRedirect(ACCESS_DENIED_PAGE);
             return;
         }
         persistUser(userInfos);

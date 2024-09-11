@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import java.io.IOException;
 import org.apache.coyote.http11.FileType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,24 +16,28 @@ public class ResourceController extends AbstractController {
         final var url = request.getRequestPath();
 
         if ("/".equals(url)) {
-            response.ok();
-            response.setContentType(FileType.HTML);
-            response.setContentOfPlainText(HELLO_WORLD);
+            buildIndexUrlResponse(response);
         }
         if (url.endsWith(HTML_SUFFIX)) {
-            response.ok();
-            response.setContentType(FileType.HTML);
-            response.setContentOfResources(url);
+            buildResourceResponse(response, FileType.HTML, url);
         }
         if (url.endsWith(CSS_SUFFIX)) {
-            response.ok();
-            response.setContentType(FileType.CSS);
-            response.setContentOfResources(url);
+            buildResourceResponse(response, FileType.CSS, url);
         }
         if (url.endsWith(JS_SUFFIX)) {
-            response.ok();
-            response.setContentType(FileType.JAVASCRIPT);
-            response.setContentOfResources(url);
+            buildResourceResponse(response, FileType.JAVASCRIPT, url);
         }
+    }
+
+    private void buildIndexUrlResponse(HttpResponse response) {
+        response.ok();
+        response.setContentType(FileType.HTML);
+        response.setContentOfPlainText(HELLO_WORLD);
+    }
+
+    private void buildResourceResponse(HttpResponse response, FileType fileType, String url) throws IOException {
+        response.ok();
+        response.setContentType(fileType);
+        response.setContentOfResources(url);
     }
 }

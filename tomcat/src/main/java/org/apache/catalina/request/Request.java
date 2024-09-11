@@ -38,10 +38,6 @@ public class Request {
         this.body = new HashMap<>(body);
     }
 
-    public void setQueryParam(Map<String, String> queryParam) {
-        requestLine.setQueryParam(queryParam);
-    }
-
     public Map<String, String> getBody() {
         return body;
     }

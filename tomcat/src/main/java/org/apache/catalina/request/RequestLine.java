@@ -1,15 +1,19 @@
 package org.apache.catalina.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RequestLine {
     private static final String SPACE = " ";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
+    private static final String QUERY_PARAMETER_SEPARATOR = "&";
+    private static final String QUERY_KEY_VALUE_DELIMITER = "=";
     private final HttpMethod httpMethod;
     private final String path;
     private final VersionOfProtocol versionOfProtocol;
-    private Map<String, String> queryParam = new HashMap<>();
+    private Map<String, String> queryParam;
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(SPACE);
@@ -19,14 +23,30 @@ public class RequestLine {
         this.httpMethod = HttpMethod.of(parts[0]);
         this.path = parts[1];
         this.versionOfProtocol = new VersionOfProtocol(parts[2]);
+
+        setQueryParams(path);
+    }
+
+    private void setQueryParams(String path) {
+        String[] separationUrl = path.split(QUERY_PARAMETER_DELIMITER, 2);
+        queryParam = new HashMap<>();
+        if (separationUrl.length >= 2) {
+            queryParam = getParamValues(separationUrl[1]);
+        }
+    }
+
+    private static Map<String, String> getParamValues(String params) {
+        return Arrays.stream(params.split(QUERY_PARAMETER_SEPARATOR))
+                .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))
+                .filter(parts -> parts.length == 2 && parts[1] != null)
+                .collect(Collectors.toMap(
+                        parts -> parts[0].trim(),
+                        parts -> parts[1].trim()
+                ));
     }
 
     public boolean checkQueryParamIsEmpty() {
         return queryParam.isEmpty();
-    }
-
-    public void setQueryParam(Map<String, String> queryParam) {
-        this.queryParam = new HashMap<>(queryParam);
     }
 
     public HttpMethod getHttpMethod() {

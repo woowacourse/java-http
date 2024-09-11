@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 public class RequestReader {
     private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
-    private static final String QUERY_SEPARATOR = "\\?";
     private static final String PARAM_SEPARATOR = "&";
     private static final String PARAM_ASSIGNMENT = "=";
 
@@ -23,7 +22,6 @@ public class RequestReader {
 
         Map<String, String> headers = parseHeaders(headerLines);
         Request request = new Request(headerLines.getFirst(), headers);
-        request.setQueryParam(getQueryParams(request.getPath()));
         request.setBody(getBody(reader, request.getContentLength()));
         return request;
     }
@@ -67,14 +65,6 @@ public class RequestReader {
             throw new RuntimeException("요청 본문을 읽는 도중 오류가 발생했습니다.", e);
         }
         return getParamValues(new String(buffer));
-    }
-
-    private static Map<String, String> getQueryParams(String url) {
-        String[] separationUrl = url.split(QUERY_SEPARATOR, 2);
-        if (separationUrl.length < 2) {
-            return Map.of();
-        }
-        return getParamValues(separationUrl[1]);
     }
 
     private static Map<String, String> getParamValues(String params) {

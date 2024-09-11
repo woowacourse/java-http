@@ -1,21 +1,17 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Optional;
-
 public class RequestBody {
 
-    private final Optional<String> body;
+    private static final String EMPTY_BODY = "";
 
-    public RequestBody(Optional<String> body) {
+    private final String body;
+
+    public RequestBody(String body) {
         this.body = body;
     }
 
-    public RequestBody(String body) {
-        this.body = Optional.of(body);
-    }
-
     public static RequestBody empty() {
-        return new RequestBody(Optional.empty());
+        return new RequestBody(EMPTY_BODY);
     }
 
     public boolean isEmpty() {
@@ -26,6 +22,6 @@ public class RequestBody {
         if (body.isEmpty()) {
             throw new IllegalArgumentException("Body가 존재하지 않습니다.");
         }
-        return body.get();
+        return body;
     }
 }

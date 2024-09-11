@@ -24,6 +24,19 @@ class HttpCookieTest {
     }
 
     @Test
+    @DisplayName("유효하지 않은 쿠키 헤더는 HttpCookie에 추가되지 않는다.")
+    void cannotCreateHttpCookie() {
+        // given
+        String cookieHeader = "JSESSIONID=; yummy_cookie=choco; tasty_cookie=strawberry";
+
+        // when
+        HttpCookie httpCookie = new HttpCookie(cookieHeader);
+
+        // then
+        assertThat(httpCookie.hasJSessionId()).isFalse();
+    }
+
+    @Test
     @DisplayName("JSESSIONID 쿠키 문자열을 생성한다.")
     void ofJSessionId() {
         // given

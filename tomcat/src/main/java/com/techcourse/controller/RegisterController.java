@@ -7,10 +7,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,20 +27,20 @@ public class RegisterController implements HttpRequestHandler {
     private static final AtomicLong userIdGenerator = new AtomicLong(2L);
 
     @Override
-    public boolean supports(HttpRequest request) {
+    public boolean supports(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.uriEquals(SUPPORTING_URI);
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         String account = request.getFormData(ACCOUNT_FORM_DATA);
         String password = request.getFormData(PASSWORD_FORM_DATA);
         String email = request.getFormData(EMAIL_FORM_DATA);
 
         User user = new User(userIdGenerator.getAndIncrement(), account, password, email);
         InMemoryUserRepository.save(user);
-        return HttpResponse.redirect(REGISTER_SUCCESS_REDIRECT_URI);
+        return HttpServletResponse.redirect(REGISTER_SUCCESS_REDIRECT_URI);
     }
 }

@@ -8,13 +8,13 @@ import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.request.line.Uri;
 
-public class HttpRequest {
+public class HttpServletRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
+    public HttpServletRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;

@@ -8,9 +8,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +18,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Dispatcher dispatcher;
+    private final DispatcherServlet dispatcherServlet;
     private final Socket connection;
 
     public Http11Processor(Socket connection) {
-        dispatcher = Dispatcher.getInstance();
+        dispatcherServlet = DispatcherServlet.getInstance();
         this.connection = connection;
     }
 
@@ -39,22 +39,22 @@ public class Http11Processor implements Runnable, Processor {
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest httpRequest = parseHttpRequest(bufferedReader);
-            HttpRequestHandler httpRequestHandler = dispatcher.mappedHandler(httpRequest);
-            HttpResponse httpResponse = httpRequestHandler.handle(httpRequest);
+            HttpServletRequest httpServletRequest = parseHttpRequest(bufferedReader);
+            HttpRequestHandler httpRequestHandler = dispatcherServlet.mappedHandler(httpServletRequest);
+            HttpServletResponse httpServletResponse = httpRequestHandler.handle(httpServletRequest);
 
-            httpResponse.flush(outputStream);
+            httpServletResponse.flush(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
+    private HttpServletRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = readHeaders(bufferedReader);
         HttpMessageBody httpMessageBody = readMessageBody(bufferedReader, httpHeaders);
 
-        return new HttpRequest(requestLine, httpHeaders, httpMessageBody);
+        return new HttpServletRequest(requestLine, httpHeaders, httpMessageBody);
     }
 
     private HttpHeaders readHeaders(BufferedReader bufferedReader) throws IOException {

@@ -8,44 +8,44 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMessageBody;
 import org.apache.coyote.http11.response.line.ResponseLine;
 
-public class HttpResponse {
+public class HttpServletResponse {
 
     private final ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpResponse(ResponseLine responseLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
+    public HttpServletResponse(ResponseLine responseLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.responseLine = responseLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;
     }
 
-    public static HttpResponse ok(String responseBody, String contentType) {
+    public static HttpServletResponse ok(String responseBody, String contentType) {
         ResponseLine line = ResponseLine.createOkResponseLine();
         HttpMessageBody body = new HttpMessageBody(responseBody);
         HttpHeaders headers = new HttpHeaders();
         headers.putHeader(HttpHeaderName.CONTENT_TYPE, "text/" + contentType + ";charset=utf-8 ");
         headers.putHeader(HttpHeaderName.CONTENT_LENGTH, body.getBytes().length + " ");
 
-        return new HttpResponse(line, headers, body);
+        return new HttpServletResponse(line, headers, body);
     }
 
-    public static HttpResponse unauthorized(String responseBody, String contentType) {
+    public static HttpServletResponse unauthorized(String responseBody, String contentType) {
         ResponseLine line = ResponseLine.createUnauthorizedLine();
         HttpMessageBody body = new HttpMessageBody(responseBody);
         HttpHeaders headers = new HttpHeaders();
         headers.putHeader(HttpHeaderName.CONTENT_TYPE, "text/" + contentType + ";charset=utf-8 ");
         headers.putHeader(HttpHeaderName.CONTENT_LENGTH, body.getBytes().length + " ");
 
-        return new HttpResponse(line, headers, body);
+        return new HttpServletResponse(line, headers, body);
     }
 
-    public static HttpResponse redirect(String uri) {
+    public static HttpServletResponse redirect(String uri) {
         ResponseLine line = ResponseLine.createFoundLine();
         HttpMessageBody body = HttpMessageBody.createEmptyBody();
         HttpHeaders headers = new HttpHeaders();
         headers.putHeader(HttpHeaderName.LOCATION, uri);
-        return new HttpResponse(line, headers, body);
+        return new HttpServletResponse(line, headers, body);
     }
 
     public void flush(OutputStream outputStream) throws IOException {

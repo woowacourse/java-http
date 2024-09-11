@@ -9,15 +9,15 @@ import com.techcourse.controller.page.RegisterPageController;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 
-public class Dispatcher {
+public class DispatcherServlet {
 
-    private static final Dispatcher INSTANCE = new Dispatcher();
+    private static final DispatcherServlet INSTANCE = new DispatcherServlet();
 
     private final List<HttpRequestHandler> handlers;
 
-    private Dispatcher() {
+    private DispatcherServlet() {
         handlers = new ArrayList<>();
         handlers.add(new StaticResourceController());
         handlers.add(new GreetingController());
@@ -27,11 +27,11 @@ public class Dispatcher {
         handlers.add(new RegisterController());
     }
 
-    public static Dispatcher getInstance() {
+    public static DispatcherServlet getInstance() {
         return INSTANCE;
     }
 
-    public HttpRequestHandler mappedHandler(HttpRequest request) {
+    public HttpRequestHandler mappedHandler(HttpServletRequest request) {
         return handlers.stream()
                 .filter(httpRequestHandler -> httpRequestHandler.supports(request))
                 .findFirst()

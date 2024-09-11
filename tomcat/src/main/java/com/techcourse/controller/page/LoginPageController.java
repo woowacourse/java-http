@@ -4,10 +4,10 @@ import java.io.IOException;
 import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;
 
 public class LoginPageController implements HttpRequestHandler {
@@ -20,19 +20,19 @@ public class LoginPageController implements HttpRequestHandler {
     private static final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public boolean supports(HttpRequest request) {
+    public boolean supports(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.uriEquals(SUPPORTING_URI);
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         if (sessionManager.hasSession(request.getSessionId())) {
-            return HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+            return HttpServletResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
         }
 
         String fileContent = FileUtils.readFile(PAGE_RESOURCE_PATH);
-        return HttpResponse.ok(fileContent, "html");
+        return HttpServletResponse.ok(fileContent, "html");
     }
 }

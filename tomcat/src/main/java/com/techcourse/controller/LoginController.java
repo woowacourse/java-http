@@ -9,10 +9,10 @@ import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;
 
 public class LoginController implements HttpRequestHandler {
@@ -27,20 +27,20 @@ public class LoginController implements HttpRequestHandler {
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
     @Override
-    public boolean supports(HttpRequest request) {
+    public boolean supports(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.uriEquals(SUPPORTING_URI);
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         String account = request.getFormData(ACCOUNT);
         String password = request.getFormData(PASSWORD);
 
         Optional<User> found = InMemoryUserRepository.findByAccount(account);
         if (found.isEmpty() || !found.get().checkPassword(password)) {
-            return HttpResponse.unauthorized(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
+            return HttpServletResponse.unauthorized(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
         }
 
         UUID jsessionId = UUID.randomUUID();
@@ -48,7 +48,7 @@ public class LoginController implements HttpRequestHandler {
         session.setAttributes("user", found.get());
         sessionManager.putSession(jsessionId.toString(), session);
 
-        HttpResponse response = HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+        HttpServletResponse response = HttpServletResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
         response.setJsessionCookie(jsessionId);
         return response;
     }

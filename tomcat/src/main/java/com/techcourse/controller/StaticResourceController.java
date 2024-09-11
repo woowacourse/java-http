@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import java.io.IOException;
 import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;
 
 public class StaticResourceController implements HttpRequestHandler {
@@ -15,7 +15,7 @@ public class StaticResourceController implements HttpRequestHandler {
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
     @Override
-    public boolean supports(HttpRequest request) {
+    public boolean supports(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 !request.isUriHome() &&
@@ -23,10 +23,10 @@ public class StaticResourceController implements HttpRequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         String fileName = request.getUriPath();
         String fileContent = FileUtils.readFile(fileName);
-        return HttpResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
+        return HttpServletResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
     }
 
     private boolean resourceAvailable(String fileName) {

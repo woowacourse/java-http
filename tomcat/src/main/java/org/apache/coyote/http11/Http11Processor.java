@@ -8,8 +8,6 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
-import org.apache.coyote.controller.StaticResourceController;
-import org.apache.coyote.controller.StaticResourceFinder;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -52,10 +50,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private void service(HttpRequest request, HttpResponse response) {
         try {
-            if (StaticResourceFinder.isStaticResource(request.getUri())) {
-                StaticResourceController.INSTANCE.service(request, response);
-                return;
-            }
             Controller controller = RequestMapping.getController(request);
             controller.service(request, response);
         } catch (Exception e) {

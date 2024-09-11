@@ -5,14 +5,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.NoSuchElementException;
 
-public class StaticResourceFinder {
+public class StaticResourceReader {
 
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final String NOT_FOUND_PAGE = "/404.html";
-
-    public static boolean isStaticResource(String uri) {
-        return uri.endsWith(".html") || uri.endsWith(".css") || uri.endsWith(".js") || uri.endsWith(".ico");
-    }
 
     public static byte[] readResource(ClassLoader classLoader, String location) {
         try {

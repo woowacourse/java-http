@@ -25,7 +25,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected final byte[] readStaticResource(String path) {
-        return StaticResourceFinder.readResource(getClass().getClassLoader(), path);
+        return StaticResourceReader.readResource(getClass().getClassLoader(), path);
     }
 
     protected final String getRequiredParameter(HttpRequest request, String parameterName) {

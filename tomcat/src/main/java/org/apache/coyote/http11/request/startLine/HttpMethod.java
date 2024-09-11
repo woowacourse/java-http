@@ -11,7 +11,8 @@ public enum HttpMethod {
     PATCH,
     DELETE,
     OPTIONS,
-    TRACE;
+    TRACE,
+    CONNECT;
 
     public static HttpMethod find(String name) {
         return Arrays.stream(values())

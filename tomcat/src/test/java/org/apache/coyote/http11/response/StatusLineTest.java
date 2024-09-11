@@ -18,7 +18,7 @@ class StatusLineTest {
         HttpStatusCode code = HttpStatusCode.ACCEPTED;
 
         // when
-        StatusLine statusLine = new StatusLine(version, code);
+        StatusLine statusLine = StatusLine.ofHTTP11(code);
 
         // then
         assertThat(statusLine.getReponseString()).isEqualTo(version.getVersionString() + " " + code.toStatus() + " ");

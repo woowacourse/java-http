@@ -9,23 +9,27 @@ public class URI {
     private static final int QUERY_PARAMS_EXIST_LENGTH = 2;
     private static final int PATH_INDEX = 0;
     private static final int QUERY_PARAMS_INDEX = 1;
+    private static final int MAX_URI_LENGTH = 2048;
 
     private final Path path;
 
     private final QueryParams queryParams;
 
     public URI(String uri) {
-        String decodedUri = decode(uri);
+        validateUri(uri);
+        String decodedUri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
         String[] uriParts = split(decodedUri);
         this.path = new Path(uriParts[PATH_INDEX]);
         this.queryParams = QueryParams.from(extractQueryParams(uriParts));
     }
 
-    private String decode(String uri) {
+    private void validateUri(String uri) {
         if (uri == null || uri.isBlank()) {
             throw new IllegalArgumentException("URI는 필수입니다.");
         }
-        return URLDecoder.decode(uri, StandardCharsets.UTF_8);
+        if (uri.length() > MAX_URI_LENGTH) {
+            throw new IllegalArgumentException("URI는 %s자를 넘을 수 없습니다.".formatted(MAX_URI_LENGTH));
+        }
     }
 
     private String[] split(String uri) {

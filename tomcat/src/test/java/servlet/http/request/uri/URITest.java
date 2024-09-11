@@ -35,6 +35,18 @@ class URITest {
     }
 
     @Test
+    void URI가_최대_길이를_초과하면_예외가_발생한다() {
+        // given
+        int maxLength = 2048;
+        String uri = "a".repeat(maxLength + 1);
+
+        // when & then
+        assertThatThrownBy(() -> new URI(uri))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("URI는 2048자를 넘을 수 없습니다.");
+    }
+
+    @Test
     void URI를_분리했을_때_path가_없으면_예외가_발생한다() {
         // given
         String uri = "?team=ddangkong";

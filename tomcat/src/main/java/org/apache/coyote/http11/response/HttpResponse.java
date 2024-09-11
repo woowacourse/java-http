@@ -19,6 +19,13 @@ public class HttpResponse {
     private HttpVersion version;
     private byte[] body;
 
+    public static HttpResponse createDefault() {
+        final HttpResponse response = new HttpResponse();
+        response.setVersion(HttpVersion.HTTP_1_1);
+        response.setStatus(HttpStatusCode.OK);
+        return response;
+    }
+
     public HttpResponse() {
         this.headers = new Headers();
         this.body = new byte[0];
@@ -46,12 +53,10 @@ public class HttpResponse {
     public void addCookie(final String cookie, final String value) {
         headers.put(ResponseHeader.SET_COOKIE, cookie + "=" + value);
     }
-    public void setRedirect(final Path path){
-        setRedirect(path.value());
-    }
 
     public void setRedirect(final String path) {
-        headers.put(ResponseHeader.LOCATION, path);
+        headers.put(ResponseHeader.LOCATION, Path.from(path)
+                .value());
         this.statusCode = HttpStatusCode.FOUND;
     }
 

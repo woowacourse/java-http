@@ -12,7 +12,7 @@ class HttpUrlTest {
     @Test
     void createTest_whenOnlyExistPath() {
         String url = "/login";
-        HttpUrl expected = new HttpUrl("/login", Collections.EMPTY_MAP);
+        HttpUrl expected = new HttpUrl("/login", Collections.emptyMap());
 
         HttpUrl actual = new HttpUrl(url);
 

@@ -12,7 +12,7 @@ class ViewResponseUtilsTest {
 
     @Test
     void createResponseTest_whenTypeIsHtml() {
-        View view = new HtmlView(HttpStatus.OK, Collections.EMPTY_MAP, "Hello World!");
+        View view = new HtmlView(HttpStatus.OK, Collections.emptyMap(), "Hello World!");
         int expectedStatus = 200;
         Map<String, String> expectedHeaders = Map.of(
                 "Content-Type", "text/html;charset=utf-8",

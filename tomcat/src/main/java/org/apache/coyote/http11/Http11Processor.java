@@ -24,11 +24,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapper requestMapper;
+    private final RequestDispatcher requestDispatcher;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestMapper = new RequestMapper();
+        this.requestDispatcher = new RequestDispatcher();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = parseInput(inputStream);
 
-            String resourceName = requestMapper.requestMapping(request);
+            String resourceName = requestDispatcher.requestMapping(request);
             String responseBody = getResource(resourceName);
             String resourceExtension = getExtension(resourceName);
 

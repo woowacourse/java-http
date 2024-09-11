@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
 
-public class RequestMapper {
+public class RequestDispatcher {
 
     private final Controller controller;
 
-    public RequestMapper() {
+    public RequestDispatcher() {
         this.controller = new Controller();
     }
 

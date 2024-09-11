@@ -43,7 +43,7 @@ public final class HttpHeaders {
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(headers.get("Cookie"));
+        return HttpCookie.from(headers.getOrDefault("Cookie", new ArrayList<>()));
     }
 
     public Map<String, List<String>> getHeaders() {

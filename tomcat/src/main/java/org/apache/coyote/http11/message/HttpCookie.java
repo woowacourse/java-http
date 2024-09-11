@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
 
 public class HttpCookie {
 
-    private static final String JSESSIONID_NAME = "JSESSIONID";
+    private static final String JSESSIONID_DIRECTIVE = "JSESSIONID";
     private static final String PATH_DIRECTIVE = "path";
     private static final String DIRECTIVE_DELIMITER = "=";
     private static final String DIRECTIVES_DELIMITER = "; ";
@@ -24,6 +24,13 @@ public class HttpCookie {
     public HttpCookie(Map<String, String> directives, boolean isHttpOnly) {
         this.directives = directives;
         this.isHttpOnly = isHttpOnly;
+    }
+
+    public static HttpCookie from(Session session) {
+        HashMap<String, String> directives = new HashMap<>(Map.of(
+                JSESSIONID_DIRECTIVE, session.getId()
+        ));
+        return new HttpCookie(directives, false);
     }
 
     public static HttpCookie from(List<String> cookieField) {
@@ -45,15 +52,8 @@ public class HttpCookie {
         return Map.entry(directiveName, directiveValue);
     }
 
-    public static HttpCookie createWithRandomJsessionid() {
-        HashMap<String, String> directives = new HashMap<>(Map.of(
-                "JSESSIONID_NAME", UUID.randomUUID().toString()
-        ));
-        return new HttpCookie(directives, false);
-    }
-
-    public boolean hasJsessionid() {
-        return !getJsessionid().isBlank();
+    public void setJsessionid(String jsessionid) {
+        directives.put(JSESSIONID_DIRECTIVE, jsessionid);
     }
 
     public void setHttpOnly(boolean isHttpOnly) {
@@ -65,7 +65,7 @@ public class HttpCookie {
     }
 
     public String getJsessionid() {
-        return directives.getOrDefault(JSESSIONID_NAME, "");
+        return directives.getOrDefault(JSESSIONID_DIRECTIVE, "");
     }
 
     public String stringify() {

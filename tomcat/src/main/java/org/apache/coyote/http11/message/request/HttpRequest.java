@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.message.request;
 
 import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 
@@ -42,6 +44,10 @@ public class HttpRequest {
         return headers.hasHeader(header);
     }
 
+    public boolean hasSession() {
+        return getSession().isPresent();
+    }
+
     public HttpCookie getCookie() {
         return headers.getCookie();
     }
@@ -68,5 +74,11 @@ public class HttpRequest {
 
     public Optional<String> getHeaderFieldByName(String name) {
         return headers.getFieldByHeaderName(name);
+    }
+
+    public Optional<Session> getSession() {
+        HttpCookie cookie = headers.getCookie();
+        return Optional.ofNullable(SessionManager.getInstance()
+                .findSession(cookie.getJsessionid()));
     }
 }

@@ -4,6 +4,8 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -38,7 +40,10 @@ public class LoginPostController implements HttpHandler {
             HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
 
             response.setHeader("Location", "http://localhost:8080/index.html");
-            setCookie(request, response);
+            if (!request.hasSession()) {
+                Session session = addSession(user);
+                setCookie(response, session);
+            }
 
             return response;
         } catch (UnauthorizedException e) {
@@ -50,19 +55,19 @@ public class LoginPostController implements HttpHandler {
         }
     }
 
-    private void setCookie(HttpRequest request, HttpResponse response) {
-        if (!request.hasHeader("Cookie")) {
-            return;
-        }
+    private Session addSession(User user) {
+        Session session = Session.create();
+        session.setAttribute("user", user);
+        SessionManager.getInstance()
+                .add(session);
 
-        HttpCookie cookie = request.getCookie();
-        if (cookie.hasJsessionid()) {
-            return;
-        }
+        return session;
+    }
 
-        HttpCookie responseCookie = HttpCookie.createWithRandomJsessionid();
-        responseCookie.setPath("/");
-        responseCookie.setHttpOnly(true);
-        response.setCookie(responseCookie);
+    private void setCookie(HttpResponse response, Session session) {
+        HttpCookie cookie = HttpCookie.from(session);
+        cookie.setJsessionid(session.getId());
+        cookie.setHttpOnly(true);
+        response.setCookie(cookie);
     }
 }

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,14 +22,14 @@ class Http11ProcessorTest {
         @Test
         void process() {
             // given
-            final var socket = new StubSocket();
-            final var processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket();
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            var expected = String.join("\r\n",
+            String expected = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: 12 ",
@@ -43,26 +43,26 @@ class Http11ProcessorTest {
         @Test
         void index() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "GET /index.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
                     "");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                           "Content-Type: text/html;charset=utf-8 \r\n" +
-                           "Content-Length: 5564 \r\n" +
-                           "\r\n" +
-                           new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            URL resource = getClass().getClassLoader().getResource("static/index.html");
+            String expected = "HTTP/1.1 200 OK \r\n" +
+                              "Content-Type: text/html;charset=utf-8 \r\n" +
+                              "Content-Length: 5564 \r\n" +
+                              "\r\n" +
+                              new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -71,28 +71,28 @@ class Http11ProcessorTest {
         @Test
         void login() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "GET /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
                     "");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/login.html");
+            URL resource = getClass().getClassLoader().getResource("static/login.html");
             Path path = new File(resource.getFile()).toPath();
             long fileSize = Files.size(path);
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                           "Content-Type: text/html;charset=utf-8 \r\n" +
-                           "Content-Length: " + fileSize + " \r\n" +
-                           "\r\n" +
-                           new String(Files.readAllBytes(path));
+            String expected = "HTTP/1.1 200 OK \r\n" +
+                              "Content-Type: text/html;charset=utf-8 \r\n" +
+                              "Content-Length: " + fileSize + " \r\n" +
+                              "\r\n" +
+                              new String(Files.readAllBytes(path));
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -101,28 +101,28 @@ class Http11ProcessorTest {
         @Test
         void register() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "GET /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
                     "");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            URL resource = getClass().getClassLoader().getResource("static/register.html");
             Path path = new File(resource.getFile()).toPath();
             long fileSize = Files.size(path);
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                           "Content-Type: text/html;charset=utf-8 \r\n" +
-                           "Content-Length: " + fileSize + " \r\n" +
-                           "\r\n" +
-                           new String(Files.readAllBytes(path));
+            String expected = "HTTP/1.1 200 OK \r\n" +
+                              "Content-Type: text/html;charset=utf-8 \r\n" +
+                              "Content-Length: " + fileSize + " \r\n" +
+                              "\r\n" +
+                              new String(Files.readAllBytes(path));
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -131,23 +131,23 @@ class Http11ProcessorTest {
         @Test
         void accessWithNotExistEndPoint() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "GET /not-exist HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
                     "");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
 
             // then
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                           "Location: /404.html \r\n" +
-                           "\r\n";
+            String expected = "HTTP/1.1 302 Found \r\n" +
+                              "Location: /404.html \r\n" +
+                              "\r\n";
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -161,7 +161,7 @@ class Http11ProcessorTest {
         @Test
         void loginSuccess() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
@@ -171,8 +171,8 @@ class Http11ProcessorTest {
                     "",
                     "account=gugu&password=password");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
@@ -180,7 +180,7 @@ class Http11ProcessorTest {
             // then
             String response = socket.output();
 
-            Assertions.assertAll(
+            assertAll(
                     () -> assertThat(response).contains("HTTP/1.1 302 Found"),
                     () -> assertThat(response).contains("Location: /index.html"),
                     () -> assertThat(response).containsPattern("Set-Cookie: JSESSIONID=[a-f0-9\\-]+")
@@ -191,7 +191,7 @@ class Http11ProcessorTest {
         @Test
         void loginFailure() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
@@ -201,8 +201,8 @@ class Http11ProcessorTest {
                     "",
                     "account=unknown&password=unknown");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
@@ -210,7 +210,7 @@ class Http11ProcessorTest {
             // then
             String response = socket.output();
 
-            Assertions.assertAll(
+            assertAll(
                     () -> assertThat(response).contains("HTTP/1.1 302 Found"),
                     () -> assertThat(response).contains("Location: /401.html")
             );
@@ -220,7 +220,7 @@ class Http11ProcessorTest {
         @Test
         void registerSuccess() throws IOException {
             // given
-            final String httpRequest = String.join("\r\n",
+            String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
@@ -230,8 +230,8 @@ class Http11ProcessorTest {
                     "",
                     "account=newuser&password=password&email=newuser%40woowahan.com");
 
-            final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket);
 
             // when
             processor.process(socket);
@@ -239,7 +239,7 @@ class Http11ProcessorTest {
             // then
             String response = socket.output();
 
-            Assertions.assertAll(
+            assertAll(
                     () -> assertThat(response).contains("HTTP/1.1 302 Found"),
                     () -> assertThat(response).contains("Location: /index.html")
             );

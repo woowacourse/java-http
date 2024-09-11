@@ -7,6 +7,11 @@ import java.util.Map;
 
 public class RequestParser {
 
+    private static final String HEADER_DELIMITER = ": ";
+    private static final int VALID_KEY_VALUE_LENGTH = 2;
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
+
     public Request parse(BufferedReader reader) throws IOException {
         RequestLine line = new RequestLine(reader.readLine());
         RequestHeaders headers = new RequestHeaders(getRequestHeaders(reader));
@@ -29,11 +34,11 @@ public class RequestParser {
     }
 
     private void putHeader(Map<String, String> headers, String header) {
-        String[] headerParts = header.split(": ");
-        if (headerParts.length != 2) {
+        String[] headerParts = header.split(HEADER_DELIMITER);
+        if (headerParts.length != VALID_KEY_VALUE_LENGTH) {
             throw new IllegalArgumentException("올바르지 않은 Request header 포맷입니다. header: %s".formatted(header));
         }
-        headers.put(headerParts[0], headerParts[1]);
+        headers.put(headerParts[HEADER_KEY_INDEX], headerParts[HEADER_VALUE_INDEX]);
     }
 
     private String getRequestBody(BufferedReader reader, String contentLength) throws IOException {

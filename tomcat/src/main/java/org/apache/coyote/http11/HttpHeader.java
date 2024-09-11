@@ -38,13 +38,13 @@ public class HttpHeader {
 
     private void validateHeaderFormat(String rawHeader) {
         if (rawHeader == null || rawHeader.isBlank()) {
-            throw new UncheckedServletException("헤더는 null이거나 비어 있을 수 없습니다.");
+            throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
         if (!rawHeader.contains(DELIMITER)) {
             throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
         if (rawHeader.startsWith(DELIMITER)) {
-            throw new UncheckedServletException("헤더의 field-name은 필수 값입니다.");
+            throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
     }
 

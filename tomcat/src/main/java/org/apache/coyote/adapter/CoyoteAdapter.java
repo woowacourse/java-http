@@ -10,12 +10,12 @@ import org.apache.coyote.http11.session.SessionManager;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class CoyoteAdapter implements Adapter{
+public class CoyoteAdapter implements Adapter {
     private final RequestMapper mapper;
     private final ResourceController resourceController;
     private final SessionManager sessionManager;
 
-    public CoyoteAdapter(final RequestMapper mapper, final ResourceController resourceController, SessionManager sessionManager) {
+    public CoyoteAdapter(final RequestMapper mapper, final ResourceController resourceController, final SessionManager sessionManager) {
         this.mapper = mapper;
         this.resourceController = resourceController;
         this.sessionManager = sessionManager;

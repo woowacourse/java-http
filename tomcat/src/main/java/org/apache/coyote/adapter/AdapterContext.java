@@ -10,5 +10,6 @@ public class AdapterContext {
     public static Adapter getAdapter() {
         return adapter;
     }
+
     private AdapterContext() {}
 }

@@ -20,7 +20,8 @@ class SessionManagerTest {
 
         final Session session1 = sessionManager.createSession(time);
         final Session session2 = sessionManager.createSession(time.plusSeconds(1));
-        final Session session3 = sessionManager.createSession(time.plusMinutes(1).plusSeconds(1));
+        final Session session3 = sessionManager.createSession(time.plusMinutes(1)
+                .plusSeconds(1));
 
         sessionManager.cleanUpSession(time.plusMinutes(1));
 

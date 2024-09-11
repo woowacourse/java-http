@@ -34,7 +34,8 @@ public class HttpResponseWriter {
     }
 
     private static void writeStringWithCSRF(final OutputStream out, final String str) throws IOException {
-        out.write(StringUtil.addSuffixIfNotEndSuffix(str,LINE_SUFFIX).getBytes());
+        out.write(StringUtil.addSuffixIfNotEndSuffix(str, LINE_SUFFIX)
+                .getBytes());
         writeCSRF(out);
     }
 

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.session.Session;
 
 public class LoginController extends AbstractController {
     private static final String USER_SESSION_ATTRIBUTE = "user";
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setResource("login.html");

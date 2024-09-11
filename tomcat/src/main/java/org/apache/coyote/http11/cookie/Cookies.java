@@ -58,7 +58,7 @@ public class Cookies {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Cookies cookies)) return false;
+        if (!(o instanceof final Cookies cookies)) return false;
         return Objects.equals(values, cookies.values);
     }
 

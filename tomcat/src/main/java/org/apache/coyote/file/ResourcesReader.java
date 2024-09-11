@@ -9,7 +9,7 @@ public class ResourcesReader {
     private static final String DEFAULT_PATH = "static";
     private static final String MAIN_PAGE = "/main.html";
 
-    public static Resource read(final Path path){
+    public static Resource read(final Path path) {
         return read(path.value());
     }
 
@@ -21,8 +21,9 @@ public class ResourcesReader {
             final byte[] bytes = inputStream.readAllBytes();
             return new Resource(resourcePath, bytes);
         } catch (final IOException e) {
-            throw new FileNotFoundException(String.format("%s not found", resourcePath),e);
+            throw new FileNotFoundException(String.format("%s not found", resourcePath), e);
         }
     }
+
     private ResourcesReader() {}
 }

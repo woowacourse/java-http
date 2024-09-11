@@ -33,8 +33,9 @@ public class RequestLine {
         final BiValue<Path, QueryParams> uriAndQueryParam = splitUriAndQueryParams(requestLineInfos[PATH_INDEX]);
         return new RequestLine(HttpMethod.from(requestLineInfos[HTTP_METHOD_INDEX]), uriAndQueryParam.first(), uriAndQueryParam.second(), HttpVersion.from(requestLineInfos[HTTP_VERSION_INDEX]));
     }
+
     private static void validateRequestLineFormat(final String[] requestLineInfos) {
-        if(requestLineInfos.length !=REQUEST_INDEX_SIZE){
+        if (requestLineInfos.length != REQUEST_INDEX_SIZE) {
             throw new IllegalArgumentException("HTTP Request Line 문법이 잘못 됐습니다.");
         }
     }

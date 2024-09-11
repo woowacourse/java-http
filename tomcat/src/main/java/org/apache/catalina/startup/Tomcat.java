@@ -38,7 +38,7 @@ public class Tomcat implements ConnectionListener {
 
     @Override
     public void onConnection(final Socket connection) {
-        final var processor = new Http11Processor(connection,adapter);
+        final var processor = new Http11Processor(connection, adapter);
         new Thread(processor).start();
     }
 }

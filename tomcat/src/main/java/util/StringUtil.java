@@ -19,7 +19,7 @@ public class StringUtil {
         if (index == -1) {
             return new BiValue<>(str, BLANK);
         }
-        return new BiValue<>(str.substring(0, index), str.substring(index+delimiter.length()));
+        return new BiValue<>(str.substring(0, index), str.substring(index + delimiter.length()));
     }
 
     public static String combineWithDelimiter(final BiValue<String, String> biValue, final String delimiter) {

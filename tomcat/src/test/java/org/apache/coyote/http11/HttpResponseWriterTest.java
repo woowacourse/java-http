@@ -24,9 +24,9 @@ class HttpResponseWriterTest {
         final OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponseWriter.write(outputStream, response);
         assertThat(outputStream.toString()).contains(
-                        "HTTP/1.1 200 OK \r\n",
-                        "Content-Type: text/html;charset=utf-8 \r\n",
-                        "Content-Length: 5564 \r\n",
-                        "");
+                "HTTP/1.1 200 OK \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: 5564 \r\n",
+                "");
     }
 }

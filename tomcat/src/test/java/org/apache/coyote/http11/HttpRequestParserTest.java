@@ -30,12 +30,15 @@ class HttpRequestParserTest {
         assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/index.html");
         assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
-        assertThat(request.getHeaders().get("Connection")).isEqualTo("keep-alive ");
-        assertThat(request.getHeaders().get("Host")).isEqualTo("localhost:8080 ");
+        assertThat(request.getHeaders()
+                .get("Connection")).isEqualTo("keep-alive ");
+        assertThat(request.getHeaders()
+                .get("Host")).isEqualTo("localhost:8080 ");
     }
+
     @Test
     @DisplayName("HTTP RequestLine 이 잘못되면 예외를 발생한다.")
-    void throw_exception_when_request_line_informat(){
+    void throw_exception_when_request_line_informat() {
         final byte[] requestBytes =
                 String.join("\r\n",
                                 "GET HTTP/1.1 ",
@@ -45,7 +48,7 @@ class HttpRequestParserTest {
                                 "")
                         .getBytes();
 
-        assertThatThrownBy(()->HttpRequestParser.parse(new ByteArrayInputStream(requestBytes)))
+        assertThatThrownBy(() -> HttpRequestParser.parse(new ByteArrayInputStream(requestBytes)))
                 .isInstanceOf(IllegalArgumentException.class);
 
     }

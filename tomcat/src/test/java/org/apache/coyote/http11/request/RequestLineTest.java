@@ -22,8 +22,8 @@ class RequestLineTest {
 
     @Test
     @DisplayName("문법에 맞지 않으면 예외를 발생한다.")
-    void throw_exception_when_not_exist_method(){
-        assertThatThrownBy(()->RequestLine.create("GET /static/img/header-background.png HTTP/1.1 SomeData"))
+    void throw_exception_when_not_exist_method() {
+        assertThatThrownBy(() -> RequestLine.create("GET /static/img/header-background.png HTTP/1.1 SomeData"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

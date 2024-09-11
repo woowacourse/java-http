@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.MethodType.GET;
-import static org.apache.coyote.http11.MethodType.POST;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
@@ -13,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.requestLine.MethodType;
 
 public class ApiProcessor {
 
@@ -24,19 +23,19 @@ public class ApiProcessor {
 
     public void process(
             Socket connection,
-            String requestPath,
-            MethodType methodType,
-            Map<String, String> requestHeader,
-            Map<String, String> requestBody
+            HttpRequest httpRequest
     ) throws IOException {
         OutputStream outputStream = connection.getOutputStream();
+        String requestPath = httpRequest.getRequestPath();
+        MethodType methodType = httpRequest.getMethodType();
+        Map<String, String> requestHeader = httpRequest.getRequestHeader();
 
         String[] splitPath = requestPath.split("\\?");
         String requestUri = splitPath[0];
 
         if (requestUri.equals("/login")) {
             if (methodType.isPost()) {
-                processLogin(outputStream, requestBody);
+                processLogin(outputStream, httpRequest.getRequestBody());
                 return;
             }
             if (methodType.isGet()) {
@@ -57,7 +56,7 @@ public class ApiProcessor {
 
         if (requestUri.equals("/register")) {
             if (methodType.isPost()) {
-                processRegisterPost(outputStream, requestBody);
+                processRegisterPost(outputStream, httpRequest.getRequestBody());
                 return;
             }
             if (methodType.isGet()) {
@@ -92,7 +91,7 @@ public class ApiProcessor {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if(optionalUser.isPresent()){
+        if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.checkPassword(password)) {
                 loginSuccess(outputStream, user);

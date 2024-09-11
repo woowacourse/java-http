@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request.requestLine;
 
 public enum MethodType {
     GET,

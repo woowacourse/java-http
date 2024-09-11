@@ -3,12 +3,17 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,54 +39,52 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = getHttpRequest(inputStream);
 
-            // request line
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = br.readLine();
-            if (requestLine == null) {
-                return;
-            }
-            StringTokenizer st = new StringTokenizer(requestLine);
-            MethodType requestMethodType = MethodType.toMethodType(st.nextToken());
-            String requestPath = st.nextToken();
-            if (requestPath.equals("/")) {
-                requestPath = "/index.html";
-            }
-
-            // header
-            Map<String, String> httpRequestHeaders = new HashMap<>();
-            String header = br.readLine();
-            while (!"".equals(header)) {
-                String[] splitHeader = header.split(": ");
-                httpRequestHeaders.put(splitHeader[0], splitHeader[1]);
-                header = br.readLine();
-            }
-
-            // body
-            Map<String, String> requestBody = new HashMap<>();
-            if (requestMethodType.isPost()) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                String[] requestBodyParams = new String(buffer).split("&");
-                for (String requestBodyParam : requestBodyParams) {
-                    String[] paramEntry = requestBodyParam.split("=");
-                    requestBody.put(paramEntry[0], paramEntry[1]);
-                }
-            }
-
-            RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
+            RequestPathType requestPathType = httpRequest.getRequestPathType();
             if (requestPathType.isAPI()) {
-                apiProcessor.process(connection, requestPath, requestMethodType, httpRequestHeaders, requestBody);
+                apiProcessor.process(connection, httpRequest);
             }
             if (requestPathType.isResource()) {
-                resourceProcessor.process(connection, requestPath);
+                resourceProcessor.process(connection, httpRequest.getRequestPath());
             }
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequestLine httpRequestLine = HttpRequestLine.toHttpRequestLine(br.readLine());
+        HttpRequestHeader httpRequestHeader = getHttpRequestHeader(br);
+
+        HttpRequestBody httpRequestBody = null;
+        if (httpRequestLine.getMethodType().isPost()) {
+            httpRequestBody = getHttpRequestBody(httpRequestHeader, br);
+        }
+
+        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+    }
+
+    private HttpRequestBody getHttpRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader br)
+            throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeader.getContentLength());
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return HttpRequestBody.toHttpRequestBody(requestBody, httpRequestHeader.getContentType());
+    }
+
+    private HttpRequestHeader getHttpRequestHeader(BufferedReader br) throws IOException {
+        List<String> requestHeaderLines = new ArrayList<>();
+        String line;
+        while ((line = br.readLine()) != null && !line.equals("")) {
+            requestHeaderLines.add(line);
+        }
+        return HttpRequestHeader.toHttpRequestHeader(requestHeaderLines);
     }
 }

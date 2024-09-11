@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpHeader;
 import org.apache.coyote.http11.common.HttpMethod;
 
@@ -33,7 +34,7 @@ public class HttpRequest {
     }
 
     public String getSessionId() {
-        return headers.getSessionId().orElse("");
+        return headers.getSessionId().orElse(Constants.EMPTY_STRING);
     }
 
     public String getBody() {

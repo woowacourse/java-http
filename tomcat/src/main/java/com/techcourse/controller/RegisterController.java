@@ -32,7 +32,12 @@ public class RegisterController extends AbstractController {
     @Override
     public void doPost(HttpRequest httpRequest, HttpResponse response) {
         RegisterRequest registerRequest = RegisterRequest.of(httpRequest.getBody());
-        User user = new User(registerRequest.account(), registerRequest.password(), registerRequest.email());
+        String account = registerRequest.account();
+        String password = registerRequest.password();
+        String email = registerRequest.email();
+        log.info("회원가입 요청 -  id: {}, password: {}, email: {}", account, password, email);
+
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         response.sendRedirect("index.html");

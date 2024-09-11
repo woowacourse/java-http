@@ -1,8 +1,12 @@
 package cache.com.example;
 
+import java.io.IOException;
+
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +16,7 @@ public class GreetingController {
 
     @GetMapping("/")
     public String index() {
-        return "index";
+        return "index.html";
     }
 
     /**
@@ -25,12 +29,12 @@ public class GreetingController {
                 .cachePrivate()
                 .getHeaderValue();
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/etag")
     public String etag() {
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")

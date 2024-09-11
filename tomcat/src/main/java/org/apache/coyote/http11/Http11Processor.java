@@ -1,11 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -28,19 +31,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-            final var responseBody = "Hello world!";
+            HttpResponse httpResponse;
+            try {
+                httpResponse = ResponseGenerator.generate(httpRequest);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                String body = StaticResourceReader.read("/500.html");
+                httpResponse = HttpResponse.of(httpRequest.getVersion(), "500 INTERNATIONAL ERROR", ContentType.HTML.getContentType(), body);
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toHttpMessage().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

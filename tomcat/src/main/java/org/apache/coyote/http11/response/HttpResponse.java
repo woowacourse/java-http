@@ -10,6 +10,14 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String FILE_EXTENSION_DELIMITER = ".";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String LOCATION_HEADER = "Location";
     private static final String CRLF = "\r\n";
 
     private HttpStatusLine httpStatusLine;
@@ -17,7 +25,7 @@ public class HttpResponse {
     private String httpResponseBody;
 
     public HttpResponse() {
-        this.httpStatusLine = new HttpStatusLine("HTTP/1.1", HttpStatus.OK);
+        this.httpStatusLine = new HttpStatusLine(HTTP_VERSION, HttpStatus.OK);
         this.httpResponseHeader = new HttpResponseHeader();
         this.httpResponseBody = "";
     }
@@ -35,12 +43,12 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType contentType) {
-        this.httpResponseHeader.add("Content-Type", contentType.getContentType());
+        this.httpResponseHeader.add(CONTENT_TYPE_HEADER, contentType.getContentType());
     }
 
     public void setContentType(String fileExtension) {
         ContentType contentType = ContentType.findByFileExtension(fileExtension);
-        this.httpResponseHeader.add("Content-Type", contentType.getContentType());
+        this.httpResponseHeader.add(CONTENT_TYPE_HEADER, contentType.getContentType());
     }
 
     public void setHttpResponseBody(String resourceName) throws IOException {
@@ -52,14 +60,22 @@ public class HttpResponse {
     }
 
     private String getResponseBody(String resourceName) throws IOException {
-        if (!resourceName.endsWith(".html") && resourceName.lastIndexOf(".") == -1) {
-            resourceName += ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + resourceName);
+        String adjustedResourceName = adjustResourceExtension(resourceName);
+        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + adjustedResourceName);
         Path path = new File(resource.getPath()).toPath();
         byte[] bytes = Files.readAllBytes(path);
         return new String(bytes);
+    }
+
+    private String adjustResourceExtension(String resourceName) {
+        if (!hasFileExtension(resourceName)) {
+            resourceName += HTML_EXTENSION;
+        }
+        return resourceName;
+    }
+
+    private boolean hasFileExtension(String resourceName) {
+        return resourceName.contains(FILE_EXTENSION_DELIMITER);
     }
 
     public String toHttpResponse() {
@@ -73,10 +89,10 @@ public class HttpResponse {
         );
         httpResponse.append(responseStatusLine).append(CRLF);
 
-        appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.getSetCookieValue());
-        appendHeader(httpResponse, "Content-Type", this.httpResponseHeader.get("Content-Type"));
-        appendHeader(httpResponse, "Content-Length", String.valueOf(this.httpResponseBody.getBytes().length));
-        appendHeader(httpResponse, "Location", this.httpResponseHeader.get("Location"));
+        appendHeader(httpResponse, SET_COOKIE_HEADER, this.httpResponseHeader.getSetCookieValue());
+        appendHeader(httpResponse, CONTENT_TYPE_HEADER, this.httpResponseHeader.get(CONTENT_TYPE_HEADER));
+        appendHeader(httpResponse, CONTENT_LENGTH_HEADER, String.valueOf(this.httpResponseBody.getBytes().length));
+        appendHeader(httpResponse, LOCATION_HEADER, this.httpResponseHeader.get(LOCATION_HEADER));
 
         httpResponse.append(CRLF);
         httpResponse.append(this.httpResponseBody);

@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public ForwardResult execute(HttpRequest request, Manager manager) {
+    public ForwardResult execute(HttpRequest request, HttpResponse response) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -45,12 +45,5 @@ public class RegisterController extends AbstractController {
         }
 
         return result;
-    }
-
-    private HttpResponse redirectDefaultPage() {
-        ResponseHeader header = new ResponseHeader();
-        header.setLocation("/index.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 }

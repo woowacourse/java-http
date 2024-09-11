@@ -6,12 +6,15 @@ import org.apache.coyote.HttpVersion;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final ResponseHeader header;
-    private final ResponseBody body;
+    private StatusLine statusLine;
+    private ResponseHeader header;
+    private ResponseBody body;
 
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header) {
         this(statusCode, header, null);
+    }
+
+    public HttpResponse() {
     }
 
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header, byte[] body) {
@@ -19,6 +22,19 @@ public class HttpResponse {
         this.header = header;
         this.body = new ResponseBody(body);
         header.setContentLength(String.valueOf(this.body.getBodyLength()));
+    }
+
+    public void setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void setHeader(ResponseHeader header) {
+        this.header = header;
+    }
+
+    public void setBody(ResponseBody body) {
+        this.body = body;
+        this.header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
     public byte[] toByte() {
@@ -47,5 +63,9 @@ public class HttpResponse {
                 ", header=" + header +
                 ", body=" + body +
                 '}';
+    }
+
+    public void setStatus(HttpStatusCode httpStatusCode) {
+
     }
 }

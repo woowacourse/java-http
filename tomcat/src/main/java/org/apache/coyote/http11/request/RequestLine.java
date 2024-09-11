@@ -1,8 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Collections;
-import java.util.Map;
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.NameValuePairs;
 
 public record RequestLine(
         HttpMethod method,
@@ -26,7 +25,7 @@ public record RequestLine(
         return url().path();
     }
 
-    public Map<String, String> getQueryParameters() {
-        return Collections.unmodifiableMap(url().queryParameters());
+    public NameValuePairs getQueryParameters() {
+        return url().queryParameters();
     }
 }

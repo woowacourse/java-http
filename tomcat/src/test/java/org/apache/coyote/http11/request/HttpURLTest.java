@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class HttpURLTest {
         assertAll(
                 () -> assertThat(httpURL.fullUrl()).isEqualTo(url),
                 () -> assertThat(httpURL.path()).isEqualTo("/path/to/file"),
-                () -> assertThat(httpURL.queryParameters()).isEmpty()
+                () -> assertThat(httpURL.queryParameters().getAll()).isEmpty()
         );
     }
 
@@ -38,8 +38,8 @@ class HttpURLTest {
         assertAll(
                 () -> assertThat(httpURL.fullUrl()).isEqualTo(url),
                 () -> assertThat(httpURL.path()).isEqualTo("/path/to/file"),
-                () -> assertThat(httpURL.queryParameters()).containsEntry("query1", "1"),
-                () -> assertThat(httpURL.queryParameters()).containsEntry("query2", "2")
+                () -> assertThat(httpURL.queryParameters().get("query1")).hasValue("1"),
+                () -> assertThat(httpURL.queryParameters().get("query2")).hasValue("2")
         );
     }
 

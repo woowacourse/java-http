@@ -1,18 +1,17 @@
 package org.apache.coyote.http11.common;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.request.HeaderNameValuePairs;
 
 public record HttpHeader(Map<String, String> headers) {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String SET_COOKIE = "Set-Cookie";
-    private static final String COOKIE = "Cookie";
     private static final String JSESSIONID = "JSSESSIONID";
     private static final String HEADER_DELIMITER = ": ";
     private static final String MULTIPLE_HEADER_KEY_DELIMITER = ",";
@@ -24,10 +23,7 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public static HttpHeader from(String rawHeaders) {
-        HashMap<String, String> headers = Arrays.stream(rawHeaders.split(Constants.CRLF))
-                .map(line -> line.split(HEADER_DELIMITER, 2))
-                .filter(keyValue -> keyValue.length == 2)
-                .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
+        Map<String, String> headers = new HeaderNameValuePairs(rawHeaders).getAll();
         return new HttpHeader(headers);
     }
 
@@ -57,7 +53,7 @@ public record HttpHeader(Map<String, String> headers) {
 
     public void addSetCookie(String key, String value) {
         String newCookie = String.join(COOKIE_KEY_VALUE_DELIMITER, key, value);
-        headers.compute(COOKIE,
+        headers.compute(SET_COOKIE,
                 (k, prev) -> prev == null ? newCookie : String.join(MULTIPLE_COOKIE_DELIMITER, prev, newCookie));
     }
 

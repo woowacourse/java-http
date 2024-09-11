@@ -7,6 +7,8 @@ import org.apache.catalina.Cookie;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestControllerMapper;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;
 import org.apache.coyote.http11.response.Http11Response;
@@ -45,25 +47,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             Http11Request request = Http11Request.from(inputStream);
+            Http11Response response = new Http11Response(HttpStatusCode.OK, "", "");
             User user = checkUser(request);
 
             // 여기부터 response 만들기
-            Http11Response response = null;
             if (request.isStaticRequest()) {
                 response = getStaticResponse(request);
             }
 
             if (!request.isStaticRequest()) {
-                if (request.getUri().startsWith("/login")) {
-                    response = login(request);
+                Controller controller = RequestControllerMapper.getController(request.getUri());
+                if (controller == null) {
+                    return; // 404 Not Found
                 }
-                if (request.getUri().startsWith("/register")) {
-                    response = register(request);
+                try {
+                    controller.service(request, response);
+                } catch (Exception e) {
+                    return; // error while service
                 }
-            }
-
-            if (response == null) {
-                return;
             }
 
             outputStream.write(response.getBytes());
@@ -84,37 +85,6 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return user;
-    }
-
-    private Http11Response register(Http11Request request) {
-        Http11RequestBody requestBody = request.getRequestBody();
-        User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
-        InMemoryUserRepository.save(user);
-
-        return new Http11Response(HttpStatusCode.FOUND, "",
-                Http11ResponseHeaders.builder().
-                        addHeader("Location", "/index.html")
-                        .build());
-    }
-
-    private Http11Response login(Http11Request request) {
-        Map<String, String> queryParameters = request.getQueryParameters();
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
-        HttpStatusCode statusCode = HttpStatusCode.FOUND;
-        String redirectUri = "/401.html";
-
-        Http11Response response = new Http11Response(statusCode, "", Http11ResponseHeaders.instance());
-
-        User user;
-        if (optionalUser.isPresent() && (user = optionalUser.get()).checkPassword(queryParameters.get("password"))) {
-            Session session = Session.getInstance(user);
-            SessionManager.add(session);
-            response.addHeader("Set-Cookie", " JSESSIONID=" + session.getId());
-            redirectUri = "/index.html";
-        }
-
-        response.addHeader("Location", " " + redirectUri);
-        return response;
     }
 
     private Http11Response getStaticResponse(Http11Request request) throws IOException {

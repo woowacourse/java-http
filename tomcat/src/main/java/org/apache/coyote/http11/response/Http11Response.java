@@ -8,7 +8,7 @@ public class Http11Response {
 
     private final String responseBody;
     private final Http11ResponseHeaders headers;
-    private final HttpStatusCode statusCode;
+    private HttpStatusCode statusCode;
     private String firstLine = "";
 
     public Http11Response(HttpStatusCode httpStatusCode, String responseBody, Http11ResponseHeaders headers) {
@@ -42,5 +42,9 @@ public class Http11Response {
 
     public void addHeader(String key, String value) {
         headers.addHeader(key, value);
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 }

@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 
-public abstract class AbstractRequestHandler implements RequestHandler {
+public abstract class AbstractRequestController implements RequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {

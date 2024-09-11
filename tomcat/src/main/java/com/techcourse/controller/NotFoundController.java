@@ -5,9 +5,8 @@ import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.AbstractRequestHandler;
 
-public class NotFoundController extends AbstractRequestHandler {
+public class NotFoundController extends AbstractRequestController {
 
     private static final String NOT_FOUND_RESOURCE = "/404.html";
 

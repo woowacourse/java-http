@@ -1,12 +1,12 @@
 package org.apache.coyote;
 
+import com.techcourse.controller.AbstractRequestController;
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;
-import org.apache.coyote.http11.AbstractRequestHandler;
 import org.apache.coyote.http11.MimeType;
 
-public class StaticResourceRequestHandler extends AbstractRequestHandler {
+public class StaticResourceRequestController extends AbstractRequestController {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {

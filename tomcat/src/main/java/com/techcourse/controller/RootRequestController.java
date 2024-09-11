@@ -4,10 +4,9 @@ import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.AbstractRequestHandler;
 import org.apache.coyote.http11.MimeType;
 
-public class RootRequestController extends AbstractRequestHandler {
+public class RootRequestController extends AbstractRequestController {
 
     private static final String ROOT_RESOURCE = "Hello world!";
 

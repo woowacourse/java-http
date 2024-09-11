@@ -22,8 +22,9 @@ public class HttpReader {
         RequestLine requestLine = getRequestLine(firstLine);
         System.out.println(requestLine.getRequestUrl());
         HttpHeader headers = getHeaders(bufferedReader);
+        RequestBody requestBody = new RequestBody(readBody(bufferedReader, headers.getContentLength()));
 
-        return new HttpRequest(requestLine, headers);
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 
     private RequestLine getRequestLine(String firstLine) {
@@ -43,6 +44,13 @@ public class HttpReader {
             httpHeader.putHeader(split[0], split[1]);
         }
         return httpHeader;
+    }
+
+    public String readBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     public HttpRequest getHttpRequest() {

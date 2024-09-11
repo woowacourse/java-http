@@ -21,4 +21,12 @@ public class HttpHeader {
         headers.forEach((key, value) -> stringBuilder.append(String.format(RESPONSE_HEADER_FORMAT, key, value)));
         return stringBuilder.toString();
     }
+
+    public int getContentLength() {
+        String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength);
+    }
 }

@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = new HttpReader(inputStream).getHttpRequest();
             RequestLine requestLine = httpRequest.requestLine();
-
+            log.info(requestLine.getMethod());
             if (requestLine.isGet() && requestLine.isRoot()) {
                 responseRoot(outputStream, requestLine);
             }
@@ -53,11 +54,17 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine.isGet() && requestLine.has401()) {
                 response401(outputStream, requestLine);
             }
+            if (requestLine.isGet() && requestLine.hasRegister()) {
+                responseRegister(outputStream, requestLine);
+            }
+            if (requestLine.isPost() && requestLine.hasRegister()) {
+                responseRegisterPost(outputStream, httpRequest);
+            }
             if (requestLine.isGet() && requestLine.hasLogin() && !requestLine.hasQuestion()) {
                 responseLogin(outputStream, requestLine);
             }
-            if (requestLine.isGet() && requestLine.hasLogin() && requestLine.hasQuestion()) {
-                responseLoginUser(outputStream, requestLine);
+            if (requestLine.isPost() && requestLine.hasLogin()) {
+                responseLoginUser(outputStream, httpRequest);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -138,6 +145,37 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private void responseRegister(OutputStream outputStream, RequestLine requestLine) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestLine.getRequestUrl() + ".html");
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseRegisterPost(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        Map<String, String> body = httpRequest.requestBody().getBody();
+        User user = new User(body.get("account"), body.get("password"), body.get("email"));
+        InMemoryUserRepository.save(user);
+        HttpHeader httpHeader = new HttpHeader();
+        StatusLine statusLine = new StatusLine(httpRequest.requestLine().getProtocol(), "302", "Found");
+        httpHeader.putHeader("Location", "/index.html");
+        String response = String.join("\r\n",
+                statusLine.getStatusLine(),
+                httpHeader.getHttpHeader(),
+                "");
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
     private void responseLogin(OutputStream outputStream, RequestLine requestLine) throws IOException {
         URL url = getClass().getClassLoader().getResource("static/login.html");
 
@@ -154,24 +192,20 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseLoginUser(OutputStream outputStream, RequestLine requestLine) throws IOException {
-        int queryStartIndex = requestLine.getRequestUrl().indexOf("?");
-        String queryString = requestLine.getRequestUrl().substring(queryStartIndex + 1);
-        String[] pairs = queryString.split("&");
-        String[] keyValue = pairs[0].split("=");
-        String account = keyValue[1];
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+    private void responseLoginUser(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        Map<String, String> body = httpRequest.requestBody().getBody();
+        Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));
         HttpHeader httpHeader = new HttpHeader();
         String response;
         if (user.isPresent()) {
-            StatusLine statusLine = new StatusLine(requestLine.getProtocol(), "302", "Found");
+            StatusLine statusLine = new StatusLine(httpRequest.requestLine().getProtocol(), "302", "Found");
             httpHeader.putHeader("Location", "/index.html");
             response = String.join("\r\n",
                     statusLine.getStatusLine(),
                     httpHeader.getHttpHeader(),
                     "");
         } else {
-            StatusLine statusLine = new StatusLine(requestLine.getProtocol(), "302", "Found");
+            StatusLine statusLine = new StatusLine(httpRequest.requestLine().getProtocol(), "302", "Found");
             httpHeader.putHeader("Location", "/401.html");
             response = String.join("\r\n",
                     statusLine.getStatusLine(),

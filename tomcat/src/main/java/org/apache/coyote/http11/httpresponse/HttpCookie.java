@@ -20,7 +20,7 @@ public class HttpCookie {
         Map<String, String> cookies = new LinkedHashMap<>();
         for (String cookie : cookieHeaderLine.split("; ")) {
             String[] keyAndValue = cookie.split("=");
-            cookies.put(keyAndValue[0], keyAndValue[1]);
+            cookies.put(keyAndValue[0].trim(), keyAndValue[1].trim());
         }
         return cookies;
     }

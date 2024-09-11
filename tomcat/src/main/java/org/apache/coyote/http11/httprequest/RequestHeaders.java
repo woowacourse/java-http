@@ -22,7 +22,7 @@ public class RequestHeaders {
 
         for (String headerLine : headerLines) {
             String[] headerInfo = headerLine.split(HEADER_DELIMITER);
-            headers.put(headerInfo[0], headerInfo[1]);
+            headers.put(headerInfo[0].trim(), headerInfo[1].trim());
         }
 
         return headers;
@@ -33,10 +33,6 @@ public class RequestHeaders {
             return headers.get("Cookie").contains("JSESSIONID");
         }
         return false;
-    }
-
-    public boolean hasCookie() {
-        return headers.containsKey("Cookie");
     }
 
     public String getJSessionId() {

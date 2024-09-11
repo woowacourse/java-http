@@ -11,9 +11,8 @@ public class HttpBody implements HttpComponent {
 
     public HttpBody(final BufferedReader reader) throws IOException {
         final var body = new StringJoiner(LINE_FEED);
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            body.add(line);
+        while (reader.ready()) {
+            body.add(reader.readLine());
         }
         content = body.toString();
         length = content.getBytes().length;

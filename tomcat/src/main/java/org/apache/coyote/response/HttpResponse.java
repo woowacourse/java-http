@@ -11,6 +11,7 @@ public class HttpResponse {
 
     private static final FileReader FILE_READER = FileReader.getInstance();
 
+    private static final String UNAUTHORIZED_FILENAME = "401.html";
     private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CRLF = "\r\n";
     private static final String FILE_DOT = ".";
@@ -39,6 +40,14 @@ public class HttpResponse {
         }
 
         return new HttpResponse(httpStatusCode, FILE_READER.read(fileName), ContentType.fromFileName(fileName));
+    }
+
+    public static HttpResponse unauthorized() {
+        return new HttpResponse(
+                HttpStatusCode.UNAUTHORIZED,
+                FILE_READER.read(UNAUTHORIZED_FILENAME),
+                ContentType.TEXT_HTML
+        );
     }
 
     public static HttpResponse notFound() {

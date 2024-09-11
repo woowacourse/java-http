@@ -135,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
                     .setCookie(HttpCookie.ofSessionId(sessionId));
         }
 
-        return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED);
+        return HttpResponse.unauthorized();
     }
 
     private HttpResponse saveUser(HttpRequest request) {

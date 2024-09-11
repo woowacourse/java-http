@@ -16,6 +16,10 @@ import java.util.Map;
 public class HttpRequest {
 
     private static final String HEADER_SPLIT_DELIMITER = ": ";
+    private static final String STATIC = "static";
+    private static final String CSS = ".css";
+    private static final String JS = ".js";
+    private static final String HTML = ".html";
 
     private final HttpMethod method;
     private final String path;
@@ -81,19 +85,19 @@ public class HttpRequest {
 
     private String loadResourceName(String path) {
         if (path.equals("/")) {
-            return "static/index.html";
+            return STATIC + "/index.html";
         }
-        if (!path.endsWith(".html") && !path.contains(".")) {
-            return "static" + path + ".html";
+        if (!path.endsWith(HTML) && !path.contains(".")) {
+            return STATIC + path + ".html";
         }
-        return "static" + path;
+        return STATIC + path;
     }
 
     public String getContentType() {
-        if (path.endsWith(".css")) {
+        if (path.endsWith(CSS)) {
             return "text/css";
         }
-        if (path.endsWith(".js")) {
+        if (path.endsWith(JS)) {
             return "text/javascript";
         }
         return "text/html;charset=utf-8";

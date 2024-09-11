@@ -7,11 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,12 +30,6 @@ class StaticResourceControllerTest {
 
         HttpResponse httpResponse = controller.process(httpRequest);
 
-        URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(httpResponse.getResponse()).isEqualTo(expected);
+        assertThat(httpResponse.getLocation()).isEqualTo("/index.html");
     }
 }

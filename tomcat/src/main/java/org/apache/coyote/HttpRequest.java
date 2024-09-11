@@ -16,11 +16,9 @@ public interface HttpRequest {
 
     boolean existsSession();
 
-    boolean existsAccept();
-
     String getHeader(String header);
 
-    MimeType getAcceptMimeType();
+    MimeType getAcceptMimeType() throws NoSuchFieldException;
 
     Map<String, String> getParsedBody();
 

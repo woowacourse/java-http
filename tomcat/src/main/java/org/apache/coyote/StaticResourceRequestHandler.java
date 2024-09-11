@@ -20,9 +20,10 @@ public class StaticResourceRequestHandler implements RequestHandler {
     }
 
     private MimeType getContentType(HttpRequest httpRequest) {
-        if (!httpRequest.existsAccept()) {
+        try {
+            return httpRequest.getAcceptMimeType();
+        } catch (NoSuchFieldException e) {
             return MimeType.fromFileName(httpRequest.getRequestURI());
         }
-        return httpRequest.getAcceptMimeType();
     }
 }

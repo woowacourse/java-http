@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ public class Http11RequestBody {
 
     public Map<String, String> parseBody() {
         if (!exists()) {
-            throw new UncheckedServletException(new UnsupportedOperationException("Body 가 존재하지 않는 요청입니다."));
+            throw new UnsupportedOperationException("Body 가 존재하지 않는 요청입니다.");
         }
         Map<String, String> param = new HashMap<>();
         for (String query : value.split(ATTRIBUTE_DELIMITER)) {

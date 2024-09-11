@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaderName;
@@ -75,12 +73,8 @@ public class Http11RequestHeaders {
     }
 
     public String getFirstAcceptMimeType() {
-        try {
-            return Arrays.stream(getValue(HttpHeaderName.ACCEPT.getName()).split(ACCEPT_HEADER_DELIMITER))
-                    .toList()
-                    .getFirst();
-        } catch (NoSuchElementException e) {
-            throw new UncheckedServletException(e);
-        }
+        return Arrays.stream(getValue(HttpHeaderName.ACCEPT.getName()).split(ACCEPT_HEADER_DELIMITER))
+                .toList()
+                .getFirst();
     }
 }

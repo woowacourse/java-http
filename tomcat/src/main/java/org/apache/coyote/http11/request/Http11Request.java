@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
@@ -50,21 +49,16 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public boolean existsAccept() {
-        return headers.existsAccept();
-    }
-
-    @Override
     public String getHeader(String header) {
         return headers.getValue(header);
     }
 
     @Override
-    public MimeType getAcceptMimeType() {
-        if (existsAccept()) {
+    public MimeType getAcceptMimeType() throws NoSuchFieldException {
+        if (headers.existsAccept()) {
             return MimeType.from(headers.getFirstAcceptMimeType());
         }
-        throw new UncheckedServletException(new IllegalArgumentException("요청에 Accept 헤더가 존재하지 않습니다."));
+        throw new NoSuchFieldException("요청에 Accept 헤더가 존재하지 않습니다.");
     }
 
     @Override

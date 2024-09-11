@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 
 public enum MimeType {
@@ -22,15 +21,14 @@ public enum MimeType {
         return Arrays.stream(values())
                 .filter(mimeType -> mimeType.value.equals(name))
                 .findAny()
-                .orElseThrow(
-                        () -> new UncheckedServletException(new IllegalArgumentException("유효한 Mime Type 이 아닙니다.")));
+                .orElseThrow(() -> new IllegalArgumentException("유효한 Mime Type 이 아닙니다."));
     }
 
     public static MimeType fromFileName(String fileName) {
         return Arrays.stream(values())
                 .filter(mimeType -> mimeType.name().equalsIgnoreCase(extractExtension(fileName)))
                 .findAny()
-                .orElseThrow(() -> new UncheckedServletException(new IllegalArgumentException("유효한 파일 확장자가 아닙니다.")));
+                .orElseThrow(() -> new IllegalArgumentException("유효한 파일 확장자가 아닙니다."));
     }
 
     private static String extractExtension(String fileName) {

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
@@ -33,13 +32,13 @@ public class Http11RequestLine {
 
     private void validate(String[] seperatedLine) {
         if (seperatedLine.length != REQUEST_LINE_LENGTH) {
-            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP RequestLine이 아닙니다."));
+            throw new IllegalArgumentException("유효한 HTTP RequestLine이 아닙니다.");
         }
     }
 
     private void validateProtocol(String versionOfProtocol) {
         if (!VERSION_OF_PROTOCOL.equals(versionOfProtocol)) {
-            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP 프로토콜 형식이 아닙니다."));
+            throw new IllegalArgumentException("유효한 HTTP 프로토콜 형식이 아닙니다.");
         }
     }
 
@@ -62,7 +61,7 @@ public class Http11RequestLine {
 
     public Map<String, String> getQueryParam() {
         if (!existsQueryString()) {
-            throw new UncheckedServletException(new UnsupportedOperationException("QueryString 이 존재하지 않는 요청입니다."));
+            throw new UnsupportedOperationException("QueryString 이 존재하지 않는 요청입니다.");
         }
         Map<String, String> queryParam = new HashMap<>();
         int index = getURI().indexOf(QUERY_STRING_DELIMITER);

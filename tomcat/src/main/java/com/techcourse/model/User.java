@@ -2,7 +2,7 @@ package com.techcourse.model;
 
 public class User {
 
-    private final Long id;
+    private Long id;
     private final String account;
     private final String password;
     private final String email;
@@ -24,6 +24,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override

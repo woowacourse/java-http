@@ -12,7 +12,7 @@ public class InputReader {
     private final BufferedReader reader;
 
     public InputReader(InputStream inputStream) {
-        this.reader =  new BufferedReader(new InputStreamReader(inputStream));
+        this.reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     public String readRequestLine() throws IOException {

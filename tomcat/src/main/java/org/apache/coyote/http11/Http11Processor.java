@@ -2,13 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.ControllerMapper;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -35,25 +38,37 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(inputReader);
 
             Controller controller = ControllerMapper.map(request.getPath());
-            String viewName = controller.process(request.getUri());
+            HttpResponse response = controller.process(request);
+            setResponse(request, response);
 
-            String responseBody = FileReader.read("static" + viewName);
-            String contentType = Files.probeContentType(Path.of("static" + viewName));
-            String response = createResponse(contentType, responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponse(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private void setResponse(HttpRequest request, HttpResponse response) throws IOException {
+        String location = getLocation(request, response);
+        String contentType = FileReader.probeContentType(location);
+        response.setContentType(contentType);
+
+        String responseBody = FileReader.read(location);
+        response.setContentLength(responseBody.getBytes().length);
+        response.setBody(responseBody);
+    }
+
+    private String getLocation(HttpRequest request, HttpResponse response) {
+        if (response.hasLocation()) {
+            return response.getLocation();
+        }
+        String path = request.getPath();
+        if ("/".equals(path)) {
+            return Constants.DEFAULT_URI;
+        }
+        if (!path.contains(".")) {
+            return path + Constants.EXTENSION_OF_HTML;
+        }
+        return path;
     }
 }

@@ -9,12 +9,17 @@ import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
 import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.StaticResourceHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FrontController implements Controller {
 
+    private static FrontController instance;
+
+    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
     private final Map<String, Controller> controllers;
 
-    public FrontController() {
+    private FrontController() {
         controllers = new ConcurrentHashMap<>();
         controllers.put("/", new RootController());
         controllers.put("/login", new LoginController());
@@ -22,8 +27,18 @@ public class FrontController implements Controller {
         controllers.put("static", new StaticResourceController());
     }
 
+    public static FrontController getInstance() {
+        if (instance == null) {
+            instance = new FrontController();
+        }
+        return instance;
+    }
+
     @Override
     public HttpResponse handle(final HttpRequest request) {
+        if (request == null) {
+            return notFound();
+        }
         String path = request.getPath();
         Controller controller;
         if (controllers.containsKey(path)) {

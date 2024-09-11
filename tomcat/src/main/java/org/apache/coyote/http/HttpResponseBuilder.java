@@ -1,8 +1,5 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.http.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.coyote.http.HttpHeaders.CONTENT_TYPE;
-
 public class HttpResponseBuilder {
 
     private HttpStatusLine statusLine;
@@ -19,22 +16,24 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder contentType(final String contentType) {
-        headers.put(CONTENT_TYPE, contentType);
+        headers.setContentType(contentType);
+        return this;
+    }
+
+    public HttpResponseBuilder location(final String location) {
+        headers.setLocation(location);
         return this;
     }
 
     public HttpResponseBuilder body(final HttpBody body) {
         this.body = body;
-        headers.put(CONTENT_LENGTH, String.valueOf(body.getLength()));
+        headers.setContentLength(body.getLength());
         return this;
     }
 
     public HttpResponse build() {
         if (statusLine == null) {
-            throw new IllegalStateException("statusLine not set");
-        }
-        if (headers == null) {
-            headers = new HttpHeaders();
+            throw new IllegalStateException("StatusLine not set");
         }
         return new HttpResponse(statusLine, headers, body);
     }

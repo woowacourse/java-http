@@ -12,6 +12,7 @@ import org.apache.coyote.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.controller.Controller;
 import com.techcourse.controller.FrontController;
 import com.techcourse.exception.UncheckedServletException;
 
@@ -20,6 +21,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Controller controller = FrontController.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -37,8 +39,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final var input = input(inputStream);
             final var request = new HttpRequest(input);
-            final var controller = new FrontController();
+            log.info("request: \n{}", request.asString());
             final var response = controller.handle(request);
+            log.info("response: \n{}", response.asString());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

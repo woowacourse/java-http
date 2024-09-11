@@ -12,7 +12,8 @@ public class HttpRequest implements HttpComponent {
     public HttpRequest(final String httpRequest) throws IOException {
         this.requestLine = new HttpRequestLine(httpRequest);
         this.headers = new HttpHeaders(httpRequest);
-        this.body = new HttpBody(httpRequest);
+        String[] parts = httpRequest.split("\r\n\r\n", 2);
+        this.body = new HttpBody(parts[1]);
     }
 
     public HttpMethod getMethod() {

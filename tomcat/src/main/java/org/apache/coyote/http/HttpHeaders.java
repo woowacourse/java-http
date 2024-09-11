@@ -13,6 +13,7 @@ public class HttpHeaders implements HttpComponent {
     public static final String ACCEPT = "Accept";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String LOCATION = "Location";
 
     private final Map<String, String> headers;
 
@@ -38,8 +39,16 @@ public class HttpHeaders implements HttpComponent {
         return null;
     }
 
-    public void put(final String name, final String value) {
-        headers.put(name, value);
+    public void setContentType(final String contentType) {
+        headers.put(CONTENT_TYPE, contentType);
+    }
+
+    public void setContentLength(final int contentLength) {
+        headers.put(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setLocation(final String location) {
+        headers.put(LOCATION, location);
     }
 
     @Override

@@ -10,8 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.SessionIdGenerator;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
@@ -44,12 +44,12 @@ public class Http11Request implements HttpRequest {
         this.session = session;
     }
 
-    public static Http11Request from(InputStream inputStream) throws IOException {
+    public static Http11Request of(InputStream inputStream, SessionIdGenerator generator) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         Http11RequestStartLine startLine = Http11RequestStartLine.from(bufferedReader.readLine());
         Http11RequestHeader httpHeaders = Http11RequestHeader.from(createHttpHeaderMap(bufferedReader));
-        Session session = getOrCreateSession(httpHeaders);
+        Session session = getOrCreateSession(httpHeaders, generator);
 
         if (startLine.getMethod().hasBody()) {
             HttpRequestBody body = HttpRequestBody.create(createBody(bufferedReader, httpHeaders.getContentLength()));
@@ -58,22 +58,22 @@ public class Http11Request implements HttpRequest {
         return new Http11Request(startLine, httpHeaders, session);
     }
 
-    private static Session getOrCreateSession(Http11RequestHeader httpHeaders) {
+    private static Session getOrCreateSession(Http11RequestHeader httpHeaders, SessionIdGenerator generator) {
         return httpHeaders.getCookieValue(Session.SESSION_COOKIE_KEY)
-                .map(Http11Request::getOrCreateSession)
-                .orElseGet(Http11Request::createSession);
+                .map(sessionId -> getOrCreateSession(sessionId, generator))
+                .orElseGet(() -> createSession(generator));
     }
 
-    private static Session getOrCreateSession(String sessionId) {
+    private static Session getOrCreateSession(String sessionId, SessionIdGenerator generator) {
         try {
             return sessionManager.findSession(sessionId);
         } catch (IllegalArgumentException e) {
-            return createSession();
+            return createSession(generator);
         }
     }
 
-    private static Session createSession() {
-        Session session = new Session(UUID.randomUUID().toString());
+    private static Session createSession(SessionIdGenerator generator) {
+        Session session = new Session(generator.generate());
         sessionManager.add(session);
         return session;
     }

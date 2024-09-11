@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class QueryStrings {
 
-    private static final String QUERY_STRING_REGEX = "^([a-zA-Z0-9%._-]+=[a-zA-Z0-9%._-]+)(&([a-zA-Z0-9%._-]+=[a-zA-Z0-9%._-]+))*$";
+    private static final String QUERY_STRING_REGEX = "^([a-zA-Z0-9%._-]+=[a-zA-Z0-9@%._-]+)(&([a-zA-Z0-9%._-]+=[a-zA-Z0-9@%._-]+))*$";
     private static final Pattern QUERY_STRING_PATTERN = Pattern.compile(QUERY_STRING_REGEX);
     private static final String PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";

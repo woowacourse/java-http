@@ -15,7 +15,10 @@ class HttpResponseTest {
     @Test
     void writeTest() {
         String content = "TOMCAT JAZZ";
-        ResponseHeaders responseHeaders = ResponseHeaders.of(ContentType.HTML, content);
+
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.addContentHeaders(ContentType.HTML, content);
+
         ResponseBody responseBody = new ResponseBody(content);
         HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, responseHeaders, responseBody);
 

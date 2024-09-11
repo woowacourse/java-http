@@ -10,8 +10,8 @@ public class ResponseBody {
         this.responseBody = responseBody;
     }
 
-    public static ResponseBody empty() {
-        return new ResponseBody(EMPTY_BODY);
+    public ResponseBody() {
+        this.responseBody = EMPTY_BODY;
     }
 
     public String write() {

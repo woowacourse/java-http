@@ -17,17 +17,9 @@ public class ResponseHeaders {
         this.headers = new LinkedHashMap<>();
     }
 
-    public static ResponseHeaders of(ContentType contentType, String body) {
-        LinkedHashMap<HttpHeader, String> headers = new LinkedHashMap<>();
+    public void addContentHeaders(ContentType contentType, String body) {
         headers.put(HttpHeader.CONTENT_TYPE, contentType.value());
         headers.put(HttpHeader.CONTENT_LENGTH, Integer.toString(body.getBytes(StandardCharsets.UTF_8).length));
-        return new ResponseHeaders(headers);
-    }
-
-    public static ResponseHeaders of(HttpHeader header, String value) {
-        LinkedHashMap<HttpHeader, String> headers = new LinkedHashMap<>();
-        headers.put(header, value);
-        return new ResponseHeaders(headers);
     }
 
     public void addHeader(HttpHeader name, String value) {

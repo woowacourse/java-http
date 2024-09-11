@@ -27,9 +27,8 @@ public class RegisterController extends AbstractController {
         redirectTo(response, "/index.html");
     }
 
-    private void redirectTo(HttpResponse response, String location) throws IOException {
-        response.addStatusLine("HTTP/1.1 302 Found");
-        response.addHeader("Location", "http://localhost:8080" + location);
-        response.writeResponse();
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        serveStaticFile(request, response);
     }
 }

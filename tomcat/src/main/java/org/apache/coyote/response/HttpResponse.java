@@ -58,15 +58,13 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        return this.build().getBytes();
-    }
-
-    private String build() {
-        return String.join(CRLF,
+        String rawResponse = String.join(CRLF,
                 HTTP_1_1 + " " + httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),
                 EMPTY_LINE,
                 responseBody
         );
+
+        return rawResponse.getBytes();
     }
 }

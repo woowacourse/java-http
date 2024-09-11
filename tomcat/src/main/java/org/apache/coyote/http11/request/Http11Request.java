@@ -33,6 +33,16 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
+    public boolean isGet() {
+        return requestLine.getMethod().isGet();
+    }
+
+    @Override
+    public boolean isPost() {
+        return requestLine.getMethod().isPost();
+    }
+
+    @Override
     public String getRequestURI() {
         return requestLine.getURI();
     }

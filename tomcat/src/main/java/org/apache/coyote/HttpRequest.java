@@ -11,6 +11,10 @@ public interface HttpRequest {
 
     HttpMethod getMethod();
 
+    boolean isGet();
+
+    boolean isPost();
+
     String getPath();
 
     boolean existsSession();

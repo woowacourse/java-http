@@ -23,12 +23,12 @@ public enum HttpMethod {
         }
     }
 
-    public static boolean isGet(HttpMethod method) {
-        return GET == method;
+    public boolean isGet() {
+        return this == GET;
     }
 
 
-    public static boolean isPost(HttpMethod method) {
-        return POST == method;
+    public boolean isPost() {
+        return this == POST;
     }
 }

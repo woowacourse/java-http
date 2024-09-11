@@ -3,16 +3,15 @@ package org.apache.coyote.handler;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.HttpMethod;
 
 public abstract class AbstractRequestHandler implements RequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (HttpMethod.isGet(httpRequest.getMethod())) {
+        if (httpRequest.isGet()) {
             get(httpRequest, httpResponse);
         }
-        if (HttpMethod.isPost(httpRequest.getMethod())) {
+        if (httpRequest.isPost()) {
             post(httpRequest, httpResponse);
         }
     }

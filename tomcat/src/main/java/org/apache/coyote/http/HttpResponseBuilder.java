@@ -5,7 +5,7 @@ public class HttpResponseBuilder {
     private HttpStatusLine statusLine;
 
     private final HttpHeaders headers;
-    
+
     private HttpBody body;
 
     HttpResponseBuilder() {
@@ -24,6 +24,11 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder location(final String location) {
         headers.setLocation(location);
+        return this;
+    }
+
+    public HttpResponseBuilder setCookie(final Cookie cookie) {
+        headers.setCookie(cookie);
         return this;
     }
 

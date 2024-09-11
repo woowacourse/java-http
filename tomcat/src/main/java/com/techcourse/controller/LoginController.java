@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.apache.coyote.http.MediaType.TEXT_HTML;
 
+import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.HttpBody;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpQueryParams;
@@ -53,6 +54,7 @@ public class LoginController implements Controller {
             return HttpResponse.builder()
                     .statusLine(statusLine)
                     .contentType(TEXT_HTML.defaultCharset())
+                    .setCookie(new Cookie(Cookie.JSESSIONID, "656cef62-e3c4-40bc-a8df-94732920ed46"))
                     .location("/index.html");
         }
         HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.UNAUTHORIZED);

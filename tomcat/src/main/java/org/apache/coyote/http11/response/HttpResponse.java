@@ -44,10 +44,10 @@ public class HttpResponse {
         responseHeaders.addHeader(HttpHeader.SET_COOKIE, cookies.toCookieHeader());
     }
 
-    public String write() {
+    public String toMessage() {
         return String.join("\r\n",
-                statusLine.write(),
-                responseHeaders.write(),
-                responseBody.write());
+                statusLine.toMessage(),
+                responseHeaders.toMessage(),
+                responseBody.toMessage());
     }
 }

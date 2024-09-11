@@ -26,7 +26,7 @@ public class ResponseHeaders {
         headers.put(name, value);
     }
 
-    public String write() {
+    public String toMessage() {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<HttpHeader, String> entry : headers.entrySet()) {
             builder.append(entry.getKey().getName())

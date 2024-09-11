@@ -13,7 +13,7 @@ class HttpResponseTest {
 
     @DisplayName("응답 메시지를 작성한다.")
     @Test
-    void writeTest() {
+    void toMessageTest() {
         String content = "TOMCAT JAZZ";
 
         ResponseHeaders responseHeaders = new ResponseHeaders();
@@ -30,7 +30,7 @@ class HttpResponseTest {
                 "TOMCAT JAZZ"
         );
 
-        assertThat(httpResponse.write()).isEqualTo(expected);
+        assertThat(httpResponse.toMessage()).isEqualTo(expected);
     }
 
 }

@@ -14,7 +14,7 @@ public class ResponseBody {
         this.responseBody = EMPTY_BODY;
     }
 
-    public String write() {
+    public String toMessage() {
         return responseBody;
     }
 }

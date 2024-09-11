@@ -8,6 +8,7 @@ import org.apache.catalina.exception.CatalinaException;
 
 public class RequestURI {
 
+    public static final String HTML_EXTENSION = ".html";
     private final String value;
 
     public RequestURI(String value) {
@@ -34,7 +35,7 @@ public class RequestURI {
     private URL getResource() {
         String path = value;
         if (!path.contains(".")) {
-            path = path + ".html";
+            path = path + HTML_EXTENSION;
         }
 
         return getClass().getClassLoader().getResource("static" + path);

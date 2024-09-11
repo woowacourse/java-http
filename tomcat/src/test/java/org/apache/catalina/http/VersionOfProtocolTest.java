@@ -1,4 +1,4 @@
-package org.apache.catalina.request;
+package org.apache.catalina.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

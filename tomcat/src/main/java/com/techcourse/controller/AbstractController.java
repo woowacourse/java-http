@@ -6,7 +6,7 @@ import org.apache.coyote.http11.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
+    public void requestMapping(HttpRequest request, HttpResponse httpResponse) {
     }
 
     protected void doPost(HttpRequest request, HttpResponse httpResponse) {

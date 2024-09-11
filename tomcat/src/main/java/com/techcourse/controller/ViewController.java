@@ -16,7 +16,7 @@ import org.apache.coyote.util.HttpResponseBuilder;
 public final class ViewController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
+    public void requestMapping(HttpRequest request, HttpResponse httpResponse) {
         if (request.getMethod() == HttpMethod.GET) {
             doGet(request, httpResponse);
             return;

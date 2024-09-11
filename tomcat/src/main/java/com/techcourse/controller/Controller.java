@@ -5,5 +5,5 @@ import org.apache.coyote.http11.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse httpResponse);
+    void requestMapping(HttpRequest request, HttpResponse httpResponse);
 }

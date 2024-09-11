@@ -14,7 +14,7 @@ import org.apache.coyote.util.HttpResponseBuilder;
 public final class MemberController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
+    public void requestMapping(HttpRequest request, HttpResponse httpResponse) {
 
         if (request.getMethod() == HttpMethod.GET) {
             doGet(request, httpResponse);
@@ -27,16 +27,16 @@ public final class MemberController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse httpResponse) {
-        if (request.getUri().equals("/login")) {
-            login(request, httpResponse);
+        if (request.getUri().equals("/loginService")) {
+            loginService(request, httpResponse);
             return;
         }
-        if (request.getUri().equals("/register")) {
-            register(request, httpResponse);
+        if (request.getUri().equals("/registerService")) {
+            registerService(request, httpResponse);
         }
     }
 
-    private void login(HttpRequest request, HttpResponse httpResponse) {
+    private void loginService(HttpRequest request, HttpResponse httpResponse) {
         String account = request.getParams("account");
         String password = request.getParams("password");
 
@@ -50,7 +50,7 @@ public final class MemberController extends AbstractController {
         HttpResponseBuilder.setRedirection(httpResponse, "/401.html");
     }
 
-    private void register(HttpRequest request, HttpResponse httpResponse) {
+    private void registerService(HttpRequest request, HttpResponse httpResponse) {
         String account = request.getParams("account");
         String password = request.getParams("password");
         String email = request.getParams("email");

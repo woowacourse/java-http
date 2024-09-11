@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
@@ -38,7 +39,7 @@ public class LoginController extends AbstractController {
         String password = httpRequest.getBodyValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 계정입니다"));
         if (user.checkPassword(password)) {
             return redirectWithCookie(httpRequest, user);
         }

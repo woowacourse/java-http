@@ -1,6 +1,9 @@
 package org.apache.coyote.http;
 
-public enum HttpVersion {
+import java.util.Arrays;
+import java.util.Objects;
+
+public enum HttpVersion implements HttpComponent {
 
     HTTP11("HTTP/1.1"),
     ;
@@ -12,10 +15,14 @@ public enum HttpVersion {
     }
 
     public static HttpVersion from(String value) {
-        return valueOf(value.toUpperCase());
+        return Arrays.stream(values())
+                .filter(httpVersion -> Objects.equals(httpVersion.value, value))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 
-    public String value() {
+    @Override
+    public String asString() {
         return value;
     }
 }

@@ -2,7 +2,7 @@ package org.apache.coyote.http;
 
 import java.util.Arrays;
 
-public enum HttpStatusCode {
+public enum HttpStatusCode implements HttpComponent {
 
     OK(200, "OK"),
     CREATED(201, "Created"),
@@ -10,11 +10,11 @@ public enum HttpStatusCode {
     UNAUTHORIZED(401, "UNAUTHORIZED"),
     ;
 
-    private final int value;
+    private final int code;
     private final String reasonPhrase;
 
-    HttpStatusCode(int value, String reasonPhrase) {
-        this.value = value;
+    HttpStatusCode(int code, String reasonPhrase) {
+        this.code = code;
         this.reasonPhrase = reasonPhrase;
     }
 
@@ -25,11 +25,12 @@ public enum HttpStatusCode {
                 .orElseThrow(() -> new InvalidFormatException(valueAndReasonPhrase));
     }
 
-    public int value() {
-        return value;
+    public int code() {
+        return code;
     }
 
+    @Override
     public String asString() {
-        return value + " " + reasonPhrase;
+        return code + " " + reasonPhrase;
     }
 }

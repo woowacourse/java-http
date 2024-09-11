@@ -1,12 +1,10 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.http.HttpRequest.LINE_FEED;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.StringJoiner;
 
-public class HttpBody {
+public class HttpBody implements HttpComponent {
 
     private final String content;
     private final int length;
@@ -34,6 +32,7 @@ public class HttpBody {
         return length;
     }
 
+    @Override
     public String asString() {
         return getContent();
     }

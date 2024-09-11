@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpHeaders {
+public class HttpHeaders implements HttpComponent {
 
     private static final int NAME_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -51,14 +51,16 @@ public class HttpHeaders {
         headers.put(name, value);
     }
 
+    @Override
     public String asString() {
         final var result = new StringBuilder();
         for (String key : headers.keySet()) {
             String value = headers.get(key);
             result.append(key)
-                    .append(": ")
+                    .append(SEPARATOR)
                     .append(value)
-                    .append(" \r\n");
+                    .append(SPACE)
+                    .append(LINE_FEED);
         }
         return result.toString();
     }

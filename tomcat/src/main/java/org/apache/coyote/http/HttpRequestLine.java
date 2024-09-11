@@ -3,9 +3,7 @@ package org.apache.coyote.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class HttpRequestLine {
-
-    private static final String SEPARATOR = " ";
+public class HttpRequestLine implements HttpComponent {
 
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
@@ -17,7 +15,7 @@ public class HttpRequestLine {
 
     public HttpRequestLine(final BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
-        String[] split = requestLine.split(SEPARATOR);
+        String[] split = requestLine.split(SPACE);
         this.method = HttpMethod.from(split[METHOD_INDEX]);
         this.requestUri = new HttpRequestUri(split[REQUEST_URI_INDEX]);
         this.version = HttpVersion.from(split[VERSION_INDEX]);
@@ -47,7 +45,8 @@ public class HttpRequestLine {
         return version;
     }
 
+    @Override
     public String asString() {
-        return method + SEPARATOR + requestUri + SEPARATOR + version;
+        return method + SPACE + requestUri + SPACE + version + SPACE;
     }
 }

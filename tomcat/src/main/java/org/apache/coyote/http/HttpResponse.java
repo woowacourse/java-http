@@ -2,7 +2,7 @@ package org.apache.coyote.http;
 
 import java.util.StringJoiner;
 
-public class HttpResponse {
+public class HttpResponse implements HttpComponent {
 
     private final HttpStatusLine statusLine;
     private final HttpHeaders headers;
@@ -39,11 +39,12 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        return toString().getBytes();
+        return asString().getBytes();
     }
 
+    @Override
     public String asString() {
-        final var result = new StringJoiner("\r\n");
+        final var result = new StringJoiner(LINE_FEED);
         result.add(statusLine.asString())
                 .add(headers.asString())
                 .add(body.asString());

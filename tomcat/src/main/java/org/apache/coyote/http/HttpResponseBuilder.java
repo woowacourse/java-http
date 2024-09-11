@@ -1,5 +1,8 @@
 package org.apache.coyote.http;
 
+import static org.apache.coyote.http.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http.HttpHeaders.CONTENT_TYPE;
+
 public class HttpResponseBuilder {
 
     private HttpStatusLine statusLine;
@@ -28,13 +31,13 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder contentType(final String contentType) {
-        headers.put("Content-Type", contentType);
+        headers.put(CONTENT_TYPE, contentType);
         return this;
     }
 
     public HttpResponseBuilder body(final HttpBody body) {
         this.body = body;
-        headers.put("Content-Length", String.valueOf(body.getLength()));
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getLength()));
         return this;
     }
 

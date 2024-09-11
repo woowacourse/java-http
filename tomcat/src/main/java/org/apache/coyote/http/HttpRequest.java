@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringJoiner;
 
-public class HttpRequest {
-
-    static final String LINE_FEED = "\r\n";
+public class HttpRequest implements HttpComponent {
 
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
@@ -47,7 +45,7 @@ public class HttpRequest {
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         final var result = new StringJoiner(LINE_FEED);
         return result.add(requestLine.asString())
                 .add(headers.asString())

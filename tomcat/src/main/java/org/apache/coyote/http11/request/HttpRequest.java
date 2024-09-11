@@ -4,12 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
@@ -53,7 +53,7 @@ public class HttpRequest {
     private HttpRequestBody parseHttpRequestBody(BufferedReader bufferedReader) throws IOException {
         HttpRequestBody httpRequestBody = new HttpRequestBody();
 
-        String contentLengthValue = httpRequestHeader.findBy(CONTENT_LENGTH);
+        String contentLengthValue = httpRequestHeader.findBy(HttpHeader.CONTENT_LENGTH);
         if (contentLengthValue == null) {
             return httpRequestBody;
         }

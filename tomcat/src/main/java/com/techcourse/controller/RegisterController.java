@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -28,7 +29,7 @@ public class RegisterController extends AbstractController {
                 request.findRequestBodyBy("email")
         ));
         log.info("savedUser = {}", InMemoryUserRepository.findByAccount(request.findRequestBodyBy("account")));
-        response.addHttpResponseHeader("Location", "/index.html");
+        response.addHttpResponseHeader(HttpHeader.LOCATION, "/index.html");
         response.setHttpStatus(HttpStatus.FOUND);
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpResponseBody(request.getUrlPath());

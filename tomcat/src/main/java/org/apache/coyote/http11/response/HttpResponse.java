@@ -6,18 +6,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
-    private static final String HTML_EXTENSION = ".html";
     private static final String FILE_EXTENSION_DELIMITER = ".";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String LOCATION_HEADER = "Location";
     private static final String CRLF = "\r\n";
 
     private HttpStatusLine httpStatusLine;
@@ -43,12 +39,12 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType contentType) {
-        this.httpResponseHeader.add(CONTENT_TYPE_HEADER, contentType.getContentType());
+        this.httpResponseHeader.add(HttpHeader.CONTENT_TYPE, contentType.getContentType());
     }
 
     public void setContentType(String fileExtension) {
         ContentType contentType = ContentType.findByFileExtension(fileExtension);
-        this.httpResponseHeader.add(CONTENT_TYPE_HEADER, contentType.getContentType());
+        this.httpResponseHeader.add(HttpHeader.CONTENT_TYPE, contentType.getContentType());
     }
 
     public void setHttpResponseBody(String resourceName) throws IOException {
@@ -69,7 +65,7 @@ public class HttpResponse {
 
     private String adjustResourceExtension(String resourceName) {
         if (!hasFileExtension(resourceName)) {
-            resourceName += HTML_EXTENSION;
+            resourceName = resourceName + FILE_EXTENSION_DELIMITER + ContentType.TEXT_HTML.getFileExtension();
         }
         return resourceName;
     }
@@ -89,10 +85,10 @@ public class HttpResponse {
         );
         httpResponse.append(responseStatusLine).append(CRLF);
 
-        appendHeader(httpResponse, SET_COOKIE_HEADER, this.httpResponseHeader.getSetCookieValue());
-        appendHeader(httpResponse, CONTENT_TYPE_HEADER, this.httpResponseHeader.get(CONTENT_TYPE_HEADER));
-        appendHeader(httpResponse, CONTENT_LENGTH_HEADER, String.valueOf(this.httpResponseBody.getBytes().length));
-        appendHeader(httpResponse, LOCATION_HEADER, this.httpResponseHeader.get(LOCATION_HEADER));
+        appendHeader(httpResponse, HttpHeader.SET_COOKIE, this.httpResponseHeader.getSetCookieValue());
+        appendHeader(httpResponse, HttpHeader.CONTENT_TYPE, this.httpResponseHeader.get(HttpHeader.CONTENT_TYPE));
+        appendHeader(httpResponse, HttpHeader.CONTENT_LENGTH, String.valueOf(this.httpResponseBody.getBytes().length));
+        appendHeader(httpResponse, HttpHeader.LOCATION, this.httpResponseHeader.get(HttpHeader.LOCATION));
 
         httpResponse.append(CRLF);
         httpResponse.append(this.httpResponseBody);

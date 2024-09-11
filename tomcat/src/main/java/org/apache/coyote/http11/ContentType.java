@@ -26,6 +26,10 @@ public enum ContentType {
         return contentType;
     }
 
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
     public static ContentType findByFileExtension(String fileExtension) {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> fileExtension.equals(contentType.fileExtension))

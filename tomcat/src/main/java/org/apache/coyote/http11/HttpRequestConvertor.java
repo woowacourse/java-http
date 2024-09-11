@@ -20,14 +20,11 @@ public class HttpRequestConvertor {
         }
 
         HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
-
         Map<String, String> headers = getHeaders(bufferedReader);
-
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
         if (httpRequestHeader.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
-
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
         }
 

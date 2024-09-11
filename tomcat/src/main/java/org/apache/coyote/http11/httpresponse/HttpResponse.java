@@ -14,6 +14,7 @@ import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class HttpResponse {
 
+    private static final String RESPONSE_DELIMITER = "\r\n";
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeader httpResponseHeader;
     private final HttpResponseBody httpResponseBody;
@@ -28,16 +29,16 @@ public class HttpResponse {
         this.httpResponseBody = httpResponseBody;
     }
 
-    public static Builder ok(HttpRequest httpRequest) {
-        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK));
+    public static HttpResponseBuilder ok(HttpRequest httpRequest) {
+        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK));
     }
 
-    public static Builder found(HttpRequest httpRequest) {
-        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND));
+    public static HttpResponseBuilder found(HttpRequest httpRequest) {
+        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND));
     }
 
-    public static Builder unauthorized(HttpRequest httpRequest) {
-        return new Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED));
+    public static HttpResponseBuilder unauthorized(HttpRequest httpRequest) {
+        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED));
     }
 
     public byte[] getBytes() {
@@ -47,13 +48,13 @@ public class HttpResponse {
 
         if (httpResponseBody != null) {
             String responseBody = httpResponseBody.getBody();
-            String join = String.join("\r\n",
+            String join = String.join(RESPONSE_DELIMITER,
                     statusLine,
                     responseHeader,
                     responseBody);
             return join.getBytes();
         }
-        String join = String.join("\r\n",
+        String join = String.join(RESPONSE_DELIMITER,
                 statusLine,
                 responseHeader);
         return join.getBytes();
@@ -71,37 +72,37 @@ public class HttpResponse {
         return httpResponseBody;
     }
 
-    public static class Builder {
+    public static class HttpResponseBuilder {
         private final HttpStatusLine httpStatusLine;
         private final Map<HttpHeaderName, String> headers;
         private HttpResponseBody httpResponseBody;
 
-        public Builder(HttpStatusLine httpStatusLine) {
+        public HttpResponseBuilder(HttpStatusLine httpStatusLine) {
             this.httpStatusLine = httpStatusLine;
             this.headers = new HashMap<>();
         }
 
-        public Builder location(String location) {
+        public HttpResponseBuilder location(String location) {
             headers.put(HttpHeaderName.LOCATION, location);
             return this;
         }
 
-        public Builder contentType(String contentType) {
+        public HttpResponseBuilder contentType(String contentType) {
             headers.put(HttpHeaderName.CONTENT_TYPE, contentType);
             return this;
         }
 
-        public Builder contentLength(String contentLength) {
+        public HttpResponseBuilder contentLength(String contentLength) {
             headers.put(HttpHeaderName.CONTENT_LENGTH, contentLength);
             return this;
         }
 
-        public Builder setCookie(String setCookie) {
+        public HttpResponseBuilder setCookie(String setCookie) {
             headers.put(HttpHeaderName.SET_COOKIE, setCookie);
             return this;
         }
 
-        public Builder staticResource(String path) throws IOException, URISyntaxException {
+        public HttpResponseBuilder staticResource(String path) throws IOException, URISyntaxException {
             if (!path.contains(".")) {
                 path += ".html";
             }
@@ -120,7 +121,7 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder responseBody(String responseBody) {
+        public HttpResponseBuilder responseBody(String responseBody) {
             this.httpResponseBody = new HttpResponseBody(responseBody);
             return this;
         }

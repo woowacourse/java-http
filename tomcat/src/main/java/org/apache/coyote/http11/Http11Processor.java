@@ -19,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String NOT_FOUND_PATH = "/404.html";
+    private static final String CHECKED_STATIC_RESOURCE = ".";
 
     private final Socket connection;
 
@@ -72,6 +73,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isStaticResource(HttpRequest httpRequest) {
-        return httpRequest.getMethod() == HttpMethod.GET && httpRequest.getPath().contains(".");
+        return httpRequest.getMethod() == HttpMethod.GET && httpRequest.getPath().contains(CHECKED_STATIC_RESOURCE);
     }
 }

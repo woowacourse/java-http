@@ -1,5 +1,6 @@
 package hoony.was;
 
+import com.techcourse.handler.LoginGetRequestHandler;
 import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.handler.RegisterGetRequestHandler;
 import com.techcourse.handler.RegisterPostRequestHandler;
@@ -18,19 +19,20 @@ public class FrontController {
         registerMethodReturnValueResolvers();
     }
 
+    public static FrontController getInstance() {
+        return instance;
+    }
+
     private void registerRequestHandlers() {
         requestHandlerMapper.register(new RegisterGetRequestHandler());
         requestHandlerMapper.register(new RegisterPostRequestHandler());
+        requestHandlerMapper.register(new LoginGetRequestHandler());
         requestHandlerMapper.register(new LoginRequestHandler());
         requestHandlerMapper.register(new StaticResourceRequestHandler());
     }
 
     private void registerMethodReturnValueResolvers() {
         returnValueResolverMapper.register(new StaticResourceReturnValueResolver());
-    }
-
-    public static FrontController getInstance() {
-        return instance;
     }
 
     public HttpResponse service(HttpRequest request) {

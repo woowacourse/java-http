@@ -19,7 +19,7 @@ class LoginRequestHandlerTest {
     void canHandle() {
         LoginRequestHandler loginRequestHandler = new LoginRequestHandler();
         byte[] bytes = """
-                GET /login HTTP/1.1\r
+                POST /login HTTP/1.1\r
                 Host: localhost:8080\r
                 """.getBytes();
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
@@ -48,8 +48,11 @@ class LoginRequestHandlerTest {
         repository.when(() -> InMemoryUserRepository.findByAccount("abc"))
                 .thenReturn(Optional.of(user));
         byte[] bytes = """
-                GET /login?account=abc&password=123 HTTP/1.1\r
+                GET /login HTTP/1.1\r
                 Host: localhost:8080\r
+                Content-Length: 17\r
+                \r
+                account=abc&password=123
                 """.getBytes();
 
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));

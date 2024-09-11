@@ -6,6 +6,7 @@ import hoony.was.RequestHandler;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,16 +16,15 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.hasMethod(HttpMethod.GET) && request.hasPath("/login");
+        return request.hasMethod(HttpMethod.POST) && request.hasPath("/login");
     }
 
     @Override
     public String handle(HttpRequest request) {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
-        if (account == null && password == null) {
-            return "login.html";
-        }
+        String content = request.getContent();
+        QueryParameters queryParameters = new QueryParameters(content);
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
         logUser(account, password);
         if (logUser(account, password)) {
             return "redirect:/index.html";

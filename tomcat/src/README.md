@@ -7,7 +7,5 @@
   - [x] Http Request Header 분리
     - [x]  `예외)` HTTP1.1 필수 헤더인 `Host`가 없는 경우
     - [x] `예외)` attribute 형식이 잘못된 경우
-  - [ ] Http Body 분리
-    - [ ] content type별로 body가 생성가능하다
-      - [ ] json
-      - [ ] form data
+  - [x] Http Body 분리
+      - [x] `예외)`formUrlEncoded 형식이 아닌 경우

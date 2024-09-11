@@ -15,7 +15,7 @@ public enum ContentType {
         throw new IllegalArgumentException("처리되지 않은 contentType입니다.");
     }
 
-    public boolean isFromData() {
+    public boolean isFormUrlEncoded() {
         return this == APPLICATION_X_WWW_FORM_URLENCODED;
     }
 }

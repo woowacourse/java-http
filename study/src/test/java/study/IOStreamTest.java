@@ -103,7 +103,6 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */

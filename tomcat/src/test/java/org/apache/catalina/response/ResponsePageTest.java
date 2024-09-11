@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class ResponsePageTest {
 
     @Test
-    @DisplayName("성공 : 로그인이 안됐을 때 url에 맞는 ResponsePage을 알아낼 수 있다.")
+    @DisplayName("성공 : 로그인이 안됐을 때 url에 맞는 ResponsePage을 조회 가능")
     void fromUrlSuccessByIsNotLogin() {
         ResponsePage expected = ResponsePage.LOGIN_IS_NOT_LOGIN;
 
@@ -22,7 +22,7 @@ class ResponsePageTest {
     }
 
     @Test
-    @DisplayName("성공 : url이 와 연관된 값이 없으면 optional을 반환한다.")
+    @DisplayName("성공 : url이 와 연관된 값이 없으면 optional 반환")
     void fromUrlSuccessByNotContaionUrl() {
         Optional<ResponsePage> actual = ResponsePage.fromUrl("/a", new HttpCookie(new HashMap<>()));
 

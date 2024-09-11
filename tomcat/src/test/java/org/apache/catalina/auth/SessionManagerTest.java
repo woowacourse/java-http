@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class SessionManagerTest {
 
     @Test
-    @DisplayName("성공 : SessionManager 인스턴스를 얻을 수 있다.")
+    @DisplayName("성공 : SessionManager 인스턴스를 조회 가능")
     void getInstance() {
         SessionManager sessionManager = SessionManager.getInstance();
 
@@ -18,7 +18,7 @@ class SessionManagerTest {
     }
 
     @Test
-    @DisplayName("성공 : 세션을 추가할 수 있다.")
+    @DisplayName("성공 : 세션을 추가 가능")
     void add() {
         SessionManager sessionManager = SessionManager.getInstance();
         Session session = new Session("id");
@@ -30,7 +30,7 @@ class SessionManagerTest {
     }
 
     @Test
-    @DisplayName("성공 : 해당 id의 세션이 있을 경우 해당 세션이 반환된다.")
+    @DisplayName("성공 : 해당 id의 세션이 있을 경우 해당 세션 반환")
     void findSessionSuccess() {
         SessionManager sessionManager = SessionManager.getInstance();
         Session session = new Session("id");
@@ -42,7 +42,7 @@ class SessionManagerTest {
     }
 
     @Test
-    @DisplayName("실패 : 해당 id의 세션이 없을 경우 optional 값이 반환된다.")
+    @DisplayName("실패 : 해당 id의 세션이 없을 경우 optional 반환")
     void findSessionFailByNotContain() {
         SessionManager sessionManager = SessionManager.getInstance();
 
@@ -52,7 +52,7 @@ class SessionManagerTest {
     }
 
     @Test
-    @DisplayName("성공 : 세션을 제거할 수 있다.")
+    @DisplayName("성공 : 세션을 제거 가능")
     void remove() {
         SessionManager sessionManager = SessionManager.getInstance();
         Session session = new Session("id");

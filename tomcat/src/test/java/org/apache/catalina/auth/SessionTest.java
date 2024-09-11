@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class SessionTest {
     @Test
-    @DisplayName("성공 : key에 해당하는 attribute를 가져올 수 있다.")
+    @DisplayName("성공 : key에 해당하는 attribute를 조회 가능")
     void getAttribute() {
         Session session = new Session("id");
         session.setAttribute("name", "value");
@@ -20,7 +20,7 @@ class SessionTest {
     }
 
     @Test
-    @DisplayName("성공 : attribute를 추가할 수 있다.")
+    @DisplayName("성공 : attribute를 추가 가능")
     void setAttribute() {
         Session session = new Session("id");
 
@@ -31,7 +31,7 @@ class SessionTest {
     }
 
     @Test
-    @DisplayName("성공 : attribute를 삭제할 수 있다.")
+    @DisplayName("성공 : attribute를 삭제 가능")
     void removeAttribute() {
         Session session = new Session("id");
         session.setAttribute("name", "value");

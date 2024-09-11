@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class RequestTest {
 
     @Test
-    @DisplayName("성공 : body 값을 추가할 수 있다.")
+    @DisplayName("성공 : body 값 추가 가능")
     void setBody() {
         Request request = new Request("GET /index.html HTTP/1.1", Map.of());
         Map<String, String> expected = Map.of("key", "value");
@@ -24,10 +24,10 @@ class RequestTest {
     }
 
     @Nested
-    @DisplayName("response 파일 타입을 알 수 있다.")
+    @DisplayName("response 파일 타입 조회")
     class getFileType {
         @Test
-        @DisplayName("성공 : response 시 원하는 파일 타입을 알 수 있다.")
+        @DisplayName("성공 : response 시 원하는 파일 타입 조회")
         void getFileTypeSuccess() {
             Request request = new Request("GET /index.html HTTP/1.1", Map.of("Accept", "text/css"));
 
@@ -37,7 +37,7 @@ class RequestTest {
         }
 
         @Test
-        @DisplayName("성공 : header에 해당 정보가 없으면 text/html을 기본 값으로 한다.")
+        @DisplayName("성공 : header에 해당 정보가 없으면 text/html을 기본 값으로 설정")
         void getFileTypeSuccessByNotContainAccept() {
             Request request = new Request("GET /index.html HTTP/1.1", Map.of());
 
@@ -48,7 +48,7 @@ class RequestTest {
     }
 
     @Test
-    @DisplayName("성공 : 콘텐트 길이를 알 수 있다.")
+    @DisplayName("성공 : 콘텐트 길이 조회 가능")
     void getContentLengthSuccess() {
         int expected = 100;
         Request request = new Request("GET /index.html HTTP/1.1", Map.of("Content-Length", String.valueOf(expected)));
@@ -59,7 +59,7 @@ class RequestTest {
     }
 
     @Test
-    @DisplayName("성공 : header에 해당 정보가 없으면 0을 기본 값으로 한다.")
+    @DisplayName("성공 : header에 해당 정보가 없으면 0을 기본 값으로 설정")
     void getContentLengthSuccessByNotContaionLength() {
         Request request = new Request("GET /index.html HTTP/1.1", Map.of());
 
@@ -69,7 +69,7 @@ class RequestTest {
     }
 
     @Test
-    @DisplayName("성공 : 쿠키를 알 수 있다.")
+    @DisplayName("성공 : 쿠키를 조회 가능")
     void getCookie() {
         Request request = new Request("GET /index.html HTTP/1.1", Map.of("Cookie", "Id=324;JSessionId=34567"));
 

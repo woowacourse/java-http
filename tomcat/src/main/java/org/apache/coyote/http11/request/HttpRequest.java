@@ -24,7 +24,7 @@ public class HttpRequest {
         if (body == null) {
             return result;
         }
-        String[] params = body.getBody().split("&");
+        String[] params = body.body().split("&");
         for (String param : params) {
             String[] keyValue = param.split("=");
             result.put(keyValue[0], keyValue[1]);
@@ -57,7 +57,7 @@ public class HttpRequest {
     }
 
     public String getBody() {
-        return body.getBody();
+        return body.body();
     }
 
     public void setBody(String body) {

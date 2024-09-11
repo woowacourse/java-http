@@ -1,14 +1,11 @@
 package org.apache.coyote.http11.request;
 
-public class RequestBody {
+public record RequestBody(String body) {
 
-    private final String body;
-
-    public RequestBody(String body) {
+    public RequestBody {
         if (body == null) {
             throw new IllegalArgumentException("요청 본문은 null일 수 없습니다.");
         }
-        this.body = body;
     }
 
     public static RequestBody empty() {
@@ -17,10 +14,6 @@ public class RequestBody {
 
     public boolean isEmpty() {
         return body.isEmpty();
-    }
-
-    public String getBody() {
-        return body;
     }
 
     @Override

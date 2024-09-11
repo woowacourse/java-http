@@ -1,6 +1,5 @@
-package org.apache.http;
+package org.apache.http.header;
 
-import org.apache.http.header.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

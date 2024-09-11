@@ -10,6 +10,9 @@ import util.StringUtil;
 public class RequestLine {
     private static final String DELIMITER = " ";
     private static final String QUERY_PARAM_DELIMITER = "?";
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final Path path;
@@ -24,13 +27,13 @@ public class RequestLine {
     }
 
     public static RequestLine create(final String line) {
-        final String[] arys = line.split(DELIMITER);
-        final BiValue<Path, QueryParams> uriAndQueryParam = splitUriAndQueryParams(arys[1]);
-        return new RequestLine(HttpMethod.from(arys[0]), uriAndQueryParam.first(), uriAndQueryParam.second(), HttpVersion.from(arys[2]));
+        final String[] requestLineInfos = line.split(DELIMITER);
+        final BiValue<Path, QueryParams> uriAndQueryParam = splitUriAndQueryParams(requestLineInfos[PATH_INDEX]);
+        return new RequestLine(HttpMethod.from(requestLineInfos[HTTP_METHOD_INDEX]), uriAndQueryParam.first(), uriAndQueryParam.second(), HttpVersion.from(requestLineInfos[HTTP_VERSION_INDEX]));
     }
 
-    private static BiValue<Path, QueryParams> splitUriAndQueryParams(final String uri) {
-        final BiValue<String, String> biValue = StringUtil.splitBiValue(uri, QUERY_PARAM_DELIMITER);
+    private static BiValue<Path, QueryParams> splitUriAndQueryParams(final String path) {
+        final BiValue<String, String> biValue = StringUtil.splitBiValue(path, QUERY_PARAM_DELIMITER);
         return new BiValue<>(Path.from(biValue.first()), QueryParams.from(biValue.second()));
     }
 

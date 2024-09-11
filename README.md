@@ -70,7 +70,7 @@
     - [x] Path 클래스
     - [x] Version 클래스
     - [x] Protocol 클래스 (enum)
-  - [ ] Headers 분석
+  - [x] Headers 분석
 
 - [ ] HttpResponse 클래스 구현
   - [ ] Response Line 분석

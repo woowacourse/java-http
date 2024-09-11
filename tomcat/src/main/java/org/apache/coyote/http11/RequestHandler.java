@@ -50,7 +50,7 @@ public class RequestHandler {
     }
 
     private String generateRegisterResponse() throws IOException {
-        if (requestParser.getMethod().equals("GET")) {
+        if ("GET".equals(requestParser.getMethod())) {
             return verifyLogin();
         }
         String body = requestParser.getBody();
@@ -70,7 +70,7 @@ public class RequestHandler {
     }
 
     private String generateLoginResponse() throws IOException {
-        if (requestParser.getMethod().equals("GET")) {
+        if ("GET".equals(requestParser.getMethod())) {
             return verifyLogin();
         }
         String body = requestParser.getBody();

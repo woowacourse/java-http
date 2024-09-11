@@ -184,10 +184,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURL.contains(QUERY_PARAMETER)) {
-            String[] statusAndPath = parseLoginQueryString(requestURL);
+            String[] loginResult = login(requestURL);
 
-            statusAndPath[1] = STATIC + statusAndPath[1] + HTML;
-            return statusAndPath;
+            loginResult[1] = STATIC + loginResult[1] + HTML;
+            return loginResult;
         }
 
         if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
@@ -215,7 +215,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String[] parseLoginQueryString(String requestURL) {
+    private String[] login(String requestURL) {
         String[] result = new String[2];
         result[0] = "302 FOUND";
 
@@ -271,7 +271,7 @@ public class Http11Processor implements Runnable, Processor {
         return loginUser.filter(user -> user.checkPassword(password))
                 .map(
                         user -> {
-                            log.info("user : {}", user);
+                            log.info("로그인 성공. user : {}", user);
                             return true;
                         }
                 )

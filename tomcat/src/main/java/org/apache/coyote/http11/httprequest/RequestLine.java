@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.httprequest;
 
+import org.apache.coyote.http11.common.HttpVersion;
+
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
@@ -8,13 +10,13 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
     private final String uri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(REQUEST_LINE_DELIMITER);
         this.httpMethod = HttpMethod.from(parts[0]);
         this.uri = parts[1];
-        this.httpVersion = parts[2];
+        this.httpVersion = HttpVersion.from(parts[2]);
     }
 
     public boolean isGetMethod() {

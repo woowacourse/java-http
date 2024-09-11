@@ -6,28 +6,35 @@ import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public ResponseHeaders(String contentType, String responseBody) {
-        Map<String, String> headers = new LinkedHashMap<>();
+    public ResponseHeaders(String location) {
+        headers.put("Location", location);
+    }
 
-        headers.put("Content-Type", contentType + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+    public String getLocation() {
+        return headers.get("Location");
+    }
 
-        this.headers = headers;
+    public void setCookie(String cookie) {
+        headers.put("Set-Cookie", cookie);
+    }
+
+    public void setContentType(String contentType) {
+        if ("text/html".equals(contentType)) {
+            headers.put("Content-Type", contentType + ";charset=utf-8");
+            return;
+        }
+        headers.put("Content-Type", contentType);
+    }
+
+    public void setContentLength(int length) {
+        headers.put("Content-Length", String.valueOf(length));
     }
 
     public String getMessage() {
         return headers.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));
-    }
-
-    public void setLocation(String location) {
-        headers.put("Location", location);
-    }
-
-    public void setCookie(String key, String value) {
-        headers.put(key, value);
     }
 }

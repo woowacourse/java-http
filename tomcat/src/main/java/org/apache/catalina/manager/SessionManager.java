@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class SessionManager implements Manager {
 
-    private static final SessionManager instance = new SessionManager();
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static SessionManager instance = new SessionManager();
 
     private SessionManager() {
     }

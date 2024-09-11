@@ -16,51 +16,80 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String EXPRESSION_OF_USER = "user";
 
     @Override
     public HttpResponse process(HttpRequest request) {
+        if (isLoginUser(request)) {
+            return new HttpResponse(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+        }
+        if (request.isGetMethod()) {
+            return doGet(request);
+        }
+        if (request.isPostMethod()) {
+            return doPost(request);
+        }
+        throw new IllegalArgumentException("잘못된 요청입니다.");
+    }
+
+    private boolean isLoginUser(HttpRequest request) {
         if (request.hasJSessionCookie()) {
-            SessionManager sessionManager = SessionManager.getInstance();
-            String jSessionId = request.getJSessionId();
-            Session session = sessionManager.findSession(jSessionId);
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                HttpResponse response = HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
-                response.sendRedirect("/index.html");
-                return response;
-            }
+            Session session = getSession(request);
+            return session.getAttribute(EXPRESSION_OF_USER) != null;
         }
-        if (hasNotQueryParameter(request)) {
-            String location = request.getUri() + Constants.EXTENSION_OF_HTML;
-            return HttpResponse.of(location, HttpStatusCode.OK);
-        }
+        return false;
+    }
 
+    private Session getSession(HttpRequest request) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String jSessionId = request.getJSessionId();
+        return sessionManager.findSession(jSessionId);
+    }
+
+    private HttpResponse doGet(HttpRequest request) {
+        if (request.hasQueryParameter()) {
+            printLogIfLoginPossible(request.getQueryParameter());
+        }
+        return new HttpResponse(request.getPath() + Constants.EXTENSION_OF_HTML, HttpStatusCode.OK);
+    }
+
+    private void printLogIfLoginPossible(QueryParameter queryParameter) {
         try {
-            QueryParameter queryParameter = request.getQueryParameter();
-            String account = queryParameter.get(Constants.PARAMETER_KEY_OF_ACCOUNT);
-            String password = queryParameter.get(Constants.PARAMETER_KEY_OF_PASSWORD);
-
-            User user = findUserByAccountAndPassword(account, password);
-            log.info("로그인 성공! 아이디 : {}", user.getAccount());
-
-            HttpResponse response = HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
-
-            Session session = request.getSession(true);
-            session.setAttribute("user", user);
-            SessionManager sessionManager = SessionManager.getInstance();
-            sessionManager.add(session);
-            response.addCookie(Cookies.ofJSessionId(session.getId()));
-            response.sendRedirect("/index.html");
-
-            return response;
+            User user = getUser(queryParameter);
+            log.info("user : {}", user);
         } catch (IllegalArgumentException e) {
-            log.info("로그인 실패 : {}", e.getMessage(), e);
-            return HttpResponse.of("/401.html", HttpStatusCode.FOUND);
+            log.info("잘못된 입력 : {}", e.getMessage(), e);
         }
     }
 
-    private boolean hasNotQueryParameter(HttpRequest request) {
-        return !request.hasQueryParameter();
+    private HttpResponse doPost(HttpRequest request) {
+        try {
+            User user = getUser(new QueryParameter(request.getBody()));
+            log.info("로그인 성공! 아이디 : {}", user.getAccount());
+
+            HttpResponse response = new HttpResponse(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
+            addSessionCookie(request, response, user);
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.info("로그인 실패 : {}", e.getMessage(), e);
+            return new HttpResponse("/401.html", HttpStatusCode.FOUND);
+        }
+    }
+
+    private void addSessionCookie(HttpRequest request, HttpResponse response, User user) {
+        Session session = request.getSession(true);
+        session.setAttribute(EXPRESSION_OF_USER, user);
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
+    }
+
+    private User getUser(QueryParameter queryParameter) {
+        String account = queryParameter.get(Constants.PARAMETER_KEY_OF_ACCOUNT);
+        String password = queryParameter.get(Constants.PARAMETER_KEY_OF_PASSWORD);
+
+        return findUserByAccountAndPassword(account, password);
     }
 
     private User findUserByAccountAndPassword(String account, String password) {

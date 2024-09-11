@@ -15,8 +15,7 @@ public class InMemoryUserRepository {
     private static final AtomicLong USER_ID = new AtomicLong(INITIAL_ID_VALUE);
 
     static {
-        final User user = new User(USER_ID.getAndIncrement(), "gugu", "password", "hkkang@woowahan.com");
-        DATABASE.put(user.getAccount(), user);
+        save(new User("gugu", "password", "hkkang@woowahan.com"));
     }
 
     private InMemoryUserRepository() {

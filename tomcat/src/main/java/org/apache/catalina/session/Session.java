@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class Session {
 
-    private final String id;
     private final Map<String, Object> values = new HashMap<>();
+    private final String id;
 
     public Session(String id) {
         this.id = id;
@@ -17,6 +17,7 @@ public class Session {
     }
 
     public void invalidate() {
+        values.clear();
     }
 
     public String getId() {

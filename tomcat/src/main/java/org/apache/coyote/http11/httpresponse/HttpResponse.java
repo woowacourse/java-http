@@ -1,40 +1,35 @@
 package org.apache.coyote.http11.httpresponse;
 
-import org.apache.coyote.http11.FileReader;
-
-import java.io.IOException;
-
 public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeaders headers;
-    private final String body;
+    private String body;
 
-    public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    public static HttpResponse of(String location, HttpStatusCode httpStatusCode) {
-        try {
-            StatusLine statusLine = new StatusLine("HTTP/1.1", httpStatusCode);
-            String contentType = FileReader.probeContentType(location);
-            String responseBody = FileReader.read(location);
-            ResponseHeaders responseHeaders = new ResponseHeaders(contentType, responseBody);
-
-            return new HttpResponse(statusLine, responseHeaders, responseBody);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("파일을 읽을 수 없습니다.", e);
-        }
+    public HttpResponse(String location, HttpStatusCode httpStatusCode) {
+        this.statusLine = new StatusLine(httpStatusCode);
+        this.headers = new ResponseHeaders(location);
+        this.body = null;
     }
 
     public void addCookie(String cookie) {
-        headers.setCookie("Set-Cookie", cookie);
+        headers.setCookie(cookie);
     }
 
-    public void sendRedirect(String location) {
-        headers.setLocation(location);
+    public void setContentType(String contentType) {
+        headers.setContentType(contentType);
+    }
+
+    public String getLocation() {
+        return headers.getLocation();
+    }
+
+    public void setContentLength(int length) {
+        headers.setContentLength(length);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getResponse() {
@@ -43,9 +38,5 @@ public class HttpResponse {
                 String.format("%s", headers.getMessage()),
                 "",
                 body);
-    }
-
-    public void setJSessionCookie(String value) {
-        headers.setCookie("Set-Cookie", "JSESSIONID=" + value);
     }
 }

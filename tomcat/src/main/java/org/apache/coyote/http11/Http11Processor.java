@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,9 +14,13 @@ import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
+import org.apache.catalina.io.RequestParser;
+import org.apache.catalina.io.RequestReader;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.Request;
-import org.apache.catalina.io.RequestReader;
+import org.apache.catalina.request.RequestBody;
+import org.apache.catalina.request.RequestHeader;
+import org.apache.catalina.request.RequestLine;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.Response;
 import org.apache.catalina.response.ResponsePage;
@@ -58,7 +63,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            Request request = RequestReader.readHeaders(reader);
+            Request request = readAndParserRequest(reader);
+
             String response = handleRequest(request);
 
             outputStream.write(response.getBytes());
@@ -66,6 +72,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
+    }
+
+    private Request readAndParserRequest(BufferedReader reader) {
+        List<String> request = RequestReader.readRequest(reader);
+        RequestLine requestLine = new RequestLine(request.getFirst());
+        RequestHeader requestHeader = new RequestHeader(RequestParser.parseHeaders(request));
+        String body = RequestReader.readBody(reader, requestHeader.getContentLength());
+        RequestBody requestBody = new RequestBody(RequestParser.parseParamValues(body));
+        return new Request(requestLine, requestHeader, requestBody);
     }
 
     private String handleRequest(Request request) {

@@ -12,6 +12,8 @@ public class HttpHeaders {
 
     private static final String SEPARATOR = ": ";
     public static final String COOKIE_HEADER = HttpHeader.COOKIE.getValue() + SEPARATOR;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
     private final HttpCookies cookies;
@@ -26,20 +28,28 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders parse(List<String> httpHeaders) {
-        Map<String, String> headers = httpHeaders.stream()
+        Map<String, String> headers = parseHeaders(httpHeaders);
+        HttpCookies httpCookies = parseCookies(httpHeaders);
+        return new HttpHeaders(headers, httpCookies);
+    }
+
+    private static Map<String, String> parseHeaders(List<String> httpHeaders) {
+        return httpHeaders.stream()
                 .filter(header -> !header.startsWith(COOKIE_HEADER))
                 .map(HttpHeaders::validateAndSplit)
                 .collect(Collectors.toMap(
-                        header -> header[0],
-                        header -> header[1]
+                        header -> header[KEY_INDEX],
+                        header -> header[VALUE_INDEX]
                 ));
-        HttpCookies httpCookies = httpHeaders.stream()
+    }
+
+    private static HttpCookies parseCookies(List<String> httpHeaders) {
+        return httpHeaders.stream()
                 .filter(header -> header.startsWith(COOKIE_HEADER))
                 .findAny()
                 .map(header -> header.substring(COOKIE_HEADER.length()))
                 .map(HttpCookies::parse)
                 .orElse(new HttpCookies());
-        return new HttpHeaders(headers, httpCookies);
     }
 
     private static String[] validateAndSplit(String header) {

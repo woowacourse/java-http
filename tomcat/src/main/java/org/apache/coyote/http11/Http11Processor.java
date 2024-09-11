@@ -1,16 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.RequestMapping;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Optional;
 import org.apache.coyote.Processor;
-import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.file.FileFinder;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.parser.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +39,30 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
-            HttpResponse<String> httpResponse = httpRequest.getHttpResponse();
-
-            bufferedWriter.write(httpResponse.convertToMessage());
+            HttpRequest request = HttpRequestParser.parse(bufferedReader);
+            HttpResponse response = new HttpResponse(request);
+            delegateDataProcess(request, response);
+            addNoRedirect(response, request);
+            bufferedWriter.write(response.convertToMessage());
             bufferedWriter.flush();
-        } catch (IOException | UncheckedServletException | UncheckedHttpException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void delegateDataProcess(HttpRequest request, HttpResponse response) throws Exception {
+        RequestMapping requestMapping = new RequestMapping();
+        Optional<Controller> optionalController = requestMapping.getController(request);
+        if (optionalController.isPresent()) {
+            Controller controller = optionalController.get();
+            controller.service(request, response);
+        }
+    }
+
+    private void addNoRedirect(HttpResponse response, HttpRequest request) throws IOException {
+        if (response.notHasLocation()) {
+            FileFinder fileFinder = new FileFinder(request);
+            fileFinder.resolve(response);
         }
     }
 }

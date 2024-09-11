@@ -8,8 +8,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 import org.apache.coyote.http11.component.FileExtension;
+import org.apache.coyote.http11.component.MediaType;
+import org.apache.coyote.http11.fixture.HttpRequestFixture;
+import org.apache.coyote.http11.fixture.HttpResponseFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -26,26 +31,20 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-
+        File file = new File(Objects.requireNonNull(resource).getFile());
+        String body = new String(Files.readAllBytes(file.toPath()));
+        var expected = HttpResponseFixture.getGetResponse(body, MediaType.TEXT_HTML.getValue());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/index.html로 요청을 보내면 HTTP 응답과 static/index.html 파일 출력을 반환한다.")
-    @Test
-    void index() throws IOException {
+    @DisplayName("GET 요청을 보내면 HTTP 응답과 해당하는 파일을 파일 출력을 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/index.html", "/login.html", "/register.html", "/css/styles.css", "/assets/chart-area.js"})
+    void processGetFile(String path) throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
+        final String httpRequest = HttpRequestFixture.getGetRequestMessage(path);
+        int lastIndex = path.lastIndexOf(".");
+        FileExtension extension = FileExtension.from(path.substring(lastIndex));
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
@@ -53,61 +52,18 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("css 파일 요청을 보내면 적절한 css 파일을 응답 본문에 반환한다.")
-    @Test
-    void cssContentType() throws IOException {
-        // given
-        String path = "/css/styles.css";
-        FileExtension expectedFileExtension = FileExtension.CSS;
-
-        String httpRequest = String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        URL resource = getClass().getClassLoader().getResource("static" + path);
-        String responseBody = new String(
-                Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + expectedFileExtension.getMediaType() + " \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
+        String body = new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+        var expected = HttpResponseFixture.getGetResponse(body, extension.getMediaType());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("확장자 없이 path를 요청하면 html 파일을 탐색한다.")
-    @Test
-    void processWithoutExtension() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"/index", "/login", "/register"})
+    void processWithoutExtension(String path) throws IOException {
         //given
-        String path = "/login";
-        FileExtension expectedFileExtension = FileExtension.HTML;
-        String httpRequest = String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpRequestFixture.getGetRequestMessage(path);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
@@ -117,13 +73,9 @@ class Http11ProcessorTest {
 
         //then
         URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
-        String responseBody = new String(
-                Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + expectedFileExtension.getMediaType() + " \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
+        File file = new File(Objects.requireNonNull(resource).getFile());
+        String body = new String(Files.readAllBytes(file.toPath()));
+        var expected = HttpResponseFixture.getGetResponse(body, MediaType.TEXT_HTML.getValue());
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

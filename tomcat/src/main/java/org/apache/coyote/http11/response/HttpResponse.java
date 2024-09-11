@@ -3,10 +3,12 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.component.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
 
-public class HttpResponse<T> {
+public class HttpResponse {
 
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
@@ -14,19 +16,13 @@ public class HttpResponse<T> {
 
     private final StatusLine statusLine;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final T body;
+    private String body;
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, T body) {
-        this(new StatusLine(httpStatus), body);
-        headers.forEach(this::addHeader);
+    public HttpResponse(HttpRequest request) {
+        this(new StatusLine(request.getHttpVersion()), "");
     }
 
-    public HttpResponse(StatusLine statusLine, Map<String, String> headers, T body) {
-        this(statusLine, body);
-        headers.forEach(this::addHeader);
-    }
-
-    public HttpResponse(StatusLine statusLine, T body) {
+    private HttpResponse(StatusLine statusLine, String body) {
         this.statusLine = statusLine;
         this.body = body;
     }
@@ -36,30 +32,49 @@ public class HttpResponse<T> {
         addHeader(HttpHeaders.LOCATION, path);
     }
 
+    public void addCookie(HttpCookie httpCookie) {
+        addHeader(HttpHeaders.SET_COOKIE, httpCookie.getCookieToMessage());
+    }
+
     public void addHeader(String header, String value) {
         headers.put(header, value);
     }
 
+    public boolean notHasLocation() {
+        return headers.keySet().stream()
+                .noneMatch(key -> key.equals(HttpHeaders.LOCATION));
+    }
+
     public String convertToMessage() {
-        StringBuilder stringBuilder = new StringBuilder();
         String headerMessages = headers.entrySet().stream().map(this::formatHeaderEntry)
                 .collect(Collectors.joining(CRLF));
 
-        stringBuilder.append(statusLine.convertToMessage()).append(CRLF).append(headerMessages).append(CRLF)
-                .append(CRLF).append(body);
-
-        return stringBuilder.toString();
-    }
-
-    public HttpResponse<String> getFileResponse(String body) {
-        return new HttpResponse<>(statusLine, headers, body);
+        return String.join(
+                CRLF,
+                statusLine.convertToMessage(),
+                headerMessages,
+                "",
+                body
+        );
     }
 
     private String formatHeaderEntry(Map.Entry<String, String> entry) {
         return entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE;
     }
 
-    public T getBody() {
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
         return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

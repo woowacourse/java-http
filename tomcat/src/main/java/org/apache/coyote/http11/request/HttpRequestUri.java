@@ -1,53 +1,43 @@
 package org.apache.coyote.http11.request;
 
-import com.techcourse.controller.ControllerMapping;
-import com.techcourse.controller.dto.HttpResponseEntity;
-import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.coyote.http11.PathInfo;
-import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.component.FileExtension;
+import org.apache.coyote.http11.file.FileDetails;
 
-public class HttpRequestUri {
+public record HttpRequestUri(URI uri, Map<String, String> queryParams) {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestUri.class);
+    private static final URI ROOT_URI = URI.create("/");
+    private static final URI DEFAULT_FILE_URI = URI.create("/index");
+    private static final String EXTENSION_DELIMITER = ".";
+    private static final int NOT_MATCHED_INDEX = -1;
 
-    private final PathInfo pathInfo;
-    private final Map<String, String> queryParams;
-
-    public HttpRequestUri(PathInfo pathInfo) {
-        this(pathInfo, Collections.emptyMap());
+    public HttpRequestUri(URI uri) {
+        this(uri, Collections.emptyMap());
     }
 
-    public HttpRequestUri(PathInfo pathInfo, Map<String, String> queryParams) {
-        this.pathInfo = pathInfo;
-        this.queryParams = queryParams;
-    }
-
-    public boolean isLogin() {
-        return pathInfo.isLogin();
-    }
-
-    public HttpResponse<?> processParams(HttpMethod method, HttpRequest httpRequest) {
-        if (queryParams.isEmpty()) {
-            return new HttpResponseEntity<>().convertResponse();
+    public FileDetails getFileDetails() {
+        if (ROOT_URI.equals(uri)) {
+            return new FileDetails(DEFAULT_FILE_URI.getPath());
         }
-        ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        HttpResponseEntity<?> response = controllerMapping.apply(queryParams, httpRequest);
-        log.info("user : {}", response.body());
-        return response.convertResponse();
+        String path = uri.getPath();
+        int extensionIndex = path.lastIndexOf(EXTENSION_DELIMITER);
+        validateEndsWithDelimiter(path, extensionIndex);
+        if (extensionIndex == NOT_MATCHED_INDEX) {
+            return new FileDetails(path);
+        }
+        String filePath = path.substring(0, extensionIndex);
+        String extension = path.substring(extensionIndex);
+        FileExtension fileExtension = FileExtension.from(extension);
+        return new FileDetails(filePath, fileExtension);
     }
 
-    public HttpResponse<?> processParams(HttpMethod method, RequestBody body, HttpRequest httpRequest) {
-        ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        HttpResponseEntity<?> response = controllerMapping.apply(body.getBody(), httpRequest);
-        return response.convertResponse();
-    }
-
-    public HttpResponse<String> getHttpResponse(HttpResponse<?> response) throws IOException {
-        return pathInfo.getHttpResponse(response);
+    private void validateEndsWithDelimiter(String path, int extensionIndex) {
+        int lastIndexOfPath = path.length() - 1;
+        if (extensionIndex == lastIndexOfPath) {
+            throw new UncheckedHttpException(new IllegalArgumentException("요청 URI는 확장자 구분자으로 끝날 수 없습니다."));
+        }
     }
 }

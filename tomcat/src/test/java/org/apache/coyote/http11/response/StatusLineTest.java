@@ -12,7 +12,7 @@ class StatusLineTest {
     void convertToMessage() {
         //given
         String expected = "HTTP/1.1 200 OK ";
-        StatusLine statusLine = new StatusLine();
+        StatusLine statusLine = new StatusLine("HTTP/1.1");
 
         //when
         String result = statusLine.convertToMessage();

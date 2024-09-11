@@ -13,7 +13,7 @@ public class Session {
         this(UUID.randomUUID().toString());
     }
 
-    private Session(String id) {
+    public Session(String id) {
         this.id = id;
     }
 

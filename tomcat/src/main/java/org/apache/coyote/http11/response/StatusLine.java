@@ -9,15 +9,11 @@ public class StatusLine {
     private final String httpVersion;
     private HttpStatus httpStatus;
 
-    public StatusLine() {
-        this("HTTP/1.1", HttpStatus.OK);
+    public StatusLine(String httpVersion) {
+        this(httpVersion, HttpStatus.OK);
     }
 
-    public StatusLine(HttpStatus httpStatus) {
-        this("HTTP/1.1", httpStatus);
-    }
-
-    private StatusLine(String httpVersion, HttpStatus httpStatus) {
+    public StatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
     }
@@ -30,6 +26,10 @@ public class StatusLine {
                 httpStatus.getValue(),
                 ""
         );
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {

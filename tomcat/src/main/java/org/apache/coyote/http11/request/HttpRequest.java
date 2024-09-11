@@ -1,22 +1,20 @@
 package org.apache.coyote.http11.request;
 
-import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.component.HttpHeaders;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.file.FileDetails;
 
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
-    private final Map<String, String> headers;
+    private final HttpRequestHeader headers;
     private final RequestBody body;
 
     public HttpRequest(
             HttpRequestLine httpRequestLine,
-            Map<String, String> headers,
+            HttpRequestHeader headers,
             RequestBody body
     ) {
         this.httpRequestLine = httpRequestLine;
@@ -24,24 +22,31 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public HttpResponse<String> getHttpResponse() throws IOException {
-        return httpRequestLine.getHttpResponse(body, this);
-    }
-
     public Session getSession(boolean needSession) {
-        if (headers.containsKey(HttpHeaders.COOKIE)) {
-            String value = headers.get(HttpHeaders.COOKIE);
-            HttpCookie cookie = HttpCookie.from(value);
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session session = sessionManager.findSession(cookie.getJSessionId());
-            if (session != null) {
-                return session;
-            }
-        }
-        return needSession ? new Session() : null;
+        return headers.getSession(needSession);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public FileDetails getFileDetails() {
+        return httpRequestLine.getFileDetails();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpRequestLine.getHttpMethod();
+    }
+
+    public String getHttpVersion() {
+        return httpRequestLine.getHttpVersion();
+    }
+
+    public URI getUri() {
+        return httpRequestLine.getUri();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return httpRequestLine.getQueryParams();
+    }
+
+    public RequestBody getBody() {
+        return body;
     }
 }

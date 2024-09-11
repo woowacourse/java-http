@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.component;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -30,13 +30,13 @@ public class HttpCookie {
         return new HttpCookie(Map.of(JSESSIONID, sessionId));
     }
 
-    public String getJSessionId() {
+    public String getSessionValue() {
         return cookies.getOrDefault(JSESSIONID, "");
     }
 
     public String getCookieToMessage() {
         return cookies.entrySet().stream()
-                .map(entry -> String.join("=", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining("; "));
+                .map(entry -> String.join(KEY_VALUE_DELIMITER, entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(COOKIE_DELIMITER));
     }
 }

@@ -1,48 +1,86 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import java.util.List;
-import java.util.Map;
-import org.apache.coyote.http11.component.HttpMethod;
-import org.junit.jupiter.api.BeforeEach;
+import java.net.URI;
+import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.component.FileExtension;
+import org.apache.coyote.http11.file.FileDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpRequestUriTest {
 
-    private ListAppender<ILoggingEvent> listAppender;
-
-    @BeforeEach
-    void setup() {
-        listAppender = new ListAppender<>();
-        Logger logger = (Logger) LoggerFactory.getLogger(HttpRequestUri.class);
-        logger.addAppender(listAppender);
-        listAppender.start();
-    }
-
-    @DisplayName("쿼리 파리미터가 없다면 로그에 아무것도 기록되지 않는다.")
-    @Test
-    void processQueryParamsWithoutEmptyParams() {
+    @DisplayName("확장자를 포함한 RequestURI로 파일 상세를 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"login.html", "daon.css", "baeky.js"})
+    void getFileDetails(String path) {
         //given
-        String expectedLog = "user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}";
-        String path = "/login";
-        HttpRequestUri requestUri = HttpRequestUriParser.parse(path);
+        HttpRequestUri httpRequestUri = new HttpRequestUri(URI.create(path));
 
         //when
-        requestUri.processParams(HttpMethod.GET,
-                new HttpRequest(new HttpRequestLine("GET /login?account=gugu&password=password HTTP/1.1"),
-                        Map.of(), new RequestBody()));
+        FileDetails fileDetails = httpRequestUri.getFileDetails();
 
         //then
-        List<ILoggingEvent> testLogs = listAppender.list;
-        List<String> messages = testLogs.stream()
-                .map(ILoggingEvent::getFormattedMessage)
-                .toList();
-        assertThat(messages).noneMatch(message -> message.contains(expectedLog));
+        int delimiterIndex = path.lastIndexOf('.');
+        String expectedFileName = path.substring(0, delimiterIndex);
+        FileExtension expectedExtension = FileExtension.from(path.substring(delimiterIndex));
+
+        assertAll(
+                () -> assertThat(fileDetails.fileName()).isEqualTo(expectedFileName),
+                () -> assertThat(fileDetails.extension()).isEqualTo(expectedExtension)
+        );
+    }
+
+    @DisplayName("확장자가 없는 RequestURI로 파일 상세를 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/login", "/daon", "/baeky"})
+    void getFileDetailsWithNoExtension(String path) {
+        //given
+        HttpRequestUri httpRequestUri = new HttpRequestUri(URI.create(path));
+
+        //when
+        FileDetails fileDetails = httpRequestUri.getFileDetails();
+
+        //then
+        assertAll(
+                () -> assertThat(fileDetails.fileName()).isEqualTo(path),
+                () -> assertThat(fileDetails.extension()).isEqualTo(FileExtension.HTML)
+        );
+    }
+
+    @DisplayName("루트 경로로 요청하면 메인 페이지에 대한 상세를 반환한다.")
+    @Test
+    void getFileWithRootPath() {
+        //given
+        String path = "/";
+        String expected = "/index";
+        HttpRequestUri httpRequestUri = new HttpRequestUri(URI.create(path));
+
+        //when
+        FileDetails fileDetails = httpRequestUri.getFileDetails();
+
+        //then
+        assertAll(
+                () -> assertThat(fileDetails.fileName()).isEqualTo(expected),
+                () -> assertThat(fileDetails.extension()).isEqualTo(FileExtension.HTML)
+        );
+    }
+
+    @DisplayName("요청 URI가 파일 확장자 구분자로 끝나면 예외가 발생한다.")
+    @Test
+    void getFileDetailsEndsWithDelimiter() {
+        //given
+        String path = "asmznxcvasdf.";
+        HttpRequestUri httpRequestUri = new HttpRequestUri(URI.create(path));
+
+        //when //then
+        assertThatThrownBy(httpRequestUri::getFileDetails)
+                .isInstanceOf(UncheckedHttpException.class)
+                .hasMessageContaining("요청 URI는 확장자 구분자으로 끝날 수 없습니다.");
     }
 }

@@ -1,6 +1,5 @@
 package org.apache.catalina.http.startline;
 
-import java.util.Arrays;
 import org.apache.catalina.exception.CatalinaException;
 
 public enum HttpVersion {
@@ -15,10 +14,10 @@ public enum HttpVersion {
     }
 
     public static HttpVersion parse(String value) {
-        return Arrays.stream(HttpVersion.values())
-                .filter(v -> v.getValue().equals(value))
-                .findFirst()
-                .orElseThrow(() -> new CatalinaException("Invalid HTTP version: " + value));
+        if (HTTP11.getValue().equals(value)) {
+            return HTTP11;
+        }
+        throw new CatalinaException("Invalid HTTP version: " + value);
     }
 
     public String getValue() {

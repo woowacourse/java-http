@@ -72,7 +72,7 @@
   - [x] Headers 분석
   - [x] body 클래스
 
-- [ ] HttpResponse 클래스 구현
+- [x] HttpResponse 클래스 구현
   - [x] Status-Line 분석
     - [x] VersionOfProtocol 클래스
     - [x] StatusCode 클래스 (enum) [code + message]

@@ -2,21 +2,42 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
-    private final String responseBody;
-    private final String contentType;
+    private String responseBody;
+    private String contentType;
+    private String resourceName;
+    private HttpStatus httpStatus;
 
-    public HttpResponse(String responseBody, String contentType) {
-        this.responseBody = responseBody;
-        this.contentType = contentType;
+    public HttpResponse() {
+        httpStatus = HttpStatus.OK;
     }
 
     public byte[] getBytes() {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.name() + " ",
                 "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody
         ).getBytes();
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 }

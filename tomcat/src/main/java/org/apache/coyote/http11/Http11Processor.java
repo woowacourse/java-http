@@ -42,12 +42,19 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = parseInput(inputStream);
+            HttpResponse response = new HttpResponse();
 
-            String resourceName = requestDispatcher.requestMapping(request);
+            requestDispatcher.requestMapping(request, response);
+            String resourceName = response.getResourceName();
+            if (resourceName == null) {
+                resourceName = request.getPath();
+                response.setResourceName(resourceName);
+            }
             String responseBody = getResource(resourceName);
             String resourceExtension = getExtension(resourceName);
 
-            HttpResponse response = new HttpResponse(responseBody, resourceExtension);
+            response.setResponseBody(responseBody);
+            response.setContentType(resourceExtension);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -97,6 +104,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getExtension(String resourceName) {
+        if (resourceName == null) {
+            return "html";
+        }
         int extensionIndex = resourceName.indexOf('.') + 1;
         if (extensionIndex == 0) {
             return "html";
@@ -108,6 +118,9 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader()
                 .getResource("static" + resourceName);
 
+        if (resource == null) {
+            return "Hello world!";
+        }
         try {
             return Files.readString(Paths.get(resource.toURI()));
         } catch (IOException e) {

@@ -1,21 +1,19 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
+import com.techcourse.controller.LoginController;
 
 public class RequestDispatcher {
 
-    private final Controller controller;
+    private final LoginController loginController;
 
     public RequestDispatcher() {
-        this.controller = new Controller();
+        this.loginController = new LoginController();
     }
 
-    public String requestMapping(HttpRequest request) {
-        String method = request.getMethod();
+    public void requestMapping(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
-        if (method.equals("GET") && path.equals("/login")) {
-            return controller.getLogin(request);
+        if (path.equals("/login")) {
+            loginController.service(request, response);
         }
-        return request.getPath();
     }
 }

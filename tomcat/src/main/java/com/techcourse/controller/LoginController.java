@@ -51,7 +51,7 @@ public class LoginController extends AbstractController {
     }
 
     private void addSession(HttpRequest request, Manager manager, User user, ResponseHeader header) {
-        if (!isSessionExists(request)) {
+        if (!existsSession(request)) {
             HttpSession session = Session.createRandomSession();
             manager.add(session);
             session.setAttribute("user", user.getAccount());
@@ -59,7 +59,7 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private boolean isSessionExists(HttpRequest request) {
+    private boolean existsSession(HttpRequest request) {
         RequestHeader requestHeaders = request.getHeaders();
         return requestHeaders.existsSession();
     }

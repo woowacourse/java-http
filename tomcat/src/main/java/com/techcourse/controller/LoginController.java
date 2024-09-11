@@ -38,7 +38,7 @@ public class LoginController implements Controller {
             return buildResponse(HttpStatusCode.UNAUTHORIZED, "/401.html", request);
         }
 
-        return buildResponse(HttpStatusCode.OK, "/index.html", request);
+        return buildResponse(HttpStatusCode.FOUND, "/index.html", request);
     }
 
     private User fetchUserByAccount(String account) {

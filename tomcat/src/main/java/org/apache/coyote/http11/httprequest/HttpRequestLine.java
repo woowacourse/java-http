@@ -18,7 +18,7 @@ public class HttpRequestLine {
     }
 
     public boolean isMethod(HttpMethod method) {
-        return method.isMethod(method);
+        return this.method.isMethod(method);
     }
 
     public boolean isPath(String path) {

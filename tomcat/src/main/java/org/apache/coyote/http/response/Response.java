@@ -23,9 +23,13 @@ public class Response {
         this.viewName = viewName;
         responseLine.setStatusCode(statusCode);
 
-        if (StatusCode.FOUND.equals(statusCode)) {
+        if (isRedirect()) {
             responseHeaders.setLocation(viewName);
         }
+    }
+
+    public boolean isRedirect() {
+        return responseLine.isRedirect();
     }
 
     public void setContentType(MimeType mimeType) {

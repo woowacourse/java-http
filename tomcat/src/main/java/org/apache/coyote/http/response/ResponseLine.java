@@ -16,6 +16,10 @@ public class ResponseLine implements Assemblable {
         this.statusCode = statusCode;
     }
 
+    protected boolean isRedirect() {
+        return StatusCode.FOUND.equals(statusCode);
+    }
+
     @Override
     public void assemble(StringBuilder builder) {
         builder.append("HTTP/1.1 ");

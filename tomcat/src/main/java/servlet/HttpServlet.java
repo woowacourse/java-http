@@ -48,11 +48,10 @@ public class HttpServlet {
     public void service(Request request, Response response) throws IOException {
         Handler handler = getHandler(request);
         handler.handleRequest(request, response);
-        File view = viewResolver.resolveViewName(response.getViewName());
-        if (view == null) {
-            NotFoundHandler.getInstance().handleRequest(request, response);
-            view = viewResolver.resolveViewName(response.getViewName());
+        if (response.isRedirect()) {
+            return;
         }
+        File view = resolveViewName(request, response);
         MimeType mimeType = MimeType.from(view.getName());
         response.setContentType(mimeType);
         response.setBody(Files.readString(view.toPath(), StandardCharsets.UTF_8));
@@ -64,5 +63,14 @@ public class HttpServlet {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElseGet(ResourceHandler::getInstance);
+    }
+
+    private File resolveViewName(Request request, Response response) {
+        File view = viewResolver.resolveViewName(response.getViewName());
+        if (view == null) {
+            NotFoundHandler.getInstance().handleRequest(request, response);
+            view = viewResolver.resolveViewName(response.getViewName());
+        }
+        return view;
     }
 }

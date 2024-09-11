@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package com.techcourse.servlet;
 
 import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
@@ -9,7 +9,9 @@ import com.techcourse.controller.page.RegisterPageController;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpServletRequest;
+import org.apache.coyote.http11.response.HttpServletResponse;
 
 public class DispatcherServlet {
 
@@ -36,5 +38,9 @@ public class DispatcherServlet {
                 .filter(httpRequestHandler -> httpRequestHandler.supports(request))
                 .findFirst()
                 .orElseThrow(() -> new UncheckedServletException("지원하지 않는 자원 요청입니다"));
+    }
+
+    public void doDispatch(HttpServletRequest request, HttpServletResponse response) {
+        
     }
 }

@@ -1,11 +1,17 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.HttpHeaderName.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeaderName.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpHeaderName.LOCATION;
+import static org.apache.coyote.http11.HttpHeaderName.SET_COOKIE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpHeaderName;
 
 public class Http11Response implements HttpResponse {
 
@@ -27,7 +33,7 @@ public class Http11Response implements HttpResponse {
     @Override
     public void sendRedirect(String url) {
         this.startLine = new Http11ResponseStartLine(HttpStatusCode.FOUND);
-        addHeader("Location", url);
+        addHeader(LOCATION, url);
     }
 
     @Override
@@ -44,22 +50,22 @@ public class Http11Response implements HttpResponse {
 
     @Override
     public void addCookie(String key, String value) {
-        addHeader("Set-Cookie", key + "=" + value);
+        addHeader(SET_COOKIE, key + "=" + value);
     }
 
     @Override
     public void addContentType(String accept) {
-        addHeader("Content-Type", accept + ";charset=utf-8");
+        addHeader(CONTENT_TYPE, accept + ";charset=utf-8");
     }
 
     @Override
     public void addBody(String body) {
         this.body = body;
-        addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 
-    private void addHeader(String key, String value) {
-        headers.add(key, value);
+    private void addHeader(HttpHeaderName name, String value) {
+        headers.add(name, value);
     }
 
     @Override

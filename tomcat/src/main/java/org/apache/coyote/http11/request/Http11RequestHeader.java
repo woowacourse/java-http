@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.HttpHeaderName.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeaderName.COOKIE;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Http11RequestHeader {
-
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
 
     private final Map<String, List<String>> headers;
     private final RequestCookies cookies;
@@ -19,14 +19,14 @@ public class Http11RequestHeader {
     }
 
     public static Http11RequestHeader from(Map<String, List<String>> headers) {
-        RequestCookies cookies = RequestCookies.from(headers.getOrDefault(COOKIE, List.of()));
+        RequestCookies cookies = RequestCookies.from(headers.getOrDefault(COOKIE.getValue(), List.of()));
         Map<String, List<String>> values = Map.copyOf(headers);
         return new Http11RequestHeader(values, cookies);
     }
 
     public int getContentLength() {
-        if (headers.containsKey(CONTENT_LENGTH)) {
-            return Integer.parseInt(headers.get(CONTENT_LENGTH).getFirst());
+        if (headers.containsKey(CONTENT_LENGTH.getValue())) {
+            return Integer.parseInt(headers.get(CONTENT_LENGTH.getValue()).getFirst());
         }
         return 0;
     }

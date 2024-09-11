@@ -11,6 +11,7 @@ public class RequestBody {
 
     private static final String DATA_DELIMITER = "&";
     private static final String NAME_VALUE_DELIMITER = "=";
+    private static final int SPLIT_LIMIT = -1;
 
     private final Map<String, String> requestBody;
 
@@ -20,7 +21,7 @@ public class RequestBody {
             return;
         }
 
-        this.requestBody = Arrays.stream(rawRequestBody.split(DATA_DELIMITER))
+        this.requestBody = Arrays.stream(rawRequestBody.split(DATA_DELIMITER, SPLIT_LIMIT))
                 .collect(Collectors.toMap(this::parseKey, this::parseValue));
     }
 

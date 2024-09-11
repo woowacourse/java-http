@@ -6,8 +6,8 @@ public enum HttpStatus {
     FOUND(302, "Found"),
     ;
 
-    private int statusCode;
-    private String statusMessage;
+    private final int statusCode;
+    private final String statusMessage;
 
     HttpStatus(int statusCode, String statusMessage) {
         this.statusCode = statusCode;

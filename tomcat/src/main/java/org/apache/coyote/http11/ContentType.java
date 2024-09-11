@@ -9,9 +9,9 @@ public enum ContentType {
     APPLICATION_JAVASCRIPT("application/javascript", "js", true),
     ;
 
-    private String contentType;
-    private String fileExtension;
-    private boolean isTextContent;
+    private final String contentType;
+    private final String fileExtension;
+    private final boolean isTextContent;
 
     ContentType(String contentType, String fileExtension, boolean isTextContent) {
         this.contentType = contentType;

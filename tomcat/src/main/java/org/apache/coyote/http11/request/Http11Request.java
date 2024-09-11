@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
 
 public class Http11Request implements HttpRequest {
@@ -25,11 +24,6 @@ public class Http11Request implements HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-    }
-
-    @Override
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
     }
 
     @Override

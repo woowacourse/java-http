@@ -45,6 +45,10 @@ public class HttpResponse {
         return headers;
     }
 
+    public String getBody() {
+        return body;
+    }
+
     public void setContentType(final FileType fileType) {
         headers.add(HttpHeader.contentType(fileType));
     }

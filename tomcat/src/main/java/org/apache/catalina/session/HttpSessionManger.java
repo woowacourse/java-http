@@ -14,14 +14,17 @@ public class HttpSessionManger implements Manager {
         return HTTP_SESSION_MANGER;
     }
 
+    @Override
     public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);
     }
 
+    @Override
     public HttpSession findSession(String id) {
         return SESSIONS.get(id);
     }
 
+    @Override
     public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
     }

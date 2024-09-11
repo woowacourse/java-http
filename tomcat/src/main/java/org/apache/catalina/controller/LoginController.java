@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     private boolean checkAlreadyLogin(HttpCookie httpCookie) {
         String sessionId = httpCookie.findCookie(JSESSIONID);
         HttpSession session = HTTP_SESSION_MANGER.findSession(sessionId);
-        return session.getAttribute(HttpSession.USER_ATTRIBUTE) != null;
+        return session != null && session.getAttribute(HttpSession.USER_ATTRIBUTE) != null;
     }
 
     @Override

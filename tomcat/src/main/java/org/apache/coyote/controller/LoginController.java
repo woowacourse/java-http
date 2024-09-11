@@ -15,7 +15,7 @@ import org.apache.util.ResourceReader;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
 
-public class LoginController extends FrontController {
+public class LoginController extends AbstractController {
 
     private final UserService userService = UserService.getInstance();
     private final SessionService sessionService = SessionService.getInstance();

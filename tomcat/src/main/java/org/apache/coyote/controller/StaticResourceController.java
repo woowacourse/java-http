@@ -6,7 +6,7 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.util.ResourceReader;
 
-public class StaticResourceController extends FrontController {
+public class StaticResourceController extends AbstractController {
 
     private static final String STATIC_PREFIX = "static";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";

@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
-import org.apache.coyote.controller.FrontController;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(reader);
             HttpResponse httpResponse = new HttpResponse();
 
-            FrontController controller = RequestMapping.getController(httpRequest.getPath());
+            AbstractController controller = RequestMapping.getController(httpRequest.getPath());
             controller.service(httpRequest, httpResponse);
 
             String response = httpResponse.toString();

@@ -10,7 +10,7 @@ import org.apache.util.ResourceReader;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
 
-public class RegisterController extends FrontController {
+public class RegisterController extends AbstractController {
 
     private final UserService userService = UserService.getInstance();
 

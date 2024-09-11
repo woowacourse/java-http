@@ -9,11 +9,16 @@ public record RequestLine(
         HttpURL url,
         String version
 ) {
+    private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int HTTP_METHOD_IDX = 0;
+    private static final int URL_IDX = 1;
+    private static final int HTTP_VERSION_IDX = 2;
+
     public static RequestLine from(String requestLine) {
-        String[] tokens = requestLine.split(" ");
-        HttpMethod method = HttpMethod.from(tokens[0]);
-        HttpURL url = HttpURL.from(tokens[1]);
-        String version = tokens[2];
+        String[] tokens = requestLine.split(REQUEST_LINE_DELIMITER);
+        HttpMethod method = HttpMethod.from(tokens[HTTP_METHOD_IDX]);
+        HttpURL url = HttpURL.from(tokens[URL_IDX]);
+        String version = tokens[HTTP_VERSION_IDX];
         return new RequestLine(method, url, version);
     }
 

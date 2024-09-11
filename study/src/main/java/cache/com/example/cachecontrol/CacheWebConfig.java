@@ -16,13 +16,12 @@ public class CacheWebConfig implements WebMvcConfigurer {
     public void addInterceptors(final InterceptorRegistry registry) {
         WebContentInterceptor cacheInterceptor = new WebContentInterceptor();
         cacheInterceptor.setCacheControl(CacheControl.noCache().cachePrivate());
-        registry.addInterceptor(cacheInterceptor)
-                .excludePathPatterns(PREFIX_STATIC_RESOURCES + "/**");
+        registry.addInterceptor(cacheInterceptor);
 
         WebContentInterceptor resourceInterceptor = new WebContentInterceptor();
         CacheControl cacheControl = CacheControl.maxAge(Duration.ofDays(365)).cachePublic();
         resourceInterceptor.setCacheControl(cacheControl);
         registry.addInterceptor(resourceInterceptor)
-                .addPathPatterns(PREFIX_STATIC_RESOURCES + "/**");
+                .addPathPatterns(PREFIX_STATIC_RESOURCES + "/static/**");
     }
 }

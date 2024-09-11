@@ -7,9 +7,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.catalina.Controller;
-import org.apache.catalina.RequestMapper;
-import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapper;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
@@ -23,13 +22,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager;
     private final RequestMapper requestMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.sessionManager = SessionManager.getInstance();
-        this.requestMapper = new RequestMapper(sessionManager);
+        this.requestMapper = new RequestMapper();
     }
 
     @Override
@@ -87,15 +84,5 @@ public class Http11Processor implements Runnable, Processor {
     private void handle(HttpRequest request, HttpResponse response) {
         Controller controller = requestMapper.getController(request);
         controller.service(request, response);
-
-//        if (request.pointsTo(GET, "/")) {
-//            return HttpResponse.ok("Hello world!");
-//        }
-//
-//        try {
-//            return HttpResponse.withStaticFile(request.getPath().substring(1));
-//        } catch (Exception e) {
-//            return HttpResponse.notFound();
-//        }
     }
 }

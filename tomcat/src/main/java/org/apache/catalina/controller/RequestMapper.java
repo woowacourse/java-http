@@ -1,9 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.controller;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.Map;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapper {
@@ -11,7 +10,7 @@ public class RequestMapper {
     private final Map<String, Controller> controllers;
 
     // TODO: map을 외부에서 등록할 수 있도록 개선 필요
-    public RequestMapper(SessionManager sessionManager) {
+    public RequestMapper() {
         this.controllers = Map.of(
                 "/login", new LoginController(),
                 "/register", new RegisterController()

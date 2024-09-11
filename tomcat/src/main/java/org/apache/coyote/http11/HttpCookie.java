@@ -8,6 +8,8 @@ public class HttpCookie {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final String COOKIE_SEPARATOR = ";";
 
     private final Map<String, String> header;
 
@@ -20,9 +22,9 @@ public class HttpCookie {
             return new HttpCookie(Collections.emptyMap());
         }
         final var header = new HashMap<String, String>();
-        for (final var cookie : str.split(";")) {
-            final var key = cookie.split("=")[KEY_INDEX].strip();
-            final var value = cookie.split("=")[VALUE_INDEX].strip();
+        for (final var cookie : str.split(COOKIE_SEPARATOR)) {
+            final var key = cookie.split(KEY_VALUE_SEPARATOR)[KEY_INDEX].strip();
+            final var value = cookie.split(KEY_VALUE_SEPARATOR)[VALUE_INDEX].strip();
             header.put(key, value);
         }
         return new HttpCookie(header);

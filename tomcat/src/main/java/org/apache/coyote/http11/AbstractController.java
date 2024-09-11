@@ -16,8 +16,8 @@ public abstract class AbstractController implements Controller {
         }
 
         response.setSourceCode(request.getResources());
-        response.putHeader("Content-Length", request.getContentLength());
-        response.putHeader("Content-Type", request.getContentTypeToResponseText());
+        response.putHeader(HttpHeaderField.CONTENT_LENGTH.getValue(), request.getContentLength());
+        response.putHeader(HttpHeaderField.CONTENT_TYPE.getValue(), request.getContentTypeToResponseText());
     }
 
     protected abstract void doPost(HttpRequest request, HttpResponse response);

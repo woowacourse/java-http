@@ -6,6 +6,7 @@ public enum HttpHeaderField {
     CONTENT_LENGTH("Content-Length"),
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie"),
+    CONTENT_TYPE("Content-Type"),
     ;
 
     private final String value;

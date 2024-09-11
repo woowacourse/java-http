@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.ProtocolVersion;
 
 public record HttpResponse(ProtocolVersion protocolVersion, Status status,
                            Map<String, String> headers, Map<String, String> cookies, byte[] body) {

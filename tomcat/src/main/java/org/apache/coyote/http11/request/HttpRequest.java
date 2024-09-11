@@ -9,17 +9,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public record HttpRequest(
-        String method,
+        Method method,
         String path,
         Map<String, String> parameters,
         Map<String, String> headers,
         Map<String, String> cookies,
-        String protocolVersion,
+        ProtocolVersion protocolVersion,
         String body) {
 
     public static HttpRequest parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
-        String method = startLineParts[0];
+        Method method = Method.from(startLineParts[0]);
 
         String path = "";
         Map<String, String> parameters = Map.of();
@@ -30,7 +30,7 @@ public record HttpRequest(
             parameters = extractParameters(matcher.group(3));
         }
 
-        String protocolVersion = startLineParts[2];
+        ProtocolVersion protocolVersion = ProtocolVersion.from(startLineParts[2]);
         Map<String, String> headers = extractHeaders(lines);
         Map<String, String> cookies = extractCookies(headers.get("Cookie"));
 

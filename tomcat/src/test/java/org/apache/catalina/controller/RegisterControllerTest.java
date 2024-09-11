@@ -1,7 +1,6 @@
 package org.apache.catalina.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,45 +13,45 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("인덱스 컨트롤러")
-class IndexControllerTest {
+@DisplayName("가입 컨트롤러")
+class RegisterControllerTest {
 
-    private IndexController indexController;
+    private RegisterController registerController;
 
     @BeforeEach
     void setUp() {
-        this.indexController = new IndexController();
+        this.registerController = new RegisterController();
     }
 
-    @DisplayName("인덱스 컨트롤러는 get 요청 시 Index 페이지를 응답한다.")
+    @DisplayName("가입 컨트롤러는 가입 페이지를 반환한다.")
     @Test
     void doGet() throws IOException {
         // given
         List<String> headers = List.of(
-                "GET /index.html HTTP/1.1 ",
+                "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive "
         );
         HttpRequest request = HttpRequest.of(headers, "");
         HttpResponse response = new HttpResponse();
-        URL resource = getClass().getClassLoader().getResource("static/index.html");
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
         String expected = Files.readString(new File(resource.getFile()).toPath());
 
         // when
-        indexController.doGet(request, response);
+        registerController.doGet(request, response);
 
         // then
         assertThat(response).extracting("body")
                 .isEqualTo(expected);
     }
 
-    @DisplayName("인덱스 컨트롤러는 post 요청 시 지원하지 않는다는 예외를 발생한다.")
+    @DisplayName("가입 컨트롤러는 가입이 완료되면 인덱스 페이지로 리다이렉트 한다.")
     @Test
     void doPost() {
         // given
-        String body = "test=test";
+        String body = "account=test&password=test&email=test@gmail.com";
         List<String> headers = List.of(
-                "POST /login HTTP/1.1 ",
+                "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + body.getBytes().length + " ",
@@ -60,10 +59,15 @@ class IndexControllerTest {
         );
         HttpRequest request = HttpRequest.of(headers, body);
         HttpResponse response = new HttpResponse();
+        String expected = "/index.html";
 
-        // when & then
-        assertThatThrownBy(() -> indexController.doPost(request, response))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("POST는 지원하지 않습니다.");
+        // when
+        registerController.doPost(request, response);
+
+        // then
+        assertThat(response).extracting("httpHeader")
+                .extracting("headers")
+                .extracting("Location")
+                .isEqualTo(expected);
     }
 }

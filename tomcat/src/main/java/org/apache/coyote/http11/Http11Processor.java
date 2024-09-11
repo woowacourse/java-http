@@ -44,7 +44,6 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = handleHttp(plaintext);
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
-
         } catch (final IOException exception) {
             log.error("[I/O ERROR] : {}", exception.getMessage());
         }

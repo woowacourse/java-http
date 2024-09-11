@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.component.common.body;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public enum BodyMapper {
 
@@ -12,6 +14,10 @@ public enum BodyMapper {
     TEXT_JS("text/javascript", TextTypeBody::new),
     FORM_URL_ENCODED("application/x-www-form-urlencoded", FormUrlEncodeBody::new);
 
+    private static final Map<String, BodyMapper> CONVERTER = Arrays.stream(BodyMapper.values())
+            .collect(Collectors.toMap(BodyMapper::getMimeType, Function.identity()));
+
+
     private final String mimeType;
     private final Function<String, Body> mapping;
 
@@ -21,19 +27,10 @@ public enum BodyMapper {
     }
 
     public static Function<String, Body> getMapping(final String plaintext) {
-        final var bodyMapper = Stream.of(values())
-                .filter(value -> plaintext.equals(value.mimeType))
-                .findAny()
-                .orElseGet(() -> EMPTY);
-
-        return bodyMapper.mapping;
+        return CONVERTER.get(plaintext).mapping;
     }
 
     public String getMimeType() {
         return mimeType;
-    }
-
-    public Function<String, Body> getMapping() {
-        return mapping;
     }
 }

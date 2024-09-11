@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import java.io.IOException;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.body.RequestBody;

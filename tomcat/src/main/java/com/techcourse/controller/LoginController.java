@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import java.io.IOException;
-import org.apache.catalina.Session;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.request.HttpRequest;

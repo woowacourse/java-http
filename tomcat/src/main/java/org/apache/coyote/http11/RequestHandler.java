@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -61,12 +62,22 @@ public class RequestHandler {
     }
 
     private void register(Map<String, String> parsed) {
+        validateRegisterKeys(parsed);
         User newbie = new User(
                 parsed.get("account"),
                 parsed.get("password"),
                 parsed.get("email")
         );
         InMemoryUserRepository.save(newbie);
+    }
+
+    private void validateRegisterKeys(Map<String, String> parsed) {
+        Set<String> registerKeys = Set.of("account", "password", "email");
+        boolean allKeysPresent = registerKeys.stream()
+                .allMatch(parsed::containsKey);
+        if (!allKeysPresent) {
+            throw new NoSuchElementException("invalid query string");
+        }
     }
 
     private String generateLoginResponse() throws IOException {

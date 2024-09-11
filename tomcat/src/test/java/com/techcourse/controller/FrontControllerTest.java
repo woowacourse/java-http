@@ -25,7 +25,7 @@ class FrontControllerTest {
 
     @DisplayName("올바른 리소스에 대해 200 응답을 반환한다.")
     @Test
-    void index() throws IOException {
+    void findResource() throws IOException {
         // given
         final String request = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",

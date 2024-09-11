@@ -129,7 +129,7 @@ class Http11ProcessorTest {
     void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -219,7 +219,7 @@ class Http11ProcessorTest {
     void registerPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /register.html HTTP/1.1 ",
+                "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

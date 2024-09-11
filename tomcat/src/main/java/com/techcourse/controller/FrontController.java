@@ -7,9 +7,12 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.NoHandlerFoundException;
 import org.apache.coyote.http.StaticResourceHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FrontController implements Controller {
 
+    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
     private final Map<String, Controller> controllers;
 
     public FrontController() {
@@ -23,6 +26,7 @@ public class FrontController implements Controller {
     @Override
     public HttpResponse handle(final HttpRequest request) {
         String path = request.getPath();
+        log.info("FrontController.handle(): Request path: {}", path);
         Controller controller;
         if (controllers.containsKey(path)) {
             controller = controllers.get(path);

@@ -10,7 +10,6 @@ import org.apache.coyote.http.HttpStatusLine;
 
 public class RootController implements Controller {
 
-
     @Override
     public HttpResponse handle(final HttpRequest request) {
         var status = HttpStatusCode.OK;

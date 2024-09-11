@@ -57,7 +57,7 @@ public class HttpHeaders implements HttpComponent {
         for (String key : headers.keySet()) {
             String value = headers.get(key);
             result.append(key)
-                    .append(SEPARATOR)
+                    .append(": ")
                     .append(value)
                     .append(SPACE)
                     .append(LINE_FEED);

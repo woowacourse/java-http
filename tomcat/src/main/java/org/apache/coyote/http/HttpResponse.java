@@ -1,5 +1,6 @@
 package org.apache.coyote.http;
 
+import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
 public class HttpResponse implements HttpComponent {
@@ -39,7 +40,7 @@ public class HttpResponse implements HttpComponent {
     }
 
     public byte[] getBytes() {
-        return asString().getBytes();
+        return asString().getBytes(StandardCharsets.UTF_8);
     }
 
     @Override

@@ -53,10 +53,6 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public String getPathWithoutQuery() {
         return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
     }

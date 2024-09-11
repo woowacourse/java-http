@@ -50,11 +50,7 @@ public class Request {
         return requestLine.getHttpMethod().name();
     }
 
-    public String getPath() {
-        return requestLine.getPath();
-    }
-
-    public String getUrl() {
+    public String getPathWithoutQuery() {
         return requestLine.getPathWithoutQuery();
     }
 

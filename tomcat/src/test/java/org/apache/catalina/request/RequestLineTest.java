@@ -21,7 +21,6 @@ class RequestLineTest {
 
             assertAll(
                     () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                    () -> assertThat(requestLine.getPath()).isEqualTo("/"),
                     () -> assertThat(requestLine.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP),
                     () -> assertThat(requestLine.getHttpVersion()).isEqualTo("1.1")
             );
@@ -71,16 +70,6 @@ class RequestLineTest {
         HttpMethod actual = requestLine.getHttpMethod();
 
         assertThat(actual).isEqualTo(HttpMethod.GET);
-    }
-
-    @Test
-    @DisplayName("성공 : query가 포함된 url 조회 가능")
-    void getPath() {
-        RequestLine requestLine = new RequestLine("GET /index?account=gugu&password=password HTTP/1.1");
-
-        String actual = requestLine.getPath();
-
-        assertThat(actual).isEqualTo("/index?account=gugu&password=password");
     }
 
     @Test

@@ -83,28 +83,28 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response generateResponseForUrl(Request request) {
         String accept = request.getFileType();
-        if (ROOT_PATH.equals(request.getUrl())) {
+        if (ROOT_PATH.equals(request.getPathWithoutQuery())) {
             return new Response(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
         if (!request.checkQueryParamIsEmpty()) {
             return generateResponseForQueryParam(request);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getUrl(), request.getCookie());
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getPathWithoutQuery(), request.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             Response response = new Response(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
             response.addLocation(page.getFileName());
             return response;
         }
-        return new Response(HttpStatus.OK, accept, FileReader.loadFileContent(request.getUrl()));
+        return new Response(HttpStatus.OK, accept, FileReader.loadFileContent(request.getPathWithoutQuery()));
     }
 
     private Response generateResponseForQueryParam(Request headers) {
-        if (LOGIN_PATH.equals(headers.getUrl())) {
+        if (LOGIN_PATH.equals(headers.getPathWithoutQuery())) {
             return handleLoginRequest(headers);
         }
-        throw new RuntimeException("'" + headers.getUrl() + "'는 정의되지 않은 URL입니다.");
+        throw new RuntimeException("'" + headers.getPathWithoutQuery() + "'는 정의되지 않은 URL입니다.");
     }
 
     private Response handleLoginRequest(Request request) {
@@ -146,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response generateResponseForPostUrl(Request headers) {
-        String url = headers.getUrl();
+        String url = headers.getPathWithoutQuery();
         String accept = headers.getFileType();
         if (REGISTER_PATH.equals(url)) {
             return handleRegistration(headers.getBody(), accept);

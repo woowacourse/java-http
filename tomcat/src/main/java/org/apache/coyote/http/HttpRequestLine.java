@@ -33,7 +33,7 @@ public class HttpRequestLine implements HttpComponent {
         return requestUri.getPath();
     }
 
-    public String getQuery() {
+    public String getQueryString() {
         return requestUri.getQueryString();
     }
 
@@ -47,6 +47,8 @@ public class HttpRequestLine implements HttpComponent {
 
     @Override
     public String asString() {
-        return method + SPACE + requestUri + SPACE + version + SPACE;
+        return method.asString() + SPACE +
+                requestUri.asString() + SPACE +
+                version.asString() + SPACE;
     }
 }

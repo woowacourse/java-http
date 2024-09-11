@@ -1,4 +1,4 @@
-package acceptance;
+package integration;
 
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +10,7 @@ import util.StringUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LoginAcceptanceTest {
+class LoginIntegrationTest {
     @Test
     @DisplayName("로그인에 성공하면, 세션을 설정하고 302 상태코드와 index.html 로 리다이렉트한다.")
     void login_success() {

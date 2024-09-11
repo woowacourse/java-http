@@ -1,7 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.path;
 
-import org.apache.coyote.http11.path.Path;
-import org.apache.coyote.http11.path.PathParseException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

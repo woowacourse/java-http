@@ -1,8 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.file;
 
-import org.apache.coyote.file.ClassLoaderContext;
-import org.apache.coyote.file.Resource;
-import org.apache.coyote.file.ResourcesReader;
 import org.apache.coyote.http11.path.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

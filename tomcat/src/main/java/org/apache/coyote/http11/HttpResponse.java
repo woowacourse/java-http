@@ -7,6 +7,9 @@ import org.apache.coyote.view.View;
 
 public class HttpResponse {
 
+    private static final String LINE_DELIMITER = "\r\n";
+    private static final String DELIMITER = " ";
+
     private HttpStatus status;
     private HttpHeaders headers;
     private View view;
@@ -24,13 +27,20 @@ public class HttpResponse {
 
     private String getResponse() {
         List<String> response = new ArrayList<>();
-        response.add("HTTP/1.1 " + status.getCode() + " " + status.name() + " ");
+        response.add(getStartLine());
         response.addAll(headers.getHeaders());
         response.add("");
         if (view != null) {
             response.add(view.getContent());
         }
-        return String.join("\r\n", response);
+        return String.join(LINE_DELIMITER, response);
+    }
+
+    private String getStartLine() {
+        return String.join(DELIMITER,
+                "HTTP/1.1",
+                String.valueOf(status.getCode()),
+                status.name()) + DELIMITER;
     }
 
     public int getCode() {

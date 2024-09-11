@@ -16,6 +16,9 @@ public class HttpHeaders {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String DELIMITER = ": ";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String UTF_8 = ";charset=utf-8";
 
     private Map<String, String> store;
 
@@ -34,8 +37,8 @@ public class HttpHeaders {
     public static HttpHeaders create(View view, ContentType contentType) {
         Map<String, String> store = new LinkedHashMap<>();
         if (view != null && contentType != null) {
-            store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
-            store.put("Content-Length", String.valueOf(view.getContent().getBytes().length));
+            store.put(CONTENT_TYPE, contentType.getValue() + UTF_8);
+            store.put(CONTENT_LENGTH, String.valueOf(view.getContent().getBytes().length));
         }
         return new HttpHeaders(store);
     }

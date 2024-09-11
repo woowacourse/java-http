@@ -17,6 +17,9 @@ public class HttpQuery {
     }
 
     public static HttpQuery createByUri(String uri) {
+        if (!uri.contains(QUERY_START_CHAR)) {
+            return null;
+        }
         validateUri(uri);
         validateQueryCharacter(uri);
         String queries = uri.substring(uri.indexOf(QUERY_START_CHAR) + 1);
@@ -38,5 +41,12 @@ public class HttpQuery {
 
     public String findByKey(String key) {
         return query.findByKey(key);
+    }
+
+    public static String extractPath(String uri) {
+        if (uri.contains(QUERY_START_CHAR)) {
+            return uri.substring(0, uri.indexOf(QUERY_START_CHAR));
+        }
+        return uri;
     }
 }

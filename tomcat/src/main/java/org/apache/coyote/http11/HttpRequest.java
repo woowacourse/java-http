@@ -5,6 +5,7 @@ import org.apache.coyote.http11.query.Query;
 
 public class HttpRequest {
     private static final int START_LINE_INDEX = 0;
+    private static final String DELIMITER = "\r\n";
 
     private HttpRequestStartLine startLine;
     private HttpHeaders httpHeaders;
@@ -18,7 +19,7 @@ public class HttpRequest {
     }
 
     public static HttpRequest create(String raw) {
-        String[] lines = raw.split("\r\n");
+        String[] lines = raw.split(DELIMITER);
         HttpRequestStartLine startLine = HttpRequestStartLine.create(lines[START_LINE_INDEX]);
         HttpHeaders headers = new HttpHeaders();
         Query body = null;

@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.HttpStatus;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

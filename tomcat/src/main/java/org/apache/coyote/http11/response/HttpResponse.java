@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.MediaType;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
-    
+
     private HttpStatusLine httpStatusLine;
     private HttpResponseHeader httpResponseHeader;
     private String httpResponseBody;
@@ -35,16 +34,13 @@ public class HttpResponse {
         this.httpResponseHeader.setJSessionId(jSessionId);
     }
 
-    public void setContentType(HttpRequest httpRequest) {
-        if (httpRequest.matchesFileExtension(".css")) {
-            this.httpResponseHeader.add("Content-Type", MediaType.TEXT_CSS.getValue());
-            return;
-        }
-        if (httpRequest.matchesFileExtension(".js")) {
-            this.httpResponseHeader.add("Content-Type", MediaType.APPLICATION_JAVASCRIPT.getValue());
-            return;
-        }
-        this.httpResponseHeader.add("Content-Type", MediaType.TEXT_HTML.getValue());
+    public void setContentType(ContentType contentType) {
+        this.httpResponseHeader.add("Content-Type", contentType.getContentType());
+    }
+
+    public void setContentType(String fileExtension) {
+        ContentType contentType = ContentType.findByFileExtension(fileExtension);
+        this.httpResponseHeader.add("Content-Type", contentType.getContentType());
     }
 
     public void setHttpResponseBody(String resourceName) throws IOException {

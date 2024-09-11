@@ -4,8 +4,9 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.UUID;
-import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -30,7 +31,7 @@ public class LoginController extends AbstractController {
             response.setHttpStatus(HttpStatus.FOUND);
             return;
         }
-        response.setContentType(request);
+        response.setContentType(ContentType.TEXT_HTML);
         response.setHttpResponseBody(request.getUrlPath());
     }
 
@@ -52,18 +53,18 @@ public class LoginController extends AbstractController {
             Session session = new Session(sessionId.toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
-            
+
             response.setJSessionId(session.getId());
             response.addHttpResponseHeader("Location", "/index.html");
             response.setHttpStatus(HttpStatus.FOUND);
-            response.setContentType(request);
+            response.setContentType(ContentType.TEXT_HTML);
             response.setHttpResponseBody(request.getUrlPath());
             log.info("user : {}", user);
 
         } catch (IllegalArgumentException e) {
             response.addHttpResponseHeader("Location", "/401.html");
             response.setHttpStatus(HttpStatus.FOUND);
-            response.setContentType(request);
+            response.setContentType(ContentType.TEXT_HTML);
             response.setHttpResponseBody(request.getUrlPath());
         }
     }

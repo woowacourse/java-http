@@ -10,7 +10,6 @@ public class RequestMapping {
     public RequestMapping() {
         this.controllers = Map.of(
                 "/", new HelloController(),
-                "/index.html", new IndexController(),
                 "/register", new RegisterController(),
                 "/login", new LoginController()
         );
@@ -21,6 +20,6 @@ public class RequestMapping {
         if (this.controllers.containsKey(urlPath)) {
             return this.controllers.get(urlPath);
         }
-        return new IndexController();
+        return new StaticResourceController();
     }
 }

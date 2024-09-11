@@ -78,10 +78,6 @@ public class HttpRequest {
         return this.httpRequestLine.matchesMethod(httpMethod);
     }
 
-    public boolean matchesFileExtension(String fileExtension) {
-        return this.httpRequestLine.matchesFileExtension(fileExtension);
-    }
-
     public String findRequestBodyBy(String key) {
         return this.httpRequestBody.findBy(key);
     }
@@ -92,5 +88,9 @@ public class HttpRequest {
 
     public String getUrlPath() {
         return this.httpRequestLine.getUrlPath();
+    }
+
+    public String getFileExtension() {
+        return this.httpRequestLine.getFileExtension();
     }
 }

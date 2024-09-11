@@ -1,6 +1,14 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Objects;
+import org.apache.catalina.DefaultDispatcher;
+import org.apache.catalina.RequestMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,32 +16,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 class Http11ProcessorTest {
 
     @DisplayName("HTTP/1.1 요청을 처리한다.")
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        StubSocket socket = new StubSocket();
+        Http11Processor processor = getProcessor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Length: 12",
-                "Content-Type: text/html;charset=utf-8",
-                "",
-                "Hello world!");
+        String expected = String.join("\r\n",
+                "HTTP/1.1 404 Not Found",
+                "Content-Length: 0",
+                "", "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -56,7 +55,7 @@ class Http11ProcessorTest {
 
             // when
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = getProcessor(socket);
             processor.process(socket);
 
             // then
@@ -83,7 +82,7 @@ class Http11ProcessorTest {
 
             // when
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = getProcessor(socket);
             processor.process(socket);
 
             // then
@@ -101,5 +100,9 @@ class Http11ProcessorTest {
             URL resource = getClass().getClassLoader().getResource("static/" + fileName);
             return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         }
+    }
+
+    private Http11Processor getProcessor(StubSocket socket) {
+        return new Http11Processor(socket, new DefaultDispatcher(new RequestMapper()));
     }
 }

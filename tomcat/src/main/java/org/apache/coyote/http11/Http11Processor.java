@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.controller.Controller;
-import org.apache.catalina.util.StaticResourceReader;
+import org.apache.coyote.Dispatcher;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -18,14 +16,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_ERROR_PAGE = "/500.html";
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
+    private final Dispatcher dispatcher;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, Dispatcher dispatcher) {
         this.connection = connection;
-        this.requestMapping = RequestMapping.getInstance();
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -49,13 +46,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {
-        Controller controller = requestMapping.getController(request);
         try {
-            controller.service(request, response);
+            dispatcher.dispatch(request, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            response.setStatus(HttpStatusCode.INTERNAL_SERVER_ERROR)
-                    .setBody(StaticResourceReader.read(DEFAULT_ERROR_PAGE));
+            response.setStatus(HttpStatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 

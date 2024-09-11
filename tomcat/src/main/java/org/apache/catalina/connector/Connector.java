@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +17,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final Dispatcher dispatcher;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(Dispatcher dispatcher) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, dispatcher);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(int port, int acceptCount, Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(int port, int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -61,11 +64,11 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(Socket connection) {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, dispatcher);
         Thread thread = new Thread(processor);
         log.info("new thread created: {}", thread.threadId());
         thread.start();
@@ -80,7 +83,7 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
+    private int checkPort(int port) {
         final var MIN_PORT = 1;
         final var MAX_PORT = 65535;
 
@@ -90,7 +93,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
+    private int checkAcceptCount(int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

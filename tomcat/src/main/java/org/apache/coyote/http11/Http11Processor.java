@@ -7,6 +7,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/register")) {
                 processRegister(httpRequest, outputStream);
             }
-            processFile(outputStream, new HttpResponse(httpRequest.getPath(), httpRequest.getFileType(), 200, "OK", null, null));
+            processFile(outputStream, new HttpResponse(httpRequest.getPath(), httpRequest.getFileType(), HttpStatusCode.OK, null, null));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -65,8 +66,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private void processHome(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
-        HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
-        outputStream.write(httpResponse.response2xx().getBytes());
+        HttpResponse httpResponse = new HttpResponse(null, "html", HttpStatusCode.OK, null, responseBody);
+        outputStream.write(httpResponse.toString().getBytes());
         outputStream.flush();
     }
 
@@ -77,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         httpResponse.setResponseBody(responseBody);
-        outputStream.write(httpResponse.response2xx().getBytes());
+        outputStream.write(httpResponse.toString().getBytes());
         outputStream.flush();
     }
 
@@ -88,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         httpResponse.setResponseBody(responseBody);
-        outputStream.write(httpResponse.response3xx().getBytes());
+        outputStream.write(httpResponse.toString().getBytes());
         outputStream.flush();
     }
 
@@ -96,8 +97,8 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.getMethod().equals("GET")) {
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
-            outputStream.write(httpResponse.response2xx().getBytes());
+            HttpResponse httpResponse = new HttpResponse(null, "html", HttpStatusCode.OK, null, responseBody);
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         }
 
@@ -108,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
             String email = body.get("email").getFirst();
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", null, null);
+            HttpResponse httpResponse = new HttpResponse("/index.html", "html", HttpStatusCode.FOUND, null, null);
             processRedirect(outputStream, httpResponse);
         }
     }
@@ -118,15 +119,15 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> cookies = httpRequest.getCookies();
             if (cookies.containsKey("JSESSIONID")) {
                 if (sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
-                    HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", null, null);
+                    HttpResponse httpResponse = new HttpResponse("/index.html", "html", HttpStatusCode.FOUND, null, null);
                     processRedirect(outputStream, httpResponse);
                 }
             }
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
-            outputStream.write(httpResponse.response2xx().getBytes());
+            HttpResponse httpResponse = new HttpResponse(null, "html", HttpStatusCode.OK, null, responseBody);
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         }
 
@@ -150,11 +151,11 @@ public class Http11Processor implements Runnable, Processor {
                 session.setAttribute("user", user);
                 Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
                 sessionManager.add(session);
-                HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", http11Cookie, null);
+                HttpResponse httpResponse = new HttpResponse("/index.html", "html", HttpStatusCode.FOUND, http11Cookie, null);
                 processRedirect(outputStream, httpResponse);
                 return;
             }
-            HttpResponse httpResponse = new HttpResponse("/401.html", "html", 302, "Found", null, null);
+            HttpResponse httpResponse = new HttpResponse("/401.html", "html", HttpStatusCode.FOUND, null, null);
             processRedirect(outputStream, httpResponse);
         }
 

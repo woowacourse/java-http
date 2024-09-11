@@ -5,33 +5,41 @@ import org.apache.coyote.http11.Http11Cookie;
 public class HttpResponse {
     private final String path;
     private final String fileType;
-    private final Integer statusCode;
-    private final String statusPhrase;
+    private final HttpStatusCode httpStatusCode;
     private final Http11Cookie http11Cookie;
     private String responseBody;
 
-    public HttpResponse(String path, String fileType, Integer statusCode, String statusPhrase,
-                        Http11Cookie http11Cookie, String responseBody) {
+    public HttpResponse(String path, String fileType, HttpStatusCode httpStatusCode, Http11Cookie http11Cookie, String responseBody) {
         this.path = path;
         this.fileType = fileType;
-        this.statusCode = statusCode;
-        this.statusPhrase = statusPhrase;
+        this.httpStatusCode = httpStatusCode;
         this.http11Cookie = http11Cookie;
         this.responseBody = responseBody;
     }
 
-    public String response2xx() {
+    @Override
+    public String toString() {
+        if (httpStatusCode.is2xxCode()) {
+            return response2xx();
+        }
+        if (httpStatusCode.is3xxCode()) {
+            return response3xx();
+        }
+        throw new IllegalArgumentException("Invalid Response");
+    }
+
+    private String response2xx() {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusPhrase,
+                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
-    public String response3xx() {
+    private String response3xx() {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusPhrase,
+                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
                 includeCookie(),
                 "Location: " + path,
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
@@ -53,14 +61,6 @@ public class HttpResponse {
 
     public String getFileType() {
         return fileType;
-    }
-
-    public Integer getStatusCode() {
-        return statusCode;
-    }
-
-    public String getStatusPhrase() {
-        return statusPhrase;
     }
 
     public Http11Cookie getHttp11Cookie() {

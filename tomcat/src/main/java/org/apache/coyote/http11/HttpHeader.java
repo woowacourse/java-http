@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpHeader {
@@ -48,8 +49,12 @@ public class HttpHeader {
         }
     }
 
+    public Optional<String> find(String name) {
+        return Optional.ofNullable(headers.get(name));
+    }
+
     public String get(String name) {
-        return headers.get(name);
+        return find(name).orElseThrow(() -> new UncheckedServletException(name + " 헤더가 존재하지 않습니다."));
     }
 
     public boolean contains(String name) {

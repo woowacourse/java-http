@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import com.techcourse.exception.UncheckedServletException;
+import java.util.Optional;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.response.HttpHeaderType;
@@ -29,15 +31,20 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpCookie getCookie() {
-        return new HttpCookie(httpHeader.get(HttpHeaderType.COOKIE.getName()));
-    }
-
     public boolean hasSession() {
-        return getCookie().hasSession();
+        return findCookie()
+                .map(HttpCookie::hasSession)
+                .orElse(false);
     }
 
     public String getSession() {
-        return getCookie().getSession();
+        return findCookie()
+                .orElseThrow(() -> new UncheckedServletException("쿠키가 존재하지 않습니다."))
+                .getSession();
+    }
+
+    private Optional<HttpCookie> findCookie() {
+        return httpHeader.find(HttpHeaderType.COOKIE.getName())
+                .map(HttpCookie::new);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.handler;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +10,7 @@ import org.apache.coyote.http11.MimeType;
 public class StaticResourceRequestHandler extends AbstractRequestHandler {
 
     @Override
-    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String body = ResourceReader.readFile(httpRequest.getRequestURI());
         httpResponse.ok(getContentType(httpRequest), body, StandardCharsets.UTF_8);
     }

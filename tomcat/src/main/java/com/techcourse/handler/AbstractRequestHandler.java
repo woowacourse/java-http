@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.handler;
 
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -7,7 +7,7 @@ import org.apache.coyote.RequestHandler;
 public abstract class AbstractRequestHandler implements RequestHandler {
 
     @Override
-    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         if (httpRequest.isGet()) {
             get(httpRequest, httpResponse);
         }
@@ -16,7 +16,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
         }
     }
 
-    protected abstract void get(HttpRequest httpRequest, HttpResponse httpResponse);
+    protected abstract void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception;
 
     protected abstract void post(HttpRequest httpRequest, HttpResponse httpResponse);
 }

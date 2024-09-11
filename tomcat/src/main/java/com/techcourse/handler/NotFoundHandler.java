@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.handler;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +11,7 @@ public class NotFoundHandler extends AbstractRequestHandler {
     private static final String NOT_FOUND_RESOURCE = "/404.html";
 
     @Override
-    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String body = ResourceReader.readFile(NOT_FOUND_RESOURCE);
         httpResponse.notFound(body, StandardCharsets.UTF_8);
     }

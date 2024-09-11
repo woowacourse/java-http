@@ -2,15 +2,14 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.handler.NotFoundHandler;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.handler.NotFoundHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;
 import org.apache.coyote.http11.request.Http11RequestHeaders;
@@ -25,7 +24,7 @@ public class NotFoundHandlerTest {
 
     @DisplayName("존재하지 않는 리소스를 요청하면 404 페이지를 응답한다.")
     @Test
-    void handle1() throws IOException {
+    void handle1() throws Exception {
         Http11RequestLine requestLine = new Http11RequestLine("GET /nothing HTTP/1.1");
         Http11RequestHeaders headers = new Http11RequestHeaders(List.of());
         Http11RequestBody requestBody = new Http11RequestBody("");

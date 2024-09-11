@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.ObjectMapper;
@@ -10,7 +8,7 @@ import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.RequestHandlerMapping;
+import org.apache.coyote.RequestHandlerMapper;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +18,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestHandlerMapping requestHandlerMapping;
+    private final RequestHandlerMapper requestHandlerMapper;
 
     public Http11Processor(final Socket connection) {
+        this(connection, new RequestHandlerMapper());
+    }
+
+    public Http11Processor(final Socket connection, final RequestHandlerMapper requestHandlerMapper) {
         this.connection = connection;
-        this.requestHandlerMapping = new RequestHandlerMapping();
+        this.requestHandlerMapper = requestHandlerMapper;
     }
 
 
@@ -43,13 +45,13 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = ObjectMapper.deserialize(bufferedReader);
 
-            RequestHandler requestHandler = requestHandlerMapping.getRequestHandler(request);
+            RequestHandler requestHandler = requestHandlerMapper.getRequestHandler(request);
             HttpResponse response = new Http11Response();
             requestHandler.handle(request, response);
 
             outputStream.write(ObjectMapper.serialize(response));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

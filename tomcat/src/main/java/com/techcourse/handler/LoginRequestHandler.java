@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -24,7 +24,7 @@ public class LoginRequestHandler extends AbstractRequestHandler {
     private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
     @Override
-    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         if (httpRequest.existsSession()) {
             Session session = httpRequest.getSession();
             User user = (User) session.getAttribute(USER_SESSION_ATTRIBUTE_NAME);

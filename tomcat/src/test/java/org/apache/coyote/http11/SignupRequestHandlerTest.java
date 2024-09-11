@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.handler.SignupRequestHandler;
 import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.handler.SignupRequestHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;
 import org.apache.coyote.http11.request.Http11RequestHeaders;
@@ -23,7 +23,7 @@ public class SignupRequestHandlerTest {
 
     @DisplayName("회원가입을 하면 /index.html로 리다이렉트 한다.")
     @Test
-    void handle1() {
+    void handle1() throws Exception {
         String body = "account=test&email=test@test&password=test";
         Http11RequestLine requestLine = new Http11RequestLine("POST /register HTTP/1.1");
         Http11RequestHeaders headers = new Http11RequestHeaders(

@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.handler.LoginRequestHandler;
 import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.handler.LoginRequestHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;
 import org.apache.coyote.http11.request.Http11RequestHeaders;
@@ -22,7 +22,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("로그인을 하면 /index.html로 리다이렉트 한다.")
     @Test
-    void handle1() {
+    void handle1() throws Exception {
         String body = "account=gugu&password=password";
         Http11RequestLine requestLine = new Http11RequestLine("POST /login HTTP/1.1");
         Http11RequestHeaders headers = new Http11RequestHeaders(
@@ -40,7 +40,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("쿠키에 세션 id가 존재하면, /login GET 요청 시 /index.html로 리다이렉트 된다.")
     @Test
-    void handle2() {
+    void handle2() throws Exception {
         Http11RequestLine requestLine = new Http11RequestLine("GET /login HTTP/1.1");
         Http11RequestHeaders headers = new Http11RequestHeaders(
                 List.of("Cookie: JSESSIONID=123")
@@ -50,7 +50,7 @@ class LoginRequestHandlerTest {
         HttpResponse response = new Http11Response();
 
         handler.handle(request, response);
-        
+
         String actual = response.getResponseMessage();
         String expectedResponseLine = "HTTP/1.1 302 Found";
         String expectedLocation = "/index.html";

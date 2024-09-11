@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -21,7 +21,7 @@ public class SignupRequestHandler extends AbstractRequestHandler {
     private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
     @Override
-    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String body = ResourceReader.readFile(httpRequest.getRequestURI());
         httpResponse.ok(MimeType.HTML, body, StandardCharsets.UTF_8);
     }

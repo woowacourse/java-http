@@ -133,17 +133,15 @@ class IOStreamTest {
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
 
-            // 바이트 -> 문자열
-            // 1) inputStreamReader로 변환
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-            // 2) int 값을 문자열로 변환
-            StringBuilder sb = new StringBuilder();
-            for (int data = inputStreamReader.read(); data != -1; data = inputStreamReader.read()) {
-                sb.append((char) data);
+            byte[] bytesData = new byte[4];
+            int data;
+            int count = 0;
+            while ((data = inputStream.read()) != -1) {
+                bytesData[count] = (byte) data;
+                count++;
             }
 
-            final String actual = sb.toString();
+            final String actual = new String(bytesData);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -231,6 +229,8 @@ class IOStreamTest {
             assertThat(count).isEqualTo(3);
 
             inputStream.close();
+            inputStreamReader.close();
+            bufferedReader.close();
         }
     }
 }

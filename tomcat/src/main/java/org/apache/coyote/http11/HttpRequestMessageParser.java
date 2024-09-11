@@ -36,7 +36,7 @@ public class HttpRequestMessageParser {
         }
 
         String body = null;
-        if (startLine.startsWith("POST")) {
+        if (headerKeyValue.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(headerKeyValue.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);

@@ -31,7 +31,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final URL resource = FileTest.class.getResource("/" + fileName);
+        final URL resource = getClass().getClassLoader().getResource(fileName);
         final String actual = resource.toString();
 
         assertThat(actual).endsWith(fileName);

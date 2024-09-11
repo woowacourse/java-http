@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) throws UncheckedServletException {
+    public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {

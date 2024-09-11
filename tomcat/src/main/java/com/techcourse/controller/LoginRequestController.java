@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -10,13 +10,14 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.AbstractRequestHandler;
 import org.apache.coyote.http11.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginRequestHandler extends AbstractRequestHandler {
+public class LoginRequestController extends AbstractRequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginRequestController.class);
     private static final String SUCCESS_LOGIN_REDIRECTION_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String ACCOUNT_KEY = "account";

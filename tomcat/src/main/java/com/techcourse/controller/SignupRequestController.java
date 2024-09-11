@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -10,9 +10,10 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.AbstractRequestHandler;
 import org.apache.coyote.http11.MimeType;
 
-public class SignupRequestHandler extends AbstractRequestHandler {
+public class SignupRequestController extends AbstractRequestHandler {
 
     private static final String REDIRECTION_PATH = "/index.html";
     private static final String ACCOUNT_KEY = "account";

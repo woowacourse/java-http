@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.handler.RootRequestHandler;
+import com.techcourse.controller.RootRequestController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +18,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
-        requestHandlerMapper.addController(new RootRequestHandler(), "/");
+        requestHandlerMapper.addController(new RootRequestController(), "/");
         final var processor = new Http11Processor(socket, requestHandlerMapper);
 
         // when

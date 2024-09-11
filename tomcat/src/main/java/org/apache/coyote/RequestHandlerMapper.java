@@ -1,7 +1,6 @@
 package org.apache.coyote;
 
-import com.techcourse.handler.NotFoundHandler;
-import com.techcourse.handler.StaticResourceRequestHandler;
+import com.techcourse.controller.NotFoundController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.ResourceReader;
@@ -30,7 +29,7 @@ public class RequestHandlerMapper {
                 .filter(entry -> entry.getKey().equals(httpRequest.getPath()))
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElse(new NotFoundHandler());
+                .orElse(new NotFoundController());
     }
 
     private boolean isStaticResourceRequest(HttpRequest httpRequest) {

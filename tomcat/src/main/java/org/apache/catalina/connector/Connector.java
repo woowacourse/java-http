@@ -1,8 +1,8 @@
 package org.apache.catalina.connector;
 
-import com.techcourse.handler.LoginRequestHandler;
-import com.techcourse.handler.RootRequestHandler;
-import com.techcourse.handler.SignupRequestHandler;
+import com.techcourse.controller.LoginRequestController;
+import com.techcourse.controller.RootRequestController;
+import com.techcourse.controller.SignupRequestController;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -70,9 +70,9 @@ public class Connector implements Runnable {
             return;
         }
         RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
-        requestHandlerMapper.addController(new LoginRequestHandler(), "/login");
-        requestHandlerMapper.addController(new SignupRequestHandler(), "/register");
-        requestHandlerMapper.addController(new RootRequestHandler(), "/");
+        requestHandlerMapper.addController(new LoginRequestController(), "/login");
+        requestHandlerMapper.addController(new SignupRequestController(), "/register");
+        requestHandlerMapper.addController(new RootRequestController(), "/");
         var processor = new Http11Processor(connection, requestHandlerMapper);
         new Thread(processor).start();
     }

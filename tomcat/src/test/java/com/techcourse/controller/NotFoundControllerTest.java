@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,9 +17,9 @@ import org.apache.coyote.http11.response.Http11Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class NotFoundHandlerTest {
+public class NotFoundControllerTest {
 
-    private RequestHandler handler = new NotFoundHandler();
+    private RequestHandler handler = new NotFoundController();
 
     @DisplayName("존재하지 않는 리소스를 요청하면 404 페이지를 응답한다.")
     @Test

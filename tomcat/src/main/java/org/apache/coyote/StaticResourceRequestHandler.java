@@ -1,10 +1,9 @@
-package com.techcourse.handler;
+package org.apache.coyote;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.AbstractRequestHandler;
 import org.apache.coyote.http11.MimeType;
 
 public class StaticResourceRequestHandler extends AbstractRequestHandler {

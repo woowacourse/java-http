@@ -1,12 +1,13 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.AbstractRequestHandler;
 
-public class NotFoundHandler extends AbstractRequestHandler {
+public class NotFoundController extends AbstractRequestHandler {
 
     private static final String NOT_FOUND_RESOURCE = "/404.html";
 

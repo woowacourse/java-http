@@ -12,9 +12,10 @@ import org.apache.catalina.exception.CatalinaException;
 public class HttpHeaders {
 
     private static final String SEPARATOR = ": ";
-    public static final String COOKIE_HEADER = HttpHeader.COOKIE.getValue() + SEPARATOR;
+    private static final String COOKIE_HEADER = HttpHeader.COOKIE.getValue() + SEPARATOR;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int COMPONENT_COUNT = 2;
 
     private final Map<String, String> headers;
     private final HttpCookies cookies;
@@ -37,7 +38,7 @@ public class HttpHeaders {
     private static Map<String, String> parseHeaders(List<String> httpHeaders) {
         return httpHeaders.stream()
                 .filter(header -> !header.startsWith(COOKIE_HEADER))
-                .map(HttpHeaders::validateAndSplit)
+                .map(HttpHeaders::split)
                 .collect(Collectors.toMap(
                         header -> header[KEY_INDEX],
                         header -> header[VALUE_INDEX]
@@ -53,9 +54,9 @@ public class HttpHeaders {
                 .orElse(new HttpCookies());
     }
 
-    private static String[] validateAndSplit(String header) {
+    private static String[] split(String header) {
         String[] keyAndValue = header.split(SEPARATOR);
-        if (keyAndValue.length == 2) {
+        if (keyAndValue.length == COMPONENT_COUNT) {
             return keyAndValue;
         }
         throw new CatalinaException("Invalid header: " + header);

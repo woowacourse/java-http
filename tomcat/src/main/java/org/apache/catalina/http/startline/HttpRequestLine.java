@@ -5,6 +5,12 @@ import org.apache.catalina.exception.CatalinaException;
 
 public class HttpRequestLine {
 
+    private static final String SEPARATOR = " ";
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final int REQUEST_LINE_ELEMENT_COUNT = 3;
+
     private final HttpMethod httpMethod;
     private final RequestURI requestURI;
     private final HttpVersion httpVersion;
@@ -18,16 +24,16 @@ public class HttpRequestLine {
     public static HttpRequestLine parse(String startLine) {
         String[] separatedStartLine = split(startLine);
         return new HttpRequestLine(
-                HttpMethod.valueOf(separatedStartLine[0]),
-                new RequestURI(separatedStartLine[1]),
-                HttpVersion.parse(separatedStartLine[2])
+                HttpMethod.valueOf(separatedStartLine[HTTP_METHOD_INDEX]),
+                new RequestURI(separatedStartLine[REQUEST_URI_INDEX]),
+                HttpVersion.parse(separatedStartLine[HTTP_VERSION_INDEX])
         );
     }
 
     private static String[] split(String startLine) {
-        String[] values = startLine.split(" ");
-        if (values.length == 3) {
-            return values;
+        String[] elements = startLine.split(SEPARATOR);
+        if (elements.length == REQUEST_LINE_ELEMENT_COUNT) {
+            return elements;
         }
         throw new CatalinaException("Invalid start line: " + startLine);
     }

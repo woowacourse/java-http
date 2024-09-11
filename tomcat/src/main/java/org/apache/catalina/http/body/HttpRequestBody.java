@@ -11,6 +11,7 @@ public class HttpRequestBody {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int COMPONENT_COUNT = 2;
 
     private final Map<String, String> body;
 
@@ -30,6 +31,14 @@ public class HttpRequestBody {
                         parameter -> parameter[VALUE_INDEX]
                 ));
         return new HttpRequestBody(body);
+    }
+
+    private String[] split(String parameter) {
+        String[] keyAndValue = parameter.split("=");
+        if (keyAndValue.length == COMPONENT_COUNT) {
+            return keyAndValue;
+        }
+        throw new CatalinaException("Invalid parameter: " + parameter);
     }
 
     public String get(String key) {

@@ -38,11 +38,21 @@ public class Http11Processor implements Runnable, Processor {
 
             Controller controller = ControllerMapper.map(request.getPath());
             HttpResponse response = controller.process(request);
+            setResponse(response);
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void setResponse(HttpResponse response) throws IOException {
+        String contentType = FileReader.probeContentType(response.getLocation());
+        response.setContentType(contentType);
+
+        String responseBody = FileReader.read(response.getLocation());
+        response.setContentLength(responseBody.getBytes().length);
+        response.setBody(responseBody);
     }
 }

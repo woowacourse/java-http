@@ -23,5 +23,10 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static long getLastId() {
+        return database.size();
+    }
+
+    private InMemoryUserRepository() {
+    }
 }

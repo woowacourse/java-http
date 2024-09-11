@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import org.apache.coyote.http11.cookie.HttpCookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -20,19 +23,22 @@ public class HttpRequest {
 
     public static HttpRequest of(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
         RequestLine requestLine = new RequestLine(reader.readLine());
-
-        List<String> headers = reader.lines()
-                .takeWhile(s -> !s.isBlank())
-                .toList();
-        RequestHeaders requestHeaders = new RequestHeaders(headers);
+        RequestHeaders requestHeaders = getRequestHeaders(reader);
 
         if (requestLine.isPost()) {
-            return new HttpRequest(requestLine, requestHeaders, parseRequestBody(reader, requestHeaders.getContentLength()));
+            RequestBody body = parseRequestBody(reader, requestHeaders.getContentLength());
+            return new HttpRequest(requestLine, requestHeaders, body);
         }
 
         return new HttpRequest(requestLine, requestHeaders, null);
+    }
+
+    private static RequestHeaders getRequestHeaders(BufferedReader reader) {
+        List<String> headers = reader.lines()
+                .takeWhile(s -> !s.isBlank())
+                .toList();
+        return new RequestHeaders(headers);
     }
 
     private static RequestBody parseRequestBody(BufferedReader reader, int contentLength) throws IOException {
@@ -49,27 +55,37 @@ public class HttpRequest {
         return requestLine.isPost();
     }
 
-    public boolean isSameUri(final String uri) {
-        return this.requestLine.isSamePath(uri);
-    }
-
     public String findBodyValueByKey(final String key) {
         return body.findByKey(key);
     }
 
-    public String getCookie() {
-        return getHeader("Cookie"); // TODO: 상수 처리하기
+    public boolean sessionNotExists() {
+        String cookieString = headers.getCookieString();
+
+        if (cookieString == null) {
+            return true;
+        }
+
+        HttpCookies cookies = new HttpCookies(cookieString);
+        return !cookies.hasJSESSIONID();
     }
 
-    public String getHeader(final String name) {
-        return headers.findHeader(name);
+    public Session getSession(boolean createIfNotExists) {
+        if (sessionNotExists() && createIfNotExists) {
+            Session session = new Session();
+            SessionManager.getInstance().add(session);
+            return session;
+        }
+
+        if (sessionNotExists()) {
+            return null;
+        }
+
+        HttpCookies cookies = new HttpCookies(headers.getCookieString());
+        return SessionManager.getInstance().findSession(cookies.getJSESSIONID());
     }
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public String getProtocolVersion() {
-        return requestLine.getProtocolVersion();
     }
 }

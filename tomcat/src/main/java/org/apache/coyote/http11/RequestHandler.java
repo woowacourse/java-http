@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +23,12 @@ public class RequestHandler {
 
     private final RequestParser requestParser;
     private final String requestUri;
+    private final SessionManager sessionManager;
 
     public RequestHandler(RequestParser requestParser) throws IOException {
         this.requestParser = requestParser;
         this.requestUri = requestParser.getRequestUri();
+        this.sessionManager = SessionManager.getSessionManager();
     }
 
     public String getResponse() throws IOException {
@@ -42,10 +47,8 @@ public class RequestHandler {
 
     private String generateRegisterResponse() throws IOException {
         if (requestParser.getMethod().equals("GET")) {
-            String responseBody = generateResponseBody("static" + requestUri);
-            return generate200Response(requestUri, responseBody);
+            return verifyLogin();
         }
-
         String body = requestParser.getBody();
         Optional<Map<String, String>> parsed = parseQueryString(body);
         Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
@@ -64,25 +67,38 @@ public class RequestHandler {
 
     private String generateLoginResponse() throws IOException {
         if (requestParser.getMethod().equals("GET")) {
-            String responseBody = generateResponseBody("static" + requestUri);
-            return generate200Response(requestUri, responseBody);
+            return verifyLogin();
         }
         String body = requestParser.getBody();
         Optional<Map<String, String>> parsed = parseQueryString(body);
-        Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
-        if (login(queryPairs)) {
-            return HttpCookie.setCookie(generate302Response("/index.html"));
-        }
-        return generate302Response("/401.html");
+        Map<String, String> parsedQueryString = parsed.orElseThrow(
+                () -> new NoSuchElementException("invalid query string")
+        );
+        return login(parsedQueryString);
     }
 
-    private boolean login(Map<String, String> parsed) {
-        Optional<User> account = InMemoryUserRepository.findByAccount(parsed.get("account"));
-        if (account.isPresent() && account.get().checkPassword(parsed.get("password"))) {
-            log.info("로그인 성공! 아이디 : {}", account.get().getAccount());
-            return true;
+    private String verifyLogin() throws IOException {
+        String sessionId = requestParser.getCookie("JSESSIONID");
+        if (sessionManager.hasSession(sessionId)) {
+            return generate302Response("/index.html");
         }
-        return false;
+        String responseBody = generateResponseBody("static" + requestUri);
+        return generate200Response(requestUri, responseBody);
+    }
+
+    private String login(Map<String, String> parsedQueryString) {
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(parsedQueryString.get("account"));
+        if (optionalUser.isEmpty()) {
+            return generate302Response("/401.html");
+        }
+        User user = optionalUser.get();
+        if (user.checkPassword(parsedQueryString.get("password"))) {
+            log.info("로그인 성공! 아이디 : {}", optionalUser.get().getAccount());
+            final var session = getSession();
+            session.setAttribute("user", user);
+            return HttpCookie.setCookie(generate302Response("/index.html"), session.getId());
+        }
+        return generate302Response("/401.html");
     }
 
     private String generateResponseBody(String path) throws IOException {
@@ -125,9 +141,15 @@ public class RequestHandler {
         var response = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: " + location,
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + 0 + " "
+                "Content-Type: text/html;charset=utf-8 "
         );
         return response;
+    }
+
+    public Session getSession() {
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid.toString());
+        sessionManager.add(session);
+        return session;
     }
 }

@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestBody {
+    private static final String BODY_DELIMITER = "&";
+    private static final String BODY_PAIR_DELIMITER = "=";
+    private static final int BODY_LIMIT = 2;
+    private static final int BODY_KEY_POSITION = 0;
+    private static final int BODY_VALUE_POSITION = 1;
+
     private final Map<String, String> body;
 
     public RequestBody(String body) {
@@ -14,12 +20,12 @@ public class RequestBody {
 
     private Map<String, String> parseRequestBody(String body) {
         Map<String, String> bodyParams = new HashMap<>();
-        String[] pairs = body.split("&");
+        String[] pairs = body.split(BODY_DELIMITER);
         for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            String[] keyValue = pair.split(BODY_PAIR_DELIMITER);
+            if (keyValue.length == BODY_LIMIT) {
+                String key = URLDecoder.decode(keyValue[BODY_KEY_POSITION], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[BODY_VALUE_POSITION], StandardCharsets.UTF_8);
                 bodyParams.put(key, value);
             }
         }

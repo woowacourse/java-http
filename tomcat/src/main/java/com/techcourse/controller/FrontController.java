@@ -1,10 +1,6 @@
 package com.techcourse.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.exception.InvalidResourceException;
 import com.techcourse.exception.UnsupportedMethodException;
 import com.techcourse.util.FileExtension;
+import com.techcourse.util.Resource;
 
 public class FrontController extends Controller {
     private static final FrontController instance = new FrontController();
@@ -74,7 +71,7 @@ public class FrontController extends Controller {
 
     private HttpResponse getResourceResponse(String fileName) throws IOException {
         HttpResponse response = new HttpResponse();
-        ResponseBody responseBody = new ResponseBody(readResource(fileName));
+        ResponseBody responseBody = new ResponseBody(Resource.read(fileName));
         response.setStatus(HttpStatus.OK);
         response.setContentType(MimeType.getMimeType(fileName));
         response.setBody(responseBody);
@@ -96,19 +93,6 @@ public class FrontController extends Controller {
             fileName = "hello.html";
         }
         return fileName;
-    }
-
-    private String readResource(String fileName) throws IOException {
-        URL resource = findResource(fileName);
-        if (Objects.isNull(resource)) {
-            throw new InvalidResourceException("Cannot find resource with name: " + fileName);
-        }
-        Path path = new File(resource.getFile()).toPath();
-        return Files.readString(path);
-    }
-
-    private URL findResource(String fileName) {
-        return getClass().getClassLoader().getResource("static/" + fileName);
     }
 
     @Override

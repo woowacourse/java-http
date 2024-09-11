@@ -10,8 +10,10 @@ import org.apache.coyote.http11.MimeType;
 
 public class HttpResponse {
     private static final String HTTP11 = "HTTP/1.1";
+    private static final CharSequence LINE_SEPARATOR = "\r\n";
     private static final String BLANK_DELIMITER = " ";
     private static final String HEADER_DELIMITER = ": ";
+    private static final CharSequence EMPTY = "";
 
     private String version;
     private HttpStatus status;
@@ -46,13 +48,13 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        StringJoiner joiner = new StringJoiner("\r\n");
+        StringJoiner joiner = new StringJoiner(LINE_SEPARATOR);
         joiner.add(version + BLANK_DELIMITER + status.getMessage() + BLANK_DELIMITER);
         for (Entry<String, String> entry : headers.getHeaders().entrySet()) {
             joiner.add(entry.getKey() + HEADER_DELIMITER + entry.getValue() + BLANK_DELIMITER);
         }
         if (Objects.nonNull(body)) {
-            joiner.add("");
+            joiner.add(EMPTY);
             joiner.add(body.getBody());
         }
         return joiner.toString();

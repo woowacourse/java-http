@@ -10,6 +10,8 @@ import java.util.Objects;
 import com.techcourse.exception.InvalidResourceException;
 
 public class Resource {
+    private static final String BASE_PATH = "static/";
+
     public static String read(String fileName) throws IOException {
         URL resource = findResource(fileName);
         if (Objects.isNull(resource)) {
@@ -20,6 +22,6 @@ public class Resource {
     }
 
     private static URL findResource(String fileName) {
-        return Resource.class.getClassLoader().getResource("static/" + fileName);
+        return Resource.class.getClassLoader().getResource(BASE_PATH + fileName);
     }
 }

@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
         if (url.equals("/")) {
             createHttpResponse(
                     "Hello world!",
-                    createHttpResponseHeader("HTTP_VERSION 200 OK ", "text/html", "Hello world!"),
+                    createHttpResponseHeader("HTTP/1.1 200 OK ", "text/html", "Hello world!"),
                     outputStream);
             return;
         }

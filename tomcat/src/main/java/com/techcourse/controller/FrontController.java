@@ -11,7 +11,7 @@ import org.apache.coyote.http.HttpVersion;
 
 public class FrontController implements Controller {
 
-    private static FrontController instance;
+    private static final FrontController instance = new FrontController();
 
     private final Map<String, Controller> controllers;
 
@@ -24,9 +24,6 @@ public class FrontController implements Controller {
     }
 
     public static FrontController getInstance() {
-        if (instance == null) {
-            instance = new FrontController();
-        }
         return instance;
     }
 

@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import org.apache.catalina.controller.NotFoundController;
 import org.apache.catalina.util.StaticResourceManager;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +9,12 @@ import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestMapping {
+
+    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
 
     private static final List<Class<? extends Controller>> CONTROLLER_CLASSES = List.of(
             GreetingController.class,
@@ -18,6 +23,7 @@ public class RequestMapping {
     );
 
     private final StaticResourceController staticResourceController;
+    private final NotFoundController notFoundController;
     private final Map<String, Controller> controllers;
 
     private static class RequestMappingHolder {
@@ -30,6 +36,7 @@ public class RequestMapping {
 
     private RequestMapping() {
         this.staticResourceController = new StaticResourceController();
+        this.notFoundController = new NotFoundController();
         this.controllers = initControllers();
     }
 
@@ -54,7 +61,8 @@ public class RequestMapping {
         }
 
         if (!controllers.containsKey(path)) {
-            throw new IllegalArgumentException("Handler not found for " + method + " " + path);
+            log.warn("Handler not found for {} {}", method, path);
+            return notFoundController;
         }
         return controllers.get(path);
     }

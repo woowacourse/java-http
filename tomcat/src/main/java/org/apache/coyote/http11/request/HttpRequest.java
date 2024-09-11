@@ -9,12 +9,12 @@ import org.apache.coyote.http11.common.HttpMethod;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeader header;
+    private final HttpHeader headers;
     private RequestBody body;
 
-    public HttpRequest(RequestLine requestLine, HttpHeader header, RequestBody body) {
+    public HttpRequest(RequestLine requestLine, HttpHeader headers, RequestBody body) {
         this.requestLine = requestLine;
-        this.header = header;
+        this.headers = headers;
         this.body = body;
     }
 
@@ -53,7 +53,11 @@ public class HttpRequest {
     }
 
     public Map<String, String> getHeaders() {
-        return header.headers();
+        return headers.headers();
+    }
+
+    public String getSessionId() {
+        return headers.getSessionId().orElse("");
     }
 
     public String getBody() {
@@ -69,20 +73,7 @@ public class HttpRequest {
         return "HttpRequest{" +
                 "body=" + body +
                 ", requestLine=" + requestLine +
-                ", header=" + header +
+                ", header=" + headers +
                 '}';
-    }
-
-    // TODO: refactor
-    public String getSessionId() {
-        Map<String, String> headers = getHeaders();
-        String cookie = headers.getOrDefault("Cookie", "");
-        String[] cookies = cookie.split(";");
-        for (String c : cookies) {
-            if (c.contains("JSESSIONID")) {
-                return c.split("=")[1];
-            }
-        }
-        return "";
     }
 }

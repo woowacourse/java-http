@@ -8,11 +8,11 @@ public class SessionManager implements Manager {
     private static final SessionManager instance = new SessionManager();
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    public static SessionManager getInstance() {
-        return instance;
+    private SessionManager() {
     }
 
-    private SessionManager() {
+    public static SessionManager getInstance() {
+        return instance;
     }
 
     @Override

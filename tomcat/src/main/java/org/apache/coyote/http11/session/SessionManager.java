@@ -18,10 +18,6 @@ public class SessionManager implements Manager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public boolean hasSession(String id) {
-        return SESSIONS.containsKey(id);
-    }
-
     @Override
     public Session findSession(String id) {
         return SESSIONS.get(id);

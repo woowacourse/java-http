@@ -76,7 +76,7 @@
   - [x] Status-Line 분석
     - [x] VersionOfProtocol 클래스
     - [x] StatusCode 클래스 (enum) [code + message]
-  - [ ] headers 분석
+  - [x] headers 분석
 
 - Controller 인터페이스 추가
   - [ ] 컨트롤러 인터페이스 제작

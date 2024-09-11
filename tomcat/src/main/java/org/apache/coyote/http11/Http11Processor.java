@@ -156,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
                     new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
                     accept,
                     FileReader.loadFileContent(INDEX_PAGE));
-            httpResponse.addHeader("Set-Cookie", cookie);
+            httpResponse.setCookie(cookie);
             httpResponse.addLocation(INDEX_PAGE);
             return httpResponse;
         }

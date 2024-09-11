@@ -1,38 +1,37 @@
 package org.apache.catalina.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 public class HttpResponse {
     private static final String DEFAULT_CHARSET = "charset=utf-8";
 
     private final StatusLine statusLine;
+    private final ResponseHeader responseHeader;
     private final String body;
-    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(StatusLine statusLine, String contentType, String body) {
         this.statusLine = statusLine;
-        headers.put("Content-Type", contentType + ";" + DEFAULT_CHARSET);
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        this.responseHeader = new ResponseHeader();
         this.body = body;
+
+        responseHeader.setAccept(contentType + ";" + DEFAULT_CHARSET);
+        responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
+    public void setCookie(String value) {
+        responseHeader.setCookie(value);
     }
 
     public void addLocation(String url) {
-        headers.put("Location", "http://localhost:8080" + url);
+        responseHeader.setLocation("http://localhost:8080" + url);
+    }
+
+    public void addHeader(String key, String value) {
+        responseHeader.add(key, value);
     }
 
     public String responseToString() {
-        StringBuilder response = new StringBuilder();
-
-        response.append(statusLine.getVersionOfProtocol()).append(" ")
-                .append(statusLine.getHttpStatus()).append(" \r\n");
-        headers.forEach((key, value) -> response.append(key).append(": ").append(value).append(" \r\n"));
-        response.append("\r\n").append(body);
-
-        return response.toString();
+        return statusLine.getVersionOfProtocol() + " "
+                + statusLine.getHttpStatus() + " \r\n"
+                + responseHeader + "\r\n"
+                + body;
     }
 }

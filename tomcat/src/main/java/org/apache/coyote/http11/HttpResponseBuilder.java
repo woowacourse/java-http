@@ -26,6 +26,11 @@ public class HttpResponseBuilder {
         return this;
     }
 
+    public HttpResponseBuilder cookie(HttpCookie cookie) {
+        headers.addCookie(cookie);
+        return this;
+    }
+
     public HttpResponseBuilder statusCode(StatusCode statusCode) {
         return new HttpResponseBuilder(headers, statusCode, body);
     }

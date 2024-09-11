@@ -14,12 +14,16 @@ public class HttpHeaders {
     private static final int SPLIT_LIMIT = 2;
 
     private final Map<String, String> fields = new HashMap<>();
+    private final HttpCookies cookies;
 
     public HttpHeaders(Collection<String> headerLines) {
         headerLines.stream()
                 .map(headerLine -> headerLine.split(HEADER_DELIMITER, SPLIT_LIMIT))
                 .filter(headerToken -> headerToken.length == SPLIT_LIMIT)
                 .forEach(headerToken -> fields.put(headerToken[0].trim(), headerToken[1].trim()));
+
+        String cookieLine = fields.remove("Cookie");
+        cookies = new HttpCookies(cookieLine);
     }
 
     public HttpHeaders() {
@@ -58,8 +62,16 @@ public class HttpHeaders {
         return Collections.unmodifiableMap(fields);
     }
 
+    public HttpCookie getCookie(String name) {
+        return cookies.get(name);
+    }
+
     @Override
     public String toString() {
         return fields.toString();
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        cookies.add(cookie);
     }
 }

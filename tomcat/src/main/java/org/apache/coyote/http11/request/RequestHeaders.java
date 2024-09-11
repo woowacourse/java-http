@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request;
 
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.httpresponse.HttpCookie;
+import org.apache.coyote.http11.common.HttpCookie;
 
 import java.util.LinkedHashMap;
 import java.util.List;

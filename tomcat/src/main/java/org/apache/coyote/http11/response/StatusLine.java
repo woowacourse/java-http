@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpresponse;
+package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.HttpVersion;
 

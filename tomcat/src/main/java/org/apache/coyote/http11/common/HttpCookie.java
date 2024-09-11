@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpresponse;
+package org.apache.coyote.http11.common;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

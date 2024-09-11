@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

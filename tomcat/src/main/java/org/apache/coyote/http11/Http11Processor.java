@@ -18,7 +18,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.response.HttpHeaderType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;

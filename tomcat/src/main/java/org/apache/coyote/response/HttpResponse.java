@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpHeaderType;
 import org.apache.coyote.util.FileReader;
 
 public class HttpResponse {

@@ -4,7 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.response.HttpHeaderType;
+import org.apache.coyote.http11.HttpHeaderType;
 
 public class HttpRequest {
 

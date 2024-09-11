@@ -35,6 +35,7 @@ public class LoginController extends AbstractController {
             sessionManager.add(sessionId, Session.ofUser(user));
             response.setRedirect("/index.html");
             response.setCookie(HttpCookie.ofSessionId(sessionId));
+            return;
         }
 
         response.setUnauthorized();
@@ -50,6 +51,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (request.hasSession() && sessionManager.hasId(request.getSession())) {
             response.setRedirect("/index.html");
+            return;
         }
 
         response.setStaticResource("login.html");

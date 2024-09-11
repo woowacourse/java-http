@@ -18,8 +18,8 @@ public class Http11Cookie {
         }
 
         Map<String, String> cookieMap = Arrays.stream(cookies.split("; "))
-                .map(cookie -> cookie.split("="))
-                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1])); // ArrayIndexOutOfBoundsException
+                .map(cookie -> cookie.split("=", 2))
+                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
 
         return new Http11Cookie(cookieMap);
     }

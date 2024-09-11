@@ -7,7 +7,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.was.Controller.exception.ControllerNotFoundException;
 import org.was.Controller.exception.MethodNotAllowedException;
 import org.was.converter.HttpResponseConverter;
-import org.was.view.View;
 import org.was.view.ViewResolver;
 
 public class FrontController {
@@ -29,18 +28,16 @@ public class FrontController {
         try {
             Controller controller = requestMapping.getController(request);
             ResponseResult responseResult = controller.service(request);
-            View view = viewResolver.getView(responseResult.getPath());
-            responseConverter.convertResponse(response,
-                    responseResult.getStatusCode(), responseResult.getHeaders(), view.getContent());
+            responseConverter.convert(response, viewResolver, responseResult);
 
         } catch (ControllerNotFoundException e) {
-            responseConverter.convertResponse(response, HttpStatusCode.NOT_FOUND, e.getMessage());
+            responseConverter.convert(response, HttpStatusCode.NOT_FOUND, "/404.html");
 
         } catch (MethodNotAllowedException e) {
-            responseConverter.convertResponse(response, HttpStatusCode.METHOD_NOT_ALLOWED, e.getMessage());
+            responseConverter.convert(response, HttpStatusCode.METHOD_NOT_ALLOWED, e.getMessage());
 
         } catch (IOException e) {
-            responseConverter.convertResponse(response, HttpStatusCode.INTERNAL_SERVER_ERROR, "서버에서 문제가 발생했습니다.");
+            responseConverter.convert(response, HttpStatusCode.INTERNAL_SERVER_ERROR, "/500.html");
         }
     }
 }

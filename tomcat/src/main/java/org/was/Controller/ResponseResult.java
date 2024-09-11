@@ -9,11 +9,13 @@ public class ResponseResult {
     private final HttpStatusCode statusCode;
     private final Map<String, String> headers;
     private final String path;
+    private final String body;
 
-    private ResponseResult(HttpStatusCode statusCode, Map<String, String> headers, String path) {
+    private ResponseResult(HttpStatusCode statusCode, Map<String, String> headers, String path, String body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.path = path;
+        this.body = body;
     }
 
     public HttpStatusCode getStatusCode() {
@@ -28,6 +30,10 @@ public class ResponseResult {
         return path;
     }
 
+    public String getBody() {
+        return body;
+    }
+
     public static Builder status(HttpStatusCode statusCode) {
         return new Builder(statusCode);
     }
@@ -37,14 +43,10 @@ public class ResponseResult {
         private HttpStatusCode statusCode;
         private Map<String, String> headers = new HashMap<>();
         private String path;
+        private String body;
 
         public Builder(HttpStatusCode statusCode) {
             this.statusCode = statusCode;
-        }
-
-        public Builder path(String path) {
-            this.path = path;
-            return this;
         }
 
         public Builder header(String key, String value) {
@@ -52,8 +54,18 @@ public class ResponseResult {
             return this;
         }
 
+        public ResponseResult path(String path) {
+            this.path = path;
+            return new ResponseResult(statusCode, headers, path, body);
+        }
+
+        public ResponseResult body(String body) {
+            this.body = body;
+            return new ResponseResult(statusCode, headers, path, body);
+        }
+
         public ResponseResult build() {
-            return new ResponseResult(statusCode, headers, path);
+            return new ResponseResult(statusCode, headers, path, body);
         }
     }
 }

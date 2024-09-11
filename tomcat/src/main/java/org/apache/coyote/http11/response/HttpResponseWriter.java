@@ -39,6 +39,8 @@ public class HttpResponseWriter {
     }
 
     private void convertBody(StringBuilder stringBuilder, ResponseBody body) {
-        stringBuilder.append(CRLF).append(body.getContent());
+        if (body != null) {
+            stringBuilder.append(CRLF).append(body.getContent());
+        }
     }
 }

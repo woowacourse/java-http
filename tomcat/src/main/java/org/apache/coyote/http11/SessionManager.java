@@ -8,7 +8,7 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
-
+    //TODO 싱글턴 적용
     @Override
     public void add(final Session session) {
         SESSIONS.put(session.getId(), session);

@@ -6,9 +6,9 @@ import org.apache.coyote.util.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ErrorController {
+public class ErrorHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ErrorController.class);
+    private static final Logger log = LoggerFactory.getLogger(ErrorHandler.class);
 
     public void handle(HttpResponse response, Exception exception) {
         if (response.getHttpStatus() == HttpStatus.NOT_FOUND) {

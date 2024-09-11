@@ -1,21 +1,15 @@
 package com.techcourse.config;
 
-import java.util.HashSet;
 import java.util.Set;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class UnauthorizedInterceptor {
 
-    private final Set<String> unauthorizedPaths = new HashSet<>();
+    private final Set<String> unauthorizedPaths;
 
     public UnauthorizedInterceptor() {
-        unauthorizedPaths.add("/401");
-        unauthorizedPaths.add("/404");
-        unauthorizedPaths.add("/500");
-        unauthorizedPaths.add("/401.html");
-        unauthorizedPaths.add("/404.html");
-        unauthorizedPaths.add("/500.html");
+        unauthorizedPaths = Set.of("/401", "/404", "/500", "/401.html", "/404.html", "/500.html");
     }
 
     public boolean isInterceptPath(HttpRequest httpRequest) {

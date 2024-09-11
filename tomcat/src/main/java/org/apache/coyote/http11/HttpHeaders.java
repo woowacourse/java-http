@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -10,6 +11,10 @@ public class HttpHeaders {
     private static final String LOCATION = "Location";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_DELIMITER = ":";
+    private static final int HEADER_LIMIT = 2;
+    private static final int HEADER_KEY_POSITION = 0;
+    private static final int HEADER_VALUE_POSITION = 1;
 
     private final Map<String, String> headers;
 
@@ -19,6 +24,21 @@ public class HttpHeaders {
 
     public HttpHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    public static HttpHeaders from(List<String> headers) {
+        return new HttpHeaders(parseHeaders(headers));
+    }
+
+    private static Map<String, String> parseHeaders(List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
+        for (String line : lines) {
+            String[] headerField = line.split(HEADER_DELIMITER, HEADER_LIMIT);
+            if (headerField.length == HEADER_LIMIT) {
+                headers.put(headerField[HEADER_KEY_POSITION].trim(), headerField[HEADER_VALUE_POSITION].trim());
+            }
+        }
+        return headers;
     }
 
     public void setCookie(String cookie) {

@@ -18,6 +18,10 @@ public class RequestBody {
         this.body = parseRequestBody(body);
     }
 
+    public RequestBody() {
+        this("");
+    }
+
     private Map<String, String> parseRequestBody(String body) {
         Map<String, String> bodyParams = new HashMap<>();
         String[] pairs = body.split(BODY_DELIMITER);

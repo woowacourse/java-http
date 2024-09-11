@@ -2,14 +2,16 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,13 +29,12 @@ class FrontControllerTest {
     @Test
     void findResource() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("GET /css/styles.css HTTP/1.1");
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Connection: keep-alive "
+        ));
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -58,13 +59,12 @@ class FrontControllerTest {
     @Test
     void wrongURL() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /unknown.html HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("GET /unknown.html HTTP/1.1 ");
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Connection: keep-alive "
+        ));
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -89,13 +89,12 @@ class FrontControllerTest {
     @Test
     void wrongMethod() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "DELETE /login HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("WRONG /login HTTP/1.1 ");
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Connection: keep-alive "
+        ));
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when

@@ -3,11 +3,14 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,15 +39,15 @@ class RegisterControllerTest {
     @Test
     void loginSuccess() throws IOException {
         // given
-        String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        final String request = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("POST /register HTTP/1.1 ");
+        String body = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+        ));
+        RequestBody requestBody = new RequestBody(body);
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -61,15 +64,15 @@ class RegisterControllerTest {
     @Test
     void loginFailedInvalidPassword() throws IOException {
         // given
-        String requestBody = "account=gugu&password=password&email=";
-        final String request = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("POST /register HTTP/1.1 ");
+        String body = "account=gugu&password=password&email=";
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+        ));
+        RequestBody requestBody = new RequestBody(body);
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -86,13 +89,12 @@ class RegisterControllerTest {
     @Test
     void registerPage() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
+        RequestLine requestLine = RequestLine.from("GET /register HTTP/1.1 ");
+        HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+                "Connection: keep-alive "
+        ));
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when

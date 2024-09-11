@@ -5,7 +5,6 @@ import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

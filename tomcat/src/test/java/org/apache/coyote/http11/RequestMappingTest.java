@@ -1,10 +1,16 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HomePageController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

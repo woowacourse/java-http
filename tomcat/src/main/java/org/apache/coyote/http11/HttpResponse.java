@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.StringJoiner;
 
+import org.apache.coyote.http11.request.HttpHeader;
+
 public class HttpResponse {
 
     private static final String HEADER_PAIR_DELIMITER = ": ";
@@ -22,8 +24,8 @@ public class HttpResponse {
         responseJoiner.add(statusLine + SPACE);
     }
 
-    public void addHeader(String key, String value) {
-        responseJoiner.add(key + HEADER_PAIR_DELIMITER + value + SPACE);
+    public void addHeader(HttpHeader header, String value) {
+        responseJoiner.add(header.getName() + HEADER_PAIR_DELIMITER + value + SPACE);
     }
 
     public void addBody(String body) {

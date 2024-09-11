@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpCookie;
+import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -45,8 +46,8 @@ public class LoginController extends AbstractController {
 
     private void redirectToHomeSettingCookie(HttpResponse response, String jSessionId) throws IOException {
         response.addStatusLine("HTTP/1.1 302 Found");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
-        response.addHeader("Location", "http://localhost:8080/index.html");
+        response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + jSessionId);
+        response.addHeader(HttpHeader.LOCATION, "http://localhost:8080/index.html");
         response.writeResponse();
     }
 

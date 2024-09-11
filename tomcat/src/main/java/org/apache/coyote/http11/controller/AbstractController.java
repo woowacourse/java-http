@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public abstract class AbstractController implements Controller {
+
+    private static final String FILE_EXTENSION_SEPARATOR_REGEX = "\\.";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -23,7 +26,7 @@ public abstract class AbstractController implements Controller {
 
     protected void redirectTo(HttpResponse response, String location) throws IOException {
         response.addStatusLine("HTTP/1.1 302 Found");
-        response.addHeader("Location", "http://localhost:8080" + location);
+        response.addHeader(HttpHeader.LOCATION, "http://localhost:8080" + location);
         response.writeResponse();
     }
 
@@ -32,13 +35,13 @@ public abstract class AbstractController implements Controller {
         String body = getStaticFileContent(path);
         if (body == null) {
             response.addStatusLine("HTTP/1.1 204 No Content");
-            response.addHeader("Content-Length", "0");
+            response.addHeader(HttpHeader.CONTENT_LENGTH, "0");
             response.writeResponse();
             return;
         }
         response.addStatusLine("HTTP/1.1 200 OK");
-        response.addHeader("Content-Type", "text/" + getFileExtension(path) + ";charset=utf-8");
-        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        response.addHeader(HttpHeader.CONTENT_TYPE, "text/" + getFileExtension(path) + ";charset=utf-8");
+        response.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.addBody(body);
         response.writeResponse();
     }
@@ -61,7 +64,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private String getFileExtension(String path) {
-        String[] splitPath = path.split("\\.");
+        String[] splitPath = path.split(FILE_EXTENSION_SEPARATOR_REGEX);
         return splitPath[splitPath.length - 1];
     }
 

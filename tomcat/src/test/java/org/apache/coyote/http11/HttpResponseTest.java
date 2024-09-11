@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.coyote.http11.request.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +19,8 @@ class HttpResponseTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse response = new HttpResponse(outputStream);
         response.addStatusLine("HTTP/1.1 200 OK");
-        response.addHeader("Content-Type", "text/html;charset=utf-8");
-        response.addHeader("Content-Length", "12");
+        response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
+        response.addHeader(HttpHeader.CONTENT_LENGTH, "12");
 
         // when
         response.writeResponse();
@@ -42,8 +43,8 @@ class HttpResponseTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse response = new HttpResponse(outputStream);
         response.addStatusLine("HTTP/1.1 200 OK");
-        response.addHeader("Content-Type", "text/html;charset=utf-8");
-        response.addHeader("Content-Length", "12");
+        response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
+        response.addHeader(HttpHeader.CONTENT_LENGTH, "12");
         response.addBody("Hello world!");
 
         // when

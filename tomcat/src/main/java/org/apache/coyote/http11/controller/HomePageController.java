@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import java.io.IOException;
 
+import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -19,8 +20,8 @@ public class HomePageController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String body = "Hello world!";
         response.addStatusLine("HTTP/1.1 200 OK");
-        response.addHeader("Content-Type", "text/html;charset=utf-8");
-        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
+        response.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.addBody(body);
         response.writeResponse();
     }

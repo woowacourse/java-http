@@ -11,7 +11,7 @@ public class HttpRequestUri {
     public HttpRequestUri(final String uri) {
         int index = uri.lastIndexOf(QUERY_SEPARATOR);
         path = (index == -1) ? uri : uri.substring(0, index);
-        queryString = uri.substring(index + 1);
+        queryString = (index == -1) ? "" : uri.substring(index + 1);
         queryParams = new HttpQueryParams(queryString);
     }
 

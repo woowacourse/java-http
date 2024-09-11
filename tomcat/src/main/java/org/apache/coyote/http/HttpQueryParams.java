@@ -15,6 +15,13 @@ public class HttpQueryParams {
 
     public HttpQueryParams(final String queryString) {
         params = new ConcurrentHashMap<>();
+        initialize(queryString);
+    }
+
+    private void initialize(final String queryString) {
+        if (queryString.isBlank()) {
+            return;
+        }
         String[] paramSplit = queryString.split(PARAM_SEPARATOR);
         for (String param : paramSplit) {
             String[] keyValue = param.split(KEY_VALUE_SEPARATOR);
@@ -27,5 +34,9 @@ public class HttpQueryParams {
             return params.get(key);
         }
         return null;
+    }
+
+    public boolean isEmpty() {
+        return params.isEmpty();
     }
 }

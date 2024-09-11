@@ -5,6 +5,8 @@ import java.io.IOException;
 
 public class HttpRequestLine {
 
+    private static final String SEPARATOR = " ";
+
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int VERSION_INDEX = 2;
@@ -15,7 +17,7 @@ public class HttpRequestLine {
 
     public HttpRequestLine(final BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
-        String[] split = requestLine.split(" ");
+        String[] split = requestLine.split(SEPARATOR);
         this.method = HttpMethod.from(split[METHOD_INDEX]);
         this.requestUri = new HttpRequestUri(split[REQUEST_URI_INDEX]);
         this.version = HttpVersion.from(split[VERSION_INDEX]);
@@ -37,11 +39,15 @@ public class HttpRequestLine {
         return requestUri.getQueryString();
     }
 
+    public HttpQueryParams getQueryParams() {
+        return requestUri.getQueryParams();
+    }
+
     public HttpVersion getVersion() {
         return version;
     }
 
     public String asString() {
-        return method + " " + requestUri + " " + version;
+        return method + SEPARATOR + requestUri + SEPARATOR + version;
     }
 }

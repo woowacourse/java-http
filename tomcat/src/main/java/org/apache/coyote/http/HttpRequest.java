@@ -30,8 +30,8 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getQuery() {
-        return requestLine.getQuery();
+    public HttpQueryParams getQueryParams() {
+        return requestLine.getQueryParams();
     }
 
     public HttpVersion getHttpVersion() {

@@ -88,8 +88,8 @@ public class HttpRequest {
         return body.isEmpty();
     }
 
-    public String getBody() {
-        return body.getBodyValue();
+    public Map<String, String> getBody() {
+        return body.getBody();
     }
 
     @Override

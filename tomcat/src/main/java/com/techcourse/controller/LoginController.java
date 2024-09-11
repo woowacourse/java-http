@@ -25,11 +25,10 @@ public class LoginController extends AbstractController {
 
     @Override
     public ForwardResult execute(HttpRequest request, HttpResponse response) {
-        String body = request.getBody();
-        Map<String, String> parsedBody = parseBody(body);
+        Map<String, String> body = request.getBody();
 
-        String account = parsedBody.get(ACCOUNT_KEY);
-        String password = parsedBody.get(PASSWORD_KEY);
+        String account = body.get(ACCOUNT_KEY);
+        String password = body.get(PASSWORD_KEY);
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         ResponseHeader header = new ResponseHeader();

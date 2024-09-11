@@ -11,6 +11,9 @@ import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestCreator;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseWriter;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.StaticFileResponseUtils;
 import org.apache.coyote.http11.response.ViewResponseUtils;
 import org.apache.coyote.http11.response.view.View;
@@ -20,7 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final View NOT_FOUND_RESPONSE_VIEW = View.createByStaticResource("/404.html");
+    private static final View NOT_FOUND_RESPONSE_VIEW = View.htmlBuilder()
+            .status(HttpStatus.NOT_FOUND)
+            .staticResource("/404.html")
+            .build();
 
     private final Socket connection;
     private final ServletContainer servletContainer;
@@ -39,34 +45,27 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest request = createHttpRequest(inputStream);
-            String response = response(request);
-            writeResponse(outputStream, response);
+            HttpRequest request = HttpRequestCreator.createHttpRequest(reader);
+            HttpResponse response = response(request);
+            HttpResponseWriter.write(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest createHttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        return HttpRequestCreator.createHttpRequest(reader);
-    }
-
-    private String response(HttpRequest request) throws IOException {
+    private HttpResponse response(HttpRequest request) throws IOException {
         Optional<View> view = servletContainer.service(request);
         if (view.isPresent()) {
             return ViewResponseUtils.createResponse(view.get());
         }
+
         String filePath = request.getPath();
         if (StaticFileResponseUtils.isExistFile(filePath)) {
             return StaticFileResponseUtils.createResponse(filePath);
         }
-        return ViewResponseUtils.createResponse(NOT_FOUND_RESPONSE_VIEW);
-    }
 
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return ViewResponseUtils.createResponse(NOT_FOUND_RESPONSE_VIEW);
     }
 }

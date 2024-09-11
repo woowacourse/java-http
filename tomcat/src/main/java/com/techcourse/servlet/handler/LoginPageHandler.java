@@ -1,8 +1,8 @@
 package com.techcourse.servlet.handler;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.servlet.Handler;
-import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.view.View;
@@ -15,27 +15,27 @@ public class LoginPageHandler implements Handler {
     private static final HttpMethod METHOD = HttpMethod.GET;
     private static final String PATH = "/login";
 
+    private final SessionManager sessionManager;
+
+    public LoginPageHandler() {
+        this.sessionManager = SessionManager.getInstance();
+    }
+
     @Override
     public boolean support(HttpRequest request) {
         return request.getPath().equals(PATH)
-                && request.getMethod() == METHOD;
+                && request.getMethod() == METHOD
+                && request.getQueryParameters().isEmpty();
     }
 
     @Override
     public View handle(HttpRequest request) {
-        Optional<String> account = request.getQueryParameter("account");
-        Optional<String> password = request.getQueryParameter("password");
-        if (account.isPresent() && password.isPresent()) {
-            leaveUserLog(account.get(), password.get());
+        Session session = sessionManager.findSession(request.getCookie().getSessionId());
+        if (session == null) {
+            return View.htmlBuilder()
+                    .staticResource("/login.html")
+                    .build();
         }
-
-        return View.createByStaticResource("/login.html");
-    }
-
-    private void leaveUserLog(String account, String password) {
-        InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .ifPresentOrElse(
-                        user -> log.info("user : {}", user),
-                        () -> log.info("해당 유저가 존재하지 않습니다"));
+        return View.redirect("/index.html");
     }
 }

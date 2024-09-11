@@ -5,21 +5,20 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.view.View;
 
-public class HomePageHandler implements Handler {
+public class RegisterPageHandler implements Handler {
     private static final HttpMethod METHOD = HttpMethod.GET;
-    private static final String PATH = "/";
-    private static final String RESPONSE_CONTENT = "Hello world!";
+    private static final String PATH = "/register";
 
     @Override
     public boolean support(HttpRequest request) {
-        return request.getPath().equals(PATH)
-                && request.getMethod() == METHOD;
+        return PATH.equals(request.getPath())
+                && METHOD == request.getMethod();
     }
 
     @Override
     public View handle(HttpRequest request) {
         return View.htmlBuilder()
-                .text(RESPONSE_CONTENT)
+                .staticResource("/register.html")
                 .build();
     }
 }

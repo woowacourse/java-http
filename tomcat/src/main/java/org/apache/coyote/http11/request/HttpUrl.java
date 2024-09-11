@@ -35,7 +35,7 @@ public class HttpUrl {
 
     private Map<String, String> createParameters(String[] urlComponents) {
         if (urlComponents.length == 1) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         String queryParameters = urlComponents[1];
         String[] parameters = queryParameters.split("&");
@@ -62,6 +62,10 @@ public class HttpUrl {
 
     public Optional<String> getParameter(String key) {
         return Optional.ofNullable(queryParameters.get(key));
+    }
+
+    public Map<String, String> getParameters() {
+        return queryParameters;
     }
 
     @Override

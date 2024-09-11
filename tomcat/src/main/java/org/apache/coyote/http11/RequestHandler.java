@@ -52,7 +52,7 @@ public class RequestHandler {
 
     private String generateRegisterResponse() throws IOException {
         if ("GET".equals(requestParser.getMethod())) {
-            return verifyLogin();
+            return getResponseBasedOnSession();
         }
         String body = requestParser.getBody();
         Optional<Map<String, String>> parsed = parseQueryString(body);
@@ -82,7 +82,7 @@ public class RequestHandler {
 
     private String generateLoginResponse() throws IOException {
         if ("GET".equals(requestParser.getMethod())) {
-            return verifyLogin();
+            return getResponseBasedOnSession();
         }
         String body = requestParser.getBody();
         Optional<Map<String, String>> parsed = parseQueryString(body);
@@ -92,7 +92,7 @@ public class RequestHandler {
         return login(parsedQueryString);
     }
 
-    private String verifyLogin() throws IOException {
+    private String getResponseBasedOnSession() throws IOException {
         String sessionId = requestParser.getCookie("JSESSIONID");
         if (sessionManager.hasSession(sessionId)) {
             return generate302Response("/index.html");

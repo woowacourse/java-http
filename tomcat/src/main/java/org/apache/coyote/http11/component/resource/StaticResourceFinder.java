@@ -46,7 +46,7 @@ public class StaticResourceFinder {
     private byte[] getBytes() {
         try {
             return Files.readAllBytes(new File(resourcePath.getFile()).toPath());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("존재하지 않는 정적 리소스");
         }
     }

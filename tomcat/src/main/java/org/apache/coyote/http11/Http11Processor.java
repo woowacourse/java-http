@@ -13,6 +13,7 @@ import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
+import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.Request;
 import org.apache.catalina.request.RequestReader;
 import org.apache.catalina.response.HttpStatus;
@@ -68,15 +69,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleRequest(Request request) {
-        String httpMethod = request.getHttpMethod();
-
-        if (httpMethod.equals("GET")) {
+        if (request.isSameHttpMethod(HttpMethod.GET)) {
             return generateResponseForUrl(request).responseToString();
         }
-        if (httpMethod.equals("POST")) {
+        if (request.isSameHttpMethod(HttpMethod.POST)) {
             return generateResponseForPostUrl(request).responseToString();
         }
-        log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
+        log.warn("지원되지 않는 HTTP 메서드입니다.");
         return new Response(HttpStatus.BAD_REQUEST, "text/html", FileReader.loadFileContent(BAD_REQUEST_PAGE))
                 .responseToString();
     }

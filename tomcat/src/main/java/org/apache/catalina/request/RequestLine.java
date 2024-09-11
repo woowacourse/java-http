@@ -53,6 +53,10 @@ public class RequestLine {
         return httpMethod;
     }
 
+    public boolean isSameHttpMethod(HttpMethod httpMethod) {
+        return httpMethod == this.httpMethod;
+    }
+
     public String getPathWithoutQuery() {
         return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
     }

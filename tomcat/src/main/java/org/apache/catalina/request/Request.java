@@ -19,8 +19,8 @@ public class Request {
         return requestLine.checkQueryParamIsEmpty();
     }
 
-    public String getHttpMethod() {
-        return requestLine.getHttpMethod().name();
+    public boolean isSameHttpMethod(HttpMethod httpMethod) {
+        return requestLine.isSameHttpMethod(httpMethod);
     }
 
     public String getPathWithoutQuery() {

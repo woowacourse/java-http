@@ -3,6 +3,8 @@ package org.apache.catalina.handler;
 import com.techcourse.exception.TechcourseException;
 import com.techcourse.model.UserService;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -94,7 +96,11 @@ public class ServletRequestHandler {
 
     private HttpResponse handlePostLoginSuccess() {
         final String location = "/index.html";
-        return new HttpResponse(FOUND_STATUS_CODE, location);
+        final String session = UUID.randomUUID().toString();
+        final HttpCookie cookie = new HttpCookie("JSESSIONID", session);
+        final HttpResponse response = new HttpResponse(FOUND_STATUS_CODE, location);
+        response.setCookie(cookie);
+        return response; // TODO: 리팩토링
     }
 
     private HttpResponse handlePostLoginFailed() {

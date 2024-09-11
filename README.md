@@ -37,9 +37,9 @@
 
 3. Cookie에 JSESSIONID 값 저장
 
-- [ ] 쿠키 활용해서 로그인 상태 유지하기 (쿠키에 JSESSIONID 값 저장)
-    - [ ] Cookie 클래스 추가
-    - [ ] 요청 헤더의 Cookie에 JSESSIONID가 없으면, 응답 헤더에 Set-Cookie 추가해 JSESSIONID 반환
+- [x] 쿠키 활용해서 로그인 상태 유지하기 (쿠키에 JSESSIONID 값 저장)
+    - [x] Cookie 클래스 추가
+    - [x] 요청 헤더의 Cookie에 JSESSIONID가 없으면, 응답 헤더에 Set-Cookie 추가해 JSESSIONID 반환
 
 4. Session 구현
 

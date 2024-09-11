@@ -73,9 +73,9 @@ public class HttpRequest {
 
         public Builder requestHead(List<String> requestHead) {
             validateRequestHead(requestHead);
-            this.requestLine = getRequestLine(requestHead);
-            this.headers = getHeaders(requestHead);
-            this.session = getSession();
+            this.requestLine = createRequestLine(requestHead);
+            this.headers = createHeaders(requestHead);
+            this.session = createSession();
             return this;
         }
 
@@ -85,17 +85,17 @@ public class HttpRequest {
             }
         }
 
-        private RequestLine getRequestLine(List<String> requestHead) {
+        private RequestLine createRequestLine(List<String> requestHead) {
             String firstLine = requestHead.getFirst();
             return RequestLine.of(firstLine);
         }
 
-        private HttpHeaders getHeaders(List<String> requestHead) {
+        private HttpHeaders createHeaders(List<String> requestHead) {
             List<String> headers = new ArrayList<>(requestHead.subList(1, requestHead.size()));
             return HttpHeaders.of(headers);
         }
 
-        private HttpSession getSession() {
+        private HttpSession createSession() {
             String sessionId = headers.getSessionId();
             if (sessionId == null || SESSION_MANAGER.findSession(sessionId) == null) {
                 return sessionGenerator.create();

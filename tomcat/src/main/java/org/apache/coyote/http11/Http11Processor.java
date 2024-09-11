@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader, sessionGenerator);
             HttpRequest request = httpRequestReader.read();
-            HttpResponse response = getResponse(request);
+            HttpResponse response = createResponse(request);
             String formattedResponse = response.toResponse();
 
             outputStream.write(formattedResponse.getBytes());
@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getResponse(HttpRequest request) throws IOException {
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
         try {
             HttpResponse response = new HttpResponse();
             Controller controller = requestMapping.getController(request);

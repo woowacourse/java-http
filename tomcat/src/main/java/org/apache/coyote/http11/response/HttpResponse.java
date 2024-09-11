@@ -82,8 +82,8 @@ public class HttpResponse {
     }
 
     public String toResponse() {
-        String statusLine = getStatusLine();
-        String headers = getHeaders();
+        String statusLine = createStatusLineResponse();
+        String headers = createHeadersResponse();
 
         return String.join(
                 LINE_SEPARATOR,
@@ -94,7 +94,7 @@ public class HttpResponse {
         );
     }
 
-    private String getStatusLine() {
+    private String createStatusLineResponse() {
         return String.format(STATUS_LINE_FORMAT,
                 protocol.getName(),
                 httpStatus.getCode(),
@@ -102,7 +102,7 @@ public class HttpResponse {
         );
     }
 
-    private String getHeaders() {
+    private String createHeadersResponse() {
         List<String> formattedHeaders = new ArrayList<>();
         for (String headerKey : headers.keySet()) {
             String headerValue = headers.get(headerKey);

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpresponse;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -108,25 +109,37 @@ public class HttpResponse {
 
         public HttpResponseBuilder staticResource(String path) {
             try {
-                if (!path.contains(EXTENSION_DELIMITER)) {
-                    path += HTML_EXTENSION;
-                }
+                path = settingExtension(path);
                 String fileName = STATIC_PATH + path;
                 var resourceUrl = getClass().getClassLoader().getResource(fileName);
-                if (resourceUrl == null) {
-                    throw new NotFoundException("존재하지 않는 경로입니다.");
-                }
+                validateResourceUrl(resourceUrl);
                 Path filePath = Path.of(resourceUrl.toURI());
                 String responseBody = new String(Files.readAllBytes(filePath));
 
-                contentType(Files.probeContentType(filePath) + CharSet.UTF_8.getCharset());
-                contentLength(String.valueOf(responseBody.getBytes().length));
+                setHttpHeader(filePath, responseBody);
                 this.httpResponseBody = new HttpResponseBody(responseBody);
-
                 return this;
             } catch (URISyntaxException | IOException e) {
                 throw new IllegalArgumentException(e.getMessage() + e);
             }
+        }
+
+        private static String settingExtension(String path) {
+            if (!path.contains(EXTENSION_DELIMITER)) {
+                path += HTML_EXTENSION;
+            }
+            return path;
+        }
+
+        private static void validateResourceUrl(URL resourceUrl) {
+            if (resourceUrl == null) {
+                throw new NotFoundException("존재하지 않는 경로입니다.");
+            }
+        }
+
+        private void setHttpHeader(Path filePath, String responseBody) throws IOException {
+            contentType(Files.probeContentType(filePath) + CharSet.UTF_8.getCharset());
+            contentLength(String.valueOf(responseBody.getBytes().length));
         }
 
         public HttpResponseBuilder responseBody(String responseBody) {

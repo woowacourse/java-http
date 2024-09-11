@@ -1,4 +1,4 @@
-package org.apache.catalina.request;
+package org.apache.catalina.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.catalina.request.Request;
+import org.apache.catalina.request.RequestBody;
+import org.apache.catalina.request.RequestHeader;
+import org.apache.catalina.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

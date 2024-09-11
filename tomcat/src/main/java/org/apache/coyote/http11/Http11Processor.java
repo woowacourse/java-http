@@ -15,7 +15,7 @@ import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.Request;
-import org.apache.catalina.request.RequestReader;
+import org.apache.catalina.io.RequestReader;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.Response;
 import org.apache.catalina.response.ResponsePage;

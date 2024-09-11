@@ -32,8 +32,8 @@
 - [x] 회원가입 페이지(`register.html`) 보여주도록 만들기 (`GET /register`)
 - [ ] 회원가입 버튼을 누르면 회원가입 시키기 (`POST /register`)
     - [ ] 회원가입 성공 시 `index.html`로 리다이렉트
-- [ ] 로그인 페이지 보여줄 때와 로그인 버튼 누를 때 API 분리하기 (`GET /login`, `POST /login`)
-    - [ ] `login.html` form 태그 수정
+- [x] 로그인 페이지 보여줄 때와 로그인 버튼 누를 때 API 분리하기 (`GET /login`, `POST /login`)
+    - [x] `login.html` form 태그 수정
 
 3. Cookie에 JSESSIONID 값 저장
 

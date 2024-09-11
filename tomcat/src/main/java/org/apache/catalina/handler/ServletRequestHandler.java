@@ -33,14 +33,16 @@ public class ServletRequestHandler {
 
     private Http11Response handlePost(Http11Request request) {
         final String requestURI = request.getRequestURI();
+        if (requestURI.equals("/login")) {
+            return handlePostLogin(request.getBody());
+        }
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
     private Http11Response handleGet(Http11Request request) {
         final String requestURI = request.getRequestURI();
-        final Map<String, String> queryString = request.getQueryParameters();
-        if (requestURI.startsWith("/login")) {
-            return handleGetLogin(queryString);
+        if (requestURI.equals("/login")) {
+            return handleGetLoginPage();
         }
         if (requestURI.equals("/register")) {
             return handleGetRegisterPage();
@@ -54,24 +56,30 @@ public class ServletRequestHandler {
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
-    private Http11Response handleGetLogin(Map<String, String> queryString) {
+    private Http11Response handlePostLogin(Map<String, String> body) {
         final UserService userService = new UserService();
         try {
-            userService.login(queryString.get("account"), queryString.get("password"));
-            return handleGetLoginSuccess();
+            userService.login(body.get("account"), body.get("password"));
+            return handlePostLoginSuccess();
         } catch (TechcourseException e) {
-            return handleGetLoginFailed();
+            return handlePostLoginFailed();
         }
     }
 
-    private Http11Response handleGetLoginSuccess() {
+    private Http11Response handlePostLoginSuccess() {
         final String location = "/index.html";
         return new Http11Response(FOUND_STATUS_CODE, location);
     }
 
-    private Http11Response handleGetLoginFailed() {
+    private Http11Response handlePostLoginFailed() {
         final String location = "/401.html";
         return new Http11Response(FOUND_STATUS_CODE, location);
+    }
+
+    private Http11Response handleGetLoginPage() {
+        final String path = "/login.html";
+        final String body = viewResolver.resolve(path);
+        return new Http11Response(SUCCESS_STATUS_CODE, new Http11ResponseContent(path, body));
     }
 
     private Http11Response handleGetRegisterPage() {

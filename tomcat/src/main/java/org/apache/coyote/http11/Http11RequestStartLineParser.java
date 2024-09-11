@@ -1,22 +1,17 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Http11RequestStartLineParser {
 
-    public static Http11RequestStartLine parse(List<String> lines) {
-        String[] startLine = parseStartLine(lines);
+    public static Http11RequestStartLine parse(String line) {
+        String[] startLine = parseStartLine(line);
         String httpVersion = parseHttpVersion(startLine);
         Http11Method httpMethod = parseHttpMethod(startLine);
         String requestURI = parseRequestURI(startLine);
-        Map<String, String> queryParameters = parseQueryParameters(requestURI);
-        return new Http11RequestStartLine(httpVersion, httpMethod, requestURI, queryParameters);
+        return new Http11RequestStartLine(httpVersion, httpMethod, requestURI);
     }
 
-    private static String[] parseStartLine(List<String> lines) {
-        final String[] startLine = lines.get(0).split(" ");
+    private static String[] parseStartLine(String line) {
+        final String[] startLine = line.split(" ");
         if (startLine.length != 3) {
             throw new IllegalArgumentException("HttpRequest의 startLine 형식이 잘못되었습니다.");
         }
@@ -34,18 +29,5 @@ public class Http11RequestStartLineParser {
 
     private static String parseRequestURI(String[] startLine) {
         return startLine[1];
-    }
-
-    private static Map<String, String> parseQueryParameters(String requestURI) {
-        Map<String, String> queryParameters = new HashMap<>();
-        if (requestURI.contains("?")) {
-            int index = requestURI.indexOf("?");
-            String queryString = requestURI.substring(index + 1);
-            for (String eachQueryString : queryString.split("&")) {
-                String[] parsedEachQueryString = eachQueryString.split("=");
-                queryParameters.put(parsedEachQueryString[0], parsedEachQueryString[1]);
-            }
-        }
-        return queryParameters;
     }
 }

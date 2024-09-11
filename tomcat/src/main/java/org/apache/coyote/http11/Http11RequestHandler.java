@@ -62,8 +62,8 @@ public class Http11RequestHandler {
             String jSessionId = http11Cookie.getJSessionId();
             Session session = SESSION_MANAGER.findSession(jSessionId);
             if (session == null) {
-                return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"), acceptTypes,
-                        StatusLine.unAuthorized(httpVersion));
+                return getHttp11Response(getStaticResource("/index.html").orElse("Index"), acceptTypes,
+                        StatusLine.found(httpVersion));
             }
             Http11ResponseBody responseBody = Http11ResponseBody.of(getStaticResource("/index.html").orElse("Index"));
             int contentLength = responseBody.getContentLength();

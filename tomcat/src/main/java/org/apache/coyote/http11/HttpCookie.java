@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpCookie {
 
+    private static final String EQUAL = "=";
+
     private final String name;
     private final String value;
 
@@ -16,5 +18,9 @@ public class HttpCookie {
 
     public String getValue() {
         return value;
+    }
+
+    public String headerFormat() {
+        return "%s%s%s".formatted(name, EQUAL, value);
     }
 }

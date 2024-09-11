@@ -3,7 +3,9 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import hoony.was.RequestHandler;
+import hoony.was.session.SessionCookie;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -28,6 +30,8 @@ public class LoginRequestHandler implements RequestHandler {
         String password = queryParameters.get("password");
         logUser(account, password);
         if (logUser(account, password)) {
+            SessionCookie sessionCookie = new SessionCookie(UUID.randomUUID().toString());
+            response.setCookie(sessionCookie.getCookie());
             return "redirect:/index.html";
         }
         return "redirect:/401.html";

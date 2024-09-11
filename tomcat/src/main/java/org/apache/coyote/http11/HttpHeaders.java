@@ -9,6 +9,7 @@ public class HttpHeaders {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
     private static final String HEADER_DELIMITER = ":";
     private static final int SPLIT_LIMIT = 2;
@@ -71,7 +72,8 @@ public class HttpHeaders {
         return fields.toString();
     }
 
-    public void addCookie(HttpCookie cookie) {
+    public void setCookie(HttpCookie cookie) {
         cookies.add(cookie);
+        fields.put(SET_COOKIE, cookie.headerFormat());
     }
 }

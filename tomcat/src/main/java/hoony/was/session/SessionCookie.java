@@ -15,4 +15,8 @@ public class SessionCookie {
     public String getValue() {
         return cookie.getValue();
     }
+
+    public HttpCookie getCookie() {
+        return cookie;
+    }
 }

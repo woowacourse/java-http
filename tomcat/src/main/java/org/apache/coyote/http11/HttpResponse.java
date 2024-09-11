@@ -17,10 +17,6 @@ public class HttpResponse {
         this(new HttpHeaders(), null, HttpBody.empty());
     }
 
-    public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder();
-    }
-
     public HttpHeaders getHeaders() {
         return headers;
     }
@@ -52,5 +48,9 @@ public class HttpResponse {
 
     public void setLocation(String location) {
         headers.setLocation(location);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        headers.setCookie(cookie);
     }
 }

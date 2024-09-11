@@ -46,12 +46,14 @@ public class Http11Processor implements Runnable, Processor {
             FileReader fileReader = FileReader.getInstance();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-            HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    fileReader.readFile(httpRequest.getHttpRequestPath()));
-            if (httpRequest.getHttpRequestPath().contains("/login?")) {
-                login(httpRequest);
+
+            String requestedFilePath = httpRequest.getHttpRequestPath();
+            if (httpRequest.getHttpRequestPath().contains("/login")) {
+                requestedFilePath = login(httpRequest);
             }
 
+            HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    fileReader.readFile(requestedFilePath));
             HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
             String response = httpResponseParser.parseResponse(httpResponse);
 
@@ -70,13 +72,21 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpResponse(code, httpResponseHeaders, responseBody);
     }
 
-    private void login(HttpRequest httpRequest) {
+    private String login(HttpRequest httpRequest) {
+        if (httpRequest.isParameterEmpty()) {
+            return "/login";
+        }
         String account = httpRequest.getQueryParameter("account");
         String password = httpRequest.getQueryParameter("password");
-        User foundUser = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException(account + "는 존재하지 않는 계정입니다."));
-        if (foundUser.checkPassword(password)) {
-            log.info("user : " + foundUser);
+        try {
+            User foundUser = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException(account + "는 존재하지 않는 계정입니다."));
+            if (foundUser.checkPassword(password)) {
+                log.info("user : " + foundUser);
+            }
+        } catch (IllegalArgumentException e) {
+            return "/401.html";
         }
+        return "/index.html";
     }
 }

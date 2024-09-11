@@ -49,4 +49,8 @@ public class HttpRequest {
     public String getQueryParameter(String key) {
         return queryString.getValue(key);
     }
+
+    public boolean isParameterEmpty() {
+        return queryString.isEmpty();
+    }
 }

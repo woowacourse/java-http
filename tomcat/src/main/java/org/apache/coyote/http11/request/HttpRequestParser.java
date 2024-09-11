@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestParser {
+public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분리
 
     private static final String DELIMITER_REQUEST_LINE = " ";
 
@@ -53,7 +53,7 @@ public class HttpRequestParser {
         }
         String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
         String[] queryStringInfos = queryString.split(DELIMITER_QUERY_STRING_VALUES);
-        for (String queryStringInfo : queryStringInfos) {
+        for (String queryStringInfo : queryStringInfos) { // TODO : 불용어 제거
             String[] splittedQueryString = queryStringInfo.split(DELIMITER_QUERY_STRING_VALUE);
             String key = splittedQueryString[0];
             String value = splittedQueryString[1];
@@ -71,9 +71,9 @@ public class HttpRequestParser {
 
         String headerLine = bufferedReader.readLine();
         while (!EMPTY_LINE.equals(headerLine)) {
-            String[] headerInfo = headerLine.split(DELIMITER_HEADER);
-            String key = headerInfo[0];
-            String value = headerInfo[1];
+            int delimiterHeaderIndex = headerLine.indexOf(DELIMITER_HEADER);
+            String key = headerLine.substring(0, delimiterHeaderIndex);
+            String value = headerLine.substring(delimiterHeaderIndex + 2);
             headers.put(key, value);
             headerLine = bufferedReader.readLine();
         }

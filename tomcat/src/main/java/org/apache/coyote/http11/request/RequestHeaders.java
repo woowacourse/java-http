@@ -29,7 +29,7 @@ public class RequestHeaders {
     }
 
     public String getCookieString() {
-        return headers.getOrDefault(HttpHeaderKey.SET_COOKIE, null);
+        return headers.getOrDefault(HttpHeaderKey.COOKIE, null);
     }
 
     public int getContentLength() {

@@ -1,30 +1,28 @@
 package org.apache.coyote.http11.cookie;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpCookies {
+
+    public static final String COOKIE_DELIMITER = "; ";
+    public static final String COOKIE_KEY_VALUE_DELIMITER = "=";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
     public HttpCookies(String cookies) {
-        Map<String, String> result = new HashMap<>();
-        String[] pairs = cookies.split("; ");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                result.put(keyValue[0], keyValue[1]);
-            }
-        }
-        this.cookies = result;
+        this.cookies = Arrays.stream(cookies.split(COOKIE_DELIMITER))
+                .map(cookie -> cookie.split(COOKIE_KEY_VALUE_DELIMITER))
+                .collect(Collectors.toMap(keyValue -> keyValue[0], keyValue -> keyValue[1]));
     }
 
-    // TODO: 상수로 관리하기
     public boolean hasJSESSIONID() {
-        return cookies.containsKey("JSESSIONID");
+        return cookies.containsKey(JSESSIONID);
     }
 
     public String getJSESSIONID() {
-        return cookies.get("JSESSIONID");
+        return cookies.get(JSESSIONID);
     }
 }

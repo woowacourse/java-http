@@ -40,7 +40,7 @@ public class SessionManager implements Manager {
         return List.copyOf(SESSIONS.keySet());
     }
 
-    public Optional<HttpSession> getSession(String id) {
+    public Optional<Session> getSession(String id) {
         return Optional.ofNullable(SESSIONS.get(id));
     }
 }

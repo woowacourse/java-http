@@ -12,7 +12,7 @@ import org.apache.coyote.http.response.Response;
 
 class WelcomeHandlerTest {
 
-    private final Handler welcomeHandler = new WelcomeHandler();
+    private final Handler welcomeHandler = WelcomeHandler.getInstance();
 
     @Test
     void welcome_경로를_반환한다() {

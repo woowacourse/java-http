@@ -12,7 +12,7 @@ import org.apache.coyote.http.response.Response;
 
 class ResourceHandlerTest {
 
-    private final Handler resourceHandler = new ResourceHandler();
+    private final Handler resourceHandler = ResourceHandler.getInstance();
 
     @Test
     void 정적_리소스를_반환한다() {

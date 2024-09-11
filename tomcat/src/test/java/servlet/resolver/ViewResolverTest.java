@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class ViewResolverTest {
 
-    private final ViewResolver viewResolver = new ViewResolver();
+    private final ViewResolver viewResolver = ViewResolver.getInstance();
 
     @Test
     void view명으로_view를_반환한다() {

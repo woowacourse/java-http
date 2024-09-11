@@ -26,8 +26,8 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestParser = new RequestParser();
-        this.httpServlet = new HttpServlet();
+        this.requestParser = RequestParser.getInstance();
+        this.httpServlet = HttpServlet.getInstance();
     }
 
     @Override

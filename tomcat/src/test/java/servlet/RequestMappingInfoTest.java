@@ -22,10 +22,10 @@ class RequestMappingInfoTest {
         RequestBody requestBody = RequestBody.from(null);
         Request request = new Request(requestLine, requestHeaders, requestBody);
 
-        RequestMappingInfo requestMappingInfo = new RequestMappingInfo("/", HttpMethod.GET, new WelcomeHandler());
+        RequestMappingInfo mappingInfo = new RequestMappingInfo("/", HttpMethod.GET, WelcomeHandler.getInstance());
 
         // when
-        Handler handler = requestMappingInfo.getHandler(request);
+        Handler handler = mappingInfo.getHandler(request);
 
         // then
         assertThat(handler).isExactlyInstanceOf(WelcomeHandler.class);
@@ -39,10 +39,10 @@ class RequestMappingInfoTest {
         RequestBody requestBody = RequestBody.from(null);
         Request request = new Request(requestLine, requestHeaders, requestBody);
 
-        RequestMappingInfo requestMappingInfo = new RequestMappingInfo("/login", HttpMethod.GET, new WelcomeHandler());
+        RequestMappingInfo mappingInfo = new RequestMappingInfo("/login", HttpMethod.GET, WelcomeHandler.getInstance());
 
         // when
-        Handler handler = requestMappingInfo.getHandler(request);
+        Handler handler = mappingInfo.getHandler(request);
 
         // then
         assertThat(handler).isNull();

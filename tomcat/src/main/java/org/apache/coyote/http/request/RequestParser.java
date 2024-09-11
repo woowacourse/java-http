@@ -12,6 +12,18 @@ public class RequestParser {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
+    private static RequestParser INSTANCE;
+
+    private RequestParser() {
+    }
+
+    public static RequestParser getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new RequestParser();
+        }
+        return INSTANCE;
+    }
+
     public Request parse(BufferedReader reader) throws IOException {
         RequestLine line = new RequestLine(reader.readLine());
         RequestHeaders headers = new RequestHeaders(getRequestHeaders(reader));

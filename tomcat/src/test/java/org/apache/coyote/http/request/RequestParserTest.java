@@ -13,6 +13,8 @@ import org.apache.coyote.http.HttpMethod;
 
 class RequestParserTest {
 
+    private final RequestParser parser = RequestParser.getInstance();
+
     @Test
     void 요청을_파싱한다() {
         // given
@@ -30,7 +32,6 @@ class RequestParserTest {
                 
                 account=prin&password=1q2w3e4r!
                 """;
-        RequestParser parser = new RequestParser();
 
         try (InputStream inputStream = new ByteArrayInputStream(request.getBytes());
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -56,7 +57,6 @@ class RequestParserTest {
     void RequestLine이_없으면_예외가_발생한다() {
         // given
         String request = "";
-        RequestParser parser = new RequestParser();
 
         try (InputStream inputStream = new ByteArrayInputStream(request.getBytes());
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -78,7 +78,6 @@ class RequestParserTest {
                 Connection - keep-alive
                 Host: localhost:8080
                 """;
-        RequestParser parser = new RequestParser();
 
         try (InputStream inputStream = new ByteArrayInputStream(request.getBytes());
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -100,7 +99,6 @@ class RequestParserTest {
                 Connection: keep-alive
                 Host: localhost:8080
                 """;
-        RequestParser parser = new RequestParser();
 
         try (InputStream inputStream = new ByteArrayInputStream(request.getBytes());
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {

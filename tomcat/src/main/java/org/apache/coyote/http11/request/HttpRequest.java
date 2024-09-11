@@ -48,6 +48,10 @@ public class HttpRequest {
     public boolean isMethod(HttpMethod httpMethod) {
         return requestLine.isMethod(httpMethod);
     }
+    
+    public boolean isStaticResource() {
+        return requestLine.isStaticResource();
+    }
 
     public String getParameter(String name) {
         return requestBody.get(name);

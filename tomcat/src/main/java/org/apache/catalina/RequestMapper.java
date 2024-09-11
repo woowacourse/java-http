@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.ResourceController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Controller;
@@ -18,6 +19,10 @@ public class RequestMapper {
     }
 
     public static Controller getController(HttpRequest request) {
+        if (request.isStaticResource()) {
+            return new ResourceController();
+        }
+
         return controllerMap.get(request.getUri());
     }
 }

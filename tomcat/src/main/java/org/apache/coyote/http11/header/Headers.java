@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.header;
 
+import util.BiValue;
 import util.StringUtil;
 
 import java.util.HashMap;
@@ -28,8 +29,8 @@ public class Headers {
     }
 
     public void put(final String line) {
-        final String[] arys = line.split(DELIMITER);
-        values.put(arys[0], arys[1]);
+        final BiValue<String, String> keyAndValue = StringUtil.splitBiValue(line, DELIMITER);
+        values.put(keyAndValue.first(), keyAndValue.second());
     }
 
     public void put(final ResponseHeader header, final String value) {

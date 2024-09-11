@@ -13,6 +13,7 @@ public class RequestLine {
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
+    private static final int REQUEST_INDEX_SIZE = 3;
 
     private final HttpMethod httpMethod;
     private final Path path;
@@ -28,8 +29,14 @@ public class RequestLine {
 
     public static RequestLine create(final String line) {
         final String[] requestLineInfos = line.split(DELIMITER);
+        validateRequestLineFormat(requestLineInfos);
         final BiValue<Path, QueryParams> uriAndQueryParam = splitUriAndQueryParams(requestLineInfos[PATH_INDEX]);
         return new RequestLine(HttpMethod.from(requestLineInfos[HTTP_METHOD_INDEX]), uriAndQueryParam.first(), uriAndQueryParam.second(), HttpVersion.from(requestLineInfos[HTTP_VERSION_INDEX]));
+    }
+    private static void validateRequestLineFormat(final String[] requestLineInfos) {
+        if(requestLineInfos.length !=REQUEST_INDEX_SIZE){
+            throw new IllegalArgumentException("HTTP Request Line 문법이 잘못 됐습니다.");
+        }
     }
 
     private static BiValue<Path, QueryParams> splitUriAndQueryParams(final String path) {

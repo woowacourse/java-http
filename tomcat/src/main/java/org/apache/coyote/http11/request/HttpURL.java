@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,17 +22,19 @@ public record HttpURL(String fullUrl, String path, Map<String, String> queryPara
 
     private static Map<String, String> parseQueryParameters(String url) {
         Map<String, String> queryParams = new HashMap<>();
-        String[] pathAndQuery = url.split(PATH_QUERY_DELIMITER);
-        if (pathAndQuery.length != 2) {
+        String[] pathAndQuery = url.split(PATH_QUERY_DELIMITER, 2);
+        if (isQueryPartExist(pathAndQuery)) {
             return queryParams;
         }
 
         String queryPart = pathAndQuery[QUERY_INDEX];
-        String[] pairs = queryPart.split(QUERY_PAIR_DELIMITER);
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(QUERY_KEY_VALUE_DELIMITER);
-            queryParams.put(keyValue[0], keyValue[1]);
-        }
+        Arrays.stream(queryPart.split(QUERY_PAIR_DELIMITER))
+                .map(part -> part.split(QUERY_KEY_VALUE_DELIMITER, 2))
+                .forEach(pair -> queryParams.put(pair[0], pair[1]));
         return queryParams;
+    }
+
+    private static boolean isQueryPartExist(String[] pathAndQuery) {
+        return pathAndQuery.length != 2 || pathAndQuery[QUERY_INDEX].isEmpty();
     }
 }

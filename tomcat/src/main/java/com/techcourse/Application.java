@@ -3,6 +3,7 @@ package com.techcourse;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceController;
+import org.apache.catalina.connector.CatalinaConnectionListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.adapter.CoyoteAdapter;
@@ -22,9 +23,10 @@ public class Application {
         final ResourceController resourceController = new ResourceController();
         final SessionManager sessionManager = new SessionManager();
 
-        final Connector connector = new Connector();
+        final CatalinaConnectionListener connectionListener = new CatalinaConnectionListener(new CoyoteAdapter(requestMapper, resourceController, sessionManager));
+        final Connector connector = new Connector(connectionListener);
 
-        final var tomcat = new Tomcat(connector, new CoyoteAdapter(requestMapper, resourceController, sessionManager));
+        final var tomcat = new Tomcat(connector);
         tomcat.start();
     }
 }

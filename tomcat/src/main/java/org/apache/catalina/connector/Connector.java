@@ -16,20 +16,16 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private ConnectionListener connectionListener;
+    private final ConnectionListener connectionListener;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final ConnectionListener connectionListener) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT,connectionListener);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount,final ConnectionListener connectionListener) {
         this.serverSocket = createServerSocket(port, acceptCount);
-
         this.stopped = false;
-    }
-
-    public void setConnectionListener(final ConnectionListener connectionListener) {
         this.connectionListener = connectionListener;
     }
 

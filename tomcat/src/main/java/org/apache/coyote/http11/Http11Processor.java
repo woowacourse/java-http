@@ -4,10 +4,10 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
-import org.apache.catalina.mapper.Mapper;
-import org.apache.catalina.servlets.Servlet;
+import org.apache.catalina.controller.http.request.HttpRequest;
+import org.apache.catalina.controller.http.response.HttpResponse;
+import org.apache.catalina.mapper.ControllerMapper;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +36,10 @@ public class Http11Processor implements Runnable, Processor {
             int read = inputStream.read(buffer);
             HttpRequest request = new HttpRequest(new String(buffer, 0, read));
 
-            Servlet servlet = Mapper.getInstance().getServlet(request.getRequestURI());
+            Controller controller = ControllerMapper.getInstance().getServlet(request.getRequestURI());
 
             HttpResponse response = new HttpResponse(outputStream);
-            servlet.service(request, response);
+            controller.service(request, response);
 
             PrintWriter writer = response.getWriter();
             response.write();

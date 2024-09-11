@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,11 +8,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
-import org.apache.catalina.servlets.http.response.HttpStatus;
+import org.apache.catalina.controller.http.request.HttpRequest;
+import org.apache.catalina.controller.http.response.HttpResponse;
+import org.apache.catalina.controller.http.response.HttpStatus;
 
-public class RegisterServlet extends HttpServlet {
+public class RegisterController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {

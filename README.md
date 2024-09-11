@@ -48,5 +48,5 @@
 ### 3단계 리팩토링
 - [x] HttpRequest 구현하기
 - [x] HttpResponse 구현하기
-- [ ] Controller 인터페이스 추가하기
-  - [ ] 컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들기
+- [x] Controller 인터페이스 추가하기
+  - [x] 컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들기

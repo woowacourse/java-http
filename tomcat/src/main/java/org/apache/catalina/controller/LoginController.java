@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,17 +8,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.Cookie;
-import org.apache.catalina.servlets.http.Session;
-import org.apache.catalina.servlets.http.SessionManager;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
+import org.apache.catalina.controller.http.Cookie;
+import org.apache.catalina.controller.http.Session;
+import org.apache.catalina.controller.http.SessionManager;
+import org.apache.catalina.controller.http.request.HttpRequest;
+import org.apache.catalina.controller.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginServlet extends HttpServlet {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {

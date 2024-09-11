@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
+import org.apache.catalina.controller.http.request.HttpMethod;
+import org.apache.catalina.controller.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

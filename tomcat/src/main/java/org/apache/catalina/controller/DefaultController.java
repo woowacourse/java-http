@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets;
+package org.apache.catalina.controller;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
+import org.apache.catalina.controller.http.request.HttpRequest;
+import org.apache.catalina.controller.http.response.HttpResponse;
 
 /**
  * 정적 리소스를 관리하는 서블릿입니다.
  */
-public class DefaultServlet implements Servlet {
+public class DefaultController implements Controller {
 
     private final Map<String, String> contentTypes = Map.of(
             "html", "text/html;charset=utf-8",

@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets.http;
+package org.apache.catalina.controller.http;
 
 public class Cookie {
 

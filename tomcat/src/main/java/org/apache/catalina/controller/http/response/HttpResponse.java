@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets.http.response;
+package org.apache.catalina.controller.http.response;
 
 import java.io.BufferedWriter;
 import java.io.OutputStream;
@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.catalina.servlets.http.Cookie;
+import org.apache.catalina.controller.http.Cookie;
 
 public class HttpResponse {
 

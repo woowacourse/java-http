@@ -1,4 +1,4 @@
-package org.apache.catalina.servlets.http.request;
+package org.apache.catalina.controller.http.request;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -10,9 +10,9 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.catalina.servlets.http.Cookie;
-import org.apache.catalina.servlets.http.Session;
-import org.apache.catalina.servlets.http.SessionManager;
+import org.apache.catalina.controller.http.Cookie;
+import org.apache.catalina.controller.http.Session;
+import org.apache.catalina.controller.http.SessionManager;
 
 public class HttpRequest {
 

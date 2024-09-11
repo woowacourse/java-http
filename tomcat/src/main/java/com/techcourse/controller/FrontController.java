@@ -40,34 +40,31 @@ public class FrontController extends Controller {
     @Override
     public void handle(HttpRequest request, HttpResponse response) throws IOException {
         String uri = request.getURI();
-        Controller handler = getHandler(uri);
-        String fileName = Resource.getFileName(uri);
-        if (Objects.isNull(handler) && FileExtension.isFileExtension(fileName)) {
-            try {
-                getResourceResponse(request, response);
-                return;
-            } catch (InvalidResourceException e) {
-                log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
+        Controller handler = getHandler(request.getURI());
+        String fileName = Resource.getFileName(request.getURI());
 
-                handler = NotFoundController.getInstance();
-            }
-        }
-        if (Objects.isNull(handler)) {
-            log.error("Error processing request for endpoint: {}", uri);
-
-            handler = NotFoundController.getInstance();
-        }
         try {
+            if (Objects.isNull(handler) && FileExtension.isFileExtension(fileName)) {
+                handleStaticResource(request, response);
+                return;
+            }
             handler.handle(request, response);
-        } catch (UnsupportedMethodException e) {
+        } catch (InvalidResourceException e) {
             log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
 
-            handler = MethodNotAllowedController.getInstance();
-            handler.handle(request, response);
+            handleNotFound(request, response);
+        } catch (UnsupportedMethodException e) {
+            log.error("Unsupported method for endpoint: {}, message: {}", uri, e.getMessage());
+
+            handleUnsupportedMethod(request, response);
         }
     }
 
-    private void getResourceResponse(HttpRequest request, HttpResponse response) throws IOException {
+    private Controller getHandler(String uri) {
+        return handlerMappings.get(uri);
+    }
+
+    private void handleStaticResource(HttpRequest request, HttpResponse response) throws IOException {
         String fileName = Resource.getFileName(request.getURI());
         ResponseBody responseBody = new ResponseBody(Resource.read(fileName));
         response.setStatus(HttpStatus.OK);
@@ -75,8 +72,14 @@ public class FrontController extends Controller {
         response.setBody(responseBody);
     }
 
-    private Controller getHandler(String uri) {
-        return handlerMappings.get(uri);
+    private void handleUnsupportedMethod(HttpRequest request, HttpResponse response) throws IOException {
+        Controller methodNotAllowedController = MethodNotAllowedController.getInstance();
+        methodNotAllowedController.handle(request, response);
+    }
+
+    private void handleNotFound(HttpRequest request, HttpResponse response) throws IOException {
+        Controller notFoundController = NotFoundController.getInstance();
+        notFoundController.handle(request, response);
     }
 
     @Override

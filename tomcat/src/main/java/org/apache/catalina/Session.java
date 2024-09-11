@@ -17,11 +17,11 @@ public class Session {
         return id;
     }
 
-    public void setAttribute(String name, Object value) {
-        values.put(name, value);
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
+    public void setAttribute(String name, Object value) {
+        values.put(name, value);
     }
 }

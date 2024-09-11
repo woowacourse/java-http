@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +30,14 @@ public class Cookies {
                         cookie -> cookie[NAME_INDEX],
                         cookie -> cookie[VALUE_INDEX])
                 );
+    }
+
+    public static Cookies ofJSessionId(String id) {
+        return new Cookies(Map.of(JSESSIONID, id));
+    }
+
+    public static Cookies empty() {
+        return new Cookies(Collections.emptyMap());
     }
 
     public String toCookieHeader() {

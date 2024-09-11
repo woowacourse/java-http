@@ -1,14 +1,20 @@
 package org.apache.coyote.http11.request;
 
 import java.io.IOException;
-import java.util.Optional;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
 import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.request.startLine.RequestLine;
-import org.apache.coyote.http11.response.header.ContentType;
 
 public class HttpRequest {
+
+    private static final int EMPTY_BODY_LENGTH = 0;
+
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -20,19 +26,19 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest parse(HttpRequestReader httpRequestReader) throws IOException {
-        RequestLine requestLine = new RequestLine(httpRequestReader.readRequestLine());
-        RequestHeaders requestHeaders = new RequestHeaders(httpRequestReader.readRequestHeaders());
+    public static HttpRequest read(RequestReader requestReader) throws IOException {
+        RequestLine requestLine = new RequestLine(requestReader.readRequestLine());
+        RequestHeaders requestHeaders = new RequestHeaders(requestReader.readRequestHeaders());
 
-        int contentLength = requestHeaders.get("Content-Length")
+        int contentLength = requestHeaders.get(HttpHeader.CONTENT_LENGTH.getName())
                 .map(Integer::parseInt)
-                .orElse(0);
+                .orElse(EMPTY_BODY_LENGTH);
 
-        if (contentLength > 0) {
-            String mediaType = requestHeaders.get(ContentType.HEADER)
+        if (contentLength > EMPTY_BODY_LENGTH) {
+            String mediaType = requestHeaders.get(HttpHeader.CONTENT_TYPE.getName())
                     .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
 
-            RequestBody requestBody = new RequestBody(mediaType, httpRequestReader.readRequestBody(contentLength));
+            RequestBody requestBody = new RequestBody(mediaType, requestReader.readRequestBody(contentLength));
             return new HttpRequest(requestLine, requestHeaders, requestBody);
         }
 
@@ -43,8 +49,20 @@ public class HttpRequest {
         return requestLine.isMethod(httpMethod);
     }
 
-    public Optional<String> getHeader(String header) {
-        return requestHeaders.get(header);
+    public String getParameter(String name) {
+        return requestBody.get(name);
+    }
+
+    public Session getSession() {
+        return getCookie().getJSessionId()
+                .flatMap(sessionManager::findSession)
+                .orElseGet(sessionManager::createSession);
+    }
+
+    public Cookies getCookie() {
+        return requestHeaders.get(HttpHeader.COOKIE.getName())
+                .map(Cookies::new)
+                .orElseGet(Cookies::empty);
     }
 
     public RequestLine getRequestLine() {

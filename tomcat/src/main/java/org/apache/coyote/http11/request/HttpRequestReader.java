@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpRequestReader {
+public class HttpRequestReader implements RequestReader {
 
     private final BufferedReader bufferedReader;
 
@@ -13,10 +13,12 @@ public class HttpRequestReader {
         this.bufferedReader = bufferedReader;
     }
 
+    @Override
     public String readRequestLine() throws IOException {
         return bufferedReader.readLine();
     }
 
+    @Override
     public List<String> readRequestHeaders() throws IOException {
         List<String> headers = new ArrayList<>();
 
@@ -30,6 +32,7 @@ public class HttpRequestReader {
         return headers;
     }
 
+    @Override
     public String readRequestBody(int contentLength) throws IOException {
         StringBuilder builder = new StringBuilder();
 

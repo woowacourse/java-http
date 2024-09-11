@@ -38,7 +38,7 @@ class URITest {
     void URI가_최대_길이를_초과하면_예외가_발생한다() {
         // given
         int maxLength = 2048;
-        String uri = "a".repeat(maxLength + 1);
+        String uri = "/" + "a".repeat(maxLength);
 
         // when & then
         assertThatThrownBy(() -> new URI(uri))

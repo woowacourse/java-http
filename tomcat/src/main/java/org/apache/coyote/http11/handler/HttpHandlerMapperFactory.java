@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
-import com.techcourse.controller.LoginController;
+import com.techcourse.controller.LoginGetController;
+import com.techcourse.controller.LoginPostController;
 import com.techcourse.controller.RegisterGetController;
 import com.techcourse.controller.RegisterPostController;
 import com.techcourse.service.UserService;
@@ -18,8 +19,9 @@ public class HttpHandlerMapperFactory {
 
         return new HttpHandlerMapper(Map.of(
                 new HttpRequestInfo(HttpMethod.GET, "/"), new StringHttpHandler("Hello world!"),
-                new HttpRequestInfo(HttpMethod.GET, "/login"), new LoginController(userService),
-                new HttpRequestInfo(HttpMethod.GET, "/register"), new RegisterGetController(userService),
+                new HttpRequestInfo(HttpMethod.GET, "/login"), new LoginGetController(),
+                new HttpRequestInfo(HttpMethod.POST, "/login"), new LoginPostController(userService),
+                new HttpRequestInfo(HttpMethod.GET, "/register"), new RegisterGetController(),
                 new HttpRequestInfo(HttpMethod.POST, "/register"), new RegisterPostController(userService)
         ));
     }

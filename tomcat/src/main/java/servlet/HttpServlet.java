@@ -8,15 +8,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
-import servlet.http.HttpMethod;
-import servlet.http.request.Request;
-import servlet.http.MimeType;
-import servlet.http.response.Response;
-import servlet.http.StatusCode;
 import servlet.handler.Handler;
-import servlet.resolver.ViewResolver;
 import servlet.handler.ResourceHandler;
-import servlet.handler.WelcomePageHandler;
+import servlet.handler.WelcomeHandler;
+import servlet.http.HttpMethod;
+import servlet.http.MimeType;
+import servlet.http.StatusCode;
+import servlet.http.request.Request;
+import servlet.http.response.Response;
+import servlet.resolver.ViewResolver;
 
 public class HttpServlet {
 
@@ -29,7 +29,7 @@ public class HttpServlet {
                 new RequestMappingInfo("/login", HttpMethod.GET, LoginController.getInstance()::getLogin),
                 new RequestMappingInfo("/login", HttpMethod.POST, LoginController.getInstance()::postLogin),
                 new RequestMappingInfo("/register", HttpMethod.POST, RegisterController.getInstance()::register),
-                new RequestMappingInfo("/", HttpMethod.GET, new WelcomePageHandler())
+                new RequestMappingInfo("/", HttpMethod.GET, new WelcomeHandler())
         );
         this.viewResolver = new ViewResolver();
     }

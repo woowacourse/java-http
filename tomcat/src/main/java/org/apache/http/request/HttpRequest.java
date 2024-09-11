@@ -8,7 +8,7 @@ import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.header.HttpHeaders;
-import org.apache.http.header.StandardHttpHeader;
+import org.apache.http.header.HttpHeaderName;
 
 public class HttpRequest {
 
@@ -37,7 +37,7 @@ public class HttpRequest {
     private HttpCookie parseCookie(HttpHeader[] headers) {
         return Optional.ofNullable(headers)
                 .flatMap(hs -> Arrays.stream(hs)
-                        .filter(header -> StandardHttpHeader.COOKIE.equalsIgnoreCase(header.getKey()))
+                        .filter(header -> HttpHeaderName.COOKIE.equalsIgnoreCase(header.getKey()))
                         .findFirst()
                         .map(header -> HttpCookie.from(header.getValue())))
                 .orElse(null);

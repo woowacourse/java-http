@@ -9,7 +9,7 @@ import org.apache.coyote.UnauthorizedException;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.catalina.session.Session;
-import org.apache.http.header.StandardHttpHeader;
+import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
 
@@ -70,6 +70,6 @@ public class LoginHandler extends Handler {
     private String addCookie(final String response, final HttpCookie cookie) {
         return response
                 .concat("\n")
-                .concat(StandardHttpHeader.SET_COOKIE.getValue() + ": " + cookie.toString());
+                .concat(HttpHeaderName.SET_COOKIE.getValue() + ": " + cookie.toString());
     }
 }

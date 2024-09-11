@@ -1,7 +1,6 @@
 package org.apache.http.header;
 
-// TODO: HttpHeaderName 로 변경
-public enum StandardHttpHeader {
+public enum HttpHeaderName {
     ACCEPT("Accept"),
     ACCEPT_RANGES("Accept-Ranges"),
     AUTHORIZATION("Authorization"),
@@ -17,7 +16,7 @@ public enum StandardHttpHeader {
 
     private final String value;
 
-    StandardHttpHeader(String value) {
+    HttpHeaderName(String value) {
         this.value = value;
     }
 

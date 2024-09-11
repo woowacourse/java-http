@@ -5,14 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class RequestParser {
-    private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
-    public static final String HEADER_SEPARATOR = ": ";
+    private static final String HEADER_SEPARATOR = ": ";
 
     private RequestParser() {}
 
@@ -22,8 +18,8 @@ public class RequestParser {
                 .map(line -> line.split(HEADER_SEPARATOR, 2))
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(
-                        parts -> parts[0],
-                        parts -> parts[1]
+                        parts -> parts[0].trim(),
+                        parts -> parts[1].trim()
                 ));
     }
 

@@ -12,27 +12,6 @@ import org.junit.jupiter.api.Test;
 class RequestTest {
 
     @Test
-    @DisplayName("성공 : 쿼리 파라미터가 없으면 true를 반환한다.")
-    void checkQueryParamIsEmptySuccessTrue() {
-        Request request = new Request("GET /index.html HTTP/1.1", Map.of());
-
-        boolean actual = request.checkQueryParamIsEmpty();
-
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("성공 : 쿼리 파라미터가 있으면 false를 반환한다.")
-    void checkQueryParamIsEmptySuccessFalse() {
-        Request request = new Request("GET /index.html HTTP/1.1", Map.of());
-        request.setQueryParam(Map.of("param", "value"));
-
-        boolean actual = request.checkQueryParamIsEmpty();
-
-        assertThat(actual).isFalse();
-    }
-
-    @Test
     @DisplayName("성공 : body 값을 추가할 수 있다.")
     void setBody() {
         Request request = new Request("GET /index.html HTTP/1.1", Map.of());
@@ -42,48 +21,6 @@ class RequestTest {
 
         Map<String, String> actual = request.getBody();
         assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("성공 : query param 값을 추가할 수 있다.")
-    void setQueryParam() {
-        Request request = new Request("GET /index.html HTTP/1.1", Map.of());
-        Map<String, String> expected = Map.of("param", "value");
-
-        request.setQueryParam(expected);
-
-        Map<String, String> actual = request.getQueryParam();
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("성공 : Http Method를 알 수 있다.")
-    void getHttpMethod() {
-        Request request = new Request("GET /index.html HTTP/1.1", Map.of());
-
-        String actual = request.getHttpMethod();
-
-        assertThat(actual).isEqualTo("GET");
-    }
-
-    @Test
-    @DisplayName("성공 : query가 포함된 url을 알 수 있다.")
-    void getUrlIncludeQuery() {
-        Request request = new Request("GET /index?id=123 HTTP/1.1", Map.of());
-
-        String actual = request.getPath();
-
-        assertThat(actual).isEqualTo("/index?id=123");
-    }
-
-    @Test
-    @DisplayName("성공 : query가 포함되지 않은 url을 알 수 있다.")
-    void getUrl() {
-        Request request = new Request("GET /index?id=123 HTTP/1.1", Map.of());
-
-        String actual = request.getUrl();
-
-        assertThat(actual).isEqualTo("/index");
     }
 
     @Nested

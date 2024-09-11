@@ -24,8 +24,10 @@ public class HttpRequestReader {
     public HttpRequest read() throws IOException {
         String requestLine = readLine();
         HttpHeaders headers = readHeaderLines();
+        byte[] bodyBytes = readBody(headers);
+        HttpRequestBody body = new HttpRequestBody(bodyBytes, HttpBodyParser.parseToFormParameters(bodyBytes, headers));
 
-        return HttpRequest.of(requestLine, headers, readBody(headers));
+        return HttpRequest.of(requestLine, headers, body);
     }
 
     private HttpHeaders readHeaderLines() throws IOException {

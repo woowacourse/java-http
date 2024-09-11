@@ -26,6 +26,10 @@ public final class HttpHeaders {
                         headerLineElements -> headerLineElements[HEADER_FIELD_INDEX])));
     }
 
+    public boolean isHeader(String headerName, String headerValue) {
+        return headerValue.equals(getFieldByHeaderName(headerName).orElse(""));
+    }
+
     public Optional<String> getFieldByHeaderName(String headerName) {
         return Optional.ofNullable(headers.get(headerName));
     }

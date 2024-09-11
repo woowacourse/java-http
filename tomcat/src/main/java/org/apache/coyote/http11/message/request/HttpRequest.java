@@ -12,16 +12,16 @@ public class HttpRequest {
     private final HttpMethod method;
     private final HttpUrl url;
     private final HttpHeaders headers;
-    private final byte[] body;
+    private final HttpRequestBody body;
 
-    public HttpRequest(HttpMethod method, HttpUrl url, HttpHeaders headers, byte[] body) {
+    public HttpRequest(HttpMethod method, HttpUrl url, HttpHeaders headers, HttpRequestBody body) {
         this.method = method;
         this.url = url;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest of(String requestLine, HttpHeaders headers, byte[] body) {
+    public static HttpRequest of(String requestLine, HttpHeaders headers, HttpRequestBody body) {
         String[] requestLineElements = requestLine.split(REQUEST_LINE_DELIMITER);
         HttpMethod method = HttpMethod.from(requestLineElements[HTTP_METHOD_INDEX]);
         String url = requestLineElements[HTTP_URL_INDEX];
@@ -29,8 +29,20 @@ public class HttpRequest {
         return new HttpRequest(method, HttpUrlParser.parseUrl(url), headers, body);
     }
 
+    public boolean hasFormParameters() {
+        return body.hasFormParameters();
+    }
+
     public boolean hasQueryString() {
         return url.hasQueryString();
+    }
+
+    public String getFormParameter(String key) {
+        return body.getFormParameter(key);
+    }
+
+    public String getQueryParameter(String key) {
+        return url.getQueryParameter(key);
     }
 
     public HttpRequestInfo getRequestInfo() {
@@ -47,13 +59,5 @@ public class HttpRequest {
 
     public Optional<String> getHeaderFieldByName(String name) {
         return headers.getFieldByHeaderName(name);
-    }
-
-    public byte[] getBody() {
-        return body;
-    }
-
-    public String getQueryParameter(String key) {
-        return url.getQueryParameter(key);
     }
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.IndexController;
 import org.apache.catalina.controller.LoginController;
@@ -13,10 +12,13 @@ import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServletContainer {
 
     private static final List<String> STATIC_RESOURCE_EXTENSION = List.of(".html", ".css", ".js");
+    private static final Logger log = LoggerFactory.getLogger(ServletContainer.class);
 
     private final Map<String, Controller> servletMapping;
 
@@ -49,7 +51,7 @@ public class ServletContainer {
                 .filter(requestUrl::startsWith)
                 .findFirst()
                 .ifPresentOrElse(
-                        doService(request, response),
+                        mappingUrl -> doService(mappingUrl, request, response),
                         () -> response.setRedirect("/404.html")
                 );
 
@@ -61,13 +63,12 @@ public class ServletContainer {
                 .anyMatch(requestUrl::endsWith);
     }
 
-    private Consumer<String> doService(HttpRequest request, HttpResponse response) {
-        return mappingUrl -> {
-            try {
-                servletMapping.get(mappingUrl).service(request, response);
-            } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage());
-            }
-        };
+    private void doService(String mappingUrl, HttpRequest request, HttpResponse response) {
+        try {
+            servletMapping.get(mappingUrl).service(request, response);
+        } catch (Exception e) {
+            log.warn("예외 메시지 = {}", e.getMessage(), e);
+            throw new IllegalStateException("요청 처리 중 예외가 발생했습니다.");
+        }
     }
 }

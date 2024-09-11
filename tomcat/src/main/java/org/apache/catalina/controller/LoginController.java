@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.function.Consumer;
 import org.apache.catalina.session.HttpSession;
 import org.apache.catalina.session.HttpSessionManger;
 import org.apache.catalina.util.ResourceReader;
@@ -45,13 +44,12 @@ public class LoginController extends AbstractController {
 
         InMemoryUserRepository.findByAccount(account)
                 .ifPresentOrElse(
-                        login(response, password),
+                        user -> login(user, response, password),
                         () -> response.setRedirect("/401.html")
                 );
     }
 
-    private Consumer<User> login(HttpResponse response, String password) {
-        return user -> {
+    private void login(User user, HttpResponse response, String password) {
             if (!user.checkPassword(password)) {
                 response.setRedirect("/401.html");
                 return;
@@ -62,7 +60,6 @@ public class LoginController extends AbstractController {
             log.info("로그인 성공 :: account = {}", user.getAccount());
             response.setCookie(JSESSIONID, sessionId);
             response.setRedirect("/index.html");
-        };
     }
 
     private String saveSession(User user) {

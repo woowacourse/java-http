@@ -30,7 +30,6 @@ public class HttpResponse {
     public void setBody(String body, String contentType) {
         httpHeader.addHeader(HttpHeaderName.CONTENT_TYPE, contentType + ";charset=utf-8");
         httpHeader.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-
         this.body = body;
     }
 

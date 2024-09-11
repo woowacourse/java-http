@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.config;
+package com.techcourse.config;
 
 import java.util.HashSet;
 import java.util.Set;

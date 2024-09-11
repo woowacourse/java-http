@@ -3,7 +3,7 @@ package org.apache.coyote.http11.httprequest;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httprequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,12 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.httprequest.HttpCookie;
-import org.apache.coyote.http11.httprequest.HttpCookieConvertor;
-import org.apache.coyote.http11.httprequest.HttpRequest;
-import org.apache.coyote.http11.httprequest.HttpRequestBody;
-import org.apache.coyote.http11.httprequest.HttpRequestHeader;
-import org.apache.coyote.http11.httprequest.HttpRequestLine;
+import org.apache.coyote.http11.HttpHeaderName;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequestConvertor {
 

@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;

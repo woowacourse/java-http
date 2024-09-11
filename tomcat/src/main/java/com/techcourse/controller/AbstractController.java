@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.httprequest.HttpRequest;

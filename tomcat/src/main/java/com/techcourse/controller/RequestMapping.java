@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.config.UnauthorizedInterceptor;
+import com.techcourse.config.UnauthorizedInterceptor;
 import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 

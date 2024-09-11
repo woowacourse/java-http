@@ -9,14 +9,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.ErrorController;
+import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.FileTypeChecker;
 import org.apache.coyote.util.IdGenerator;
 import org.apache.coyote.util.RequestBodyParser;
-import org.apache.coyote.util.SessionManager;
-import org.apache.coyote.util.ViewResolver;
+import org.apache.coyote.view.StaticResourceResolver;
+import org.apache.coyote.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +53,8 @@ public class Http11Processor implements Runnable, Processor {
                     resolvePostHttpMethod(request, response);
                 }
             } catch (Exception exception) {
-                ErrorController errorController = new ErrorController();
-                errorController.handle(response, exception);
+                ErrorHandler errorHandler = new ErrorHandler();
+                errorHandler.handle(response, exception);
             }
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
@@ -64,14 +64,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void resolveGetHttpMethod(HttpRequest request, HttpResponse response) {
+        ViewResolver staticResourceResolver = new StaticResourceResolver();
         if (request.getTargetPath().equals("/")) {
-            ViewResolver.resolveView("index.html", response);
+            staticResourceResolver.resolve("index.html", response);
         }
         if (request.getTargetPath().equals("/login")) {
             resolveAuthUser(request, response);
         }
         if (request.getTargetPath().equals("/register")) {
-            ViewResolver.resolveView("register.html", response);
+            staticResourceResolver.resolve("register.html", response);
         }
         resolveStaticResource(request, response);
     }
@@ -85,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
             redirectHomeAuthUser(response, user);
             return;
         }
-        ViewResolver.resolveView("login.html", response);
+        new StaticResourceResolver().resolve("login.html", response);
     }
 
     private void redirectHomeAuthUser(HttpResponse response, User user) {
@@ -97,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
     private void resolveStaticResource(HttpRequest request, HttpResponse response) {
         String targetPath = request.getTargetPath();
         if (FileTypeChecker.isSupported(targetPath)) {
-            ViewResolver.resolveView(targetPath, response);
+            new StaticResourceResolver().resolve(targetPath, response);
         }
     }
 

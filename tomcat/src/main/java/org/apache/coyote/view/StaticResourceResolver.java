@@ -1,4 +1,4 @@
-package org.apache.coyote.util;
+package org.apache.coyote.view;
 
 import java.io.IOException;
 import java.net.URL;
@@ -7,14 +7,12 @@ import java.nio.file.Path;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.response.HttpResponse;
 
-public class ViewResolver {
+public class StaticResourceResolver implements ViewResolver {
 
-    private ViewResolver() {
-    }
-
-    public static void resolveView(String fileName, HttpResponse response) {
+    @Override
+    public void resolve(String fileName, HttpResponse response) {
         try {
-            URL resource = ViewResolver.class.getClassLoader().getResource("static/" + fileName);
+            URL resource = StaticResourceResolver.class.getClassLoader().getResource("static/" + fileName);
             if (resource == null) {
                 throw new IllegalArgumentException(fileName + " 파일이 존재하지 않습니다.");
             }

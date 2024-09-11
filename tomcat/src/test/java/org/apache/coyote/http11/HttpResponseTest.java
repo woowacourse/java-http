@@ -105,6 +105,7 @@ public class HttpResponseTest {
                 new HttpHeaders(),
                 new HttpResponseBody()
         );
+        response.setStatus(HttpStatus.OK);
 
         // when&then
         assertThat(response.isValid()).isTrue();

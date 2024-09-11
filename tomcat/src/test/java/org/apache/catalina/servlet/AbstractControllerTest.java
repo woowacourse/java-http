@@ -56,7 +56,6 @@ class AbstractControllerTest {
         controller.responseResource(response, "/index.html");
 
         // then
-        assertThat(responseLine.getStatus()).isEqualTo(HttpStatus.OK);
         assertThat(responseHeaders.get(HttpHeader.CONTENT_TYPE)).contains("text/html");
         assertThat(responseBody.getValue()).contains("<title>대시보드</title>");
     }

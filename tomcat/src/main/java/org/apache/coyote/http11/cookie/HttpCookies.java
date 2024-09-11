@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -24,5 +25,9 @@ public class HttpCookies {
 
     public String getJSESSIONID() {
         return cookies.get(JSESSIONID);
+    }
+
+    public Map<String, String> getCookies() {
+        return Collections.unmodifiableMap(cookies);
     }
 }

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

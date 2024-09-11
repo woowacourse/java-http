@@ -7,20 +7,30 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
-    //TODO 싱글턴 적용
+    private static final SessionManager INSTANCE = new SessionManager(new HashMap<>());
+
+    private final Map<String, Session> session;
+
+    private SessionManager(final Map<String, Session> session) {
+        this.session = session;
+    }
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        this.session.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return session.get(id);
     }
 
     @Override
     public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        this.session.remove(session.getId());
     }
 }

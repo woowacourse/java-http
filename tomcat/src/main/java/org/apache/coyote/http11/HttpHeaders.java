@@ -9,6 +9,7 @@ import java.util.Map;
 public class HttpHeaders {
 
     private static final String HEADER_SEPARATOR = ":";
+
     private final Map<String, String> headers;
 
     public HttpHeaders() {

@@ -20,7 +20,7 @@ public class LoginController extends AbstractController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {

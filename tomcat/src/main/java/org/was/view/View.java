@@ -1,4 +1,4 @@
-package com.techcourse.view;
+package org.was.view;
 
 public class View {
 

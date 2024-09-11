@@ -87,17 +87,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private String handleRequest(Request request) {
         if (request.isSameHttpMethod(HttpMethod.GET)) {
-            return generateResponseForUrl(request).responseToString();
+            return generateResponseForUrl(request).toString();
         }
         if (request.isSameHttpMethod(HttpMethod.POST)) {
-            return generateResponseForPostUrl(request).responseToString();
+            return generateResponseForPostUrl(request).toString();
         }
         log.warn("지원되지 않는 HTTP 메서드입니다.");
         return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
                 "text/html",
-                FileReader.loadFileContent(BAD_REQUEST_PAGE))
-                .responseToString();
+                FileReader.loadFileContent(BAD_REQUEST_PAGE)).toString();
     }
 
     private HttpResponse generateResponseForUrl(Request request) {

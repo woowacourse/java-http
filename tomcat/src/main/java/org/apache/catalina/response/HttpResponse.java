@@ -28,7 +28,8 @@ public class HttpResponse {
         responseHeader.add(key, value);
     }
 
-    public String responseToString() {
+    @Override
+    public String toString() {
         return statusLine.getVersionOfProtocol() + " "
                 + statusLine.getHttpStatus() + " \r\n"
                 + responseHeader + "\r\n"

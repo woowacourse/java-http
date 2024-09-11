@@ -33,6 +33,6 @@ class MethodTest {
 
         // when & then
         assertThatThrownBy(() -> Method.from(text))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -27,7 +27,10 @@ public enum Method {
 
     public static Method from(final String plaintext) {
         final var method = CONVERTER.get(plaintext);
-        return Objects.requireNonNull(method);
+        if (Objects.isNull(method)) {
+            throw new IllegalArgumentException("존재하지 않는 Http Method");
+        }
+        return method;
     }
 
     public String getValue() {

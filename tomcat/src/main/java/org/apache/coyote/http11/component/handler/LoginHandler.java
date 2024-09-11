@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.component.handler;
 
+import org.apache.coyote.http11.component.common.Method;
 import org.apache.coyote.http11.component.exception.AuthenticationException;
 import org.apache.coyote.http11.component.exception.NotFoundException;
 import org.apache.coyote.http11.component.request.HttpRequest;
@@ -32,16 +33,24 @@ public class LoginHandler implements HttpHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
+        if (request.isSameMethod(Method.POST)) {
+            return doPost(request);
+        }
+        return doGet(request);
+    }
+
+    private HttpResponse doPost(final HttpRequest request) {
+        final var identifier = request.getBodyContent(ID_QUERY_NAME);
+        final var password = request.getBodyContent(PASSWORD_QUERY_NAME);
+        validateUser(identifier, password);
+        return renderSuccessful(identifier);
+    }
+
+    private HttpResponse doGet(final HttpRequest request) {
         if (isLogin(request.getCookieContent(LOGIN_SUCCESSFUL_COOKIE_NAME))) {
             return StaticResourceFinder.renderRedirect(LOGIN_SUCCESSFUL_REDIRECT_URI);
         }
-        if (request.hasNotQuery()) {
-            return StaticResourceFinder.render(LOGIN_HTML);
-        }
-        final var identifier = request.getQueryValue(ID_QUERY_NAME);
-        final var password = request.getQueryValue(PASSWORD_QUERY_NAME);
-        validateUser(identifier, password);
-        return renderSuccessful(identifier);
+        return StaticResourceFinder.render(LOGIN_HTML);
     }
 
     private boolean isLogin(final String sessionId) {

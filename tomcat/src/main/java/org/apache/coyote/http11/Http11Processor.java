@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.request.HttpRequest;
@@ -82,11 +83,12 @@ public class Http11Processor implements Runnable, Processor {
             String sessionId = request.getSessionId();
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = sessionManager.findSession(sessionId);
-            User user = session.getUser();
-            redirectHomeAuthUser(response, user);
-            return;
+            if (session != null) {
+                session.getUser().ifPresent(user -> redirectHomeAuthUser(response, user));
+            } else {
+                new StaticResourceResolver().resolve("login.html", response);
+            }
         }
-        new StaticResourceResolver().resolve("login.html", response);
     }
 
     private void redirectHomeAuthUser(HttpResponse response, User user) {

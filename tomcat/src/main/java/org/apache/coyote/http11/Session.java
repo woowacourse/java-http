@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session implements HttpSession {
 
@@ -112,8 +113,8 @@ public class Session implements HttpSession {
         return isNew;
     }
 
-    public User getUser() {
-        return (User) getAttribute("user");
+    public Optional<User> getUser() {
+        return Optional.ofNullable((User) getAttribute("user")) ;
     }
 
     public void setUser(User user) {

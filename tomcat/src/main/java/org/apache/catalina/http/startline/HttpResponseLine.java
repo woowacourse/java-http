@@ -9,7 +9,6 @@ public class HttpResponseLine {
 
     public HttpResponseLine(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-        this.httpStatus = HttpStatus.OK;
     }
 
     public boolean isValid() {

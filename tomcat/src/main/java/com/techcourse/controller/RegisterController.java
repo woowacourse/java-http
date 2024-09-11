@@ -17,6 +17,7 @@ public class RegisterController implements Controller {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     @Override
     public void service(HttpRequest req, HttpResponse resp) {
@@ -24,26 +25,20 @@ public class RegisterController implements Controller {
             File requestFile = ResourceParser.getRequestFile("/register.html");
             resp.setResponse("200 OK", requestFile);
         } else if (req.getMethod().equals(HttpMethod.POST)) {
-//            if (req.getQueries().isEmpty()) {
-//            }
-//
-//            String account = req.getQueryValue(ACCOUNT);
-//            String password = req.getQueryValue(PASSWORD);
-//
-//            Optional<User> user = InMemoryUserRepository.findByAccount(account);
-//            if (user.isEmpty()) {
-//                log.error("찾으시는 유저가 존재하지 않습니다. (Account: {})", account);
-//                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
-//                return;
-//            }
-//            if (!user.get().checkPassword(password)) {
-//                log.error("찾으시는 유저 정보가 잘못되었습니다. (Account: {}, Password: {})", account, password);
-//                resp.setResponse("401 Unauthorized", ResourceParser.getRequestFile("/401.html"));
-//                return;
-//            }
-//
-//            resp.setRedirect("302 Found", "/index.html");
-//            log.info(user.toString());
+            try {
+                String account = req.getBodyValue(ACCOUNT);
+                String password = req.getBodyValue(PASSWORD);
+                String email = req.getBodyValue(EMAIL);
+
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+
+                resp.setRedirect("302 Found", "/index.html");
+                log.info("회원가입 성공 (account: {})", account);
+            } catch (IllegalArgumentException e) {
+                log.warn("회원가입 실패", e);
+                resp.setResponse("400 Bad Request", ResourceParser.getRequestFile("/register.html"));
+            }
         } else {
             throw new IllegalArgumentException("%s 요청을 처리할 컨트롤러가 존재하지 않습니다.".formatted(req.getMethod().getValue()));
         }

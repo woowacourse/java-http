@@ -16,6 +16,7 @@ public class HttpRequest {
     private String path;
     private Map<String, String> queries;
     private Map<String, String> headers;
+    private Map<String, String> body;
 
     public static HttpRequest from(BufferedReader request) {
         try {
@@ -28,8 +29,9 @@ public class HttpRequest {
             String version = requestLine[2].split("/")[1];
             HttpProtocol httpProtocol = new HttpProtocol(protocol, version);
             Map<String, String> headers = getHttpHeaders(request);
+            Map<String, String> body = getHttpBody(request, headers);
 
-            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers);
+            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers, body);
 
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다.", e);
@@ -73,18 +75,53 @@ public class HttpRequest {
         return httpHeader;
     }
 
+    private static Map<String, String> getHttpBody(BufferedReader request, Map<String, String> httpHeaders) throws IOException {
+        Map<String, String> httpBody = new HashMap<>();
+
+        if(!httpHeaders.containsKey("Content-Length")) {
+            return httpBody;
+        }
+
+        int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+
+        char[] buffer = new char[1024];
+        int bytesRead;
+        int totalBytesRead = 0;
+
+        StringBuilder sb = new StringBuilder();
+        while (totalBytesRead < contentLength
+                && (bytesRead = request.read(buffer, 0, Math.min(buffer.length, contentLength - totalBytesRead))) != -1) {
+            sb.append(buffer, 0, bytesRead);
+            totalBytesRead += bytesRead;
+        }
+        for (String body : sb.toString().split("&")) {
+            String[] keyValue = body.split("=");
+            httpBody.put(keyValue[0], keyValue[1]);
+        }
+        return httpBody;
+    }
+
     public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path, Map<String, String> queries,
-                       Map<String, String> headers) {
+                       Map<String, String> headers, Map<String, String> body) {
         this.method = method;
         this.protocol = protocol;
         this.httpVersion = httpVersion;
         this.path = path;
         this.queries = queries;
         this.headers = headers;
+        this.body = body;
     }
 
     public String getQueryValue(String key) {
         return queries.entrySet().stream()
+                .filter(queryKey -> queryKey.getKey().equals(key))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Key(%s) 값이 존재하지 않습니다.".formatted(key)))
+                .getValue();
+    }
+
+    public String getBodyValue(String key) {
+        return body.entrySet().stream()
                 .filter(queryKey -> queryKey.getKey().equals(key))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Key(%s) 값이 존재하지 않습니다.".formatted(key)))

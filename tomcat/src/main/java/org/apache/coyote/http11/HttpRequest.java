@@ -82,6 +82,10 @@ public class HttpRequest {
         return contentType.toResponseText();
     }
 
+    public String getBodyValue(final String key) {
+        return body.get(key);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

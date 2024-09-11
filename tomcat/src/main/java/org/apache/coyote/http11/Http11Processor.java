@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.coyote.Processor;
@@ -67,13 +66,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpRequest.hasMethod(HttpMethod.POST)) {
-                final var body = httpRequest.getBody();
                 if (httpRequest.hasPath("/login")) {
-                    final var user = createResponse(body, httpRequest, httpResponse);
+                    final var user = createResponse(httpRequest, httpResponse);
 
                     log.info("user login = {}", user);
                 } else if (httpRequest.hasPath("/register")) {
-                    final var user = new User(body.get("account"), body.get("password"), body.get("email"));
+                    final var user = new User(httpRequest.getBodyValue("account"), httpRequest.getBodyValue("password"),
+                            httpRequest.getBodyValue("email"));
                     InMemoryUserRepository.save(user);
                     redirectLocation(httpResponse, httpRequest, "index.html");
                 }
@@ -107,14 +106,14 @@ public class Http11Processor implements Runnable, Processor {
         response.putHeader("Location", location);
     }
 
-    private User createResponse(final Map<String, String> body, final HttpRequest request,
+    private User createResponse(final HttpRequest request,
                                 final HttpResponse response) throws IOException {
-        final var account = body.get("account");
+        final var account = request.getBodyValue("account");
         log.info("account = {}", account);
         try {
             final var user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-            final var password = body.get("password");
+            final var password = request.getBodyValue("password");
             if (!user.checkPassword(password)) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }

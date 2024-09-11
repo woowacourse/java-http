@@ -4,9 +4,11 @@ import com.techcourse.dto.LoginRequestDto;
 import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http.*;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpMessageGenerator;
+import org.apache.coyote.http.Session;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
 import org.apache.coyote.util.StringUtils;
@@ -17,6 +19,7 @@ import java.io.IOException;
 
 public class LoginController extends AbstractController {
 
+    private static final String LOGIN_LOCATION = "/login.html";
     private static final String REDIRECT_LOCATION = "/index.html";
     private static final String UNAUTHORIZED_LOCATION = "/401.html";
 
@@ -29,10 +32,9 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         try {
             if (request.hasCookieWithSession()) {
-                alreadyLoggedIn(request, response);
+                alreadyLoggedIn(response);
             }
-            Path path = request.getPath();
-            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
+            HttpMessageGenerator.generateStaticResponse(LOGIN_LOCATION, HttpStatus.OK, response);
         } catch (IllegalArgumentException | NullPointerException e) {
             new NotFoundController().doGet(request, response);
         } catch (IOException e) {
@@ -44,10 +46,9 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         try {
             if (request.hasCookieWithSession()) {
-                alreadyLoggedIn(request, response);
+                alreadyLoggedIn(response);
             }
-            Path path = request.getPath();
-            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+            HttpMessageGenerator.generateStaticResponse(LOGIN_LOCATION, HttpStatus.FOUND, response);
             if (!isLoginSuccess(request, response)) {
                 HttpMessageGenerator.generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED, response);
             }
@@ -61,10 +62,8 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private void alreadyLoggedIn(HttpRequest request, HttpResponse response) throws IOException, NullPointerException {
-        Path path = request.getPath();
-
-        HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+    private void alreadyLoggedIn(HttpResponse response) throws IOException, NullPointerException {
+        HttpMessageGenerator.generateStaticResponse(LOGIN_LOCATION, HttpStatus.FOUND, response);
         response.setRedirectLocation(REDIRECT_LOCATION);
     }
 

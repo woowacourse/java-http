@@ -4,9 +4,7 @@ import com.techcourse.dto.RegisterRequestDto;
 import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.HttpMessageGenerator;
-import org.apache.coyote.http.MimeType;
 import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
 import org.apache.coyote.util.StringUtils;
@@ -17,7 +15,9 @@ import java.io.IOException;
 
 public class RegisterController extends AbstractController {
 
+    private static final String REGISTER_LOCATION = "/register.html";
     private static final String REDIRECT_LOCATION = "/index.html";
+
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     private final LoginService loginService = new LoginService();
@@ -25,8 +25,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         try {
-            Path path = request.getPath();
-            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
+            HttpMessageGenerator.generateStaticResponse(REGISTER_LOCATION, HttpStatus.OK, response);
         } catch (NullPointerException e) {
             new NotFoundController().doGet(request, response);
         } catch (IOException e) {
@@ -37,8 +36,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         try {
-            Path path = request.getPath();
-            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+            HttpMessageGenerator.generateStaticResponse(REGISTER_LOCATION, HttpStatus.FOUND, response);
             response.setRedirectLocation(REDIRECT_LOCATION);
 
             RegisterRequestDto registerRequestDto = RegisterRequestDto.of(StringUtils.separateKeyValue(request.getBody()));

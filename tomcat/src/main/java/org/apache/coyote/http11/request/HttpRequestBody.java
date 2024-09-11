@@ -6,7 +6,9 @@ import java.util.Map;
 public class HttpRequestBody {
     private static final String JSON_LINE_SEPARATOR = System.lineSeparator();
 
-    private static final String JSON_SEPARATOR = ":";
+    private static final String JSON_PARAM_SEPARATOR = ":";
+    private static final String FORM_DATA_ENTRY_SEPARATOR = "&";
+    private static final String FORM_DATA_PARAM_SEPARATOR = "=";
 
     private final Map<String, String> httpRequestBody;
 
@@ -33,7 +35,7 @@ public class HttpRequestBody {
         Map<String, String> requestBody = new HashMap<>();
         String[] requestBodyLines = httpRequestBody.split(JSON_LINE_SEPARATOR);
         for (int i = 0; i <= requestBody.size(); i++) {
-            String[] splitBody = requestBodyLines[i].split(JSON_SEPARATOR);
+            String[] splitBody = requestBodyLines[i].split(JSON_PARAM_SEPARATOR);
             validateJsonForm(splitBody);
             requestBody.put(splitBody[0], splitBody[1]);
         }
@@ -42,9 +44,9 @@ public class HttpRequestBody {
 
     private static Map<String, String> toRequestBodyMapFromFormData(String httpRequestBody) {
         Map<String, String> requestBody = new HashMap<>();
-        String[] splitFormData = httpRequestBody.split("&");
+        String[] splitFormData = httpRequestBody.split(FORM_DATA_ENTRY_SEPARATOR);
         for (String splitFormDatum : splitFormData) {
-            String[] formDataEntry = splitFormDatum.split("=");
+            String[] formDataEntry = splitFormDatum.split(FORM_DATA_PARAM_SEPARATOR);
             validateFormDataForm(formDataEntry);
             requestBody.put(formDataEntry[0], formDataEntry[1]);
         }

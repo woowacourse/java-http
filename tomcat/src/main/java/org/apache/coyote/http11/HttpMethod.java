@@ -27,7 +27,6 @@ public enum HttpMethod {
         return this == GET;
     }
 
-
     public boolean isPost() {
         return this == POST;
     }

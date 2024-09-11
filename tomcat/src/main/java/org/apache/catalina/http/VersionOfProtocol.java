@@ -1,4 +1,4 @@
-package org.apache.catalina.request;
+package org.apache.catalina.http;
 
 public class VersionOfProtocol {
     private final HttpProtocol httpProtocol;

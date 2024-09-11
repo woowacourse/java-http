@@ -74,7 +74,7 @@
   - [x] body 클래스
 
 - [ ] HttpResponse 클래스 구현
-  - [ ] Response Line 분석
+  - [ ] Status-Line 분석
     - [ ] Version 클래스 (enum)
     - [ ] Protocol 클래스 (enum)
     - [ ] StatusCode 클래스 (enum) [code + message]

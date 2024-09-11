@@ -3,6 +3,8 @@ package org.apache.catalina.request;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.catalina.http.HttpProtocol;
+import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.io.RequestParser;
 
 public class RequestLine {

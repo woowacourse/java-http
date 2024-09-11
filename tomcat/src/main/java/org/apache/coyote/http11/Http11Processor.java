@@ -21,8 +21,8 @@ import org.apache.catalina.request.Request;
 import org.apache.catalina.request.RequestBody;
 import org.apache.catalina.request.RequestHeader;
 import org.apache.catalina.request.RequestLine;
-import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.HttpResponse;
+import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponsePage;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -107,7 +107,8 @@ public class Http11Processor implements Runnable, Processor {
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getPathWithoutQuery(), request.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
-            HttpResponse httpResponse = new HttpResponse(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
+            HttpResponse httpResponse = new HttpResponse(
+                    page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
             httpResponse.addLocation(page.getFileName());
             return httpResponse;
         }

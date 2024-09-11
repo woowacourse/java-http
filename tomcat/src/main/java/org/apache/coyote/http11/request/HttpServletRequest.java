@@ -48,4 +48,12 @@ public class HttpServletRequest {
         HttpCookies cookies = HttpCookies.from(httpHeaders);
         return cookies.getCookieValue("JSESSIONID");
     }
+
+    public Method getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public HttpProtocol getProtocol() {
+        return requestLine.getProtocol();
+    }
 }

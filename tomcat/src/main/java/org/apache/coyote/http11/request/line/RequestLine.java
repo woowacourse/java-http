@@ -50,4 +50,8 @@ public class RequestLine {
     public boolean isUriStartsWith(final Uri target) {
         return uri.isStartsWith(target);
     }
+
+    public HttpProtocol getProtocol() {
+        return protocol;
+    }
 }

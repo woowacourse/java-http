@@ -8,8 +8,8 @@ import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.page.LoginPageController;
+import com.techcourse.exception.UncheckedServletException;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpServletRequest;
@@ -27,10 +27,17 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
     }
 
     @Override
-    public Optional<HttpRequestHandler> getHandler(HttpServletRequest httpServletRequest) {
+    public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
+        RequestMappingInformation requestMappingInformation = RequestMappingInformation.from(httpServletRequest);
+        return handlers.containsKey(requestMappingInformation);
+    }
+
+    @Override
+    public HttpRequestHandler getHandler(HttpServletRequest httpServletRequest) {
         return handlers.keySet().stream()
                 .filter(mappingInformation -> mappingInformation.matches(httpServletRequest))
                 .map(handlers::get)
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new UncheckedServletException("요청을 처리할 수 있는 핸들러가 없습니다"));
     }
 }

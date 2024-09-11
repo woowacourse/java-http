@@ -8,15 +8,15 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        if (httpRequest.isGet()) {
-            get(httpRequest, httpResponse);
-        }
-        throw new UnsupportedOperationException("지원하지 않는 Http Method 입니다.");
-    }
-
-    private void get(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        validateRequestMethod(httpRequest);
         String body = ResourceReader.readFile(httpRequest.getRequestURI());
         httpResponse.ok(getContentType(httpRequest), body, StandardCharsets.UTF_8);
+    }
+
+    private void validateRequestMethod(HttpRequest httpRequest) {
+        if (!httpRequest.isGet()) {
+            throw new UnsupportedOperationException("지원하지 않는 Http Method 입니다.");
+        }
     }
 
     private MimeType getContentType(HttpRequest httpRequest) {

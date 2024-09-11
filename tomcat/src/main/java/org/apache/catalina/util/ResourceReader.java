@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import org.apache.catalina.exception.CatalinaException;
+import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,9 @@ public class ResourceReader {
     }
 
     public static String probeContentType(String path) {
+        Tika tika = new Tika();
         try {
-            return Files.probeContentType(getPath(path));
+            return tika.detect(getPath(path));
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new CatalinaException("Invalid path: " + path);

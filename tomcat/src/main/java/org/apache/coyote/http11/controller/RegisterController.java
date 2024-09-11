@@ -22,6 +22,10 @@ public class RegisterController extends AbstractController {
             log.error("입력하지 않은 항목이 있습니다.");
             return redirectPage(httpRequest, REGISTER_PATH);
         }
+        return acceptRegister(httpRequest);
+    }
+
+    private HttpResponse acceptRegister(HttpRequest httpRequest) {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
         String email = httpRequest.getBodyValue(EMAIL);

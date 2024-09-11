@@ -26,27 +26,34 @@ public class LoginController extends AbstractController {
             log.error("입력하지 않은 항목이 있습니다.");
             return redirectPage(httpRequest, LOGIN_PATH);
         }
+        return acceptLogin(httpRequest);
+    }
+
+    private boolean validateUserInput(HttpRequest httpRequest) {
+        return !httpRequest.containsBody(ACCOUNT) || !httpRequest.containsBody(PASSWORD);
+    }
+
+    private HttpResponse acceptLogin(HttpRequest httpRequest) {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
-
         if (user.checkPassword(password)) {
-            Session session = httpRequest.getSession();
-            session.setAttribute(SESSION_USER_NAME, user);
-            log.info(user.toString());
-            return HttpResponse.found(httpRequest)
-                    .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
-                    .location(INDEX_PATH)
-                    .build();
+            return redirectWithCookie(httpRequest, user);
         }
         log.error("비밀번호 불일치");
         return redirectPage(httpRequest, UNAUTHORIZED_PATH);
     }
 
-    private boolean validateUserInput(HttpRequest httpRequest) {
-        return !httpRequest.containsBody(ACCOUNT) || !httpRequest.containsBody(PASSWORD);
+    private static HttpResponse redirectWithCookie(HttpRequest httpRequest, User user) {
+        Session session = httpRequest.getSession();
+        session.setAttribute(SESSION_USER_NAME, user);
+        log.info(user.toString());
+        return HttpResponse.found(httpRequest)
+                .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
+                .location(INDEX_PATH)
+                .build();
     }
 
     @Override

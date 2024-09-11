@@ -4,8 +4,6 @@ import org.apache.coyote.http11.component.HttpStatus;
 
 public class StatusLine {
 
-    private static final String STATUS_LINE_DELIMITER = " ";
-
     private final String httpVersion;
     private HttpStatus httpStatus;
 
@@ -18,14 +16,8 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public String convertToMessage() {
-        return String.join(
-                STATUS_LINE_DELIMITER,
-                httpVersion,
-                String.valueOf(httpStatus.getCode()),
-                httpStatus.getValue(),
-                ""
-        );
+    public String getHttpVersion() {
+        return httpVersion;
     }
 
     public HttpStatus getHttpStatus() {

@@ -2,17 +2,12 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.component.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
-
-    private static final String CRLF = "\r\n";
-    private static final String HEADER_DELIMITER = ": ";
-    private static final String SPACE = " ";
 
     private final StatusLine statusLine;
     private final Map<String, String> headers = new LinkedHashMap<>();
@@ -43,23 +38,6 @@ public class HttpResponse {
     public boolean notHasLocation() {
         return headers.keySet().stream()
                 .noneMatch(key -> key.equals(HttpHeaders.LOCATION));
-    }
-
-    public String convertToMessage() {
-        String headerMessages = headers.entrySet().stream().map(this::formatHeaderEntry)
-                .collect(Collectors.joining(CRLF));
-
-        return String.join(
-                CRLF,
-                statusLine.convertToMessage(),
-                headerMessages,
-                "",
-                body
-        );
-    }
-
-    private String formatHeaderEntry(Map.Entry<String, String> entry) {
-        return entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE;
     }
 
     public StatusLine getStatusLine() {

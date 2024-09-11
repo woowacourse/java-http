@@ -37,7 +37,7 @@ public class HttpRequestReader {
 
     private static String readRequestBody(final HttpHeader[] headers, final BufferedReader bufferedReader) throws IOException {
         Optional<HttpHeader> httpHeader = Arrays.stream(headers)
-                .filter(header -> HttpHeaderName.CONTENT_LENGTH.equalsIgnoreCase(header.getKey()))
+                .filter(header -> HttpHeaderName.CONTENT_LENGTH == header.getKey())
                 .findFirst();
 
         if (httpHeader.isEmpty()) {

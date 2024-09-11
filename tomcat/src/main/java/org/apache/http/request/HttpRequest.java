@@ -37,7 +37,7 @@ public class HttpRequest {
     private HttpCookie parseCookie(HttpHeader[] headers) {
         return Optional.ofNullable(headers)
                 .flatMap(hs -> Arrays.stream(hs)
-                        .filter(header -> HttpHeaderName.COOKIE.equalsIgnoreCase(header.getKey()))
+                        .filter(header -> HttpHeaderName.COOKIE == header.getKey())
                         .findFirst()
                         .map(header -> HttpCookie.from(header.getValue())))
                 .orElse(null);

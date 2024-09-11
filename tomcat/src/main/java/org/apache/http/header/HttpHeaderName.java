@@ -1,5 +1,7 @@
 package org.apache.http.header;
 
+import java.util.Arrays;
+
 public enum HttpHeaderName {
     ACCEPT("Accept"),
     ACCEPT_RANGES("Accept-Ranges"),
@@ -18,6 +20,13 @@ public enum HttpHeaderName {
 
     HttpHeaderName(String value) {
         this.value = value;
+    }
+
+    public static HttpHeaderName from(String value) {
+        return Arrays.stream(values())
+                .filter(httpHeaderName -> httpHeaderName.equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 HttpHeaderName이 없습니다."));
     }
 
     public boolean equalsIgnoreCase(String value) {

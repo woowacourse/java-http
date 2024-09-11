@@ -8,11 +8,16 @@ public class HttpHeader {
     private static final int KEY_ORDER = 0;
     private static final int VALUE_ORDER = 1;
 
-    private final String key;
+    private final HttpHeaderName key;
     private final String value;
 
-    public HttpHeader(String key, String value) {
+    public HttpHeader(HttpHeaderName key, String value) {
         this.key = key;
+        this.value = value;
+    }
+
+    public HttpHeader(String key, String value) {
+        this.key = HttpHeaderName.from(key);
         this.value = value;
     }
 
@@ -21,7 +26,7 @@ public class HttpHeader {
         return new HttpHeader(keyAndValue[KEY_ORDER], keyAndValue[VALUE_ORDER]);
     }
 
-    public String getKey() {
+    public HttpHeaderName getKey() {
         return key;
     }
 
@@ -31,7 +36,7 @@ public class HttpHeader {
 
     @Override
     public String toString() {
-        return key + KEY_VALUE_DELIMITER + value;
+        return key.getValue() + KEY_VALUE_DELIMITER + value;
     }
 
     @Override

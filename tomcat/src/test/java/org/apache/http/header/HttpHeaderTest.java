@@ -12,14 +12,14 @@ class HttpHeaderTest {
         HttpHeader header = HttpHeader.from("Content-Type: application/json");
 
         assertAll(
-                () -> assertEquals("Content-Type", header.getKey()),
+                () -> assertEquals(HttpHeaderName.CONTENT_TYPE, header.getKey()),
                 () -> assertEquals("application/json", header.getValue())
         );
     }
 
     @Test
     void testToString() {
-        HttpHeader header = new HttpHeader("Content-Type", "application/json");
+        HttpHeader header = new HttpHeader(HttpHeaderName.CONTENT_TYPE, "application/json");
         assertEquals("Content-Type: application/json", header.toString());
     }
 }

@@ -4,7 +4,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.domain.User;
 import com.techcourse.model.dto.UserInfo;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.cookie.HttpCookie;
+import org.apache.coyote.http.session.HttpSession;
+import org.apache.coyote.http.session.HttpSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +21,15 @@ import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
-    public static final String QUERY_PARAMETER = "?";
-    public static final String STATIC = "/static";
-    public static final String HTML = ".html";
-    public static final String CSS = ".css";
-    public static final String JS = ".js";
-    public static final String SVG = ".svg";
+    private static final String STATIC = "/static";
+    private static final String HTML = ".html";
+    private static final String CSS = ".css";
+    private static final String JS = ".js";
+    private static final String SVG = ".svg";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final HttpSessionManager httpSessionManager = HttpSessionManager.getInstance();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -93,8 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestBody = readRequestBody(httpRequestHeaders, bufferedReader);
 
         if (requestURL.equals("/login")) {
-            String path = "/login" + "?" + requestBody;
-            doGet(httpRequestHeaders, path, outputStream);
+            login(httpRequestHeaders, outputStream, requestBody);
         }
 
         if (requestURL.equals("/register")) {
@@ -103,7 +103,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestBody(final Map<String, String> httpRequestHeaders, final BufferedReader bufferedReader) throws IOException {
+    private void login(final Map<String, String> httpRequestHeaders, final OutputStream outputStream, final String requestBody) throws IOException {
+        String cookies = httpRequestHeaders.get("Cookie");
+
+        Optional<HttpSession> httpSession = loginPost(requestBody);
+        String[] result = loginGet(httpSession.isPresent());
+        String path = determineResourcePath(result[1])[1];
+        String httpStatus = result[0];
+        String contentType = determineContentType(result[1]);
+        String cookie = "";
+
+        if (httpSession.isPresent() && !isLogined(cookies)) {
+            cookie = setCookie(httpSession.get().getId());
+        }
+
+        createHttpResponse(path, outputStream, httpStatus, contentType, cookie);
+    }
+
+    private String setCookie(UUID uuid) {
+        return "Set-Cookie: JSESSIONID=" + uuid + " " + "\r\n"
+                + "";
+    }
+
+    private String readRequestBody(final Map<String, String> httpRequestHeaders, final BufferedReader bufferedReader)
+            throws IOException {
         int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
@@ -117,6 +140,10 @@ public class Http11Processor implements Runnable, Processor {
         String password = userInfo.get("password");
         String email = userInfo.get("email");
 
+        return validateRegistration(account, password, email);
+    }
+
+    private String validateRegistration(final String account, final String password, final String email) {
         try {
             InMemoryUserRepository.findByAccount(account)
                     .ifPresentOrElse(
@@ -129,32 +156,32 @@ public class Http11Processor implements Runnable, Processor {
                                 log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
                             }
                     );
+            return "/success";
         } catch (IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
             return "/fail";
         }
+    }
 
-        return "/success";
+    private boolean isLogined(String cookies) {
+        return cookies != null && cookies.contains("JSESSIONID");
     }
 
     private void doGet(final Map<String, String> httpRequestHeaders, final String requestURL,
                        final OutputStream outputStream) throws IOException {
+        String cookies = httpRequestHeaders.get("Cookie");
         String[] searchResourcePath = determineResourcePath(requestURL);
+
+        if (isLogined(cookies) && requestURL.equals("/login")) {
+            searchResourcePath = determineResourcePath("/");
+        }
+
         String httpStatus = searchResourcePath[0];
         String resourcePath = searchResourcePath[1];
 
         String contentType = determineContentType(resourcePath);
-        String cookies = httpRequestHeaders.get("Cookie");
-        URL resource = getClass().getResource(resourcePath);
 
-        if (resource == null) {
-            resource = getClass().getResource("/static/404.html");
-            httpStatus = "404 NOT FOUND";
-        }
-
-        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        createHttpResponse(cookies, outputStream, httpStatus, contentType, responseBody);
+        createHttpResponse(resourcePath, outputStream, httpStatus, contentType, "");
     }
 
     private String[] determineResourcePath(String requestURL) {
@@ -183,13 +210,6 @@ public class Http11Processor implements Runnable, Processor {
             return result;
         }
 
-        if (requestURL.contains(QUERY_PARAMETER)) {
-            String[] loginResult = login(requestURL);
-
-            loginResult[1] = STATIC + loginResult[1] + HTML;
-            return loginResult;
-        }
-
         if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
             result[1] = STATIC + requestURL;
             return result;
@@ -215,27 +235,28 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String[] login(String requestURL) {
-        String[] result = new String[2];
-        result[0] = "302 FOUND";
-
-        int index = requestURL.indexOf(QUERY_PARAMETER);
-        boolean isMember = false;
+    private Optional<HttpSession> loginPost(String requestBody) {
+        Map<String, String> userInfo = parseUserInfo(requestBody);
+        UUID uuid = null;
 
         try {
-            isMember = isValidUser(parseUserInfo(requestURL.substring(index + 1)));
+            uuid = validateUser(userInfo);
         } catch (IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
         }
 
-        if (!isMember) {
-            result[0] = "401 UNAUTHORIZED";
-            result[1] = "/401";
-            return result;
+        if (uuid != null) {
+            return Optional.ofNullable(HttpSessionManager.getInstance().findSession(uuid.toString()));
         }
-        result[1] = "/index";
 
-        return result;
+        return Optional.empty();
+    }
+
+    private String[] loginGet(boolean isLogined) {
+        if (!isLogined) {
+            return new String[]{"401 UNAUTHORIZED", "/401"};
+        }
+        return new String[]{"302 FOUND", "/index"};
     }
 
     private Map<String, String> parseUserInfo(String requestBody) {
@@ -253,11 +274,10 @@ public class Http11Processor implements Runnable, Processor {
 
             userInfo.put(key, value);
         }
-
         return userInfo;
     }
 
-    private boolean isValidUser(Map<String, String> userInfo) {
+    private UUID validateUser(Map<String, String> userInfo) {
         String account = userInfo.get("account");
         String password = userInfo.get("password");
 
@@ -265,31 +285,37 @@ public class Http11Processor implements Runnable, Processor {
 
         if (loginUser.isEmpty()) {
             log.info(account + "는(은) 등록되지 않은 계정입니다.");
-            return false;
+            return null;
         }
 
         return loginUser.filter(user -> user.checkPassword(password))
                 .map(
                         user -> {
+                            UUID uuid = UUID.randomUUID();
+                            HttpSession session = new HttpSession(uuid);
+                            session.setAttribute("user", user);
+                            httpSessionManager.add(session);
+
                             log.info("로그인 성공. user : {}", user);
-                            return true;
+                            return uuid;
                         }
                 )
                 .orElseGet(() -> {
                     log.info(account + "의 비밀번호가 잘못 입력되었습니다.");
-                    return false;
+                    return null;
                 });
     }
 
-    private void createHttpResponse(final String cookies, final OutputStream outputStream, final String httpStatus,
-                                    final String contentType, final byte[] responseBody) throws IOException {
+    private void createHttpResponse(final String path, final OutputStream outputStream, String httpStatus,
+                                    final String contentType, final String cookie) throws IOException {
+        URL resource = getClass().getResource(path);
 
-        String cookie = "";
-
-        if (httpStatus.equals("302 FOUND")) {
-            cookie = setCookie(cookies, cookie);
+        if (resource == null) {
+            resource = getClass().getResource("/static/404.html");
+            httpStatus = "404 NOT FOUND";
         }
 
+        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
                 "Content-Type: " + contentType + " ",
@@ -300,15 +326,5 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(response.getBytes());
         outputStream.write(responseBody);
         outputStream.flush();
-    }
-
-    private static String setCookie(final String cookies, String setCookie) {
-        try {
-            HttpCookie.from(cookies);
-        } catch (IllegalArgumentException e) {
-            setCookie = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + " " + "\r\n"
-                    + "";
-        }
-        return setCookie;
     }
 }

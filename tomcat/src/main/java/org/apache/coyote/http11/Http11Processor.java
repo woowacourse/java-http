@@ -3,10 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.http.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/register")) {
                 processRegister(httpRequest, outputStream);
             }
-            processFilesWithStatus(outputStream, httpRequest.getPath(), httpRequest.getFileType(), 200, "OK");
+            processFile(outputStream, new HttpResponse(httpRequest.getPath(), httpRequest.getFileType(), 200, "OK", null, null));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -65,72 +65,30 @@ public class Http11Processor implements Runnable, Processor {
 
     private void processHome(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
+        HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
+        outputStream.write(httpResponse.response2xx().getBytes());
         outputStream.flush();
     }
 
-    private void processFilesWithStatus(OutputStream outputStream, String path, String fileType, Integer httpStatusCode, String HttpStatusPhrase) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
+    private void processFile(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + httpResponse.getPath());
         if (resource == null) {
             return;
         }
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode + " " + HttpStatusPhrase,
-                "Content-Type: text/" + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
+        httpResponse.setResponseBody(responseBody);
+        outputStream.write(httpResponse.response2xx().getBytes());
         outputStream.flush();
     }
 
-    private void processRedirect(OutputStream outputStream, String path, String fileType, Integer httpStatusCode, String HttpStatusPhrase, String Cookie) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
+    private void processRedirect(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + httpResponse.getResponseBody());
         if (resource == null) {
             return;
         }
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode + " " + HttpStatusPhrase,
-                "Set-Cookie:" + Cookie+ " ",
-                "Location: " + path,
-                "Content-Type: text/" + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void processRedirect(OutputStream outputStream, String path, String fileType, Integer httpStatusCode, String HttpStatusPhrase) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
-        if (resource == null) {
-            return;
-        }
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode + " " + HttpStatusPhrase,
-                "Location: " + path,
-                "Content-Type: text/" + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
+        httpResponse.setResponseBody(responseBody);
+        outputStream.write(httpResponse.response3xx().getBytes());
         outputStream.flush();
     }
 
@@ -138,17 +96,11 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.getMethod().equals("GET")) {
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
+            outputStream.write(httpResponse.response2xx().getBytes());
             outputStream.flush();
         }
+
         if (httpRequest.getMethod().equals("POST")) {
             Map<String, List<String>> body = httpRequest.getBody();
             String account = body.get("account").getFirst();
@@ -156,7 +108,8 @@ public class Http11Processor implements Runnable, Processor {
             String email = body.get("email").getFirst();
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            processRedirect(outputStream, "/index.html", "html", 302, "OK");
+            HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", null, null);
+            processRedirect(outputStream, httpResponse);
         }
     }
 
@@ -165,19 +118,15 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> cookies = httpRequest.getCookies();
             if (cookies.containsKey("JSESSIONID")) {
                 if (sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
-                    processRedirect(outputStream, "/index.html", "html", 302, "Found");
+                    HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", null, null);
+                    processRedirect(outputStream, httpResponse);
                 }
             }
+
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-            outputStream.write(response.getBytes());
+            HttpResponse httpResponse = new HttpResponse(null, "html", 200, "OK", null, responseBody);
+            outputStream.write(httpResponse.response2xx().getBytes());
             outputStream.flush();
         }
 
@@ -194,16 +143,19 @@ public class Http11Processor implements Runnable, Processor {
             if (!body.containsKey("password")) {
                 return;
             }
+
             if (user.checkPassword(body.get("password").getFirst())) {
                 log.info("user : {}", user);
                 Session session = Session.createRandomSession();
                 session.setAttribute("user", user);
                 Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
                 sessionManager.add(session);
-                processRedirect(outputStream, "/index.html", "html", 302, "Found", http11Cookie.toString());
+                HttpResponse httpResponse = new HttpResponse("/index.html", "html", 302, "Found", http11Cookie, null);
+                processRedirect(outputStream, httpResponse);
                 return;
             }
-            processRedirect(outputStream, "/401.html", "html", 302, "Unauthorized");
+            HttpResponse httpResponse = new HttpResponse("/401.html", "html", 302, "Found", null, null);
+            processRedirect(outputStream, httpResponse);
         }
 
     }

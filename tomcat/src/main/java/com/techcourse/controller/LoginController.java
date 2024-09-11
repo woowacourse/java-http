@@ -8,6 +8,7 @@ import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.startline.HttpStatus;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.servlet.RestController;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 @RequestMapping("/login")
@@ -31,15 +32,14 @@ public class LoginController extends RestController {
     }
 
     private boolean loginAndRedirectToIndex(HttpResponse response, User user) {
-        String jSessionId = SessionManager.add("user", user);
-        response.addSessionToCookies(jSessionId);
+        Session session = SessionManager.add("user", user);
+        response.addSessionToCookies(session);
         return redirectTo(response, "/index");
     }
 
     private boolean responsePage401(HttpResponse response) {
         String path = "/401.html";
         response.setStatus(HttpStatus.UNAUTHORIZED);
-
         return responseResource(response, path);
     }
 }

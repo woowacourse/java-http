@@ -49,8 +49,8 @@ public class HttpResponse {
         httpHeaders.add(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 
-    public void addSessionToCookies(String session) {
-        httpHeaders.addToCookies(Session.KEY, session);
+    public void addSessionToCookies(Session session) {
+        httpHeaders.addToCookies(Session.KEY, session.getId());
     }
 
     public boolean isValid() {

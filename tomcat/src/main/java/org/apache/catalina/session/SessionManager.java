@@ -10,11 +10,11 @@ public class SessionManager {
     private SessionManager() {
     }
 
-    public static String add(String key, Object object) {
+    public static Session add(String key, Object object) {
         Session session = new Session();
         session.setAttribute(key, object);
         sessions.put(session.getId(), session);
-        return session.getId();
+        return session;
     }
 
     public static boolean contains(String session) {

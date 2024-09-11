@@ -1,17 +1,16 @@
 package org.apache.coyote.http11.request.header;
 
+import static org.apache.coyote.http11.Constants.HTTP_HEADER_SEPARATOR;
+import static org.apache.coyote.http11.Constants.NAME_INDEX;
+import static org.apache.coyote.http11.Constants.VALID_PARAMETER_PAIR_LENGTH;
+import static org.apache.coyote.http11.Constants.VALUE_INDEX;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RequestHeaders {
-
-    private static final String HTTP_HEADER_SEPARATOR = ": ";
-
-    private static final int NAME_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
-    private static final int VALID_HEADER_PAIR_LENGTH = 2;
 
     private final Map<String, String> headers;
 
@@ -22,7 +21,7 @@ public class RequestHeaders {
     public RequestHeaders(List<String> headerFields) {
         this.headers = headerFields.stream()
                 .map(field -> field.split(HTTP_HEADER_SEPARATOR))
-                .filter(parts -> parts.length == VALID_HEADER_PAIR_LENGTH)
+                .filter(parts -> parts.length == VALID_PARAMETER_PAIR_LENGTH)
                 .collect(Collectors.toMap(
                         parts -> parts[NAME_INDEX],
                         parts -> parts[VALUE_INDEX]

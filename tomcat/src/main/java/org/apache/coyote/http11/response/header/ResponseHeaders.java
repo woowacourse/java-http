@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response.header;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.Constants;
 import org.apache.coyote.http11.HttpHeader;
 
 public class ResponseHeaders {
@@ -30,7 +31,7 @@ public class ResponseHeaders {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<HttpHeader, String> entry : headers.entrySet()) {
             builder.append(entry.getKey().getName())
-                    .append(": ")
+                    .append(Constants.HTTP_HEADER_SEPARATOR)
                     .append(entry.getValue())
                     .append("\r\n");
         }

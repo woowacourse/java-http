@@ -9,15 +9,14 @@ import servlet.http.HttpHeader;
 public class ResponseCookie implements Assemblable {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String PREFIX = "";
+    private static final String SUFFIX = " ";
 
     private final Map<String, String> cookies;
 
     protected ResponseCookie() {
-        this(new HashMap<>());
-    }
-
-    private ResponseCookie(Map<String, String> cookies) {
-        this.cookies = cookies;
+        this.cookies = new HashMap<>();
     }
 
     protected void setJsessionid(String jsessionid) {
@@ -33,7 +32,7 @@ public class ResponseCookie implements Assemblable {
                 .append(cookies.entrySet()
                         .stream()
                         .map(this::convert)
-                        .collect(Collectors.joining("; ", "", " ")))
+                        .collect(Collectors.joining(COOKIE_DELIMITER, PREFIX, SUFFIX)))
                 .append("\r\n");
     }
 

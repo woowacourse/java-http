@@ -13,7 +13,7 @@ class ResponseTest {
         // given
         Response response = new Response();
         response.configureViewAndStatus("index.html", StatusCode.OK);
-        response.contentType(MimeType.HTML);
+        response.setContentType(MimeType.HTML);
         response.setBody("Hello, World!");
 
 

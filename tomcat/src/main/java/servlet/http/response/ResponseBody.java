@@ -7,11 +7,7 @@ public class ResponseBody implements Assemblable {
     private String body;
 
     protected ResponseBody() {
-        this(EMPTY_BODY);
-    }
-
-    private ResponseBody(String body) {
-        this.body = body;
+        this.body = EMPTY_BODY;
     }
 
     protected void setBody(String body) {

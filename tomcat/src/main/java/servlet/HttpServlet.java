@@ -43,7 +43,7 @@ public class HttpServlet {
             view = viewResolver.resolveViewName(response.getViewName());
         }
         MimeType mimeType = MimeType.from(view.getName());
-        response.contentType(mimeType);
+        response.setContentType(mimeType);
         response.setBody(Files.readString(view.toPath(), StandardCharsets.UTF_8));
     }
 

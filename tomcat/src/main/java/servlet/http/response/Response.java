@@ -14,25 +14,22 @@ public class Response {
     private String viewName;
 
     public Response() {
-        this(new ResponseLine(), new ResponseHeaders(), new ResponseBody());
-    }
-
-    private Response(ResponseLine responseLine, ResponseHeaders responseHeaders, ResponseBody responseBody) {
-        this.responseLine = responseLine;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
+        this.responseLine = new ResponseLine();
+        this.responseHeaders = new ResponseHeaders();
+        this.responseBody = new ResponseBody();
     }
 
     public void configureViewAndStatus(String viewName, StatusCode statusCode) {
-        if (StatusCode.FOUND.equals(statusCode)) {
-            responseHeaders.location(viewName);
-        }
         this.viewName = viewName;
         responseLine.setStatusCode(statusCode);
+
+        if (StatusCode.FOUND.equals(statusCode)) {
+            responseHeaders.setLocation(viewName);
+        }
     }
 
-    public void contentType(MimeType mimeType) {
-        responseHeaders.contentType(mimeType.getType());
+    public void setContentType(MimeType mimeType) {
+        responseHeaders.setContentType(mimeType.getType());
     }
 
     public void setJsessionid(String jsessionid) {
@@ -41,7 +38,7 @@ public class Response {
 
     public void setBody(String body) {
         responseBody.setBody(body);
-        responseHeaders.contentLength(responseBody.length());
+        responseHeaders.setContentLength(responseBody.length());
     }
 
     public String getViewName() {

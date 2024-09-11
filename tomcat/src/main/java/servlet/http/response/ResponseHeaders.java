@@ -3,32 +3,33 @@ package servlet.http.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import servlet.http.HttpHeader;
 
 public class ResponseHeaders implements Assemblable {
+
+    private static final String ENCODING = "charset=utf-8";
+    private static final String CRLF = "\r\n";
+    private static final String PREFIX = "";
 
     private final Map<String, String> headers;
 
     private final ResponseCookie responseCookie;
 
     protected ResponseHeaders() {
-        this(new LinkedHashMap<>(), new ResponseCookie());
+        this.headers = new LinkedHashMap<>();
+        this.responseCookie = new ResponseCookie();
     }
 
-    private ResponseHeaders(Map<String, String> headers, ResponseCookie responseCookie) {
-        this.headers = headers;
-        this.responseCookie = responseCookie;
+    protected void setContentType(String contentType) {
+        headers.put(HttpHeader.CONTENT_TYPE.value(), "%s;%s".formatted(contentType, ENCODING));
     }
 
-    protected void contentType(String contentType) {
-        headers.put(HttpHeader.CONTENT_TYPE.value(), "%s;charset=utf-8".formatted(contentType));
-    }
-
-    protected void contentLength(int contentLength) {
+    protected void setContentLength(int contentLength) {
         headers.put(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(contentLength));
     }
 
-    protected void location(String location) {
+    protected void setLocation(String location) {
         headers.put(HttpHeader.LOCATION.value(), location);
     }
 
@@ -39,13 +40,14 @@ public class ResponseHeaders implements Assemblable {
     @Override
     public void assemble(StringBuilder builder) {
         responseCookie.assemble(builder);
-        for (Entry<String, String> entry : headers.entrySet()) {
-            builder.append(convert(entry));
-        }
-        builder.append("\r\n");
+        builder.append(headers.entrySet()
+                        .stream()
+                        .map(this::convert)
+                        .collect(Collectors.joining(CRLF, PREFIX, CRLF)))
+                .append(CRLF);
     }
 
     private String convert(Entry<String, String> entry) {
-        return "%s: %s \r\n".formatted(entry.getKey(), entry.getValue());
+        return "%s: %s ".formatted(entry.getKey(), entry.getValue());
     }
 }

@@ -10,8 +10,8 @@ class ResponseHeadersTest {
     void ResponseHeaders를_조립한다() {
         // given
         ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.contentType("text/html");
-        responseHeaders.contentLength(1024);
+        responseHeaders.setContentType("text/html");
+        responseHeaders.setContentLength(1024);
 
         // when
         StringBuilder builder = new StringBuilder();
@@ -30,8 +30,8 @@ class ResponseHeadersTest {
     void 쿠키가_있다면_Set_Cookie_헤더도_함께_조립한다() {
         // given
         ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.contentType("text/html");
-        responseHeaders.contentLength(1024);
+        responseHeaders.setContentType("text/html");
+        responseHeaders.setContentLength(1024);
         responseHeaders.setJsessionid("656cef62-e3c4-40bc-a8df-94732920ed46");
 
         // when

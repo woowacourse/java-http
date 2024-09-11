@@ -9,11 +9,7 @@ public class ResponseLine implements Assemblable {
     private StatusCode statusCode;
 
     protected ResponseLine() {
-        this(DEFAULT_STATUS_CODE);
-    }
-
-    private ResponseLine(StatusCode statusCode) {
-        this.statusCode = statusCode;
+        this.statusCode = DEFAULT_STATUS_CODE;
     }
 
     protected void setStatusCode(StatusCode statusCode) {

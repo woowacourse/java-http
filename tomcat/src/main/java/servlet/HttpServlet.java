@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import servlet.handler.Handler;
+import servlet.handler.NotFoundHandler;
 import servlet.handler.ResourceHandler;
 import servlet.handler.WelcomeHandler;
 import org.apache.coyote.http.HttpMethod;
@@ -49,10 +50,9 @@ public class HttpServlet {
 
     private Handler getHandler(Request request) {
         return requestMappingInfos.stream()
-                .map(requestMappingInfo -> requestMappingInfo.match(request))
+                .map(requestMappingInfo -> requestMappingInfo.getHandler(request))
                 .filter(Objects::nonNull)
                 .findFirst()
-                .map(RequestMappingInfo::getHandler)
                 .orElseGet(ResourceHandler::new);
     }
 }

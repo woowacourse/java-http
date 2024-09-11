@@ -18,14 +18,14 @@ public class RequestMappingInfo {
         this.handler = handler;
     }
 
-    public RequestMappingInfo match(Request request) {
-        if (path.equals(request.getPath()) && httpMethod.equals(request.getHttpMethod())) {
-            return this;
+    public Handler getHandler(Request request) {
+        if (matches(request)) {
+            return this.handler;
         }
         return null;
     }
 
-    public Handler getHandler() {
-        return this.handler;
+    private boolean matches(Request request) {
+        return path.equals(request.getPath()) && httpMethod.equals(request.getHttpMethod());
     }
 }

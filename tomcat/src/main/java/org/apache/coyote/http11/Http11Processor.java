@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.domain.HttpStatusCode.FOUND;
+import static org.apache.coyote.http11.domain.HttpStatusCode.OK;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -90,14 +93,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private String[] determineGetResponse(String url, Map<String, String> requestHeaders) {
         String[] result = new String[3];
-        result[0] = "200 OK";
+        result[0] = OK.toString();
         result[2] = "";
         if (url.endsWith("html") || url.endsWith("js") || url.endsWith("css")) {
             result[1] = "static" + url;
             return result;
         }
         if (url.equals("/login") && isAlreadyLogin(requestHeaders)) {
-            result[0] = "302 FOUND";
+            result[0] = FOUND.toString();
             result[1] = "static/index.html";
             result[2] = "Location: /index.html";
 
@@ -138,7 +141,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String[] doLogin(Map<String, String> requestHeaders, String[] requestBody) {
         String[] result = new String[3];
-        result[0] = "302 FOUND";
+        result[0] = FOUND.toString();
         result[1] = "static/index.html";
         result[2] = "Location: /index.html";
 
@@ -148,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
-            result[0] = "302 FOUND";
+            result[0] = FOUND.toString();
             result[1] = "static/401.html";
             result[2] = "Location: /401.html";
             return result;
@@ -196,7 +199,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String[] doRegister(String[] requestBody) {
         String[] result = new String[3];
-        result[0] = "302 FOUND";
+        result[0] = FOUND.toString();
         result[1] = "static/index.html";
         result[2] = "Location: /index.html ";
         User user = createUser(requestBody);

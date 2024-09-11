@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.domain;
 
+import java.util.Arrays;
+
 public enum HttpStatusCode {
     OK(200),
     CREATED(201),
@@ -12,11 +14,22 @@ public enum HttpStatusCode {
         this.code = code;
     }
 
+    public static HttpStatusCode valueOf(int code) {
+        return Arrays.stream(values())
+                .filter(value -> value.code == code)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid HttpStatusCode code: " + code));
+    }
+
     public int getCode() {
         return code;
     }
 
     public String getName() {
         return name();
+    }
+
+    public String toString() {
+        return code + " " + name();
     }
 }

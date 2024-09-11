@@ -12,7 +12,7 @@ public class HttpResponse {
         this.responseHeader = new ResponseHeader();
         this.body = body;
 
-        responseHeader.setAccept(contentType + ";" + DEFAULT_CHARSET);
+        responseHeader.setContentType(contentType + ";" + DEFAULT_CHARSET);
         responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 

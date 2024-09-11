@@ -15,7 +15,7 @@ public class ResponseHeader {
         this.headers = new LinkedHashMap<>();
     }
 
-    public void setAccept(String value) {
+    public void setContentType(String value) {
         headers.put(CONTENT_TYPE, value);
     }
 

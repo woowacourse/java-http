@@ -10,8 +10,6 @@ import org.apache.catalina.session.Session;
 
 public class HttpResponse {
 
-    private static final String DELIMITER = "\r\n";
-
     private final HttpResponseLine httpResponseLine;
     private final HttpHeaders httpHeaders;
     private final HttpResponseBody httpResponseBody;
@@ -27,9 +25,9 @@ public class HttpResponse {
     }
 
     private String stringify() {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
+        StringJoiner joiner = new StringJoiner(System.lineSeparator());
         joiner.add(httpResponseLine.stringify());
-        joiner.add(httpHeaders.stringify(DELIMITER));
+        joiner.add(httpHeaders.stringify(System.lineSeparator()));
         joiner.add("");
         joiner.add(httpResponseBody.getValue());
 

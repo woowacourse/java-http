@@ -16,7 +16,7 @@ public class RegisterController extends RestController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.OK);
-        responseResource(response, request.getTargetPath());
+        responseResource(response, request.getURI());
     }
 
     @Override

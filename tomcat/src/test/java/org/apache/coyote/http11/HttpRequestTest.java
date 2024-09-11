@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.exception.CatalinaException;
@@ -136,36 +134,6 @@ class HttpRequestTest {
 
         // when&then
         assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
-    }
-
-    @DisplayName("요청 uri의 path를 반환한다.")
-    @Test
-    void getTargetPath() throws URISyntaxException {
-        // given
-        HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestURI("/index"), HttpVersion.HTTP11),
-                new HttpHeaders(),
-                new HttpRequestBody()
-        );
-
-        // when&then
-        Path expected = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
-        assertThat(request.getTargetPath()).isEqualTo(expected);
-    }
-
-    @DisplayName("요청 uri의 파일이 존재하지 않으면 예외를 던진다.")
-    @Test
-    void getTargetPath_targetNotFound() {
-        // given
-        HttpRequest request = new HttpRequest(
-                new HttpRequestLine(HttpMethod.GET, new RequestURI("/invalidUrl"), HttpVersion.HTTP11),
-                new HttpHeaders(),
-                new HttpRequestBody()
-        );
-
-        // when&then
-        assertThatThrownBy(request::getTargetPath)
-                .isInstanceOf(CatalinaException.class);
     }
 
     @DisplayName("요청 body에서 특정 값을 꺼내온다.")

@@ -1,6 +1,5 @@
 package org.apache.catalina.http.startline;
 
-import java.nio.file.Path;
 import org.apache.catalina.exception.CatalinaException;
 
 public class HttpRequestLine {
@@ -50,8 +49,8 @@ public class HttpRequestLine {
         return requestURI.startsWith(startsWith);
     }
 
-    public Path getTargetPath() {
-        return requestURI.getPath();
+    public String getURI() {
+        return requestURI.getValue();
     }
 
     public HttpMethod getHttpMethod() {

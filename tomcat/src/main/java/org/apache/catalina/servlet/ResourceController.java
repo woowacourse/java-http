@@ -18,7 +18,7 @@ public class ResourceController extends AbstractController {
         }
         if (request.isURIStatic()) {
             response.setStatus(HttpStatus.OK);
-            responseResource(response, request.getTargetPath());
+            responseResource(response, request.getURI());
         }
     }
 }

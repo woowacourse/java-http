@@ -35,7 +35,7 @@ public class LoginController extends RestController {
 
     private void responseLoginPage(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.OK);
-        responseResource(response, request.getTargetPath());
+        responseResource(response, request.getURI());
     }
 
     private void loginAndRedirectToIndex(HttpResponse response, User user) {

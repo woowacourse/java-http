@@ -36,15 +36,10 @@ public enum ContentType {
         throw new IllegalArgumentException(extension + " 는 지원하지 않는 형식입니다.");
     }
 
-    public String getResponseText() {
-        return "Content-Type: " + category + "/" + type;
-    }
-
-    public String getResponseText(final Charset charset) {
-        return "Content-Type: " + category + "/" + type + "; charset=" + charset.name;
-    }
-
     public String toResponseText() {
+        if ("text".equals(category)) {
+            return category + "/" + type + "; charset=" + Charset.UTF_8.name;
+        }
         return category + "/" + type;
     }
 

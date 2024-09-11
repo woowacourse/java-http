@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
 
-import org.apache.coyote.http11.ContentType.Charset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +17,7 @@ class ContentTypeTest {
     void responseText() {
         final ContentType contentType = ContentType.TEXT_HTML;
 
-        assertThat(contentType.getResponseText(Charset.UTF_8)).isEqualTo("Content-Type: text/html; charset=utf-8");
+        assertThat(contentType.toResponseText()).isEqualTo("text/html; charset=utf-8");
     }
 
     @ParameterizedTest

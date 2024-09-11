@@ -23,6 +23,7 @@ public class HttpRequestConvertor {
     private static final int TUPLE_VALUE_INDEX = 1;
     private static final int HEADER_KEY_INDEX = 0;
     private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private static final String REQUEST_LINE_DELIMITER = " ";
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
@@ -43,6 +44,9 @@ public class HttpRequestConvertor {
     private static void validateRequestLine(String requestLine) {
         if (requestLine == null) {
             throw new IllegalArgumentException("요청이 비어 있습니다.");
+        }
+        if (requestLine.split(REQUEST_LINE_DELIMITER).length < 3) {
+            throw new IllegalArgumentException("RequestLine이 잘못된 요청입니다.");
         }
     }
 

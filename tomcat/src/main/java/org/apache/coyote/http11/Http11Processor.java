@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_ERROR_PAGE = "/500.html";
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -43,13 +45,18 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-            // TODO: error response
         }
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {
         Controller controller = requestMapping.getController(request);
-        controller.service(request, response);
+        try {
+            controller.service(request, response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            response.setStatus(HttpStatusCode.INTERNAL_SERVER_ERROR)
+                    .setBody(StaticResourceManager.read(DEFAULT_ERROR_PAGE));
+        }
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {

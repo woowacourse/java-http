@@ -1,12 +1,12 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.controller.NotFoundController;
-import org.apache.catalina.util.StaticResourceManager;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.util.StaticResourceManager;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class RequestMapping {
 
     private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
 
-    private static final List<Class<? extends Controller>> CONTROLLER_CLASSES = List.of(
+    private static final List<Class<? extends AbstractController>> CONTROLLER_CLASSES = List.of(
             GreetingController.class,
             LoginController.class,
             RegisterController.class
@@ -49,7 +49,7 @@ public class RequestMapping {
                         throw new IllegalArgumentException("Failed to instantiate controller: " + clazz, e);
                     }
                 })
-                .collect(HashMap::new, (map, controller) -> map.put(controller.matchedPath(), controller), HashMap::putAll);
+                .collect(Collectors.toMap(AbstractController::matchedPath, controller -> controller));
     }
 
     public Controller getController(HttpRequest request) {

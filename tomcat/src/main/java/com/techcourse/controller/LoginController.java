@@ -28,7 +28,6 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        // 로그인한 경우 index.html로 리다이렉트
         Optional<HttpSession> session = sessionManager.getSession(request.getSessionId());
         boolean isLogin = session.map(s -> s.getAttribute("user") != null)
                 .orElse(false);

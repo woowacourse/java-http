@@ -7,7 +7,6 @@ import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RegisterPageController;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestKey;
@@ -16,19 +15,19 @@ import org.apache.coyote.util.FileExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FrontController {
+public class RequestMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
     private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
-    public FrontController() {
+    public RequestMapping() {
         controllers.put(new RequestKey(HttpMethod.GET, "/login"), new LoginPageController());
         controllers.put(new RequestKey(HttpMethod.POST, "/login"), new LoginController());
         controllers.put(new RequestKey(HttpMethod.GET, "/register"), new RegisterPageController());
         controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
     }
 
-    public HttpResponse dispatch(HttpRequest request, Manager manager) {
+    public HttpResponse dispatch(HttpRequest request) {
         log(request);
         HttpResponse response = new HttpResponse();
         String path = request.getPath();

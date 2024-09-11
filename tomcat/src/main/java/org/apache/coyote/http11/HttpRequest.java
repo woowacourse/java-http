@@ -4,22 +4,24 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final Map<String, String> queryString;
-    private final String protocolVersion;
-    private final Map<String, String> headers;
-    private final HttpCookie httpCookie;
-    private final String body;
+    private String method;
+    private String path;
+    private Map<String, String> queryString;
+    private String protocolVersion;
+    private Map<String, String> headers;
+    private HttpCookie httpCookie;
+    private Session session;
+    private String body;
 
     public HttpRequest(String method, String path, Map<String, String> queryString, String protocolVersion,
-                       Map<String, String> headers, HttpCookie httpCookie, String body) {
+                       Map<String, String> headers, HttpCookie httpCookie, Session session, String body) {
         this.method = method;
         this.path = path;
         this.queryString = queryString;
         this.protocolVersion = protocolVersion;
         this.headers = headers;
         this.httpCookie = httpCookie;
+        this.session = session;
         this.body = body;
     }
 
@@ -45,6 +47,10 @@ public class HttpRequest {
 
     public String getMethod() {
         return this.method;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     public String getBody() {

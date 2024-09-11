@@ -10,6 +10,10 @@ public class HttpCookie {
         this.values = values;
     }
 
+    public static HttpCookie ofJSessionId(String sessionId) {
+        return new HttpCookie(Map.of("JSESSIONID", sessionId));
+    }
+
     public String getValue(String input) {
         return values.get(input);
     }
@@ -20,12 +24,10 @@ public class HttpCookie {
 
     public String getResponse() {
         StringBuilder response = new StringBuilder();
-        values.entrySet()
-                .forEach(entry -> response.append(entry.getKey())
-                        .append("=")
-                        .append(entry.getValue())
-                        .append(" ")
-                );
+        values.forEach((key, value) -> response.append(key)
+                .append("=")
+                .append(value)
+                .append(" "));
         return response.toString();
     }
 }

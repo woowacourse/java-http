@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final RequestDispatcher requestDispatcher;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestDispatcher = new RequestDispatcher();
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override
@@ -79,8 +82,9 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryString = parseQueryString(tokens[1]);
         Map<String, String> headers = parseHeaders(bufferedReader);
         HttpCookie httpCookie = parseCookie(headers);
+        Session session = parseSession(httpCookie);
         String body = parseBody(bufferedReader, headers);
-        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, httpCookie, body);
+        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, httpCookie, session, body);
     }
 
     private String parsePath(String token) {
@@ -167,6 +171,17 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 });
         return new HttpCookie(cookies);
+    }
+
+    private Session parseSession(HttpCookie httpCookie) {
+        String sessionId = httpCookie.getValue("JSESSIONID");
+        Session found = sessionManager.findSession(sessionId);
+        if (found == null && sessionId != null) {
+            Session session = new Session(sessionId);
+            sessionManager.add(new Session(sessionId));
+            return session;
+        }
+        return found;
     }
 
     private String parseBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {

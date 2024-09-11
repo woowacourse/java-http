@@ -7,8 +7,16 @@ import org.apache.coyote.http11.Session;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static SessionManager sessionManager;
 
     private SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        if (sessionManager == null) {
+            sessionManager = new SessionManager();
+        }
+        return sessionManager;
     }
 
     @Override

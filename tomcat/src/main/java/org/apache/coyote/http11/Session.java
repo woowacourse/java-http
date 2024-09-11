@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Session {
     private final String id;
-    private final Map<String, String> values = new HashMap<>();
+    private final Map<String, Object> values = new HashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -15,11 +15,11 @@ public class Session {
         return this.id;
     }
 
-    public String getAttribute(final String name) {
+    public Object getAttribute(final String name) {
         return values.get(name);
     }
 
-    public void setAttribute(final String name, final String value) {
+    public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }
 

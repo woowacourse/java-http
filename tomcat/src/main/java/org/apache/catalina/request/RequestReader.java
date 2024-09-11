@@ -17,16 +17,16 @@ public class RequestReader {
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
 
     public static Request readHeaders(BufferedReader reader) {
-        List<String> headerLines = readHeaderLines(reader);
-        validateHeaderLines(headerLines);
+        List<String> readRequest = readRequest(reader);
+        validateRequestLines(readRequest);
 
-        Map<String, String> headers = parseHeaders(headerLines);
-        Request request = new Request(headerLines.getFirst(), headers);
-        request.setBody(getBody(reader, request.getContentLength()));
-        return request;
+        RequestLine requestLine = new RequestLine(readRequest.getFirst());
+        RequestHeader requestHeader = new RequestHeader(parseHeaders(readRequest));
+        RequestBody requestBody = new RequestBody(getBody(reader, requestHeader.getContentLength()));
+        return new Request(requestLine, requestHeader, requestBody);
     }
 
-    private static List<String> readHeaderLines(BufferedReader reader) {
+    private static List<String> readRequest(BufferedReader reader) {
         List<String> headerLines = new ArrayList<>();
         try {
             String line;
@@ -40,7 +40,7 @@ public class RequestReader {
         return headerLines;
     }
 
-    private static void validateHeaderLines(List<String> headerLines) {
+    private static void validateRequestLines(List<String> headerLines) {
         if (headerLines.isEmpty()) {
             throw new IllegalArgumentException("요청 헤더가 비어 있습니다.");
         }
@@ -51,7 +51,10 @@ public class RequestReader {
                 .skip(1)
                 .map(line -> line.split(": ", 2))
                 .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+                .collect(Collectors.toMap(
+                        parts -> parts[0],
+                        parts -> parts[1]
+                ));
     }
 
     private static Map<String, String> getBody(BufferedReader reader, int contentLength) {

@@ -26,7 +26,6 @@ class RequestLineTest {
             );
         }
 
-
         @Test
         @DisplayName("실패 : 적절하지 않은 문자열일 경우, 예외 발생")
         void ConstructorFail() {

@@ -71,6 +71,7 @@
     - [x] Version 클래스
     - [x] Protocol 클래스 (enum)
   - [x] Headers 분석
+  - [x] body 클래스
 
 - [ ] HttpResponse 클래스 구현
   - [ ] Response Line 분석

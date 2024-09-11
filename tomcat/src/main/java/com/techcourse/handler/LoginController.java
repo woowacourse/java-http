@@ -24,28 +24,37 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         HttpBody body = request.getBody();
         Header header = response.getHeader();
-        if (!isLoggedIn(body)) {
+        String account = getAccount(body);
+        String password = getPassword(body);
+
+        if (!isLoggedIn(account, password)) {
             response.sendRedirect("401.html");
             return;
         }
 
         HttpSession session = request.getSession(true);
-        session.setAttribute("user", getUser(body));
+        session.setAttribute("user", getUser(account));
         header.appendJSessionId(session.getId());
         response.sendRedirect("index.html");
     }
 
-    private boolean isLoggedIn(HttpBody body) {
-        String password = body.get("password").orElse("");
-
+    private String getAccount(HttpBody body) {
         return body.get("account")
-                .flatMap(InMemoryUserRepository::findByAccount)
+                .orElseThrow(() -> new IllegalArgumentException("account 값은 필수입니다."));
+    }
+
+    private String getPassword(HttpBody body) {
+        return body.get("password")
+                .orElseThrow(() -> new IllegalArgumentException("password 값은 필수입니다."));
+    }
+
+    private boolean isLoggedIn(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .map(it -> it.checkPassword(password))
                 .orElse(false);
     }
 
-    private User getUser(HttpBody body) {
-        String account = body.get("account").orElseThrow();
+    private User getUser(String account) {
         return InMemoryUserRepository.findByAccount(account).orElseThrow();
     }
 }

@@ -15,6 +15,7 @@ public class RequestReader {
     private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
     private static final String PARAM_SEPARATOR = "&";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
+    public static final String HEADER_SEPARATOR = ": ";
 
     public static Request readHeaders(BufferedReader reader) {
         List<String> readRequest = readRequest(reader);
@@ -49,7 +50,7 @@ public class RequestReader {
     private static Map<String, String> parseHeaders(List<String> headerLines) {
         return headerLines.stream()
                 .skip(1)
-                .map(line -> line.split(": ", 2))
+                .map(line -> line.split(HEADER_SEPARATOR, 2))
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(
                         parts -> parts[0],

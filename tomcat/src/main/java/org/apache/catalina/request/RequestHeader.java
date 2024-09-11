@@ -14,9 +14,9 @@ public class RequestHeader {
     public static final String TEXT_HTML = "text/html";
     public static final String COMMA = ",";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
-    public static final String SEMICOLON = ";";
-    private final Map<String, String> headers;
+    public static final String COOKIE_SEPARATOR = ";";
 
+    private final Map<String, String> headers;
     private final String fileType;
 
     public RequestHeader(Map<String, String> headers) {
@@ -49,7 +49,7 @@ public class RequestHeader {
         if (setCookies == null) {
             return new HttpCookie(new HashMap<>());
         }
-        Map<String, String> cookie = Arrays.stream(setCookies.split(SEMICOLON))
+        Map<String, String> cookie = Arrays.stream(setCookies.split(COOKIE_SEPARATOR))
                 .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))
                 .filter(parts -> parts.length == 2 && parts[1] != null)
                 .collect(Collectors.toMap(

@@ -10,6 +10,7 @@ public class RequestLine {
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
+
     private final HttpMethod httpMethod;
     private final String path;
     private final VersionOfProtocol versionOfProtocol;

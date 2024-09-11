@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.Cookie;
+import org.apache.coyote.http11.domain.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String ASSIGN_OPERATOR = "=";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -53,10 +62,10 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> requestHeaders = readRequestHeaders(reader);
 
-            if (method.equals("GET")) {
+            if (method.equals(GET)) {
                 doGet(url, requestHeaders, outputStream);
             }
-            if (method.equals("POST")) {
+            if (method.equals(POST)) {
                 doPost(url, requestHeaders, reader, outputStream);
             }
 
@@ -78,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
         if (url.equals("/")) {
             createHttpResponse(
                     "Hello world!",
-                    createHttpResponseHeader("200 OK", "", "text/html", "Hello world!"),
+                    createHttpResponseHeader("HTTP_VERSION 200 OK ", "text/html", "Hello world!"),
                     outputStream);
             return;
         }
@@ -87,22 +96,20 @@ public class Http11Processor implements Runnable, Processor {
         var responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
 
-        String responseHeader = createHttpResponseHeader(result[0], result[2], contentType, responseBody);
+        String responseHeader = createHttpResponseHeader(result[0], contentType, responseBody);
         createHttpResponse(responseBody, responseHeader, outputStream);
     }
 
     private String[] determineGetResponse(String url, Map<String, String> requestHeaders) {
-        String[] result = new String[3];
-        result[0] = OK.toString();
-        result[2] = "";
+        String[] result = new String[2];
+        result[0] = HTTP_VERSION + " " + OK.toString() + " ";
         if (url.endsWith("html") || url.endsWith("js") || url.endsWith("css")) {
             result[1] = "static" + url;
             return result;
         }
         if (url.equals("/login") && isAlreadyLogin(requestHeaders)) {
-            result[0] = FOUND.toString();
+            result[0] = createResponseHeader(FOUND, "/index.html");
             result[1] = "static/index.html";
-            result[2] = "Location: /index.html";
 
         }
         result[1] = "static" + url + ".html";
@@ -114,24 +121,27 @@ public class Http11Processor implements Runnable, Processor {
         return new File(resource.getPath()).toPath();
     }
 
-    private void doPost(String url, Map<String, String> requestHeaders, BufferedReader reader,
+    private void doPost(
+            String url,
+            Map<String, String> requestHeaders,
+            BufferedReader reader,
             OutputStream outputStream
     ) throws IOException {
         String[] requestBody = readRequestBody(requestHeaders, reader);
-        String[] pathAndStatus = determinePostResponse(url, requestHeaders, requestBody);
+        String[] pathAndStatus = determinePostResponse(url, requestBody);
 
         final Path path = getPath(pathAndStatus);
         var responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
 
-        String responseHeader = createHttpResponseHeader(pathAndStatus[0], pathAndStatus[2], contentType, responseBody);
+        String responseHeader = createHttpResponseHeader(pathAndStatus[0], contentType, responseBody);
         createHttpResponse(responseBody, responseHeader, outputStream);
     }
 
-    private String[] determinePostResponse(String url, Map<String, String> requestHeaders, String[] requestBody) {
-        String[] pathAndStatus = new String[3];
+    private String[] determinePostResponse(String url, String[] requestBody) {
+        String[] pathAndStatus = new String[2];
         if (url.startsWith("/login")) {
-            pathAndStatus = doLogin(requestHeaders, requestBody);
+            pathAndStatus = doLogin(requestBody);
         }
         if (url.equals("/register")) {
             pathAndStatus = doRegister(requestBody);
@@ -139,36 +149,40 @@ public class Http11Processor implements Runnable, Processor {
         return pathAndStatus;
     }
 
-    private String[] doLogin(Map<String, String> requestHeaders, String[] requestBody) {
-        String[] result = new String[3];
-        result[0] = FOUND.toString();
+    private String[] doLogin(String[] requestBody) {
+        String[] result = new String[2];
+        result[0] = createResponseHeader(FOUND, "/index.html");
         result[1] = "static/index.html";
-        result[2] = "Location: /index.html";
 
-        String account = requestBody[0].split("=")[1];
-        String password = requestBody[1].split("=")[1];
+        String account = requestBody[0].split(ASSIGN_OPERATOR)[1];
+        String password = requestBody[1].split(ASSIGN_OPERATOR)[1];
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
-            result[0] = FOUND.toString();
             result[1] = "static/401.html";
-            result[2] = "Location: /401.html";
+            result[0] = createResponseHeader(FOUND, "/401.html");
             return result;
         }
         log.info(user.toString());
 
         Cookie cookie = createCookie();
         createSession(user, cookie.getSessionId());
-        result[2] = String.join("\r\n",
-                result[2],
-                "Set-Cookie: JSESSIONID=" + cookie.getSessionId());
+        result[0] = String.join("\r\n",
+                result[0],
+                "Set-Cookie: " + JSESSIONID + "=" + cookie.getSessionId());
         return result;
     }
 
+    private static String createResponseHeader(HttpStatusCode statusCode, String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode.toString() + " ",
+                "Location: " + location + " ");
+    }
+
     private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
-        if (requestHeaders.containsKey("Cookie")) {
-            String sessionId = requestHeaders.get("Cookie").split("=")[1];
+        if (requestHeaders.containsKey(COOKIE)) {
+            String sessionId = requestHeaders.get(COOKIE).split(ASSIGN_OPERATOR)[1];
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = sessionManager.findSession(sessionId);
             return session != null;
@@ -179,7 +193,7 @@ public class Http11Processor implements Runnable, Processor {
     private Cookie createCookie() {
         String sessionId = UUID.randomUUID().toString();
         Cookie cookie = new Cookie();
-        cookie.setCookie("JSESSIONID", sessionId);
+        cookie.setCookie(JSESSIONID, sessionId);
         return cookie;
     }
 
@@ -194,14 +208,13 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        return new String(buffer).split("&");
+        return new String(buffer).split(PARAMETER_SEPARATOR);
     }
 
     private String[] doRegister(String[] requestBody) {
-        String[] result = new String[3];
-        result[0] = FOUND.toString();
+        String[] result = new String[2];
+        result[0] = createResponseHeader(FOUND, "/index.html");
         result[1] = "static/index.html";
-        result[2] = "Location: /index.html ";
         User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 
@@ -211,24 +224,16 @@ public class Http11Processor implements Runnable, Processor {
     private User createUser(String[] requestBody) {
         Map<String, String> userInfo = new HashMap<>();
         for (String param : requestBody) {
-            userInfo.put(param.split("=")[0], param.split("=")[1]);
+            userInfo.put(param.split(ASSIGN_OPERATOR)[0], param.split(ASSIGN_OPERATOR)[1]);
         }
         return new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
     }
 
-    private static String createHttpResponseHeader(String status, String additionalHeader, String contentType,
-            String responseBody
-    ) {
-        String responseHeader = String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
+    private static String createHttpResponseHeader(String responseHeader, String contentType, String responseBody) {
+        return String.join("\r\n",
+                responseHeader,
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ");
-        if (!additionalHeader.isBlank()) {
-            responseHeader = String.join("\r\n",
-                    responseHeader,
-                    additionalHeader);
-        }
-        return responseHeader;
     }
 
     private void createHttpResponse(String responseBody, String responseHeader, OutputStream outputStream)

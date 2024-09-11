@@ -44,7 +44,7 @@ public class LoginHandler extends Handler {
     private String processLoginGetRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = httpRequest.getHttpCookie();
         if (httpCookie == null || ! sessionManager.existsById(httpCookie.getValue("JSESSIONID"))) {
-            throw new UnauthorizedException("로그인에 실패하였습니다.");
+            return HttpResponseGenerator.getFoundResponse("/login.html");
         }
 
         return HttpResponseGenerator.getFoundResponse("/index.html");

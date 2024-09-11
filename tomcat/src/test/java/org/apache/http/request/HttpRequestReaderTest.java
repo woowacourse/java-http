@@ -10,6 +10,7 @@ import java.io.StringReader;
 
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
+import org.apache.http.header.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +36,10 @@ class HttpRequestReaderTest {
                 () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo("/index.html"),
                 () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
-                () -> assertThat(request.getHeaders()).hasSize(2),
+                () -> assertThat(request.getHeaders().getHeaders()).containsExactly(
+                        new HttpHeader("Host", "localhost:8080"),
+                        new HttpHeader("Connection", "keep-alive")
+                ),
                 () -> assertThat(request.getHeader("Host")).isEqualTo("localhost:8080"),
                 () -> assertThat(request.getBody()).isNull()
         );
@@ -62,7 +66,11 @@ class HttpRequestReaderTest {
                 () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/login"),
                 () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
-                () -> assertThat(request.getHeaders()).hasSize(3),
+                () -> assertThat(request.getHeaders().getHeaders()).containsExactlyInAnyOrder(
+                        new HttpHeader("Host", "localhost:8080"),
+                        new HttpHeader("Content-Type", "application/x-www-form-urlencoded"),
+                        new HttpHeader("Content-Length", "27")
+                ),
                 () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isEqualTo("username=john&password=pass")
         );
@@ -86,7 +94,7 @@ class HttpRequestReaderTest {
                 () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo("/"),
                 () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
-                () -> assertThat(request.getHeaders()).isEmpty(),
+                () -> assertThat(request.getHeaders().getHeaders()).isEmpty(),
                 () -> assertThat(request.getBody()).isNull()
 
         );
@@ -112,7 +120,7 @@ class HttpRequestReaderTest {
                 () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/hi"),
                 () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
-                () -> assertThat(request.getHeaders()).hasSize(2),
+                () -> assertThat(request.getHeaders().getHeaders()).hasSize(2),
                 () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isNull()
 
@@ -128,6 +136,7 @@ class HttpRequestReaderTest {
 
         // when & then
         assertThatThrownBy(() -> HttpRequestReader.readHttpRequest(reader))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("RequestLine 형식이 맞지 않습니다. method, path, version으로 구성해주세요.");
     }
 }

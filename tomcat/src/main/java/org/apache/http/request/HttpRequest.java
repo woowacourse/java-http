@@ -7,6 +7,7 @@ import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeader;
+import org.apache.http.header.HttpHeaders;
 import org.apache.http.header.StandardHttpHeader;
 
 public class HttpRequest {
@@ -18,13 +19,13 @@ public class HttpRequest {
     private static final int VALUE_ORDER = 1;
 
     private final RequestLine requestLine;
-    private final HttpHeader[] headers;
+    private final HttpHeaders headers;
     private final String body;
     private final HttpCookie httpCookie;
 
     public HttpRequest(RequestLine requestLine, HttpHeader[] headers, String body) {
         this.requestLine = requestLine;
-        this.headers = headers;
+        this.headers = new HttpHeaders(headers);
         this.body = body;
         this.httpCookie = parseCookie(headers);
     }
@@ -68,12 +69,12 @@ public class HttpRequest {
         return requestLine.getVersion();
     }
 
-    public HttpHeader[] getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 
     public String getHeader(String key) {
-        return Arrays.stream(headers)
+        return Arrays.stream(headers.getHeaders())
                 .filter(httpHeader -> httpHeader.getKey().equals(key))
                 .map(HttpHeader::getValue)
                 .findFirst()

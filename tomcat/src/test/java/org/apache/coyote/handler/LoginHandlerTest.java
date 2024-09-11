@@ -1,6 +1,6 @@
 package org.apache.coyote.handler;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.NotFoundException;
+import org.apache.coyote.UnauthorizedException;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.RequestLine;
@@ -29,7 +31,10 @@ class LoginHandlerTest {
         final RequestLine requestLine = new RequestLine("GET", "/login", "HTTP/1.1");
         final HttpRequest request = new HttpRequest(requestLine, null, null);
 
-        assertTrue(LoginHandler.getInstance().handle(request).contains(fileContent));
+        assertAll(
+                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found")),
+                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("http://localhost:8080/login.html"))
+        );
     }
 
     @Test
@@ -41,7 +46,10 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest(requestLine,
                 new HttpHeader[]{new HttpHeader("Cookie", "JSESSIONID=" + sessionId)}, null);
 
-        assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found"));
+        assertAll(
+                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found")),
+                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("http://localhost:8080/index.html"))
+        );
 
         SessionManager.getInstance().remove(new Session(sessionId));
     }
@@ -60,45 +68,48 @@ class LoginHandlerTest {
                 () -> assertTrue(result.contains("http://localhost:8080/index.html")),
                 () -> assertTrue(result.contains("Set-Cookie: JSESSIONID="))
         );
-        assertTrue(result.contains("http://localhost:8080/index.html"));
-        assertTrue(result.contains("Set-Cookie: JSESSIONID="));
     }
 
     @Test
     @DisplayName("POST 요청 처리: 비밀번호가 올바르지 않는 경우 로그인 실패")
-    void handle_PostRequest_With_InvalidCredentials() throws IOException {
+    void handle_PostRequest_With_InvalidCredentials() {
         final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
-        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
-        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=gugu&password=wrongpassword");
 
-        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
+        assertThatThrownBy(
+                () -> LoginHandler.getInstance().handle(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("로그인에 실패하였습니다.");
+
     }
 
     @Test
     @DisplayName("POST 요청 처리: 존재하지 않는 계정 정보로 로그인 실패")
-    void handle_PostRequest_WithNonexistentUser() throws IOException {
+    void handle_PostRequest_WithNonexistentUser() {
         final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
-        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
-        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=nonexistent&password=anypassword");
 
-        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
+        assertThatThrownBy(
+                () -> LoginHandler.getInstance().handle(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("로그인에 실패하였습니다.");
     }
 
     @Test
-    @DisplayName("지원하지 않는 메소드 처리: 404 페이지 반환")
-    void handle_UnsupportedMethod() throws IOException {
+    @DisplayName("지원하지 않는 메소드 처리: 예외 반환")
+    void handle_UnsupportedMethod() {
         final RequestLine requestLine = new RequestLine("PUT", "/login", "HTTP/1.1");
-        final URL resourceURL = getClass().getClassLoader().getResource("static/404.html");
-        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final HttpRequest request = new HttpRequest(requestLine, null, null);
 
-        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
+        assertThatThrownBy(
+                () -> LoginHandler.getInstance().handle(request))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("페이지를 찾을 수 없습니다.");
+
     }
 }

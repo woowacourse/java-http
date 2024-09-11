@@ -67,8 +67,8 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("login Get 요청 처리: 세션이 없는 경우 login html 반환")
-    void login_Get_WhenExistsSession() throws IOException {
+    @DisplayName("login Get 요청 처리: 세션이 없는 경우 login html 로 리다이렉트")
+    void login_Get_WhenExistsSession() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -84,14 +84,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3797 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).isEqualTo(
+                HttpResponseGenerator.getFoundResponse("/login.html"));
     }
 
     @Test

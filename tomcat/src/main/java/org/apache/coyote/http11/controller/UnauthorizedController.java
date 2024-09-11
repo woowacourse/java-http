@@ -7,6 +7,8 @@ import org.apache.coyote.http11.httpresponse.HttpResponse;
 
 public class UnauthorizedController extends AbstractController {
 
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         throw new IllegalArgumentException();
@@ -16,7 +18,7 @@ public class UnauthorizedController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
             return HttpResponse.unauthorized(httpRequest)
-                    .staticResource("/401.html")
+                    .staticResource(UNAUTHORIZED_PATH)
                     .build();
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);

@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.Session;
@@ -19,13 +18,19 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String LOGIN_PATH = "/login";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_DELIMITER = "JSESSIONID";
 
     private final Session session = Session.getInstance();
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValue("account");
-        String password = httpRequest.getBodyValue("password");
+        String account = httpRequest.getBodyValue(ACCOUNT);
+        String password = httpRequest.getBodyValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
@@ -35,18 +40,14 @@ public class LoginController extends AbstractController {
             session.save(uuid.toString(), user);
             log.info(user.toString());
             return HttpResponse.found(httpRequest)
-                    .setCookie("JSESSIONID=" + uuid)
-                    .location("/index.html")
+                    .setCookie(JSESSIONID + COOKIE_DELIMITER + uuid)
+                    .location(INDEX_PATH)
                     .build();
         }
         log.error("비밀번호 불일치");
         return HttpResponse.found(httpRequest)
-                .location("/401.html")
+                .location(UNAUTHORIZED_PATH)
                 .build();
-    }
-
-    private boolean checkToken(String[] token) {
-        return Arrays.stream(token).anyMatch(t -> t.split("=").length < 2);
     }
 
     @Override
@@ -57,11 +58,11 @@ public class LoginController extends AbstractController {
             }
 
             HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getHeaderValue(HttpHeaderName.COOKIE));
-            if (!httpCookie.containsKey("JSESSIONID")) {
+            if (!httpCookie.containsCookie(JSESSIONID)) {
                 return redirectLoginPage(httpRequest);
             }
 
-            String jsessionid = httpCookie.getValue("JSESSIONID");
+            String jsessionid = httpCookie.getCookieValue(JSESSIONID);
             if (!session.containsUser(jsessionid)) {
                 return redirectLoginPage(httpRequest);
             }
@@ -69,8 +70,8 @@ public class LoginController extends AbstractController {
             User user = session.getUser(jsessionid);
             log.info(user.toString());
             return HttpResponse.found(httpRequest)
-                    .setCookie("JSESSIONID=" + jsessionid)
-                    .location("/index.html")
+                    .setCookie(JSESSIONID + COOKIE_DELIMITER + jsessionid)
+                    .location(INDEX_PATH)
                     .build();
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);

@@ -14,7 +14,11 @@ import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class HttpResponse {
 
-    private static final String RESPONSE_DELIMITER = "\r\n";
+    private static final String RESPONSE_LINE_DELIMITER = "\r\n";
+    private static final String EXTENSION_DELIMITER = ".";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String STATIC_PATH = "static";
+
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeader httpResponseHeader;
     private final HttpResponseBody httpResponseBody;
@@ -48,13 +52,13 @@ public class HttpResponse {
 
         if (httpResponseBody != null) {
             String responseBody = httpResponseBody.getBody();
-            String join = String.join(RESPONSE_DELIMITER,
+            String join = String.join(RESPONSE_LINE_DELIMITER,
                     statusLine,
                     responseHeader,
                     responseBody);
             return join.getBytes();
         }
-        String join = String.join(RESPONSE_DELIMITER,
+        String join = String.join(RESPONSE_LINE_DELIMITER,
                 statusLine,
                 responseHeader);
         return join.getBytes();
@@ -103,10 +107,10 @@ public class HttpResponse {
         }
 
         public HttpResponseBuilder staticResource(String path) throws IOException, URISyntaxException {
-            if (!path.contains(".")) {
-                path += ".html";
+            if (!path.contains(EXTENSION_DELIMITER)) {
+                path += HTML_EXTENSION;
             }
-            String fileName = "static" + path;
+            String fileName = STATIC_PATH + path;
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
             if (resourceUrl == null) {
                 throw new NotFoundException("존재하지 않는 경로입니다.");

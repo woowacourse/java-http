@@ -15,11 +15,11 @@ public class HttpCookie {
         cookies.put(key, value);
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsCookie(String key) {
         return cookies.containsKey(key);
     }
 
-    public String getValue(String key) {
+    public String getCookieValue(String key) {
         return cookies.get(key);
     }
 }

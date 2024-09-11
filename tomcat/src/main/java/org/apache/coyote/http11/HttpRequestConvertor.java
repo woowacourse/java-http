@@ -14,6 +14,13 @@ import org.apache.coyote.http11.httprequest.HttpRequestLine;
 public class HttpRequestConvertor {
 
     private static final String HEADER_DELIMITER = ":";
+    private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+    private static final String BODY_DELIMITER = "&";
+    private static final String TUPLE_DELIMITER = "=";
+    private static final int TUPLE_MIN_LENGTH = 2;
+    private static final int TUPLE_KEY_INDEX = 0;
+    private static final int TUPLE_VALUE_INDEX = 1;
+    private static final int HEADER_KEY_INDEX = 0;
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
@@ -26,7 +33,7 @@ public class HttpRequestConvertor {
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
         if (httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH)
-                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals("application/x-www-form-urlencoded")
+                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals(BODY_FORM_CONTENT_TYPE)
         ) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
@@ -40,7 +47,7 @@ public class HttpRequestConvertor {
         Map<String, String> headers = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] requestLine = line.split(HEADER_DELIMITER);
-            headers.put(requestLine[0], parseHeaderValue(requestLine));
+            headers.put(requestLine[HEADER_KEY_INDEX], parseHeaderValue(requestLine));
         }
 
         return headers;
@@ -68,13 +75,13 @@ public class HttpRequestConvertor {
     }
 
     private static Map<String, String> extractBody(String requestBody) {
-        String[] tokens = requestBody.split("&");
+        String[] tokens = requestBody.split(BODY_DELIMITER);
         return Arrays.stream(tokens)
-                .filter(token -> token.split("=").length >= 2)
-                .map(token -> token.split("="))
+                .filter(token -> token.split(TUPLE_DELIMITER).length >= TUPLE_MIN_LENGTH)
+                .map(token -> token.split(TUPLE_DELIMITER))
                 .collect(Collectors.toMap(
-                        token -> token[0],
-                        token -> token[1]
+                        token -> token[TUPLE_KEY_INDEX],
+                        token -> token[TUPLE_VALUE_INDEX]
                 ));
     }
 }

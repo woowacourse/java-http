@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;
@@ -14,12 +13,16 @@ public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REGISTER_PATH = "/register";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+    private static final String INDEX_PATH = "/index.html";
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValue("account");
-        String password = httpRequest.getBodyValue("password");
-        String email = httpRequest.getBodyValue("email");
+        String account = httpRequest.getBodyValue(ACCOUNT);
+        String password = httpRequest.getBodyValue(PASSWORD);
+        String email = httpRequest.getBodyValue(EMAIL);
 
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
@@ -32,12 +35,8 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         return HttpResponse.found(httpRequest)
-                .location("/index.html")
+                .location(INDEX_PATH)
                 .build();
-    }
-
-    private boolean checkToken(String[] token) {
-        return Arrays.stream(token).anyMatch(t -> t.split("=").length < 2);
     }
 
     @Override

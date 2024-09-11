@@ -113,7 +113,7 @@ class Http11ProcessorTest {
                 ""
         );
 
-        HttpSessionManger httpSessionManger = new HttpSessionManger();
+        HttpSessionManger httpSessionManger = HttpSessionManger.getInstance();
         HttpSession httpSession = new HttpSession("randomUUID");
         httpSession.setAttribute("user", new User("tester", "password", "test@gmail.com"));
         httpSessionManger.add(httpSession);

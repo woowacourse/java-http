@@ -5,7 +5,14 @@ import java.util.Map;
 
 public class HttpSessionManger implements Manager {
 
+    private static final HttpSessionManger HTTP_SESSION_MANGER = new HttpSessionManger();
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+
+    private HttpSessionManger() { }
+
+    public static HttpSessionManger getInstance() {
+        return HTTP_SESSION_MANGER;
+    }
 
     public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);

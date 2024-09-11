@@ -53,7 +53,7 @@ class LoginControllerTest {
     @Test
     void doGetWithAlreadyLogin() throws IOException {
         // given
-        HttpSessionManger httpSessionManger = new HttpSessionManger();
+        HttpSessionManger httpSessionManger = HttpSessionManger.getInstance();
         User user = new User("tester", "password", "test@gmail.com");
         HttpSession httpSession = new HttpSession("something");
         httpSession.setAttribute(HttpSession.USER_ATTRIBUTE, user);

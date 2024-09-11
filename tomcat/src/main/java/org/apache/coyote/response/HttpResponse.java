@@ -11,8 +11,14 @@ import org.apache.coyote.util.FileReader;
 public class HttpResponse {
 
     private static final FileReader FILE_READER = FileReader.getInstance();
+
     private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CRLF = "\r\n";
+    private static final String FILE_DOT = ".";
+    private static final String HTML_SUFFIX = ".html";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String EMPTY_BODY = "";
+    private static final String EMPTY_LINE = "";
 
     private final HttpStatusCode httpStatusCode;
     private final HttpHeader responseHeader;
@@ -29,8 +35,8 @@ public class HttpResponse {
     }
 
     public static HttpResponse ofStaticFile(String fileName, HttpStatusCode httpStatusCode) {
-        if (!fileName.contains(".")) {
-            fileName += ".html";
+        if (!fileName.contains(FILE_DOT)) {
+            fileName += HTML_SUFFIX;
         }
 
         try {
@@ -49,7 +55,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse redirectTo(String path) {
-        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, "", ContentType.TEXT_HTML);
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, EMPTY_BODY, ContentType.TEXT_HTML);
         response.addHeader(HttpHeaderType.LOCATION.getName(), path);
         return response;
     }
@@ -57,7 +63,7 @@ public class HttpResponse {
     private HttpHeader buildInitialHeaders(String responseBody, ContentType contentType) {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderType.CONTENT_LENGTH.getName(), responseBody.getBytes().length + " ");
-        headers.put(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + ";charset=utf-8 ");
+        headers.put(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + CHARSET_UTF_8 + " ");
         return new HttpHeader(headers);
     }
 
@@ -78,7 +84,7 @@ public class HttpResponse {
         return String.join(CRLF,
                 httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),
-                "",
+                EMPTY_LINE,
                 responseBody
         );
     }

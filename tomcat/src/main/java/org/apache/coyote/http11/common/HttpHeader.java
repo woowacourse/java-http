@@ -10,8 +10,15 @@ import java.util.StringJoiner;
 public record HttpHeader(Map<String, String> headers) {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String COOKIE = "Cookie";
     private static final String HEADER_DELIMITER = ": ";
     private static final String MULTIPLE_HEADER_KEY_DELIMITER = ",";
+
+    public static HttpHeader empty() {
+        return new HttpHeader(new HashMap<>());
+    }
 
     public static HttpHeader from(String rawHeaders) {
         HashMap<String, String> headers = Arrays.stream(rawHeaders.split(Constants.CRLF))
@@ -35,6 +42,14 @@ public record HttpHeader(Map<String, String> headers) {
     public void add(String key, String value) {
         headers.computeIfPresent(key, (k, v) -> String.join(MULTIPLE_HEADER_KEY_DELIMITER, v, value));
         headers.putIfAbsent(key, value);
+    }
+
+    public void setContentLength(int length) {
+        headers.put(CONTENT_LENGTH, String.valueOf(length));
+    }
+
+    public void setContentType(String contentType) {
+        headers.put(CONTENT_TYPE, contentType);
     }
 
     public String toString() {

@@ -38,7 +38,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.setStatus(HttpStatusCode.OK)
-                .addHeader("Content-Type", mediaType.getValue())
+                .setContentType(mediaType.getValue())
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
 

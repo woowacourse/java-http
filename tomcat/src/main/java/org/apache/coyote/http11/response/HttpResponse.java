@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpHeader;
@@ -8,25 +7,30 @@ import org.apache.coyote.http11.common.HttpStatusCode;
 
 public class HttpResponse {
 
-    private static final double VERSION = 1.1;
+    private static final String VERSION = "HTTP/1.1";
 
     private final ResponseLine responseLine;
     private final HttpHeader headers;
-    private ResponseBody body;
+    private ResponseBody responseBody;
 
     public HttpResponse(HttpStatusCode statusCode) {
-        this(statusCode, new HttpHeader(new HashMap<>()), null);
+        this(statusCode, HttpHeader.empty(), ResponseBody.empty());
     }
 
-    public HttpResponse(HttpStatusCode statusCode, HttpHeader headers, byte[] body) {
-        this.responseLine = new ResponseLine("HTTP/" + VERSION, statusCode);
+    public HttpResponse(HttpStatusCode statusCode, HttpHeader headers, ResponseBody responseBody) {
+        this.responseLine = new ResponseLine(VERSION, statusCode);
         this.headers = headers;
-        this.body = new ResponseBody(body);
-        headers.headers().put("Content-Length", String.valueOf(this.body.getBody().length));
+        this.responseBody = responseBody;
+        headers.setContentLength(responseBody.size());
     }
 
     public HttpResponse addHeader(String key, String value) {
-        headers.headers().put(key, value);
+        headers.add(key, value);
+        return this;
+    }
+
+    public HttpResponse setContentType(String contentType) {
+        headers.setContentType(contentType);
         return this;
     }
 
@@ -39,9 +43,9 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setBody(String body) {
-        this.body = new ResponseBody(body.getBytes());
-        headers.headers().put("Content-Length", String.valueOf(this.body.size()));
+    public HttpResponse setBody(String rawBody) {
+        responseBody = new ResponseBody(rawBody.getBytes());
+        headers.setContentLength(responseBody.size());
         return this;
     }
 
@@ -56,17 +60,17 @@ public class HttpResponse {
         return this;
     }
 
+    public byte[] getAsBytes() {
+        return toHttpMessage().getBytes();
+    }
+
     public String toHttpMessage() {
         StringJoiner joiner = new StringJoiner(Constants.CRLF);
         joiner.add(responseLine.toResponseString())
                 .add(headers.toString())
                 .add("")
-                .add(new String(body.getBody()));
+                .add(new String(responseBody.getBody()));
         return joiner.toString();
-    }
-
-    public byte[] getAsBytes() {
-        return toHttpMessage().getBytes();
     }
 
     @Override
@@ -74,7 +78,7 @@ public class HttpResponse {
         return "HttpResponse{" +
                 "responseLine=" + responseLine +
                 ", header=" + headers +
-                ", body=" + body +
+                ", body=" + responseBody +
                 '}';
     }
 }

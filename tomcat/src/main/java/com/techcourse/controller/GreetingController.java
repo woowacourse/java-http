@@ -13,7 +13,7 @@ public class GreetingController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.addHeader("Content-Type", "text/html;charset=utf-8");
+        response.setContentType("text/html;charset=utf-8");
         response.setBody("Hello world!");
     }
 

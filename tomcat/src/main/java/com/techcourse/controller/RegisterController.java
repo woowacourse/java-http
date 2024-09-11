@@ -28,7 +28,7 @@ public class RegisterController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
         response.setStatus(HttpStatusCode.OK)
-                .addHeader("Content-Type", mediaType.getValue())
+                .setContentType(mediaType.getValue())
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
 

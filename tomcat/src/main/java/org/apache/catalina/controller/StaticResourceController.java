@@ -28,7 +28,7 @@ public class StaticResourceController extends AbstractController {
 
         String responseBody = StaticResourceManager.read(request.getPath());
         response.setStatus(HttpStatusCode.OK)
-                .addHeader("Content-Type", mediaType.getValue())
+                .setContentType(mediaType.getValue())
                 .setBody(responseBody);
     }
 

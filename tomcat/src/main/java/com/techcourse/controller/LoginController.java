@@ -43,8 +43,7 @@ public class LoginController extends AbstractController {
             response.addCookie(ResponseCookie.of(session));
         }
 
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.addRedirectHeader("/index.html");
+        response.redirectTo("/index.html");
     }
 
     private void validateLoginRequest(String account, String password) {
@@ -67,8 +66,7 @@ public class LoginController extends AbstractController {
 
     private void doLoginGet(HttpRequest request, HttpResponse response) {
         if (isLoginUser(request)) {
-            response.setHttpStatus(HttpStatus.FOUND);
-            response.addRedirectHeader("/index.html");
+            response.redirectTo("/index.html");
             return;
         }
         ResponseFile responseFile = ResponseFile.of(LOGIN_PAGE);

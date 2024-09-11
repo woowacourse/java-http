@@ -41,8 +41,7 @@ public class RegisterController extends AbstractController {
         validateRegisterAccount(account);
         InMemoryUserRepository.save(user);
 
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.addRedirectHeader("/index.html");
+        response.redirectTo("/index.html");
     }
 
     private void validateRegisterAccount(String account) {

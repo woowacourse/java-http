@@ -13,6 +13,7 @@ public class HttpResponse {
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String REDIRECTION_HEADER = "Location";
     private static final String COOKIE_HEADER = "Set-Cookie";
+    private static final HttpStatus DEFAULT_REDIRECT_STATUS = HttpStatus.FOUND;
 
     private final Protocol protocol = Protocol.HTTP11;
     private HttpStatus httpStatus;
@@ -59,16 +60,25 @@ public class HttpResponse {
         );
     }
 
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
+    public void redirectTo(String location) {
+        redirectTo(location, DEFAULT_REDIRECT_STATUS);
     }
 
-    public void addRedirectHeader(String location) {
+    public void redirectTo(String location, HttpStatus status) {
+        addRedirectHeader(location);
+        setHttpStatus(status);
+    }
+
+    private void addRedirectHeader(String location) {
         addHeader(REDIRECTION_HEADER, location);
     }
 
     public void addCookie(ResponseCookie cookie) {
         addHeader(COOKIE_HEADER, cookie.toResponse());
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
     public String toResponse() {

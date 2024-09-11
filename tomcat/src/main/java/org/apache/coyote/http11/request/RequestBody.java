@@ -20,6 +20,6 @@ public class RequestBody {
     }
 
     public String findByKey(final String key) {
-        return body.get(key);
+        return body.getOrDefault(key, null);
     }
 }

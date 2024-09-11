@@ -28,15 +28,7 @@ public class RequestLine {
         return method.isPost();
     }
 
-    public boolean isSamePath(final String uri) {
-        return path.equals(uri);
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
     }
 }

@@ -111,7 +111,7 @@ class RequestParserTest {
             // when & then
             assertThatThrownBy(() -> actual.getBodyValue("any"))
                     .isExactlyInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Request body가 존재하지 않습니다.");
+                    .hasMessageContaining("Request body가 비어있습니다.");
         } catch (Exception e) {
             fail(e);
         }

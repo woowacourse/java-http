@@ -67,21 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        String readLine;
-        while (!"".equals(readLine = bufferedReader.readLine())) {
-            String[] split = readLine.split(": ");
-            header.put(split[0], split[1]);
-        }
-
-        return header;
-    }
-
     private void processGetRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
             throws URISyntaxException, IOException {
         if ("/".equals(requestURL)) {
-            processRootRequest(outputStream);
+            getRootRequest(outputStream);
             return;
         }
 
@@ -120,51 +109,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Path findPath(String requestURL) throws URISyntaxException, FileNotFoundException {
-        if (!requestURL.contains(".")) {
-            requestURL += ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + requestURL);
-        if (resource == null) {
-            throw new FileNotFoundException();
-        }
-
-        return Path.of(resource.toURI());
-    }
-
     private void processPostRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
             throws URISyntaxException, IOException {
         Map<String, String> header = getHeader(bufferedReader);
-
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-
-        Map<String, String> bodys = new HashMap<>();
-        String[] querys = requestBody.split("&");
-        for (String query : querys) {
-            String[] keyAndValue = query.split("=");
-            bodys.put(keyAndValue[0], keyAndValue[1]);
-        }
+        Map<String, String> body = getBody(bufferedReader, header);
 
         if (requestURL.equals("/register")) {
-            processRegisterRequest(outputStream, bodys);
+            postRegisterRequest(outputStream, body);
         }
 
         if (requestURL.equals("/login")) {
-            processLoginRequest(outputStream, bodys);
+            postLoginRequest(outputStream, body);
         }
     }
 
-    private void processRegisterRequest(OutputStream outputStream, Map<String, String> bodys) throws IOException {
+    private void postRegisterRequest(OutputStream outputStream, Map<String, String> bodys) throws IOException {
         User user = new User(bodys.get("account"), bodys.get("password"), bodys.get("email"));
         InMemoryUserRepository.save(user);
         redirect("index.html", outputStream);
     }
 
-    private void processLoginRequest(OutputStream outputStream, Map<String, String> bodys) throws IOException {
+    private void postLoginRequest(OutputStream outputStream, Map<String, String> bodys) throws IOException {
         try {
             User user = InMemoryUserRepository.findByAccount(bodys.get("account"))
                     .orElseThrow();
@@ -192,7 +157,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processRootRequest(OutputStream outputStream) throws IOException {
+    private void getRootRequest(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
         final var response = String.join("\r\n",
@@ -215,5 +180,45 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private Path findPath(String requestURL) throws URISyntaxException, FileNotFoundException {
+        if (!requestURL.contains(".")) {
+            requestURL += ".html";
+        }
+
+        URL resource = getClass().getClassLoader().getResource("static" + requestURL);
+        if (resource == null) {
+            throw new FileNotFoundException();
+        }
+
+        return Path.of(resource.toURI());
+    }
+
+    private Map<String, String> getHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        String readLine;
+        while (!"".equals(readLine = bufferedReader.readLine())) {
+            String[] split = readLine.split(": ");
+            header.put(split[0], split[1]);
+        }
+
+        return header;
+    }
+
+    private Map<String, String> getBody(BufferedReader bufferedReader, Map<String, String> header)
+            throws IOException {
+        int contentLength = Integer.parseInt(header.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        Map<String, String> bodys = new HashMap<>();
+        String[] querys = requestBody.split("&");
+        for (String query : querys) {
+            String[] keyAndValue = query.split("=");
+            bodys.put(keyAndValue[0], keyAndValue[1]);
+        }
+        return bodys;
     }
 }

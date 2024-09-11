@@ -115,6 +115,6 @@ public class HttpResponse {
     }
 
     private void setContentType(ContentType contentType) {
-        responseHeader.add(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName());
+        responseHeader.add(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + CHARSET_UTF_8);
     }
 }

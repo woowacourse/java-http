@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.Method;
 import java.io.BufferedReader;
 import java.io.IOException;
 

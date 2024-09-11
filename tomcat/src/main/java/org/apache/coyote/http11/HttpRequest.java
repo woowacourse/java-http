@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.Method;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.Method.POST;
+import static org.apache.coyote.http11.Method.POST;
 
 public class HttpRequest {
 
@@ -92,7 +91,7 @@ public class HttpRequest {
         return null;
     }
 
-    public String getMimeType() {
+    public String getContentType() {
         String fileExtension = getPath().split("\\.")[1];
         return "text/" + fileExtension;
     }

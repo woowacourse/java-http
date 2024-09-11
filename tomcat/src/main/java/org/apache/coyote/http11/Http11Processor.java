@@ -17,8 +17,9 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.Method.GET;
-import static org.apache.Method.POST;
+import static org.apache.coyote.http11.Method.GET;
+import static org.apache.coyote.http11.Method.POST;
+import static org.apache.coyote.http11.Status.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,21 +43,24 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
-
-            String mimeType = "";
-            String responseBody = "";
-            String response = "";
+            HttpResponse httpResponse = new HttpResponse();
 
             if (httpRequest.isMethod(GET)) {
                 if (httpRequest.getPath().startsWith("/login")
                         && httpRequest.getCookie() != null
                         && getSession(httpRequest.getCookie()) != null) {
                     Session session = getSession(httpRequest.getCookie());
-                    response = getRedirectResponse(session.getId(), responseBody, "/index.html");
+
+                    httpResponse.setStatusLine(FOUND);
+                    httpResponse.setCookie(session.getId());
+                    httpResponse.setLocation("/index.html");
                 } else {
-                    mimeType = httpRequest.getMimeType();
-                    responseBody = getResource(httpRequest.getPath());
-                    response = getOKResponse(mimeType, responseBody);
+                    String responseBody = getResource(httpRequest.getPath());
+
+                    httpResponse.setStatusLine(OK);
+                    httpResponse.setContentType(httpRequest.getContentType());
+                    httpResponse.setResponseBody(responseBody);
+                    httpResponse.setContentLength(responseBody.getBytes().length);
                 }
             } else if (httpRequest.isMethod(POST)) {
                 String requestBody = httpRequest.getRequestBody();
@@ -65,17 +69,23 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = authenticate(requestBody);
 
                     if (session == null) {
-                        response = getRedirectResponse(responseBody, "/401.html");
+                        httpResponse.setStatusLine(FOUND);
+                        httpResponse.setLocation("/401.html");
                     } else {
-                        response = getRedirectResponse(session.getId(), responseBody, "/index.html");
+                        httpResponse.setStatusLine(FOUND);
+                        httpResponse.setCookie(session.getId());
+                        httpResponse.setLocation("/index.html");
                     }
                 } else if (httpRequest.getPath().startsWith("/register")) {
                     Session session = register(requestBody);
-                    response = getRedirectResponse(session.getId(), responseBody, "/index.html");
+
+                    httpResponse.setStatusLine(FOUND);
+                    httpResponse.setCookie(session.getId());
+                    httpResponse.setLocation("/index.html");
                 }
             }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -117,31 +127,5 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource("static" + path);
         File file = new File(resource.getFile());
         return new String(Files.readAllBytes(file.toPath()));
-    }
-
-    private String getOKResponse(String mimeType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String getRedirectResponse(String responseBody, String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "",
-                responseBody);
-    }
-
-    private String getRedirectResponse(String sessionId, String responseBody, String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Set-Cookie: JSESSIONID=" + sessionId + " ",
-                "Location: " + location + " ",
-                "",
-                responseBody);
     }
 }

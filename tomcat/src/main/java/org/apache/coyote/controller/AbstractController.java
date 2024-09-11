@@ -28,13 +28,13 @@ public abstract class AbstractController implements Controller {
         return StaticResourceFinder.readResource(getClass().getClassLoader(), path);
     }
 
-    protected String getRequiredParameter(HttpRequest request, String parameterName) {
+    protected final String getRequiredParameter(HttpRequest request, String parameterName) {
         String value = request.getParameter(parameterName);
         validateNotNull(parameterName, value);
         return value;
     }
 
-    protected String getRequiredBodyField(HttpRequest request, String fieldName) {
+    protected final String getRequiredBodyField(HttpRequest request, String fieldName) {
         RequestBody requestBody = request.getBody();
         String value = requestBody.getValue(fieldName);
         validateNotNull(fieldName, value);

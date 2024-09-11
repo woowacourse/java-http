@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceController;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class RequestMapper {
 
     static {
         controllerMap.put("/login", new LoginController());
+        controllerMap.put("/register", new RegisterController());
     }
 
     private RequestMapper() {

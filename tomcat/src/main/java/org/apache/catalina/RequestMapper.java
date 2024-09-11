@@ -11,12 +11,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapper {
 
-    private static final Map<String, Controller> controllerMap = new HashMap<>();
+    private static final Map<String, Controller> handlerMap = new HashMap<>();
 
     static {
-        controllerMap.put("/login", new LoginController());
-        controllerMap.put("/register", new RegisterController());
-        controllerMap.put("/", new RootController());
+        handlerMap.put("/login", new LoginController());
+        handlerMap.put("/register", new RegisterController());
+        handlerMap.put("/", new RootController());
     }
 
     private RequestMapper() {
@@ -27,6 +27,6 @@ public class RequestMapper {
             return new ResourceController();
         }
 
-        return controllerMap.get(request.getUri());
+        return handlerMap.get(request.getUri());
     }
 }

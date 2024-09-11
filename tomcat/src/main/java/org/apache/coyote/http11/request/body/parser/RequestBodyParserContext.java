@@ -6,15 +6,15 @@ import org.apache.coyote.http11.response.header.ContentType;
 
 public class RequestBodyParserContext {
 
-    private static final Map<ContentType, BodyParser> PARSER = new HashMap<>();
+    private static final Map<ContentType, BodyParser> parser = new HashMap<>();
 
     static {
-        PARSER.put(ContentType.APPLICATION_X_WWW_FORM_URLENCODED, new FormUrlEncodedParser());
+        parser.put(ContentType.APPLICATION_X_WWW_FORM_URLENCODED, new FormUrlEncodedParser());
     }
 
     public static Map<String, String> parse(String mediaType, String body) {
         ContentType contentType = ContentType.findByMediaType(mediaType);
-        BodyParser bodyParser = PARSER.get(contentType);
+        BodyParser bodyParser = parser.get(contentType);
         return bodyParser.parse(body);
     }
 }

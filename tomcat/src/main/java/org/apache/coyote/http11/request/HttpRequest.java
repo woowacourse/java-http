@@ -2,11 +2,14 @@ package org.apache.coyote.http11.request;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public record HttpRequest(
         Method method,
@@ -21,7 +24,7 @@ public record HttpRequest(
     private static final String DELIMITER_HEADER = ": ";
     private static final String DELIMITER_SPACE = " ";
     private static final String DELIMITER_VALUE = "=";
-    private static final String DELIMITER_PARAMETER_KEYSET = "&";
+    private static final String DELIMITER_PARAMETER_ENTRY = "&";
     private static final String HEADER_NAME_COOKIE = "Cookie";
 
     public static HttpRequest parse(List<String> lines) {
@@ -47,34 +50,24 @@ public record HttpRequest(
     }
 
     private static Map<String, String> extractParameters(String query) {
-        Map<String, String> parameters = new HashMap<>();
-
-        if (query != null) {
-            String[] pairs = query.split(DELIMITER_PARAMETER_KEYSET);
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(DELIMITER_VALUE);
-                if (keyValue.length == 2) {
-                    String key = keyValue[0];
-                    String value = URLDecoder.decode(keyValue[1], Charset.defaultCharset());
-                    parameters.put(key, value);
-                }
-            }
+        if (query == null) {
+            return Map.of();
         }
-
-        return parameters;
+        return Arrays.stream(query.split(DELIMITER_PARAMETER_ENTRY))
+                .map(keyValue -> keyValue.split(DELIMITER_VALUE))
+                .filter(entry -> entry.length == 2)
+                .collect(Collectors.toMap(
+                        entry -> entry[0],
+                        entry -> URLDecoder.decode(entry[1], Charset.defaultCharset())
+                ));
     }
 
     private static Map<String, String> extractHeaders(List<String> lines) {
-        Map<String, String> headers = new HashMap<>();
-
-        for (int i = 1; i < lines.size() - 2; i++) {
-            String[] lineParts = lines.get(i).trim().split(DELIMITER_HEADER);
-            if (lineParts.length >= 2) {
-                headers.put(lineParts[0], lineParts[1]);
-            }
-        }
-
-        return headers;
+        return IntStream.range(1, lines.size() - 3)
+                .mapToObj(lines::get)
+                .map(String::trim)
+                .map(line -> line.split(DELIMITER_HEADER))
+                .collect(Collectors.toMap(entry -> entry[0], entry -> entry[1]));
     }
 
     private static Map<String, String> extractCookies(String cookieMessage) {

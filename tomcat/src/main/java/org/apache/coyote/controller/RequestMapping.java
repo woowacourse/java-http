@@ -21,10 +21,10 @@ public class RequestMapping {
     private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
     public RequestMapping() {
-        controllers.put(new RequestKey(HttpMethod.GET, "/login"), new LoginPageController());
-        controllers.put(new RequestKey(HttpMethod.POST, "/login"), new LoginController());
-        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new RegisterPageController());
-        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
+        controllers.put(RequestKey.ofGet("/login"), new LoginPageController());
+        controllers.put(RequestKey.ofPost("/login"), new LoginController());
+        controllers.put(RequestKey.ofGet("/register"), new RegisterPageController());
+        controllers.put(RequestKey.ofPost("/register"), new RegisterController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {
@@ -32,8 +32,8 @@ public class RequestMapping {
         HttpResponse response = new HttpResponse();
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
-             new StaticResourceController().service(request, response);
-             return response;
+            new StaticResourceController().service(request, response);
+            return response;
         }
         Controller controller = getController(request.getMethod(), path);
         controller.service(request, response);

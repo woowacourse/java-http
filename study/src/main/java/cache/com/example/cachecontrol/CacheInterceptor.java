@@ -1,4 +1,4 @@
-package cache.com.example.interceptor;
+package cache.com.example.cachecontrol;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

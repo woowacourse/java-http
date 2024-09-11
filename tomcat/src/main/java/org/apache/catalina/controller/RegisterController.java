@@ -14,6 +14,17 @@ import org.apache.catalina.controller.http.response.HttpStatus;
 
 public class RegisterController extends AbstractController {
 
+    private static RegisterController instance;
+
+    private RegisterController() {}
+
+    public static RegisterController getInstance() {
+        if (instance == null) {
+            instance = new RegisterController();
+        }
+        return instance;
+    }
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");

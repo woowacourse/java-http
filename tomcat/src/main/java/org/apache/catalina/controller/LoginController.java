@@ -20,6 +20,17 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
+    private static LoginController instance;
+
+    private LoginController() {}
+
+    public static LoginController getInstance() {
+        if (instance == null) {
+            instance = new LoginController();
+        }
+        return instance;
+    }
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");

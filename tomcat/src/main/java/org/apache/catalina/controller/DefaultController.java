@@ -21,6 +21,17 @@ public class DefaultController implements Controller {
             "js", "application/javascript"
     );
 
+    private static DefaultController instance;
+
+    public static DefaultController getInstance() {
+        if (instance == null) {
+            instance = new DefaultController();
+        }
+        return instance;
+    }
+
+    private DefaultController() {}
+
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI());

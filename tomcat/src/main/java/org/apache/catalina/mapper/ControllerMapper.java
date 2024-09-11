@@ -14,10 +14,10 @@ import org.apache.catalina.controller.Controller;
 public class ControllerMapper {
 
     private static final Map<Pattern, Controller> values = Map.of(
-            Pattern.compile(".*\\..*"), new DefaultController(),
-            Pattern.compile("/"), new DefaultController(),
-            Pattern.compile("^/login$"), new LoginController(),
-            Pattern.compile("^/register$"), new RegisterController()
+            Pattern.compile(".*\\..*"), DefaultController.getInstance(),
+            Pattern.compile("/"), DefaultController.getInstance(),
+            Pattern.compile("^/login$"), LoginController.getInstance(),
+            Pattern.compile("^/register$"), RegisterController.getInstance()
     );
 
     private static ControllerMapper instance;

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,6 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    @Disabled
     void process() {
         // given
         final var socket = new StubSocket();
@@ -28,10 +26,10 @@ class Http11ProcessorTest {
         // then
         final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: 0 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "",
-                "Hello world!");
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -53,11 +51,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        //TODO ; charset=utf-8  추가해주기
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final var expected = "HTTP/1.1 200 OK \r\n" +
                              "Content-Length: 5670 \r\n" +
-                             "Content-Type: text/html \r\n" +
+                             "Content-Type: text/html; charset=utf-8 \r\n" +
                              "\r\n" +
                              new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

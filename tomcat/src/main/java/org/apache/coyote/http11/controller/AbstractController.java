@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.request.HttpRequest;
@@ -29,7 +30,12 @@ public abstract class AbstractController implements Controller {
     protected void serveStaticFile(HttpRequest request, HttpResponse response) throws IOException {
         String path = addHtmlExtension(request.getPath());
         String body = getStaticFileContent(path);
-
+        if (body == null) {
+            response.addStatusLine("HTTP/1.1 204 No Content");
+            response.addHeader("Content-Length", "0");
+            response.writeResponse();
+            return;
+        }
         response.addStatusLine("HTTP/1.1 200 OK");
         response.addHeader("Content-Type", "text/" + getFileExtension(path) + ";charset=utf-8");
         response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
@@ -46,7 +52,11 @@ public abstract class AbstractController implements Controller {
 
     private String getStaticFileContent(String path) throws IOException {
         String staticPath = "static" + path;
-        File file = new File(getClass().getClassLoader().getResource(staticPath).getPath());
+        URL url = getClass().getClassLoader().getResource(staticPath);
+        if (url == null) {
+            return null;
+        }
+        File file = new File(url.getPath());
         return new String(Files.readAllBytes(file.toPath()));
     }
 

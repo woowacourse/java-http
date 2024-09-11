@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -50,6 +51,34 @@ class StaticResourceControllerTest {
                 "",
                 new String(fileContent),
                 "");
+        assertThat(outputStream.toString()).isEqualTo(expected);
+        inputStream.close();
+        outputStream.close();
+    }
+
+    @DisplayName("존재하지 않는 자원을 요청 시 204 상태코드를 응답한다.")
+    @Test
+    void getNoContent() throws Exception {
+        // given
+        String httpRequestMessage = String.join("\r\n",
+                "GET /favicon.ico HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest request = new HttpRequest(inputStream);
+        OutputStream outputStream = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(outputStream);
+
+        // when
+        staticResourceController.service(request, response);
+
+        // then
+        String expected = "HTTP/1.1 204 No Content \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
         assertThat(outputStream.toString()).isEqualTo(expected);
         inputStream.close();
         outputStream.close();

@@ -1,20 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.HttpCookie;
-import com.techcourse.HttpProtocol;
 import com.techcourse.MyHttpRequest;
 import com.techcourse.Session;
 import com.techcourse.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.Processor;
@@ -28,7 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -39,26 +37,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (var reader = new Http11Reader(connection.getInputStream());
+             var outputStream = connection.getOutputStream()) {
 
-            // parse request
-            MyHttpRequest request = new MyHttpRequest(inputStream);
+            List<String> clientData = reader.readLines();
 
-            // handle post
-            if ("POST".equals(request.getMethod())) {
-                outputStream.write(handleStaticPostRequest(request));
-                outputStream.flush();
-                return;
-            }
 
-            log.info("request = {}", request);
+//            MyHttpRequest request = new MyHttpRequest(inputStream);
+//
+//            // handle post
+//            if ("POST".equals(request.getMethod())) {
+//                outputStream.write(handleStaticPostRequest(request));
+//                outputStream.flush();
+//                return;
+//            }
+//
+//            log.info("request = {}", request);
+//
+//            outputStream.write(handleStaticRequest(request));
+//            outputStream.flush();
 
-            outputStream.write(handleStaticRequest(request));
-            outputStream.flush();
-
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

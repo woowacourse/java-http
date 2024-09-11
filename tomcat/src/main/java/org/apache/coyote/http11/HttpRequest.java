@@ -93,6 +93,10 @@ public class HttpRequest {
         return body.get(key);
     }
 
+    public String getProtocolValue() {
+        return requestLine.getProtocol().getValue();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

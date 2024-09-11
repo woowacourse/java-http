@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final var request = HttpRequest.from(bufferedReader);
             final var response = new HttpResponse();
             service(request, response);
-            render(outputStream, response);
+            render(outputStream, request, response);
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -50,8 +50,9 @@ public class Http11Processor implements Runnable, Processor {
         controller.service(request, response);
     }
 
-    private void render(final OutputStream outputStream, final HttpResponse response) throws IOException {
-        outputStream.write(response.toHttpResponse().getBytes());
+    private void render(final OutputStream outputStream, final HttpRequest request, final HttpResponse response)
+            throws IOException {
+        outputStream.write(response.toHttpResponse(request).getBytes());
         outputStream.flush();
     }
 }

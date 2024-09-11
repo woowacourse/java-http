@@ -8,6 +8,7 @@ public class SessionManager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private SessionManager() {
+        throw new IllegalStateException("유틸리티 클래스는 인스턴스를 생성할 수 없습니다.");
     }
 
     public static void add(final Session session) {

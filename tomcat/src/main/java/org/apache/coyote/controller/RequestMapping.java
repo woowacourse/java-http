@@ -1,14 +1,14 @@
 package org.apache.coyote.controller;
 
+import org.apache.coyote.http11.HttpRequest;
+
 public class RequestMapping {
 
-//    public Controller getController(HttpRequest request) {
-//        if (request.isMethod(GET)) {
-//            return
-//        } else if (request.isMethod(POST)) {
-//            return
-//        }
-//
-//        return null;
-//    }
+    public static Controller getController(HttpRequest request) {
+        if (request.getPath().startsWith("/login")) {
+            return new LoginController();
+        } else {
+            return new PageController();
+        }
+    }
 }

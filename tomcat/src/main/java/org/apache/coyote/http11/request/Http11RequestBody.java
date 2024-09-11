@@ -16,6 +16,10 @@ public class Http11RequestBody {
         this.value = requestBody;
     }
 
+    public static Http11RequestBody ofEmpty() {
+        return new Http11RequestBody("");
+    }
+
     public Map<String, String> parseBody() {
         if (!exists()) {
             throw new UnsupportedOperationException("Body 가 존재하지 않는 요청입니다.");

@@ -51,7 +51,7 @@ public class ObjectMapper {
             bufferedReader.read(buffer, 0, bodyLength);
             return new Http11RequestBody(new String(buffer));
         } catch (NumberFormatException e) {
-            return new Http11RequestBody("");
+            return Http11RequestBody.ofEmpty();
         }
     }
 }

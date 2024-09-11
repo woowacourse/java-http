@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.HttpHeaderField;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -23,6 +24,6 @@ public class RegisterController extends AbstractController implements Controller
                 request.getBodyValue("email"));
         InMemoryUserRepository.save(user);
         response.setHttpStatusCode(HttpStatusCode.FOUND);
-        response.putHeader("Location", "index.html");
+        response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
     }
 }

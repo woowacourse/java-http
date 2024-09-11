@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeaderField;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -24,7 +25,7 @@ public class LoginController extends AbstractController implements Controller {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final var cookie = request.getHeaders().get("Cookie");
+        final var cookie = request.getHeaders().get(HttpHeaderField.COOKIE.getValue());
         final var httpCookie = HttpCookie.parse(cookie);
         if (httpCookie.containsKey("JSESSIONID")) {
             final var jSessionId = httpCookie.get("JSESSIONID");
@@ -32,11 +33,11 @@ public class LoginController extends AbstractController implements Controller {
             response.setHttpStatusCode(HttpStatusCode.FOUND);
             if (session == null) {
                 log.warn("유효하지 않은 세션입니다.");
-                response.putHeader("Location", "401.html");
+                response.putHeader(HttpHeaderField.LOCATION.getValue(), "401.html");
             } else {
                 final var sessionUser = (User) session.getAttribute("user");
                 log.info("이미 로그인 유저 = {}", sessionUser);
-                response.putHeader("Location", "index.html");
+                response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
             }
         } else {
             response.setHttpStatusCode(HttpStatusCode.OK);
@@ -58,15 +59,15 @@ public class LoginController extends AbstractController implements Controller {
             }
 
             final var uuid = UUID.randomUUID();
-            response.putHeader("Set-Cookie", "JSESSIONID=" + uuid);
-            response.putHeader("Location", "index.html");
+            response.putHeader(HttpHeaderField.SET_COOKIE.getValue(), "JSESSIONID=" + uuid);
+            response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
 
             final var session = new Session(uuid.toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
 
         } catch (final IllegalArgumentException e) {
-            response.putHeader("Location", "401.html");
+            response.putHeader(HttpHeaderField.LOCATION.getValue(), "401.html");
             log.warn(e.getMessage());
         }
     }

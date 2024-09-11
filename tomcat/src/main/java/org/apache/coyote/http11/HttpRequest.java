@@ -33,10 +33,10 @@ public class HttpRequest {
 
     private static Map<String, String> parseRequestBody(final HttpHeaders headers, final BufferedReader bufferedReader)
             throws IOException {
-        if (!headers.contains("Content-Length")) {
+        if (!headers.contains(HttpHeaderField.CONTENT_LENGTH.getValue())) {
             return Map.of();
         }
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        final int contentLength = Integer.parseInt(headers.get(HttpHeaderField.CONTENT_LENGTH.getValue()));
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         final var requestBody = new String(buffer);

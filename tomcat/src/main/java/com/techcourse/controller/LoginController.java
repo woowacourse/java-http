@@ -19,6 +19,8 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -36,13 +38,13 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        if (request.hasNotParameter("account") || request.hasNotParameter("password")) {
+        if (!request.hasParameter(ACCOUNT) || !request.hasParameter(PASSWORD)) {
             response.found("/401.html");
             return;
         }
 
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
+        String account = request.getParameter(ACCOUNT);
+        String password = request.getParameter(PASSWORD);
         Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
         if (userOpt.isEmpty() || !userOpt.get().checkPassword(password)) {
             response.found("/401.html");
@@ -54,7 +56,8 @@ public class LoginController extends AbstractController {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
-            response.setCookie(JSESSIONID, session.getId());
+            response.setCookie(JSESSIONID, session.getId())
+                    .setHttpOnly(true);
         }
 
         response.found("/index.html");

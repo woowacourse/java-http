@@ -39,16 +39,16 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequestParser.parse(inputStream);
             HttpResponse response = new HttpResponse();
-            mvcProcess(request, response);
+            service(request, response);
 
-            outputStream.write(response.build().getBytes());
+            outputStream.write(response.build());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void mvcProcess(HttpRequest request, HttpResponse response) throws IOException {
+    private void service(HttpRequest request, HttpResponse response) throws IOException {
         try {
             jSessionInterceptor(request, response);
             Controller controller = requestMapping.getController(request);
@@ -69,8 +69,9 @@ public class Http11Processor implements Runnable, Processor {
     private void jSessionInterceptor(HttpRequest request, HttpResponse response) {
         String jSession = request.getCookie(JSESSIONID);
         if (isInvalidJSession(jSession)) {
-            response.setHeader("Location", "/login.html")
-                    .setCookie(JSESSIONID, jSession).setCookie("Max-Age", "0");
+            response.setLocation("/login.html")
+                    .setCookie(JSESSIONID, jSession)
+                    .setCookie("Max-Age", "0");
         }
     }
 

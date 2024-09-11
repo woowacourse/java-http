@@ -1,7 +1,5 @@
 package com.techcourse.http;
 
-import java.util.HashMap;
-import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,16 +9,13 @@ import lombok.Getter;
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
-    private static final String CRLF = "\r\n";
-    private static final String HEADER_SEPARATOR = ": ";
 
     private HttpStatusCode httpStatusCode;
-    private Map<String, String> headers;
-    private HttpCookie cookie;
+    private HttpHeaders headers;
     private String body;
 
     public HttpResponse() {
-        this(HttpStatusCode.OK, new HashMap<>(), new HttpCookie(), "");
+        this(HttpStatusCode.OK, new HttpHeaders(), "");
     }
 
     public HttpResponse ok(String body) {
@@ -31,7 +26,12 @@ public class HttpResponse {
 
     public HttpResponse found(String location) {
         httpStatusCode = HttpStatusCode.FOUND;
-        headers.put("Location", location);
+        headers.setLocation(location);
+        return this;
+    }
+
+    public HttpResponse badRequest() {
+        httpStatusCode = HttpStatusCode.BAD_REQUEST;
         return this;
     }
 
@@ -45,35 +45,24 @@ public class HttpResponse {
         return this;
     }
 
-    public String build() {
-        if (cookie.isExist()) {
-            headers.put("Set-Cookie", cookie.serialize());
-        }
+    public byte[] build() {
         if (!body.isBlank()) {
-            headers.put("Content-Length", String.valueOf(body.getBytes().length));
+            headers.setContentLength(body.getBytes().length);
         }
 
         return "%s %d %s \r\n%s\r\n%s"
-                .formatted(HTTP_VERSION, httpStatusCode.getCode(), httpStatusCode.getMessage(), getHeadersString(),
-                        body);
+                .formatted(
+                        HTTP_VERSION,
+                        httpStatusCode.getCode(),
+                        httpStatusCode.getMessage(),
+                        headers.getHeadersString(),
+                        body
+                ).getBytes();
     }
 
     public void clear() {
         headers.clear();
-        cookie.clear();
         body = "";
-    }
-
-    private String getHeadersString() {
-        StringBuilder headersString = new StringBuilder();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            headersString.append(entry.getKey())
-                    .append(HEADER_SEPARATOR)
-                    .append(entry.getValue())
-                    .append(" ")
-                    .append(CRLF);
-        }
-        return headersString.toString();
     }
 
     public HttpResponse setStatusCode(HttpStatusCode httpStatusCode) {
@@ -82,26 +71,31 @@ public class HttpResponse {
     }
 
     public HttpResponse setHeader(String key, String value) {
-        headers.put(key, value);
+        headers.set(key, value);
+        return this;
+    }
+
+    public HttpResponse setLocation(String location) {
+        headers.setLocation(location);
         return this;
     }
 
     public HttpResponse setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+        headers.setContentType(contentType);
         return this;
     }
 
     public HttpResponse setCookie(String key, String value) {
-        if (headers.get("Set-Cookie") != null) {
-            headers.put("Set-Cookie", "%s; %s=%s".formatted(headers.get("Set-Cookie"), key, value));
-            return this;
-        }
-        headers.put("Set-Cookie", "%s=%s".formatted(key, value));
+        headers.setCookie(key, value);
         return this;
     }
 
     public HttpResponse setBody(String body) {
         this.body = body;
         return this;
+    }
+
+    public void setHttpOnly(boolean httpOnly) {
+        headers.setHttpOnly(httpOnly);
     }
 }

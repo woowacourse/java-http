@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class StaticResourceProvider {
 
-    private static final ClassLoader CLASS_LOADER = StaticResourceProvider.class.getClassLoader();
     private static final Map<String, String> CACHE = new HashMap<>();
+    private static final ClassLoader CLASS_LOADER = StaticResourceProvider.class.getClassLoader();
     private static final String STATIC_PATH = "static";
     private static final int MAX_LENGTH = 1024 * 1024;
 

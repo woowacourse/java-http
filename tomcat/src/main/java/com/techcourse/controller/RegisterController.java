@@ -20,6 +20,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
+        if (!request.hasParameter("account") || !request.hasParameter("password") || !request.hasParameter("email")) {
+            response.badRequest();
+            return;
+        }
+
         InMemoryUserRepository.save(new User(
                 request.getParameter("account"),
                 request.getParameter("password"),

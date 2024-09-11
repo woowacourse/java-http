@@ -6,10 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HttpRequestParser {
+
+    private static final String START_LINE_SEPARATOR = " ";
+    private static final String QUERY_PARAMETER_SEPARATOR = "?";
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String PARAMETER_KEY_VALUE_SEPARATOR = "=";
+    private static final String HEADER_KEY_VALUE_SEPARATOR = ": ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -24,14 +30,14 @@ public class HttpRequestParser {
 
     private static void parseStartLine(BufferedReader reader, HttpRequest request) throws IOException {
         String startLine = reader.readLine();
-        String[] startLineParts = startLine.split(" ");
+        String[] startLineParts = startLine.split(START_LINE_SEPARATOR);
         String method = startLineParts[0];
         String uri = URLDecoder.decode(startLineParts[1], StandardCharsets.UTF_8);
 
         request.setMethod(method);
         request.setUri(uri);
 
-        int queryIndex = uri.indexOf("?");
+        int queryIndex = uri.indexOf(QUERY_PARAMETER_SEPARATOR);
         if (queryIndex == -1) {
             request.setPath(uri);
             return;
@@ -46,57 +52,52 @@ public class HttpRequestParser {
             return;
         }
 
-        String[] parameters = parameterString.split("&");
+        String[] parameters = parameterString.split(PARAMETER_SEPARATOR);
 
         for (String parameter : parameters) {
-            String[] keyValue = parameter.split("=");
-            request.setParameter(keyValue[0], keyValue[1]);
+            String[] keyValue = parameter.split(PARAMETER_KEY_VALUE_SEPARATOR);
+            request.setParameter(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
     }
 
     private static void parseHeaders(BufferedReader reader, HttpRequest request) throws IOException {
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
-            String[] headerParts = line.split(": ");
-            request.setHeader(headerParts[0], headerParts[1]);
+            String[] headerParts = line.split(HEADER_KEY_VALUE_SEPARATOR);
+            request.setHeader(headerParts[KEY_INDEX], headerParts[VALUE_INDEX]);
         }
 
-        if (request.getHeader("Cookie") != null) {
-            HttpCookie cookie = parseCookie(request.getHeader("Cookie"));
-            request.setCookie(cookie);
+        if (request.getHeader(HttpHeaders.COOKIE) != null) {
+            parseCookie(request);
         }
     }
 
-    private static HttpCookie parseCookie(String cookieString) {
-        Map<String, String> cookies = new HashMap<>();
+    private static void parseCookie(HttpRequest request) {
+        String cookieString = request.getHeader(HttpHeaders.COOKIE);
 
-        String[] cookieArray = cookieString.split("; ");
+        String[] cookieArray = cookieString.split(HttpCookie.SEPARATOR);
         for (String cookiePair : cookieArray) {
-            String[] pair = cookiePair.split("=");
-            cookies.put(pair[0], pair[1]);
+            String[] pair = cookiePair.split(HttpCookie.KEY_VALUE_SEPARATOR);
+            request.setCookie(pair[KEY_INDEX], pair[VALUE_INDEX]);
         }
-        return new HttpCookie(cookies);
     }
 
     private static void parseBody(BufferedReader reader, HttpRequest request) throws IOException {
-        String contentLengthHeader = request.getHeader("Content-Length");
-        if (contentLengthHeader == null) {
+        int contentLength = request.getContentLength();
+        if (contentLength == 0) {
             return;
         }
 
-        int contentLength = Integer.parseInt(contentLengthHeader);
         char[] bodyChars = new char[contentLength];
-
         if (reader.read(bodyChars, 0, contentLength) != contentLength) {
             throw new IOException("Failed to read the entire request body");
         }
 
-        String contentTypeHeader = request.getHeader("Content-Type");
-        if ("application/x-www-form-urlencoded".equals(contentTypeHeader)) {
-            parseParameters(request, new String(bodyChars));
+        String body = new String(bodyChars);
+        if (request.hasContentType(HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED)) {
+            parseParameters(request, URLDecoder.decode(body, StandardCharsets.UTF_8));
             return;
         }
-
-        request.setBody(new String(bodyChars));
+        request.setBody(body);
     }
 }

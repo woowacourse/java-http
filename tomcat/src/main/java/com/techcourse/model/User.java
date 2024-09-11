@@ -2,7 +2,7 @@ package com.techcourse.model;
 
 public class User {
 
-    private final Long id;
+    private Long id;
     private final String account;
     private final String password;
     private final String email;
@@ -22,10 +22,6 @@ public class User {
         return this.password.equals(password);
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     @Override
     public String toString() {
         return "User{" +
@@ -34,5 +30,13 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

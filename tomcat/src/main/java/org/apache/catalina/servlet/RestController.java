@@ -6,7 +6,6 @@ import org.apache.catalina.http.HttpResponse;
 public abstract class RestController extends AbstractController {
 
     public void service(HttpRequest request, HttpResponse response) {
-
         switch (request.getHttpMethod()) {
             case GET -> doGet(request, response);
             case POST -> doPost(request, response);

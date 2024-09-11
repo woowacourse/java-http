@@ -44,7 +44,7 @@ public class RequestURI {
         return Objects.nonNull(getResource());
     }
 
-    public boolean isBlank() {
-        return value.isBlank() || value.equals("/");
+    public boolean isHome() {
+        return value.equals("/");
     }
 }

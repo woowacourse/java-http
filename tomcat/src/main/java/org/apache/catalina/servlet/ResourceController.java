@@ -11,7 +11,7 @@ public class ResourceController extends AbstractController {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        if (request.isURIBlank()) {
+        if (request.isURIHome()) {
             response.addHeader(HttpHeader.CONTENT_TYPE, "text/html");
             response.setBody(BASIC_RESPONSE_BODY);
             response.setStatus(HttpStatus.OK);

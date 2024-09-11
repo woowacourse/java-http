@@ -63,8 +63,8 @@ public class HttpRequest {
         return httpRequestLine.isURIStatic();
     }
 
-    public boolean isURIBlank() {
-        return httpRequestLine.isURIBlank();
+    public boolean isURIHome() {
+        return httpRequestLine.isURIHome();
     }
 
     public boolean URIStartsWith(String startsWith) {

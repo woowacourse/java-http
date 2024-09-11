@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Optional;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
 import org.apache.catalina.http.startline.HttpStatus;
@@ -26,8 +25,7 @@ public class LoginController extends RestController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Optional<User> nullableUser = InMemoryUserRepository.findByAccount(request.getFromBody("account"));
-        nullableUser
+        InMemoryUserRepository.findByAccount(request.getFromBody("account"))
                 .filter(user -> user.checkPassword(request.getFromBody("password")))
                 .ifPresentOrElse(
                         user -> loginAndRedirectToIndex(response, user),

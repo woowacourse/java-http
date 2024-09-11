@@ -16,7 +16,7 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine parse(String startLine) {
-        String[] separatedStartLine = validateAndSplit(startLine);
+        String[] separatedStartLine = split(startLine);
         return new HttpRequestLine(
                 HttpMethod.valueOf(separatedStartLine[0]),
                 new RequestURI(separatedStartLine[1]),
@@ -24,11 +24,8 @@ public class HttpRequestLine {
         );
     }
 
-    private static String[] validateAndSplit(String startLine) {
+    private static String[] split(String startLine) {
         String[] values = startLine.split(" ");
-        if (values.length == 2) {
-            return new String[]{values[0], "", values[1]};
-        }
         if (values.length == 3) {
             return values;
         }
@@ -39,8 +36,8 @@ public class HttpRequestLine {
         return httpMethod.equals(HttpMethod.GET) && requestURI.isResource();
     }
 
-    public boolean isURIBlank() {
-        return requestURI.isBlank();
+    public boolean isURIHome() {
+        return requestURI.isHome();
     }
 
     public boolean URIStartsWith(String startsWith) {

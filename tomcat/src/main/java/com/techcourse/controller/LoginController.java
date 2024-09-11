@@ -10,6 +10,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String USER_SESSION_NAME = "user";
+
     private final UserService userService = UserService.getInstance();
 
     @Override
@@ -19,14 +23,14 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
+        String account = request.getParameter(ACCOUNT);
+        String password = request.getParameter(PASSWORD);
 
         userService.login(account, password)
                 .ifPresentOrElse(
                         user -> {
                             Session session = request.getSession();
-                            session.setAttribute("user", user);
+                            session.setAttribute(USER_SESSION_NAME, user);
                             response.addCookie(Cookies.ofJSessionId(session.getId()));
                             response.redirect("/index.html");
                         },

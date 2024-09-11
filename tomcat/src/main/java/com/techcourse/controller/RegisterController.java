@@ -7,6 +7,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
     private final RegisterService registerService = RegisterService.getInstance();
 
     @Override
@@ -16,9 +20,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
-        String email = request.getParameter("email");
+        String account = request.getParameter(ACCOUNT);
+        String password = request.getParameter(PASSWORD);
+        String email = request.getParameter(EMAIL);
 
         registerService.register(account, password, email);
 

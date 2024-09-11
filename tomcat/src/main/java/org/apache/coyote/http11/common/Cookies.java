@@ -5,11 +5,7 @@ import java.util.Map;
 
 public class Cookies {
 
-    private final Map<String, String> cookies;
-
-    public Cookies() {
-        this.cookies = new HashMap<>();
-    }
+    private final Map<String, String> cookies = new HashMap<>();
 
     public String getCookieLine() {
         return String.join(

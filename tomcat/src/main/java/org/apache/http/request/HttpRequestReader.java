@@ -16,15 +16,10 @@ public class HttpRequestReader {
     }
 
     public static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final String request = bufferedReader.readLine();
-
-        final String[] requestStartLine = request.split(" ");
-        final String method = requestStartLine[0];
-        final String path = requestStartLine[1];
-        final String version = requestStartLine[2];
-
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final HttpHeader[] headers = readRequestHeaders(bufferedReader);
-        return new HttpRequest(method, path, version, headers, readRequestBody(headers, bufferedReader));
+
+        return new HttpRequest(requestLine, headers, readRequestBody(headers, bufferedReader));
     }
 
     private static HttpHeader[] readRequestHeaders(final BufferedReader bufferedReader) throws IOException {

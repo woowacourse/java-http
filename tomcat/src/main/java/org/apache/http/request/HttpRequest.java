@@ -10,6 +10,13 @@ import org.apache.http.header.HttpHeader;
 import org.apache.http.header.StandardHttpHeader;
 
 public class HttpRequest {
+
+    private static final String FORM_DATA_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_VALUE_COUNT = 2;
+    private static final int KEY_ORDER = 0;
+    private static final int VALUE_ORDER = 1;
+
     private final RequestLine requestLine;
     private final HttpHeader[] headers;
     private final String body;
@@ -22,11 +29,8 @@ public class HttpRequest {
         this.httpCookie = parseCookie(headers);
     }
 
-    public HttpRequest(String method, String path, String version, HttpHeader[] headers, String body) {
-        this.requestLine = new RequestLine(method, path, version);
-        this.headers = headers;
-        this.body = body;
-        this.httpCookie = parseCookie(headers);
+    public static HttpRequest from(String requestLine, HttpHeader[] headers, String body) {
+        return new HttpRequest(RequestLine.from(requestLine), headers, body);
     }
 
     private HttpCookie parseCookie(HttpHeader[] headers) {
@@ -34,19 +38,18 @@ public class HttpRequest {
                 .flatMap(hs -> Arrays.stream(hs)
                         .filter(header -> StandardHttpHeader.COOKIE.equalsIgnoreCase(header.getKey()))
                         .findFirst()
-                        .map(header -> HttpCookie.of(header.getValue())))
+                        .map(header -> HttpCookie.from(header.getValue())))
                 .orElse(null);
     }
 
-    public String getFormBody(String key) {
-        final String[] params = this.body.split("&");
-        for (int i = 0; i < params.length; i++) {
-            String[] keyAndValue = params[i].split("=");
-            if (keyAndValue[0].equals(key)) {
-                return keyAndValue[1];
-            }
-        }
-        return null;
+    // TODO: mime 체크하기
+    public String getFormBodyByKey(String key) {
+        return Arrays.stream(body.split(FORM_DATA_DELIMITER))
+                .map(param -> param.split(KEY_VALUE_DELIMITER, KEY_VALUE_COUNT))
+                .filter(keyValue -> keyValue.length == KEY_VALUE_COUNT && keyValue[KEY_ORDER].equals(key))
+                .map(keyValue -> keyValue[VALUE_ORDER])
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {
@@ -70,12 +73,11 @@ public class HttpRequest {
     }
 
     public String getHeader(String key) {
-        for (HttpHeader header : headers) {
-            if (header.getKey().equals(key)) {
-                return header.getValue();
-            }
-        }
-        throw new IllegalArgumentException("존재 하지 않는 Header " + key + "입니다.");
+        return Arrays.stream(headers)
+                .filter(httpHeader -> httpHeader.getKey().equals(key))
+                .map(HttpHeader::getValue)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 Header " + key + "입니다."));
     }
 
     public String getBody() {

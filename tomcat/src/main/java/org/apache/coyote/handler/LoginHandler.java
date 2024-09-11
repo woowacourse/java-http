@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.NotFoundException;
+import org.apache.coyote.UnauthorizedException;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.catalina.session.Session;
@@ -36,26 +38,25 @@ public class LoginHandler extends Handler {
             return processLoginPostRequest(httpRequest);
         }
 
-        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
-
+        throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
     private String processLoginGetRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = httpRequest.getHttpCookie();
         if (httpCookie == null || ! sessionManager.existsById(httpCookie.getValue("JSESSIONID"))) {
-            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
+            throw new UnauthorizedException("로그인에 실패하였습니다.");
         }
 
         return HttpResponseGenerator.getFoundResponse("/index.html");
     }
 
     private String processLoginPostRequest(final HttpRequest httpRequest) {
-        final String account = httpRequest.getFormBody("account");
-        final String password = httpRequest.getFormBody("password");
+        final String account = httpRequest.getFormBodyByKey("account");
+        final String password = httpRequest.getFormBodyByKey("password");
 
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
-            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/401.html", "HTTP/1.1", null, null));
+            throw new UnauthorizedException("로그인에 실패하였습니다.");
         }
 
         final Session session = new Session(UUID.randomUUID().toString());

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.http.request.HttpRequest;
+import org.apache.http.request.RequestLine;
 import org.apache.http.response.HttpResponseGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,8 @@ class StaticResourceHandlerTest {
         final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
+        final RequestLine requestLine = new RequestLine("GET", "/404.html", "HTTP/1.1");
+        final String response = handler.handle(new HttpRequest(requestLine, null, null));
 
         assertThat(response).contains(responseBody);
     }
@@ -34,7 +36,8 @@ class StaticResourceHandlerTest {
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "/css/styles.css", "HTTP/1.1", null, null));
+        final RequestLine requestLine = new RequestLine("GET", "/css/styles.css", "HTTP/1.1");
+        final String response = handler.handle(new HttpRequest(requestLine, null, null));
 
         assertThat(response).contains(fileContent);
     }
@@ -46,7 +49,8 @@ class StaticResourceHandlerTest {
         final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "/404", "HTTP/1.1", null, null));
+        final RequestLine requestLine = new RequestLine("GET", "/404", "HTTP/1.1");
+        final String response = handler.handle(new HttpRequest(requestLine, null, null));
 
         assertThat(response).contains(responseBody);
     }

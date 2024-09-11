@@ -14,6 +14,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.request.HttpRequest;
+import org.apache.http.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,8 @@ class LoginHandlerTest {
         final URL resourceURL = getClass().getClassLoader().getResource("static/login.html");
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
-        final HttpRequest request = new HttpRequest("GET", "/login", "HTTP/1.1", null, null);
+        final RequestLine requestLine = new RequestLine("GET", "/login", "HTTP/1.1");
+        final HttpRequest request = new HttpRequest(requestLine, null, null);
 
         assertTrue(LoginHandler.getInstance().handle(request).contains(fileContent));
     }
@@ -35,7 +37,8 @@ class LoginHandlerTest {
     void handle_GetRequest_With_ValidSession() {
         final String sessionId = UUID.randomUUID().toString();
         SessionManager.getInstance().add(new Session(sessionId));
-        final HttpRequest request = new HttpRequest("GET", "/login", "HTTP/1.1",
+        final RequestLine requestLine = new RequestLine("GET", "/login", "HTTP/1.1");
+        final HttpRequest request = new HttpRequest(requestLine,
                 new HttpHeader[]{new HttpHeader("Cookie", "JSESSIONID=" + sessionId)}, null);
 
         assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found"));
@@ -46,7 +49,8 @@ class LoginHandlerTest {
     @Test
     @DisplayName("POST 요청 처리: 유효한 계정 정보로 로그인 성공")
     void handle_PostRequest_With_ValidCredentials() {
-        final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
+        final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
+        final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=gugu&password=password");
 
         final String result = LoginHandler.getInstance().handle(request);
@@ -63,10 +67,11 @@ class LoginHandlerTest {
     @Test
     @DisplayName("POST 요청 처리: 비밀번호가 올바르지 않는 경우 로그인 실패")
     void handle_PostRequest_With_InvalidCredentials() throws IOException {
+        final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
         final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
-        final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
+        final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=gugu&password=wrongpassword");
 
         assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
@@ -75,10 +80,11 @@ class LoginHandlerTest {
     @Test
     @DisplayName("POST 요청 처리: 존재하지 않는 계정 정보로 로그인 실패")
     void handle_PostRequest_WithNonexistentUser() throws IOException {
+        final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
         final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
-        final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
+        final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=nonexistent&password=anypassword");
 
         assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
@@ -87,10 +93,11 @@ class LoginHandlerTest {
     @Test
     @DisplayName("지원하지 않는 메소드 처리: 404 페이지 반환")
     void handle_UnsupportedMethod() throws IOException {
+        final RequestLine requestLine = new RequestLine("PUT", "/login", "HTTP/1.1");
         final URL resourceURL = getClass().getClassLoader().getResource("static/404.html");
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
-        final HttpRequest request = new HttpRequest("PUT", "/login", "HTTP/1.1", null, null);
+        final HttpRequest request = new HttpRequest(requestLine, null, null);
 
         assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
     }

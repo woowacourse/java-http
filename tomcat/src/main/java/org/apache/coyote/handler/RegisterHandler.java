@@ -1,14 +1,15 @@
 package org.apache.coyote.handler;
 
+import org.apache.coyote.NotFoundException;
 import org.apache.http.HttpMethod;
 import org.apache.http.request.HttpRequest;
+import org.apache.http.request.RequestLine;
 import org.apache.http.response.HttpResponseGenerator;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class RegisterHandler extends Handler {
-
     private static final RegisterHandler INSTANCE = new RegisterHandler();
 
     private RegisterHandler() {
@@ -20,21 +21,21 @@ public class RegisterHandler extends Handler {
 
     public String handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/register.html", "HTTP/1.1", null, null));
+            final RequestLine requestLine = RequestLine.from("GET /register.html HTTP/1.1");
+            return StaticResourceHandler.getInstance().handle(new HttpRequest(requestLine, null, null));
         }
 
         if (httpRequest.isSameMethod(HttpMethod.POST)) {
             return processRegisterPostRequest(httpRequest);
         }
 
-        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/401.html", "HTTP/1.1", null, null));
+        throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
     private String processRegisterPostRequest(final HttpRequest httpRequest) {
-        String[] body = httpRequest.getBody().split("&");
-        String account = body[0].split("=")[1];
-        String email = body[1].split("=")[1];
-        String password = body[2].split("=")[1];
+        String account = httpRequest.getFormBodyByKey("account");
+        String email = httpRequest.getFormBodyByKey("email");
+        String password = httpRequest.getFormBodyByKey("password");
         InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponseGenerator.getFoundResponse("/index.html");
     }

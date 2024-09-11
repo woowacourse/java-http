@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.http.request.HttpRequest;
+import org.apache.http.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,8 @@ class RegisterHandlerTest {
         final URL resourceURL = getClass().getClassLoader().getResource("static/register.html");
         final String expectedResponseBody = Files.readString(Path.of(resourceURL.getPath()));
 
-        final HttpRequest request = new HttpRequest("GET", "/register", "HTTP/1.1", null, null);
+        final RequestLine requestLine = new RequestLine("GET", "/register", "HTTP/1.1");
+        final HttpRequest request = new HttpRequest(requestLine, null, null);
 
         assertThat(RegisterHandler.getInstance().handle(request)).contains(expectedResponseBody);
     }
@@ -28,7 +30,8 @@ class RegisterHandlerTest {
     @Test
     @DisplayName("POST 요청 처리: 유효한 회원가입 정보로 회원가입 성공")
     void handle_PostRequest_WithValidRegistration() {
-        final HttpRequest request = new HttpRequest("POST", "/register", "HTTP/1.1", null,
+        final RequestLine requestLine = new RequestLine("POST", "/register", "HTTP/1.1");
+        final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=newuser&email=newuser@example.com&password=password123");
 
         final String result = RegisterHandler.getInstance().handle(request);

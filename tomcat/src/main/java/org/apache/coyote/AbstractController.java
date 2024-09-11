@@ -10,10 +10,12 @@ public class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isMethod(HttpMethod.GET)) {
             doGet(request, response);
+            return;
         }
 
         if (request.isMethod(HttpMethod.POST)) {
             doPost(request, response);
+            return;
         }
 
         throw new RuntimeException("지원하지 않는 HTTP 메소드: " + request.getHttpMethod());

@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +45,31 @@ public class HttpRequest {
             body.put(param.split("=")[0].strip(), param.split("=")[1].strip());
         }
         return body;
+    }
+
+    public boolean hasPath(final String target) {
+        return requestLine.getPath().isEqualPath(target);
+    }
+
+    public int getContentLength() throws IOException {
+        final var absolutePath = requestLine.getAbsolutePath();
+        if (absolutePath == null) {
+            return "".getBytes().length;
+        }
+        final String file = new String(Files.readAllBytes(new File(absolutePath.getFile()).toPath()));
+        return file.getBytes().length;
+    }
+
+    private String getFile(final Path path) throws IOException {
+        final var resource = path.getAbsolutePath();
+        if (resource == null) {
+            return "";
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    public String getResources() throws IOException {
+        return getFile(requestLine.getPath());
     }
 
     public boolean hasMethod(final HttpMethod method) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.net.URL;
+
 public class RequestLine {
 
     private static final int METHOD_INDEX = 0;
@@ -23,6 +25,10 @@ public class RequestLine {
 
     public boolean isEqualHttpMethod(final HttpMethod target) {
         return httpMethod == target;
+    }
+
+    public URL getAbsolutePath() {
+        return path.getAbsolutePath();
     }
 
     public HttpMethod getHttpMethod() {

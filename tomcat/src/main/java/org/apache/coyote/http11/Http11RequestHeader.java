@@ -15,19 +15,19 @@ public class Http11RequestHeader {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final StartLine startLine;
+    private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
 
-    private Http11RequestHeader(StartLine startLine, HttpHeaders httpHeaders) {
-        this.startLine = startLine;
+    private Http11RequestHeader(RequestLine requestLine, HttpHeaders httpHeaders) {
+        this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
     }
 
     public static Http11RequestHeader from(BufferedReader bufferedReader) throws IOException {
-        StartLine startLine = StartLine.from(bufferedReader.readLine());
+        RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(extractRequestHeader(bufferedReader), (s1, s2) -> true);
 
-        return new Http11RequestHeader(startLine, httpHeaders);
+        return new Http11RequestHeader(requestLine, httpHeaders);
     }
 
     private static Map<String, List<String>> extractRequestHeader(BufferedReader bufferedReader) {
@@ -44,11 +44,11 @@ public class Http11RequestHeader {
     }
 
     public RequestUri getRequestUri() {
-        return startLine.getRequestUri();
+        return requestLine.getRequestUri();
     }
 
     public HttpVersion getHttpVersion() {
-        return startLine.getHttpVersion();
+        return requestLine.getHttpVersion();
     }
 
     public List<String> getAcceptType() {
@@ -61,7 +61,7 @@ public class Http11RequestHeader {
     }
 
     public HttpMethod getHttpMethod() {
-        return startLine.getHttpMethod();
+        return requestLine.getHttpMethod();
     }
 
     public String getCookie() {

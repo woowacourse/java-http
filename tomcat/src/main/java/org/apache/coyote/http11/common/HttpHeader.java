@@ -8,15 +8,11 @@ import java.util.StringJoiner;
 
 public record HttpHeader(Map<String, String> headers) {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String COOKIE = "Cookie";
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_DELIMITER = ": ";
     private static final String MULTIPLE_HEADER_KEY_DELIMITER = ",";
     private static final String MULTIPLE_COOKIE_DELIMITER = "; ";
     private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     public static HttpHeader empty() {
         return new HttpHeader(new HashMap<>());
@@ -32,10 +28,10 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public OptionalInt getContentLength() {
-        if (!headers.containsKey(CONTENT_LENGTH)) {
+        if (!headers.containsKey(StandardHttpHeaderName.CONTENT_LENGTH.getName())) {
             return OptionalInt.empty();
         }
-        return OptionalInt.of(Integer.parseInt(headers.get(CONTENT_LENGTH)));
+        return OptionalInt.of(Integer.parseInt(headers.get(StandardHttpHeaderName.CONTENT_LENGTH.getName())));
     }
 
     public void add(String key, String value) {
@@ -44,27 +40,27 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public void setContentLength(int length) {
-        headers.put(CONTENT_LENGTH, String.valueOf(length));
+        headers.put(StandardHttpHeaderName.CONTENT_LENGTH.getName(), String.valueOf(length));
     }
 
     public void setContentType(String contentType) {
-        headers.put(CONTENT_TYPE, contentType);
+        headers.put(StandardHttpHeaderName.CONTENT_TYPE.getName(), contentType);
     }
 
     public Optional<String> getCookie(String cookieName) {
-        return Optional.ofNullable(headers.get(COOKIE))
+        return Optional.ofNullable(headers.get(StandardHttpHeaderName.COOKIE.getName()))
                 .map(CookieNameValuePairs::new)
                 .flatMap(cookiePairs -> cookiePairs.get(cookieName));
     }
 
     public void addSetCookie(String key, String value) {
         String newCookie = String.join(COOKIE_KEY_VALUE_DELIMITER, key, value);
-        headers.compute(SET_COOKIE,
+        headers.compute(StandardHttpHeaderName.SET_COOKIE.getName(),
                 (k, prev) -> prev == null ? newCookie : String.join(MULTIPLE_COOKIE_DELIMITER, prev, newCookie));
     }
 
     public Optional<String> getSessionId() {
-        return getCookie(JSESSIONID);
+        return getCookie(SESSION_COOKIE_NAME);
     }
 
     public String toString() {

@@ -24,6 +24,10 @@ public class HttpResponse {
         headers.setContentLength(responseBody.size());
     }
 
+    public static HttpResponse ok() {
+        return new HttpResponse(HttpStatusCode.OK);
+    }
+
     public HttpResponse addHeader(String key, String value) {
         headers.add(key, value);
         return this;

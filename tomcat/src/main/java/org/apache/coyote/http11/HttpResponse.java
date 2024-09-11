@@ -9,6 +9,7 @@ public class HttpResponse {
 
     private static final String LINE_DELIMITER = "\r\n";
     private static final String DELIMITER = " ";
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private HttpStatus status;
     private HttpHeaders headers;
@@ -38,7 +39,7 @@ public class HttpResponse {
 
     private String getStartLine() {
         return String.join(DELIMITER,
-                "HTTP/1.1",
+                HTTP_VERSION,
                 String.valueOf(status.getCode()),
                 status.name()) + DELIMITER;
     }

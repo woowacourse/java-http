@@ -64,7 +64,7 @@
 
 ### 3단계
 
-- [ ] HttpRequest 클래스 구현
+- [x] HttpRequest 클래스 구현
   - [x] Request Line 분석
     - [x] Method 클래스 (enum)
     - [x] Path 클래스

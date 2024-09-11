@@ -88,6 +88,24 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
+        processStaticResource(requestURL, outputStream);
+    }
+
+    private void processPostRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
+            throws URISyntaxException, IOException {
+        Map<String, String> header = getHeader(bufferedReader);
+        Map<String, String> body = getBody(bufferedReader, header);
+
+        if (requestURL.equals("/register")) {
+            postRegisterRequest(outputStream, body);
+        }
+
+        if (requestURL.equals("/login")) {
+            postLoginRequest(outputStream, body);
+        }
+    }
+
+    private void processStaticResource(String requestURL, OutputStream outputStream) throws URISyntaxException, IOException {
         try {
             final Path path = findPath(requestURL);
             byte[] fileBytes = Files.readAllBytes(path);
@@ -106,20 +124,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (FileNotFoundException e) {
             redirect("/404.html", outputStream);
-        }
-    }
-
-    private void processPostRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
-            throws URISyntaxException, IOException {
-        Map<String, String> header = getHeader(bufferedReader);
-        Map<String, String> body = getBody(bufferedReader, header);
-
-        if (requestURL.equals("/register")) {
-            postRegisterRequest(outputStream, body);
-        }
-
-        if (requestURL.equals("/login")) {
-            postLoginRequest(outputStream, body);
         }
     }
 

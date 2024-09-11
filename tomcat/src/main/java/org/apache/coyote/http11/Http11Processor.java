@@ -22,7 +22,7 @@ import org.apache.catalina.request.RequestBody;
 import org.apache.catalina.request.RequestHeader;
 import org.apache.catalina.request.RequestLine;
 import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.Response;
+import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.ResponsePage;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -91,14 +91,14 @@ public class Http11Processor implements Runnable, Processor {
             return generateResponseForPostUrl(request).responseToString();
         }
         log.warn("지원되지 않는 HTTP 메서드입니다.");
-        return new Response(HttpStatus.BAD_REQUEST, "text/html", FileReader.loadFileContent(BAD_REQUEST_PAGE))
+        return new HttpResponse(HttpStatus.BAD_REQUEST, "text/html", FileReader.loadFileContent(BAD_REQUEST_PAGE))
                 .responseToString();
     }
 
-    private Response generateResponseForUrl(Request request) {
+    private HttpResponse generateResponseForUrl(Request request) {
         String accept = request.getFileType();
         if (ROOT_PATH.equals(request.getPathWithoutQuery())) {
-            return new Response(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
+            return new HttpResponse(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
         if (!request.checkQueryParamIsEmpty()) {
             return generateResponseForQueryParam(request);
@@ -107,25 +107,25 @@ public class Http11Processor implements Runnable, Processor {
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getPathWithoutQuery(), request.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
-            Response response = new Response(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
-            response.addLocation(page.getFileName());
-            return response;
+            HttpResponse httpResponse = new HttpResponse(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
+            httpResponse.addLocation(page.getFileName());
+            return httpResponse;
         }
-        return new Response(HttpStatus.OK, accept, FileReader.loadFileContent(request.getPathWithoutQuery()));
+        return new HttpResponse(HttpStatus.OK, accept, FileReader.loadFileContent(request.getPathWithoutQuery()));
     }
 
-    private Response generateResponseForQueryParam(Request headers) {
+    private HttpResponse generateResponseForQueryParam(Request headers) {
         if (LOGIN_PATH.equals(headers.getPathWithoutQuery())) {
             return handleLoginRequest(headers);
         }
         throw new RuntimeException("'" + headers.getPathWithoutQuery() + "'는 정의되지 않은 URL입니다.");
     }
 
-    private Response handleLoginRequest(Request request) {
+    private HttpResponse handleLoginRequest(Request request) {
         String accept = request.getFileType();
         Map<String, String> queryParams = request.getQueryParam();
         if (isMissingRequiredParams(request, queryParams)) {
-            return new Response(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
+            return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
 
         Optional<User> user = authenticateUser(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
@@ -136,13 +136,13 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie httpCookie = request.getCookie();
             String cookie = httpCookie.getCookies(session.getId());
 
-            Response response
-                    = new Response(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
-            response.addHeader("Set-Cookie", cookie);
-            response.addLocation(INDEX_PAGE);
-            return response;
+            HttpResponse httpResponse
+                    = new HttpResponse(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+            httpResponse.addHeader("Set-Cookie", cookie);
+            httpResponse.addLocation(INDEX_PAGE);
+            return httpResponse;
         }
-        return new Response(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
+        return new HttpResponse(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 
     private boolean isMissingRequiredParams(Request request, Map<String, String> queryParams) {
@@ -159,26 +159,26 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private Response generateResponseForPostUrl(Request headers) {
+    private HttpResponse generateResponseForPostUrl(Request headers) {
         String url = headers.getPathWithoutQuery();
         String accept = headers.getFileType();
         if (REGISTER_PATH.equals(url)) {
             return handleRegistration(headers.getBody(), accept);
         }
-        return new Response(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
+        return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
     }
 
-    private Response handleRegistration(Map<String, String> bodyParams, String accept) {
+    private HttpResponse handleRegistration(Map<String, String> bodyParams, String accept) {
         String account = bodyParams.get(ACCOUNT);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return new Response(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
+            return new HttpResponse(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
-        Response response
-                = new Response(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
-        response.addLocation(INDEX_PAGE);
-        return response;
+        HttpResponse httpResponse
+                = new HttpResponse(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+        httpResponse.addLocation(INDEX_PAGE);
+        return httpResponse;
     }
 }

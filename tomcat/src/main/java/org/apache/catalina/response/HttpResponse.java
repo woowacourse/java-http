@@ -3,7 +3,7 @@ package org.apache.catalina.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Response {
+public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String DEFAULT_CHARSET = "charset=utf-8";
 
@@ -11,7 +11,7 @@ public class Response {
     private final String body;
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public Response(HttpStatus httpStatus, String contentType, String body) {
+    public HttpResponse(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
         headers.put("Content-Type", contentType + ";" + DEFAULT_CHARSET);
         headers.put("Content-Length", String.valueOf(body.getBytes().length));

@@ -9,7 +9,7 @@ import org.apache.catalina.auth.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ResponsePageTest {
+class HttpResponsePageTest {
 
     @Test
     @DisplayName("성공 : 로그인이 안됐을 때 url에 맞는 ResponsePage을 조회 가능")

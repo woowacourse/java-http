@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -16,18 +17,15 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        if (request.hasQueryString()) {
-            response.found();
-            login(request, response);
-            return;
-        }
         response.setResourceName("/login.html");
         response.ok();
     }
 
-    private void login(HttpRequest request, HttpResponse response) {
-        String account = request.getQueryData("account");
-        String password = request.getQueryData("password");
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) {
+        Map<String, String> values = BodyParser.parseValues(request.getBody());
+        String account = values.get("account");
+        String password = values.get("password");
         if (account == null || password == null) {
             failLogin(response);
             return;
@@ -38,6 +36,7 @@ public class LoginController extends AbstractController {
                         user -> successLogin(user, response),
                         () -> failLogin(response)
                 );
+        response.found();
     }
 
     private void successLogin(User user, HttpResponse response) {

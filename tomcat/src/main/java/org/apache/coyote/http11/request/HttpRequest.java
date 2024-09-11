@@ -3,7 +3,6 @@ package org.apache.coyote.http11.request;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -14,10 +13,10 @@ import java.util.stream.IntStream;
 public record HttpRequest(
         Method method,
         String path,
+        ProtocolVersion protocolVersion,
         Map<String, String> parameters,
         Map<String, String> headers,
         Map<String, String> cookies,
-        ProtocolVersion protocolVersion,
         String body) {
 
     private static final String DELIMITER_COOKIE = "; ";
@@ -46,7 +45,7 @@ public record HttpRequest(
 
         String body = extractBody(lines);
 
-        return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
+        return new HttpRequest(method, path, protocolVersion, parameters, headers, cookies, body);
     }
 
     private static Map<String, String> extractParameters(String query) {
@@ -63,10 +62,16 @@ public record HttpRequest(
     }
 
     private static Map<String, String> extractHeaders(List<String> lines) {
-        return IntStream.range(1, lines.size() - 3)
-                .mapToObj(lines::get)
+        int endHeaderIndex = IntStream.range(0, lines.size())
+                .filter(i -> lines.get(i).isEmpty())
+                .findFirst()
+                .orElse(lines.size());
+
+        return lines.stream()
+                .limit(endHeaderIndex)
                 .map(String::trim)
                 .map(line -> line.split(DELIMITER_HEADER))
+                .filter(entry -> entry.length == 2)
                 .collect(Collectors.toMap(entry -> entry[0], entry -> entry[1]));
     }
 
@@ -74,21 +79,11 @@ public record HttpRequest(
         if (cookieMessage == null) {
             return Map.of();
         }
-
-        Map<String, String> cookies = new HashMap<>();
-
-        for (String entry : cookieMessage.split(DELIMITER_COOKIE)) {
-            int delimiterIndex = entry.indexOf(DELIMITER_VALUE);
-            if (delimiterIndex == -1) {
-                continue;
-            }
-
-            String key = entry.substring(0, delimiterIndex).trim();
-            String value = entry.substring(delimiterIndex + 1).trim();
-            cookies.put(key, value);
-        }
-
-        return cookies;
+        
+        return Arrays.stream(cookieMessage.split(DELIMITER_COOKIE))
+                .map(cookie -> cookie.split(DELIMITER_VALUE))
+                .filter(entry -> entry.length == 2)
+                .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
     }
 
     private static String extractBody(List<String> lines) {
@@ -99,7 +94,7 @@ public record HttpRequest(
     }
 
     public HttpRequest updatePath(String path) {
-        return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
+        return new HttpRequest(method, path, protocolVersion, parameters, headers, cookies, body);
     }
 
     public Map<String, String> extractUrlEncodedBody() {

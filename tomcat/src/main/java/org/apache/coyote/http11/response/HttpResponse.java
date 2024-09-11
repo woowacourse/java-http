@@ -19,7 +19,8 @@ public record HttpResponse(ProtocolVersion protocolVersion, Status status,
     private static final String HEADER_NAME_CONTENT_LENGTH = "Content-Length: ";
 
     public static Builder builder() {
-        return new Builder().protocolVersion(DEFAULT_PROTOCOL);
+        return new Builder().protocolVersion(DEFAULT_PROTOCOL)
+                .status(Status.OK);
     }
 
     private static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
@@ -45,7 +46,7 @@ public record HttpResponse(ProtocolVersion protocolVersion, Status status,
     }
 
     private void buildFirstLine(StringBuilder builder) {
-        builder.append(protocolVersion).append(DELIMITER_SPACE)
+        builder.append(protocolVersion.getValue()).append(DELIMITER_SPACE)
                 .append(status.getCode()).append(DELIMITER_SPACE)
                 .append(status.getMessage()).append(DELIMITER_SPACE);
     }

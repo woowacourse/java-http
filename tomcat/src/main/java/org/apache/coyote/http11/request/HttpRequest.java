@@ -30,25 +30,38 @@ public class HttpRequest {
         RequestLine requestLine = new RequestLine(requestReader.readRequestLine());
         RequestHeaders requestHeaders = new RequestHeaders(requestReader.readRequestHeaders());
 
-        int contentLength = requestHeaders.get(HttpHeader.CONTENT_LENGTH.getName())
-                .map(Integer::parseInt)
-                .orElse(EMPTY_BODY_LENGTH);
-
-        if (contentLength > EMPTY_BODY_LENGTH) {
-            String mediaType = requestHeaders.get(HttpHeader.CONTENT_TYPE.getName())
-                    .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
-
-            RequestBody requestBody = new RequestBody(mediaType, requestReader.readRequestBody(contentLength));
+        int contentLength = getContentLength(requestHeaders);
+        if (hasRequestBody(contentLength)) {
+            RequestBody requestBody = createRequestBody(requestReader, requestHeaders, contentLength);
             return new HttpRequest(requestLine, requestHeaders, requestBody);
         }
 
         return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
     }
 
+    private static Integer getContentLength(RequestHeaders requestHeaders) {
+        return requestHeaders.get(HttpHeader.CONTENT_LENGTH.getName())
+                .map(Integer::parseInt)
+                .orElse(EMPTY_BODY_LENGTH);
+    }
+
+    private static boolean hasRequestBody(int contentLength) {
+        return contentLength > EMPTY_BODY_LENGTH;
+    }
+
+    private static RequestBody createRequestBody(
+            RequestReader requestReader, RequestHeaders requestHeaders, int contentLength) throws IOException {
+
+        String mediaType = requestHeaders.get(HttpHeader.CONTENT_TYPE.getName())
+                .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
+
+        return new RequestBody(mediaType, requestReader.readRequestBody(contentLength));
+    }
+
     public boolean isMethod(HttpMethod httpMethod) {
         return requestLine.isMethod(httpMethod);
     }
-    
+
     public boolean isStaticResource() {
         return requestLine.isStaticResource();
     }

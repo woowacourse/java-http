@@ -28,7 +28,7 @@ public class RequestLine {
                 return new RequestLine(HttpMethod.of(requestLine[METHOD_POSITION]), requestLine[URI_POSITION], HttpVersion.of(requestLine[VERSION_POSITION]));
             }
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Illegal Request Line Syntax: " + line);
     }
 
     public HttpMethod getMethod() {

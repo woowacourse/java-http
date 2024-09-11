@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.serialize().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

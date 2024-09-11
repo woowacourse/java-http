@@ -4,26 +4,26 @@ import java.util.Arrays;
 
 public enum ContentType {
 
-    TEXT_HTML("text/html;charset=utf-8", "html", true),
-    TEXT_CSS("text/css;charset=utf-8", "css", true),
-    APPLICATION_JAVASCRIPT("application/javascript;charset=utf-8", "js", true),
+    TEXT_HTML("text/html", "html", true),
+    TEXT_CSS("text/css", "css", true),
+    APPLICATION_JAVASCRIPT("application/javascript", "js", true),
     ;
 
-    private String value;
+    private String contentType;
     private String fileExtension;
     private boolean isTextContent;
 
-    ContentType(String value, String fileExtension, boolean isTextContent) {
-        this.value = value;
+    ContentType(String contentType, String fileExtension, boolean isTextContent) {
+        this.contentType = contentType;
         this.fileExtension = fileExtension;
         this.isTextContent = isTextContent;
     }
 
     public String getContentType() {
         if (isTextContent) {
-            return value + ";charset=utf-8";
+            return contentType + ";charset=utf-8";
         }
-        return value;
+        return contentType;
     }
 
     public static ContentType findByFileExtension(String fileExtension) {

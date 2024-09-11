@@ -10,11 +10,11 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isMethod(HttpMethod.GET)) {
             doGet(request, response);
-            return ;
+            return;
         }
         if (request.isMethod(HttpMethod.POST)) {
             doPost(request, response);
-            return ;
+            return;
         }
         throw new UnsupportedOperationException("Not allowed method " + request.getMethodName());
     }

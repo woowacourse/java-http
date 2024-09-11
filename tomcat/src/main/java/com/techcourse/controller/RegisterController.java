@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
         User user = createUserFromRequest(request);
         validateUserDoesNotExist(user);
         saveUser(user);
-        response.setBody(readStaticResource(LOGIN_PAGE));
+        response.sendRedirect(LOGIN_PAGE);
     }
 
     private User createUserFromRequest(HttpRequest request) {
@@ -37,7 +37,7 @@ public class RegisterController extends AbstractController {
         }
     }
 
-    private static void saveUser(User user) {
+    private void saveUser(User user) {
         InMemoryUserRepository.save(user);
     }
 

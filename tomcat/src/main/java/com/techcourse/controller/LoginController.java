@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
         String password = getPasswordFromRequest(request);
         User user = getUser(account, password);
         request.getSession().setAttribute(USER_FIELD, user);
-        response.setBody(readStaticResource(INDEX_PAGE));
+        response.sendRedirect(INDEX_PAGE);
         response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId());
     }
 
@@ -44,8 +44,7 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         if (userLoggedIn(request)) {
-            response.setBody(readStaticResource(INDEX_PAGE));
-            response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId());
+            response.sendRedirect(INDEX_PAGE);
             return;
         }
         response.setBody(readStaticResource(LOGIN_PAGE));

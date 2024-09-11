@@ -41,16 +41,17 @@ public class HttpResponse {
         return this.getBytes();
     }
 
+    public void sendRedirect(String path) {
+        setStatus(StatusCode.FOUND);
+        setHeader(Header.LOCATION.value(), path);
+    }
+
     public void setStatus(StatusCode status) {
         this.status = status;
     }
 
     public void setHeader(String key, String value) {
         this.headers.put(key, value);
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers.putAll(headers);
     }
 
     public void setBody(byte[] responseBody) {

@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -65,5 +67,23 @@ class Http11RequestTest {
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("유효한 HTTP Method가 아닙니다.");
+    }
+
+    @DisplayName("body가 queryString 형태면 파싱하여 Map으로 반환한다.")
+    @Test
+    void parsedBody() {
+        Http11Request request = new Http11Request(
+                new Http11RequestLine("GET /path HTTP/1.1"),
+                new Http11RequestHeaders(List.of("Host: localhost::8080")),
+                new Http11RequestBody("account=gugu&password=password&email=hkkang%40woowahan.com"));
+
+        Map<String, String> actual = request.getParsedBody();
+        Map<String, String> expected = Map.ofEntries(
+                Map.entry("account", "gugu"),
+                Map.entry("password", "password"),
+                Map.entry("email", "hkkang%40woowahan.com")
+        );
+
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

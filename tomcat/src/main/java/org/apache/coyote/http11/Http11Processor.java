@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -53,6 +54,10 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = getResource(resourceName);
             String resourceExtension = getExtension(resourceName);
 
+            if (!request.hasCookieFrom("JSESSIONID")) {
+                Map<String, String> parameter = Map.of("JSESSIONID", UUID.randomUUID().toString());
+                response.setHttpCookie(new HttpCookie(parameter));
+            }
             response.setResponseBody(responseBody);
             response.setContentType(resourceExtension);
             outputStream.write(response.getBytes());
@@ -73,8 +78,9 @@ public class Http11Processor implements Runnable, Processor {
         String path = parsePath(tokens[1]);
         Map<String, String> queryString = parseQueryString(tokens[1]);
         Map<String, String> headers = parseHeaders(bufferedReader);
+        HttpCookie httpCookie = parseCookie(headers);
         String body = parseBody(bufferedReader, headers);
-        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, body);
+        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, httpCookie, body);
     }
 
     private String parsePath(String token) {
@@ -144,6 +150,23 @@ public class Http11Processor implements Runnable, Processor {
             line = bufferedReader.readLine();
         }
         return headers;
+    }
+
+    private HttpCookie parseCookie(Map<String, String> headers) {
+        Map<String, String> cookies = new HashMap<>();
+        if (!headers.containsKey("Cookie")) {
+            return new HttpCookie(cookies);
+        }
+        String data = headers.get("Cookie");
+        Stream.of(data.split(";"))
+                .map(String::trim)
+                .forEach(s -> {
+                    int separatorIndex = s.indexOf("=");
+                    if (separatorIndex != -1) {
+                        cookies.put(s.substring(0, separatorIndex), s.substring(separatorIndex + 1));
+                    }
+                });
+        return new HttpCookie(cookies);
     }
 
     private String parseBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {

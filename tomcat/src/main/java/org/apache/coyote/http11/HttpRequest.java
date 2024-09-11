@@ -9,15 +9,17 @@ public class HttpRequest {
     private final Map<String, String> queryString;
     private final String protocolVersion;
     private final Map<String, String> headers;
+    private final HttpCookie httpCookie;
     private final String body;
 
     public HttpRequest(String method, String path, Map<String, String> queryString, String protocolVersion,
-                       Map<String, String> headers, String body) {
+                       Map<String, String> headers, HttpCookie httpCookie, String body) {
         this.method = method;
         this.path = path;
         this.queryString = queryString;
         this.protocolVersion = protocolVersion;
         this.headers = headers;
+        this.httpCookie = httpCookie;
         this.body = body;
     }
 
@@ -25,8 +27,16 @@ public class HttpRequest {
         return !queryString.isEmpty();
     }
 
+    public boolean hasCookieFrom(String input) {
+        return httpCookie.hasValue(input);
+    }
+
     public String getQueryData(String input) {
         return queryString.get(input);
+    }
+
+    public String getHeaderData(String input) {
+        return headers.get(input);
     }
 
     public String getPath() {

@@ -6,6 +6,11 @@ import java.util.Map;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_PAIR_DELIMITER = ";";
+    private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
+    private static final int COOKIE_KEY_INDEX = 0;
+    private static final int COOKIE_VALUE_INDEX = 1;
+    private static final int COOKIE_PAIR_SPLIT_LIMIT = 2;
 
     private final Map<String, String> cookies;
 
@@ -19,20 +24,22 @@ public class HttpCookie {
             return;
         }
 
-        String[] cookiePairs = cookieHeader.split(";");
+        for (String cookiePair : cookieHeader.split(COOKIE_PAIR_DELIMITER)) {
+            String[] keyValue = cookiePair.trim().split(COOKIE_KEY_VALUE_DELIMITER, COOKIE_PAIR_SPLIT_LIMIT);
+            setCookie(keyValue);
+        }
+    }
 
-        for (String cookiePair : cookiePairs) {
-            String[] keyValue = cookiePair.trim().split("=", 2);
-            if (keyValue.length == 2) {
-                String key = keyValue[0].trim();
-                String value = keyValue[1].trim();
-                cookies.put(key, value);
-            }
+    private void setCookie(String[] keyValue) {
+        if (keyValue.length == COOKIE_PAIR_SPLIT_LIMIT) {
+            String key = keyValue[COOKIE_KEY_INDEX].trim();
+            String value = keyValue[COOKIE_VALUE_INDEX].trim();
+            cookies.put(key, value);
         }
     }
 
     public static String ofJSessionId(String value) {
-        return JSESSIONID + "=" + value;
+        return JSESSIONID + COOKIE_KEY_VALUE_DELIMITER + value;
     }
 
     public String getJsessionid() {
@@ -44,11 +51,7 @@ public class HttpCookie {
     }
 
     public boolean containsJSessionId() {
-        if (cookies.containsKey(JSESSIONID)) {
-            return true;
-        }
-
-        return false;
+        return cookies.containsKey(JSESSIONID);
     }
 
     public Map<String, String> getCookies() {

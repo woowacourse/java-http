@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.catalina.controller.http.Cookie;
+import org.apache.catalina.controller.http.HttpVersion;
 
 public class HttpResponse {
 
@@ -17,7 +18,7 @@ public class HttpResponse {
     private final OutputStream outputStream;
 
     private HttpStatus httpStatus;
-    private String version;
+    private HttpVersion version;
     private final Map<String, String> headers;
     private String responseBody;
 
@@ -25,7 +26,7 @@ public class HttpResponse {
 
     public HttpResponse(OutputStream outputStream) {
         this.httpStatus = HttpStatus.OK;
-        this.version = "HTTP/1.1";
+        this.version = HttpVersion.HTTP_1_1;
         this.headers = new LinkedHashMap<>();
         this.responseBody = "";
         this.outputStream = outputStream;
@@ -60,7 +61,7 @@ public class HttpResponse {
         return httpStatus;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 
@@ -75,7 +76,7 @@ public class HttpResponse {
     public void write() {
         PrintWriter responseWriter = getWriter();
         responseWriter.write(STATUS_LINE.formatted(
-                version, httpStatus.getStatusCode(), httpStatus.name()
+                version.getVersion(), httpStatus.getStatusCode(), httpStatus.name()
         ));
         responseWriter.write(CRLF);
         headers.forEach((name, value) -> responseWriter.write(HEADER_FORMAT_TEMPLATE.formatted(name, value)));

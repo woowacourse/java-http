@@ -32,8 +32,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return statusLine.getVersionOfProtocol() + " "
-                + statusLine.getHttpStatus() + " \r\n"
+        return statusLine + " \r\n"
                 + responseHeader + "\r\n"
                 + body;
     }

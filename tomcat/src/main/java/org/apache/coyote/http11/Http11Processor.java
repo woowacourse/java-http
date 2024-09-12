@@ -1,15 +1,15 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,7 +40,9 @@ public class Http11Processor implements Runnable, Processor {
             } catch (Exception e) {
                 log.error(e.getMessage());
                 String body = StaticResourceReader.read("/500.html");
-                httpResponse = HttpResponse.of(httpRequest.getVersion(), "500 INTERNATIONAL ERROR", ContentType.HTML.getContentType(), body);
+                httpResponse = HttpResponse.of(httpRequest.getVersion(),
+                        HttpStatus.INTERNATIONAL_SERVER_ERROR.getHttpStatusMessage(), ContentType.HTML.getContentType(),
+                        body);
             }
 
             outputStream.write(httpResponse.toHttpMessage().getBytes());

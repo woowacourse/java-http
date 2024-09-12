@@ -10,6 +10,7 @@ import org.apache.coyote.Processor;
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httprequest.HttpRequestConvertor;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
@@ -20,6 +21,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String NOT_FOUND_PATH = "/404.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String CHECKED_STATIC_RESOURCE = ".";
 
     private final Socket connection;
@@ -66,6 +68,10 @@ public class Http11Processor implements Runnable, Processor {
         } catch (NotFoundException e) {
             return HttpResponse.found(httpRequest)
                     .location(NOT_FOUND_PATH)
+                    .build();
+        } catch (UnauthorizedException e) {
+            return HttpResponse.found(httpRequest)
+                    .location(UNAUTHORIZED_PATH)
                     .build();
         }
     }

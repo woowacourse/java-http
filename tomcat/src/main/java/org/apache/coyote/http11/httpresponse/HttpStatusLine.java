@@ -15,12 +15,7 @@ public class HttpStatusLine {
     }
 
     public String getString() {
-        return String.join(
-                STATUS_LINE_DELIMITER,
-                version,
-                String.valueOf(httpStatusCode.getCode()),
-                httpStatusCode.getMessage()
-        );
+        return "%s %s %s ".formatted(version, httpStatusCode.getCode(), httpStatusCode.getMessage());
     }
 
     public String getVersion() {

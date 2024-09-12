@@ -2,10 +2,10 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.exception.NotFoundException;
-import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,6 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String INDEX_PATH = "/index.html";
-    private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_DELIMITER = "=";
     private static final String SESSION_USER_NAME = "user";
@@ -39,12 +38,12 @@ public class LoginController extends AbstractController {
         String password = httpRequest.getBodyValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 계정입니다"));
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 계정입니다"));
         if (user.checkPassword(password)) {
             return redirectWithCookie(httpRequest, user);
         }
         log.error("비밀번호 불일치");
-        return redirectPage(httpRequest, UNAUTHORIZED_PATH);
+        throw new UnauthorizedException("존재하지 않는 계정입니다");
     }
 
     private static HttpResponse redirectWithCookie(HttpRequest httpRequest, User user) {

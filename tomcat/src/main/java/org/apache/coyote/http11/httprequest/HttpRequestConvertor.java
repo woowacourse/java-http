@@ -106,6 +106,7 @@ public class HttpRequestConvertor {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
+        System.out.println(requestBody);
         Map<String, String> body = extractBody(requestBody);
         return new HttpRequestBody(body);
     }

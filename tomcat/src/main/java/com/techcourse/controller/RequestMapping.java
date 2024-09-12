@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.techcourse.config.UnauthorizedInterceptor;
 import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class RequestMapping {
@@ -19,7 +20,7 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest httpRequest) {
         if (unauthorizedInterceptor.isInterceptPath(httpRequest)) {
-            return new UnauthorizedController();
+            throw new UnauthorizedException("권한이 없는 페이지로의 접근입니다");
         }
 
         String path = httpRequest.getPath();

@@ -34,8 +34,12 @@ public class HttpRequest {
         return headers.hasJSessionCookie();
     }
 
-    public QueryParameter getQueryParameter() {
-        return requestLine.getQueryParameter();
+    public String getQueryParameterAttribute(String name) {
+        return requestLine.getQueryParameterAttribute(name);
+    }
+
+    public String getBodyAttribute(String name) {
+        return body.getAttribute(name);
     }
 
     public Session getSession(boolean flag) {

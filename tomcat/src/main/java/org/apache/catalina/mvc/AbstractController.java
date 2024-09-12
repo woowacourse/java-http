@@ -28,8 +28,4 @@ public abstract class AbstractController implements Controller {
                 DEFAULT_CONTENT_TYPE,
                 FileReader.loadFileContent(BAD_REQUEST_PAGE));
     }
-
-    protected abstract HttpResponse doGet(HttpRequest request);
-
-    protected abstract HttpResponse doPost(HttpRequest request);
 }

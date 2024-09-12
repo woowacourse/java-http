@@ -12,6 +12,12 @@ public class HttpResponseBuilder {
         headers = new HttpHeaders();
     }
 
+    public HttpResponseBuilder redirect(final String location) {
+        statusLine(new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.FOUND));
+        headers.setLocation(location);
+        return this;
+    }
+
     public HttpResponseBuilder statusLine(final HttpStatusLine statusLine) {
         this.statusLine = statusLine;
         return this;
@@ -27,7 +33,7 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder setCookie(final Cookie cookie) {
+    public HttpResponseBuilder setCookie(final HttpCookie cookie) {
         headers.setCookie(cookie);
         return this;
     }

@@ -4,6 +4,7 @@ public enum HttpStatusCode {
 
     OK(200, "OK"),
     FOUND(302, "FOUND"),
+    BAD_REQUEST(400, "BAD_REQUEST"),
     UNAUTHORIZED(401, "UNAUTHORIZED");
 
     private final int code;

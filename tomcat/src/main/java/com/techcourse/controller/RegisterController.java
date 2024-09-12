@@ -12,37 +12,38 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeaders;
 import org.apache.coyote.http11.response.HttpStatusCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class RegisterController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-
-    public static HttpResponse login(HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public static HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
-        String filePath = "/login";
         HttpStatusCode statusCode = HttpStatusCode.OK;
+        String filePath = "/index.html";
         String account = httpRequest.getRequestBodyValue("account");
+        String email = httpRequest.getRequestBodyValue("email");
         String password = httpRequest.getRequestBodyValue("password");
         try {
-            User foundUser = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
-            if (foundUser.checkPassword(password)) {
-                log.info("user : " + foundUser);
-                statusCode = HttpStatusCode.FOUND;
-                filePath = "/index.html";
-            }
+            User user = new User(account, password, email);
+            checkDuplicatedUser(user);
+            InMemoryUserRepository.save(user);
         } catch (UserException e) {
-            filePath = "/401.html";
-            statusCode = HttpStatusCode.UNAUTHORIZED;
+            filePath = "/register.html";
+            statusCode = HttpStatusCode.BAD_REQUEST;
         }
-
         HttpResponseBody httpResponseBody = new HttpResponseBody(
                 fileReader.readFile(filePath));
+
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         httpResponseHeaders.setContentType(httpRequest);
         httpResponseHeaders.setContentLength(httpResponseBody);
         return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
+    }
+
+    private static void checkDuplicatedUser(User user) {
+        String userAccount = user.getAccount();
+        InMemoryUserRepository.findByAccount(userAccount)
+                .ifPresent(foundUser -> {
+                    throw new UserException(userAccount + "는 이미 존재하는 계정입니다.");
+                });
     }
 }

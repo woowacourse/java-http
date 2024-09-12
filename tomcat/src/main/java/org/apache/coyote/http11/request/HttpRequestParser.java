@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.response.HttpResponseHeaders;
 
 public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분리
 
@@ -13,9 +14,9 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
 
     private static final String DELIMITER_QUERY_STRING = "?";
 
-    private static final String DELIMITER_QUERY_STRING_VALUES = "&";
+    private static final String DELIMITER_PARAMETER_SET = "&";
 
-    private static final String DELIMITER_QUERY_STRING_VALUE = "=";
+    private static final String DELIMITER_PARAMETER_VALUE = "=";
 
     private static final String EMPTY_LINE = "";
 
@@ -27,8 +28,12 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
         HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
+        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
+        if (httpMethod.equals(HttpMethod.POST)) {
+            httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
+        }
 
-        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpRequestHeaders);
+        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpRequestHeaders, httpRequestBody);
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {
@@ -52,9 +57,9 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
             return new QueryString(queryStrings);
         }
         String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
-        String[] queryStringInfos = queryString.split(DELIMITER_QUERY_STRING_VALUES);
+        String[] queryStringInfos = queryString.split(DELIMITER_PARAMETER_SET);
         for (String queryStringInfo : queryStringInfos) { // TODO : 불용어 제거
-            String[] splittedQueryString = queryStringInfo.split(DELIMITER_QUERY_STRING_VALUE);
+            String[] splittedQueryString = queryStringInfo.split(DELIMITER_PARAMETER_VALUE);
             String key = splittedQueryString[0];
             String value = splittedQueryString[1];
             queryStrings.put(key, value);
@@ -78,5 +83,23 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
             headerLine = bufferedReader.readLine();
         }
         return new HttpRequestHeaders(headers);
+    }
+
+    private HttpRequestBody parseHttpRequestBody(
+            HttpRequestHeaders headers, BufferedReader bufferedReader) throws IOException {
+        Map<String, String> requestBody = new HashMap<>();
+        int contentLength = headers.getContentLength();
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String[] requestBodySets = new String(buffer).split(DELIMITER_PARAMETER_SET);
+            for (String requestBodySet : requestBodySets) {
+                int delimiterIndex = requestBodySet.indexOf(DELIMITER_PARAMETER_VALUE);
+                String key = requestBodySet.substring(0, delimiterIndex);
+                String value = requestBodySet.substring(delimiterIndex + 1);
+                requestBody.put(key, value);
+            }
+        }
+        return new HttpRequestBody(requestBody);
     }
 }

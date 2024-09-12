@@ -6,20 +6,32 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
 
-    private final HttpRequestPath httpRequestPath;
-
     private final QueryString queryString;
 
     private final HttpRequestHeaders httpRequestHeaders;
 
+    private final HttpRequestBody httpRequestBody;
+
+    private HttpRequestPath httpRequestPath;
+
     public HttpRequest(HttpMethod httpMethod,
                        HttpRequestPath httpRequestPath,
                        QueryString queryString,
-                       HttpRequestHeaders httpRequestHeaders) {
+                       HttpRequestHeaders httpRequestHeaders,
+                       HttpRequestBody httpRequestBody) {
         this.httpMethod = httpMethod;
         this.httpRequestPath = httpRequestPath;
         this.queryString = queryString;
         this.httpRequestHeaders = httpRequestHeaders;
+        this.httpRequestBody = httpRequestBody;
+    }
+
+    public void setHttpRequestPath(String filePath) {
+        this.httpRequestPath = new HttpRequestPath(filePath);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return this.httpMethod;
     }
 
     public String getHttpRequestPath() {
@@ -48,6 +60,10 @@ public class HttpRequest {
 
     public String getQueryParameter(String key) {
         return queryString.getValue(key);
+    }
+
+    public String getRequestBodyValue(String key) {
+        return httpRequestBody.getValue(key);
     }
 
     public boolean isParameterEmpty() {

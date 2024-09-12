@@ -34,8 +34,8 @@ public class FileReader {
     }
 
     private URL findFile(String path) {
-        if (path.equals("/login")) {
-            path = path.concat(".html");
+        if (path.equals("/login") || path.equals("/register")) {
+            path += ".html";
         }
         URL url = getClass().getClassLoader().getResource(BASE_DIRECTORY + path);
         if (url == null) {

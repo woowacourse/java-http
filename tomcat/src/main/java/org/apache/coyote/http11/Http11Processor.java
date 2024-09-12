@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticPageController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -12,6 +14,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -54,13 +57,19 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponseBody httpResponseBody = new HttpResponseBody(
                     fileReader.readFile(requestedFilePath));
             HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
-
-            if (httpRequest.getHttpRequestPath().contains("/login")) { // response를 통으로 만들어주기
-                httpResponse = LoginController.login(httpRequest);
+            if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
+                httpResponse = StaticPageController.getStaticPage(httpRequest);
+            }
+            if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+                if (httpRequest.getHttpRequestPath().contains("/login")) {
+                    httpResponse = LoginController.login(httpRequest);
+                }
+                if (httpRequest.getHttpRequestPath().contains("/register")) {
+                    httpResponse = RegisterController.register(httpRequest);
+                }
             }
 
             String response = httpResponseParser.parseResponse(httpResponse);
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {

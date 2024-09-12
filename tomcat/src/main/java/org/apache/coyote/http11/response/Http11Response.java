@@ -72,6 +72,18 @@ public class Http11Response implements HttpResponse {
         headers.add(name, value);
     }
 
+    public Http11ResponseStartLine getStartLine() {
+        return startLine;
+    }
+
+    public Http11ResponseHeaders getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         if (body == null) {

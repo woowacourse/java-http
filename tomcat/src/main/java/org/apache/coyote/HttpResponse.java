@@ -13,4 +13,6 @@ public interface HttpResponse {
     void addContentType(String accept);
 
     void addBody(String body);
+
+
 }

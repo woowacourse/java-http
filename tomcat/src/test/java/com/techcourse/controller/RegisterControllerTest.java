@@ -30,7 +30,7 @@ class RegisterControllerTest {
                 ""
         );
         InputStream inputStream = new ByteArrayInputStream(getLogin.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
+        HttpRequest httpRequest = Http11Request.from(inputStream);
         HttpResponse httpResponse = Http11Response.create();
 
         registerController.doGet(httpRequest, httpResponse);
@@ -62,7 +62,7 @@ class RegisterControllerTest {
                 "account=aa&password=password&email=abc@naver.com"
         );
         InputStream inputStream = new ByteArrayInputStream(register.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
+        HttpRequest httpRequest = Http11Request.from(inputStream);
         HttpResponse httpResponse = Http11Response.create();
 
         registerController.doPost(httpRequest, httpResponse);
@@ -91,7 +91,7 @@ class RegisterControllerTest {
                 "account=gugu&password=password&email=abc@naver.com"
         );
         InputStream inputStream = new ByteArrayInputStream(register.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
+        HttpRequest httpRequest = Http11Request.from(inputStream);
         HttpResponse httpResponse = Http11Response.create();
 
         assertThatThrownBy(() -> registerController.doPost(httpRequest, httpResponse))

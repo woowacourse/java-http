@@ -24,7 +24,7 @@ class Http11RequestTest {
                 ""
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        Http11Request http11Request = Http11Request.of(inputStream, () -> "abcdefg");
+        Http11Request http11Request = Http11Request.from(inputStream);
         Http11RequestHeader headers = http11Request.getHeaders();
 
         assertThat(headers.getHeaders())
@@ -49,7 +49,7 @@ class Http11RequestTest {
                 "account=gugu&password=password"
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        Http11Request http11Request = Http11Request.of(inputStream, () -> "abcdefg");
+        Http11Request http11Request = Http11Request.from(inputStream);
         String body = http11Request.getBodyValue();
 
         assertThat(body).isEqualTo("account=gugu&password=password");

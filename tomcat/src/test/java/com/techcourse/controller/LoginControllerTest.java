@@ -1,17 +1,20 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.Http11ResponseStartLine;
+import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.session.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,20 +33,17 @@ class LoginControllerTest {
                 "account=gugu&password=password"
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequestString.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
-        HttpResponse httpResponse = Http11Response.create();
+        Http11Request httpRequest = Http11Request.from(inputStream);
+        Http11Response httpResponse = Http11Response.create();
 
         LoginController loginController = new LoginController();
         loginController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.toString()).isEqualTo(
-                String.join(
-                        "\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Set-Cookie: JSESSIONID=abcdefg ",
-                        "Location: /index.html ",
-                        ""
-                )
+        assertAll(
+                () -> assertThat(httpResponse.getStartLine())
+                        .isEqualTo(new Http11ResponseStartLine(HttpStatusCode.FOUND)),
+                () -> assertThat(httpResponse.getHeaders().toString())
+                        .contains("Location: /index.html ")
         );
     }
 
@@ -60,19 +60,17 @@ class LoginControllerTest {
                 "account=gugu&password=passwod"
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequestString.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
-        HttpResponse httpResponse = Http11Response.create();
+        Http11Request httpRequest = Http11Request.from(inputStream);
+        Http11Response httpResponse = Http11Response.create();
 
         LoginController loginController = new LoginController();
         loginController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.toString()).isEqualTo(
-                String.join(
-                        "\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /401.html ",
-                        ""
-                )
+        assertAll(
+                () -> assertThat(httpResponse.getStartLine())
+                        .isEqualTo(new Http11ResponseStartLine(HttpStatusCode.FOUND)),
+                () -> assertThat(httpResponse.getHeaders().toString())
+                        .contains("Location: /401.html ")
         );
     }
 
@@ -80,20 +78,6 @@ class LoginControllerTest {
     @Test
     void doGetAlreadyLogin() throws IOException {
         LoginController loginController = new LoginController();
-        String login = String.join(
-                "\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: 30 ",
-                "",
-                "account=gugu&password=password"
-        );
-        InputStream inputStream = new ByteArrayInputStream(login.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
-        HttpResponse httpResponse = Http11Response.create();
-
-        loginController.doPost(httpRequest, httpResponse);
 
         String getLogin = String.join(
                 "\r\n",
@@ -103,19 +87,19 @@ class LoginControllerTest {
                 "Cookie: JSESSIONID=abcdefg ",
                 ""
         );
-        InputStream inputStream1 = new ByteArrayInputStream(getLogin.getBytes());
-        HttpRequest httpRequest1 = Http11Request.of(inputStream1, () -> "abcdefg");
-        HttpResponse httpResponse1 = Http11Response.create();
+        InputStream inputStream = new ByteArrayInputStream(getLogin.getBytes());
+        Http11Request httpRequest = Http11Request.from(inputStream);
+        Http11Response httpResponse = Http11Response.create();
+        Session session = httpRequest.getSession();
+        session.setAttribute("user", new User("gugu", "password", "email"));
 
-        loginController.doGet(httpRequest1, httpResponse1);
+        loginController.doGet(httpRequest, httpResponse);
 
-        assertThat(httpResponse1.toString()).isEqualTo(
-                String.join(
-                        "\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /index.html ",
-                        ""
-                )
+        assertAll(
+                () -> assertThat(httpResponse.getStartLine())
+                        .isEqualTo(new Http11ResponseStartLine(HttpStatusCode.FOUND)),
+                () -> assertThat(httpResponse.getHeaders().toString())
+                        .contains("Location: /index.html ")
         );
     }
 
@@ -131,21 +115,18 @@ class LoginControllerTest {
                 ""
         );
         InputStream inputStream = new ByteArrayInputStream(getLogin.getBytes());
-        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
-        HttpResponse httpResponse = Http11Response.create();
+        Http11Request httpRequest = Http11Request.from(inputStream);
+        Http11Response httpResponse = Http11Response.create();
 
         loginController.doGet(httpRequest, httpResponse);
 
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        assertThat(httpResponse.toString()).isEqualTo(
-                String.join(
-                        "\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Length: 3797 ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "",
-                        new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
-                )
+        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertAll(
+                () -> assertThat(httpResponse.getStartLine()).isEqualTo(Http11ResponseStartLine.defaultLine()),
+                () -> assertThat(httpResponse.getHeaders().toString()).contains("Content-Length: 3797 "),
+                () -> assertThat(httpResponse.getHeaders().toString()).contains("Content-Type: text/html;charset=utf-8 "),
+                () -> assertThat(httpResponse.getBody()).isEqualTo(body)
         );
     }
 }

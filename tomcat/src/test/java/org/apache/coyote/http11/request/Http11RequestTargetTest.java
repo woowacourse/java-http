@@ -9,7 +9,7 @@ class Http11RequestTargetTest {
 
     @DisplayName("reqeust target의 파싱하여 엔드포인트를 추출한다.")
     @Test
-    void ofEndPoint() {
+    void fromEndPoint() {
         Http11RequestTarget requestTarget = Http11RequestTarget.from("/login?account=gugu&password=password");
 
         assertThat(requestTarget.getEndPoint())

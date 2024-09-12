@@ -8,9 +8,7 @@ import java.net.Socket;
 import org.apache.controller.Controller;
 import org.apache.controller.ControllerContainer;
 import org.apache.coyote.Processor;
-import org.apache.coyote.SessionIdGenerator;
 import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.UUIDSessionIdGenerator;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.exception.HandlerNotFoundException;
 import org.slf4j.Logger;
@@ -24,11 +22,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String SERVER_ERR_PAGE = "/500.html";
 
     private final Socket connection;
-    private final SessionIdGenerator generator;
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
-        this.generator = new UUIDSessionIdGenerator();
     }
 
     @Override
@@ -41,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            Http11Request request = Http11Request.of(inputStream, generator);
+            Http11Request request = Http11Request.from(inputStream);
             log.info("http request : {}", request);
 
             Http11Response response = createResponse(request);

@@ -21,7 +21,7 @@ class Http11RequestStartLineTest {
 
     @DisplayName("StartLine에서 Http Method와 Request Target을 추출한다.")
     @Test
-    void of() {
+    void from() {
         Http11RequestStartLine http11StartLine = Http11RequestStartLine.from("GET /index.html HTTP/1.1");
 
         assertAll(

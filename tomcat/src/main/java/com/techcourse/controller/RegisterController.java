@@ -31,7 +31,7 @@ public class RegisterController extends AbstractController {
             responseBuilder.status(Status.CONFLICT);
             return;
         }
-        postProcess(responseBuilder, body);
+        saveUserAndRedirectHome(responseBuilder, body);
     }
 
     private boolean isInvalidBody(Map<String, String> body) {
@@ -44,7 +44,7 @@ public class RegisterController extends AbstractController {
         return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 
-    private void postProcess(HttpResponse.Builder responseBuilder, Map<String, String> body) {
+    private void saveUserAndRedirectHome(HttpResponse.Builder responseBuilder, Map<String, String> body) {
         InMemoryUserRepository.save(new User(body));
         responseBuilder.status(Status.FOUND)
                 .location("/index.html");

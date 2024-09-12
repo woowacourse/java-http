@@ -13,6 +13,12 @@ import com.techcourse.model.User;
 
 public class LoginController extends AbstractController {
 
+    private final SessionManager sessionManager;
+
+    public LoginController() {
+        this.sessionManager = SessionManager.getInstance();
+    }
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         super.doGet(request, response);
@@ -43,7 +49,6 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {
-        SessionManager sessionManager = SessionManager.getInstance();
         String sessionId = request.getSession();
         if (sessionId.isBlank()) {
             return false;
@@ -55,8 +60,6 @@ public class LoginController extends AbstractController {
     }
 
     private String createSession(User user) {
-        final SessionManager sessionManager = SessionManager.getInstance();
-
         String newSessionId = UUID.randomUUID().toString();
         Session session = new Session(newSessionId);
         session.setAttribute("user", user);

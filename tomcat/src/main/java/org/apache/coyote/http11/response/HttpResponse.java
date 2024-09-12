@@ -4,24 +4,58 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.catalina.session.Session;
 
 public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String EMPTY_BODY = "";
 
-    private final HttpStatus status;
     private final HttpResponseHeaders headers;
-    private final String body;
+    private HttpStatus status;
+    private String body;
 
     public HttpResponse(HttpStatus status, HttpResponseHeaders headers, String body) {
-        this.status = status;
         this.headers = headers;
+        this.status = status;
         this.body = body;
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public HttpResponse() {
+        this.headers = new HttpResponseHeaders();
+        this.status = HttpStatus.OK;
+        this.body = EMPTY_BODY;
+        headers.addContentLength(body.getBytes().length);
     }
 
     public static HttpResponseBuilder builder() {
         return new HttpResponseBuilder();
+    }
+
+    public void sendTextFiles(String text) {
+        status = HttpStatus.OK;
+        body = text;
+        headers.addContentType("text/html");
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendStaticFiles(String filePath) {
+        status = HttpStatus.OK;
+        body = StaticFileResponseUtils.makeResponseBody(filePath);
+        headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendRedirect(String location) {
+        status = HttpStatus.FOUND;
+        body = EMPTY_BODY;
+        headers.addLocation(location);
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void setSession(Session session) {
+        headers.setSession(session);
     }
 
     public String getHttpVersion() {
@@ -34,10 +68,6 @@ public class HttpResponse {
 
     public String getStatusMessage() {
         return status.getStatusMessage();
-    }
-
-    public Optional<String> getHeader(String key) {
-        return headers.getHeader(key);
     }
 
     public Map<String, String> getHeaders() {

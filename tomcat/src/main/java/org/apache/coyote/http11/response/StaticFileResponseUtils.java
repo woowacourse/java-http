@@ -21,27 +21,25 @@ public class StaticFileResponseUtils {
 
     public static HttpResponse createResponse(String resourceFilePath) {
         String responseBody = makeResponseBody(resourceFilePath);
-        String contentType = getContentType(findExtension(resourceFilePath));
+        String contentType = getContentType(resourceFilePath);
         return makeResponse(contentType, responseBody);
     }
 
-    private static String makeResponseBody(String resourceFilePath) {
+    public static String makeResponseBody(String resourceFilePath) {
         return StaticFileUtils.readStaticFile(resourceFilePath);
     }
 
-    private static String getContentType(String extension) {
-        if (EXTENSION_TO_CONTENT_TYPE.containsKey(extension)) {
-            return EXTENSION_TO_CONTENT_TYPE.get(extension);
-        }
-        return DEFAULT_CONTENT_TYPE;
-    }
-
-    private static String findExtension(String filePath) {
+    public static String getContentType(String filePath) {
         int delimiterIndex = filePath.lastIndexOf(".");
         if (delimiterIndex == -1) {
             throw new UncheckedServletException("파일의 확장자가 존재하지 않습니다.");
         }
-        return filePath.substring(delimiterIndex + 1);
+        String extension = filePath.substring(delimiterIndex + 1);
+
+        if (EXTENSION_TO_CONTENT_TYPE.containsKey(extension)) {
+            return EXTENSION_TO_CONTENT_TYPE.get(extension);
+        }
+        return DEFAULT_CONTENT_TYPE;
     }
 
     private static HttpResponse makeResponse(String contentType, String responseBody) {

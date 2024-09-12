@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.exception.CanNotHandleRequest;
@@ -43,11 +44,20 @@ public class DefaultResourceHandler implements RequestHandler {
         if (request.isPost()) {
             return login(request).toHttpMessage();
         }
-
+        if (isLoggedIn(request)) {
+            return Response.builder()
+                    .versionOf(request.getHttpVersion())
+                    .found("/index.html")
+                    .toHttpMessage();
+        }
         return Response.builder()
                 .versionOf(request.getHttpVersion())
                 .ofStaticResource(new StaticResource("/login.html"))
                 .toHttpMessage();
+    }
+
+    private boolean isLoggedIn(Request request) {
+        return Objects.nonNull(request.getSession(false));
     }
 
     private Response login(Request request) throws NoSuchUserException {

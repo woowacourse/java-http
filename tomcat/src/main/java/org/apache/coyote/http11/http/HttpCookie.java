@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-	private static final String JSESSIONID = "JSESSIONID";
+	public static final String JSESSIONID = "JSESSIONID";
 	private static final String COOKIE_VALUE_DELIMITER = "; ";
 	private static final String KEY_VALUE_DELIMITER = "=";
 	private static final int KEY_INDEX = 0;
@@ -38,10 +38,6 @@ public class HttpCookie {
 
 	private boolean isNotExistKey(String key) {
 		return !cookie.containsKey(key);
-	}
-
-	public boolean hasJsessionId() {
-		return cookie.containsKey(JSESSIONID) && cookie.get(JSESSIONID) != null;
 	}
 
 	public String getJsessionid() {

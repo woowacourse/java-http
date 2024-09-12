@@ -16,6 +16,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {}
+
     public static void save(User user) {
         Long id = sequence.getAndIncrement();
         database.put(user.getAccount(), user.withId(id));
@@ -25,5 +27,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static void deleteAll() {
+        database.clear();
+    }
 }

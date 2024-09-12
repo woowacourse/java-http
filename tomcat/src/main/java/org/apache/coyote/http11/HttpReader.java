@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestLine;
 
 public class HttpReader {
 

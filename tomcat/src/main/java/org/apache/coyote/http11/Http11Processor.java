@@ -12,6 +12,11 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.StatusLine;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

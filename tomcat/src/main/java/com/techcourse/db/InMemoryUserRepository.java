@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class InMemoryUserRepository {
 

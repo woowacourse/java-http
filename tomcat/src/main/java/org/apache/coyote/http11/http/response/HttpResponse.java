@@ -1,30 +1,18 @@
 package org.apache.coyote.http11.http.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.coyote.http11.http.HttpHeader;
 
 public class HttpResponse {
-
-	private static final String HTTP_VERSION = "HTTP/1.1";
 
 	private final HttpResponseStartLine startLine;
 	private final HttpResponseHeader header;
 	private final HttpResponseBody body;
 
-	public static HttpResponse ok(HttpResponseHeader header, HttpResponseBody body) {
-		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.OK), header, body);
-	}
-
-	public static HttpResponse notFound(HttpResponseHeader header, HttpResponseBody body) {
-		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.NOT_FOUND), header, body);
-	}
-
-	public static HttpResponse redirect(HttpResponseHeader responseHeader) {
-		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.FOUND), responseHeader, null);
-	}
-
-	public static HttpResponse badRequest(HttpResponseHeader httpResponseHeader) {
-		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.BAD_REQUEST), httpResponseHeader,
-			null);
+	public HttpResponse() {
+		this(new HttpResponseStartLine(), new HttpResponseHeader(), new HttpResponseBody());
 	}
 
 	private HttpResponse(HttpResponseStartLine startLine, HttpResponseHeader header, HttpResponseBody body) {
@@ -34,32 +22,49 @@ public class HttpResponse {
 	}
 
 	public String toResponseMessage() {
-		if (body == null) {
-			return createResponseMessageWithoutBody();
+		if (body.isExist()) {
+			return createMessageWithBody();
 		}
-
-		return createResponseMessage();
+		return createMessageWithoutBody();
 	}
 
-	private String createResponseMessageWithoutBody() {
-		header.addHeader(HttpHeader.CONTENT_LENGTH.getName(), "0");
-		return String.join("\r\n"
-			, startLine.toResponseMessage()
-			, header.toResponseMessage()
-			, ""
-		);
-	}
-
-	private String createResponseMessage() {
+	private String createMessageWithBody() {
 		String contentCharset = ";charset=utf-8";
-		header.addHeader(HttpHeader.CONTENT_TYPE.getName(), body.getContentType() + contentCharset);
-		header.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(body.getContentLength()));
+		addHeader(HttpHeader.CONTENT_TYPE.getName(), body.getContentType() + contentCharset);
+		addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(body.getContent().length));
 
-		return String.join("\r\n"
-			, startLine.toResponseMessage()
-			, header.toResponseMessage()
-			, ""
-			, body.toResponseMessage()
-		);
+		List<String> lines = createBaseMessage();
+		lines.add(body.toResponseMessage());
+
+		return String.join("\r\n", lines);
+	}
+
+	private String createMessageWithoutBody() {
+		return String.join("\r\n", createBaseMessage());
+	}
+
+	public List<String> createBaseMessage() {
+		List<String> lines = new ArrayList<>();
+		lines.add(startLine.toResponseMessage());
+		lines.add(header.toResponseMessage());
+		lines.add("");
+		return lines;
+	}
+
+	public void setStatusCode(HttpStatusCode statusCode) {
+		this.startLine.setStatusCode(statusCode);
+	}
+
+	public void addHeader(String key, String value) {
+		this.header.addHeader(key, value);
+	}
+
+	public void addHeader(String key, List<String> values) {
+		this.header.addHeader(key, values);
+	}
+
+	public void setBody(String contentType, byte[] content) {
+		this.body.setContent(content);
+		this.body.setContentType(contentType);
 	}
 }

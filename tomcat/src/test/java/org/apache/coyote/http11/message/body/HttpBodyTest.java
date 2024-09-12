@@ -1,15 +1,13 @@
 package org.apache.coyote.http11.message.body;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.Map;
 import java.util.Optional;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpBodyTest {
 
@@ -26,43 +24,66 @@ class HttpBodyTest {
         assertThat(httpbody).isNotNull();
     }
 
-    @DisplayName("폼 데이터 형식이 아닌 바디 값이 입력되면 예외를 발생시킨다")
-    @ValueSource(strings = {"age, 13", "age", "age-13"})
-    @ParameterizedTest
-    void validateKeyAndValueFormat(final String input) {
-        // When & Then
-        assertThatThrownBy(() -> new HttpBody(input))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("유효하지 않은 Form Data 값 입니다. - " + input);
-    }
 
-    @DisplayName("문자열 키 값이 입력되었을 때 매핑되는 값이 존재하면 반환한다.")
+    @DisplayName("바디 값이 존재한다면 값을 담은 Optional 객체를 반환한다.")
     @Test
-    void findValueByKeyWithStringKey() {
+    void getValueWhenValueIsExist() {
         // Given
         final String input = "name=John+Doe&email=john%40example.com";
         final HttpBody httpBody = new HttpBody(input);
 
         // When
-        final Optional<String> name = httpBody.findByKey("name");
+        final Optional<String> value = httpBody.getValue();
 
         // Then
-        SoftAssertions.assertSoftly(softAssertions -> {
-            softAssertions.assertThat(name).isPresent();
-            softAssertions.assertThat(name.get()).isEqualTo("John+Doe");
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(value).isPresent();
+            softAssertions.assertThat(value.get()).isEqualTo("name=John+Doe&email=john%40example.com");
         });
     }
 
-    @DisplayName("존재하지 않는 키 값이 이력되면 빈 Optional 객체를 반환한다.")
+    @DisplayName("바디 값이 존재하지 않다면 빈 Optional 객체를 반환한다.")
     @Test
-    void findValueByKeyWithNotExistValue() {
+    void getValueWhenValueIsNotExist() {
         // Given
         final HttpBody httpBody = new HttpBody(null);
 
         // When
-        final Optional<String> data = httpBody.findByKey("Kelly");
+        final Optional<String> value = httpBody.getValue();
 
         // Then
-        assertThat(data).isEmpty();
+        assertThat(value).isEmpty();
+    }
+
+    @DisplayName("키와 값으로 구성된 바디 값이라면 Map 형태로 키와 값을 반환한다.")
+    @Test
+    void parseFormDataKeyAndValue() {
+        // Given
+        final String input = "name=John+Doe&email=john%40example.com";
+        final HttpBody httpBody = new HttpBody(input);
+
+        // When
+        final Map<String, String> keyAndValue = httpBody.parseFormDataKeyAndValue();
+
+        // Then
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(keyAndValue).isNotEmpty();
+            softAssertions.assertThat(keyAndValue.get("name")).isEqualTo("John+Doe");
+            softAssertions.assertThat(keyAndValue.get("email")).isEqualTo("john%40example.com");
+        });
+    }
+
+    @DisplayName("키와 값으로 구성되지 않은 바디 값이라면 빈 Map 객체를 반환한다.")
+    @Test
+    void parseFormDataKeyAndValueWithNotKeyAndValueFormatData() {
+        // Given
+        final String input = "Hello Kelly!";
+        final HttpBody httpBody = new HttpBody(input);
+
+        // When
+        final Map<String, String> keyAndValue = httpBody.parseFormDataKeyAndValue();
+
+        // Then
+        assertThat(keyAndValue).isEmpty();
     }
 }

@@ -13,42 +13,39 @@ public class HttpBody {
     private static final int FORM_DATA_KEY_INDEX = 0;
     private static final int FORM_DATA_VALUE_INDEX = 1;
 
-    private final Map<String, String> values;
+    private final String value;
 
-    public HttpBody(final String httpBodyValue) {
-        this.values = parseValues(httpBodyValue);
+    public HttpBody(final String value) {
+        this.value = value;
     }
 
-    private Map<String, String> parseValues(final String httpBodyValue) {
+    public Optional<String> getValue() {
+        if (value == null || value.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(value);
+    }
+
+    public Map<String, String> parseFormDataKeyAndValue() {
         final Map<String, String> values = new HashMap<>();
-        if (httpBodyValue == null || httpBodyValue.isBlank()) {
+        if (value == null || value.isBlank()) {
             return Collections.EMPTY_MAP;
         }
 
-        final String[] splitValues = httpBodyValue.split(FORM_DATA_SEPARATOR);
+        final String[] splitValues = value.split(FORM_DATA_SEPARATOR);
         Arrays.stream(splitValues)
-                .forEach(value -> {
-                    final String[] keyAndValue = parseKeyAndValue(value);
-                    values.put(keyAndValue[FORM_DATA_KEY_INDEX], keyAndValue[FORM_DATA_VALUE_INDEX]);
-                });
+                .forEach(value -> setKeyAndValue(values, value));
 
         return values;
     }
 
-    private String[] parseKeyAndValue(final String data) {
-        final String[] keyAndValue = data.split(FORM_DATA_KEY_AND_VALUE_SEPARATOR);
+    private void setKeyAndValue(final Map<String, String> values, final String value) {
+        final String[] keyAndValue = value.split(FORM_DATA_KEY_AND_VALUE_SEPARATOR);
         if (keyAndValue.length != 2) {
-            throw new IllegalArgumentException("유효하지 않은 Form Data 값 입니다. - " + data);
+            return;
         }
 
-        return keyAndValue;
-    }
-
-    public Optional<String> findByKey(final String key) {
-        if (!values.containsKey(key)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(values.get(key));
+        values.put(keyAndValue[FORM_DATA_KEY_INDEX], keyAndValue[FORM_DATA_VALUE_INDEX]);
     }
 }

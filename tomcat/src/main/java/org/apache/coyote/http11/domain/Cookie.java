@@ -14,11 +14,7 @@ public class Cookie {
         cookies.put(name, value);
     }
 
-    public String getSessionId() {
-        return cookies.get("JSESSIONID");
-    }
-
-    public boolean containsJSessionId() {
-        return cookies.containsKey("JSESSIONID");
+    public Map<String, String> getCookies() {
+        return cookies;
     }
 }

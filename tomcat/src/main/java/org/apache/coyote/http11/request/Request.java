@@ -35,8 +35,12 @@ public class Request {
         return requestLine.hasPath(path);
     }
 
-    public boolean hasMethod(RequestMethod method) {
-        return requestLine.hasMethod(method);
+    public boolean hasGetMethod() {
+        return requestLine.hasGetMethod();
+    }
+
+    public boolean hasPostMethod() {
+        return requestLine.hasPostMethod();
     }
 
     public RequestBody getBody() {

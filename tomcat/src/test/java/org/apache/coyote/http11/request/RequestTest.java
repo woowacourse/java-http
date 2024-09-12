@@ -25,7 +25,7 @@ class RequestTest {
 
         // then
         assertThat(request.hasPath("/path")).isTrue();
-        assertThat(request.hasMethod(RequestMethod.POST)).isTrue();
+        assertThat(request.hasPostMethod()).isTrue();
         assertThat(request.getBody()).isInstanceOf(RequestBody.class);
     }
 }

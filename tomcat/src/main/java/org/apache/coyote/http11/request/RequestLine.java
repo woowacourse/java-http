@@ -20,8 +20,12 @@ public class RequestLine {
         return this.path.hasPath(path);
     }
 
-    public boolean hasMethod(RequestMethod method) {
-        return this.method == method;
+    public boolean hasGetMethod() {
+        return this.method.isGet();
+    }
+
+    public boolean hasPostMethod() {
+        return this.method.isPost();
     }
 
     public String getPath() {

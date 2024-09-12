@@ -14,4 +14,12 @@ public enum RequestMethod {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP 메서드입니다."));
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

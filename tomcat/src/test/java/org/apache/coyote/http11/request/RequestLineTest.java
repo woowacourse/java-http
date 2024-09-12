@@ -18,6 +18,6 @@ class RequestLineTest {
 
         // then
         assertThat(requestLine.hasPath("/path")).isTrue();
-        assertThat(requestLine.hasMethod(RequestMethod.GET)).isTrue();
+        assertThat(requestLine.hasGetMethod()).isTrue();
     }
 }

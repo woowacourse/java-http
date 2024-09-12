@@ -15,4 +15,8 @@ public record HttpRequest(
     public boolean isPOST() {
         return POST.equals(this.requestLine.httpMethod());
     }
+
+    public String getPath() {
+        return this.requestLine.path();
+    }
 }

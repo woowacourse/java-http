@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import org.apache.catalina.exception.ApplicationException;
+import com.techcourse.exception.ApplicationException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

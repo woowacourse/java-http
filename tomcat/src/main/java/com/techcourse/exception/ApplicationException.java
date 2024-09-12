@@ -1,4 +1,4 @@
-package org.apache.catalina.exception;
+package com.techcourse.exception;
 
 public abstract class ApplicationException extends RuntimeException {
 

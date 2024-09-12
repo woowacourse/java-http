@@ -28,4 +28,8 @@ public class SessionService {
     public Optional<HttpSession> findSession(String sessionId) {
         return Optional.ofNullable(MANAGER.findSession(sessionId));
     }
+
+    public void addSession(HttpSession session) {
+        MANAGER.add(session);
+    }
 }

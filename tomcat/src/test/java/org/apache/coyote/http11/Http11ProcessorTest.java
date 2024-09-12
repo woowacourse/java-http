@@ -11,6 +11,8 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.route.DefaultDispatcher;
 import org.apache.catalina.route.RequestMapper;
 import org.apache.catalina.route.RequestMapping;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -28,21 +30,9 @@ class Http11ProcessorTest {
         // given
         StubSocket socket = new StubSocket();
         RequestMapping requestMapping = new RequestMapper();
-        requestMapping.register(new AbstractController() {
-            @Override
-            protected void doGet(HttpRequest request, HttpResponse response) {
-                response.setBody("Hello, World!");
-            }
-
-            @Override
-            protected void doPost(HttpRequest request, HttpResponse response) {
-            }
-
-            @Override
-            public String matchedPath() {
-                return "/";
-            }
-        });
+        requestMapping.register(getAnonymousController(
+                HttpMethod.GET, "/", HttpStatusCode.OK, "Hello, World!", false
+        ));
         Http11Processor processor = new Http11Processor(socket, new DefaultDispatcher(requestMapping));
 
         // when
@@ -69,21 +59,9 @@ class Http11ProcessorTest {
         );
         StubSocket socket = new StubSocket(httpRequest);
         RequestMapping requestMapping = new RequestMapper();
-        requestMapping.register(new AbstractController() {
-            @Override
-            protected void doGet(HttpRequest request, HttpResponse response) {
-                response.setBody("Hello, World!");
-            }
-
-            @Override
-            protected void doPost(HttpRequest request, HttpResponse response) {
-            }
-
-            @Override
-            public String matchedPath() {
-                return "/";
-            }
-        });
+        requestMapping.register(getAnonymousController(
+                HttpMethod.GET, "/", HttpStatusCode.OK, "Hello, World!", false
+        ));
         Http11Processor processor = new Http11Processor(socket, new DefaultDispatcher(requestMapping));
 
         // when
@@ -191,5 +169,36 @@ class Http11ProcessorTest {
 
     private Http11Processor getProcessor(StubSocket socket) {
         return new Http11Processor(socket, new DefaultDispatcher(new RequestMapper()));
+    }
+
+    private AbstractController getAnonymousController(
+            HttpMethod mapMethod, String mapPath, HttpStatusCode responseStatus, String responseBody, boolean exception
+    ) {
+        return new AbstractController() {
+            @Override
+            protected void doGet(HttpRequest request, HttpResponse response) {
+                process(request, response);
+            }
+
+            @Override
+            protected void doPost(HttpRequest request, HttpResponse response) {
+                process(request, response);
+            }
+
+            private void process(HttpRequest request, HttpResponse response) {
+                if (exception) {
+                    throw new RuntimeException(String.format("%s %s 의도적 예외 발생", mapMethod, mapPath));
+                }
+                if (request.getMethod().equals(mapMethod)) {
+                    response.setStatus(responseStatus)
+                            .setBody(responseBody);
+                }
+            }
+
+            @Override
+            public String matchedPath() {
+                return mapPath;
+            }
+        };
     }
 }

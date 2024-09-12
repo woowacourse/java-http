@@ -117,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
             cookie = setCookie(httpSession.get().getId());
         }
 
-        createHttpResponse(path, outputStream, httpStatus, contentType, cookie);
+        sendHttpResponse(path, outputStream, httpStatus, contentType, cookie);
     }
 
     private String setCookie(UUID uuid) {
@@ -181,7 +181,7 @@ public class Http11Processor implements Runnable, Processor {
 
         String contentType = determineContentType(resourcePath);
 
-        createHttpResponse(resourcePath, outputStream, httpStatus, contentType, "");
+        sendHttpResponse(resourcePath, outputStream, httpStatus, contentType, "");
     }
 
     private String[] determineResourcePath(String requestURL) {
@@ -311,8 +311,14 @@ public class Http11Processor implements Runnable, Processor {
         return uuid;
     }
 
-    private void createHttpResponse(final String path, final OutputStream outputStream, String httpStatus,
-                                    final String contentType, final String cookie) throws IOException {
+    private void sendHttpResponse(final String path, final OutputStream outputStream, String httpStatus,
+                                  final String contentType, final String cookie) throws IOException {
+
+        byte[] response = createHttpResponse(httpStatus, contentType, cookie, path);
+        writeHttpResponse(response, outputStream);
+    }
+
+    private byte[] createHttpResponse(String httpStatus, String contentType, String cookie, final String path) throws IOException {
         URL resource = getClass().getResource(path);
 
         if (resource == null) {
@@ -321,15 +327,25 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-        final var response = String.join("\r\n",
+
+        String header = String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.length + " ",
                 cookie,
                 "");
 
-        outputStream.write(response.getBytes());
-        outputStream.write(responseBody);
+        byte[] headerBytes = header.getBytes();
+        byte[] response = new byte[headerBytes.length + responseBody.length];
+
+        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
+        System.arraycopy(responseBody, 0, response, headerBytes.length, responseBody.length);
+
+        return response;
+    }
+
+    private void writeHttpResponse(byte[] response, OutputStream outputStream) throws IOException {
+        outputStream.write(response);
         outputStream.flush();
     }
 }

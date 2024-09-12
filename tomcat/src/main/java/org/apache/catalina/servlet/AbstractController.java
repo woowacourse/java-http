@@ -8,8 +8,6 @@ import org.apache.catalina.util.ResourceReader;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String UTF_8_ENCODING = ";charset=utf-8";
-
     @Override
     public abstract void service(HttpRequest request, HttpResponse response);
 
@@ -21,7 +19,7 @@ public abstract class AbstractController implements Controller {
     protected void responseResource(HttpResponse response, String path) {
         String responseBody = ResourceReader.read(path);
         String contentType = ResourceReader.probeContentType(path);
-        response.addHeader(HttpHeader.CONTENT_TYPE, contentType + UTF_8_ENCODING);
+        response.addHeader(HttpHeader.CONTENT_TYPE, contentType);
         response.setBody(responseBody);
     }
 }

@@ -19,6 +19,7 @@ public class ResourceReader {
     private static final String BASE_PATH = "static";
     private static final String HTML_EXTENSION = ".html";
     private static final String END_OF_LINE = "";
+    private static final String UTF_8_ENCODING = ";charset=utf-8";
 
     private static final Logger log = LoggerFactory.getLogger(ResourceReader.class);
 
@@ -29,7 +30,7 @@ public class ResourceReader {
     public static String probeContentType(String path) {
         Tika tika = new Tika();
         try {
-            return tika.detect(getPath(path));
+            return tika.detect(getPath(path)) + UTF_8_ENCODING;
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new CatalinaException("Invalid path: " + path);

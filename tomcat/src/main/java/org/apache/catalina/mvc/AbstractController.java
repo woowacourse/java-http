@@ -1,5 +1,6 @@
 package org.apache.catalina.mvc;
 
+import org.apache.catalina.http.ContentType;
 import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
     protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
-    public static final String DEFAULT_CONTENT_TYPE = "text/html";
+    public static final ContentType DEFAULT_CONTENT_TYPE = ContentType.HTML;
     private static final String BAD_REQUEST_PAGE = "/400.html";
 
     @Override

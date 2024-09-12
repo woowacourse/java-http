@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 
 import org.apache.catalina.auth.HttpCookie;
+import org.apache.catalina.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,9 @@ class HttpRequestHeaderTest {
         void getFileTypeSuccess() {
             RequestHeader requestHeader = new RequestHeader(Map.of("Accept", "text/css"));
 
-            String actual = requestHeader.getFileType();
+            ContentType actual = requestHeader.getContentType();
 
-            assertThat(actual).isEqualTo("text/css");
+            assertThat(actual).isEqualTo(ContentType.CSS);
         }
 
         @Test
@@ -29,9 +30,9 @@ class HttpRequestHeaderTest {
         void getFileTypeSuccessByNotContainAccept() {
             RequestHeader requestHeader = new RequestHeader(Map.of());
 
-            String actual = requestHeader.getFileType();
+            ContentType actual = requestHeader.getContentType();
 
-            assertThat(actual).isEqualTo("text/html");
+            assertThat(actual).isEqualTo(ContentType.HTML);
         }
     }
 

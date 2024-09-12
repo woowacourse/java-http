@@ -20,7 +20,7 @@ public class RootController extends AbstractController {
     public HttpResponse doGet(HttpRequest request) {
         return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                request.getFileType(),
+                request.getContentType(),
                 DEFAULT_PAGE_CONTENT
         );
     }

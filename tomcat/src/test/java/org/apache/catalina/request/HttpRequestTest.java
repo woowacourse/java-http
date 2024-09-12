@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.Map;
 
 import org.apache.catalina.auth.HttpCookie;
+import org.apache.catalina.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class HttpRequestTest {
             assertAll(() -> assertThat(httpRequest.getQueryParam()).isEqualTo(
                             Map.of("account", "gugu", "password", "password")),
                     () -> assertThat(httpRequest.getPathWithoutQuery()).isEqualTo("/index"),
-                    () -> assertThat(httpRequest.getFileType()).isEqualTo("text/html"),
+                    () -> assertThat(httpRequest.getContentType()).isEqualTo(ContentType.HTML),
                     () -> assertThat(httpRequest.getCookie()).isEqualTo(new HttpCookie(Map.of("id", "gugu"))),
                     () -> assertThat(httpRequest.getBody()).isEqualTo(body));
         }

@@ -3,6 +3,7 @@ package org.apache.catalina.request;
 import java.util.Map;
 
 import org.apache.catalina.auth.HttpCookie;
+import org.apache.catalina.http.ContentType;
 import org.apache.catalina.http.VersionOfProtocol;
 
 public class HttpRequest {
@@ -44,8 +45,8 @@ public class HttpRequest {
         return requestBody.getBody();
     }
 
-    public String getFileType() {
-        return requestHeader.getFileType();
+    public ContentType getContentType() {
+        return requestHeader.getContentType();
     }
 
     public HttpCookie getCookie() {

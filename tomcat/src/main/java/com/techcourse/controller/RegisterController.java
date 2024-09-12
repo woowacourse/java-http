@@ -38,7 +38,7 @@ public class RegisterController extends AbstractController {
         }
         HttpResponse response = new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(request.getPath() + ".html"));
         response.addLocation(request.getPath() + ".html");
         return response;
@@ -56,7 +56,7 @@ public class RegisterController extends AbstractController {
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return new HttpResponse(
                     new StatusLine(versionOfProtocol, HttpStatus.BAD_REQUEST),
-                    request.getFileType(),
+                    request.getContentType(),
                     FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
         String password = bodyParams.get(PASSWORD);
@@ -69,7 +69,7 @@ public class RegisterController extends AbstractController {
     private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
         HttpResponse response = new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(INDEX_PAGE));
         response.addLocation(INDEX_PAGE);
         return response;

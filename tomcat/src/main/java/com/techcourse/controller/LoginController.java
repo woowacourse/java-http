@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
             }
             HttpResponse response = new HttpResponse(
                     new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                    request.getFileType(),
+                    request.getContentType(),
                     FileReader.loadFileContent(request.getPath() + ".html"));
             response.addLocation(request.getPath() + ".html");
             return response;
@@ -63,7 +63,7 @@ public class LoginController extends AbstractController {
     private static HttpResponse getBadRequestResponse(HttpRequest request) {
         return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(BAD_REQUEST_PAGE));
     }
 
@@ -90,7 +90,7 @@ public class LoginController extends AbstractController {
     private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
         HttpResponse response = new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(INDEX_PAGE));
         response.addLocation(INDEX_PAGE);
         return response;
@@ -105,7 +105,7 @@ public class LoginController extends AbstractController {
     private static HttpResponse getUnauthorizedResponse(HttpRequest request) {
         return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.UNAUTHORIZED),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 

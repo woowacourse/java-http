@@ -20,7 +20,7 @@ public class PageLoadController extends AbstractController {
     public HttpResponse doGet(HttpRequest request) {
         return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                request.getFileType(),
+                request.getContentType(),
                 FileReader.loadFileContent(request.getPathWithoutQuery()));
     }
 

@@ -51,7 +51,17 @@ public class RegisterController extends AbstractController {
         if (hasMissingRequiredParams(bodyParams)) {
             throw new IllegalArgumentException("바디가 제대로 정의되지 않았습니다.");
         }
+        registerAndSetResponse(response, bodyParams);
+    }
 
+    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
+        return queryParams.size() < 3 ||
+                queryParams.get(ACCOUNT) == null ||
+                queryParams.get(PASSWORD) == null ||
+                queryParams.get(EMAIL) == null;
+    }
+
+    private void registerAndSetResponse(HttpResponse response, Map<String, String> bodyParams) {
         String account = bodyParams.get(ACCOUNT);
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
@@ -60,12 +70,5 @@ public class RegisterController extends AbstractController {
         response.setHttpStatus(HttpStatus.FOUND);
         response.setBody(FileReader.loadFileContent(INDEX_PAGE));
         response.setRedirection(INDEX_PAGE);
-    }
-
-    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
-        return queryParams.size() < 3 ||
-                queryParams.get(ACCOUNT) == null ||
-                queryParams.get(PASSWORD) == null ||
-                queryParams.get(EMAIL) == null;
     }
 }

@@ -31,7 +31,7 @@ public class HttpResponse {
 	private String createMessageWithBody() {
 		String contentCharset = ";charset=utf-8";
 		addHeader(HttpHeader.CONTENT_TYPE.getName(), body.getContentType() + contentCharset);
-		addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(body.getContent().length));
+		addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(body.getContentLength()));
 
 		List<String> lines = createBaseMessage();
 		lines.add(body.toResponseMessage());

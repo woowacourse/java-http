@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request.requestLine;
 
 public class Path {
 
-    public static final String ROOT_PATH= "/";
+    private static final String ROOT_PATH= "/";
     private final String DEFAULT_PATH = "/index.html";
 
     private final String value;

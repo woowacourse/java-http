@@ -12,7 +12,7 @@ import util.ResourceFileLoader;
 
 public class RegisterController extends AbstractController {
 
-    public static final String ROOT_LOCATION = "http://localhost:8080/";
+    private static final String ROOT_LOCATION = "http://localhost:8080/";
     private final String JAVA_SESSION_ID = "JSESSIONID";
 
     @Override

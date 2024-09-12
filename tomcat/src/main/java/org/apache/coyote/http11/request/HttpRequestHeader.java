@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +43,11 @@ public class HttpRequestHeader {
     }
 
     public ContentType getContentType() {
-        return ContentType.toContentType(httpRequestHeaders.get("Content-Type"));
+        return ContentType.toContentType(httpRequestHeaders.get(CONTENT_TYPE.getHttpForm()));
     }
 
     public String getContentLength() {
-        return httpRequestHeaders.get("Content-Length");
+        return httpRequestHeaders.get(CONTENT_LENGTH.getHttpForm());
     }
 
     public String getValue(String name) {

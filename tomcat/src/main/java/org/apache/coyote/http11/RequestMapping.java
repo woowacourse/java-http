@@ -6,6 +6,7 @@ import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
+
     public Controller getController(HttpRequest request) {
         String requestPath = request.getRequestPath();
         if (requestPath.equals("/login")) {

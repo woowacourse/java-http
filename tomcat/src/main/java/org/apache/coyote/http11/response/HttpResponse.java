@@ -1,15 +1,22 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
-    private final String DEFAULT_CONTENT_ENCODING_TYPE = "utf-8";
+    private static final String CONTENT_TYPE_SEPARATOR = ";";
+    private static final String HEADER_ENTRY_SEPARATOR = ": ";
+    private final String DEFAULT_CONTENT_ENCODING_TYPE = "charset=utf-8";
 
     private HttpResponseStatusLine statusLine;
     private Map<String, String> header;
@@ -26,21 +33,21 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType contentType) {
-        header.put("Content-Type",
-                contentType.toHttpForm() + ";" + "charset=" + DEFAULT_CONTENT_ENCODING_TYPE);
+        header.put(HttpHeader.CONTENT_TYPE.getHttpForm(),
+                contentType.toHttpForm() + CONTENT_TYPE_SEPARATOR + DEFAULT_CONTENT_ENCODING_TYPE);
     }
 
     public void setResponseBody(String content) {
-        header.put("Content-Length", String.valueOf(content.getBytes().length));
+        header.put(CONTENT_LENGTH.getHttpForm(), String.valueOf(content.getBytes().length));
         body = content;
     }
 
     public void setCookie(HttpCookie cookie) {
-        header.put("Set-Cookie", cookie.toHttpForm());
+        header.put(SET_COOKIE.getHttpForm(), cookie.toHttpForm());
     }
 
     public void sendRedirect(String location) {
-        header.put("Location", location);
+        header.put(LOCATION.getHttpForm(), location);
         setHttpStatus(HttpStatus.FOUND);
     }
 
@@ -51,7 +58,7 @@ public class HttpResponse {
     public String toHttpForm() {
         String httpFormHeader = header.entrySet()
                 .stream()
-                .map((singleHeader) -> singleHeader.getKey() + ": " + singleHeader.getValue())
+                .map((singleHeader) -> singleHeader.getKey() + HEADER_ENTRY_SEPARATOR + singleHeader.getValue())
                 .collect(Collectors.joining("\r\n"));
 
         return String.join("\r\n",

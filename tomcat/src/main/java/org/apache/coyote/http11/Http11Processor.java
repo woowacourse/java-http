@@ -30,12 +30,17 @@ public class Http11Processor implements Runnable, Processor {
         try (OutputStream outputStream = connection.getOutputStream();
              InputStream inputStream = connection.getInputStream()) {
             Http11Request request = Http11Request.from(inputStream);
-            Http11Response response = Http11RequestHandler.handle(request);
-            String responseString = response.getResponse();
-            outputStream.write(responseString.getBytes());
-            outputStream.flush();
+            Http11Response response = Http11Response.of(request);
+            Http11RequestHandler requestHandler = Http11RequestHandler.from();
+            requestHandler.handle(request, response);
+            writeAndFlush(outputStream, response.getResponse());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void writeAndFlush(OutputStream outputStream, String responseString) throws IOException {
+        outputStream.write(responseString.getBytes());
+        outputStream.flush();
     }
 }

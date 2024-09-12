@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
+
 public enum StatusCode {
     OK(200, "OK"),
     FOUND(302, "FOUND"),
@@ -16,8 +18,22 @@ public enum StatusCode {
         this.reasonPhrase = reasonPhrase;
     }
 
+    public static StatusCode valueOf(int code) {
+        return Arrays.stream(values())
+                .filter(statusCode -> statusCode.code == code)
+                .findAny()
+                .orElseThrow();
+    }
+
+    public String getStatusCode() {
+        return code + " " + reasonPhrase;
+    }
+
     @Override
     public String toString() {
-        return code + " " + reasonPhrase;
+        return "StatusCode{" +
+                "code=" + code +
+                ", reasonPhrase='" + reasonPhrase + '\'' +
+                '}';
     }
 }

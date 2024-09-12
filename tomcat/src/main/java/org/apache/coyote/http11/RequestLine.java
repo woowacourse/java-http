@@ -1,10 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
-
 public class RequestLine {
 
     private static final String START_LINE_DELIMITER = " ";
+    private static final int FIRST = 0;
+    private static final int SECOND = 1;
+    private static final int THIRD = 2;
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
@@ -18,9 +19,9 @@ public class RequestLine {
 
     public static RequestLine from(String startLine) {
         String[] splitStartLine = startLine.split(START_LINE_DELIMITER);
-        HttpMethod httpMethod = HttpMethod.from(splitStartLine[0]);
-        RequestUri requestUri = RequestUri.from(splitStartLine[1]);
-        HttpVersion httpVersion = HttpVersion.from(splitStartLine[2]);
+        HttpMethod httpMethod = HttpMethod.from(splitStartLine[FIRST]);
+        RequestUri requestUri = RequestUri.from(splitStartLine[SECOND]);
+        HttpVersion httpVersion = HttpVersion.from(splitStartLine[THIRD]);
 
         return new RequestLine(httpMethod, requestUri, httpVersion);
     }
@@ -37,7 +38,12 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public Map<String, String> getQueryParameters() {
-        return requestUri.getQueryParameters();
+    @Override
+    public String toString() {
+        return "RequestLine{" +
+                "httpMethod=" + httpMethod +
+                ", requestUri=" + requestUri +
+                ", httpVersion=" + httpVersion +
+                '}';
     }
 }

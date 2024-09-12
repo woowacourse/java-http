@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Http11HeaderName.ACCEPT;
+import static org.apache.coyote.http11.Http11HeaderName.CONTENT_LENGTH;
+import static org.apache.coyote.http11.Http11HeaderName.COOKIE;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.http.HttpHeaders;
@@ -15,19 +19,19 @@ public class Http11RequestHeader {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
 
-    private Http11RequestHeader(RequestLine requestLine, HttpHeaders httpHeaders) {
-        this.requestLine = requestLine;
+    private Http11RequestHeader(HttpHeaders httpHeaders) {
         this.httpHeaders = httpHeaders;
     }
 
-    public static Http11RequestHeader from(BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
-        HttpHeaders httpHeaders = HttpHeaders.of(extractRequestHeader(bufferedReader), (s1, s2) -> true);
+    public static Http11RequestHeaderBuilder builder() {
+        return new Http11RequestHeaderBuilder();
+    }
 
-        return new Http11RequestHeader(requestLine, httpHeaders);
+    public static Http11RequestHeader from(BufferedReader bufferedReader) throws IOException {
+        HttpHeaders httpHeaders = HttpHeaders.of(extractRequestHeader(bufferedReader), (s1, s2) -> true);
+        return new Http11RequestHeader(httpHeaders);
     }
 
     private static Map<String, List<String>> extractRequestHeader(BufferedReader bufferedReader) {
@@ -43,28 +47,41 @@ public class Http11RequestHeader {
                 .toList();
     }
 
-    public RequestUri getRequestUri() {
-        return requestLine.getRequestUri();
-    }
-
-    public HttpVersion getHttpVersion() {
-        return requestLine.getHttpVersion();
-    }
-
     public List<String> getAcceptType() {
-        return httpHeaders.allValues("Accept");
+        return httpHeaders.allValues(ACCEPT.getName());
     }
 
     public int getContentLength() {
-        String contentLength = httpHeaders.firstValue("Content-Length").orElse("0");
+        String contentLength = httpHeaders.firstValue(CONTENT_LENGTH.getName()).orElse("0");
         return Integer.parseInt(contentLength);
     }
 
-    public HttpMethod getHttpMethod() {
-        return requestLine.getHttpMethod();
+    public String getCookie() {
+        return httpHeaders.firstValue(COOKIE.getName()).orElseGet(() -> "");
     }
 
-    public String getCookie() {
-        return httpHeaders.firstValue("Cookie").orElseGet(() -> "");
+    public static class Http11RequestHeaderBuilder {
+        private final Map<String, List<String>> headers;
+
+        public Http11RequestHeaderBuilder() {
+            this.headers = new java.util.HashMap<>();
+        }
+
+        public Http11RequestHeaderBuilder addHeader(String key, List<String> values) {
+            headers.put(key, values);
+            return this;
+        }
+
+        public Http11RequestHeader build() {
+            HttpHeaders httpHeaders = HttpHeaders.of(headers, (s1, s2) -> true);
+            return new Http11RequestHeader(httpHeaders);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Http11RequestHeader{" +
+                "httpHeaders=" + httpHeaders +
+                '}';
     }
 }

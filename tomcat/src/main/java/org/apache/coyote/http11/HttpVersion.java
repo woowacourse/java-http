@@ -16,11 +16,18 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(value -> value.version.equals(httpVersion))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Not found HTTP Version : %s", httpVersion)));
+                .orElseThrow(
+                        () -> new IllegalArgumentException(String.format("Not found HTTP Version : %s", httpVersion)));
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     @Override
     public String toString() {
-        return version;
+        return "HttpVersion{" +
+                "version='" + version + '\'' +
+                '}';
     }
 }

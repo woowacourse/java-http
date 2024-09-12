@@ -9,29 +9,27 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
-    public static StatusLine ok(HttpVersion httpVersion) {
-        return new StatusLine(httpVersion, StatusCode.OK);
+    public static StatusLine of(HttpVersion httpVersion, int statusCode) {
+        return new StatusLine(httpVersion, StatusCode.valueOf(statusCode));
     }
 
-    public static StatusLine found(HttpVersion httpVersion) {
-        return new StatusLine(httpVersion, StatusCode.FOUND);
+    public String getStatusLine() {
+        return httpVersion.getVersion() + " " + statusCode.getStatusCode();
     }
 
-    public static StatusLine unAuthorized(HttpVersion httpVersion) {
-        return new StatusLine(httpVersion, StatusCode.UNAUTHORIZED);
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 
-    public static StatusLine notFound(HttpVersion httpVersion) {
-        return new StatusLine(httpVersion, StatusCode.NOT_FOUND);
-    }
-
-    public static StatusLine internalServerError(HttpVersion httpVersion) {
-        return new StatusLine(httpVersion, StatusCode.INTERNAL_SERVER_ERROR);
+    public StatusCode getStatusCode() {
+        return statusCode;
     }
 
     @Override
     public String toString() {
-        return httpVersion + " " + statusCode;
+        return "StatusLine{" +
+                "httpVersion=" + httpVersion +
+                ", statusCode=" + statusCode +
+                '}';
     }
 }
-

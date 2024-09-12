@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 
 public class Http11RequestBody {
 
+    private static final int OFF = 0;
+
     private final String body;
 
     public Http11RequestBody(String body) {
@@ -15,19 +17,22 @@ public class Http11RequestBody {
 
     public static Http11RequestBody of(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
+        bufferedReader.read(buffer, OFF, contentLength);
 
         String encodedBody = new String(buffer);
         String decodedBody = URLDecoder.decode(encodedBody, StandardCharsets.UTF_8);
 
         return new Http11RequestBody(decodedBody);
     }
-    
-    public boolean hasBody() {
-        return !body.isBlank();
-    }
 
     public String getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        return "Http11RequestBody{" +
+                "body='" + body + '\'' +
+                '}';
     }
 }

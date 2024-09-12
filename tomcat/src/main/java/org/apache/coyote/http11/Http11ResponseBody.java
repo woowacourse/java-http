@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.nio.charset.StandardCharsets;
-
 public class Http11ResponseBody {
 
     private final String body;
@@ -14,11 +12,18 @@ public class Http11ResponseBody {
         return new Http11ResponseBody(response);
     }
 
-    public int getContentLength() {
-        return body.getBytes(StandardCharsets.UTF_8).length;
+    public static Http11ResponseBody of() {
+        return new Http11ResponseBody("");
     }
 
     public String getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        return "Http11ResponseBody{" +
+                "body='" + body + '\'' +
+                '}';
     }
 }

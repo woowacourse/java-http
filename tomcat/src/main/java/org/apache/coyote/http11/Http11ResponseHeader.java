@@ -1,45 +1,61 @@
 package org.apache.coyote.http11;
 
 import java.net.http.HttpHeaders;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Http11ResponseHeader {
 
-    private static final String RESPONSE_HEADER_FORMAT = String.join("\r\n",
-            "%s ",
-            "Content-Type: %s;charset=utf-8 ",
-            "Content-Length: %s ") + "\r\n" +
-            "%s"; // Location과 Set-Cookie를 포함할 부분 추가
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-
-    private final StatusLine statusLine;
+    private static final String KEY_VALUE_DELIMITER = ": ";
+    private static final String NEW_LINE = "\r\n";
     private final HttpHeaders httpHeaders;
 
-    private Http11ResponseHeader(StatusLine statusLine, HttpHeaders httpHeaders) {
-        this.statusLine = statusLine;
+    private Http11ResponseHeader(HttpHeaders httpHeaders) {
         this.httpHeaders = httpHeaders;
     }
 
-    public static Http11ResponseHeader of(StatusLine statusLine, HttpHeaders httpHeaders) {
-        return new Http11ResponseHeader(statusLine, httpHeaders);
+    public static Http11ResponseHeader of() {
+        return new Http11ResponseHeader(HttpHeaders.of(Map.of(), (s1, s2) -> true));
     }
 
-    public String getResponseHeader() {
-        StringBuilder additionalHeaders = new StringBuilder();
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        if (httpHeaders.firstValue("Location").isPresent()) {
-            additionalHeaders.append("Location: ").append(httpHeaders.firstValue("Location").get()).append("\r\n");
+    public String getAllHeaders() {
+        StringBuilder headerString = new StringBuilder();
+        for (Map.Entry<String, List<String>> entry : httpHeaders.map().entrySet()) {
+            String key = entry.getKey();
+            for (String value : entry.getValue()) {
+                headerString.append(key).append(KEY_VALUE_DELIMITER).append(value).append(NEW_LINE);
+            }
+        }
+        return headerString.toString();
+    }
+
+    public String getHeader(String name) {
+        List<String> values = httpHeaders.allValues(name);
+        return String.join(",", values);
+    }
+
+    public static class Builder {
+        private final Map<String, List<String>> headers = new HashMap<>();
+
+        public Builder addHeader(String name, List<String> values) {
+            headers.put(name, values);
+            return this;
         }
 
-        if (httpHeaders.firstValue("Set-Cookie").isPresent()) {
-            additionalHeaders.append("Set-Cookie: ").append(httpHeaders.firstValue("Set-Cookie").get()).append("\r\n");
+        public Http11ResponseHeader build() {
+            return new Http11ResponseHeader(HttpHeaders.of(headers, (s1, s2) -> true));
         }
+    }
 
-        return String.format(RESPONSE_HEADER_FORMAT,
-                statusLine,
-                httpHeaders.firstValue(CONTENT_TYPE).orElse(""),
-                httpHeaders.firstValue(CONTENT_LENGTH).orElse(""),
-                additionalHeaders);
+    @Override
+    public String toString() {
+        return "Http11ResponseHeader{" +
+                "httpHeaders=" + httpHeaders +
+                '}';
     }
 }
-

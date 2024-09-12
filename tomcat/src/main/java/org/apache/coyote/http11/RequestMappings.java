@@ -11,7 +11,7 @@ public class RequestMappings {
         this(List.of(requestMappings));
     }
 
-    public RequestMappings(List<RequestMapping> requestMappings) {
+    private RequestMappings(List<RequestMapping> requestMappings) {
         this.requestMappings = requestMappings;
     }
 

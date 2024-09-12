@@ -1,10 +1,10 @@
-package org.apache.coyote.handler.exception;
+package com.techcourse.controller.exception;
 
-import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class UnAuthorizationHandler extends Handler {
+public class UnAuthorizationHandler extends AbstractController {
     private static final UnAuthorizationHandler INSTANCE = new UnAuthorizationHandler();
 
     private UnAuthorizationHandler() {
@@ -15,8 +15,7 @@ public class UnAuthorizationHandler extends Handler {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
-        return HttpResponse.builder()
-                .unauthorizedBuild();
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        response.setResponse(HttpResponse.builder().unauthorizedBuild());
     }
 }

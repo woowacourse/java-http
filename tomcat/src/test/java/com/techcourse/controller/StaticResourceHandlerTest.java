@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package com.techcourse.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.coyote.handler.StaticResourceHandler;
 import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.RequestLine;

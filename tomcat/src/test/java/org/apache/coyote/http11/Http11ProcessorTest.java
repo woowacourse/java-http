@@ -80,9 +80,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final HttpResponse httpResponse = HttpResponse.builder()
-                .addHeader(HttpHeaderName.LOCATION, "/login.html")
-                .foundBuild();
+        final HttpResponse httpResponse = HttpResponse.builder().foundBuild("/login.html");
         assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
@@ -106,6 +104,9 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
+
+        // clear
+        sessionManager.remove(new Session("1"));
     }
 
     @Test
@@ -117,6 +118,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Length: 30",
                 "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
                 "account=gugu&password=password");
 
@@ -158,6 +160,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Length: 49",
                 "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
                 "account=gugu&email=hi@naver.com&password=password");
 

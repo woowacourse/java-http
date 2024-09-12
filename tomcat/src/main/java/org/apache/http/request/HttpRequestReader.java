@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.apache.http.header.HttpHeader;
 import org.apache.http.header.HttpHeaderName;
+import org.apache.http.header.HttpHeaders;
 
 public class HttpRequestReader {
 
@@ -17,7 +18,7 @@ public class HttpRequestReader {
 
     public static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
-        final HttpHeader[] headers = readRequestHeaders(bufferedReader);
+        final HttpHeaders headers = new HttpHeaders(readRequestHeaders(bufferedReader));
 
         return new HttpRequest(requestLine, headers, readRequestBody(headers, bufferedReader));
     }
@@ -35,8 +36,9 @@ public class HttpRequestReader {
         return headers.toArray(HttpHeader[]::new);
     }
 
-    private static String readRequestBody(final HttpHeader[] headers, final BufferedReader bufferedReader) throws IOException {
-        Optional<HttpHeader> httpHeader = Arrays.stream(headers)
+    private static String readRequestBody(final HttpHeaders headers, final BufferedReader bufferedReader)
+            throws IOException {
+        Optional<HttpHeader> httpHeader = headers.getHeaders().stream()
                 .filter(header -> HttpHeaderName.CONTENT_LENGTH == header.getKey())
                 .findFirst();
 

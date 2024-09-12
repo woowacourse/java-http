@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -9,14 +8,13 @@ import java.net.Socket;
 
 import org.apache.coyote.HandlerMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.Controller;
+import org.apache.http.HttpVersion;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.HttpRequestReader;
 import org.apache.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,19 +43,22 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse process(final HttpRequest httpRequest) {
+    private HttpResponse process(final HttpRequest httpRequest) throws Exception {
         final HandlerMapping handlerMapping = HandlerMapping.getInstance();
-        final Handler handler = handlerMapping.getHandler(httpRequest);
+        final Controller controller = handlerMapping.getHandler(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.builder().version(HttpVersion.HTTP_1_1).build();
 
         try {
-            return handler.handle(httpRequest);
+            controller.service(httpRequest, httpResponse);
         } catch (Exception e) {
-            return handlerMapping.getHandlerByException(e).handle(httpRequest);
+            handlerMapping.getHandlerByException(e).service(httpRequest, httpResponse);
         }
+
+        return httpResponse;
     }
 }

@@ -6,12 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-import org.apache.coyote.NotFoundException;
+import org.apache.coyote.exception.NotFoundException;
 import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class StaticResourceHandler extends Handler {
+public class StaticResourceHandler implements Controller {
 
     private static final Map<String, String> STATIC_RESOURCE_EXTENSIONS = Map.of(
             "html", "",
@@ -31,6 +31,11 @@ public class StaticResourceHandler extends Handler {
         return INSTANCE;
     }
 
+    @Override
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        response.setResponse(handle(request));
+    }
+
     public HttpResponse handle(final HttpRequest httpRequest) {
         final URL resourceURL = getClass().getClassLoader().getResource(findResourcePath(httpRequest.getPath()));
         try {
@@ -48,6 +53,7 @@ public class StaticResourceHandler extends Handler {
         }
     }
 
+    // TODO: 분리
     private String findResourcePath(final String path) {
         final String[] resourceNames = findResourceName(path).split("\\.");
         final String extension = resourceNames[resourceNames.length - 1];

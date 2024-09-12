@@ -40,7 +40,7 @@ class HttpRequestReaderTest {
                         new HttpHeader("Host", "localhost:8080"),
                         new HttpHeader("Connection", "keep-alive")
                 ),
-                () -> assertThat(request.getHeader("Host")).isEqualTo("localhost:8080"),
+                () -> assertThat(request.getHeaderValue("Host")).isEqualTo("localhost:8080"),
                 () -> assertThat(request.getBody()).isNull()
         );
     }
@@ -71,7 +71,7 @@ class HttpRequestReaderTest {
                         new HttpHeader("Content-Type", "application/x-www-form-urlencoded"),
                         new HttpHeader("Content-Length", "27")
                 ),
-                () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
+                () -> assertThat(request.getHeaderValue("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isEqualTo("username=john&password=pass")
         );
     }
@@ -121,7 +121,7 @@ class HttpRequestReaderTest {
                 () -> assertThat(request.getPath()).isEqualTo("/hi"),
                 () -> assertThat(request.getVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(request.getHeaders().getHeaders()).hasSize(2),
-                () -> assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
+                () -> assertThat(request.getHeaderValue("Content-Type")).isEqualTo("application/x-www-form-urlencoded"),
                 () -> assertThat(request.getBody()).isNull()
 
         );

@@ -15,9 +15,9 @@ public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final StartLine startLine;
-    private final HttpHeaders headers;
-    private final String responseBody;
+    private StartLine startLine;
+    private HttpHeaders headers;
+    private String responseBody;
 
     public HttpResponse(StartLine startLine, HttpHeaders headers, String responseBody) {
         this.startLine = startLine;
@@ -53,6 +53,12 @@ public class HttpResponse {
         return headers.getCookie();
     }
 
+    public void setResponse(HttpResponse httpResponse) {
+        this.startLine = httpResponse.startLine;
+        this.headers = httpResponse.headers;
+        this.responseBody = httpResponse.responseBody;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -75,13 +81,13 @@ public class HttpResponse {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(startLine.toString());
-        stringBuilder.append(headers.toString()).append(CRLF);
+        stringBuilder.append(headers.toString());
 
         if (responseBody == null) {
             return stringBuilder.toString();
         }
 
-        stringBuilder.append(responseBody);
+        stringBuilder.append(CRLF).append(responseBody);
         return stringBuilder.toString();
     }
 
@@ -153,9 +159,9 @@ public class HttpResponse {
             return this.build();
         }
 
-        public HttpResponse foundBuild() {
+        public HttpResponse foundBuild(String redirectUrl) {
             status = HttpStatus.FOUND;
-            return this.build();
+            return this.addLocation(redirectUrl).build();
         }
 
         public HttpResponse internalServerErrorBuild() {

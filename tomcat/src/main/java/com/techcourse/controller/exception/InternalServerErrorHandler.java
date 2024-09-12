@@ -1,10 +1,10 @@
-package org.apache.coyote.handler.exception;
+package com.techcourse.controller.exception;
 
-import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class InternalServerErrorHandler extends Handler {
+public class InternalServerErrorHandler extends AbstractController {
     private static final InternalServerErrorHandler INSTANCE = new InternalServerErrorHandler();
 
     private InternalServerErrorHandler() {
@@ -15,9 +15,8 @@ public class InternalServerErrorHandler extends Handler {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
-        return HttpResponse.builder()
-                .internalServerErrorBuild();
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        response.setResponse(HttpResponse.builder().internalServerErrorBuild());
     }
 }
 

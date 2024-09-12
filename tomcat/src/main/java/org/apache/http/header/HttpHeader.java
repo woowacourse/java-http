@@ -1,6 +1,10 @@
 package org.apache.http.header;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.http.HttpCookie;
 
 public class HttpHeader {
     private static final String KEY_VALUE_DELIMITER = ": ";

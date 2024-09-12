@@ -42,7 +42,8 @@ class HttpResponseTest {
 
             assertEquals(HttpVersion.HTTP_2_0, response.getVersion());
             assertEquals(HttpStatus.NOT_FOUND, response.getStatus());
-            assertEquals(response.getHeaders(), new HttpHeaders(new HttpHeader(HttpHeaderName.CONTENT_TYPE, "application/json")));
+            assertEquals(response.getHeaders(),
+                    new HttpHeaders(new HttpHeader(HttpHeaderName.CONTENT_TYPE, "application/json")));
             assertEquals("{\"message\":\"Not Found\"}", response.getResponseBody());
         }
     }
@@ -85,7 +86,7 @@ class HttpResponseTest {
         @Test
         @DisplayName("상태 코드에 따른 HttpResponse 객체 생성: FOUND")
         void testFoundBuild() {
-            HttpResponse response = HttpResponse.builder().foundBuild();
+            HttpResponse response = HttpResponse.builder().foundBuild("/new-location");
             assertEquals(HttpStatus.FOUND, response.getStatus());
         }
 

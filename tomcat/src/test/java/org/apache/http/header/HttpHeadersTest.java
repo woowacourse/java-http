@@ -89,7 +89,7 @@ class HttpHeadersTest {
             HttpHeaders httpHeaders = new HttpHeaders(
                     new HttpHeader(HttpHeaderName.HOST, "http://localhost:8080")
             );
-            assertThatThrownBy(() -> httpHeaders.getCookie())
+            assertThatThrownBy(httpHeaders::getCookie)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("쿠키가 존재하지 않습니다.");
         }

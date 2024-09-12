@@ -14,6 +14,21 @@ public enum HttpHeaderName {
     LOCATION("Location"),
     ORIGIN("Origin"),
     SET_COOKIE("Set-Cookie"),
+    CACHE_CONTROL("Cache-Control"),
+    PRAGMA("Pragma"),
+    USER_AGENT("User-Agent"),
+    REFERER("Referer"),
+    ACCEPT_ENCODING("Accept-Encoding"),
+    ACCEPT_LANGUAGE("Accept-Language"),
+    SEC_FETCH_SITE("Sec-Fetch-Site"),
+    SEC_FETCH_MODE("Sec-Fetch-Mode"),
+    SEC_CH_UA("Sec-CH-UA"),
+    SEC_CH_UA_MOBILE("Sec-CH-UA-Mobile"),
+    SEC_FETCH_USER("Sec-Fetch-User"),
+    SEC_FETCH_DEST("Sec-Fetch-Dest"),
+    SEC_CH_UA_PLATFORM("Sec-CH-UA-Platform"),
+    SEC_CH_UA_ARCH("Sec-CH-UA-Arch"),
+    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
     ;
 
     private final String value;

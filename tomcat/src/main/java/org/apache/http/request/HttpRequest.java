@@ -1,11 +1,11 @@
 package org.apache.http.request;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
+import org.apache.http.MimeType;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.header.HttpHeaderName;
 import org.apache.http.header.HttpHeaders;
@@ -23,11 +23,11 @@ public class HttpRequest {
     private final String body;
     private final HttpCookie httpCookie;
 
-    public HttpRequest(RequestLine requestLine, HttpHeader[] headers, String body) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String body) {
         this.requestLine = requestLine;
-        this.headers = new HttpHeaders(headers);
+        this.headers = headers;
         this.body = body;
-        this.httpCookie = parseCookie(headers);
+        this.httpCookie = headers != null ? headers.parseCookie() : null;
     }
 
     public HttpRequest(RequestLine requestLine) {
@@ -37,27 +37,21 @@ public class HttpRequest {
         this.httpCookie = null;
     }
 
-    public static HttpRequest from(String requestLine, HttpHeader[] headers, String body) {
-        return new HttpRequest(RequestLine.from(requestLine), headers, body);
-    }
-
-    private HttpCookie parseCookie(HttpHeader[] headers) {
-        return Optional.ofNullable(headers)
-                .flatMap(hs -> Arrays.stream(hs)
-                        .filter(header -> HttpHeaderName.COOKIE == header.getKey())
-                        .findFirst()
-                        .map(header -> HttpCookie.from(header.getValue())))
-                .orElse(null);
-    }
-
-    // TODO: mime 체크하기
     public String getFormBodyByKey(String key) {
+        validateContentTypeFormLogin();
         return Arrays.stream(body.split(FORM_DATA_DELIMITER))
                 .map(param -> param.split(KEY_VALUE_DELIMITER, KEY_VALUE_COUNT))
                 .filter(keyValue -> keyValue.length == KEY_VALUE_COUNT && keyValue[KEY_ORDER].equals(key))
                 .map(keyValue -> keyValue[VALUE_ORDER])
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void validateContentTypeFormLogin() {
+        String requestContentType = getHeaderValue(HttpHeaderName.CONTENT_TYPE.getValue());
+        if (MimeType.APPLICATION_X_WWW_FORM_URLENCODED != MimeType.getMimeType(requestContentType)) {
+            throw new UnsupportedOperationException("application/x-www-form-urlencoded 형식이 아닌 미디어 타입입니다.");
+        }
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {
@@ -80,8 +74,8 @@ public class HttpRequest {
         return headers;
     }
 
-    public String getHeader(String key) {
-        return Arrays.stream(headers.getHeaders())
+    public String getHeaderValue(String key) {
+        return headers.getHeaders().stream()
                 .filter(httpHeader -> httpHeader.getKey().equalsIgnoreCase(key))
                 .map(HttpHeader::getValue)
                 .findFirst()

@@ -37,9 +37,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
-    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String PARAMETER_SEPARATOR = "&";
     private static final String ASSIGN_OPERATOR = "=";
+    private static final String HEADER_DELIMITER = ": ";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -64,10 +64,10 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> requestHeaders = readRequestHeaders(reader);
 
             if (method.equals(GET)) {
-                doGet(url, requestHeaders, outputStream);
+                doGet(url, version, requestHeaders, outputStream);
             }
             if (method.equals(POST)) {
-                doPost(url, requestHeaders, reader, outputStream);
+                doPost(url, version, requestHeaders, reader, outputStream);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -79,21 +79,27 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> requestHeaders = new HashMap<>();
         String line;
         while (!(line = bufferedReader.readLine()).isEmpty()) {
-            String[] header = line.split(PARAMETER_SEPARATOR);
+            String[] header = line.split(HEADER_DELIMITER);
+            System.out.println(header[0]);
             requestHeaders.put(header[0], header[1]);
         }
         return Collections.unmodifiableMap(requestHeaders);
     }
 
-    private void doGet(String url, Map<String, String> requestHeaders, OutputStream outputStream) throws IOException {
+    private void doGet(
+            String url,
+            String version,
+            Map<String, String> requestHeaders,
+            OutputStream outputStream
+    ) throws IOException {
         if (url.equals("/")) {
             createHttpResponse(
                     "Hello world!",
-                    createHttpResponseHeader("HTTP/1.1 200 OK ", "text/html", "Hello world!"),
+                    createHttpResponseHeader(version + " 200 OK ", "text/html", "Hello world!"),
                     outputStream);
             return;
         }
-        String[] result = determineGetResponse(url, requestHeaders);
+        String[] result = determineGetResponse(url, version, requestHeaders);
         Path path = getPath(result);
         var responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
@@ -102,15 +108,15 @@ public class Http11Processor implements Runnable, Processor {
         createHttpResponse(responseBody, responseHeader, outputStream);
     }
 
-    private String[] determineGetResponse(String url, Map<String, String> requestHeaders) {
+    private String[] determineGetResponse(String url, String version, Map<String, String> requestHeaders) {
         String[] result = new String[2];
-        result[0] = HTTP_VERSION + " " + OK.toString() + " ";
+        result[0] = version + " " + OK.toString() + " ";
         if (url.endsWith("html") || url.endsWith("js") || url.endsWith("css")) {
             result[1] = "static" + url;
             return result;
         }
         if (url.equals("/login") && isAlreadyLogin(requestHeaders)) {
-            result[0] = createResponseHeader(FOUND, "/index.html");
+            result[0] = createResponseHeader(version, FOUND, "/index.html");
             result[1] = "static/index.html";
 
         }
@@ -125,35 +131,36 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doPost(
             String url,
+            String version,
             Map<String, String> requestHeaders,
             BufferedReader reader,
             OutputStream outputStream
     ) throws IOException {
         String[] requestBody = readRequestBody(requestHeaders, reader);
-        String[] pathAndStatus = determinePostResponse(url, requestBody);
+        String[] responseHeaderAndPath = determinePostResponse(url, version, requestBody);
 
-        final Path path = getPath(pathAndStatus);
+        final Path path = getPath(responseHeaderAndPath);
         var responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
 
-        String responseHeader = createHttpResponseHeader(pathAndStatus[0], contentType, responseBody);
+        String responseHeader = createHttpResponseHeader(responseHeaderAndPath[0], contentType, responseBody);
         createHttpResponse(responseBody, responseHeader, outputStream);
     }
 
-    private String[] determinePostResponse(String url, String[] requestBody) {
-        String[] pathAndStatus = new String[2];
+    private String[] determinePostResponse(String url, String version, String[] requestBody) {
+        String[] result = new String[2];
         if (url.startsWith("/login")) {
-            pathAndStatus = doLogin(requestBody);
+            result = doLogin(version, requestBody);
         }
         if (url.equals("/register")) {
-            pathAndStatus = doRegister(requestBody);
+            result = doRegister(version, requestBody);
         }
-        return pathAndStatus;
+        return result;
     }
 
-    private String[] doLogin(String[] requestBody) {
+    private String[] doLogin(String version, String[] requestBody) {
         String[] result = new String[2];
-        result[0] = createResponseHeader(FOUND, "/index.html");
+        result[0] = createResponseHeader(version, FOUND, "/index.html");
         result[1] = "static/index.html";
 
         String account = requestBody[0].split(ASSIGN_OPERATOR)[1];
@@ -163,7 +170,7 @@ public class Http11Processor implements Runnable, Processor {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
             result[1] = "static/401.html";
-            result[0] = createResponseHeader(FOUND, "/401.html");
+            result[0] = createResponseHeader(version, FOUND, "/401.html");
             return result;
         }
         log.info(user.toString());
@@ -176,9 +183,9 @@ public class Http11Processor implements Runnable, Processor {
         return result;
     }
 
-    private static String createResponseHeader(HttpStatusCode statusCode, String location) {
+    private static String createResponseHeader(String version, HttpStatusCode statusCode, String location) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.toString() + " ",
+                version + " " + statusCode.toString() + " ",
                 "Location: " + location + " ");
     }
 
@@ -213,9 +220,9 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).split(PARAMETER_SEPARATOR);
     }
 
-    private String[] doRegister(String[] requestBody) {
+    private String[] doRegister(String version, String[] requestBody) {
         String[] result = new String[2];
-        result[0] = createResponseHeader(FOUND, "/index.html");
+        result[0] = createResponseHeader(version, FOUND, "/index.html");
         result[1] = "static/index.html";
         User user = createUser(requestBody);
         InMemoryUserRepository.save(user);

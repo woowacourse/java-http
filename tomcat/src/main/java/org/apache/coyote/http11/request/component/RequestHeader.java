@@ -10,7 +10,7 @@ import org.apache.coyote.http11.cookie.HttpCookie;
 public class RequestHeader {
     private static final String HTTP_LINE_SEPARATOR = "\r\n";
     private static final String ACCEPT_LINE_SEPARATOR = ",";
-    private static final String CONTENT_LENGTH_FIELD = "Content";
+    private static final String CONTENT_LENGTH_FIELD = "Content-Length";
     private static final String COOKIE_FIELD = "Cookie";
     private static final String ACCEPT_FIELD = "Accept";
 

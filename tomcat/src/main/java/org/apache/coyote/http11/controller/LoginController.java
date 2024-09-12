@@ -21,12 +21,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        super.doGet(request, response);
-
         if (isAlreadyLogin(request)) {
             response.setStatusLine("302", "Found");
             response.setFieldValue("Location", "/index.html");
+            return;
         }
+
+        super.doGet(request, response);
     }
 
     @Override

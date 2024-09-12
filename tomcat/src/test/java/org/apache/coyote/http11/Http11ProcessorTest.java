@@ -3,12 +3,10 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.regex.Pattern;
 
+import org.apache.coyote.http11.file.ResponseFactory;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
@@ -19,13 +17,14 @@ import com.techcourse.model.User;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+    private static final String HTTP_LINE_SEPARATOR = "\r\n";
     private static final String FAKE_SESSION_ID = "abcdefghijklmnopqrstuvwxyz";
 
     @DisplayName("index 페이지를 조회할 수 있다.")
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -38,14 +37,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String resourceName = "static/index.html";
-        final URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
-        assert resourceUrl != null;
-        final String contentLength = String.valueOf(new File(resourceUrl.getFile()).length());
-        final String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-        final String httpResponse = String.join("\r\n",
+        final String requestUri = "/index.html";
+        final String responseBody = ResponseFactory.getResponseBody(requestUri);
+        final String httpResponse = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 200 OK",
-                "Content-Length: " + contentLength,
+                "Content-Length: " + responseBody.length(),
                 "Content-Type: text/html;charset=utf-8",
                 "",
                 responseBody);
@@ -57,7 +53,7 @@ class Http11ProcessorTest {
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "GET /css/styles.css HTTP/1.1",
                 "Host: localhost:8080",
                 "Accept: text/css,*/*;q=0.1",
@@ -71,14 +67,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String resourceName = "static/css/styles.css";
-        final URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
-        assert resourceUrl != null;
-        final String contentLength = String.valueOf(new File(resourceUrl.getFile()).length());
-        final String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-        var expected = String.join("\r\n",
+        final String requestUri = "/css/styles.css";
+        final String responseBody = ResponseFactory.getResponseBody(requestUri);
+        var expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 200 OK",
-                "Content-Length: " + contentLength,
+                "Content-Length: " + responseBody.length(),
                 "Content-Type: text/css;charset=utf-8",
                 "",
                 responseBody);
@@ -90,7 +83,7 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -104,14 +97,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String resourceName = "static/login.html";
-        final URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
-        assert resourceUrl != null;
-        final String contentLength = String.valueOf(new File(resourceUrl.getFile()).length());
-        final String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-        var expected = String.join("\r\n",
+        final String requestUri = "/login.html";
+        final String responseBody = ResponseFactory.getResponseBody(requestUri);
+        var expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 200 OK",
-                "Content-Length: " + contentLength,
+                "Content-Length: " + responseBody.length(),
                 "Content-Type: text/html;charset=utf-8",
                 "",
                 responseBody);
@@ -125,7 +115,7 @@ class Http11ProcessorTest {
         // given
         final String account = "gugu";
         final String correctPassword = "password";
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -156,7 +146,7 @@ class Http11ProcessorTest {
         // given
         final String account = "gugu";
         final String correctPassword = "password";
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -190,7 +180,7 @@ class Http11ProcessorTest {
         // given
         final String account = "gugu";
         final String wrongPassword = "gugu";
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -206,7 +196,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        var expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 302 Found",
                 "Location: /401.html",
                 "",
@@ -219,7 +209,7 @@ class Http11ProcessorTest {
     @Test
     void register() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "GET /register HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -232,14 +222,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String resourceName = "static/register.html";
-        final URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
-        assert resourceUrl != null;
-        final String contentLength = String.valueOf(new File(resourceUrl.getFile()).length());
-        final String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-        var expected = String.join("\r\n",
+        final String requestUri = "/register.html";
+        final String responseBody = ResponseFactory.getResponseBody(requestUri);
+        var expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 200 OK",
-                "Content-Length: " + contentLength,
+                "Content-Length: " + responseBody.length(),
                 "Content-Type: text/html;charset=utf-8",
                 "",
                 responseBody);
@@ -251,7 +238,7 @@ class Http11ProcessorTest {
     @Test
     void redirectIndexPageWhenRegisterComplete() {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "POST /register HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -267,7 +254,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        var expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 302 Found",
                 "Location: /index.html",
                 "",
@@ -281,7 +268,7 @@ class Http11ProcessorTest {
     void redirectIndexPageIfAlreadyLoginWhenAccessLoginPage() {
         // given
         makeFakeSession();
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(HTTP_LINE_SEPARATOR,
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -296,7 +283,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
+        final String expected = String.join(HTTP_LINE_SEPARATOR,
                 "HTTP/1.1 302 Found",
                 "Location: /index.html",
                 "",

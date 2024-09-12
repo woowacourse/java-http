@@ -1,15 +1,18 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.ContentType;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.Status;
 
-import java.util.Map;
-
 public class RegisterController extends MappingController {
+
+    private final UserService userService;
+
+    public RegisterController() {
+        this.userService = new UserService();
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
@@ -21,9 +24,7 @@ public class RegisterController extends MappingController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> requestBody = request.getBody();
-        User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
-        InMemoryUserRepository.save(user);
+        userService.register(request);
 
         String path = "/index.html";
         String body = resourceResolver.resolve(path);

@@ -48,4 +48,10 @@ public class UserService {
         sessionManager.add(session);
         return session;
     }
+
+    public void register(HttpRequest request) {
+        Map<String, String> requestBody = request.getBody();
+        User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+        InMemoryUserRepository.save(user);
+    }
 }

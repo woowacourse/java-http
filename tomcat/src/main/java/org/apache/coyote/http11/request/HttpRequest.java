@@ -8,20 +8,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.coyote.exception.ContentLengthExceededException;
-import org.apache.coyote.http11.StartLine;
 
 public class HttpRequest {
 
-    private final StartLine startLine;
+    public static final String FIELD_VALUE_SEPARATOR = ": ";
+    public static final int FIELD_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
 
     public HttpRequest(
-            final StartLine startLine,
+            final RequestLine requestLine,
             final Map<String, String> headers,
             final String body
     ) {
-        this.startLine = startLine;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
@@ -30,13 +33,13 @@ public class HttpRequest {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final StartLine startLine = StartLine.from(bufferedReader.readLine());
-        if (startLine.isNull()) {
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+        if (requestLine.isNull()) {
             return null;
         }
         final Map<String, String> headers = parseHeaders(bufferedReader);
         final String body = parseBody(bufferedReader, headers);
-        return new HttpRequest(startLine, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     private static Map<String, String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -46,8 +49,8 @@ public class HttpRequest {
             if (header.isBlank()) {
                 break;
             }
-            final String[] parsedHeader = header.split(": ");
-            headers.put(parsedHeader[0], parsedHeader[1]);
+            final String[] parsedHeader = header.split(FIELD_VALUE_SEPARATOR);
+            headers.put(parsedHeader[FIELD_INDEX], parsedHeader[VALUE_INDEX]);
         }
         return headers;
     }
@@ -70,8 +73,8 @@ public class HttpRequest {
         return headers.getOrDefault(headerTitle, null);
     }
 
-    public StartLine getStartLine() {
-        return startLine;
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public Map<String, String> getHeaders() {

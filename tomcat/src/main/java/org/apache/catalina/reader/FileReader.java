@@ -11,6 +11,8 @@ import com.techcourse.exception.UncheckedServletException;
 public class FileReader {
     private static final String RESOURCE_PATH_PREFIX = "static";
 
+    private FileReader() {}
+
     public static String loadFileContent(String fileName) {
         URL resource = FileReader.class.getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
         if (resource == null) {

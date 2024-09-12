@@ -2,24 +2,32 @@ package com.techcourse.web.handler;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.http.HttpCookie;
+import org.apache.coyote.http11.http.request.HttpMethod;
+import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.request.HttpRequestHeader;
+import org.apache.coyote.http11.http.request.HttpRequestLine;
+import org.apache.coyote.http11.http.request.HttpRequestUrl;
+import org.apache.coyote.http11.http.response.HttpResponse;
+import org.apache.coyote.http11.http.response.HttpResponseBody;
+import org.apache.coyote.http11.http.response.HttpResponseHeader;
+import org.apache.coyote.http11.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.web.HttpResponse;
-import com.techcourse.web.HttpStatusCode;
-import com.techcourse.web.annotation.Param;
-import com.techcourse.web.annotation.Query;
-import com.techcourse.web.annotation.Request;
+import com.techcourse.web.util.FormUrlEncodedParser;
+import com.techcourse.web.util.JsessionIdGenerator;
+import com.techcourse.web.util.LoginChecker;
+import com.techcourse.web.util.ResourceLoader;
 
-public class LoginHandler extends RequestHandler {
+public class LoginHandler implements Handler {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 	private static final LoginHandler instance = new LoginHandler();
+	private static final String LOGIN_PATH = "/login";
 
 	private LoginHandler() {
 	}
@@ -28,38 +36,67 @@ public class LoginHandler extends RequestHandler {
 		return instance;
 	}
 
-	@Request(path = "/login", method = "GET")
-	@Query(params = {
-		@Param(key = "account", required = true),
-		@Param(key = "password", required = true)
-	})
-	public HttpResponse loginWithQuery(HttpRequest request) throws IOException {
-		Map<String, String> query = request.getRequestQuery();
-		String account = query.get("account");
-		String password = query.get("password");
-
-		logUser(account, password);
-
-		return HttpResponse.builder()
-			.protocol(request.getProtocol())
-			.statusCode(HttpStatusCode.OK)
-			.body(HttpResponse.Body.fromPath(request.getRequestPath()))
-			.build();
+	@Override
+	public boolean isSupport(HttpRequestLine requestLine) {
+		return requestLine.getRequestPath().startsWith(LOGIN_PATH);
 	}
 
-	private void logUser(String account, String password) {
-		Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-		if (userOptional.isEmpty()) {
-			log.info("user not found. account: {}", account);
-			return;
+	@Override
+	public HttpResponse handle(HttpRequest request) throws IOException {
+		HttpRequestLine requestLine = request.getRequestLine();
+		HttpRequestUrl requestUrl = request.getRequestLine().getHttpRequestUrl();
+		HttpMethod method = requestLine.getMethod();
+
+		if (method == HttpMethod.GET && LOGIN_PATH.equals(requestUrl.getRequestUrl())) {
+			return loadLoginPage(request);
+		}
+		if (method == HttpMethod.POST) {
+			return login(request);
 		}
 
-		User user = userOptional.get();
-		if (!user.checkPassword(password)) {
-			log.info("password not matched. account: {}", account);
-			return;
+		return notFoundResponse();
+	}
+
+	private HttpResponse loadLoginPage(HttpRequest request) throws IOException {
+		if (LoginChecker.isLoggedIn(request)) {
+			return redirect(new HttpResponseHeader(), "/index.html");
+		}
+		HttpResponseBody body = ResourceLoader.getInstance().loadResource("/login.html");
+		return HttpResponse.ok(new HttpResponseHeader(), body);
+	}
+
+	private HttpResponse login(HttpRequest request) {
+		Map<String, String> body = FormUrlEncodedParser.parse(request.getRequestBody());
+		String account = body.get("account");
+		String password = body.get("password");
+
+		User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+		if (isUserNotExist(user, password)) {
+			return redirect(new HttpResponseHeader(), "/401.html");
 		}
 
-		log.info("user: {}", user);
+		HttpResponseHeader responseHeader = createResponseHeader(request, user);
+		return redirect(responseHeader, "/index.html");
+	}
+
+	private HttpResponseHeader createResponseHeader(HttpRequest request, User user) {
+		HttpResponseHeader header = new HttpResponseHeader();
+		String sessionId = JsessionIdGenerator.generate();
+		header.addJSessionId(sessionId);
+		SessionManager.createSession(sessionId, user);
+
+		return header;
+	}
+
+	private boolean isNotExistJsessionid(HttpCookie httpCookie) {
+		return httpCookie == null || !httpCookie.hasJsessionId();
+	}
+
+	private boolean isUserNotExist(User user, String password) {
+		if (user == null) {
+			log.info("user is not exist");
+			return true;
+		}
+		return !user.checkPassword(password);
 	}
 }

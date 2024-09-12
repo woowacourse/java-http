@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.startLine;
 
+import static org.apache.coyote.http11.Constants.STATUS_LINE_DELIMITER;
+
 public enum HttpStatus {
 
     OK(200, "OK"),
@@ -13,8 +15,8 @@ public enum HttpStatus {
         this.message = message;
     }
 
-    public String compose() {
-        return getCode() + " " + getMessage();
+    public String toMessage() {
+        return getCode() + STATUS_LINE_DELIMITER + getMessage();
     }
 
     public int getCode() {

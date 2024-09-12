@@ -1,8 +1,11 @@
 package org.apache.coyote.http11.request.startLine;
 
+import static org.apache.coyote.http11.Constants.REQUEST_LINE_DELIMITER;
+
+import org.apache.coyote.http11.response.header.ContentType;
+
 public class RequestLine {
 
-    private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
@@ -36,8 +39,12 @@ public class RequestLine {
         return requestParts;
     }
 
-    public boolean matchesMethod(HttpMethod method) {
-        return httpMethod == method;
+    public boolean isStaticResource() {
+        return ContentType.isStaticResource(uri);
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
     }
 
     public HttpMethod getHttpMethod() {

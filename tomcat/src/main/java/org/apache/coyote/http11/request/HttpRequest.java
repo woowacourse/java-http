@@ -1,18 +1,20 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
 import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.request.startLine.RequestLine;
 
 public class HttpRequest {
+
+    private static final int EMPTY_BODY_LENGTH = 0;
+
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -24,62 +26,60 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-        RequestHeaders requestHeaders = createRequestHeaders(bufferedReader);
-        RequestBody requestBody = createRequestBody(bufferedReader, requestHeaders);
+    public static HttpRequest read(RequestReader requestReader) throws IOException {
+        RequestLine requestLine = new RequestLine(requestReader.readRequestLine());
+        RequestHeaders requestHeaders = new RequestHeaders(requestReader.readRequestHeaders());
 
-        return new HttpRequest(requestLine, requestHeaders, requestBody);
-    }
-
-    private static RequestHeaders createRequestHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
-        String headerLine = bufferedReader.readLine();
-        while (!headerLine.isBlank()) {
-            String[] header = headerLine.split(": ");
-            headers.put(header[0], header[1]);
-            headerLine = bufferedReader.readLine();
+        int contentLength = getContentLength(requestHeaders);
+        if (hasRequestBody(contentLength)) {
+            RequestBody requestBody = createRequestBody(requestReader, requestHeaders, contentLength);
+            return new HttpRequest(requestLine, requestHeaders, requestBody);
         }
 
-        return new RequestHeaders(headers);
+        return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
     }
 
-    private static RequestBody createRequestBody(BufferedReader bufferedReader, RequestHeaders requestHeaders)
-            throws IOException {
-        StringBuilder body = new StringBuilder();
-        int contentLength = requestHeaders.get("Content-Length")
+    private static Integer getContentLength(RequestHeaders requestHeaders) {
+        return requestHeaders.get(HttpHeader.CONTENT_LENGTH.getName())
                 .map(Integer::parseInt)
-                .orElse(0);
-
-        if (contentLength > 0) {
-            char[] bodyChars = new char[contentLength];
-            bufferedReader.read(bodyChars, 0, contentLength);
-            body.append(bodyChars);
-        }
-
-        Map<String, String> params = new HashMap<>();
-
-        String[] paramPairs = body.toString().split("&");
-        for (String pair : paramPairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(
-                        URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
-                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
-                );
-            }
-        }
-
-        return new RequestBody(params);
+                .orElse(EMPTY_BODY_LENGTH);
     }
 
-    public boolean matchesMethod(HttpMethod method) {
-        return requestLine.matchesMethod(method);
+    private static boolean hasRequestBody(int contentLength) {
+        return contentLength > EMPTY_BODY_LENGTH;
     }
 
-    public Optional<String> getHeader(String header) {
-        return requestHeaders.get(header);
+    private static RequestBody createRequestBody(
+            RequestReader requestReader, RequestHeaders requestHeaders, int contentLength) throws IOException {
+
+        String mediaType = requestHeaders.get(HttpHeader.CONTENT_TYPE.getName())
+                .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
+
+        return new RequestBody(mediaType, requestReader.readRequestBody(contentLength));
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
+    }
+
+    public boolean isStaticResource() {
+        return requestLine.isStaticResource();
+    }
+
+    public String getParameter(String name) {
+        return requestBody.get(name);
+    }
+
+    public Session getSession() {
+        return getCookie().getJSessionId()
+                .flatMap(sessionManager::findSession)
+                .orElseGet(sessionManager::createSession);
+    }
+
+    public Cookie getCookie() {
+        return requestHeaders.get(HttpHeader.COOKIE.getName())
+                .map(Cookie::new)
+                .orElseGet(Cookie::empty);
     }
 
     public RequestLine getRequestLine() {

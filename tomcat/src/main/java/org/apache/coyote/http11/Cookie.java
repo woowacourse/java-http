@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Constants.NAME_INDEX;
+import static org.apache.coyote.http11.Constants.VALID_PARAMETER_PAIR_LENGTH;
+import static org.apache.coyote.http11.Constants.VALUE_INDEX;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,24 +16,28 @@ public class Cookie {
     private static final String COOKIE_DELIMITER = "; ";
     private static final String COOKIE_SEPARATOR = "=";
 
-    private static final int VALID_COOKIE_PAIR_LENGTH = 2;
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
-
     private final Map<String, String> cookies;
+
+    public Cookie(Map<String, String> cookies) {
+        this.cookies = cookies;
+    }
 
     public Cookie(String cookieHeader) {
         this.cookies = Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
                 .map(cookies -> cookies.split(COOKIE_SEPARATOR))
-                .filter(cookie -> cookie.length == VALID_COOKIE_PAIR_LENGTH)
+                .filter(cookie -> cookie.length == VALID_PARAMETER_PAIR_LENGTH)
                 .collect(Collectors.toMap(
-                        cookie -> cookie[KEY_INDEX],
+                        cookie -> cookie[NAME_INDEX],
                         cookie -> cookie[VALUE_INDEX])
                 );
     }
 
-    public void addCookie(String key, String value) {
-        cookies.put(key, value);
+    public static Cookie ofJSessionId(String id) {
+        return new Cookie(Map.of(JSESSIONID, id));
+    }
+
+    public static Cookie empty() {
+        return new Cookie(Collections.emptyMap());
     }
 
     public String toCookieHeader() {

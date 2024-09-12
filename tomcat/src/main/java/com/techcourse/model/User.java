@@ -14,6 +14,10 @@ public class User {
         this.email = email;
     }
 
+    public User(Long id, User user) {
+        this(id, user.account, user.password, user.email);
+    }
+
     public User(String account, String password, String email) {
         this(null, account, password, email);
     }

@@ -11,7 +11,7 @@ import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     @Test
     @DisplayName("GET 요청 처리: 회원가입 페이지 반환")
@@ -22,7 +22,7 @@ class RegisterHandlerTest {
         final HttpResponse actual = HttpResponse.builder().okBuild();
 
         // when
-        RegisterHandler.getInstance().service(request, actual);
+        RegisterController.getInstance().service(request, actual);
 
         final HttpResponse expected = HttpResponse.builder()
                 .foundBuild("/register.html");
@@ -39,7 +39,7 @@ class RegisterHandlerTest {
         final HttpResponse actual = HttpResponse.builder().okBuild();
 
         // when
-        RegisterHandler.getInstance().service(request, actual);
+        RegisterController.getInstance().service(request, actual);
 
         // then
         final HttpResponse expected = HttpResponse.builder().foundBuild("/index.html");

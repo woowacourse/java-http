@@ -4,13 +4,13 @@ import org.apache.coyote.handler.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class NotFoundHandler extends AbstractController {
-    private static final NotFoundHandler INSTANCE = new NotFoundHandler();
+public class NotFoundController extends AbstractController {
+    private static final NotFoundController INSTANCE = new NotFoundController();
 
-    private NotFoundHandler() {
+    private NotFoundController() {
     }
 
-    public static NotFoundHandler getInstance() {
+    public static NotFoundController getInstance() {
         return INSTANCE;
     }
 

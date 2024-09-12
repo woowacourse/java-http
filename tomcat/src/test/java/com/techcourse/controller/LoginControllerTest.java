@@ -17,7 +17,7 @@ import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
     @Test
     @DisplayName("GET 요청 처리: 세션이 없는 경우 로그인 페이지로 리다이렉트")
@@ -28,7 +28,7 @@ class LoginHandlerTest {
         final HttpResponse actual = HttpResponse.builder().okBuild();
 
         // when
-        LoginHandler.getInstance().service(request, actual);
+        LoginController.getInstance().service(request, actual);
 
         // then
         final HttpResponse expected = HttpResponse.builder().foundBuild("/login.html");
@@ -47,7 +47,7 @@ class LoginHandlerTest {
         final HttpResponse actual = HttpResponse.builder().okBuild();
 
         // when
-        LoginHandler.getInstance().service(request, actual);
+        LoginController.getInstance().service(request, actual);
 
         // then
         final HttpResponse expected = HttpResponse.builder().foundBuild("/index.html");
@@ -68,7 +68,7 @@ class LoginHandlerTest {
         final HttpResponse actual = HttpResponse.builder().okBuild();
 
         // when
-        LoginHandler.getInstance().service(request, actual);
+        LoginController.getInstance().service(request, actual);
 
         // then
         assertThat(actual.toString()).contains("JSESSIONID=", "Location: /index.html", "HTTP/1.1 302 Found");
@@ -82,7 +82,7 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest(requestLine, headers, "account=gugu&password=wrongpassword");
         final HttpResponse response = HttpResponse.builder().okBuild();
 
-        assertThatThrownBy(() -> LoginHandler.getInstance().service(request, response))
+        assertThatThrownBy(() -> LoginController.getInstance().service(request, response))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("로그인에 실패하였습니다.");
     }
@@ -95,7 +95,7 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest(requestLine, httpHeaders, "account=nonexistent&password=anypassword");
         final HttpResponse response = HttpResponse.builder().okBuild();
 
-        assertThatThrownBy(() -> LoginHandler.getInstance().service(request, response))
+        assertThatThrownBy(() -> LoginController.getInstance().service(request, response))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("로그인에 실패하였습니다.");
     }
@@ -107,7 +107,7 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest(requestLine, null, null);
         final HttpResponse response = HttpResponse.builder().okBuild();
 
-        assertThatThrownBy(() -> LoginHandler.getInstance().service(request, response))
+        assertThatThrownBy(() -> LoginController.getInstance().service(request, response))
                 .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessageContaining("지원하지 않는 HTTP Method 입니다");
     }

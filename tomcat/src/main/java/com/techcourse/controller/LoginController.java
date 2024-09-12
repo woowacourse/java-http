@@ -8,22 +8,21 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.handler.AbstractController;
 import org.apache.http.HttpCookie;
-import org.apache.http.MimeType;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginHandler extends AbstractController {
+public class LoginController extends AbstractController {
 
-    private static final LoginHandler INSTANCE = new LoginHandler();
+    private static final LoginController INSTANCE = new LoginController();
     private final SessionManager sessionManager = SessionManager.getInstance();
 
-    private LoginHandler() {
+    private LoginController() {
     }
 
-    public static LoginHandler getInstance() {
+    public static LoginController getInstance() {
         return INSTANCE;
     }
 

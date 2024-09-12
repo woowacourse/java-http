@@ -9,7 +9,7 @@ import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RootEndPointHandlerTest {
+class RootEndPointControllerTest {
 
     @Test
     @DisplayName("루트 엔드포인트에 대한 요청 처리: Get, Post 요청에 대해 동일한 응답 반환")
@@ -20,7 +20,7 @@ class RootEndPointHandlerTest {
             final HttpRequest request = new HttpRequest(requestLine, null, null);
             final HttpResponse actual = HttpResponse.builder().okBuild();
 
-            RootEndPointHandler.getInstance().service(request, actual);
+            RootEndPointController.getInstance().service(request, actual);
 
             final HttpResponse expected = HttpResponse.builder()
                     .addHeader(HttpHeaderName.CONTENT_TYPE, "text/plain")

@@ -7,13 +7,13 @@ import org.apache.http.response.HttpResponse;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterHandler extends AbstractController {
-    private static final RegisterHandler INSTANCE = new RegisterHandler();
+public class RegisterController extends AbstractController {
+    private static final RegisterController INSTANCE = new RegisterController();
 
-    private RegisterHandler() {
+    private RegisterController() {
     }
 
-    public static RegisterHandler getInstance() {
+    public static RegisterController getInstance() {
         return INSTANCE;
     }
 

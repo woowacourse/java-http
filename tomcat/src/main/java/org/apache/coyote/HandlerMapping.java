@@ -3,15 +3,15 @@ package org.apache.coyote;
 import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.handler.Controller;
-import org.apache.coyote.handler.StaticResourceHandler;
+import org.apache.coyote.handler.StaticResourceController;
 import org.apache.http.request.HttpRequest;
 
-import com.techcourse.controller.LoginHandler;
-import com.techcourse.controller.RegisterHandler;
-import com.techcourse.controller.RootEndPointHandler;
-import com.techcourse.controller.exception.InternalServerErrorHandler;
-import com.techcourse.controller.exception.NotFoundHandler;
-import com.techcourse.controller.exception.UnAuthorizationHandler;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootEndPointController;
+import com.techcourse.controller.exception.InternalServerErrorController;
+import com.techcourse.controller.exception.NotFoundController;
+import com.techcourse.controller.exception.UnAuthorizationController;
 
 
 public class HandlerMapping {
@@ -34,29 +34,29 @@ public class HandlerMapping {
         final String path = httpRequest.getPath();
 
         if (path.equals(PATH_DELIMITER)) {
-            return RootEndPointHandler.getInstance();
+            return RootEndPointController.getInstance();
         }
 
         if (path.equals("/login")) {
-            return LoginHandler.getInstance();
+            return LoginController.getInstance();
         }
 
         if (path.equals("/register")) {
-            return RegisterHandler.getInstance();
+            return RegisterController.getInstance();
         }
 
-        return StaticResourceHandler.getInstance();
+        return StaticResourceController.getInstance();
     }
 
     public Controller getHandlerByException(final Exception exception) {
         if (exception instanceof NotFoundException) {
-            return NotFoundHandler.getInstance();
+            return NotFoundController.getInstance();
         }
 
         if (exception instanceof UnauthorizedException) {
-            return UnAuthorizationHandler.getInstance();
+            return UnAuthorizationController.getInstance();
         }
 
-        return InternalServerErrorHandler.getInstance();
+        return InternalServerErrorController.getInstance();
     }
 }

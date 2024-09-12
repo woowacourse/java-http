@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.handler.Controller;
-import org.apache.coyote.handler.StaticResourceHandler;
+import org.apache.coyote.handler.StaticResourceController;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeaders;
@@ -15,12 +15,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.techcourse.controller.LoginHandler;
-import com.techcourse.controller.RegisterHandler;
-import com.techcourse.controller.RootEndPointHandler;
-import com.techcourse.controller.exception.InternalServerErrorHandler;
-import com.techcourse.controller.exception.NotFoundHandler;
-import com.techcourse.controller.exception.UnAuthorizationHandler;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootEndPointController;
+import com.techcourse.controller.exception.InternalServerErrorController;
+import com.techcourse.controller.exception.NotFoundController;
+import com.techcourse.controller.exception.UnAuthorizationController;
 
 class HandlerMappingTest {
 
@@ -32,7 +32,7 @@ class HandlerMappingTest {
             RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
             HttpRequest request = new HttpRequest(requestLine, new HttpHeaders(), null);
             Controller handler = HandlerMapping.getInstance().getHandler(request);
-            assertThat(handler).isInstanceOf(RootEndPointHandler.class);
+            assertThat(handler).isInstanceOf(RootEndPointController.class);
         }
 
         @Test
@@ -41,7 +41,7 @@ class HandlerMappingTest {
             RequestLine requestLine = new RequestLine(HttpMethod.GET, "/login", HttpVersion.HTTP_1_1);
             HttpRequest request = new HttpRequest(requestLine, new HttpHeaders(), null);
             Controller handler = HandlerMapping.getInstance().getHandler(request);
-            assertThat(handler).isInstanceOf(LoginHandler.class);
+            assertThat(handler).isInstanceOf(LoginController.class);
         }
 
         @Test
@@ -50,7 +50,7 @@ class HandlerMappingTest {
             RequestLine requestLine = new RequestLine(HttpMethod.GET, "/register", HttpVersion.HTTP_1_1);
             HttpRequest request = new HttpRequest(requestLine, new HttpHeaders(), null);
             Controller handler = HandlerMapping.getInstance().getHandler(request);
-            assertThat(handler).isInstanceOf(RegisterHandler.class);
+            assertThat(handler).isInstanceOf(RegisterController.class);
         }
 
         @Test
@@ -59,7 +59,7 @@ class HandlerMappingTest {
             RequestLine requestLine = new RequestLine(HttpMethod.GET, "/index.html", HttpVersion.HTTP_1_1);
             HttpRequest request = new HttpRequest(requestLine, new HttpHeaders(), null);
             Controller handler = HandlerMapping.getInstance().getHandler(request);
-            assertThat(handler).isInstanceOf(StaticResourceHandler.class);
+            assertThat(handler).isInstanceOf(StaticResourceController.class);
         }
     }
 
@@ -71,7 +71,7 @@ class HandlerMappingTest {
         void getHandlerByException_UnauthorizedException() {
             Controller handler = HandlerMapping.getInstance()
                     .getHandlerByException(new UnauthorizedException("권한이 없습니다."));
-            assertThat(handler).isInstanceOf(UnAuthorizationHandler.class);
+            assertThat(handler).isInstanceOf(UnAuthorizationController.class);
         }
 
         @Test
@@ -79,14 +79,14 @@ class HandlerMappingTest {
         void getHandlerByException_NotFoundException() {
             Controller handler = HandlerMapping.getInstance()
                     .getHandlerByException(new NotFoundException("존재하지 않는 리소스입니다."));
-            assertThat(handler).isInstanceOf(NotFoundHandler.class);
+            assertThat(handler).isInstanceOf(NotFoundController.class);
         }
 
         @Test
         @DisplayName("알 수 없는 에러: InternalServerErrornHandler 반환")
         void getHandlerByException_UnknownPath_ReturnsStaticResourceHandler() {
             Controller handler = HandlerMapping.getInstance().getHandlerByException(new Exception("에러"));
-            assertThat(handler).isInstanceOf(InternalServerErrorHandler.class);
+            assertThat(handler).isInstanceOf(InternalServerErrorController.class);
         }
     }
 }

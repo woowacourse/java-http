@@ -4,13 +4,13 @@ import org.apache.coyote.handler.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class UnAuthorizationHandler extends AbstractController {
-    private static final UnAuthorizationHandler INSTANCE = new UnAuthorizationHandler();
+public class UnAuthorizationController extends AbstractController {
+    private static final UnAuthorizationController INSTANCE = new UnAuthorizationController();
 
-    private UnAuthorizationHandler() {
+    private UnAuthorizationController() {
     }
 
-    public static UnAuthorizationHandler getInstance() {
+    public static UnAuthorizationController getInstance() {
         return INSTANCE;
     }
 

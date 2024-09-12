@@ -5,13 +5,13 @@ import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class RootEndPointHandler extends AbstractController {
-    private static final RootEndPointHandler INSTANCE = new RootEndPointHandler();
+public class RootEndPointController extends AbstractController {
+    private static final RootEndPointController INSTANCE = new RootEndPointController();
 
-    private RootEndPointHandler() {
+    private RootEndPointController() {
     }
 
-    public static RootEndPointHandler getInstance() {
+    public static RootEndPointController getInstance() {
         return INSTANCE;
     }
 

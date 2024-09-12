@@ -2,16 +2,6 @@ package org.apache.coyote.file;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.apache.coyote.handler.StaticResourceHandler;
-import org.apache.http.header.HttpHeaderName;
-import org.apache.http.request.HttpRequest;
-import org.apache.http.request.RequestLine;
-import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

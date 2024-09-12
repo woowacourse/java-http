@@ -4,13 +4,13 @@ import org.apache.coyote.handler.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class InternalServerErrorHandler extends AbstractController {
-    private static final InternalServerErrorHandler INSTANCE = new InternalServerErrorHandler();
+public class InternalServerErrorController extends AbstractController {
+    private static final InternalServerErrorController INSTANCE = new InternalServerErrorController();
 
-    private InternalServerErrorHandler() {
+    private InternalServerErrorController() {
     }
 
-    public static InternalServerErrorHandler getInstance() {
+    public static InternalServerErrorController getInstance() {
         return INSTANCE;
     }
 

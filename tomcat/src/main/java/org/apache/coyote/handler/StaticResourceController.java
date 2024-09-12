@@ -8,14 +8,14 @@ import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
-public class StaticResourceHandler implements Controller {
+public class StaticResourceController implements Controller {
 
-    private static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
+    private static final StaticResourceController INSTANCE = new StaticResourceController();
 
-    private StaticResourceHandler() {
+    private StaticResourceController() {
     }
 
-    public static StaticResourceHandler getInstance() {
+    public static StaticResourceController getInstance() {
         return INSTANCE;
     }
 

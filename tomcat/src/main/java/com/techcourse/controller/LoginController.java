@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
@@ -16,6 +17,7 @@ import util.ResourceFileLoader;
 
 public class LoginController extends AbstractController {
 
+    private static final String HOME_LOCATION = "http://localhost:8080/";
     private final String JAVA_SESSION_ID = "JSESSIONID";
 
     @Override
@@ -25,7 +27,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        processLoginPage(response);
+        processLoginPage(request, response);
     }
 
     private void processLogin(HttpResponse response, Map<String, String> requestBody) throws IOException {
@@ -42,9 +44,51 @@ public class LoginController extends AbstractController {
         loginFail(response);
     }
 
-    private void processLoginPage(HttpResponse httpResponse) throws IOException {
+    private void processLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        if (isAlreadyLogin(httpRequest)) {
+            httpResponse.sendRedirect(HOME_LOCATION);
+            return;
+        }
         httpResponse.setContentType(ContentType.TEXT_HTML);
         httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/login.html"));
+    }
+
+    private boolean isAlreadyLogin(HttpRequest httpRequest) {
+        if (!httpRequest.isExistCookie()) {
+            return false;
+        }
+
+        List<HttpCookie> cookies = httpRequest.getCookies();
+        if (!isContainJSessionId(cookies)) {
+            return false;
+        }
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(getJSessionId(cookies));
+        if (session == null) {
+            return false;
+        }
+
+        User user = (User) session.getAttribute("user");
+        return user != null;
+    }
+
+    private boolean isContainJSessionId(List<HttpCookie> cookies) {
+        for (HttpCookie cookie : cookies) {
+            if (cookie.getName().equals(JAVA_SESSION_ID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getJSessionId(List<HttpCookie> cookies) {
+        for (HttpCookie cookie : cookies) {
+            if (cookie.getName().equals(JAVA_SESSION_ID)) {
+                return cookie.getValue();
+            }
+        }
+        throw new IllegalStateException("Cookie에 JSessionId가 존재하지 않습니다.");
     }
 
     private void loginSuccess(HttpResponse httpResponse, User user) {

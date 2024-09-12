@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -152,5 +153,40 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(expectedBody);
+    }
+
+    @DisplayName("/login GET 요청 시, 이미 로그인해 있다면 루트로 다이렉트")
+    @Test
+    void direct_root_path_When_get_login_with_already_login() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + "account=gugu&password=password".length(),
+                "",
+                "account=gugu&password=password");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+        processor.process(socket);
+
+        // given
+        String jSessionId = InMemoryUserRepository.findByAccount("gugu").get().getId().toString();
+        String httpGetLoginRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID="+jSessionId,
+                "",
+                "");
+        StubSocket socket2 = new StubSocket(httpGetLoginRequest);
+        Http11Processor processor2 = new Http11Processor(socket2);
+
+        // when
+        processor2.process(socket2);
+
+        //then
+        assertThat(socket2.output()).contains("http://localhost:8080");
     }
 }

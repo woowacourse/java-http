@@ -42,7 +42,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.createEmptyHttpRequest();
             requestProcessor.process(inputStream, httpRequest);
             HttpResponse httpResponse = HttpResponse.createEmptyResponse();
-
             RequestPathType requestPathType = httpRequest.getRequestPathType();
             if (requestPathType.isStaticResource()) {
                 processStaticResourceResponse(httpRequest, httpResponse);

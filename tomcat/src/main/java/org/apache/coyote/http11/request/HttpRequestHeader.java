@@ -47,4 +47,11 @@ public class HttpRequestHeader {
         return httpRequestHeaders.get("Content-Length");
     }
 
+    public String getValue(String name) {
+        return httpRequestHeaders.get(name);
+    }
+
+    public boolean isContainKey(String key) {
+        return httpRequestHeaders.containsKey(key);
+    }
 }

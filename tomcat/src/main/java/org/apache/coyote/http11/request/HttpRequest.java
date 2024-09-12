@@ -1,12 +1,18 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.RequestPathType;
 import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
 import org.apache.coyote.http11.request.requestLine.MethodType;
 
 public class HttpRequest {
 
+    private static final String COOKIE_SEPARATOR = "&";
+    private static final String COOKIE_ENTRY_SEPARATOR = "=";
     private HttpRequestLine httpRequestLine;
     private HttpRequestHeader httpRequestHeader;
     private HttpRequestBody httpRequestBody;
@@ -50,4 +56,15 @@ public class HttpRequest {
         return httpRequestBody.getMap();
     }
 
+    public List<HttpCookie> getCookies() {
+        String cookies = httpRequestHeader.getValue("Cookie");
+        return Arrays.stream(cookies.split(COOKIE_SEPARATOR))
+                .map((singleHeader) -> singleHeader.split(COOKIE_ENTRY_SEPARATOR))
+                .map((cookieEntry) -> new HttpCookie(cookieEntry[0], cookieEntry[1]))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isExistCookie() {
+        return httpRequestHeader.isContainKey("Cookie");
+    }
 }

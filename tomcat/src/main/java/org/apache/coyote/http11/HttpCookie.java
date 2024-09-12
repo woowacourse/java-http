@@ -13,4 +13,12 @@ public class HttpCookie {
     public String toHttpForm() {
         return name + "=" + value;
     }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

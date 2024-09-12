@@ -2,12 +2,14 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.mapper.RequestMapper;
 import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.catalina.Mapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class RegisterControllerTest {
+
+    private final Mapper mapper = RequestMapper.getInstance();
 
     @BeforeEach
     void setUp() {
@@ -32,7 +36,7 @@ class RegisterControllerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 
@@ -64,7 +68,7 @@ class RegisterControllerTest {
                 "account=jazz&password=password&email=jazz@woowa.net");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 

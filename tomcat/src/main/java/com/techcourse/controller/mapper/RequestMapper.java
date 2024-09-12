@@ -1,18 +1,20 @@
 package com.techcourse.controller.mapper;
 
 import com.techcourse.controller.LoginController;
-import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
 import com.techcourse.service.RegisterService;
 import com.techcourse.service.UserService;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.controller.DefaultController;
+import java.util.Optional;
+import org.apache.catalina.Mapper;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class RequestMapper {
+public class RequestMapper implements Mapper {
+
+    private static final RequestMapper INSTANCE = new RequestMapper();
 
     private static final Map<String, Controller> handlerMap = new HashMap<>();
 
@@ -22,14 +24,15 @@ public class RequestMapper {
         handlerMap.put("/", new RootController());
     }
 
+    public static RequestMapper getInstance() {
+        return INSTANCE;
+    }
+
     private RequestMapper() {
     }
 
-    public static Controller getController(HttpRequest request) {
-        if (request.isStaticResource()) {
-            return new DefaultController();
-        }
-
-        return handlerMap.getOrDefault(request.getUri(), new NotFoundController());
+    @Override
+    public Optional<Controller> getController(HttpRequest request) {
+        return Optional.ofNullable(handlerMap.get(request.getUri()));
     }
 }

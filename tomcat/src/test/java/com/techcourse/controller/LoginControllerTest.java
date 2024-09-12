@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.mapper.RequestMapper;
 import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
+import org.apache.catalina.Mapper;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -20,6 +22,7 @@ import support.StubSocket;
 class LoginControllerTest {
 
     private final SessionManager sessionManager = SessionManager.getInstance();
+    private final Mapper mapper = RequestMapper.getInstance();
 
     @BeforeEach
     void setUp() {
@@ -37,7 +40,7 @@ class LoginControllerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 
@@ -72,7 +75,7 @@ class LoginControllerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 
@@ -98,7 +101,7 @@ class LoginControllerTest {
                 "account=gugu&password=password");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 
@@ -130,7 +133,7 @@ class LoginControllerTest {
                 "account=jazz&password=java");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 

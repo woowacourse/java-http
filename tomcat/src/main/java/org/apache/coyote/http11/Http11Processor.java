@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import org.apache.catalina.RequestMapper;
+import org.apache.catalina.Mapper;
+import org.apache.catalina.controller.DefaultController;
+import org.apache.catalina.controller.NotFoundController;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -21,9 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Mapper mapper;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, Mapper mapper) {
         this.connection = connection;
+        this.mapper = mapper;
     }
 
     @Override
@@ -62,8 +66,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleResponse(HttpRequest httpRequest) throws Exception {
         HttpResponse httpResponse = new HttpResponse();
-        Controller controller = RequestMapper.getController(httpRequest);
-        controller.service(httpRequest, httpResponse);
+
+        mapper.getController(httpRequest)
+                .orElseGet(() -> handleStaticRequest(httpRequest))
+                .service(httpRequest, httpResponse);
+
         return httpResponse;
+    }
+
+    private Controller handleStaticRequest(HttpRequest httpRequest) {
+        return httpRequest.isStaticResource() ? new DefaultController() : new NotFoundController();
     }
 }

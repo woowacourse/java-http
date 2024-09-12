@@ -2,12 +2,16 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.mapper.RequestMapper;
+import org.apache.catalina.Mapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class RootControllerTest {
+
+    private final Mapper mapper = RequestMapper.getInstance();
 
     @DisplayName("루트 페이지를 호출한다.")
     @Test
@@ -20,7 +24,7 @@ class RootControllerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, mapper);
 
         processor.process(socket);
 

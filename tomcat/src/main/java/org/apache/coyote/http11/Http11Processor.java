@@ -107,22 +107,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doGet(
-            HttpRequest httpRequest,
-            HttpResponse httpResponse,
-            HttpResponseWriter responseWriter
+            HttpRequest request,
+            HttpResponse response,
+            HttpResponseWriter writer
     ) throws IOException {
-        String path = httpRequest.getPath();
-        String version = httpRequest.getVersion();
-        if (path.equals("/")) {
-            httpResponse.addHeader("Content-Length", Integer.toString("Hello world!".length()));
-            httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
-            httpResponse.setResponseBody("Hello world!");
-            writeHttpResponse(httpResponse, responseWriter);
+        if (request.getPath().equals("/")) {
+            response.addHeader("Content-Length", Integer.toString("Hello world!".length()));
+            response.addHeader("Content-Type", "text/html;charset=utf-8");
+            response.setResponseBody("Hello world!");
+            writeHttpResponse(response, writer);
             return;
         }
-        determineGetResponse(httpRequest, httpResponse, httpRequest.getRequestHeader());
+        determineGetResponse(request, response, request.getRequestHeader());
 
-        writeHttpResponse(httpResponse, responseWriter);
+        writeHttpResponse(response, writer);
     }
 
     private void determineGetResponse(HttpRequest request, HttpResponse response, Map<String, String> requestHeaders)
@@ -150,13 +148,9 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Location", path);
     }
 
-    private void doPost(
-            HttpRequest httpRequest,
-            HttpResponse httpResponse,
-            HttpResponseWriter responseWriter
-    ) throws IOException {
-        determinePostResponse(httpRequest, httpResponse);
-        writeHttpResponse(httpResponse, responseWriter);
+    private void doPost(HttpRequest request, HttpResponse response, HttpResponseWriter writer) throws IOException {
+        determinePostResponse(request, response);
+        writeHttpResponse(response, writer);
     }
 
     private void determinePostResponse(HttpRequest request, HttpResponse response) throws IOException {
@@ -170,21 +164,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doLogin(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> requestBody = request.getRequestBody();
-
         String account = requestBody.get("account");
         String password = requestBody.get("password");
-
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
-            response.setStatusLine(request.getVersion(), FOUND);
-            response.addHeader("Location", "/401.html");
+            redirect(request, response, "/401.html");
             return;
         }
         log.info(user.toString());
-
-        response.setStatusLine(request.getVersion(), FOUND);
-        response.addHeader("Location", "/index.html");
+        redirect(request, response, "/index.html");
 
         String sessionId = UUID.randomUUID().toString();
         createSession(user, createCookie(JSESSIONID, sessionId));
@@ -216,9 +205,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doRegister(HttpRequest request, HttpResponse response) throws IOException {
-        response.setStatusLine(request.getVersion(), FOUND);
-        response.addHeader("Location", "/index.html");
-
+        redirect(request, response, "/index.html");
         User user = createUser(request.getRequestBody());
         InMemoryUserRepository.save(user);
     }
@@ -227,7 +214,7 @@ public class Http11Processor implements Runnable, Processor {
         return new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
     }
 
-    private void writeHttpResponse(HttpResponse httpResponse, HttpResponseWriter responseWriter) throws IOException {
-        responseWriter.writeResponse(httpResponse);
+    private void writeHttpResponse(HttpResponse response, HttpResponseWriter writer) throws IOException {
+        writer.writeResponse(response);
     }
 }

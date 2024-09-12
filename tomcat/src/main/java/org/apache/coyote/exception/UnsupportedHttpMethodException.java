@@ -1,4 +1,4 @@
-package com.techcourse.exception;
+package org.apache.coyote.exception;
 
 import org.apache.coyote.http11.request.startLine.HttpMethod;
 

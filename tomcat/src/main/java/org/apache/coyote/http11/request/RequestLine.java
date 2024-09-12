@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import org.apache.coyote.http11.exception.HttpFormatException;
 
 public class RequestLine {
 
@@ -24,7 +25,7 @@ public class RequestLine {
     public static RequestLine of(String requestLine) {
         List<String> splitRequestLine = Arrays.stream(requestLine.split(" ")).toList();
         if (splitRequestLine.size() != SPILT_REQUEST_LINE_COUNT) {
-            throw new IllegalArgumentException("올바르지 않은 request line 형식입니다.");
+            throw new HttpFormatException("올바르지 않은 request line 형식입니다.");
         }
 
         return new RequestLine(

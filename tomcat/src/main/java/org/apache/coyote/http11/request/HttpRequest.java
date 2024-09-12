@@ -4,7 +4,11 @@ public record HttpRequest(
         HttpRequestHeader header,
         HttpRequestBody body) {
 
-    public String getQueryStringValue(String key) {
-        return header.getQueryStringValue(key);
+    public boolean isMethodGET() {
+        return HttpMethod.GET.equals(header.requestLine().httpMethod());
+    }
+
+    public boolean isMethodPOST() {
+        return HttpMethod.POST.equals(header.requestLine().httpMethod());
     }
 }

@@ -53,7 +53,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {
-        String sessionId = request.getSession();
+        String sessionId = request.getJSessionId();
         if (sessionId.isBlank()) {
             return false;
         }

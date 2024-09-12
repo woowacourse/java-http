@@ -30,8 +30,8 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public String getSession() {
-        return headers.getSession();
+    public String getJSessionId() {
+        return headers.getJSessionId();
     }
 
     public String getRequestUri() {

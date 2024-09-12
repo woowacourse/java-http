@@ -19,7 +19,7 @@ public class LoginController extends MappingController {
         if (userService.existsUser(request)) {
             String path = "/index.html";
             String body = resourceResolver.resolve(path);
-            response.setStatus(Status.UNAUTHORIZED);
+            response.setStatusLine(Status.UNAUTHORIZED);
             response.setLocation(path);
             response.setContentType(ContentType.of(path));
             response.setBody(body);
@@ -27,7 +27,7 @@ public class LoginController extends MappingController {
         }
         String path = "/login.html";
         String body = resourceResolver.resolve(path);
-        response.setStatus(Status.OK);
+        response.setStatusLine(Status.OK);
         response.setContentType(ContentType.of(path));
         response.setBody(body);
     }
@@ -38,7 +38,7 @@ public class LoginController extends MappingController {
         if (successLogin) {
             String path = "/index.html";
             String body = resourceResolver.resolve(path);
-            response.setStatus(Status.FOUND);
+            response.setStatusLine(Status.FOUND);
             response.setLocation(path);
             response.setContentType(ContentType.of(path));
             response.setBody(body);
@@ -46,7 +46,7 @@ public class LoginController extends MappingController {
         }
         String path = "/401.html";
         String body = resourceResolver.resolve(path);
-        response.setStatus(Status.UNAUTHORIZED);
+        response.setStatusLine(Status.UNAUTHORIZED);
         response.setLocation(path);
         response.setContentType(ContentType.of(path));
         response.setBody(body);

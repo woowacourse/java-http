@@ -7,15 +7,15 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private Status status;
+    private StatusLine statusLine;
     private final Map<Header, Object> headers = new HashMap<>();
     private String body;
 
     public HttpResponse() {
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setStatusLine(Status status) {
+        this.statusLine = new StatusLine(status);
     }
 
     public void setLocation(String location) {
@@ -38,8 +38,8 @@ public class HttpResponse {
         return headers;
     }
 
-    public Status getStatus() {
-        return status;
+    public StatusLine getStatusLine() {
+        return statusLine;
     }
 
     public String getBody() {

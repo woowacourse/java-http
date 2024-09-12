@@ -14,6 +14,7 @@ public class RegisterController extends MappingController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         String body = resourceResolver.resolve(request.getUri());
+        response.setStatusLine(Status.OK);
         response.setContentType(ContentType.of(request.getUri()));
         response.setBody(body);
     }
@@ -26,7 +27,7 @@ public class RegisterController extends MappingController {
 
         String path = "/index.html";
         String body = resourceResolver.resolve(path);
-        response.setStatus(Status.FOUND);
+        response.setStatusLine(Status.FOUND);
         response.setLocation(path);
         response.setContentType(ContentType.of(path));
         response.setBody(body);

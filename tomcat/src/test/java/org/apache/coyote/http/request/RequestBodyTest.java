@@ -45,7 +45,7 @@ class RequestBodyTest {
     }
 
     @Test
-    void query_param이_비어있을_경우_예외가_발생한다() {
+    void body가_비어있을_경우_예외가_발생한다() {
         // given
         String bodies = "account=prin&&password=1q2w3e4r!";
 

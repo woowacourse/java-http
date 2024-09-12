@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
-import org.apache.coyote.http11.message.HttpMethodType;
-import org.apache.coyote.http11.message.HttpVersionType;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.HttpVersion;
 
 public class HttpRequestLine {
 
@@ -11,16 +11,16 @@ public class HttpRequestLine {
     private static final int HTTP_REQUEST_URI_ORDER = 1;
     private static final int HTTP_VERSION_ORDER = 2;
 
-    private final HttpMethodType httpMethodType;
+    private final HttpMethod httpMethod;
     private final HttpRequestUri httpRequestUri;
-    private final HttpVersionType httpVersionType;
+    private final HttpVersion httpVersion;
 
     public HttpRequestLine(final String httpRequestLineValue) {
         validateHttpRequestLineValue(httpRequestLineValue);
         String[] httpRequestLineData = parseHttpRequestLineFields(httpRequestLineValue);
-        this.httpMethodType = HttpMethodType.valueOf(httpRequestLineData[HTTP_METHOD_ORDER]);
+        this.httpMethod = HttpMethod.valueOf(httpRequestLineData[HTTP_METHOD_ORDER]);
         this.httpRequestUri = new HttpRequestUri(httpRequestLineData[HTTP_REQUEST_URI_ORDER]);
-        this.httpVersionType = HttpVersionType.getByValue(httpRequestLineData[HTTP_VERSION_ORDER]);
+        this.httpVersion = HttpVersion.getByValue(httpRequestLineData[HTTP_VERSION_ORDER]);
     }
 
     private void validateHttpRequestLineValue(final String httpRequestLineValue) {

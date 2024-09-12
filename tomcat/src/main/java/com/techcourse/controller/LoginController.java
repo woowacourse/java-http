@@ -26,18 +26,12 @@ public class LoginController {
 
     public void login(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
-        request.setHttpRequestPath("/login");
         String account = request.getRequestBodyValue("account");
         String password = request.getRequestBodyValue("password");
         try {
             User foundUser = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
-            if (foundUser.checkPassword(password)) {
-                log.info("user : " + foundUser);
-                response.setHttpStatusCode(HttpStatusCode.FOUND);
-                request.setHttpRequestPath("/index.html");
-                setSessionAtResponseHeader(foundUser, response);
-            }
+            loginProcess(password, foundUser, response);
         } catch (UserException e) {
             request.setHttpRequestPath("/401.html");
             response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
@@ -48,12 +42,26 @@ public class LoginController {
         response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
+    private void loginProcess(String password, User user, HttpResponse response) {
+        if (user.checkPassword(password)) {
+            log.info("user : " + user);
+            response.setHttpStatusCode(HttpStatusCode.FOUND);
+            redirect(response, "/index.html");
+            setSessionAtResponseHeader(user, response);
+        }
+    }
+
     private void setSessionAtResponseHeader(User user, HttpResponse response) {
         String jsessionid = UUID.randomUUID().toString();
         Session session = new Session(jsessionid);
         session.setAttribute("user", user);
         SessionManager.add(session.getId(), session);
         response.setHttpResponseHeader("Set-Cookie", "JSESSIONID=" + jsessionid);
+    }
+
+    private void redirect(HttpResponse response, String path) {
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setHttpResponseHeader("Location", path);
     }
 
     public static LoginController getInstance() {

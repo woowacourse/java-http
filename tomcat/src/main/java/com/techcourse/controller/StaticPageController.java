@@ -19,8 +19,7 @@ public class StaticPageController {
         FileReader fileReader = FileReader.getInstance();
         response.setHttpStatusCode(HttpStatusCode.OK);
         if (request.getHttpRequestPath().equals("/login") && checkLogin(request)) {
-            response.setHttpStatusCode(HttpStatusCode.FOUND);
-            request.setHttpRequestPath("/index.html");
+            redirect(response, "/index.html");
         }
 
         response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
@@ -34,6 +33,11 @@ public class StaticPageController {
             return false;
         }
         return SessionManager.containsSession(jsessionid);
+    }
+
+    private void redirect(HttpResponse response, String path) {
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setHttpResponseHeader("Location", path);
     }
 
     public static StaticPageController getInstance() {

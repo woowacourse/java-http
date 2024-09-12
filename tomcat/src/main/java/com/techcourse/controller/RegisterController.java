@@ -19,7 +19,6 @@ public class RegisterController {
 
     public void register(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
-        request.setHttpRequestPath("/index.html");
         String account = request.getRequestBodyValue("account");
         String email = request.getRequestBodyValue("email");
         String password = request.getRequestBodyValue("password");
@@ -27,6 +26,7 @@ public class RegisterController {
             User user = new User(account, password, email);
             checkDuplicatedUser(user);
             InMemoryUserRepository.save(user);
+            redirect(response, "/index.html");
         } catch (UserException e) {
             request.setHttpRequestPath("/register.html");
             response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
@@ -43,6 +43,11 @@ public class RegisterController {
                 .ifPresent(foundUser -> {
                     throw new UserException(userAccount + "는 이미 존재하는 계정입니다.");
                 });
+    }
+
+    private void redirect(HttpResponse response, String path) {
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setHttpResponseHeader("Location", path);
     }
 
     public static RegisterController getInstance() {

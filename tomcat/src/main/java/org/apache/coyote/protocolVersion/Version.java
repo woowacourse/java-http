@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.domain.protocolVersion;
+package org.apache.coyote.protocolVersion;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Version {
@@ -15,7 +16,7 @@ public class Version {
 
     private void validateVersion(String version) {
         if (version == null) {
-            throw new NullPointerException("프로토콜의 버전이 Null 입니다.");
+            throw new NullPointerException("프로토콜의 버전이 존재하지 않습니다.");
         }
         validateMadeOfNumber(version);
     }
@@ -28,5 +29,22 @@ public class Version {
 
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Version version1 = (Version) o;
+        return Objects.equals(version, version1.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version);
     }
 }

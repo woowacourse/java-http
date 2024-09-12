@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain.protocolVersion;
+package org.apache.coyote.protocolVersion;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -16,9 +16,6 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String INDEX_PATH = "/index.html";
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String COOKIE_DELIMITER = "=";
-    private static final String SESSION_USER_NAME = "user";
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -55,25 +52,25 @@ public class LoginController extends AbstractController {
 
     private void redirectWithCookie(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
         Session session = httpRequest.getSession();
-        session.setAttribute(SESSION_USER_NAME, user);
+        session.setUser(user);
         log.info(user.toString());
         httpResponse.found(httpRequest);
-        httpResponse.setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId());
+        httpResponse.setSession(session);
         httpResponse.location(INDEX_PATH);
     }
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         Session session = httpRequest.getSession();
-        if (!session.hasAttribute(SESSION_USER_NAME)) {
+        if (!session.hasUser()) {
             httpResponse.ok(httpRequest);
             httpResponse.staticResource(LOGIN_PATH);
             return;
         }
-        User user = (User) session.getAttribute(SESSION_USER_NAME);
+        User user = (User) session.getUser();
         log.info(user.toString());
         httpResponse.found(httpRequest);
-        httpResponse.setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId());
+        httpResponse.setSession(session);
         httpResponse.location(INDEX_PATH);
     }
 }

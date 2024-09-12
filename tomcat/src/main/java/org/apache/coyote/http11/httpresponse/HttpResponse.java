@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
@@ -58,6 +59,10 @@ public class HttpResponse {
 
     public void setCookie(String cookie) {
         addHeader(HttpHeaderName.SET_COOKIE, cookie);
+    }
+
+    public void setSession(Session session) {
+        setCookie(session.getId());
     }
 
     public void contentLength(String contentLength) {

@@ -47,9 +47,16 @@ public class LoginController extends AbstractController {
 
         if (request.isEmptyByQueryParam()) {
             response.setBody(FileReader.loadFileContent(LOGIN_PAGE));
-            return;
         }
+    }
 
+    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
+        return queryParams.size() < 2 ||
+                queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
+    }
+
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> queryParams = request.getQueryParam();
         if (hasMissingRequiredParams(queryParams)) {
             throw new IllegalArgumentException("파라미터가 제대로 정의되지 않았습니다.");
@@ -69,11 +76,5 @@ public class LoginController extends AbstractController {
             return;
         }
         throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
-
-    }
-
-    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
-        return queryParams.size() < 2 ||
-                queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
     }
 }

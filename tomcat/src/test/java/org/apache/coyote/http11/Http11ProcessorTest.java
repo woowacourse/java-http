@@ -178,7 +178,7 @@ class Http11ProcessorTest {
         void loginFailByPassword(String url) throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
-                    "GET " + url + " HTTP/1.1 ",
+                    "POST " + url + " HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "");
@@ -206,7 +206,7 @@ class Http11ProcessorTest {
         void loginSuccess() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=password HTTP/1.1 ",
+                    "POST /login?account=gugu&password=password HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "");

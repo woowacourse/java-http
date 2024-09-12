@@ -122,54 +122,55 @@ class LoginControllerTest {
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);
         }
+    }
 
-        @Nested
-        @DisplayName("(파라미터 존재할 때)로그인 시도")
-        class doGetSuccessContainParameter {
-            @Test
-            @DisplayName("성공 : login 시도 성공 시 index.html response 반환")
-            void doGetSuccessContainParameterSuccess() throws IOException {
-                User user = new User("kyum", "password", "kyum@naver.com");
-                InMemoryUserRepository.save(user);
-                HttpRequest request = new HttpRequest(
-                        new RequestLine("GET /login?account=kyum&password=password HTTP/1.1"),
-                        new RequestHeader(),
-                        new RequestBody()
-                );
-                HttpResponse response = HttpResponse.of(request);
 
-                new LoginController().doGet(request, response);
+    @Nested
+    @DisplayName("로그인 시도")
+    class doPost {
+        @Test
+        @DisplayName("성공 : login 시도 성공 시 index.html response 반환")
+        void doPostSuccess() throws IOException {
+            User user = new User("kyum", "password", "kyum@naver.com");
+            InMemoryUserRepository.save(user);
+            HttpRequest request = new HttpRequest(
+                    new RequestLine("POST /login?account=kyum&password=password HTTP/1.1"),
+                    new RequestHeader(),
+                    new RequestBody()
+            );
+            HttpResponse response = HttpResponse.of(request);
 
-                final URL resource = getClass().getClassLoader().getResource("static/index.html");
-                byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-                String actual = response.toString();
-                String JSessionId = actual.split("JSESSIONID=")[1].split(" \r\n")[0];
-                String expected = "HTTP/1.1 302 Found \r\n" +
-                        "Content-Type: text/html;charset=utf-8 \r\n" +
-                        "Content-Length: " + bytes.length + " \r\n" +
-                        "Location: http://localhost:8080/index.html" + " \r\n" +
-                        "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
-                        "\r\n" +
-                        new String(bytes);
+            new LoginController().doPost(request, response);
 
-                assertThat(actual).isEqualTo(expected);
-            }
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+            String actual = response.toString();
+            String JSessionId = actual.split("JSESSIONID=")[1].split(" \r\n")[0];
+            String expected = "HTTP/1.1 302 Found \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: " + bytes.length + " \r\n" +
+                    "Location: http://localhost:8080/index.html" + " \r\n" +
+                    "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
+                    "\r\n" +
+                    new String(bytes);
 
-            @Test
-            @DisplayName("실패 : login 시도 실패 시 예외 발생")
-            void doGetSuccessContainParameterFail() {
-                HttpRequest request = new HttpRequest(
-                        new RequestLine("GET /login?account=kyummi&password=password HTTP/1.1"),
-                        new RequestHeader(),
-                        new RequestBody()
-                );
-                HttpResponse response = HttpResponse.of(request);
-                LoginController loginController = new LoginController();
+            assertThat(actual).isEqualTo(expected);
+        }
 
-                assertThatThrownBy(() -> loginController.doGet(request, response))
-                        .isInstanceOf(IllegalStateException.class)
-                        .hasMessage("로그인 정보가 잘못되었습니다.");
-            }
+        @Test
+        @DisplayName("실패 : login 시도 실패 시 예외 발생")
+        void doPostFail() {
+            HttpRequest request = new HttpRequest(
+                    new RequestLine("POST /login?account=kyummi&password=password HTTP/1.1"),
+                    new RequestHeader(),
+                    new RequestBody()
+            );
+            HttpResponse response = HttpResponse.of(request);
+            LoginController loginController = new LoginController();
+
+            assertThatThrownBy(() -> loginController.doPost(request, response))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("로그인 정보가 잘못되었습니다.");
         }
     }
 }

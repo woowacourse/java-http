@@ -88,7 +88,7 @@
       - get /*.html (* : 페이지 이름)
     - [x] 로그인 컨트롤러
       - get /login
-      - get /login?account=gugu&password=password
+      - post /login?account=gugu&password=password
     - [x] 회원가입 컨트롤러
       - get /register
       - post /register

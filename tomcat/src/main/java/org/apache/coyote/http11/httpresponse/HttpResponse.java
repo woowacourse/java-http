@@ -57,13 +57,11 @@ public class HttpResponse {
                     statusLine,
                     responseHeader,
                     responseBody);
-            System.out.println(join);
             return join.getBytes();
         }
         String join = String.join(RESPONSE_LINE_DELIMITER,
                 statusLine,
                 responseHeader);
-        System.out.println(join);
         return join.getBytes();
     }
 

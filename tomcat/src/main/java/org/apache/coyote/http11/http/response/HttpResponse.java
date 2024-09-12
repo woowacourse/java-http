@@ -18,12 +18,6 @@ public class HttpResponse {
 		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.NOT_FOUND), header, body);
 	}
 
-	public HttpResponse(HttpResponseStartLine startLine, HttpResponseHeader header, HttpResponseBody body) {
-		this.startLine = startLine;
-		this.header = header;
-		this.body = body;
-	}
-
 	public static HttpResponse redirect(HttpResponseHeader responseHeader) {
 		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.FOUND), responseHeader, null);
 	}
@@ -31,6 +25,12 @@ public class HttpResponse {
 	public static HttpResponse badRequest(HttpResponseHeader httpResponseHeader) {
 		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.BAD_REQUEST), httpResponseHeader,
 			null);
+	}
+
+	private HttpResponse(HttpResponseStartLine startLine, HttpResponseHeader header, HttpResponseBody body) {
+		this.startLine = startLine;
+		this.header = header;
+		this.body = body;
 	}
 
 	public String toResponseMessage() {

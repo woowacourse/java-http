@@ -9,11 +9,13 @@ import org.apache.coyote.http11.CharSet;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.httprequest.HttpCookie;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
+    private static final String COOKIE_TOKEN_DELIMITER = "=";
     private static final String RESPONSE_LINE_DELIMITER = "\r\n";
     private static final String EXTENSION_DELIMITER = ".";
     private static final String HTML_EXTENSION = ".html";
@@ -62,7 +64,7 @@ public class HttpResponse {
     }
 
     public void setSession(Session session) {
-        setCookie(session.getId());
+        setCookie(HttpCookie.JSESSIONID + COOKIE_TOKEN_DELIMITER + session.getId());
     }
 
     public void contentLength(String contentLength) {
@@ -122,11 +124,13 @@ public class HttpResponse {
                     statusLine,
                     responseHeader,
                     responseBody);
+            System.out.println(join);
             return join.getBytes();
         }
         String join = String.join(RESPONSE_LINE_DELIMITER,
                 statusLine,
                 responseHeader);
+        System.out.println(join);
         return join.getBytes();
     }
 

@@ -22,7 +22,7 @@ public class HttpRequestHeader {
     }
 
     public boolean existRequestBody() {
-        return getHeaderValue(HttpHeaderName.CONTENT_LENGTH).equals(BODY_FORM_CONTENT_TYPE);
+        return getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals(BODY_FORM_CONTENT_TYPE);
     }
 
     public String getHeaderValue(String key) {

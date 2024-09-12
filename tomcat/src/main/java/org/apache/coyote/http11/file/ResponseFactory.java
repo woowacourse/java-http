@@ -15,9 +15,9 @@ public class ResponseFactory {
     public static void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
         final String rawResponse = String.join(HTTP_LINE_SEPARATOR,
                 writeStatusLine(response),
-                writeHeaders(response),
+                writeResponseHeaders(response),
                 "",
-                writeBody(response));
+                writeResponseBody(response));
 
         outputStream.write(rawResponse.getBytes());
     }
@@ -26,14 +26,14 @@ public class ResponseFactory {
         return String.join(STATUS_LINE_DELIMITER, response.getVersion(), response.getStatusCode(), response.getStatusMessage());
     }
 
-    private static String writeHeaders(HttpResponse response) {
+    private static String writeResponseHeaders(HttpResponse response) {
         Map<String, String> headers = response.getResponseHeader();
         return headers.entrySet().stream()
                 .map(entry -> entry.getKey() + HEADER_LINE_DELIMITER + entry.getValue())
                 .collect(Collectors.joining(HTTP_LINE_SEPARATOR));
     }
 
-    private static String writeBody(HttpResponse response) {
+    private static String writeResponseBody(HttpResponse response) {
         return response.getBody();
     }
 }

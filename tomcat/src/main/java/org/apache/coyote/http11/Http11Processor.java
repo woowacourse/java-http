@@ -59,11 +59,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
         final String requestLine = RequestFactory.readRequestLine(bufferedReader);
-        final String requestHeaders = RequestFactory.readHeaders(bufferedReader);
+        final String requestHeaders = RequestFactory.readRequestHeaders(bufferedReader);
         final HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders);
 
         int contentLength = httpRequest.getContentLength();
-        final String requestBody = RequestFactory.readBody(bufferedReader, contentLength);
+        final String requestBody = RequestFactory.readRequestBody(bufferedReader, contentLength);
         httpRequest.setBody(requestBody);
 
         return httpRequest;

@@ -12,7 +12,7 @@ public class RequestFactory {
         return reader.readLine();
     }
 
-    public static String readHeaders(BufferedReader reader) throws IOException {
+    public static String readRequestHeaders(BufferedReader reader) throws IOException {
         final StringBuilder requestHeaders = new StringBuilder();
         String line;
         while (Objects.nonNull(line = reader.readLine()) && !line.isBlank()) {
@@ -21,7 +21,7 @@ public class RequestFactory {
         return requestHeaders.toString();
     }
 
-    public static String readBody(BufferedReader reader, int contentLength) throws IOException {
+    public static String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         int charsRead = reader.read(buffer, 0, contentLength);
         if (charsRead == -1) {

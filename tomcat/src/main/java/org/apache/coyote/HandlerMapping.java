@@ -1,7 +1,7 @@
 package org.apache.coyote;
 
 import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.controller.DefaultController;
 import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.http.request.HttpRequest;
@@ -45,7 +45,7 @@ public class HandlerMapping {
             return RegisterController.getInstance();
         }
 
-        return StaticResourceController.getInstance();
+        return DefaultController.getInstance();
     }
 
     public Controller getHandlerByException(final Exception exception) {

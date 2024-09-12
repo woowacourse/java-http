@@ -15,12 +15,16 @@ public class QueryParser {
     }
 
     public static Map<String, String> parse(String query) {
-        List<String> keys = List.of(query.split(QUERY_SEPARATOR));
-        return keys.stream()
-                .map(key -> key.split(PARAM_SEPARATOR))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[KEY_INDEX],
-                        keyValue -> keyValue[VALUE_INDEX]
-                ));
+        try {
+            List<String> keys = List.of(query.split(QUERY_SEPARATOR));
+            return keys.stream()
+                    .map(key -> key.split(PARAM_SEPARATOR))
+                    .collect(Collectors.toMap(
+                            keyValue -> keyValue[KEY_INDEX],
+                            keyValue -> keyValue[VALUE_INDEX]
+                    ));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("파싱할 수 없는 형태의 쿼리입니다.");
+        }
     }
 }

@@ -2,10 +2,13 @@ package org.apache.coyote.request.parser;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class QueryParserTest {
 
@@ -21,5 +24,13 @@ class QueryParserTest {
                 () -> assertEquals(params.get("password"), "password"),
                 () -> assertEquals(params.get("email"), "hkkang@woowahan.com")
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"account=gugu&password=password&em", "acc", "--="})
+    @DisplayName("잘못된 형식의 쿼리인 경우 에러를 발생한다.")
+    void parse_WhenNotParamForm(String param) {
+        assertThrows(IllegalArgumentException.class,
+                () -> QueryParser.parse(param));
     }
 }

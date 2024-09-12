@@ -26,11 +26,11 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         final String account = request.getFormBodyByKey("account");
-        final String requestPasswrd = request.getFormBodyByKey("password");
-        final User savedUser = getvaliduser(account, requestPasswrd);
-        validateUserPassword(savedUser, requestPasswrd);
+        final String requestPassword = request.getFormBodyByKey("password");
+        final User savedUser = getvaliduser(account, requestPassword);
+        validateUserPassword(savedUser, requestPassword);
 
         response.setResponse(processSuccessLogin(savedUser));
     }

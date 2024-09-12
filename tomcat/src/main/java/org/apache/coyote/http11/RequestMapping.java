@@ -1,14 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.UserController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.resource.ResourceHandler;
 
-public class RequestMapper {
-    public static Handler getHandler(HttpRequest request) {
+public class RequestMapping {
+    public static Controller getHandler(HttpRequest request) {
         String path = request.getPath();
-        if (path.startsWith("/login") || path.startsWith("/register")) {
-            return UserController.getInstance();
+        if (path.equals("/login")) {
+            return LoginController.getInstance();
+        }
+        if (path.equals("/register")) {
+            return RegisterController.getInstance();
         }
         if (path.equals("/") || path.endsWith("html") || path.endsWith("css") || path.endsWith("js")) {
             return ResourceHandler.getInstance();

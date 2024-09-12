@@ -12,7 +12,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     protected static final SessionManagerWrapper SESSION_MANAGER = new SessionManagerWrapper(new SessionManager());
+
     protected static final String SESSION_USER_ATTRIBUTE_NAME = "user";
+
+    protected static final String INDEX_HTML = "/index.html";
+
+    protected static final String UNAUTHORIZED_HTML = "/401.html";
 
     @Override
     public final void service(HttpRequest request, HttpResponse response) {

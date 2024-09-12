@@ -16,7 +16,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (isLogin(request)) {
-            response.setRedirect("/index.html");
+            response.setRedirect(INDEX_HTML);
             return;
         }
         Path path = resourceFinder.find(request.requestUri());
@@ -33,9 +33,9 @@ public class LoginController extends AbstractController {
         boolean loginSuccess = user.isPresent() && user.get().checkPassword(password);
         if (loginSuccess) {
             addSessionAttribute(request, SESSION_USER_ATTRIBUTE_NAME, user);
-            response.setRedirect("/index.html");
+            response.setRedirect(INDEX_HTML);
             return;
         }
-        response.setRedirect("/401.html");
+        response.setRedirect(UNAUTHORIZED_HTML);
     }
 }

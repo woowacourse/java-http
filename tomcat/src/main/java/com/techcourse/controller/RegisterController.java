@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (isLogin(request)) {
-            response.setRedirect("/index.html");
+            response.setRedirect(INDEX_HTML);
             return;
         }
 
@@ -26,7 +26,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         if (isLogin(request)) {
-            response.setRedirect("/index.html");
+            response.setRedirect(INDEX_HTML);
             return;
         }
 
@@ -37,6 +37,6 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        response.setRedirect("/index.html");
+        response.setRedirect(INDEX_HTML);
     }
 }

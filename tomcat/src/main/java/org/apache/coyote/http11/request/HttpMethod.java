@@ -11,11 +11,4 @@ public enum HttpMethod {
     HttpMethod(String method) {
         this.method = method;
     }
-
-    public static HttpMethod parse(String method) {
-        if (GET.method.equals(method)) {
-            return GET;
-        }
-        return POST;
-    }
 }

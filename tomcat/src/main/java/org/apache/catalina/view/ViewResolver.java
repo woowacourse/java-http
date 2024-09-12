@@ -15,10 +15,6 @@ public class ViewResolver {
     private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ContentTypeConverter contentTypeConverter = new ContentTypeConverter();
 
-    public String resolve(String view) throws IOException {
-        return handleGetRequest(view);
-    }
-
     public String resolve(HttpRequestHeader request) throws IOException {
         if (HttpMethod.GET.equals(request.getHttpMethod())
                 && (request.getPath().startsWith("/login") || request.getPath().startsWith("/register"))

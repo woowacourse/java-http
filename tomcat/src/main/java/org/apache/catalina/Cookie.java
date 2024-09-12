@@ -2,8 +2,10 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class Cookie {
+
     private static final String COOKIE_DELIMITER = "&";
     private static final String SPLIT_DELIMITER = "=";
 
@@ -29,5 +31,14 @@ public class Cookie {
 
     public String getValue(String key) {
         return values.getOrDefault(key, null);
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        for (String key : values.keySet()) {
+            stringJoiner.add(key + "=" + values.get(key));
+        }
+        return stringJoiner.toString();
     }
 }

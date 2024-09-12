@@ -6,13 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequestParser {
 
     private static final HttpRequestParser INSTANCE = new HttpRequestParser();
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
     private HttpRequestParser() {
     }
@@ -40,8 +38,6 @@ public class HttpRequestParser {
         String firstLine = reader.readLine();
 
         if (firstLine != null) {
-            log.info("[Request] requestLine: {}", firstLine);
-
             String[] requestLineParts = firstLine.split(" ");
             method = requestLineParts[0];
             String uri = requestLineParts[1];
@@ -72,13 +68,12 @@ public class HttpRequestParser {
             headers.put(headerLineParts[0], headerLineParts[1]);
         }
 
-        log.info("[Request] header: {}", headers);
         return new RequestHeader(headers);
     }
 
     private RequestBody extractRequestBody(BufferedReader reader, RequestHeader header) throws IOException {
         try {
-            int contentLength = Integer.parseInt(header.getHeader("Content-Length"));
+            int contentLength = Integer.parseInt(header.getHeader(HttpHeaders.CONTENT_LENGTH.getName()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new RequestBody(new String(buffer));

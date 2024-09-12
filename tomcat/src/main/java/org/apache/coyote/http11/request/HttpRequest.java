@@ -27,7 +27,12 @@ public class HttpRequest {
     }
 
     public String getContentType() {
-        return header.getHeader(HttpHeaders.CONTENT_TYPE.getName()).split(",")[0];
+        String contentType = header.getHeader(HttpHeaders.ACCEPT.getName());
+        if (contentType == null) {
+            return null;
+        }
+
+        return contentType.split(",")[0];
     }
 
     public HttpCookie getCookie() {
@@ -41,5 +46,9 @@ public class HttpRequest {
 
     public RequestLine getRequestLine() {
         return requestLine;
+    }
+
+    public Map<String, String> getHeader() {
+        return header.getHeaders();
     }
 }

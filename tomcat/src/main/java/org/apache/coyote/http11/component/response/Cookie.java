@@ -23,6 +23,9 @@ public class Cookie {
     }
 
     public String get(final String cookieName) {
-        return values.getOrDefault(cookieName, "");
+        if (!values.containsKey(cookieName)) {
+            throw new IllegalArgumentException("존재하지 않는 쿠키 값");
+        }
+        return values.get(cookieName);
     }
 }

@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 public class RequestLine {
 
-	public static final String PROTOCOL_VERSION = "HTTP/1.1";
-	public static final String SPLIT_REGEX = " ";
-	public static final int METHOD_INDEX = 0;
-	public static final int PATH_INDEX = 1;
-	public static final int VERSION_INDEX = 2;
+	private static final String PROTOCOL_VERSION = "HTTP/1.1";
+	private static final String SPLIT_REGEX = " ";
+	private static final int METHOD_INDEX = 0;
+	private static final int PATH_INDEX = 1;
+	private static final int VERSION_INDEX = 2;
 
 	private final HttpMethod method;
 	private final String path;

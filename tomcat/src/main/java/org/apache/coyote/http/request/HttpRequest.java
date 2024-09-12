@@ -3,8 +3,8 @@ package org.apache.coyote.http.request;
 import java.util.UUID;
 import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.session.Session;
-import org.apache.coyote.http.session.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 

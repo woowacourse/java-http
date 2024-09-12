@@ -5,11 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.RequestMapping;
-import org.apache.coyote.http.Header;
-import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
+        this.adapter = adapter;
     }
 
     @Override
@@ -39,22 +38,12 @@ public class Http11Processor implements Runnable, Processor {
             final var request = RequestGenerator.accept(requestReader);
             final var response = HttpResponse.create();
             log.info("request: {}", request);
-            service(request, response);
+            adapter.service(request, response);
 
             outputStream.write(response.serialize());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void service(HttpRequest request, HttpResponse response) {
-        try {
-            Controller controller = RequestMapping.getController(request);
-            controller.service(request, response);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            response.setHeader(Header.LOCATION.value(), "/500.html");
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.catalina.controller;
 
 import com.techcourse.controller.IndexController;
 import com.techcourse.controller.LoginController;

@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.controller.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;

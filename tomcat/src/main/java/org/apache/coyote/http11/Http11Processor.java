@@ -58,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
                     .addHttpStatusCode(HttpStatusCode.FOUND)
                     .addRedirectUrl("/login.html");
         }
-        Controller controller = RequestMapping.getHandler(request);
+        Controller controller = RequestMapping.getController(request);
         if (controller == null) {
             return new HttpResponse(HttpVersion.HTTP_1_1)
                     .addHttpStatusCode(HttpStatusCode.NOT_FOUND);

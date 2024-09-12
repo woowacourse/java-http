@@ -6,7 +6,7 @@ import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.resource.ResourceHandler;
 
 public class RequestMapping {
-    public static Controller getHandler(HttpRequest request) {
+    public static Controller getController(HttpRequest request) {
         String path = request.getPath();
         if (path.equals("/login")) {
             return LoginController.getInstance();

@@ -13,7 +13,7 @@ class HttpResponseTest {
     @DisplayName("http 응답 메세지 생성한다.")
     void generate_http_response_message() {
         // given
-        final var responseLine = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
+        final var responseLine = new StatusLine(new Version(1, 1), new StatusCode("OK", 200));
         final var responseHeader = new ResponseHeader();
         responseHeader.put("Content-type", "text/plain");
         responseHeader.put("fram", "6");

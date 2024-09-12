@@ -9,7 +9,7 @@ import org.apache.coyote.http11.component.common.MimeType;
 import org.apache.coyote.http11.component.common.body.TextTypeBody;
 import org.apache.coyote.http11.component.response.HttpResponse;
 import org.apache.coyote.http11.component.response.ResponseHeader;
-import org.apache.coyote.http11.component.response.ResponseLine;
+import org.apache.coyote.http11.component.response.StatusLine;
 
 public class StaticResourceFinder {
 
@@ -21,7 +21,7 @@ public class StaticResourceFinder {
 
     public static HttpResponse render(final String resourceName) {
         final var resourceFinder = new StaticResourceFinder(resourceName);
-        final var ok = ResponseLine.OK;
+        final var ok = StatusLine.OK;
         final var responseHeader = new ResponseHeader();
         responseHeader.put("Content-Length", String.valueOf(resourceFinder.getBytes().length));
         responseHeader.put("Content-Type", MimeType.find(resourceName) + ";charset=utf-8");
@@ -30,7 +30,7 @@ public class StaticResourceFinder {
     }
 
     public static HttpResponse renderRedirect(final String location) {
-        final var found = ResponseLine.FOUND;
+        final var found = StatusLine.FOUND;
         final var responseHeader = new ResponseHeader();
         responseHeader.put("Location", location);
         final var textTypeBody = new TextTypeBody("");
@@ -38,7 +38,7 @@ public class StaticResourceFinder {
     }
 
     public static HttpResponse renderRedirect(final ResponseHeader header) {
-        final var found = ResponseLine.FOUND;
+        final var found = StatusLine.FOUND;
         final var textTypeBody = new TextTypeBody("");
         return new HttpResponse(found, header, textTypeBody);
     }

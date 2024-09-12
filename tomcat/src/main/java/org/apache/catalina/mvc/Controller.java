@@ -1,4 +1,4 @@
-package org.apache.catalina.mvc.controller;
+package org.apache.catalina.mvc;
 
 
 import org.apache.catalina.request.HttpRequest;

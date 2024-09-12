@@ -1,6 +1,6 @@
-package org.apache.catalina.mvc.controller;
+package org.apache.catalina.mvc;
 
-import org.apache.catalina.io.FileReader;
+import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;

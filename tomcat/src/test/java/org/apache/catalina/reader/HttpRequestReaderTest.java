@@ -1,8 +1,9 @@
-package org.apache.catalina.io;
+package org.apache.catalina.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.atomicIntegerFieldUpdater;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -76,8 +77,9 @@ class HttpRequestReaderTest {
             final String httpRequest = String.join("\r\n", body);
             final var socket = new StubSocket(httpRequest);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            final var byteLength = body.getBytes().length;
 
-            assertThatCode(() -> RequestReader.readBody(reader, body.getBytes().length + 1))
+            assertThatCode(() -> RequestReader.readBody(reader,  byteLength + 1))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("실제 읽은 바이트 수가 예상된 길이보다 작습니다.");
         }

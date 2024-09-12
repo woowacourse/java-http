@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.catalina.http.VersionOfProtocol;
-import org.apache.catalina.io.RequestParser;
+import org.apache.catalina.parser.RequestParser;
 
 public class RequestLine {
     private static final String SPACE = " ";

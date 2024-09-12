@@ -1,4 +1,4 @@
-package org.apache.catalina.io;
+package org.apache.catalina.parser;
 
 import java.util.Arrays;
 import java.util.List;

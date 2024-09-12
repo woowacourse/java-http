@@ -1,4 +1,4 @@
-package org.apache.catalina.io;
+package org.apache.catalina.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

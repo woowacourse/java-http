@@ -1,10 +1,11 @@
-package org.apache.catalina.io;
+package org.apache.catalina.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.parser.RequestParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

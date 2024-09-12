@@ -1,4 +1,4 @@
-package org.apache.catalina.io;
+package org.apache.catalina.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;

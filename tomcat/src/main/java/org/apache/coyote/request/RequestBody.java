@@ -53,6 +53,10 @@ public class RequestBody {
     }
 
     public String get(String name) {
-        return requestBody.get(name);
+        if (requestBody.containsKey(name)) {
+            return requestBody.get(name);
+        }
+
+        throw new CoyoteException("올바르지 않은 Request Body 형식입니다.");
     }
 }

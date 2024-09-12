@@ -27,6 +27,11 @@ public class HttpResponse {
         responseHeader = new HttpHeader();
     }
 
+    public void setRedirectWithSessionId(String path, String sessionId) {
+        setRedirect(path);
+        setCookie(HttpCookie.ofSessionId(sessionId));
+    }
+
     public void setCookie(HttpCookie cookie) {
         responseHeader.add(HttpHeaderType.SET_COOKIE.getName(), cookie.buildMessage());
     }

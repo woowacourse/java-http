@@ -1,21 +1,22 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
-    private static final String ACCOUNT_FIELD = "account";
-    private static final String PASSWORD_FIELD = "password";
+    private static final String ACCOUNT_FIELD_NAME = "account";
+    private static final String PASSWORD_FIELD_NAME = "password";
     private static final String USER_ATTRIBUTE_NAME = "user";
+
+    private static final String INDEX_PATH = "/index.html";
+    private static final String INDEX_FILE_NAME = "login.html";
 
     private final SessionManager sessionManager;
 
@@ -26,38 +27,36 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
-        validateFields(requestBody);
-
-        String account = requestBody.get(ACCOUNT_FIELD);
-        String password = requestBody.get(PASSWORD_FIELD);
+        String account = requestBody.get(ACCOUNT_FIELD_NAME);
+        String password = requestBody.get(PASSWORD_FIELD_NAME);
 
         if (InMemoryUserRepository.exists(account, password)) {
             User user = InMemoryUserRepository.getByAccount(account);
-            String sessionId = sessionManager.generateId();
-            Session session = new Session();
-            session.setAttribute(USER_ATTRIBUTE_NAME, user);
-            sessionManager.add(sessionId, session);
-            response.setRedirect("/index.html");
-            response.setCookie(HttpCookie.ofSessionId(sessionId));
+            String sessionId = saveSessionAndGetSessionId(user);
+            response.setRedirectWithSessionId(INDEX_PATH, sessionId);
             return;
         }
 
         response.setUnauthorized();
     }
 
-    private static void validateFields(RequestBody requestBody) {
-        if (!requestBody.containsExactly(ACCOUNT_FIELD, PASSWORD_FIELD)) {
-            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
-        }
+    private String saveSessionAndGetSessionId(User user) {
+        Session session = new Session();
+        session.setAttribute(USER_ATTRIBUTE_NAME, user);
+
+        String sessionId = sessionManager.generateId();
+        sessionManager.add(sessionId, session);
+
+        return sessionId;
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (request.hasSession() && sessionManager.hasId(request.getSession())) {
-            response.setRedirect("/index.html");
+            response.setRedirect(INDEX_PATH);
             return;
         }
 
-        response.setStaticResource("login.html");
+        response.setStaticResource(INDEX_FILE_NAME);
     }
 }

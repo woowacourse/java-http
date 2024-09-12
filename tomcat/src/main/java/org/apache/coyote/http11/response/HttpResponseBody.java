@@ -1,11 +1,17 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Map;
-
 public class HttpResponseBody {
-    private final Map<String, String> bodies;
+    private String body;
 
-    public HttpResponseBody(Map<String, String> bodies) {
-        this.bodies = bodies;
+    public HttpResponseBody() {
+        body = "";
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

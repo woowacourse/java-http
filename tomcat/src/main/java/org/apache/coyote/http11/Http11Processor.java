@@ -3,17 +3,15 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.request.HttpMethod.GET;
 import static org.apache.coyote.http11.request.HttpMethod.POST;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
-import static org.apache.coyote.http11.response.HttpStatusCode.OK;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +19,13 @@ import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.Cookie;
-import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.io.HttpResponseWriter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.response.ContentTypes;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,16 +61,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
+             final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+             final BufferedReader reader = new BufferedReader(inputStreamReader)) {
             HttpRequest httpRequest = readHttpRequest(reader);
+            HttpResponse httpResponse = HttpResponse.defaultResponse();
+            HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStreamWriter);
 
             if (httpRequest.getMethod().equals(GET)) {
-                doGet(httpRequest, outputStream);
+                doGet(httpRequest, httpResponse, httpResponseWriter);
             }
             if (httpRequest.getMethod().equals(POST)) {
-                doPost(httpRequest, reader, outputStream);
+                doPost(httpRequest, httpResponse, httpResponseWriter);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -106,79 +108,68 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doGet(
             HttpRequest httpRequest,
-            OutputStream outputStream
+            HttpResponse httpResponse,
+            HttpResponseWriter responseWriter
     ) throws IOException {
         String path = httpRequest.getPath();
         String version = httpRequest.getVersion();
         if (path.equals("/")) {
-            writeHttpResponse(
-                    "Hello world!",
-                    createHttpResponseHeader(version + " 200 OK ", "text/html", "Hello world!"),
-                    outputStream);
+            httpResponse.addHeader("Content-Length", Integer.toString("Hello world!".length()));
+            httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+            httpResponse.addBody("Hello world!");
+            writeHttpResponse(httpResponse, responseWriter);
             return;
         }
-        String[] result = determineGetResponse(path, version, httpRequest.getRequestHeader());
-        Path filePath = getPath(result);
-        var responseBody = Files.readString(filePath);
-        String contentType = Files.probeContentType(filePath);
+        determineGetResponse(httpRequest, httpResponse, httpRequest.getRequestHeader());
 
-        String responseHeader = createHttpResponseHeader(result[0], contentType, responseBody);
-        writeHttpResponse(responseBody, responseHeader, outputStream);
+        writeHttpResponse(httpResponse, responseWriter);
     }
 
-    private String[] determineGetResponse(String url, String version, Map<String, String> requestHeaders) {
-        String[] result = new String[2];
-        result[0] = version + " " + OK.concatCodeAndStatus() + " ";
-        if (url.endsWith("html") || url.endsWith("js") || url.endsWith("css")) {
-            result[1] = "static" + url;
-            return result;
-        }
-        if (url.equals("/login") && isAlreadyLogin(requestHeaders)) {
-            result[0] = createResponseHeader(version, FOUND, "/index.html");
-            result[1] = "static/index.html";
+    private void determineGetResponse(HttpRequest request, HttpResponse response, Map<String, String> requestHeaders)
+            throws IOException {
+        String path = "static" + request.getPath();
 
+        if (path.equals("/login") && isAlreadyLogin(requestHeaders)) {
+            redirect(request, response, "index.html");
+            return;
         }
-        result[1] = "static" + url + ".html";
-        return result;
+        if (!path.contains(".")) {
+            path = path + ".html";
+        }
+        URL resource = getClass().getClassLoader().getResource(path);
+        File file = new File(resource.getPath());
+        var responseBody = Files.readString(file.toPath());
+        String contentType = Files.probeContentType(file.toPath());
+        response.addHeader("Content-Length", Long.toString(file.length()));
+        response.addHeader("Content-Type", ContentTypes.getContentType(contentType));
+        response.addBody(responseBody);
     }
 
-    private Path getPath(String[] pathAndStatus) {
-        URL resource = getClass().getClassLoader().getResource(pathAndStatus[1]);
-        return new File(resource.getPath()).toPath();
+    private void redirect(HttpRequest request, HttpResponse response, String path) {
+        response.setStatusLine(request.getVersion(), FOUND);
+        response.addHeader("Location", path);
     }
 
     private void doPost(
             HttpRequest httpRequest,
-            BufferedReader reader,
-            OutputStream outputStream
+            HttpResponse httpResponse,
+            HttpResponseWriter responseWriter
     ) throws IOException {
-        String url = httpRequest.getPath();
-        String version = httpRequest.getVersion();
-        String[] responseHeaderAndPath = determinePostResponse(url, version, httpRequest.getRequestBody());
-
-        final Path path = getPath(responseHeaderAndPath);
-        var responseBody = Files.readString(path);
-        String contentType = Files.probeContentType(path);
-
-        String responseHeader = createHttpResponseHeader(responseHeaderAndPath[0], contentType, responseBody);
-        writeHttpResponse(responseBody, responseHeader, outputStream);
+        determinePostResponse(httpRequest, httpResponse);
+        writeHttpResponse(httpResponse, responseWriter);
     }
 
-    private String[] determinePostResponse(String url, String version, Map<String, String> requestBody) {
-        String[] result = new String[2];
-        if (url.startsWith("/login")) {
-            result = doLogin(version, requestBody);
+    private void determinePostResponse(HttpRequest request, HttpResponse response) throws IOException {
+        if (request.getPath().equals("/login")) {
+            doLogin(request, response);
         }
-        if (url.equals("/register")) {
-            result = doRegister(version, requestBody);
+        if (request.getPath().equals("/register")) {
+            doRegister(request, response);
         }
-        return result;
     }
 
-    private String[] doLogin(String version, Map<String, String> requestBody) {
-        String[] result = new String[2];
-        result[0] = createResponseHeader(version, FOUND, "/index.html");
-        result[1] = "static/index.html";
+    private void doLogin(HttpRequest request, HttpResponse response) throws IOException {
+        Map<String, String> requestBody = request.getRequestBody();
 
         String account = requestBody.get("account");
         String password = requestBody.get("password");
@@ -186,24 +177,18 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
-            result[1] = "static/401.html";
-            result[0] = createResponseHeader(version, FOUND, "/401.html");
-            return result;
+            response.setStatusLine(request.getVersion(), FOUND);
+            response.addHeader("Location", "/401.html");
+            return;
         }
         log.info(user.toString());
 
+        response.setStatusLine(request.getVersion(), FOUND);
+        response.addHeader("Location", "/index.html");
+
         String sessionId = UUID.randomUUID().toString();
         createSession(user, createCookie(JSESSIONID, sessionId));
-        result[0] = String.join("\r\n",
-                result[0],
-                SET_COOKIE + HEADER_DELIMITER + JSESSIONID + "=" + sessionId);
-        return result;
-    }
-
-    private static String createResponseHeader(String version, HttpStatusCode statusCode, String location) {
-        return String.join("\r\n",
-                version + " " + statusCode.concatCodeAndStatus() + " ",
-                "Location: " + location + " ");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
     private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
@@ -230,35 +215,19 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", user);
     }
 
-    private String[] doRegister(String version, Map<String, String> requestBody) {
-        String[] result = new String[2];
-        result[0] = createResponseHeader(version, FOUND, "/index.html");
-        result[1] = "static/index.html";
-        User user = createUser(requestBody);
-        InMemoryUserRepository.save(user);
+    private void doRegister(HttpRequest request, HttpResponse response) throws IOException {
+        response.setStatusLine(request.getVersion(), FOUND);
+        response.addHeader("Location", "/index.html");
 
-        return result;
+        User user = createUser(request.getRequestBody());
+        InMemoryUserRepository.save(user);
     }
 
     private User createUser(Map<String, String> requestBody) {
         return new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
     }
 
-    private static String createHttpResponseHeader(String responseHeader, String contentType, String responseBody) {
-        return String.join("\r\n",
-                responseHeader,
-                CONTENT_TYPE + HEADER_DELIMITER + contentType + CHARSET + " ",
-                CONTENT_LENGTH + HEADER_DELIMITER + responseBody.getBytes().length + " ");
-    }
-
-    private void writeHttpResponse(String responseBody, String responseHeader, OutputStream outputStream)
-            throws IOException {
-        final var response = String.join("\r\n",
-                responseHeader,
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private void writeHttpResponse(HttpResponse httpResponse, HttpResponseWriter responseWriter) throws IOException {
+        responseWriter.writeResponse(httpResponse);
     }
 }

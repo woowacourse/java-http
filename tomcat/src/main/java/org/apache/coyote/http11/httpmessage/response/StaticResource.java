@@ -9,11 +9,10 @@ import java.nio.file.NoSuchFileException;
 public class StaticResource {
     private final File file;
 
-    public StaticResource(String resourceName) throws IOException {
-        String path = "static" + resourceName;
-        URL resource = getClass().getClassLoader().getResource(path);
+    public StaticResource(String resourcePath) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         if (resource == null) {
-            throw new NoSuchFileException("파일 " + resourceName + "이 존재하지 않습니다.");
+            throw new NoSuchFileException(resourcePath + " 경로의 파일이 존재하지 않습니다.");
         }
         this.file = new File(resource.getPath());
     }

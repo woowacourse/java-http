@@ -40,8 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var inputStreamReader = new InputStreamReader(inputStream);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
-
-            final var plaintext = readLines(bufferedReader);
+            final var plaintext = parseLines(bufferedReader);
 
             final HttpResponse response = handleHttp(plaintext);
             outputStream.write(response.getResponseBytes());
@@ -63,22 +62,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readLines(final BufferedReader bufferedReader) throws IOException {
+    private String parseLines(final BufferedReader bufferedReader) throws IOException {
         final var collector = new ArrayList<String>();
         var line = bufferedReader.readLine();
         var contentLength = 0;
         while (!Objects.isNull(line) && !line.isBlank()) {
             collector.add(line);
             line = bufferedReader.readLine();
-            if (line.startsWith("Content-Length")) {
-                final List<String> content = List.of(line.replaceAll(" ", "").split(":"));
-                contentLength = Integer.parseInt(content.getLast());
-            }
+            contentLength = findContentLength(line);
         }
         collector.add("");
         collector.addAll(parseBody(bufferedReader, contentLength));
 
         return String.join(CRLF, collector);
+    }
+
+    private int findContentLength(final String line) {
+        if (line.startsWith("Content-Length")) {
+            final List<String> content = List.of(line.replaceAll(" ", "").split(":"));
+            return Integer.parseInt(content.getLast());
+        }
+        return 0;
     }
 
     private List<String> parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {

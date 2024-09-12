@@ -47,18 +47,16 @@ public class LoginHandler implements HttpHandler {
     }
 
     private HttpResponse doGet(final HttpRequest request) {
-        if (isLogin(request.getCookieContent(LOGIN_SUCCESSFUL_COOKIE_NAME))) {
+        if (isLogin(request)) {
             return StaticResourceFinder.renderRedirect(LOGIN_SUCCESSFUL_REDIRECT_URI);
         }
         return StaticResourceFinder.render(LOGIN_HTML);
     }
 
-    private boolean isLogin(final String sessionId) {
-        if (sessionId.isBlank()) {
-            return false;
-        }
-        final SessionManager sessionManager = SessionManager.getInstance();
+    private boolean isLogin(final HttpRequest request) {
         try {
+            final var sessionId = request.getCookieContent(LOGIN_SUCCESSFUL_COOKIE_NAME);
+            final SessionManager sessionManager = SessionManager.getInstance();
             sessionManager.findSession(sessionId);
             return true;
         } catch (final IllegalArgumentException exception) {

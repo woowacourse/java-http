@@ -12,6 +12,7 @@ import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.util.FileReader;
 import org.apache.coyote.util.HttpResponseBuilder;
+import org.apache.coyote.util.Symbol;
 
 public final class ViewController extends AbstractController {
 
@@ -47,7 +48,7 @@ public final class ViewController extends AbstractController {
     }
 
     private String getFilePath(String path) {
-        if (path.isEmpty()) {
+        if (path.isEmpty() || path.equals(Symbol.URL_DELIMITER)) {
             return "index.html";
         }
         if (!path.contains(".")) {

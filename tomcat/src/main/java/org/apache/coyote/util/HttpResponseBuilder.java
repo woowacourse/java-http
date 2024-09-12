@@ -14,6 +14,7 @@ public class HttpResponseBuilder {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String HTTP_VERSION_PROTOCOL = "HTTP/1.1";
     private static final String CHARSET_UTF_8 = "charset=utf-8";
+    private static final String LOCATION = "Location";
 
     static {
         contentMapper.put("html", HttpContentType.HTML);
@@ -23,47 +24,46 @@ public class HttpResponseBuilder {
     }
 
     private HttpResponseBuilder() {
-        throw new IllegalStateException("Utility class");
+        throw new IllegalStateException("유틸리티 클래스는 인스턴스를 생성할 수 없습니다.");
     }
 
     public static void buildStaticContent(
-            final HttpResponse httpResponse,
-            final String fileName,
-            final List<String> contentLines
+            final HttpResponse httpResponse, final String fileName, final List<String> contentLines
     ) {
-        final String fileContent = String.join("\r\n", contentLines);
+        final String fileContent = String.join(System.lineSeparator(), contentLines);
         final String mediaType = httpContentType(fileName);
         int contentLength = fileContent.getBytes(StandardCharsets.UTF_8).length;
 
         httpResponse.setProtocol(HTTP_VERSION_PROTOCOL);
         httpResponse.setStatusCode(HttpStatus.OK.statusCode());
         httpResponse.setStatusMessage(HttpStatus.OK.statusMessage());
-        httpResponse.addHeaders(CONTENT_TYPE, mediaType + ";" + CHARSET_UTF_8);
+        httpResponse.addHeaders(CONTENT_TYPE, mediaType + Symbol.SEMICOLON + CHARSET_UTF_8);
         httpResponse.addHeaders(CONTENT_LENGTH, String.valueOf(contentLength));
         httpResponse.setBody(fileContent);
     }
 
     private static String httpContentType(String fileName) {
-        return contentMapper.get(fileName.substring(fileName.lastIndexOf(".") + 1)).mediaType();
+        return contentMapper.get(fileName.substring(fileName.lastIndexOf(Symbol.FILE_EXTENSION_DELIMITER) + 1))
+                .mediaType();
     }
 
     public static void setRedirection(HttpResponse httpResponse, String redirectUrl) {
         httpResponse.setStatusCode(HttpStatus.FOUND.statusCode());
         httpResponse.setStatusMessage(HttpStatus.FOUND.statusMessage());
         httpResponse.setProtocol(HTTP_VERSION_PROTOCOL);
-        httpResponse.addHeaders("Location", redirectUrl);
-        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + ";" + CHARSET_UTF_8);
+        httpResponse.addHeaders(LOCATION, redirectUrl);
+        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + Symbol.SEMICOLON + CHARSET_UTF_8);
         httpResponse.setBody("");
     }
 
     public static void buildNotFound(final HttpResponse httpResponse, final List<String> contentLines) {
-        final String fileContent = String.join("\r\n", contentLines);
+        final String fileContent = String.join(System.lineSeparator(), contentLines);
         int contentLength = fileContent.getBytes(StandardCharsets.UTF_8).length;
 
         httpResponse.setProtocol(HTTP_VERSION_PROTOCOL);
         httpResponse.setStatusCode(HttpStatus.NOT_FOUND.statusCode());
         httpResponse.setStatusMessage(HttpStatus.NOT_FOUND.statusMessage());
-        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + ";" + CHARSET_UTF_8);
+        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + Symbol.SEMICOLON + CHARSET_UTF_8);
         httpResponse.addHeaders(CONTENT_LENGTH, String.valueOf(contentLength));
         httpResponse.setBody(fileContent);
     }

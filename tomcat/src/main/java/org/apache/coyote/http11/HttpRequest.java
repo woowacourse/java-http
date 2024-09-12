@@ -7,9 +7,11 @@ import java.util.Map;
 import org.apache.coyote.exception.UnexpectedQueryParamException;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.util.Symbol;
 
 public class HttpRequest {
 
+    private static final String COOKIE_HEADER_KEY = "Cookie";
     private final HttpMethod method;
     private final String uri;
     private final String path;
@@ -41,10 +43,10 @@ public class HttpRequest {
 
     private void mapQueryParams(String[] pairs) {
         for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
+            String[] keyValue = pair.split(Symbol.QUERY_PARAM_DELIMITER);
 
             String key = keyValue[0];
-            String value = "";
+            String value = Symbol.EMPTY;
 
             if (keyValue.length > 1) {
                 value = keyValue[1];
@@ -55,8 +57,8 @@ public class HttpRequest {
 
     private void mapHeaders(String[] headerLines) {
         for (String headerLine : headerLines) {
-            String[] pair = headerLine.split(": ");
-            List<String> headerValues = Arrays.stream(pair[1].split(";"))
+            String[] pair = headerLine.split(Symbol.COLON);
+            List<String> headerValues = Arrays.stream(pair[1].split(Symbol.SEMICOLON))
                     .toList();
 
             headers.put(
@@ -69,12 +71,12 @@ public class HttpRequest {
     }
 
     private void parseCookies() {
-        List<String> cookies = headers.get("Cookie");
+        List<String> cookies = headers.get(COOKIE_HEADER_KEY);
         if (cookies == null) {
             return;
         }
         for (String cookiePair : cookies) {
-            String[] pairs = cookiePair.split("=");
+            String[] pairs = cookiePair.split(Symbol.QUERY_PARAM_DELIMITER);
             String name = pairs[0];
             String value = pairs[1];
             cookie.setCookie(name, value);

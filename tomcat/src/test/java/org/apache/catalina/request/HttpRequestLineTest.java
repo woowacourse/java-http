@@ -21,7 +21,7 @@ class HttpRequestLineTest {
             RequestLine requestLine = new RequestLine("GET / HTTP/1.1");
 
             assertAll(
-                    () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
+                    () -> assertThat(requestLine.isSameHttpMethod(HttpMethod.GET)).isTrue(),
                     () -> assertThat(requestLine.getVersionOfProtocol()).isEqualTo(new VersionOfProtocol("HTTP/1.1"))
             );
         }
@@ -62,13 +62,13 @@ class HttpRequestLineTest {
     }
 
     @Test
-    @DisplayName("성공 : Http Method 조회 가능")
+    @DisplayName("성공 : Http Method 비교 가능")
     void getHttpMethod() {
         RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
 
-        HttpMethod actual = requestLine.getHttpMethod();
+        boolean actual = requestLine.isSameHttpMethod(HttpMethod.GET);
 
-        assertThat(actual).isEqualTo(HttpMethod.GET);
+        assertThat(actual).isTrue();
     }
 
     @Test

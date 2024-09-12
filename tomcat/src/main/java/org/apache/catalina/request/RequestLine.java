@@ -13,7 +13,7 @@ public class RequestLine {
     private final HttpMethod httpMethod;
     private final String path;
     private final VersionOfProtocol versionOfProtocol;
-    private Map<String, String> queryParam;
+    private final Map<String, String> queryParam;
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(SPACE);
@@ -23,36 +23,31 @@ public class RequestLine {
         this.httpMethod = HttpMethod.of(parts[0]);
         this.path = parts[1];
         this.versionOfProtocol = new VersionOfProtocol(parts[2]);
-
-        setQueryParams(path);
+        this.queryParam = findQueryParams(path);
     }
 
-    private void setQueryParams(String path) {
+    private Map<String, String> findQueryParams(String path) {
         String[] separationUrl = path.split(QUERY_PARAMETER_DELIMITER, 2);
-        queryParam = new HashMap<>();
         if (separationUrl.length >= 2) {
-            queryParam = RequestParser.parseParamValues(separationUrl[1]);
+            return RequestParser.parseParamValues(separationUrl[1]);
         }
+        return new HashMap<>();
     }
 
     public boolean checkQueryParamIsEmpty() {
         return queryParam.isEmpty();
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     public boolean isSameHttpMethod(HttpMethod httpMethod) {
         return httpMethod == this.httpMethod;
     }
 
-    public String getPathWithoutQuery() {
-        return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
-    }
-
     public String getPath() {
         return path;
+    }
+
+    public String getPathWithoutQuery() {
+        return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
     }
 
     public VersionOfProtocol getVersionOfProtocol() {

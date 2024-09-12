@@ -1,13 +1,12 @@
 package org.apache.coyote.connector;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import org.apache.coyote.exception.CreatingSocketFailedException;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 public class Connector implements Runnable {
 
@@ -34,7 +33,7 @@ public class Connector implements Runnable {
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new CreatingSocketFailedException();
         }
     }
 

@@ -3,7 +3,7 @@ package com.techcourse.handler;
 import java.io.IOException;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.Session;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;

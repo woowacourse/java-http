@@ -7,8 +7,8 @@ import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 

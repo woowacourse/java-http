@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import org.apache.coyote.exception.CoyoteException;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpHeaderType;
@@ -10,6 +11,7 @@ public class HttpResponse {
     private static final FileReader FILE_READER = FileReader.getInstance();
 
     private static final String UNAUTHORIZED_FILENAME = "401.html";
+    private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CRLF = "\r\n";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String EMPTY_LINE = "";
@@ -40,9 +42,15 @@ public class HttpResponse {
     }
 
     public void setStaticResource(String fileName) {
-        httpStatusCode = HttpStatusCode.OK;
-        setContentType(ContentType.fromFileName(fileName));
-        setResponseBody(FILE_READER.read(fileName));
+        try {
+            httpStatusCode = HttpStatusCode.OK;
+            setContentType(ContentType.fromFileName(fileName));
+            setResponseBody(FILE_READER.read(fileName));
+        } catch (CoyoteException e) {
+            httpStatusCode = HttpStatusCode.NOT_FOUND;
+            setContentType(ContentType.fromFileName(NOT_FOUND_FILENAME));
+            setResponseBody(FILE_READER.read(NOT_FOUND_FILENAME));
+        }
     }
 
     private void setResponseBody(String rawBody) {

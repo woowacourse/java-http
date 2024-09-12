@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.coyote.http11.http.response.HttpResponseBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.techcourse.web.Resource;
 
 class ResourceLoaderTest {
 
@@ -18,12 +19,12 @@ class ResourceLoaderTest {
 		ResourceLoader resourceLoader = ResourceLoader.getInstance();
 		String filePath = "/index.html";
 
-		HttpResponseBody responseBody = resourceLoader.loadResource(filePath);
+		Resource resource = resourceLoader.loadResource(filePath);
 
 		byte[] expected = Files.readAllBytes(Path.of(getClass().getResource("/static" + filePath).getPath()));
-		assertThat(responseBody).satisfies(body -> {
-			assertThat(body.getContentType()).isEqualTo("text/html");
-			assertThat(body.getContent()).isEqualTo(expected);
+		assertThat(resource).satisfies(r -> {
+			assertThat(r.getContentType()).isEqualTo("text/html");
+			assertThat(r.getContent()).isEqualTo(expected);
 		});
 	}
 

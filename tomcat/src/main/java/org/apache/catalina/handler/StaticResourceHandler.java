@@ -3,9 +3,11 @@ package org.apache.catalina.handler;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -60,13 +62,16 @@ public class StaticResourceHandler {
     }
 
     private static Map<String, String> createResponseHeader(HttpRequest request, String body) {
-        Map<String, String> header = new HashMap<>();
+        Map<String, String> header = new LinkedHashMap<>();
 
         String contentTypeValue = request.getContentType();
         if (contentTypeValue != null) {
             header.put(HttpHeaders.CONTENT_TYPE.getName(), contentTypeValue);
+        } else {
+            header.put(HttpHeaders.CONTENT_TYPE.getName(), HttpContentType.TEXT_HTML.getContentType());
         }
-        header.put(HttpHeaders.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
+
+        header.put(HttpHeaders.CONTENT_LENGTH.getName(), String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         return header;
     }
 }

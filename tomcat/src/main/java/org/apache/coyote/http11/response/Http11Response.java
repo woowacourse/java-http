@@ -31,7 +31,7 @@ public class Http11Response {
         sb.append(firstLine)
                 .append(" \r\n")
                 .append(headers.asString())
-                .append("\r\n\r\n")
+                .append("\r\n")
                 .append(responseBody);
 
         return sb.toString().getBytes();

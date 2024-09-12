@@ -54,4 +54,8 @@ public class RequestLine {
     public String getExtension() {
         return requestUri.getExtension();
     }
+
+    public String getVersion() {
+        return version;
+    }
 }

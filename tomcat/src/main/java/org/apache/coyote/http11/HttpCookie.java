@@ -26,6 +26,6 @@ public class HttpCookie {
     }
 
     public String headerFormat() {
-        return "%s%s%s".formatted(name, EQUAL, value);
+        return name + EQUAL + value;
     }
 }

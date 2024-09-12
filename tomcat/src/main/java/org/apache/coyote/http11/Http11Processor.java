@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +13,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,16 +42,16 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = getHttpRequest(inputStream);
-
+            HttpResponse httpResponse = HttpResponse.createEmptyResponse();
             RequestPathType requestPathType = httpRequest.getRequestPathType();
             if (requestPathType.isAPI()) {
-                apiProcessor.process(connection, httpRequest);
+                apiProcessor.process(httpRequest, httpResponse);
             }
             if (requestPathType.isResource()) {
                 resourceProcessor.process(connection, httpRequest.getRequestPath());
             }
 
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

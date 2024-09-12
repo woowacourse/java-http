@@ -22,6 +22,10 @@ public class HttpResponse {
         return new HttpResponse(new HttpResponseStatusLine(httpStatus), new HashMap<>(), "");
     }
 
+    public static HttpResponse createEmptyResponse() {
+        return new HttpResponse(new HttpResponseStatusLine(HttpStatus.OK),)
+    }
+
     public void setContentType(ContentType contentType) {
         header.put("Content-Type", contentType.getValueToHttpHeaderForm());
     }
@@ -58,5 +62,9 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        statusLine.setStatus(httpStatus);
     }
 }

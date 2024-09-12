@@ -8,7 +8,7 @@ public class HttpResponseStatusLine {
     private static final HttpVersion DEFAULT_VERSION = HttpVersion.HTTP_1_1;
 
     private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
     public HttpResponseStatusLine(HttpStatus httpStatus) {
         this.httpVersion = DEFAULT_VERSION;
@@ -17,5 +17,9 @@ public class HttpResponseStatusLine {
 
     public String toResponseForm() {
         return httpVersion.getValueToHttpForm()+" "+httpStatus.getHeaderForm();
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 }

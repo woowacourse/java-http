@@ -4,13 +4,13 @@ public enum HttpVersion {
 
     HTTP_1_1("HTTP/1.1");
 
-    private final String version;
+    private final String value;
 
-    HttpVersion(String version) {
-        this.version = version;
+    HttpVersion(String value) {
+        this.value = value;
     }
 
-    public String getVersion() {
-        return version;
+    public String getValue() {
+        return value;
     }
 }

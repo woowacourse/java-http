@@ -76,9 +76,9 @@ public class HttpResponse {
     }
 
     private void appendStatusLine(StringBuilder responseBuilder, HttpVersion httpVersion, StatusCode statusCode) {
-        responseBuilder.append(httpVersion.getVersion())
+        responseBuilder.append(httpVersion.getValue())
                 .append(SPACE)
-                .append(statusCode.getStatusCode())
+                .append(statusCode.getValue())
                 .append(SPACE)
                 .append(LINE_BREAK);
     }

@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
@@ -19,16 +20,22 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final String RESOURCE_BASE_PATH = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String ACCOUNT_PARAM = "account";
+    private static final String PASSWORD_PARAM = "password";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String ERROR_401_PATH = "/401.html";
+    private static final String RESOURCE_BASE_PATH = "static";
+    public static final String TEXT_HTML = "text/html";
+    private static final String JSESSIONID_COOKIE = "JSESSIONID=";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
         String resource = ensureHtmlExtension(request.getPath());
         String responseBody = loadResourceContent(resource);
-        boolean containsCookie = request.containsHeaders("Cookie");
+        boolean containsCookie = request.containsHeaders(HttpHeader.COOKIE.getValue());
         if (containsCookie) {
-            HttpCookie httpCookie = new HttpCookie(request.getHeader("Cookie"));
+            HttpCookie httpCookie = new HttpCookie(request.getHeader(HttpHeader.COOKIE.getValue()));
             handleCookieRequest(httpCookie, responseBody, response);
         }
 
@@ -39,8 +46,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
+        String account = request.getParameter(ACCOUNT_PARAM);
+        String password = request.getParameter(PASSWORD_PARAM);
 
         if (findUserByInfo(account, password)) {
             handleSuccessfulLogin(response, account);
@@ -58,7 +65,7 @@ public class LoginController extends AbstractController {
                 buildOkResponse(responseBody, response);
                 return;
             }
-            buildRedirectResponse("/index.html", response);
+            buildRedirectResponse(INDEX_PATH, response);
             return;
         }
 
@@ -73,12 +80,12 @@ public class LoginController extends AbstractController {
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {
                     session.setAttribute(sessionId, user);
-                    buildRedirectWithCookieResponse("/index.html", sessionId, response);
+                    buildRedirectWithCookieResponse(INDEX_PATH, sessionId, response);
                 });
     }
 
     private void handleFailedLogin(HttpResponse.HttpResponseBuilder response) {
-        buildRedirectResponse("/401.html", response);
+        buildRedirectResponse(ERROR_401_PATH, response);
     }
 
     private boolean findUserByInfo(String account, String password) {
@@ -104,19 +111,19 @@ public class LoginController extends AbstractController {
     private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
-                .addHeader("Content-Type", "text/html")
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML)
+                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.FOUND)
-                .addHeader("Location", location);
+                .addHeader(HttpHeader.LOCATION.getValue(), location);
     }
 
     private void buildRedirectWithCookieResponse(String location, String sessionId, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.FOUND)
-                .addHeader("Location", location)
-                .addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+                .addHeader(HttpHeader.LOCATION.getValue(), location)
+                .addHeader(HttpHeader.SET_COOKIE.getValue(), JSESSIONID_COOKIE + sessionId);
     }
 
     private String ensureHtmlExtension(String path) {

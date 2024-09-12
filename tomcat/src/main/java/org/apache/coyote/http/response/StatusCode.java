@@ -5,13 +5,13 @@ public enum StatusCode {
     OK("200 OK"),
     FOUND("302 Found");
 
-    private final String statusCode;
+    private final String value;
 
-    StatusCode(String statusCode) {
-        this.statusCode = statusCode;
+    StatusCode(String value) {
+        this.value = value;
     }
 
-    public String getStatusCode() {
-        return statusCode;
+    public String getValue() {
+        return value;
     }
 }

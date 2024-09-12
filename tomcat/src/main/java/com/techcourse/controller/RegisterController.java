@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
@@ -14,6 +15,10 @@ import org.apache.coyote.http.response.StatusCode;
 public class RegisterController extends AbstractController {
 
     private static final String RESOURCE_BASE_PATH = "static";
+    private static final String ACCOUNT_PARAM = "account";
+    private static final String EMAIL_PARAM = "email";
+    private static final String PASSWORD_PARAM = "password";
+    private static final String INDEX_PATH = "/index.html";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
@@ -25,13 +30,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        String account = request.getParameter("account");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+        String account = request.getParameter(ACCOUNT_PARAM);
+        String email = request.getParameter(EMAIL_PARAM);
+        String password = request.getParameter(PASSWORD_PARAM);
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        buildRedirectResponse("/index.html", response);
+        buildRedirectResponse(INDEX_PATH, response);
     }
 
     private String ensureHtmlExtension(String path) {
@@ -55,12 +60,12 @@ public class RegisterController extends AbstractController {
     private void buildOkResponse(String responseBody, String contentType, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
-                .addHeader("Content-Type", contentType)
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), contentType)
+                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.FOUND)
-                .addHeader("Location", location);
+                .addHeader(HttpHeader.LOCATION.getValue(), location);
     }
 }

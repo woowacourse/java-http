@@ -1,15 +1,19 @@
 package com.techcourse.controller;
 
 import org.apache.catalina.controller.AbstractController;
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 
 public class HomeController extends AbstractController {
 
+    private static final String HELLO_WORLD = "Hello world!";
+    public static final String TEXT_HTML = "text/html";
+
     @Override
-    protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
-        buildOkResponse("Hello world!", response);
+    protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+        buildOkResponse(HELLO_WORLD, response);
     }
 
     @Override
@@ -20,7 +24,7 @@ public class HomeController extends AbstractController {
     private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
-                .addHeader("Content-Type", "text/html");
+                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length))
+                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML);
     }
 }

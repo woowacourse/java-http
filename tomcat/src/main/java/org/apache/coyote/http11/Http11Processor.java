@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
             dispatcherServlet.doDispatch(httpServletRequest, httpServletResponse);
 
-            flushResponseMessage(httpServletResponse, outputStream);
+            flushResponse(httpServletResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpMessageBody(requestBody);
     }
 
-    private void flushResponseMessage(HttpServletResponse httpServletResponse, OutputStream outputStream)
+    private void flushResponse(HttpServletResponse httpServletResponse, OutputStream outputStream)
             throws IOException {
         byte[] httpMessage = httpServletResponse.resolveHttpMessage().getBytes();
         outputStream.write(httpMessage);

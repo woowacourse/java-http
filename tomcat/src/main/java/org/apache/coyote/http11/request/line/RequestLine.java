@@ -19,15 +19,6 @@ public class RequestLine {
         return new RequestLine(Method.from(lineParts[0]), new Uri(lineParts[1]), HttpProtocol.from(lineParts[2]));
     }
 
-    public Method getMethod() {
-        return method;
-    }
-
-    public String getUriPath() {
-        return uri.getPath();
-    }
-
-
     public boolean isMethod(Method target) {
         return method.equals(target);
     }
@@ -42,6 +33,14 @@ public class RequestLine {
 
     public boolean isUriHome() {
         return uri.isHome();
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUriPath() {
+        return uri.getPath();
     }
 
     public HttpProtocol getProtocol() {

@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +32,7 @@ class LoginServletTest {
         request.setManager(manager);
         HttpResponse response = new HttpResponse();
         handler.service(request, response);
-        assertThat(response.getHeader("Location")).isEqualTo("/index.html");
+        assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo("/index.html");
 
         manager.remove(session);
     }
@@ -50,7 +51,7 @@ class LoginServletTest {
         request.setManager(manager);
         HttpResponse response = new HttpResponse();
         handler.service(request, response);
-        assertThat(response.getHeader("Location")).isEqualTo("/login.html");
+        assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo("/login.html");
     }
 
     @Test
@@ -66,6 +67,6 @@ class LoginServletTest {
         request.setManager(manager);
         HttpResponse response = new HttpResponse();
         handler.service(request, response);
-        assertThat(response.getHeader("Location")).isEqualTo("/login.html");
+        assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo("/login.html");
     }
 }

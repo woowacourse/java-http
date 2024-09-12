@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import java.io.ByteArrayInputStream;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +36,7 @@ class RegisterPostHttpServletTest {
         HttpResponse response = new HttpResponse();
         handler.service(request, response);
         assertAll(
-                () -> assertThat(response.getHeader("Location")).isEqualTo("/index.html"),
+                () -> assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo("/index.html"),
                 () -> assertThat(InMemoryUserRepository.findByAccount("account")).isPresent()
         );
     }

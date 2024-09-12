@@ -7,11 +7,12 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String LOCATION = "Location";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE = "Cookie";
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String LOCATION = HttpHeaders.LOCATION;
+    
     private static final String HEADER_DELIMITER = ":";
     private static final int SPLIT_LIMIT = 2;
     private static final int HEADER_FIELD_INDEX = 0;

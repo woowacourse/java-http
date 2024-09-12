@@ -10,14 +10,6 @@ public class HttpStatusLine implements HttpComponent {
         this.statusCode = statusCode;
     }
 
-    public HttpVersion getVersion() {
-        return version;
-    }
-
-    public HttpStatusCode getStatusCode() {
-        return statusCode;
-    }
-
     public String asString() {
         return version.asString() + SPACE + statusCode.asString() + SPACE;
     }

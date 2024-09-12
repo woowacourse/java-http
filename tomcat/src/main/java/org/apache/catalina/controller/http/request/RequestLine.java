@@ -9,7 +9,7 @@ import org.apache.catalina.controller.http.HttpVersion;
 
 public class RequestLine {
 
-    private static final String SP = " ";
+    private static final String SPACE = " ";
 
     private final HttpMethod method;
     private final String path;
@@ -50,7 +50,6 @@ public class RequestLine {
                         LinkedHashMap::new));
     }
 
-
     public HttpMethod getMethod() {
         return method;
     }
@@ -65,6 +64,6 @@ public class RequestLine {
 
     @Override
     public String toString() {
-        return method.name() + SP + path + SP + version;
+        return method.name() + SPACE + path + SPACE + version;
     }
 }

@@ -17,7 +17,7 @@ import org.apache.catalina.controller.http.SessionManager;
 
 public class HttpRequest {
 
-    private static final String SP = " ";
+    private static final String SPACE = " ";
 
     private RequestLine requestLine;
     private Map<String, String> headers;
@@ -31,16 +31,16 @@ public class HttpRequest {
 
     private String parseHttpMethod(String request) {
         String startLine = parseStartLine(request);
-        return startLine.split(SP)[0];
+        return startLine.split(SPACE)[0];
     }
 
     private String parsePath(String request) {
-        String[] startLine = parseStartLine(request).split(SP);
+        String[] startLine = parseStartLine(request).split(SPACE);
         return startLine[1];
     }
 
     private String parseVersion(String request) {
-        String[] startLine = parseStartLine(request).split(SP);
+        String[] startLine = parseStartLine(request).split(SPACE);
         return startLine[2];
     }
 
@@ -100,7 +100,6 @@ public class HttpRequest {
         Map<String, String[]> map = getParameters();
         return map.getOrDefault(name, new String[0]);
     }
-
 
     public Map<String, String[]> getParameters() {
         Map<String, String[]> parameterMap = new LinkedHashMap<>();

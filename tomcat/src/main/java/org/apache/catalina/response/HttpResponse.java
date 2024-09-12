@@ -9,7 +9,7 @@ public class HttpResponse {
 
     private Status status;
     private final Map<Header, Object> headers = new HashMap<>();
-    private ResponseBody responseBody;
+    private String body;
 
     public HttpResponse() {
     }
@@ -30,8 +30,8 @@ public class HttpResponse {
         headers.put(Header.CONTENT_TYPE, contentType);
     }
 
-    public void setBodyUri(String url) {
-        responseBody = new ResponseBody(url);
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public Map<Header, Object> getHeaders() {
@@ -42,7 +42,7 @@ public class HttpResponse {
         return status;
     }
 
-    public String getResponseBodyURI() {
-        return responseBody.getUri();
+    public String getBody() {
+        return body;
     }
 }

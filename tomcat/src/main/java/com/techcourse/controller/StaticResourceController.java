@@ -8,8 +8,9 @@ public class StaticResourceController extends MappingController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
+        String body = resourceResolver.resolve(request.getUrl());
         response.setStatus(Status.OK);
-        response.setBodyUri(request.getUrl());
         response.setContentType(getContentType(request.getUrl()));
+        response.setBody(body);
     }
 }

@@ -16,30 +16,34 @@ public class LoginController extends MappingController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (userService.existsUser(request)) {
+            String body = resourceResolver.resolve("/index.html");
             response.setStatus(Status.UNAUTHORIZED);
             response.setLocation("/index.html");
             response.setContentType("text/html;charset=utf-8");
-            response.setBodyUri("/index.html");
+            response.setBody(body);
             return;
         }
+        String body = resourceResolver.resolve("/login.html");
         response.setStatus(Status.OK);
         response.setContentType("text/html;charset=utf-8");
-        response.setBodyUri("/login.html");
+        response.setBody(body);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         boolean successLogin = userService.login(request, response);
         if (successLogin) {
+            String body = resourceResolver.resolve("/index.html");
             response.setStatus(Status.FOUND);
             response.setLocation("/index.html");
             response.setContentType("text/html;charset=utf-8");
-            response.setBodyUri("/index.html");
+            response.setBody(body);
             return;
         }
+        String body = resourceResolver.resolve("/401.html");
         response.setStatus(Status.UNAUTHORIZED);
         response.setLocation("/401.html");
         response.setContentType("text/html;charset=utf-8");
-        response.setBodyUri("/401.html");
+        response.setBody(body);
     }
 }

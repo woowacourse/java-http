@@ -12,9 +12,10 @@ public class RegisterController extends MappingController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
+        String body = resourceResolver.resolve(request.getUrl());
         response.setStatus(Status.OK);
-        response.setContentType("text/html;charset=utf-8 ");
-        response.setBodyUri(request.getUrl());
+        response.setContentType("text/html;charset=utf-8");
+        response.setBody(body);
     }
 
     @Override
@@ -23,9 +24,10 @@ public class RegisterController extends MappingController {
         User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
+        String body = resourceResolver.resolve("/index.html");
         response.setStatus(Status.FOUND);
         response.setLocation("/index.html");
-        response.setContentType("text/html;charset=utf-8 ");
-        response.setBodyUri("/index.html");
+        response.setContentType("text/html;charset=utf-8");
+        response.setBody(body);
     }
 }

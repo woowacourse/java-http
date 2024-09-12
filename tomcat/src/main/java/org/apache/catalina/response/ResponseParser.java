@@ -1,18 +1,10 @@
 package org.apache.catalina.response;
 
-import org.apache.catalina.ResourceResolver;
-
 import java.util.Map;
 
 public class ResponseParser {
 
     private static final String HEADER_FORMAT = "%s: %s \r\n";
-
-    private final ResourceResolver resourceResolver;
-
-    public ResponseParser() {
-        this.resourceResolver = new ResourceResolver();
-    }
 
     public String parse(HttpResponse response) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -23,10 +15,10 @@ public class ResponseParser {
             stringBuilder.append(String.format(HEADER_FORMAT, header.value(), headers.get(header)));
         }
 
-        String responseBody = resourceResolver.resolve(response.getResponseBodyURI());
-        stringBuilder.append("Content-Length: " + responseBody.getBytes().length + " \r\n")
+        String body = response.getBody();
+        stringBuilder.append(Header.CONTENT_LENGTH.value() + body.getBytes().length + " \r\n")
                 .append("\r\n")
-                .append(responseBody);
+                .append(body);
 
         return stringBuilder.toString();
     }

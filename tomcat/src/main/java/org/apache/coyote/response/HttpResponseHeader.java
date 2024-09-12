@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.HttpMessageBodyInfo;
 
 public class HttpResponseHeader {
 
@@ -18,10 +19,10 @@ public class HttpResponseHeader {
     }
 
     public void add(String name, String value) {
-        if ("Content-Type".equals(name)) {
+        if (HttpMessageBodyInfo.isContentType(name)) {
             addContentType(value);
         }
-        if ("Content-Length".equals(name)) {
+        if (HttpMessageBodyInfo.isContentLength(name)) {
             addContentLength(value.getBytes().length);
         }
         this.values.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
@@ -29,23 +30,23 @@ public class HttpResponseHeader {
 
     public void addCookie(String key, String value) {
         cookie.add(key, value);
-        values.computeIfAbsent("Set-Cookie", k -> new ArrayList<>()).add(key + "=" + value);
+        values.computeIfAbsent(HttpMessageBodyInfo.SET_COOKIE.getValue(), k -> new ArrayList<>()).add(key + "=" + value);
     }
 
     public void addContentType(String contentType) {
         if (contentType.equals("text/html")) {
-            values.put("Content-Type", List.of(contentType + ";charset=utf-8"));
+            values.put(HttpMessageBodyInfo.CONTENT_TYPE.getValue(), List.of(contentType + ";charset=utf-8"));
             return;
         }
-        values.put("Content-Type", List.of(contentType));
+        values.put(HttpMessageBodyInfo.CONTENT_TYPE.getValue(), List.of(contentType));
     }
 
     public void addContentLength(int length) {
-        values.put("Content-Length", List.of(String.valueOf(length)));
+        values.put(HttpMessageBodyInfo.CONTENT_LENGTH.getValue(), List.of(String.valueOf(length)));
     }
 
     public void addLocation(String redirectUri) {
-        values.put("Location", List.of(redirectUri));
+        values.put(HttpMessageBodyInfo.LOCATION.getValue(), List.of(redirectUri));
     }
 
     @Override

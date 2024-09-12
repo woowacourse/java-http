@@ -5,51 +5,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.util.Constants.*;
+public abstract class Header {
 
-public class Header {
+    protected static final String HEADER_SEPARATOR = ":";
+    protected static final String HEADER_DELIMITER = ": ";
+    protected static final String CONTENT_LENGTH = "Content-Length";
 
-    private final Map<String, String> headers;
+    protected final Map<String, String> headers;
 
-    public static Header of(String bulkHeaders) {
-        List<String> splitHeaders = List.of(bulkHeaders.split(CRLF));
-        return of(splitHeaders);
+    protected Header(List<String> splitHeaders) {
+        this(splitHeaders.stream()
+                .filter(header -> header.contains(HEADER_SEPARATOR))
+                .collect(Collectors.toMap(
+                        header -> header.substring(0, header.indexOf(HEADER_SEPARATOR)).trim(),
+                        header -> header.substring(header.indexOf(HEADER_SEPARATOR) + 1).trim())));
     }
 
-    public static Header of(List<String> splitHeaders) {
-        Map<String, String> headers = splitHeaders.stream()
-                .filter(header -> header.contains(COLON))
-                .map(header -> header.split(COLON_WITH_SPACE))
-                .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
-        return new Header(headers);
-    }
-
-    public Header() {
-        this(new HashMap<>());
-    }
-
-    private Header(Map<String, String> headers) {
+    protected Header(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    protected Header() {
+        this(new HashMap<>());
     }
 
     public boolean hasHeader(String header) {
         return headers.containsKey(header);
     }
 
-    public String getValue(String header) {
-        if (!headers.containsKey(header)) {
-            throw new IllegalArgumentException("Header " + header + " not found");
-        }
-        return headers.get(header);
-    }
-
-    public void addHeader(String key, String value) {
+    public void setHeader(String key, String value) {
         headers.put(key, value);
-    }
-
-    public String toResponse() {
-        return headers.entrySet().stream()
-                .map(entry -> entry.getKey().concat(COLON_WITH_SPACE).concat(entry.getValue()).concat(SPACE))
-                .collect(Collectors.joining(CRLF));
     }
 }

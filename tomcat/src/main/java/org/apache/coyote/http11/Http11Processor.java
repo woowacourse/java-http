@@ -2,27 +2,30 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.ControllerMapper;
 import org.apache.coyote.http.Dispatcher;
-import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.HttpMessageGenerator;
 import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Dispatcher dispatcher;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.dispatcher = new Dispatcher(ControllerMapper.getControllers());
     }
 
     @Override
@@ -38,39 +41,24 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            Dispatcher dispatcher = new Dispatcher();
+            httpProcess(bufferedReader, outputStream);
 
-            HttpRequest request = getRequestHeader(bufferedReader);
-            if (request.getRequestLine().getMethod().equals(HttpMethod.POST)) {
-                getRequestBody(bufferedReader, request);
-            }
-
-            final var response = dispatcher.dispatch(request);
-
-            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest getRequestHeader(final BufferedReader reader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
-        String line;
+    private void httpProcess(BufferedReader bufferedReader, OutputStream outputStream) throws IOException {
+        HttpRequest request = HttpMessageGenerator.generateRequest(bufferedReader);
+        log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
+                request.getPath().getUri(), request.getMethodName(), request.getBody());
 
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
+        HttpResponse response = new HttpResponse();
 
-        return HttpRequest.of(headerLines);
-    }
+        dispatcher.dispatch(request, response);
+        log.info("\nresponse: {}", response);
 
-
-    private void getRequestBody(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
-        int contentLength = Integer.parseInt(request.getHeaders().getContentLength());
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        request.setBody(requestBody);
+        outputStream.write(response.toResponse().getBytes());
     }
 }

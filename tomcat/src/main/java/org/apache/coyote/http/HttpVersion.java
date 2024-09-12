@@ -16,7 +16,7 @@ public enum HttpVersion {
         return version;
     }
 
-    public static HttpVersion findByVersion(String version) {
+    public static HttpVersion findVersionByProtocolVersion(String version) {
         return Arrays.stream(HttpVersion.values()).filter(httpVersion -> httpVersion.getVersion().equals(version)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown http version: " + version));
     }

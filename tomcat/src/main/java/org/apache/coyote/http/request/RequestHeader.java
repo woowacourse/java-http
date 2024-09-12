@@ -3,37 +3,37 @@ package org.apache.coyote.http.request;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.HttpCookie;
 
-public class RequestHeader {
+import java.util.List;
 
-    private static final String CONTENT_LENGTH = "Content-Length";
+public class RequestHeader extends Header {
+
     private static final String COOKIE = "Cookie";
+    private static final String COOKIE_NAME_WITH_SESSION = "JSESSIONID";
 
-    private final Header header;
-
-    public RequestHeader(Header header) {
-        this.header = header;
+    public RequestHeader(List<String> splitHeaders) {
+        super(splitHeaders);
     }
 
-    public boolean hasHeader(String headerName) {
-        return header.hasHeader(headerName);
+    public int getContentLength() {
+        return Integer.parseInt(getValue(CONTENT_LENGTH));
     }
 
-    public HttpCookie getCookie() {
-        if (header.hasHeader(COOKIE)) {
-            return HttpCookie.of(header.getValue(COOKIE));
+    public boolean hasCookieWithSession() {
+        HttpCookie cookie = getCookie();
+        return cookie.hasCookieName(COOKIE_NAME_WITH_SESSION);
+    }
+
+    private HttpCookie getCookie() {
+        if (hasHeader(COOKIE)) {
+            return HttpCookie.of(getValue(COOKIE));
         }
         return new HttpCookie();
     }
 
-    public String getContentLength() {
-        return header.getValue(CONTENT_LENGTH);
-    }
-
-    public String getValue(String headerName) {
-        return header.getValue(headerName);
-    }
-
-    public String toResponse() {
-        return header.toResponse();
+    private String getValue(String header) {
+        if (!headers.containsKey(header)) {
+            throw new IllegalArgumentException("Header " + header + " not found");
+        }
+        return headers.get(header);
     }
 }

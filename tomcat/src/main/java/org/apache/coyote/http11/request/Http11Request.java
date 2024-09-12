@@ -5,11 +5,9 @@ import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.MimeType;
 
 public class Http11Request implements HttpRequest {
-
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final Http11RequestLine requestLine;
     private final Http11RequestHeaders headers;
@@ -26,8 +24,13 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
+    public boolean isGet() {
+        return requestLine.getMethod().isGet();
+    }
+
+    @Override
+    public boolean isPost() {
+        return requestLine.getMethod().isPost();
     }
 
     @Override
@@ -41,8 +44,8 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public boolean isExistsSession() {
-        return headers.existsCookie(JSESSIONID);
+    public boolean existsSession() {
+        return headers.existsSession();
     }
 
     @Override
@@ -51,8 +54,11 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getCookie(String cookieName) {
-        return headers.getCookie(cookieName);
+    public MimeType getAcceptMimeType() throws NoSuchFieldException {
+        if (headers.existsAccept()) {
+            return MimeType.from(headers.getFirstAcceptMimeType());
+        }
+        throw new NoSuchFieldException("요청에 Accept 헤더가 존재하지 않습니다.");
     }
 
     @Override
@@ -62,7 +68,7 @@ public class Http11Request implements HttpRequest {
 
     @Override
     public Session getSession() {
-        Optional<Session> sessionOptional = SessionManager.getInstance().findSession(getCookie(JSESSIONID));
+        Optional<Session> sessionOptional = SessionManager.getInstance().findSession(headers.getSession());
         return sessionOptional.orElseGet(Session::new);
     }
 

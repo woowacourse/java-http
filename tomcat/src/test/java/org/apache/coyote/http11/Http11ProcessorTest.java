@@ -2,10 +2,12 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.RootRequestController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.RequestHandlerMapper;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,7 +17,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
+        requestHandlerMapper.addController(new RootRequestController(), "/");
+        final var processor = new Http11Processor(socket, requestHandlerMapper);
 
         // when
         processor.process(socket);

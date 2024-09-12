@@ -13,7 +13,7 @@ public class Session {
         this(UUID.randomUUID().toString());
     }
 
-    public Session(final String id) {
+    public Session(String id) {
         this.id = id;
     }
 
@@ -21,19 +21,12 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
+    public Object getAttribute(String name) {
         return values.get(name);
     }
 
-    public void setAttribute(final String name, final Object value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
-    }
 }

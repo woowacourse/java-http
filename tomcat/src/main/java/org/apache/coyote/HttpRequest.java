@@ -2,21 +2,23 @@ package org.apache.coyote;
 
 import java.util.Map;
 import org.apache.catalina.Session;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.MimeType;
 
 public interface HttpRequest {
 
     String getRequestURI();
 
-    HttpMethod getMethod();
+    boolean isGet();
+
+    boolean isPost();
 
     String getPath();
 
-    boolean isExistsSession();
+    boolean existsSession();
 
     String getHeader(String header);
 
-    String getCookie(String cookieName);
+    MimeType getAcceptMimeType() throws NoSuchFieldException;
 
     Map<String, String> getParsedBody();
 

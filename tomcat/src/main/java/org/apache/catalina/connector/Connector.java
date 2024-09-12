@@ -1,13 +1,16 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.techcourse.controller.LoginRequestController;
+import com.techcourse.controller.RootRequestController;
+import com.techcourse.controller.SignupRequestController;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.RequestHandlerMapper;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -66,7 +69,11 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
+        requestHandlerMapper.addController(new LoginRequestController(), "/login");
+        requestHandlerMapper.addController(new SignupRequestController(), "/register");
+        requestHandlerMapper.addController(new RootRequestController(), "/");
+        var processor = new Http11Processor(connection, requestHandlerMapper);
         new Thread(processor).start();
     }
 

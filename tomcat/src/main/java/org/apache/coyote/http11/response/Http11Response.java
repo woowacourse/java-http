@@ -1,78 +1,81 @@
 package org.apache.coyote.http11.response;
 
+import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.Session;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class Http11Response implements HttpResponse {
 
-    private final String protocol;
-    private final int statusCode;
-    private final String statusMessage;
-    private final Map<String, String> headers;
-    private final String body;
+    private static final String VERSION_OF_PROTOCOL = "HTTP/1.1";
+    private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
+    private static final String HEADER_FORMAT = "%s: %s";
+    private static final String CONTENT_TYPE_FORMAT = "%s;charset=%s ";
+    private static final String SESSION_FORMAT = "JSESSIONID=%s";
+    private static final String HEADER_BODY_DELIMITER = "";
 
-    private Http11Response(Http11ResponseBuilder builder) {
-        this.protocol = builder.protocol;
-        this.statusCode = builder.statusCode;
-        this.statusMessage = builder.statusMessage;
-        this.headers = builder.headers;
-        this.body = builder.body;
-    }
+    private int statusCode;
+    private String statusMessage;
+    private Map<String, String> headers;
+    private String body;
 
-    public static Http11ResponseBuilder builder() {
-        return new Http11ResponseBuilder();
+    public Http11Response() {
+        this.headers = new LinkedHashMap<>();
+        this.body = "";
     }
 
     @Override
     public String getResponseMessage() {
         String headerMessage = headers.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> String.format(HEADER_FORMAT, entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining("\r\n"));
 
         return String.join("\r\n",
-                protocol + " " + statusCode + " " + statusMessage + " ",
+                String.format(RESPONSE_LINE_FORMAT, VERSION_OF_PROTOCOL, statusCode, statusMessage),
                 headerMessage,
-                "",
+                HEADER_BODY_DELIMITER,
                 body
         );
     }
 
-    public static class Http11ResponseBuilder {
-        private String protocol;
-        private int statusCode;
-        private String statusMessage;
-        private Map<String, String> headers;
-        private String body;
+    @Override
+    public void ok(MimeType mimeType, String body, Charset charSet) {
+        setStatus(HttpStatus.OK);
+        setBody(mimeType, body, charSet);
+    }
 
-        private Http11ResponseBuilder() {
-            this.protocol = "HTTP/1.1";
-            this.headers = new LinkedHashMap<>();
-            this.body = "";
-        }
+    @Override
+    public void found(String path) {
+        setStatus(HttpStatus.FOUND);
+        this.headers.put(HttpHeaderName.LOCATION.getName(), path);
+    }
 
-        public Http11ResponseBuilder status(HttpStatus status) {
-            this.statusCode = status.statusCode();
-            this.statusMessage = status.statusMessage();
-            return this;
-        }
+    @Override
+    public void notFound(String body, Charset charset) {
+        setStatus(HttpStatus.NOT_FOUND);
+        setBody(MimeType.HTML, body, charset);
+    }
 
-        public Http11ResponseBuilder appendHeader(String key, String value) {
-            this.headers.put(key, value);
-            return this;
-        }
+    @Override
+    public void setSession(Session session) {
+        this.headers.put(HttpHeaderName.SET_COOKIE.getName(), String.format(SESSION_FORMAT, session.getId()));
+    }
 
-        public Http11ResponseBuilder body(String body) {
-            this.body = body;
-            appendHeader("Content-Length", body.getBytes().length + " ");
-            return this;
-        }
+    private void setStatus(HttpStatus status) {
+        this.statusCode = status.statusCode();
+        this.statusMessage = status.statusMessage();
+    }
 
-        public Http11Response build() {
-            return new Http11Response(this);
-        }
+    private void setBody(MimeType mimeType, String body, Charset charset) {
+        this.body = body;
+        this.headers.put(HttpHeaderName.CONTENT_TYPE.getName(),
+                String.format(CONTENT_TYPE_FORMAT, mimeType.value(), charset.name().toLowerCase()));
+        this.headers.put(HttpHeaderName.CONTENT_LENGTH.getName(), body.getBytes().length + " ");
     }
 }

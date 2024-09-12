@@ -11,7 +11,9 @@ public class HomeController extends AbstractController {
         String method = request.getMethod();
         if (method.equalsIgnoreCase("GET")) {
             doGet(request, response);
+            return;
         }
+        throw new IllegalArgumentException("Method not supported: " + method);
     }
 
     @Override

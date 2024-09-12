@@ -24,13 +24,6 @@ public class Session {
         values.put(name, value);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-    }
-
     @Override
     public String toString() {
         return "Session{" +

@@ -2,6 +2,7 @@ package org.apache.coyote.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -21,7 +22,10 @@ public class Session {
         values.put(key, object);
     }
 
-    public Object findAttribute(String key) {
-        return values.get(key);
+    public Optional<Object> findAttribute(String key) {
+        if (values.containsKey(key)) {
+            return Optional.of(values.get(key));
+        }
+        return Optional.empty();
     }
 }

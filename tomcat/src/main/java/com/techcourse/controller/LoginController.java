@@ -11,6 +11,8 @@ import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.util.HttpStatus;
 
+import java.util.Optional;
+
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
@@ -55,9 +57,9 @@ public class LoginController extends AbstractController {
 
     private void isLoggedInUser(HttpRequest httpRequest, HttpResponse httpResponse) {
         Session session = httpRequest.getSession(false);
-        User user = (User) session.findAttribute(USER);
+        Optional<Object> user = session.findAttribute(USER);
 
-        if (user != null) {
+        if (user.isPresent()) {
             httpResponse.sendRedirect(MAIN_PATH);
         }
     }

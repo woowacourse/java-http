@@ -16,10 +16,11 @@ import org.apache.coyote.http11.response.Http11StatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class LoginControllerTest {
 
-    private final LoginController loginController = new LoginController();
+    private final LoginController loginController = Mockito.spy(new LoginController());
 
     @Test
     @DisplayName("로그인 페이지 조회한다.")
@@ -45,6 +46,22 @@ class LoginControllerTest {
                 new ArrayList<>(),
                 new ArrayList<>(),
                 body
+        );
+    }
+
+    @Test
+    @DisplayName("로그인 상태에서 로그인 페이지 조회시 index 페이지로 리다이렉트 한다.")
+    void doGetWhenLogin() throws IOException {
+        HttpRequest request = makeRequest(new LinkedHashMap<>());
+        HttpResponse response = new HttpResponse();
+
+        Mockito.when(loginController.isLogin(request)).thenReturn(true);
+
+        loginController.doGet(request, response);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(Http11StatusCode.FOUND),
+                () -> assertThat(response.findHeader("Location")).hasValue(new Http11Header("Location", "/index.html"))
         );
     }
 

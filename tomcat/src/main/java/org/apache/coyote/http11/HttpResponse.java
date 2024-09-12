@@ -10,49 +10,46 @@ public class HttpResponse {
     private static final String BLANK = " ";
 
     private final String version;
-    private final String httpStatusCode;
-    private final Map<String, String> headers;
-    private final String contentType;
+    private final HttpStatus httpStatus;
+    private final Map<HttpHeader, String> headers;
     private final String body;
 
     private HttpResponse(final String version,
-                         final String httpStatusCode,
-                         final Map<String, String> headers,
-                         final String contentType,
+                         final HttpStatus httpStatus,
+                         final Map<HttpHeader, String> headers,
                          final String body) {
         this.version = version;
-        this.httpStatusCode = httpStatusCode;
+        this.httpStatus = httpStatus;
         this.headers = headers;
-        this.contentType = contentType;
         this.body = body;
     }
 
     public static HttpResponse of(final String version,
-                                  final String httpStatusCode,
-                                  final String contentType,
+                                  final HttpStatus HttpStatus,
+                                  final ContentType contentType,
                                   final String body) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeader.CONTENT_TYPE.getHeaderName(), contentType + CHARSET_UTF_8);
-        headers.put(HttpHeader.CONTENT_LENGTH.getHeaderName(), String.valueOf(body.getBytes().length));
-        return new HttpResponse(version, httpStatusCode, headers, contentType, body);
+        final Map<HttpHeader, String> headers = new HashMap<>();
+        headers.put(HttpHeader.CONTENT_TYPE, contentType.getContentType() + CHARSET_UTF_8);
+        headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        return new HttpResponse(version, HttpStatus, headers, body);
     }
 
     public static HttpResponse of(final String version,
-                                  final String httpStatusCode,
-                                  final String contentType) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeader.CONTENT_TYPE.getHeaderName(), contentType + CHARSET_UTF_8);
-        return new HttpResponse(version, httpStatusCode, headers, contentType, null);
+                                  final HttpStatus HttpStatus,
+                                  final ContentType contentType) {
+        final Map<HttpHeader, String> headers = new HashMap<>();
+        headers.put(HttpHeader.CONTENT_TYPE, contentType.getContentType() + CHARSET_UTF_8);
+        return new HttpResponse(version, HttpStatus, headers, null);
     }
 
-    public void addHeader(String key, String value) {
+    public void addHeader(HttpHeader key, String value) {
         headers.put(key, value);
     }
 
     public String toHttpMessage() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(version).append(BLANK).append(httpStatusCode).append(BLANK).append(CRLF);
-        headers.forEach((key, value) -> stringBuilder.append(key).append(": ").append(value).append(BLANK).append(CRLF));
+        stringBuilder.append(version).append(BLANK).append(httpStatus.getHttpStatusMessage()).append(BLANK).append(CRLF);
+        headers.forEach((key, value) -> stringBuilder.append(key.getHeaderName()).append(": ").append(value).append(BLANK).append(CRLF));
         stringBuilder.append(CRLF);
         stringBuilder.append(body);
 

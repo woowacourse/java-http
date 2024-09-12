@@ -31,10 +31,10 @@ public enum ContentType {
         return contentType;
     }
 
-    public static String toContentType(final String extension) {
+    public static ContentType toContentType(final String extension) {
         for (ContentType contentType : values()) {
             if (contentType.getExtension().equalsIgnoreCase(extension)) {
-                return contentType.getContentType();
+                return contentType;
             }
         }
         throw new IllegalArgumentException("Unknown content type: " + extension);

@@ -40,9 +40,12 @@ public class Http11Processor implements Runnable, Processor {
             } catch (Exception e) {
                 log.error(e.getMessage());
                 String body = StaticResourceReader.read("/500.html");
-                httpResponse = HttpResponse.of(httpRequest.getVersion(),
-                        HttpStatus.INTERNATIONAL_SERVER_ERROR.getHttpStatusMessage(), ContentType.HTML.getContentType(),
-                        body);
+                httpResponse = HttpResponse.of(
+                        httpRequest.getVersion(),
+                        HttpStatus.INTERNATIONAL_SERVER_ERROR,
+                        ContentType.HTML,
+                        body
+                );
             }
 
             outputStream.write(httpResponse.toHttpMessage().getBytes());

@@ -14,24 +14,24 @@ public class ResponseGenerator {
         final String uri = httpRequest.getUri();
         final String version = httpRequest.getVersion();
         final String acceptLine = httpRequest.getAcceptLine();
-        final String httpMethod = httpRequest.getMethod();
+        final HttpMethod httpMethod = httpRequest.getMethod();
         final String requestBody = httpRequest.getBody();
 
         Cookie cookie = httpRequest.getCookie();
         HttpResponse httpResponse = null;
 
         if (uri.equals("/login")) {
-            if (httpMethod.equalsIgnoreCase(HttpMethod.GET.name())) {
+            if (httpMethod.equals(HttpMethod.GET)) {
                 if (isLoggedIn(cookie)) {
-                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND.getHttpStatusMessage(), ContentType.HTML.getContentType());
-                    httpResponse.addHeader(HttpHeader.LOCATION.getHeaderName(), "/index.html");
+                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND, ContentType.HTML);
+                    httpResponse.addHeader(HttpHeader.LOCATION, "/index.html");
                 } else {
                     String body = StaticResourceReader.read("/login.html");
-                    httpResponse = HttpResponse.of(version, HttpStatus.OK.getHttpStatusMessage(), ContentType.HTML.getContentType(), body);
+                    httpResponse = HttpResponse.of(version, HttpStatus.OK, ContentType.HTML, body);
                 }
             }
 
-            if (httpMethod.equalsIgnoreCase(HttpMethod.POST.name())) {
+            if (httpMethod.equals(HttpMethod.POST)) {
                 final String[] loginRequest = requestBody.split("&");
                 final String account = loginRequest[0].split("=")[1];
                 final String password = loginRequest[1].split("=")[1];
@@ -45,22 +45,22 @@ public class ResponseGenerator {
                     sessionManager.add(session);
 
                     cookie = new Cookie("JSESSIONID=" + session.getId());
-                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND.getHttpStatusMessage(), ContentType.HTML.getContentType());
-                    httpResponse.addHeader("Set-Cookie", cookie.getValue());
-                    httpResponse.addHeader(HttpHeader.LOCATION.getHeaderName(), "/index.html");
+                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND, ContentType.HTML);
+                    httpResponse.addHeader(HttpHeader.SET_COOKIE, cookie.getValue());
+                    httpResponse.addHeader(HttpHeader.LOCATION, "/index.html");
                 } else {
-                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND.getHttpStatusMessage(), ContentType.HTML.getContentType());
-                    httpResponse.addHeader(HttpHeader.LOCATION.getHeaderName(), "/401.html");
+                    httpResponse = HttpResponse.of(version, HttpStatus.FOUND, ContentType.HTML);
+                    httpResponse.addHeader(HttpHeader.LOCATION, "/401.html");
                 }
             }
 
         } else if (uri.equals("/register")) {
-            if (httpMethod.equalsIgnoreCase(HttpMethod.GET.name())) {
+            if (httpMethod.equals(HttpMethod.GET)) {
                 final String body = StaticResourceReader.read("/register.html");
-                httpResponse = HttpResponse.of(version, HttpStatus.OK.getHttpStatusMessage(), ContentType.HTML.getContentType(), body);
+                httpResponse = HttpResponse.of(version, HttpStatus.OK, ContentType.HTML, body);
             }
 
-            if (httpMethod.equalsIgnoreCase(HttpMethod.POST.name())) {
+            if (httpMethod.equals(HttpMethod.POST)) {
                 final String[] loginRequest = requestBody.split("&");
                 final String account = loginRequest[0].split("=")[1];
                 final String email = loginRequest[1].split("=")[1];
@@ -68,18 +68,18 @@ public class ResponseGenerator {
 
                 final User user = new User(account, email, password);
                 InMemoryUserRepository.save(user);
-                httpResponse = HttpResponse.of(version, HttpStatus.FOUND.getHttpStatusMessage(), ContentType.HTML.getContentType());
-                httpResponse.addHeader(HttpHeader.LOCATION.getHeaderName(), "/index.html");
+                httpResponse = HttpResponse.of(version, HttpStatus.FOUND, ContentType.HTML);
+                httpResponse.addHeader(HttpHeader.LOCATION, "/index.html");
             }
 
         } else if (ContentType.isValidType(uri)) {
-            String contentType = ContentTypeResolver.resolve(uri, acceptLine);
+            ContentType contentType = ContentTypeResolver.resolve(uri, acceptLine);
             String body = StaticResourceReader.read(uri);
-            httpResponse = HttpResponse.of(version, HttpStatus.OK.getHttpStatusMessage(), contentType, body);
+            httpResponse = HttpResponse.of(version, HttpStatus.OK, contentType, body);
 
         } else {
             String body = StaticResourceReader.read("/404.html");
-            httpResponse = HttpResponse.of(version, HttpStatus.NOT_FOUND.getHttpStatusMessage(), ContentType.HTML.getContentType(), body);
+            httpResponse = HttpResponse.of(version, HttpStatus.NOT_FOUND, ContentType.HTML, body);
         }
         return httpResponse;
     }

@@ -7,41 +7,31 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String uri;
-    private final String version;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
 
 
-    private HttpRequest(final String method,
-                        final String uri,
-                        final String version,
+    private HttpRequest(final RequestLine requestLine,
                         final Map<String, String> headers,
                         final  String body) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
-        final String[] requestParts = requestLine.split(" ");
-        final String httpMethod = requestParts[0];
-        final String uri = resolveDefaultPage(requestParts[1]);
-        final String version = requestParts[2];
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final Map<String, String> headers = collectHeaders(bufferedReader);
 
-        if (httpMethod.equals("POST")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        if (requestLine.method().equals(HttpMethod.POST)) {
+            int contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getHeaderName()));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String requestBody = new String(buffer);
-            return new HttpRequest(httpMethod, uri, version, headers, requestBody);
+            return new HttpRequest(requestLine, headers, requestBody);
         }
-        return new HttpRequest(httpMethod, uri, version, headers, null);
+        return new HttpRequest(requestLine, headers, null);
     }
 
     private static Map<String, String> collectHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -54,12 +44,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String resolveDefaultPage(final String endPoint) {
-        if (endPoint.equals("/") || endPoint.isEmpty()) {
-            return "/index.html";
-        }
-        return endPoint;
-    }
+
 
     public Cookie getCookie() {
         final String cookie = headers.get("Cookie");
@@ -69,12 +54,16 @@ public class HttpRequest {
         return null;
     }
 
-    public String getMethod() {
-        return method;
+    public HttpMethod getMethod() {
+        return requestLine.method();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.uri();
+    }
+
+    public String getVersion() {
+        return requestLine.version();
     }
 
     public String getAcceptLine() {
@@ -83,9 +72,5 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
-    }
-
-    public String getVersion() {
-        return version;
     }
 }

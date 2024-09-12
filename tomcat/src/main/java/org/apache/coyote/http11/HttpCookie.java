@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,14 +21,31 @@ public class HttpCookie {
     }
 
     private void parseCookies(String cookieHeader) {
-        if (cookieHeader == null || cookieHeader.isEmpty()) {
+        if (hasCookiePairs(cookieHeader)) {
             return;
         }
 
-        for (String cookiePair : cookieHeader.split(COOKIE_PAIR_DELIMITER)) {
-            String[] keyValue = cookiePair.trim().split(COOKIE_KEY_VALUE_DELIMITER, COOKIE_PAIR_SPLIT_LIMIT);
-            setCookie(keyValue);
+        Arrays.stream(cookieHeader.split(COOKIE_PAIR_DELIMITER))
+                .forEach(this::parseCookiePair);
+    }
+
+    private boolean hasCookiePairs(String cookieHeader) {
+        return cookieHeader == null || cookieHeader.isEmpty();
+    }
+
+    private void parseCookiePair(String cookiePair) {
+        if (hasCookieKeyValue(cookiePair)) {
+            return;
         }
+
+        String trim = cookiePair.trim();
+        String[] keyValue = trim.split(COOKIE_KEY_VALUE_DELIMITER, COOKIE_PAIR_SPLIT_LIMIT);
+
+        setCookie(keyValue);
+    }
+
+    private boolean hasCookieKeyValue(String cookiePair) {
+        return cookiePair == null || !cookiePair.contains(COOKIE_KEY_VALUE_DELIMITER);
     }
 
     private void setCookie(String[] keyValue) {

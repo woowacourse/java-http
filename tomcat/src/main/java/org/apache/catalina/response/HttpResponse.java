@@ -3,6 +3,7 @@ package org.apache.catalina.response;
 import org.apache.catalina.http.ContentType;
 
 public class HttpResponse {
+
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private final String body;

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestReader {
+
     private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
     private final BufferedReader reader;
 
@@ -45,7 +46,7 @@ public class RequestReader {
                 throw new IllegalArgumentException("실제 읽은 바이트 수가 예상된 길이보다 작습니다.");
             }
         } catch (IOException e) {
-            throw new RuntimeException("요청 본문을 읽는 도중 오류가 발생했습니다.", e);
+            throw new RuntimeException("요청 본문을 읽는 도중 오류가 발생했습니다.");
         }
         return new String(buffer);
     }

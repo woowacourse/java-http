@@ -11,6 +11,7 @@ import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
 
 public class RequestMapping {
+
     private final List<Controller> controllers;
 
     public RequestMapping() {
@@ -24,7 +25,7 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest request) {
         return controllers.stream()
-                .filter(controller -> controller.matchesRequest(request))
+                .filter(controller -> controller.isMatchesRequest(request))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("연결된 컨트롤러가 없습니다."));
     }

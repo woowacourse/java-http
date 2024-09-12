@@ -1,6 +1,7 @@
 package org.apache.catalina.response;
 
 public enum HttpStatus {
+
     CONTINUE(100, "Continue"),
     SWITCHING_PROTOCOLS(101, "Switching Protocols"),
     OK(200, "OK"),

@@ -10,7 +10,7 @@ import org.apache.catalina.response.StatusLine;
 public class PageLoadController extends AbstractController {
 
     @Override
-    public boolean matchesRequest(HttpRequest request) {
+    public boolean isMatchesRequest(HttpRequest request) {
         return request.getPath().endsWith(".css") ||
                 request.getPath().endsWith(".js") ||
                 request.getPath().endsWith(".html");

@@ -18,6 +18,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class LoginController extends AbstractController {
+
     public static final String LOGIN_PATH = "/login";
     private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
@@ -26,7 +27,7 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD = "password";
 
     @Override
-    public boolean matchesRequest(HttpRequest request) {
+    public boolean isMatchesRequest(HttpRequest request) {
         return LOGIN_PATH.equals(request.getPathWithoutQuery());
     }
 

@@ -17,6 +17,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class RegisterController extends AbstractController {
+
     private static final String REGISTER_PATH = "/register";
     private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String INDEX_PAGE = "/index.html";
@@ -25,7 +26,7 @@ public class RegisterController extends AbstractController {
     private static final String EMAIL = "email";
 
     @Override
-    public boolean matchesRequest(HttpRequest request) {
+    public boolean isMatchesRequest(HttpRequest request) {
         return REGISTER_PATH.equals(request.getPath());
     }
 

@@ -3,6 +3,7 @@ package org.apache.catalina.request;
 import java.util.Arrays;
 
 public enum HttpMethod {
+
     GET,
     POST,
     DELETE,

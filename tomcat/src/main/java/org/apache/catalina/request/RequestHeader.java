@@ -9,6 +9,7 @@ import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.http.ContentType;
 
 public class RequestHeader {
+
     public static final String ACCEPT = "Accept";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";

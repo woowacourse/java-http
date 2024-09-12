@@ -7,6 +7,7 @@ import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.parser.RequestParser;
 
 public class RequestLine {
+
     private static final String SPACE = " ";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
 

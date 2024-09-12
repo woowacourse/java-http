@@ -7,6 +7,7 @@ import org.apache.catalina.http.ContentType;
 import org.apache.catalina.http.VersionOfProtocol;
 
 public class HttpRequest {
+
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -17,10 +18,6 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public boolean checkQueryParamIsEmpty() {
-        return requestLine.checkQueryParamIsEmpty();
-    }
-
     public boolean isSameHttpMethod(HttpMethod httpMethod) {
         return requestLine.isSameHttpMethod(httpMethod);
     }
@@ -29,20 +26,16 @@ public class HttpRequest {
         return requestLine.getVersionOfProtocol();
     }
 
-    public String getPathWithoutQuery() {
-        return requestLine.getPathWithoutQuery();
-    }
-
     public String getPath() {
         return requestLine.getPath();
     }
 
-    public Map<String, String> getQueryParam() {
-        return requestLine.getQueryParam();
+    public String getPathWithoutQuery() {
+        return requestLine.getPathWithoutQuery();
     }
 
-    public Map<String, String> getBody() {
-        return requestBody.getBody();
+    public Map<String, String> getQueryParam() {
+        return requestLine.getQueryParam();
     }
 
     public ContentType getContentType() {
@@ -51,5 +44,9 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return requestHeader.getCookie();
+    }
+
+    public Map<String, String> getBody() {
+        return requestBody.body();
     }
 }

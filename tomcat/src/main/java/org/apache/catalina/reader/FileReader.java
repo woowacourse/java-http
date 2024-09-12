@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import com.techcourse.exception.UncheckedServletException;
 
 public class FileReader {
+
     private static final String RESOURCE_PATH_PREFIX = "static";
 
     private FileReader() {}

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+
     private static final String AUTH_COOKIE_KEY = "JSESSIONID";
     private final Map<String, String> cookies;
 

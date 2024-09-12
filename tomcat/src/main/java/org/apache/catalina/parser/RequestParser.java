@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RequestParser {
+
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
     private static final String HEADER_SEPARATOR = ": ";

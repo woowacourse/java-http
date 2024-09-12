@@ -3,6 +3,7 @@ package org.apache.catalina.http;
 import java.util.Arrays;
 
 public enum ContentType {
+
     HTML("text/html"),
     CSS("text/css"),
     JS("text/javascript"),

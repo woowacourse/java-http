@@ -6,20 +6,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.exception.ReceivingRequestFailedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 
 public class HttpRequestReceiver {
 
-    HttpRequest receiveRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    HttpRequest receiveRequest(InputStream inputStream) {
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        HttpRequestHeader header = receiveRequestHeader(bufferedReader);
-        HttpRequestBody body = receiveRequestBody(header, bufferedReader);
+            HttpRequestHeader header = receiveRequestHeader(bufferedReader);
+            HttpRequestBody body = receiveRequestBody(header, bufferedReader);
 
-        return new HttpRequest(header, body);
+            return new HttpRequest(header, body);
+        } catch (IOException e) {
+            throw new ReceivingRequestFailedException();
+        }
     }
 
     private HttpRequestHeader receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -44,8 +49,10 @@ public class HttpRequestReceiver {
         int contentLength = header.getContentLength();
         char[] bodyChars = new char[contentLength];
         bufferedReader.read(bodyChars, 0, contentLength);
+
         String payload = new String(bodyChars);
         String decodedPayload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+
         return new HttpRequestBody(decodedPayload, header.getContentType());
     }
 }

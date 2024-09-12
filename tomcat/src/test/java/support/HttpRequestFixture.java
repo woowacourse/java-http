@@ -113,4 +113,15 @@ public class HttpRequestFixture {
 
         return HttpRequestGenerator.generate(requestString);
     }
+
+    public static HttpRequest indexPageGet() throws IOException {
+        final String requestString = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        return HttpRequestGenerator.generate(requestString);
+    }
 }

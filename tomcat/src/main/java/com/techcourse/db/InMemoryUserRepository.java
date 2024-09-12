@@ -1,7 +1,6 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +15,9 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalArgumentException("이미 있는 회원입니다.");
+        }
         database.put(user.getAccount(), user);
     }
 
@@ -23,5 +25,6 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

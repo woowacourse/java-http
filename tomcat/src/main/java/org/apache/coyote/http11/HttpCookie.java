@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_DELIMITER = ";";
     private static final String NAME_VALUE_DELIMITER = "=";
+    private static final int SPLIT_LIMIT = -1;
 
     private final Map<String, String> cookies;
 
@@ -33,8 +34,17 @@ public class HttpCookie {
             throw new UncheckedServletException("cookie는 null일 수 없습니다.");
         }
 
-        return Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
-                .collect(Collectors.toMap(this::parseCookieName, this::parseCookieValue));
+        return toMap(rawCookies);
+    }
+
+    private Map<String, String> toMap(String rawCookies) {
+        try {
+            return Arrays.stream(rawCookies.split(COOKIE_DELIMITER, SPLIT_LIMIT))
+                    .map(String::trim)
+                    .collect(Collectors.toMap(this::parseCookieName, this::parseCookieValue));
+        } catch (IllegalStateException e) {
+            throw new UncheckedServletException("쿠키의 이름은 중복될 수 없습니다.");
+        }
     }
 
     private String parseCookieName(String rawCookie) {
@@ -62,7 +72,7 @@ public class HttpCookie {
     public String buildMessage() {
         return cookies.keySet().stream()
                 .map(key -> key + NAME_VALUE_DELIMITER + cookies.get(key))
-                .collect(Collectors.joining(COOKIE_DELIMITER));
+                .collect(Collectors.joining(COOKIE_DELIMITER + " "));
     }
 
     public boolean hasSession() {

@@ -8,14 +8,17 @@ public class RequestMapping {
         String path = request.getPath();
         if (path == null) {
             throw new IllegalArgumentException("path is null");
-        } else if (path.equals("/")) {
-            return new HomeController();
-        } else if (path.startsWith("/login")) {
-            return new LoginController();
-        } else if (path.equals("/register")) {
-            return new RegisterController();
-        } else {
-            return new PageController();
         }
+        if (path.equals("/")) {
+            return new HomeController();
+        }
+
+        if (path.startsWith("/login")) {
+            return new LoginController();
+        }
+        if (path.equals("/register")) {
+            return new RegisterController();
+        }
+        return new PageController();
     }
 }

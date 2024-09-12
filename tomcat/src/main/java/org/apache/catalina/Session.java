@@ -16,19 +16,19 @@ public class Session {
         return new Session(UUID.randomUUID().toString());
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
-
     public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }
 
     public void removeAttribute(final String name) {
         values.remove(name);
+    }
+
+    public Object getAttribute(final String name) {
+        return values.get(name);
+    }
+
+    public String getId() {
+        return id;
     }
 }

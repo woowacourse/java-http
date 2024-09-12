@@ -88,9 +88,4 @@ public class LoginHandler implements Handler {
 		Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
 		return userOptional.map(user -> !user.checkPassword(password)).orElse(true);
 	}
-
-	private static HttpResponse notFoundResponse() throws IOException {
-		HttpResponseBody notFoundPage = ResourceLoader.getInstance().loadResource("/404.html");
-		return HttpResponse.notFound(new HttpResponseHeader(), notFoundPage);
-	}
 }

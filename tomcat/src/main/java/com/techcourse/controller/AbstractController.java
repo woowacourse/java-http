@@ -31,17 +31,19 @@ public abstract class AbstractController implements Controller {
         if (hasSessionCookie(request) && sessionNotFound(request)) {
             SESSION_MANAGER.add(new Session(request.findSessionCookie().get().value()));
         }
-
-        switch (getMethod(request)) {
-            case GET -> doGet(request, response);
-            case PUT -> doPut(request, response);
-            case HEAD -> doHead(request, response);
-            case POST -> doPost(request, response);
-            case TRACE -> doTrace(request, response);
-            case DELETE -> doDelete(request, response);
-            case CONNECT -> doConnect(request, response);
-            case OPTIONS -> doOptions(request, response);
-            case null, default -> throw new RuntimeException("지원하지 않는 메서드 입니다.");
+        try {
+            switch (getMethod(request)) {
+                case GET -> doGet(request, response);
+                case PUT -> doPut(request, response);
+                case HEAD -> doHead(request, response);
+                case POST -> doPost(request, response);
+                case TRACE -> doTrace(request, response);
+                case DELETE -> doDelete(request, response);
+                case CONNECT -> doConnect(request, response);
+                case OPTIONS -> doOptions(request, response);
+            }
+        } catch (Exception e) {
+            response.setRedirect("/500.html");
         }
     }
 

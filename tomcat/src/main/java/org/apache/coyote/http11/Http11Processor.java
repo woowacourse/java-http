@@ -8,7 +8,7 @@ import java.net.Socket;
 
 import org.apache.coyote.HandlerMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.handler.Controller;
+import org.apache.coyote.controller.Controller;
 import org.apache.http.HttpVersion;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.HttpRequestReader;

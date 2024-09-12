@@ -1,6 +1,6 @@
 package com.techcourse.controller.exception;
 
-import org.apache.coyote.handler.AbstractController;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 

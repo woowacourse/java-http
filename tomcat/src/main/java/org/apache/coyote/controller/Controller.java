@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;

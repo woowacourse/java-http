@@ -8,6 +8,9 @@ import org.apache.coyote.http11.http.BaseHttpHeaders;
 
 public class HttpResponseHeader extends BaseHttpHeaders {
 
+	private static final String SET_COOKIE = "Set-Cookie";
+	private static final String JSESSIONID = "JSESSIONID=";
+
 	public HttpResponseHeader() {
 		super(new LinkedHashMap<>());
 	}
@@ -18,6 +21,10 @@ public class HttpResponseHeader extends BaseHttpHeaders {
 
 	public void addHeader(String key, List<String> values) {
 		headers.put(key, values);
+	}
+
+	public void addJSessionId(String sessionId) {
+		addHeader(SET_COOKIE, JSESSIONID + sessionId);
 	}
 
 	public String toResponseMessage() {

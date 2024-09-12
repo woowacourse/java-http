@@ -3,8 +3,10 @@ package com.techcourse.web.handler;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.request.HttpMethod;
 import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.request.HttpRequestHeader;
 import org.apache.coyote.http11.http.request.HttpRequestLine;
 import org.apache.coyote.http11.http.request.HttpRequestQuery;
 import org.apache.coyote.http11.http.request.HttpRequestUrl;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.web.util.JsessionIdGenerator;
 import com.techcourse.web.util.ResourceLoader;
 
 public class LoginHandler implements Handler {
@@ -64,8 +67,21 @@ public class LoginHandler implements Handler {
 
 		HttpResponseHeader responseHeader = new HttpResponseHeader();
 		responseHeader.addHeader("Location", getRedirectLocation(account, password));
+		addJSessionId(request, responseHeader);
 
 		return HttpResponse.redirect(responseHeader);
+	}
+
+	private void addJSessionId(HttpRequest request, HttpResponseHeader responseHeader) {
+		HttpRequestHeader header = request.getHeaders();
+		HttpCookie httpCookie = header.getHttpCookie();
+		if (isNotExistJsessionid(httpCookie)) {
+			responseHeader.addJSessionId(JsessionIdGenerator.generate());
+		}
+	}
+
+	private boolean isNotExistJsessionid(HttpCookie httpCookie) {
+		return httpCookie == null || !httpCookie.hasJsessionId();
 	}
 
 	private String getRedirectLocation(String account, String password) {

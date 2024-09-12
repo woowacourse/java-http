@@ -54,7 +54,7 @@ class ResponseHeaderTest {
         String location = "ID=dsaf9e-dfs0-e3";
         ResponseHeader responseHeader = new ResponseHeader();
 
-        responseHeader.setLocation(location);
+        responseHeader.setRedirection(location);
 
         String actual = responseHeader.toString();
         String expected = "Location: " + location + " \r\n";

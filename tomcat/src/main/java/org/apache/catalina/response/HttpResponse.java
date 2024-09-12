@@ -23,7 +23,7 @@ public class HttpResponse {
     }
 
     public void addLocation(String url) {
-        responseHeader.setLocation("http://localhost:8080" + url);
+        responseHeader.setRedirection("http://localhost:8080" + url);
     }
 
     public void addHeader(String key, String value) {

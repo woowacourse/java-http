@@ -27,7 +27,7 @@ public class ResponseHeader {
         headers.put(COOKIE, value);
     }
 
-    public void setLocation(String value) {
+    public void setRedirection(String value) {
         headers.put(LOCATION, value);
     }
 

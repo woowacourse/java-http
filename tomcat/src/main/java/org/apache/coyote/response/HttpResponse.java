@@ -35,8 +35,8 @@ public class HttpResponse {
 
     public void setUnauthorized() {
         httpStatusCode = HttpStatusCode.UNAUTHORIZED;
-        responseHeader.add(HttpHeaderType.CONTENT_TYPE.getName(), ContentType.TEXT_HTML.getName());
-        responseBody = FILE_READER.read(UNAUTHORIZED_FILENAME);
+        setContentType(ContentType.fromFileName(UNAUTHORIZED_FILENAME));
+        setResponseBody(FILE_READER.read(UNAUTHORIZED_FILENAME));
     }
 
     public void setStaticResource(String fileName) {

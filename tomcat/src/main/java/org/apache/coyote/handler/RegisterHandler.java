@@ -2,9 +2,9 @@ package org.apache.coyote.handler;
 
 import org.apache.coyote.NotFoundException;
 import org.apache.http.HttpMethod;
+import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.request.RequestLine;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -19,10 +19,9 @@ public class RegisterHandler extends Handler {
         return INSTANCE;
     }
 
-    public String handle(final HttpRequest httpRequest) {
+    public HttpResponse handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            final RequestLine requestLine = RequestLine.from("GET /register.html HTTP/1.1");
-            return StaticResourceHandler.getInstance().handle(new HttpRequest(requestLine, null, null));
+            return processRegisterGetRequest(httpRequest);
         }
 
         if (httpRequest.isSameMethod(HttpMethod.POST)) {
@@ -32,11 +31,19 @@ public class RegisterHandler extends Handler {
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
-    private String processRegisterPostRequest(final HttpRequest httpRequest) {
+    private HttpResponse processRegisterGetRequest(final HttpRequest httpRequest) {
+        return HttpResponse.builder()
+                .addHeader(HttpHeaderName.LOCATION, "/register.html")
+                .foundBuild();
+    }
+
+    private HttpResponse processRegisterPostRequest(final HttpRequest httpRequest) {
         String account = httpRequest.getFormBodyByKey("account");
         String email = httpRequest.getFormBodyByKey("email");
         String password = httpRequest.getFormBodyByKey("password");
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponseGenerator.getFoundResponse("/index.html");
+        return HttpResponse.builder()
+                .addHeader(HttpHeaderName.LOCATION, "/index.html")
+                .foundBuild();
     }
 }

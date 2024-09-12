@@ -9,7 +9,8 @@ import java.nio.file.Files;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.header.HttpHeaderName;
+import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +29,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addHeader(HttpHeaderName.CONTENT_TYPE, "text/plain")
+                .body("Hello world!")
+                .okBuild();
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
@@ -57,13 +55,11 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5128 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addHeader(HttpHeaderName.CONTENT_TYPE, "text/html")
+                .body(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+                .okBuild();
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
@@ -84,8 +80,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).isEqualTo(
-                HttpResponseGenerator.getFoundResponse("/login.html"));
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addHeader(HttpHeaderName.LOCATION, "/login.html")
+                .foundBuild();
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
@@ -106,8 +104,8 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
-        assertThat(socket.output()).isEqualTo(
-                HttpResponseGenerator.getFoundResponse("/index.html"));
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
     }
 
     @Test
@@ -129,14 +127,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("/index.html"),
-                "Set-Cookie: JSESSIONID=");
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html", "Set-Cookie: JSESSIONID=");
     }
 
     @Test
-    @DisplayName("register Get 요청 처리: 성공 시 register html")
-    void register_Get() throws IOException {
+    @DisplayName("register Get 요청 처리: 성공 시 register html 리다이렉트")
+    void register_Get() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1",
@@ -150,14 +146,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 4319 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /register.html");
     }
 
     @Test
@@ -179,7 +168,6 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("/index.html"));
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
     }
 }

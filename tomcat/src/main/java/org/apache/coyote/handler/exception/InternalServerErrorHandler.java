@@ -2,7 +2,7 @@ package org.apache.coyote.handler.exception;
 
 import org.apache.coyote.handler.Handler;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponse;
 
 public class InternalServerErrorHandler extends Handler {
     private static final InternalServerErrorHandler INSTANCE = new InternalServerErrorHandler();
@@ -15,8 +15,9 @@ public class InternalServerErrorHandler extends Handler {
     }
 
     @Override
-    public String handle(final HttpRequest httpRequest) {
-        return HttpResponseGenerator.getInternalServerErrorResponse();
+    public HttpResponse handle(final HttpRequest httpRequest) {
+        return HttpResponse.builder()
+                .internalServerErrorBuild();
     }
 }
 

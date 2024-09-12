@@ -2,7 +2,7 @@ package org.apache.coyote.handler.exception;
 
 import org.apache.coyote.handler.Handler;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponse;
 
 public class UnAuthorizationHandler extends Handler {
     private static final UnAuthorizationHandler INSTANCE = new UnAuthorizationHandler();
@@ -15,7 +15,8 @@ public class UnAuthorizationHandler extends Handler {
     }
 
     @Override
-    public String handle(final HttpRequest httpRequest) {
-        return HttpResponseGenerator.getUnauthorizedResponse();
+    public HttpResponse handle(final HttpRequest httpRequest) {
+        return HttpResponse.builder()
+                .unauthorizedBuild();
     }
 }

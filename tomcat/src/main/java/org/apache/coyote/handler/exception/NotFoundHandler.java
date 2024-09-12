@@ -2,7 +2,7 @@ package org.apache.coyote.handler.exception;
 
 import org.apache.coyote.handler.Handler;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponse;
 
 public class NotFoundHandler extends Handler {
     private static final NotFoundHandler INSTANCE = new NotFoundHandler();
@@ -15,7 +15,8 @@ public class NotFoundHandler extends Handler {
     }
 
     @Override
-    public String handle(final HttpRequest httpRequest) {
-        return HttpResponseGenerator.getNotFountResponse();
+    public HttpResponse handle(final HttpRequest httpRequest) {
+        return HttpResponse.builder()
+                .notFoundBuild();
     }
 }

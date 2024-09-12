@@ -7,8 +7,8 @@ import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeader;
-import org.apache.http.header.HttpHeaders;
 import org.apache.http.header.HttpHeaderName;
+import org.apache.http.header.HttpHeaders;
 
 public class HttpRequest {
 
@@ -28,6 +28,13 @@ public class HttpRequest {
         this.headers = new HttpHeaders(headers);
         this.body = body;
         this.httpCookie = parseCookie(headers);
+    }
+
+    public HttpRequest(RequestLine requestLine) {
+        this.requestLine = requestLine;
+        this.headers = null;
+        this.body = null;
+        this.httpCookie = null;
     }
 
     public static HttpRequest from(String requestLine, HttpHeader[] headers, String body) {

@@ -1,13 +1,8 @@
 package org.apache.coyote.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
 
 import org.apache.catalina.session.Session;
@@ -17,24 +12,22 @@ import org.apache.coyote.UnauthorizedException;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.RequestLine;
+import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class LoginHandlerTest {
 
     @Test
-    @DisplayName("GET 요청 처리: 세션이 없는 경우 로그인 페이지를 반환")
-    void handle_GetRequest_Without_Session() throws IOException {
-        final URL resourceURL = getClass().getClassLoader().getResource("static/login.html");
-        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
-
+    @DisplayName("GET 요청 처리: 세션이 없는 경우 로그인 페이지로 리다이렉트")
+    void handle_GetRequest_Without_Session() {
         final RequestLine requestLine = new RequestLine("GET", "/login", "HTTP/1.1");
         final HttpRequest request = new HttpRequest(requestLine, null, null);
 
-        assertAll(
-                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found")),
-                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("http://localhost:8080/login.html"))
-        );
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addLocation("/login.html")
+                .foundBuild();
+        assertThat(LoginHandler.getInstance().handle(request)).isEqualTo(httpResponse);
     }
 
     @Test
@@ -46,28 +39,23 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest(requestLine,
                 new HttpHeader[]{new HttpHeader("Cookie", "JSESSIONID=" + sessionId)}, null);
 
-        assertAll(
-                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found")),
-                () -> assertTrue(LoginHandler.getInstance().handle(request).contains("http://localhost:8080/index.html"))
-        );
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addLocation("/index.html")
+                .foundBuild();
+        assertThat(LoginHandler.getInstance().handle(request)).isEqualTo(httpResponse);
 
         SessionManager.getInstance().remove(new Session(sessionId));
     }
 
     @Test
-    @DisplayName("POST 요청 처리: 유효한 계정 정보로 로그인 성공")
+    @DisplayName("POST 요청 처리: 유효한 계정 정보로 로그인 성공 및 /index.html로 리다이렉트")
     void handle_PostRequest_With_ValidCredentials() {
         final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
         final HttpRequest request = new HttpRequest(requestLine, null,
                 "account=gugu&password=password");
 
-        final String result = LoginHandler.getInstance().handle(request);
-
-        assertAll(
-                () -> assertTrue(result.contains("302 Found")),
-                () -> assertTrue(result.contains("http://localhost:8080/index.html")),
-                () -> assertTrue(result.contains("Set-Cookie: JSESSIONID="))
-        );
+        final HttpResponse actual = LoginHandler.getInstance().handle(request);
+        assertThat(actual.toString()).contains("JSESSIONID=", "Location: /index.html", "HTTP/1.1 302 Found");
     }
 
     @Test

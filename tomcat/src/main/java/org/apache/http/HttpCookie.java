@@ -1,9 +1,9 @@
 package org.apache.http;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -29,14 +29,14 @@ public class HttpCookie {
 
     private static Map<String, String> parseCookie(String cookie) {
         if (cookie == null || cookie.isEmpty()) {
-            return Collections.emptyMap();
+            return new HashMap<>();
         }
 
         return Arrays.stream(cookie.split(COOKIE_SEPARATOR))
                 .filter(pair -> pair.contains(KEY_VALUE_SEPARATOR))
                 .map(pair -> pair.split(KEY_VALUE_SEPARATOR, KEY_VALUE_COUNT))
                 .filter(pair -> pair.length == KEY_VALUE_COUNT)
-                .collect(Collectors.toUnmodifiableMap(
+                .collect(Collectors.toConcurrentMap(
                         pair -> pair[KEY_ORDER].trim(),
                         pair -> pair[VALUE_ORDER].trim(),
                         (v1, v2) -> v1));
@@ -57,5 +57,22 @@ public class HttpCookie {
                 .stream()
                 .map(entry -> entry.getKey() + KEY_VALUE_SEPARATOR + entry.getValue())
                 .collect(Collectors.joining(COOKIE_SEPARATOR));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpCookie that = (HttpCookie) o;
+        return Objects.equals(cookie, that.cookie);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(cookie);
     }
 }

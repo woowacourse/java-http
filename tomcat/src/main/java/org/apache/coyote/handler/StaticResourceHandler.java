@@ -7,8 +7,9 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import org.apache.coyote.NotFoundException;
+import org.apache.http.header.HttpHeaderName;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponse;
 
 public class StaticResourceHandler extends Handler {
 
@@ -30,13 +31,16 @@ public class StaticResourceHandler extends Handler {
         return INSTANCE;
     }
 
-    public String handle(final HttpRequest httpRequest) {
+    public HttpResponse handle(final HttpRequest httpRequest) {
         final URL resourceURL = getClass().getClassLoader().getResource(findResourcePath(httpRequest.getPath()));
         try {
             final Path resourcePath = Path.of(resourceURL.getPath());
             final String responseBody = Files.readString(resourcePath);
             final String mimeType = Files.probeContentType(resourcePath);
-            return HttpResponseGenerator.getOkResponse(mimeType, responseBody);
+            return HttpResponse.builder()
+                    .body(responseBody)
+                    .addHeader(HttpHeaderName.CONTENT_TYPE, mimeType)
+                    .build();
         } catch (NullPointerException e) {
             throw new NotFoundException(e.getMessage());
         } catch (IOException e) {

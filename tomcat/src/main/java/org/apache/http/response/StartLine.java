@@ -36,6 +36,14 @@ public class StartLine {
         }
     }
 
+    public HttpVersion getVersion() {
+        return version;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

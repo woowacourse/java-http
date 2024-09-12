@@ -33,6 +33,25 @@ public class HttpResponse {
         this.cookie = httpRequest.getHttpCookie();
     }
 
+    private String mapBody(String resource) throws IOException {
+        StringBuilder rawBody = new StringBuilder();
+        Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());
+
+        Files.readAllLines(path)
+                .forEach(line -> rawBody.append(line).append("\r\n"));
+        return String.valueOf(rawBody);
+    }
+
+    private Map<String, String> mapHeader(HttpRequest httpRequest, ResourceType resourceType) throws IOException {
+        Map<String, String> headerEntry = new HashMap<>();
+        headerEntry.put(HeaderName.SET_COOKIE.getValue(), httpRequest.getCookieResponse());
+        headerEntry.put(HeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType());
+        if (resourceType == ResourceType.STATIC) {
+            headerEntry.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
+        }
+        return headerEntry;
+    }
+
     public String getReponse() {
         StringBuilder response = new StringBuilder();
 
@@ -56,36 +75,12 @@ public class HttpResponse {
         return String.valueOf(response);
     }
 
-    private Map<String, String> mapHeader(HttpRequest httpRequest, ResourceType resourceType) throws IOException {
-        Map<String, String> headerEntry = new HashMap<>();
-        headerEntry.put(HeaderName.SET_COOKIE.getValue(), httpRequest.getCookieResponse());
-        headerEntry.put(HeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType());
-        if (resourceType == ResourceType.STATIC) {
-            headerEntry.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
-        }
-        return headerEntry;
-    }
-
-    private String mapBody(String resource) throws IOException {
-        StringBuilder rawBody = new StringBuilder();
-        Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());
-
-        Files.readAllLines(path)
-                .forEach(line -> rawBody.append(line).append("\r\n"));
-        return String.valueOf(rawBody);
-    }
-
     public void setStatusCode(StatusCode statusCode) {
         statusLine.setStatusCode(statusCode);
     }
 
     public void setHeader(HeaderName headerName, String value) {
         header.put(headerName.getValue(), value);
-    }
-
-    public void setBody(String resource) throws IOException {
-        this.body = mapBody(resource);
-        header.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
     }
 
     public void generateJSESSIONID() {
@@ -95,5 +90,10 @@ public class HttpResponse {
 
     public String getJESSIONID() {
         return cookie.getJESSIONID();
+    }
+
+    public void setBody(String resource) throws IOException {
+        this.body = mapBody(resource);
+        header.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
     }
 }

@@ -29,30 +29,6 @@ public class RequestLine {
         this.versionOfProtocol = requestLineEntries[2];
     }
 
-    private String mapPath(String path) {
-        if (!queryParams.isEmpty()) {
-            int queryStringIndex = path.indexOf("?");
-            return path.substring(0, queryStringIndex);
-        }
-        return path;
-    }
-
-    public boolean isMethod(HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public boolean hasQueryParam() {
-        return !queryParams.isEmpty();
-    }
-
-    public String getQueryParam(String paramName) {
-        return queryParams.get(paramName);
-    }
-
     private Map<String, String> mapQueryParam(String requestLineEntry) {
         Map<String, String> mappedQueryParams = new HashMap<>();
         if (!requestLineEntry.contains(QUERY_INDICATOR)) {
@@ -72,6 +48,26 @@ public class RequestLine {
         return mappedQueryParams;
     }
 
+    private String mapPath(String path) {
+        if (!queryParams.isEmpty()) {
+            int queryStringIndex = path.indexOf("?");
+            return path.substring(0, queryStringIndex);
+        }
+        return path;
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
+    public boolean hasQueryParam() {
+        return !queryParams.isEmpty();
+    }
+
+    public String getQueryParam(String paramName) {
+        return queryParams.get(paramName);
+    }
+
     public String getContentType() throws IOException {
         return Files.probeContentType(new File(path).toPath());
     }
@@ -87,5 +83,9 @@ public class RequestLine {
 
     public boolean isPathWithQuery(String path) {
         return isPath(path) && hasQueryParam();
+    }
+
+    public String getPath() {
+        return path;
     }
 }

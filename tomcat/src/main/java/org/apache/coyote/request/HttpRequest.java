@@ -27,62 +27,6 @@ public class HttpRequest {
         this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
     }
 
-    public boolean isMethod(HttpMethod httpMethod) {
-        return requestLine.isMethod(httpMethod);
-    }
-
-    public String getPath() {
-        return requestLine.getPath();
-    }
-
-    public String get(HeaderName headerName) {
-        return header.get(headerName.getValue());
-    }
-
-    public boolean hasCookie() {
-        return header.containsKey(HeaderName.COOKIE.getValue());
-    }
-
-    public String getQueryParam(String paramName) {
-        return requestLine.getQueryParam(paramName);
-    }
-
-    public boolean isStaticRequest() {
-        return requestLine.isStaticRequest();
-    }
-
-    public boolean isPath(String path) {
-        return requestLine.isPath(path);
-    }
-
-    public boolean isPathWithQuery(String path) {
-        return requestLine.isPathWithQuery(path);
-    }
-
-    public String getContentType() throws IOException {
-        return requestLine.getContentType();
-    }
-
-    public String getCookieResponse() {
-        return httpCookie.getResponse();
-    }
-
-    public boolean hasJESSIONID() {
-        return httpCookie.hasJESSIONID();
-    }
-
-    public String getJESSIONID() {
-        return httpCookie.getJESSIONID();
-    }
-
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
-    }
-
-    public RequestBody getBody() {
-        return body;
-    }
-
     private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
         Map<String, String> rawHeader = new HashMap<>();
         String rawLine;
@@ -102,7 +46,63 @@ public class HttpRequest {
         return new RequestBody();
     }
 
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getQueryParam(String paramName) {
+        return requestLine.getQueryParam(paramName);
+    }
+
+    public String getContentType() throws IOException {
+        return requestLine.getContentType();
+    }
+
+    public String get(HeaderName headerName) {
+        return header.get(headerName.getValue());
+    }
+
+    public String getCookieResponse() {
+        return httpCookie.getResponse();
+    }
+
+    public String getJESSIONID() {
+        return httpCookie.getJESSIONID();
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
+    }
+
+    public boolean isPath(String path) {
+        return requestLine.isPath(path);
+    }
+
+    public boolean isPathWithQuery(String path) {
+        return requestLine.isPathWithQuery(path);
+    }
+
+    public boolean isStaticRequest() {
+        return requestLine.isStaticRequest();
+    }
+
+    public boolean hasCookie() {
+        return header.containsKey(HeaderName.COOKIE.getValue());
+    }
+
     public boolean hasSession() {
         return hasCookie() && httpCookie.hasJESSIONID();
+    }
+
+    public boolean hasJESSIONID() {
+        return httpCookie.hasJESSIONID();
+    }
+
+    public RequestBody getBody() {
+        return body;
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 }

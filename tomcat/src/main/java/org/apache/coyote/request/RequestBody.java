@@ -9,6 +9,10 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
+    public RequestBody() {
+        this.body = new HashMap<>();
+    }
+
     public RequestBody(BufferedReader bufferedReader, String bodyLength) throws IOException {
         this.body = mapBody(bufferedReader, bodyLength);
     }
@@ -27,10 +31,6 @@ public class RequestBody {
             rawBody.put(info[0], info[1]);
         }
         return rawBody;
-    }
-
-    public RequestBody() {
-        this.body = new HashMap<>();
     }
 
     public String get(String key) {

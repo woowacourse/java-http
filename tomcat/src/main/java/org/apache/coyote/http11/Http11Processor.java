@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -81,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             String[] header = line.split(PARAMETER_SEPARATOR);
             requestHeaders.put(header[0], header[1]);
         }
-        return requestHeaders;
+        return Collections.unmodifiableMap(requestHeaders);
     }
 
     private void doGet(String url, Map<String, String> requestHeaders, OutputStream outputStream) throws IOException {

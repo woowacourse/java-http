@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.StatusCode;
 
 public class HomeController extends AbstractController {
 
@@ -16,7 +17,7 @@ public class HomeController extends AbstractController {
     }
 
     private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("200 OK")
+        response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
                 .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
                 .addHeader("Content-Type", "text/html");

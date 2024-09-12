@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.StatusCode;
 
 public class StaticResourceController extends AbstractController {
 
@@ -40,14 +41,14 @@ public class StaticResourceController extends AbstractController {
     }
 
     private void buildOkResponse(String responseBody, String contentType, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("200 OK")
+        response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
+        response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location);
     }
 

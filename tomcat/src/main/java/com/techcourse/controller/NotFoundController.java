@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.StatusCode;
 
 public class NotFoundController extends AbstractController {
 
@@ -16,7 +17,7 @@ public class NotFoundController extends AbstractController {
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
+        response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location);
     }
 }

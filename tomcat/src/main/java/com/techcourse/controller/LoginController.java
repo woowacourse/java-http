@@ -10,6 +10,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.StatusCode;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -111,19 +112,19 @@ public class LoginController extends AbstractController {
     }
 
     private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("200 OK")
+        response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
                 .addHeader("Content-Type", "text/html")
                 .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
+        response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location);
     }
 
     private void buildRedirectWithCookieResponse(String location, String sessionId, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
+        response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location)
                 .addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
     }

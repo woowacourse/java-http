@@ -8,6 +8,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.StatusCode;
 
 public class RegisterController extends AbstractController {
 
@@ -50,14 +51,14 @@ public class RegisterController extends AbstractController {
     }
 
     private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("200 OK")
+        response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
                 .addHeader("Content-Type", "text/html")
                 .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
+        response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location);
     }
 }

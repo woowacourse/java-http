@@ -12,7 +12,6 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.error.ErrorHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse resolveViewResponse(HttpRequest httpRequest) {
         return new HttpResponse()
-                .statusCode(HttpStatusCode.OK_200)
+                .statusCode(StatusCode.OK_200)
                 .viewUrl(httpRequest.getRequestUri());
     }
 

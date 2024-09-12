@@ -4,7 +4,7 @@ import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -37,7 +37,7 @@ public class LoginController implements Controller {
 
     public void loginView(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse
-                .statusCode(HttpStatusCode.OK_200)
+                .statusCode(StatusCode.OK_200)
                 .viewUrl("/login.html");
     }
 
@@ -50,7 +50,7 @@ public class LoginController implements Controller {
         }
 
         httpResponse
-                .statusCode(HttpStatusCode.FOUND_302)
+                .statusCode(StatusCode.FOUND_302)
                 .location("/index.html");
     }
 
@@ -61,7 +61,7 @@ public class LoginController implements Controller {
         Cookie userSessionCookie = makeUserSessionCookie(user);
 
         httpResponse
-                .statusCode(HttpStatusCode.FOUND_302)
+                .statusCode(StatusCode.FOUND_302)
                 .location("/index.html")
                 .setCookie(userSessionCookie);
     }

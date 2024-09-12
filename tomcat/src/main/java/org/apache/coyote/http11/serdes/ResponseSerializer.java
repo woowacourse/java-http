@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.serdes;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpRequestHeaders;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 
@@ -15,7 +15,7 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
     @Override
     public String serialize(HttpResponse response) {
         ResponseBody responseBody = response.getResponseBody();
-        String firstLine = resolveFirstLine(response.getStatusCode(), response.getStatusMessage());
+        String firstLine = resolveFirstLine(response.getStatusCode());
         String header = serializeHeader(response.getHeaders());
 
         StringJoiner joiner = new StringJoiner(RESPONSE_DELIMITER);
@@ -28,10 +28,10 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
         return joiner.toString();
     }
 
-    private String resolveFirstLine(int statusCode, String statusMessage) {
+    private String resolveFirstLine(StatusCode statusCode) {
         StringJoiner joiner = new StringJoiner(" ", PROTOCOL_AND_VERSION, " ");
-        joiner.add(String.valueOf(statusCode));
-        joiner.add(statusMessage);
+        joiner.add(String.valueOf(statusCode.getCode()));
+        joiner.add(statusCode.getMessage());
         return joiner.toString();
     }
 

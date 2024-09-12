@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpRequestHeaders;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
 
@@ -16,8 +15,7 @@ public class HttpResponse {
     private final ViewResolver viewResolver;
     private final Serializer<HttpResponse> serialzer;
     private final HttpRequestHeaders headers;
-    private int statusCode;
-    private String statusMessage;
+    private StatusCode statusCode;
     private ResponseBody responseBody;
 
     public HttpResponse() {
@@ -26,12 +24,10 @@ public class HttpResponse {
         this.headers = new HttpRequestHeaders();
     }
 
-    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage,ResponseBody responseBody) {
+    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage, ResponseBody responseBody) {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
         this.headers = headers;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
         this.responseBody = responseBody;
     }
 
@@ -43,9 +39,8 @@ public class HttpResponse {
         return serialzer.serialize(this);
     }
 
-    public HttpResponse statusCode(HttpStatusCode statusCode) {
-        this.statusCode = statusCode.getCode();
-        this.statusMessage = statusCode.getMessage();
+    public HttpResponse statusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
         return this;
     }
 
@@ -81,12 +76,8 @@ public class HttpResponse {
         return headers;
     }
 
-    public int getStatusCode() {
+    public StatusCode getStatusCode() {
         return statusCode;
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
     }
 
     public ResponseBody getResponseBody() {

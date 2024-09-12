@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum HttpStatusCode {
+public enum StatusCode {
 
     OK_200(200, "OK"),
     FOUND_302(302, "Found"),
@@ -9,7 +9,7 @@ public enum HttpStatusCode {
     private final int code;
     private final String message;
 
-    HttpStatusCode(int code, String message) {
+    StatusCode(int code, String message) {
         this.code = code;
         this.message = message;
     }

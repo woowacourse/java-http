@@ -2,7 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.resolver.RequestBodyResolver;
 import org.apache.coyote.http11.request.resolver.UserResolver;
@@ -25,12 +25,12 @@ public class UserController implements Controller {
             User user = userResolver.resolve(httpRequest.getRequestBody());
             userService.save(user);
 
-            httpResponse.statusCode(HttpStatusCode.FOUND_302)
+            httpResponse.statusCode(StatusCode.FOUND_302)
                     .location("/index.html");
             return;
         }
 
-        httpResponse.statusCode(HttpStatusCode.OK_200)
+        httpResponse.statusCode(StatusCode.OK_200)
                 .viewUrl("/register.html");
     }
 }

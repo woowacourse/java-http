@@ -17,7 +17,6 @@ public class ViewResolver {
         if (resource == null) {
             throw new IllegalArgumentException("해당 경로의 응답 파일이 존재하지 않습니다: " + staticPath); // TODO: 404 처리
         }
-
         try {
             final Path path = Paths.get(resource.toURI());
             return Files.readString(path);

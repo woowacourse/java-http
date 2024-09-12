@@ -16,11 +16,9 @@ public record RequestLine (
     }
 
     public boolean isStaticResourceRequest() {
-        String[] pathToken = target.split("/");
-        String extension = pathToken[pathToken.length - 1];
-        return extension.contains(".css") ||
-                extension.contains(".html") ||
-                extension.contains(".js");
+        return target.contains(".css") ||
+                target.contains(".html") ||
+                target.contains(".js");
     }
 
     @Override

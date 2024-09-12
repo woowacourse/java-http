@@ -44,7 +44,6 @@ public class Session {
     }
 
     public boolean isValid() {
-        long now = System.currentTimeMillis();
         if (getIdleSecond() >= maxInactiveInterval) {
             expire();
             return false;

@@ -1,8 +1,10 @@
 package org.apache.coyote.request.body;
 
+import org.apache.coyote.request.parser.QueryParser;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.coyote.request.parser.QueryParser;
 
 public class RequestBody {
 
@@ -18,7 +20,7 @@ public class RequestBody {
 
     private Map<String, String> parseBody(String body) {
         if (body == null) {
-            return null;
+            return new HashMap<>();
         }
         return QueryParser.parse(getQueryString(body));
     }

@@ -7,16 +7,10 @@ import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.catalina.webresources.WebResource;
 
-public class DefaultServlet implements Controller {
+public class DefaultServlet extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        switch (request.getHttpMethod()) {
-            case GET -> doGet(request, response);
-        }
-    }
-
-    private void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         WebResource webResource = StandardRoot.getResource(request.getURI());
         if (webResource.exists()) {
             response.writeStaticResource(request.getURI());

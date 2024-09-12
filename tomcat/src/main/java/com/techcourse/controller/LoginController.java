@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
-import org.apache.catalina.servlet.Controller;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.tomcat.util.http.ResourceURI;
@@ -21,20 +21,13 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final ResourceURI LOGIN_RESOURCE_URI = new ResourceURI("/login.html");
     private static final ResourceURI REDIRECT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        switch (request.getHttpMethod()) {
-            case GET -> doGet(request, response);
-            case POST -> doPost(request, response);
-        }
-    }
-
-    private void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Session session = request.getSession(false);
         if (Objects.nonNull(session)) {
             response.sendRedirect(REDIRECT_RESOURCE_URI);
@@ -43,7 +36,8 @@ public class LoginController implements Controller {
         response.writeStaticResource(LOGIN_RESOURCE_URI);
     }
 
-    private void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Session session = request.getSession(true);
         Map<String, String> parsed = QueryStringParser.parse(request.httpBody().body());
         String account = parsed.get("account");

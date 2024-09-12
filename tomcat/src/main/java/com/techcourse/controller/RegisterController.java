@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
-import org.apache.catalina.servlet.Controller;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.tomcat.util.http.ResourceURI;
 import org.apache.tomcat.util.http.parser.QueryStringParser;
 import org.slf4j.Logger;
@@ -15,24 +15,18 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final ResourceURI REGISTER_RESOURCE_URI = new ResourceURI("/register.html");
     private static final ResourceURI REDIRECT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        switch (request.getHttpMethod()) {
-            case GET -> doGet(request, response);
-            case POST -> doPost(request, response);
-        }
-    }
-
-    private void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.writeStaticResource(REGISTER_RESOURCE_URI);
     }
 
-    private void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> parsed = QueryStringParser.parse(request.httpBody().body());
         String account = parsed.get("account");
         String password = parsed.get("password");

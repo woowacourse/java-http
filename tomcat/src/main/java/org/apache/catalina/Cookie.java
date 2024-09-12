@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 public class Cookie {
 
-    private static final String COOKIE_DELIMITER = "&";
+    private static final String COOKIE_DELIMITER = "; ";
     private static final String SPLIT_DELIMITER = "=";
 
     private final Map<String, String> values;

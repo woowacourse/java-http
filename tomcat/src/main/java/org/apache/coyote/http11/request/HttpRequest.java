@@ -11,7 +11,7 @@ import com.techcourse.model.User;
 
 public class HttpRequest {
     private static final String ALL_MIME_TYPE = "*/*";
-    private static final String CHARSET_UTF8 = ";charset=UTF-8";
+    private static final String CHARSET_UTF8 = ";charset=utf-8";
 
     private final RequestLine requestLine;
     private final RequestHeader headers;

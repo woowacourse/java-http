@@ -83,6 +83,6 @@ public class HttpRequestHeaderTest {
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(lines);
 
         // then
-        assertThat(httpRequestHeader.get("Content-Length")).isEqualTo("0");
+        assertThat(httpRequestHeader.getContentLength()).isEqualTo(0);
     }
 }

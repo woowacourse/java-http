@@ -40,14 +40,6 @@ public class HttpResponse {
         return header.getHeaders();
     }
 
-    public String getLocation() {
-        return header.getLocation();
-    }
-
-    public String getContentType() {
-        return header.getContentType();
-    }
-
     public int getContentLength() {
         return header.getContentLength();
     }

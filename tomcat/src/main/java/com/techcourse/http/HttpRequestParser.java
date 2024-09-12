@@ -56,15 +56,19 @@ public class HttpRequestParser {
 
         for (String parameter : parameters) {
             String[] keyValue = parameter.split(PARAMETER_KEY_VALUE_SEPARATOR);
-            request.setParameter(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+            if (keyValue.length == 2) {
+                request.setParameter(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+            }
         }
     }
 
     private static void parseHeaders(BufferedReader reader, HttpRequest request) throws IOException {
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
-            String[] headerParts = line.split(HEADER_KEY_VALUE_SEPARATOR);
-            request.setHeader(headerParts[KEY_INDEX], headerParts[VALUE_INDEX]);
+            String[] keyValue = line.split(HEADER_KEY_VALUE_SEPARATOR);
+            if (keyValue.length == 2) {
+                request.setHeader(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+            }
         }
 
         if (request.getHeader(HttpHeaders.COOKIE) != null) {
@@ -77,8 +81,10 @@ public class HttpRequestParser {
 
         String[] cookieArray = cookieString.split(HttpCookie.SEPARATOR);
         for (String cookiePair : cookieArray) {
-            String[] pair = cookiePair.split(HttpCookie.KEY_VALUE_SEPARATOR);
-            request.setCookie(pair[KEY_INDEX], pair[VALUE_INDEX]);
+            String[] keyValue = cookiePair.split(HttpCookie.KEY_VALUE_SEPARATOR);
+            if (keyValue.length == 2) {
+                request.setCookie(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+            }
         }
     }
 

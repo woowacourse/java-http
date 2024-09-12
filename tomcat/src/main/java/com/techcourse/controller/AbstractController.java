@@ -52,7 +52,7 @@ public abstract class AbstractController implements Controller {
     protected final boolean isLogin(HttpRequest request) {
         return request.findSessionCookie()
                 .flatMap(SESSION_MANAGER::findBySessionCookie)
-                .map(session -> session.hasAttribute("user"))
+                .map(session -> session.hasAttribute(SESSION_USER_ATTRIBUTE_NAME))
                 .orElse(false);
     }
 

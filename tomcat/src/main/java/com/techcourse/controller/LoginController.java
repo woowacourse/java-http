@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         boolean loginSuccess = user.isPresent() && user.get().checkPassword(password);
         if (loginSuccess) {
-            addSessionAttribute(request, "user", user);
+            addSessionAttribute(request, SESSION_USER_ATTRIBUTE_NAME, user);
             response.setRedirect("/index.html");
             return;
         }

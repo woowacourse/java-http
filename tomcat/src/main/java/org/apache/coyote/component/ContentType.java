@@ -47,7 +47,7 @@ public enum ContentType {
         return type;
     }
 
-    public enum Charset {
+    enum Charset {
         ISO_LATIN_1("iso-latin-1"),
         UTF_8("utf-8");
 

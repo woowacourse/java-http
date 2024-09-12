@@ -49,7 +49,7 @@ public class HttpResponse {
         WebResource webResource = StandardRoot.getResource(redirectResourceURI);
         this.addHttpStatus(HttpStatus.FOUND);
         this.addHeader(HttpHeaderType.CONTENT_TYPE, webResource.getContentType());
-        this.addHeader(HttpHeaderType.LOCATION, webResource.getURL());
+        this.addHeader(HttpHeaderType.LOCATION, redirectResourceURI.uri());
         this.setBody(webResource.getContent());
     }
 

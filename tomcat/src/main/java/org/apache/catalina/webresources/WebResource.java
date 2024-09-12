@@ -5,5 +5,4 @@ public interface WebResource {
     boolean exists();
     String getContent();
     String getContentType();
-    String getURL();
 }

@@ -36,9 +36,4 @@ public record FileResource(File file) implements WebResource {
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public String getURL() {
-        return "/" + file.getName();
-    }
 }

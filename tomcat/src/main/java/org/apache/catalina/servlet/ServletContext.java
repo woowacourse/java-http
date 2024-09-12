@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpRequest;
 public class ServletContext {
 
     private final List<HttpServlet> servlets = new ArrayList<>();
-    private final SessionManager sessionManager = new SessionManager();
+    private final SessionManager sessionManager = new SessionManager(new UUIDSessionIdGenerator());
 
     public void addServlet(HttpServlet servlet) {
         servlets.add(servlet);

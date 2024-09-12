@@ -125,7 +125,6 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + bytes.length + " \r\n" +
-                "Location: http://localhost:8080" + url + ".html \r\n" +
                 "\r\n" +
                 new String(bytes);
 
@@ -210,7 +209,6 @@ class Http11ProcessorTest {
                     "GET /login?account=gugu&password=password HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb",
                     "");
 
             final var socket = new StubSocket(httpRequest);
@@ -222,11 +220,12 @@ class Http11ProcessorTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+            String JSessionId = socket.output().split("JSESSIONID=")[1].split(" \r\n")[0];
             var expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: " + bytes.length + " \r\n" +
                     "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "Set-Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb" + " \r\n" +
+                    "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
                     "\r\n" +
                     new String(bytes);
 

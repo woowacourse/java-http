@@ -10,6 +10,10 @@ public class HttpCookie {
     private static final String AUTH_COOKIE_KEY = "JSESSIONID";
     private final Map<String, String> cookies;
 
+    public HttpCookie() {
+        this.cookies = new ConcurrentHashMap<>();
+    }
+
     public HttpCookie(Map<String, String> cookies) {
         this.cookies = new ConcurrentHashMap<>(cookies);
     }
@@ -18,7 +22,7 @@ public class HttpCookie {
         cookies.put(key, value);
     }
 
-    public void addAuthCookie(String value) {
+    public void addAuthSessionId(String value) {
         if (cookies.containsKey(AUTH_COOKIE_KEY)) {
             return;
         }
@@ -32,7 +36,7 @@ public class HttpCookie {
         return "";
     }
 
-    public String getAuthCookie() {
+    public String getAuthSessionId() {
         if (cookies.containsKey(AUTH_COOKIE_KEY)) {
             return cookies.get(AUTH_COOKIE_KEY);
         }

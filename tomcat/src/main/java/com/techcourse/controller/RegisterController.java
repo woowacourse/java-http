@@ -30,17 +30,15 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        String id = request.getCookie().getAuthCookie();
+        String id = request.getCookie().getAuthSessionId();
         Optional<Session> session = SessionManager.getInstance().findSession(id);
         if (session.isPresent()) {
             return getLoginSuccessResponse(request);
         }
-        HttpResponse response = new HttpResponse(
+        return new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
                 request.getContentType(),
                 FileReader.loadFileContent(request.getPath() + ".html"));
-        response.addLocation(request.getPath() + ".html");
-        return response;
     }
 
     @Override

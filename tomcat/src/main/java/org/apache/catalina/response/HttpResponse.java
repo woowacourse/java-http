@@ -21,8 +21,9 @@ public class HttpResponse {
         responseHeader.setCookie(value);
     }
 
-    public void addLocation(String url) {
+    public HttpResponse addLocation(String url) {
         responseHeader.setRedirection("http://localhost:8080" + url);
+        return this;
     }
 
     public void addHeader(String key, String value) {

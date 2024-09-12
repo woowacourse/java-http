@@ -1,7 +1,8 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import java.util.Map;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;

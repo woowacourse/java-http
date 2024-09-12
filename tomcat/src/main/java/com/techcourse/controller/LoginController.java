@@ -1,10 +1,11 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;

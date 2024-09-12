@@ -34,7 +34,7 @@ public class HttpResponse {
 
     public void setContentType(ContentType contentType) {
         header.put(HttpHeader.CONTENT_TYPE.getHttpForm(),
-                contentType.toHttpForm() + CONTENT_TYPE_SEPARATOR + DEFAULT_CONTENT_ENCODING_TYPE);
+                contentType.toHttpOutputForm() + CONTENT_TYPE_SEPARATOR + DEFAULT_CONTENT_ENCODING_TYPE);
     }
 
     public void setResponseBody(String content) {

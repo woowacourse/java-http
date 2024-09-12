@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
@@ -187,4 +188,33 @@ class Http11ProcessorTest {
         //then
         assertThat(socket2.output()).contains(ROOT_LOCATION);
     }
+
+    @DisplayName("css 자원 Get 요청 시 css content로 반환가능하다.")
+    @Test
+    void response_css_content_When_get_css_resources() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+        URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        // when
+        processor.process(socket);
+
+        String response = socket.output();
+        // then
+        assertAll(
+                () -> assertThat(response).contains("text/css"),
+                () -> assertThat(response).contains(expectedBody)
+        );
+
+
+    }
+
 }

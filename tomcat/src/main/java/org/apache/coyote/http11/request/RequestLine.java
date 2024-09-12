@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.component;
+package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;

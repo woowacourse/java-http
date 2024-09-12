@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.component;
+package org.apache.coyote.http11.response;
 
 public class StatusLine {
     private static final String VERSION = "HTTP/1.1";

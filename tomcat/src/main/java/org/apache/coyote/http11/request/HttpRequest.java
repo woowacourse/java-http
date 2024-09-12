@@ -3,9 +3,6 @@ package org.apache.coyote.http11.request;
 import java.util.Map;
 
 import org.apache.coyote.http11.file.MimeTypeMaker;
-import org.apache.coyote.http11.request.component.RequestBody;
-import org.apache.coyote.http11.request.component.RequestHeader;
-import org.apache.coyote.http11.request.component.RequestLine;
 
 import com.techcourse.model.User;
 

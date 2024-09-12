@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.component;
+package org.apache.coyote.http11.response;
 
 public class ResponseBody {
     private String body;

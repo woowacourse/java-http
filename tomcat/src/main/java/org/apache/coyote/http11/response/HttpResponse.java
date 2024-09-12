@@ -2,10 +2,6 @@ package org.apache.coyote.http11.response;
 
 import java.util.Map;
 
-import org.apache.coyote.http11.response.component.ResponseBody;
-import org.apache.coyote.http11.response.component.ResponseHeader;
-import org.apache.coyote.http11.response.component.StatusLine;
-
 public class HttpResponse {
 
     private final StatusLine statusLine;

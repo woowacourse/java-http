@@ -29,7 +29,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        throw new RuntimeException();
+        throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
     private String loadResourceContent(String resource) throws IOException {

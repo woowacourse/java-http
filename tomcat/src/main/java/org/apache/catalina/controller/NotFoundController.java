@@ -16,7 +16,7 @@ public class NotFoundController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        throw new RuntimeException();
+        throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {

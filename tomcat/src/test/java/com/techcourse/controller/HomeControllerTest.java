@@ -39,6 +39,6 @@ class HomeControllerTest {
         HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
 
         assertThatThrownBy(() -> homeController.service(request, builder))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

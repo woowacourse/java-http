@@ -1,20 +1,25 @@
 package org.apache.catalina.controller;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapper {
 
+    private static final RequestMapper INSTANCE = new RequestMapper();
+
     private final Map<String, Controller> controllers;
 
-    // TODO: map을 외부에서 등록할 수 있도록 개선 필요
-    public RequestMapper() {
-        this.controllers = Map.of(
-                "/login", new LoginController(),
-                "/register", new RegisterController()
-        );
+    public static RequestMapper getInstance() {
+        return INSTANCE;
+    }
+
+    private RequestMapper() {
+        controllers = new HashMap<>();
+    }
+
+    public void addMapping(String endpoint, Controller controller) {
+        controllers.put(endpoint, controller);
     }
 
     public Controller getController(HttpRequest request) {

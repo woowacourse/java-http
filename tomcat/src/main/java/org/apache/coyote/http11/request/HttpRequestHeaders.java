@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,6 +17,10 @@ public class HttpRequestHeaders {
 
     public HttpRequestHeaders(Map<String, String> headers) {
         this.headers = Map.copyOf(headers);
+    }
+
+    public HttpRequestHeaders() {
+        this.headers = Collections.emptyMap();
     }
 
     @Nullable

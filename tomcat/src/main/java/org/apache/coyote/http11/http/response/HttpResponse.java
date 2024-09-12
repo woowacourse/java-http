@@ -59,10 +59,6 @@ public class HttpResponse {
 		this.header.addHeader(key, value);
 	}
 
-	public void addHeader(String key, List<String> values) {
-		this.header.addHeader(key, values);
-	}
-
 	public void setBody(String contentType, byte[] content) {
 		this.body.setContent(content);
 		this.body.setContentType(contentType);

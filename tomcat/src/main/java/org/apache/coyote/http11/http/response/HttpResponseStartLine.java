@@ -11,17 +11,8 @@ public class HttpResponseStartLine {
 		this.httpVersion = DEFAULT_HTTP_VERSION;
 	}
 
-	public HttpResponseStartLine(String httpVersion, HttpStatusCode statusCode) {
-		this.httpVersion = httpVersion;
-		this.statusCode = statusCode;
-	}
-
 	public String toResponseMessage() {
 		return httpVersion + " " + statusCode.getCode() + " " + statusCode.getMessage() + " ";
-	}
-
-	public void setHttpVersion(String httpVersion) {
-		this.httpVersion = httpVersion;
 	}
 
 	public void setStatusCode(HttpStatusCode statusCode) {

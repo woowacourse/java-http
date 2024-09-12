@@ -9,7 +9,7 @@ public class HttpResponseBody {
     }
 
     public boolean hasBody() {
-        return this.value != null || !this.value.isEmpty();
+        return this.value != null && !this.value.isBlank();
     }
 
     public void update(String newValue) {

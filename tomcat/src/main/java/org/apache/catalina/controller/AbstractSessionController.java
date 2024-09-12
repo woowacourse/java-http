@@ -34,6 +34,7 @@ public abstract class AbstractSessionController extends AbstractController {
         if (sessionService.isManagedSession(session)) {
             return;
         }
+        sessionService.addSession(session);
         HttpCookie sessionCookie = HttpCookie.ofSession(session.getId());
         response.addCookie(sessionCookie);
     }

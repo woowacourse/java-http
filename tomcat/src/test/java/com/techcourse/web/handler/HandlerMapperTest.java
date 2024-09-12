@@ -15,7 +15,7 @@ class HandlerMapperTest {
 	void findHandler_WhenRequestRootPage() {
 		String requestPath = "/";
 
-		Class<? extends Handler> expectedHandler = RootPageHandler.class;
+		Class<RootPageHandler> expectedHandler = RootPageHandler.class;
 
 		runTest(requestPath, expectedHandler);
 	}
@@ -25,7 +25,7 @@ class HandlerMapperTest {
 	void findHandler_WhenRequestLogin() {
 		String requestPath = "/login";
 
-		Class<? extends Handler> expectedHandler = LoginHandler.class;
+		Class<LoginHandler> expectedHandler = LoginHandler.class;
 
 		runTest(requestPath, expectedHandler);
 	}
@@ -35,7 +35,7 @@ class HandlerMapperTest {
 	void findHandler_WhenRequestResource() {
 		String requestPath = "/css/test.css";
 
-		Class<? extends Handler> expectedHandler = ResourceHandler.class;
+		Class<ResourceHandler> expectedHandler = ResourceHandler.class;
 
 		runTest(requestPath, expectedHandler);
 	}
@@ -43,11 +43,11 @@ class HandlerMapperTest {
 	@DisplayName("찾는 핸들러가 없는 경우 404 핸들러를 반환한다.")
 	@Test
 	void findHandler_WhenHandlerNotFound() {
-		HttpRequest request = new HttpRequest("GET /not-found HTTP/1.1", List.of(), null);
+		String requestPath = "/notfound";
 
-		Class<? extends Handler> expectedHandler = NotFoundHandler.class;
+		Class<NotFoundHandler> expectedHandler = NotFoundHandler.class;
 
-		runTest("/not-found", expectedHandler);
+		runTest(requestPath, expectedHandler);
 	}
 
 	private void runTest(String requestPath, Class<? extends Handler> expectedHandler) {

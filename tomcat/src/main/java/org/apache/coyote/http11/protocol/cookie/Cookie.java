@@ -9,6 +9,9 @@ public class Cookie {
 
     private static final String COOKIE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int VALID_KEY_VALUE_LENGTH = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> cookies = new LinkedHashMap<>();
 
@@ -26,9 +29,9 @@ public class Cookie {
         Arrays.stream(cookieString.split(COOKIE_DELIMITER))
                 .filter(cookiePair -> cookiePair.contains(KEY_VALUE_DELIMITER))
                 .map(cookiePair -> cookiePair.split(KEY_VALUE_DELIMITER))
-                .filter(keyValue -> keyValue.length == 2)
-                .filter(keyValue -> !keyValue[0].isEmpty())
-                .forEach(keyValue -> cookies.put(keyValue[0], keyValue[1]));
+                .filter(keyValue -> keyValue.length == VALID_KEY_VALUE_LENGTH)
+                .filter(keyValue -> !keyValue[KEY_INDEX].isEmpty())
+                .forEach(keyValue -> cookies.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]));
     }
 
     public void setValue(String key, String value) {

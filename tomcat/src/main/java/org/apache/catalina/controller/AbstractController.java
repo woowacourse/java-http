@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

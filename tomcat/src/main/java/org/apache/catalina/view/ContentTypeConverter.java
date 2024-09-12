@@ -1,4 +1,4 @@
-package org.apache.coyote.view;
+package org.apache.catalina.view;
 
 import java.util.Map;
 

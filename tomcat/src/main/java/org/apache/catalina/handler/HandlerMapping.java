@@ -1,9 +1,9 @@
-package org.apache.coyote.handler;
+package org.apache.catalina.handler;
 
 import java.util.Map;
-import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.controller.LogInController;
-import org.apache.coyote.controller.RegisterAbstractController;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.LogInController;
+import org.apache.catalina.controller.RegisterAbstractController;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 

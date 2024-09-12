@@ -4,11 +4,11 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.handler.HandlerMapping;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.handler.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.view.ViewResolver;
+import org.apache.catalina.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

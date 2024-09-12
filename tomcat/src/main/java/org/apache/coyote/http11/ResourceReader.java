@@ -36,7 +36,7 @@ public class ResourceReader {
 
     private URL getURL(String fileName) {
         String filePath = getFilePath(fileName);
-        URL url = getClass().getClassLoader().getResource(filePath);
+        URL url = CLASS_LOADER.getResource(filePath);
         if (url == null) {
             return CLASS_LOADER.getResource(NOT_FOUND_HTML);
         }

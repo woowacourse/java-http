@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.Http11Header.CONTENT_LENGTH;
+import static org.apache.coyote.http11.Http11Header.CONTENT_TYPE;
+import static org.apache.coyote.http11.Http11Header.LOCATION;
+import static org.apache.coyote.http11.Http11Header.SET_COOKIE;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,7 +18,9 @@ import org.apache.coyote.http11.Http11Header;
 public final class HttpResponse {
 
     private static final Http11ContentTypeFinder contentTypeFinder = new Http11ContentTypeFinder();
+
     private static final String CRLF = "\r\n";
+
     private Http11StatusCode statusCode;
     private final List<Http11Header> headers;
     private final List<Http11Cookie> cookies;
@@ -47,8 +54,8 @@ public final class HttpResponse {
                 .map(Http11Cookie::toString)
                 .collect(Collectors.joining(";"));
 
-        String cookieHeader = "Set-Cookie: %s".formatted(rawCookies) + CRLF;
-        if (cookieHeader.equals("Set-Cookie: " + CRLF)) {
+        String cookieHeader = (SET_COOKIE + " %s").formatted(rawCookies) + CRLF;
+        if (cookieHeader.equals(SET_COOKIE + " " + CRLF)) {
             cookieHeader = "";
         }
         return cookieHeader;
@@ -66,7 +73,7 @@ public final class HttpResponse {
     }
 
     public void setRedirect(String redirectUri) {
-        addHeader(new Http11Header("Location", redirectUri));
+        addHeader(new Http11Header(LOCATION, redirectUri));
         setStatusCode(Http11StatusCode.FOUND);
         body = new byte[0];
     }
@@ -77,8 +84,8 @@ public final class HttpResponse {
 
     public void setBodyAndContentType(Path path) {
         this.body = readStaticData(path);
-        addHeader(new Http11Header("Content-Length", body.length + ""));
-        addHeader(new Http11Header("Content-Type", contentTypeFinder.find(path) + ";charset=utf-8"));
+        addHeader(new Http11Header(CONTENT_LENGTH, body.length + ""));
+        addHeader(new Http11Header(CONTENT_TYPE, contentTypeFinder.find(path) + ";charset=utf-8"));
     }
 
     private byte[] readStaticData(Path path) {

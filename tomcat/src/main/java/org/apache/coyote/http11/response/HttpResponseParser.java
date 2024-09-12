@@ -9,6 +9,11 @@ public class HttpResponseParser {
 
     private static final String DELIMITER_HEADER = ": ";
 
+    private static final HttpResponseParser instance = new HttpResponseParser();
+
+    private HttpResponseParser() {
+    }
+
     public String parseResponse(HttpResponse httpResponse) {
         String responseLine = parseResponseLine(httpResponse.getHttpStatusCode());
         String responseHeader = parseResponseHeaders(httpResponse.getHttpResponseHeaders());
@@ -33,5 +38,9 @@ public class HttpResponseParser {
             headers.add(key + DELIMITER_HEADER + httpResponseHeaders.getValue(key));
         }
         return String.join(DELIMITER_LINE, headers);
+    }
+
+    public static HttpResponseParser getInstance() {
+        return instance;
     }
 }

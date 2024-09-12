@@ -21,6 +21,11 @@ public class HttpRequestParser {
 
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
+    private static final HttpRequestParser instance = new HttpRequestParser();
+
+    private HttpRequestParser() {
+    }
+
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
         String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
@@ -104,5 +109,9 @@ public class HttpRequestParser {
         String key = rawString.substring(0, delimiterIndex);
         String value = rawString.substring(delimiterIndex + delimiterLength);
         set.put(key, value);
+    }
+
+    public static HttpRequestParser getInstance() {
+        return instance;
     }
 }

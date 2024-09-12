@@ -21,14 +21,6 @@ public class ResponseHeader {
         this.header = new HashMap<>();
     }
 
-    public void setLocation(String location) {
-        addHeader(LOCATION, location);
-    }
-
-    private void addHeader(String key, String value) {
-        header.put(key, value);
-    }
-
     public void setContentType(MimeType mimeType) {
         String contentType = mimeType.getMimeType();
         if (mimeType.isTextBased()) {
@@ -48,6 +40,18 @@ public class ResponseHeader {
 
     public HttpCookie getCookies() {
         return new HttpCookie(header.get(SET_COOKIE));
+    }
+
+    public String getLocation() {
+        return header.get(LOCATION);
+    }
+
+    public void setLocation(String location) {
+        addHeader(LOCATION, location);
+    }
+
+    private void addHeader(String key, String value) {
+        header.put(key, value);
     }
 
     public String toHeaderString() {

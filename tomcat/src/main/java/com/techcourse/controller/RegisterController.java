@@ -3,7 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.coyote.ForwardResult;
+import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public ForwardResult execute(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> body = request.getBody();
 
         String account = body.get(ACCOUNT_KEY);
@@ -24,6 +24,13 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return ForwardResult.ofRedirect("index.html");
+        response.setLocation("index.html");
+        response.setStatus(HttpStatusCode.FOUND);
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setLocation("register.html");
+        response.setStatus(HttpStatusCode.FOUND);
     }
 }

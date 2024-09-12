@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.Map;
 
 public record HttpResponse(
-        HttpResponseStatusLine statusLine,
+        HttpStatusCode statusCode,
         Map<String, String> headers,
         String body) {
 
@@ -12,7 +12,7 @@ public record HttpResponse(
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder
-                .append(statusLine)
+                .append(statusCode)
                 .append(System.lineSeparator());
 
         headers.forEach((key, value) -> stringBuilder

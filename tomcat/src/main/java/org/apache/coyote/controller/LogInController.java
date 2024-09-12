@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseStatusLine;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class LogInController extends Controller {
             log.info("optionalUser : {}", user);
             String sessionId = SessionManager.add(new Session(user));
             return new HttpResponse(
-                    new HttpResponseStatusLine(302, "Found"),
+                    HttpStatusCode.REDIRECT,
                     Map.of("Location", "/index.html",
                             "Set-Cookie", "JSESSIONID=" + sessionId),
                     null
@@ -35,7 +35,7 @@ public class LogInController extends Controller {
         }
 
         return new HttpResponse(
-                new HttpResponseStatusLine(302, "Found"),
+                HttpStatusCode.REDIRECT,
                 Map.of("Location", "/401.html"),
                 null
         );

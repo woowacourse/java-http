@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpRequest {
 
+    private static final int DELIMITER_NOT_FOUND_CODE = -1;
+
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final String responseBody;
@@ -27,7 +29,7 @@ public class HttpRequest {
 
     private String parsePath(String url) {
         int index = url.indexOf("?");
-        if (index == -1) {
+        if (index == DELIMITER_NOT_FOUND_CODE) {
             return url;
         }
         return url.substring(0, index);

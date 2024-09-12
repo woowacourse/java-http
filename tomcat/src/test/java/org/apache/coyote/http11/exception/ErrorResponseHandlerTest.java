@@ -31,16 +31,15 @@ public class ErrorResponseHandlerTest {
     void exceptionHandler() {
         // given
         ErrorResponseHandler.getInstance().setResponse(new HttpResponse(outputStream));
-        String errorMessage = "잘못된 요청입니다.";
 
         // when
         try {
-            throw new RequestException(HttpStatusCode.BAD_REQUEST, errorMessage);
+            throw new RequestException(HttpStatusCode.BAD_REQUEST, "/401.html");
         } catch (RequestException e) {
             e.handleErrorResponse();
             String actual = outputStream.toString(StandardCharsets.UTF_8);
             // then
-            assertThat(actual).contains("400", errorMessage);
+            assertThat(actual).contains("400");
         }
     }
 }

@@ -18,8 +18,8 @@ public class ErrorResponseHandler {
         this.response = response;
     }
 
-    public void handleError(HttpStatusCode statusCode, String errorMessage) {
+    public void handleErrorMessage(HttpStatusCode statusCode, String errorPagePath) {
         response.statusCode(statusCode)
-                .responseBody(errorMessage);
+                .staticResource(errorPagePath);
     }
 }

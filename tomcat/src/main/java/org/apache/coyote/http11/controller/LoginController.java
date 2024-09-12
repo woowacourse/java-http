@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Parameter;
+import org.apache.coyote.http11.exception.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class LoginController extends AbstractController {
         String account = parameter.getValue("account");
         String password = parameter.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("계정 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html"));
         if (user.checkPassword(password)) {
             loginSuccess(user, response);
         }
@@ -64,7 +65,6 @@ public class LoginController extends AbstractController {
     }
 
     private void loginFail(HttpResponse response) {
-        response.statusCode(HttpStatusCode.UNAUTHORIZED)
-                .staticResource("/401.html");
+        throw new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
     }
 }

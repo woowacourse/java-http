@@ -2,18 +2,18 @@ package org.apache.coyote.http11.exception;
 
 import org.apache.coyote.http11.HttpStatusCode;
 
-public class RequestException extends RuntimeException {
+public class RequestException extends IllegalArgumentException {
 
     private final HttpStatusCode statusCode;
-    private final String message;
+    private final String errorPagePath;
 
-    public RequestException(HttpStatusCode statusCode, String message) {
+    public RequestException(HttpStatusCode statusCode, String errorPagePath) {
         this.statusCode = statusCode;
-        this.message = message;
+        this.errorPagePath = errorPagePath;
     }
 
     public void handleErrorResponse() {
         ErrorResponseHandler.getInstance()
-                .handleError(statusCode, message);
+                .handleErrorMessage(statusCode, errorPagePath);
     }
 }

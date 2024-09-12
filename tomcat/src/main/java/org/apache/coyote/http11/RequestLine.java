@@ -18,7 +18,7 @@ public class RequestLine {
 
     private void validateRequestPartLength(String[] requestPart) {
         if (requestPart.length != 3) {
-            throw new RequestException(HttpStatusCode.BAD_REQUEST, "RequestLine 양식이 맞지 않습다.");
+            throw new RequestException(HttpStatusCode.BAD_REQUEST, "/500.html");
         }
     }
 

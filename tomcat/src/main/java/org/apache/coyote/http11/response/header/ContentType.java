@@ -8,6 +8,7 @@ public enum ContentType {
     CSS("text/css", ".css"),
     JS("text/javascript", ".js"),
     ICO("image/x-icon", ".ico"),
+    SVG("image/svg+xml", ".svg"),
     APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded", "");
 
     private static final String CHARSET = ";charset=utf-8";

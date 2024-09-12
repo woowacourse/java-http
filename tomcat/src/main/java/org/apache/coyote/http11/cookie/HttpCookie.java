@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -10,7 +11,7 @@ public class HttpCookie {
     private Map<String, String> cookie;
 
     public HttpCookie(String cookieLines) {
-        this.cookie = convertToCookie(cookieLines);;
+        this.cookie = convertToCookie(cookieLines);
     }
 
     private Map<String, String> convertToCookie(String cookieLines) {
@@ -22,14 +23,8 @@ public class HttpCookie {
                 ));
     }
 
-    public boolean isSessionIdNotExist() {
-        return !cookie.containsKey(JSESSIONID_KEY);
-    }
-
     public String getJSessionId() {
-        if (isSessionIdNotExist()) {
-            return "";
-        }
-        return cookie.get(JSESSIONID_KEY);
+        return Optional.ofNullable(cookie.get(JSESSIONID_KEY))
+                .orElse("");
     }
 }

@@ -55,10 +55,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String[] firstLine = reader.readLine().split(" ");
-            String method = firstLine[0];
-            String url = firstLine[1];
-            String version = firstLine[2];
+            String[] requestLine = reader.readLine().split(" ");
+            String method = requestLine[0];
+            String url = requestLine[1];
+            String version = requestLine[2];
 
             Map<String, String> requestHeaders = readRequestHeaders(reader);
 

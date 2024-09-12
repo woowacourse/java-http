@@ -48,17 +48,16 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader reader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(reader)) {
 
-            HttpRequestFirstLine firstLine = new HttpRequestFirstLine(bufferedReader.readLine());
-            String requestURL = firstLine.getUrl();
-            HttpMethod requestMethod = firstLine.getMethod();
+            HttpRequest request = new HttpRequest(bufferedReader);
+            HttpMethod requestMethod = request.getMethod();
 
             if (requestMethod == HttpMethod.GET) {
-                processGetRequest(requestURL, bufferedReader, outputStream);
+                processGetRequest(request, outputStream);
                 return;
             }
 
             if (requestMethod == HttpMethod.POST) {
-                processPostRequest(requestURL, bufferedReader, outputStream);
+                processPostRequest(request, outputStream);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -67,16 +66,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processGetRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
+    private void processGetRequest(HttpRequest request, OutputStream outputStream)
             throws URISyntaxException, IOException {
-        if ("/".equals(requestURL)) {
+        String requestUrl = request.getUrl();
+
+        if (requestUrl.equals("/")) {
             getRootRequest(outputStream);
             return;
         }
 
-        if ("/login".equals(requestURL)) {
-            Map<String, String> headers = getHeader(bufferedReader);
-            HttpCookie cookie = new HttpCookie(headers.getOrDefault("Cookie", ""));
+        if (requestUrl.equals("/login")) {
+            HttpCookie cookie = request.getCookie();
             String sessionId = cookie.get("JSESSIONID");
 
             if (sessionId != null) {
@@ -88,26 +88,27 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        processStaticResource(requestURL, outputStream);
+        processStaticResource(requestUrl, outputStream);
     }
 
-    private void processPostRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
+    private void processPostRequest(HttpRequest request, OutputStream outputStream)
             throws URISyntaxException, IOException {
-        Map<String, String> header = getHeader(bufferedReader);
-        Map<String, String> body = getBody(bufferedReader, header);
+        String requestUrl = request.getUrl();
+        Map<String, String> body = getBody(request.getBody());
 
-        if (requestURL.equals("/register")) {
+        if (requestUrl.equals("/register")) {
             postRegisterRequest(outputStream, body);
         }
 
-        if (requestURL.equals("/login")) {
+        if (requestUrl.equals("/login")) {
             postLoginRequest(outputStream, body);
         }
     }
 
-    private void processStaticResource(String requestURL, OutputStream outputStream) throws URISyntaxException, IOException {
+    private void processStaticResource(String requestUrl, OutputStream outputStream)
+            throws URISyntaxException, IOException {
         try {
-            final Path path = findPath(requestURL);
+            final Path path = findPath(requestUrl);
             byte[] fileBytes = Files.readAllBytes(path);
             String contentType = URLConnection.guessContentTypeFromName(path.toString());
 
@@ -199,28 +200,11 @@ public class Http11Processor implements Runnable, Processor {
         return Path.of(resource.toURI());
     }
 
-    private Map<String, String> getHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        String readLine;
-        while (!"".equals(readLine = bufferedReader.readLine())) {
-            String[] split = readLine.split(": ");
-            header.put(split[0], split[1]);
-        }
-
-        return header;
-    }
-
-    private Map<String, String> getBody(BufferedReader bufferedReader, Map<String, String> header)
-            throws IOException {
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-
+    private Map<String, String> getBody(String body) {
         Map<String, String> bodys = new HashMap<>();
-        String[] querys = requestBody.split("&");
-        for (String query : querys) {
-            String[] keyAndValue = query.split("=");
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] keyAndValue = pair.split("=");
             bodys.put(keyAndValue[0], keyAndValue[1]);
         }
         return bodys;

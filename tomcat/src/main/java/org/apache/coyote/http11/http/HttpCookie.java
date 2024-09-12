@@ -17,13 +17,12 @@ public class HttpCookie {
 	public static HttpCookie from(String cookieValues) {
 		String[] cookies = cookieValues.split(COOKIE_VALUE_DELIMITER);
 
-		Map<String, String> cookie = Arrays.stream(cookies)
-			.collect(Collectors.toMap(
+		return Arrays.stream(cookies).collect(Collectors.collectingAndThen(
+			Collectors.toMap(
 				c -> c.split(KEY_VALUE_DELIMITER)[KEY_INDEX],
 				c -> c.split(KEY_VALUE_DELIMITER)[VALUE_INDEX]
-			));
-
-		return new HttpCookie(cookie);
+			),
+			HttpCookie::new));
 	}
 
 	private HttpCookie(Map<String, String> cookie) {
@@ -42,7 +41,7 @@ public class HttpCookie {
 	}
 
 	public boolean hasJsessionId() {
-		return cookie.containsKey(JSESSIONID) && getValue(JSESSIONID) != null;
+		return cookie.containsKey(JSESSIONID) && cookie.get(JSESSIONID) != null;
 	}
 
 	public String getJsessionid() {

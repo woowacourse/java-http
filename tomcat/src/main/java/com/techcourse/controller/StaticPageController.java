@@ -13,7 +13,9 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class StaticPageController {
 
-    public StaticPageController() {
+    private static final StaticPageController instance = new StaticPageController();
+
+    private StaticPageController() {
     }
 
     public HttpResponse getStaticPage(HttpRequest httpRequest) throws URISyntaxException, IOException {
@@ -38,5 +40,9 @@ public class StaticPageController {
             return false;
         }
         return SessionManager.containsSession(jsessionid);
+    }
+
+    public static StaticPageController getInstance() {
+        return instance;
     }
 }

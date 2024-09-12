@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String getResponse(InputStream inputStream) throws IOException, URISyntaxException {
-        RequestMapper requestMapper = new RequestMapper();
+        RequestMapper requestMapper = RequestMapper.getInstance();
         HttpRequestParser httpRequestParser = HttpRequestParser.getInstance();
         HttpResponseParser httpResponseParser = HttpResponseParser.getInstance();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));

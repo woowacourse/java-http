@@ -15,7 +15,9 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RegisterController {
 
-    public RegisterController() {
+    private static final RegisterController instance = new RegisterController();
+
+    private RegisterController() {
     }
 
     public HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
@@ -48,5 +50,9 @@ public class RegisterController {
                 .ifPresent(foundUser -> {
                     throw new UserException(userAccount + "는 이미 존재하는 계정입니다.");
                 });
+    }
+
+    public static RegisterController getInstance() {
+        return instance;
     }
 }

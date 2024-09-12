@@ -22,7 +22,9 @@ public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginController() {
+    private static final LoginController instance = new LoginController();
+
+    private LoginController() {
     }
 
     public HttpResponse login(HttpRequest httpRequest) throws URISyntaxException, IOException {
@@ -60,5 +62,9 @@ public class LoginController {
         session.setAttribute("user", user);
         SessionManager.add(session.getId(), session);
         httpResponseHeaders.setCookie("JSESSIONID=" + jsessionid);
+    }
+
+    public static LoginController getInstance() {
+        return instance;
     }
 }

@@ -11,16 +11,18 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RequestMapper {
 
+    private static final RequestMapper instance = new RequestMapper();
+
     private final LoginController loginController;
 
     private final RegisterController registerController;
 
     private final StaticPageController staticPageController;
 
-    public RequestMapper() {
-        this.loginController = new LoginController();
-        this.registerController = new RegisterController();
-        this.staticPageController = new StaticPageController();
+    private RequestMapper() {
+        this.loginController = LoginController.getInstance();
+        this.registerController = RegisterController.getInstance();
+        this.staticPageController = StaticPageController.getInstance();
     }
 
     public HttpResponse mapRequest(HttpRequest request) throws URISyntaxException, IOException {
@@ -33,5 +35,9 @@ public class RequestMapper {
             }
         }
         return staticPageController.getStaticPage(request);
+    }
+
+    public static RequestMapper getInstance() {
+        return instance;
     }
 }

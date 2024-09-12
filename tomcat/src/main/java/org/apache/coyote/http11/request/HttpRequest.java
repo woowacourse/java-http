@@ -38,7 +38,7 @@ public class HttpRequest {
     }
 
     private String parseBody(BufferedReader bufferedReader) throws IOException {
-        String rawContentLength = headers.get(HttpHeader.CONTENT_LENGTH.getName());
+        String rawContentLength = headers.get(HttpHeader.CONTENT_LENGTH);
         if (rawContentLength == null) {
             return null;
         }
@@ -50,15 +50,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return new HttpCookie(headers.get("Cookie"));
-    }
-
-    public boolean isGetMethod() {
-        return "GET".equals(requestLine.getMethod());
-    }
-
-    public boolean isPostMethod() {
-        return "POST".equals(requestLine.getMethod());
+        return new HttpCookie(headers.get(HttpHeader.COOKIE));
     }
 
     public String getPath() {
@@ -75,5 +67,9 @@ public class HttpRequest {
         }
 
         return queryStrings;
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 }

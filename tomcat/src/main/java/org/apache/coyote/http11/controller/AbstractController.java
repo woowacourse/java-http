@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.request.HttpHeader;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
@@ -16,11 +17,12 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.isPostMethod()) {
+        HttpMethod method = request.getRequestLine().getMethod();
+        if (method.isPost()) {
             doPost(request, response);
             return;
         }
-        if (request.isGetMethod()) {
+        if (method.isGet()) {
             doGet(request, response);
         }
     }

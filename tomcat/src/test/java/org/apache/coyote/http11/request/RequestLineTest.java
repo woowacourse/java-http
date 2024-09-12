@@ -20,7 +20,7 @@ class RequestLineTest {
 
         // then
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
+                () -> assertThat(requestLine.getMethod().getName()).isEqualTo("GET"),
                 () -> assertThat(requestLine.getPath()).isEqualTo("/login"),
                 () -> assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1")
         );

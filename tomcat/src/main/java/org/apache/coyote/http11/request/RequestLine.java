@@ -5,14 +5,14 @@ public class RequestLine {
     private static final int REQUEST_LINE_ELEMENTS_COUNT = 3;
     private static final String SPACE = " ";
 
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final String version;
 
     public RequestLine(String requestLine) {
         String[] requestLineElements = requestLine.split(SPACE);
         validateRequestLineElementsCount(requestLineElements);
-        this.method = requestLineElements[0];
+        this.method = HttpMethod.findByName(requestLineElements[0]);
         this.path = requestLineElements[1];
         this.version = requestLineElements[2];
     }
@@ -26,7 +26,7 @@ public class RequestLine {
         }
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

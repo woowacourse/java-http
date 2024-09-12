@@ -33,8 +33,8 @@ public class HttpResponse {
         header.setCookie(cookie);
     }
 
-    public void setBody(ResponseBody body) {
-        this.body = body;
+    public void setBody(byte[] body) {
+        this.body = new ResponseBody(body);
         this.header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 

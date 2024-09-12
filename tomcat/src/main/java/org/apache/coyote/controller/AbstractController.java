@@ -9,7 +9,6 @@ import org.apache.coyote.MimeType;
 import org.apache.coyote.file.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.util.FileExtension;
 
 public abstract class AbstractController implements Controller {
@@ -24,18 +23,18 @@ public abstract class AbstractController implements Controller {
         if (result.statusCode().isRedirection()) {
             response.setLocation(result.path());
             response.setStatus(result.statusCode());
-            response.setBody(new ResponseBody("".getBytes()));
+            response.setBody("".getBytes());
             return;
         }
 
         try {
             byte[] body = ResourceReader.read(result.path());
             response.setStatus(HttpStatusCode.OK);
-            response.setBody(new ResponseBody(Arrays.toString(body).getBytes()));
+            response.setBody(Arrays.toString(body).getBytes());
         } catch (URISyntaxException | IOException e) {
             response.setMimeType(MimeType.OTHER);
             response.setStatus(HttpStatusCode.NOT_FOUND);
-            response.setBody(new ResponseBody("No File Found".getBytes()));
+            response.setBody("No File Found".getBytes());
         }
     }
 

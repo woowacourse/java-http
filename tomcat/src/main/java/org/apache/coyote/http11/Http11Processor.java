@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
                     .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
             if (handler != null) {
-                httpResponse = handler.doHandle(httpRequest, httpResponse); // null 처리
+                httpResponse = handler.doHandle(httpRequest, httpResponse);
             }
 
             String response = HttpResponseParser.parse(httpResponse);

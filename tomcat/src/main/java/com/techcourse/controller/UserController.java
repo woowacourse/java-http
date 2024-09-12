@@ -34,7 +34,7 @@ public class UserController implements Handler {
         if (path.startsWith("/login")) {
             return login(httpRequest, httpResponse);
         }
-        return null;
+        return httpResponse;
     }
 
     public HttpResponse register(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

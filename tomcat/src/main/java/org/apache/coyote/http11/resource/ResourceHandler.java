@@ -35,7 +35,7 @@ public class ResourceHandler implements Handler {
         if (path.endsWith("js")) {
             return getJs(path, httpResponse);
         }
-        return null;
+        return httpResponse;
     }
 
     public HttpResponse getRoot(HttpResponse httpResponse) {

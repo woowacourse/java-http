@@ -23,15 +23,6 @@ public class HttpResponse {
         this.httpHeaders = new HttpHeaders();
     }
 
-    private void addHttpStatus(HttpStatus httpStatus) {
-        httpStatusLine.setStatus(httpStatus);
-    }
-
-    private void setBody(String body) {
-        this.httpBody = new HttpBody(body);
-        addHeader(HttpHeaderType.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-    }
-
     public void addHeader(HttpHeaderType header, String headerValue) {
         if (header.equals(HttpHeaderType.CONTENT_TYPE)) {
             headerValue = HttpContentType.encoding(headerValue);
@@ -58,5 +49,14 @@ public class HttpResponse {
         this.addHttpStatus(HttpStatus.OK);
         this.addHeader(HttpHeaderType.CONTENT_TYPE, webResource.getContentType());
         this.setBody(webResource.getContent());
+    }
+
+    private void addHttpStatus(HttpStatus httpStatus) {
+        httpStatusLine.setStatus(httpStatus);
+    }
+
+    private void setBody(String body) {
+        this.httpBody = new HttpBody(body);
+        addHeader(HttpHeaderType.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 }

@@ -17,16 +17,6 @@ public class User {
         this.email = email;
     }
 
-    private void validateNonNull(String account, String password, String email) {
-        if (isNullOrEmpty(account) || isNullOrEmpty(password) || isNullOrEmpty(email)) {
-            throw new IllegalArgumentException("사용자 필수 정보가 누락되었습니다.");
-        }
-    }
-
-    private boolean isNullOrEmpty(String value) {
-        return Objects.isNull(value) || value.trim().isEmpty();
-    }
-
     public User(String account, String password, String email) {
         this(null, account, password, email);
     }
@@ -48,5 +38,15 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    private void validateNonNull(String account, String password, String email) {
+        if (isNullOrEmpty(account) || isNullOrEmpty(password) || isNullOrEmpty(email)) {
+            throw new IllegalArgumentException("사용자 필수 정보가 누락되었습니다.");
+        }
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return Objects.isNull(value) || value.trim().isEmpty();
     }
 }

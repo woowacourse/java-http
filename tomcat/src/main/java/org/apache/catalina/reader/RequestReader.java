@@ -10,10 +10,13 @@ import org.slf4j.LoggerFactory;
 
 public class RequestReader {
     private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
+    private final BufferedReader reader;
 
-    private RequestReader() {}
+    public RequestReader(BufferedReader reader) {
+        this.reader = reader;
+    }
 
-    public static List<String> readRequest(BufferedReader reader) {
+    public List<String> readRequest() {
         List<String> readRequest = new ArrayList<>();
         try {
             String line;
@@ -28,13 +31,13 @@ public class RequestReader {
         return readRequest;
     }
 
-    private static void validateRequestLines(List<String> headerLines) {
+    private void validateRequestLines(List<String> headerLines) {
         if (headerLines.isEmpty()) {
             throw new IllegalArgumentException("요청 헤더가 비어 있습니다.");
         }
     }
 
-    public static String readBody(BufferedReader reader, int contentLength) {
+    public String readBody(int contentLength) {
         char[] buffer = new char[contentLength];
         try {
             int readChars = reader.read(buffer, 0, contentLength);

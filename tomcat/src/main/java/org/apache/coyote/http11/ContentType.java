@@ -1,8 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11;
 
 public enum ContentType {
     APPLICATION_JSON,
     APPLICATION_X_WWW_FORM_URLENCODED,
+    text_html,
+    test_javascript,
+    text_css,
     ;
 
     public static ContentType toContentType(String contentType) {
@@ -17,5 +20,9 @@ public enum ContentType {
 
     public boolean isFormUrlEncoded() {
         return this == APPLICATION_X_WWW_FORM_URLENCODED;
+    }
+
+    public String getValueToHttpHeaderForm() {
+        return name().replaceFirst("_", "/");
     }
 }

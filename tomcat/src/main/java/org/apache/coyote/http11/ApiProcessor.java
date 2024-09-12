@@ -12,6 +12,8 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.requestLine.MethodType;
+import org.apache.coyote.http11.response.HttpResponse;
+import util.ResourceFileLoader;
 
 public class ApiProcessor {
 
@@ -60,7 +62,10 @@ public class ApiProcessor {
                 return;
             }
             if (methodType.isGet()) {
-                pageProcessor.process(outputStream, "register");
+                HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.OK);
+                httpResponse.setContentType(ContentType.text_html);
+                httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("register.html"));
+                pageProcessor.process(outputStream, httpResponse);
             }
         }
     }
@@ -72,15 +77,10 @@ public class ApiProcessor {
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.FOUND.getHeaderForm(),
-                "Location: " + " http://localhost:8080/",
-                "Set-Cookie: JSESSIONID=" + user.getId().toString(),
-                "");
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.FOUND);
+        httpResponse.setLocation("http://localhost:8080/");
+        httpResponse.setCookie("JSESSIONID=" + user.getId().toString());
+        pageProcessor.process(outputStream, httpResponse);
     }
 
     private Map<String, String> findParameterEntries(String requestPath) {
@@ -109,7 +109,10 @@ public class ApiProcessor {
     }
 
     private void processLoginPage(OutputStream outputStream) throws IOException {
-        pageProcessor.process(outputStream, "login");
+        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.OK);
+        httpResponse.setContentType(ContentType.text_html);
+        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("login.html"));
+        pageProcessor.process(outputStream, httpResponse);
 
     }
 
@@ -117,17 +120,15 @@ public class ApiProcessor {
         Session session = new Session(user.getId().toString());
         session.setAttribute("user", user);
         SessionManager.getInstance().add(session);
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.FOUND.getHeaderForm(),
-                "Location: " + " http://localhost:8080/",
-                "Set-Cookie: JSESSIONID=" + user.getId().toString(),
-                "");
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.FOUND);
+        httpResponse.setLocation("http://localhost:8080/");
+        httpResponse.setCookie("JSESSIONID=" + user.getId().toString());
+        pageProcessor.process(outputStream, httpResponse);
     }
 
     private void loginFail(OutputStream outputStream) throws IOException {
-        pageProcessor.processWithHttpStatus(outputStream, "401", HttpStatus.UNAUTHORIZED);
+        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.UNAUTHORIZED);
+        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("401.html"));
+        pageProcessor.process(outputStream, httpResponse);
     }
 }

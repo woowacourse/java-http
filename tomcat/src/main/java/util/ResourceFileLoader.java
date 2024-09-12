@@ -11,4 +11,9 @@ public class ResourceFileLoader {
         URL resource = ResourceFileLoader.class.getClassLoader().getResource(fileName);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
+
+    public static String loadStaticFileToString(String fileName) throws IOException {
+        URL resource = ResourceFileLoader.class.getClassLoader().getResource("static/" + fileName);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
 }

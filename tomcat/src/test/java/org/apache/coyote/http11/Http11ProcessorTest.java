@@ -115,7 +115,7 @@ class Http11ProcessorTest {
 
     @DisplayName("/register Post요청시, 성공-> index페이지 반환")
     @Test
-    void response_redirect_default_uri_When_request_post_register() throws IOException {
+    void response_redirect_default_uri_When_request_post_register() {
         // given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
@@ -135,5 +135,27 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(defaultLocation);
+    }
+
+    @DisplayName("/register Get요청시, 성공-> index페이지 반환")
+    @Test
+    void response_redirect_default_uri_When_request_get_register() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(expectedBody);
     }
 }

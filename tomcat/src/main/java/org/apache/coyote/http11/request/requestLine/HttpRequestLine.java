@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request.requestLine;
 
+import org.apache.coyote.http11.request.HttpVersion;
+
 public class HttpRequestLine {
 
     private final static String REQUEST_LINE_SEPARATOR = " ";

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.ContentType;
 
 public class HttpRequestBody {
 

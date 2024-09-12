@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private String method;
+    private HttpMethod method;
     private String path;
     private Map<String, String> queryString;
     private String protocolVersion;
@@ -13,7 +13,7 @@ public class HttpRequest {
     private Session session;
     private String body;
 
-    public HttpRequest(String method, String path, Map<String, String> queryString, String protocolVersion,
+    public HttpRequest(HttpMethod method, String path, Map<String, String> queryString, String protocolVersion,
                        Map<String, String> headers, HttpCookie httpCookie, Session session, String body) {
         this.method = method;
         this.path = path;
@@ -23,6 +23,14 @@ public class HttpRequest {
         this.httpCookie = httpCookie;
         this.session = session;
         this.body = body;
+    }
+
+    public boolean hasMethod(HttpMethod method) {
+        return this.method == method;
+    }
+
+    public boolean hasPath(String path) {
+        return this.path.equals(path);
     }
 
     public boolean hasQueryString() {
@@ -43,10 +51,6 @@ public class HttpRequest {
 
     public String getPath() {
         return this.path;
-    }
-
-    public String getMethod() {
-        return this.method;
     }
 
     public Session getSession() {

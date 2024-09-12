@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -7,11 +8,10 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        String method = request.getMethod();
-        if (method.equals("GET")) {
+        if (request.hasMethod(HttpMethod.GET)) {
             doGet(request, response);
         }
-        if (method.equals("POST")) {
+        if (request.hasMethod(HttpMethod.POST)) {
             doPost(request, response);
         }
     }

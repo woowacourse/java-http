@@ -84,7 +84,8 @@ public class Http11Processor implements Runnable, Processor {
         HttpCookie httpCookie = parseCookie(headers);
         Session session = parseSession(httpCookie);
         String body = parseBody(bufferedReader, headers);
-        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers, httpCookie, session, body);
+        return new HttpRequest(HttpMethod.valueOf(tokens[0]), path, queryString, tokens[2], headers, httpCookie,
+                session, body);
     }
 
     private String parsePath(String token) {

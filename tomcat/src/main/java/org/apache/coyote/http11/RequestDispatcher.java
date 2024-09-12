@@ -14,11 +14,10 @@ public class RequestDispatcher {
     }
 
     public void requestMapping(HttpRequest request, HttpResponse response) {
-        String path = request.getPath();
-        if (path.equals("/login")) {
+        if (request.hasPath("/login")) {
             loginController.service(request, response);
         }
-        if (path.equals("/register")) {
+        if (request.hasPath("/register")) {
             registerController.service(request, response);
         }
     }

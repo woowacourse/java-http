@@ -183,7 +183,7 @@ class Http11ProcessorTest {
     class Register {
         @Test
         @DisplayName("회원가입 페이지로 이동한다.")
-        void loginPage() throws IOException {
+        void registerPage() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /register HTTP/1.1 ",
@@ -211,7 +211,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("회원가입 성공")
-        void loginSuccess() throws IOException {
+        void registerSuccess() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",

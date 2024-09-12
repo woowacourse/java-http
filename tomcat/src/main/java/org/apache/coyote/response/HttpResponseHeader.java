@@ -32,7 +32,8 @@ public class HttpResponseHeader {
 
     public void addCookie(String key, String value) {
         cookie.add(key, value);
-        values.computeIfAbsent(HttpMessageBodyInfo.SET_COOKIE.getValue(), k -> new ArrayList<>()).add(key + "=" + value);
+        values.computeIfAbsent(HttpMessageBodyInfo.SET_COOKIE.getValue(), k -> new ArrayList<>())
+                .add(key + "=" + value);
     }
 
     public void addContentType(String contentType) {

@@ -1,8 +1,8 @@
 package com.techcourse.handler;
 
+import com.techcourse.servlet.view.StaticResourceView;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.response.HttpResponse;
-import com.techcourse.servlet.view.StaticResourceView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

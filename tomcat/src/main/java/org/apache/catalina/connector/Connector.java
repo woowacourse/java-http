@@ -7,8 +7,6 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -23,10 +21,10 @@ public class Connector implements Runnable {
     private static final int MAX_THREAD_POOL_COUNT = 10; // 서버가 동시에 처리할 수 있는 최대 스레드 수
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
     private final Dispatcher dispatcher;
     private final ExecutorService executorService;
     private final LinkedBlockingQueue<Runnable> acceptQueue;
+    private boolean stopped;
 
     public Connector(Dispatcher dispatcher) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_POOL_COUNT, dispatcher);

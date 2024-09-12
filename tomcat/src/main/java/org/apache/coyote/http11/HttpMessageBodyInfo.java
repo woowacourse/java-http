@@ -6,17 +6,12 @@ public enum HttpMessageBodyInfo {
     CONTENT_TYPE("Content-Type"),
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie"),
-    LOCATION("Location")
-    ;
+    LOCATION("Location");
 
     private final String value;
 
     HttpMessageBodyInfo(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static boolean isContentType(String name) {
@@ -25,5 +20,9 @@ public enum HttpMessageBodyInfo {
 
     public static boolean isContentLength(String name) {
         return CONTENT_LENGTH.getValue().equals(name);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

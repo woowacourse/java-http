@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import org.apache.catalina.cookie.Cookie;
-import org.apache.catalina.cookie.CookieCreator;
+import org.apache.catalina.cookie.CookieUtils;
 
 public class HttpRequestHeaders {
 
@@ -21,7 +21,7 @@ public class HttpRequestHeaders {
 
     public Cookie getCookie() {
         return getHeader("Cookie")
-                .map(CookieCreator::create)
+                .map(CookieUtils::createCookie)
                 .orElse(new Cookie());
     }
 

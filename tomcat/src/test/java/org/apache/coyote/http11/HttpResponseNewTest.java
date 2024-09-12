@@ -42,8 +42,7 @@ class HttpResponseNewTest {
 
         // when
         response.statusCode(HttpStatusCode.OK)
-                .responseBody(body)
-                .write();
+                .responseBody(body);
         String actual = outputStream.toString(StandardCharsets.UTF_8);
 
         // then
@@ -64,8 +63,7 @@ class HttpResponseNewTest {
 
         // when
         response.statusCode(HttpStatusCode.OK)
-                .staticResource(path)
-                .write();
+                .staticResource(path);
 
         String actual = outputStream.toString(StandardCharsets.UTF_8);
 
@@ -88,8 +86,7 @@ class HttpResponseNewTest {
 
         // when
         response.statusCode(HttpStatusCode.FOUND)
-                .redirect("index.html")
-                .write();
+                .redirect("index.html");
 
         String actual = outputStream.toString(StandardCharsets.UTF_8);
 
@@ -105,9 +102,8 @@ class HttpResponseNewTest {
 
         // when
         response.statusCode(HttpStatusCode.OK)
-                .responseBody("test body")
                 .createSession("name", "value")
-                .write();
+                .responseBody("test body");
 
         String actual = outputStream.toString(StandardCharsets.UTF_8);
 

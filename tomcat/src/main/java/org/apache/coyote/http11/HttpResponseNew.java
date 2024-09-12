@@ -23,10 +23,18 @@ public class HttpResponseNew {
         return this;
     }
 
-    public HttpResponseNew responseBody(String body) {
+    public void responseBody(String body) {
         setDefaultHaders(HttpContentType.TEXT, body);
         this.body = body;
-        return this;
+        write();
+    }
+
+    private void write() {
+        try (outputStream) {
+            outputStream.write(build().getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setDefaultHaders(HttpContentType httpContentType, String body) {
@@ -34,19 +42,19 @@ public class HttpResponseNew {
         this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
-    public HttpResponseNew staticResource(String path) {
+    public void staticResource(String path) {
         StaticResourceLoader loader = new StaticResourceLoader();
         String resource = loader.load(path);
         if (resource.isEmpty()) {
             String notFoundResource = loader.load("/404.html");
-            return this.statusCode(HttpStatusCode.NOT_FOUND)
+            this.statusCode(HttpStatusCode.NOT_FOUND)
                     .responseBody(notFoundResource);
         }
 
         HttpContentType contentType = HttpContentType.matchContentType(path);
         setDefaultHaders(contentType, resource);
         this.body = resource;
-        return this;
+        write();
     }
 
     public String build() {
@@ -58,19 +66,11 @@ public class HttpResponseNew {
         );
     }
 
-    public void write() {
-        try (outputStream) {
-            outputStream.write(build().getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public HttpResponseNew redirect(String uri) {
+    public void redirect(String uri) {
         this.body = "";
         headers.addHeader("Location", uri);
         setDefaultHaders(HttpContentType.TEXT, "");
-        return this;
+        write();
     }
 
     public HttpResponseNew createSession(String name, Object object) {

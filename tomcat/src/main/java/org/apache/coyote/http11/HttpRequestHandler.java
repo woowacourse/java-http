@@ -21,18 +21,16 @@ public class HttpRequestHandler {
         );
     }
 
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponseNew response) {
         String path = request.getPath();
         Controller controller = controllerResolver.get(path);
         if (controller != null) {
-            return controller.service(request);
+            controller.service(request, response);
         }
-        return staticPage(path);
-    }
 
-    private HttpResponse staticPage(String url) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.OK)
-                .staticResource(url);
+        if (controller == null) {
+            response.statusCode(HttpStatusCode.OK)
+                    .staticResource(path);
+        }
     }
 }

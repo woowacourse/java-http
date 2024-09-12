@@ -12,26 +12,28 @@ public class AbstractController implements Controller {
         methodMapping.put("POST", this::doPost);
     }
 
-    public HttpResponse service(HttpRequest request) {
+    @Override
+    public void service(HttpRequest request, HttpResponseNew response) {
         String method = request.getMethod().toUpperCase();
         MethodHandler handler = methodMapping.get(method);
         if (handler != null) {
-            return handler.handle(request);
+            handler.handle(request, response);
         }
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
+        if (handler == null) {
+            handleMethodNotAllowed(response);
+        }
+    }
+
+    private void handleMethodNotAllowed(HttpResponseNew response) {
+        response.statusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
                 .responseBody("");
     }
 
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
-                .responseBody("");
+    protected void doGet(HttpRequest request, HttpResponseNew response) {
+        handleMethodNotAllowed(response);
     }
 
-    protected HttpResponse doPost(HttpRequest request) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
-                .responseBody("");
+    protected void doPost(HttpRequest request, HttpResponseNew response) {
+        handleMethodNotAllowed(response);
     }
 }

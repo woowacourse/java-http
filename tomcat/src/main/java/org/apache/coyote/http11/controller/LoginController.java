@@ -7,7 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpResponseNew;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.QueryParam;
 import org.slf4j.Logger;
@@ -19,56 +19,52 @@ public class LoginController extends AbstractController {
     private static final String USER_SESSION_INFO_NAME = "user";
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected void doGet(HttpRequest request, HttpResponseNew response) {
         HttpCookies cookies = request.getCookies();
         String sessionId = cookies.getSessionId();
         if (!sessionId.isEmpty()) {
-            return findUserFromSession(sessionId);
+            findUserFromSession(sessionId, response);
         }
         QueryParam queryParam = request.getQueryParam();
-        return loginCheck(queryParam);
+        loginCheck(queryParam, response);
     }
 
-    private HttpResponse findUserFromSession(String sessionId) {
+    private void findUserFromSession(String sessionId, HttpResponseNew response) {
         Session session = SessionManager.getInstance().findSessionById(sessionId);
         User user = (User) session.findValue(USER_SESSION_INFO_NAME);
         logger.info("session user : {}", user);
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.FOUND)
+        response.statusCode(HttpStatusCode.FOUND)
                 .staticResource("/index.html");
     }
 
-    private HttpResponse loginCheck(QueryParam queryParam) {
+    private void loginCheck(QueryParam queryParam, HttpResponseNew response) {
         if (queryParam.getValue("account").isEmpty() &&
                 queryParam.getValue("password").isEmpty()) {
-            return HttpResponse.builder()
-                    .statusCode(HttpStatusCode.OK)
+            response.statusCode(HttpStatusCode.OK)
                     .staticResource("/login.html");
         }
-        return login(queryParam);
+        login(queryParam, response);
     }
 
-    private HttpResponse login(QueryParam queryParam) {
+    private void login(QueryParam queryParam, HttpResponseNew response) {
         String account = queryParam.getValue("account");
         String password = queryParam.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("계정 정보가 존재하지 않습니다."));
         if (user.checkPassword(password)) {
-            return loginSuccess(user);
+            loginSuccess(user, response);
         }
-        return loginFail();
+        loginFail(response);
     }
 
-    private HttpResponse loginSuccess(User account) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.FOUND)
+    private void loginSuccess(User account, HttpResponseNew response) {
+        response.statusCode(HttpStatusCode.FOUND)
                 .createSession(USER_SESSION_INFO_NAME, account)
                 .redirect("index.html");
     }
 
-    private HttpResponse loginFail() {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.UNAUTHORIZED)
+    private void loginFail(HttpResponseNew response) {
+        response.statusCode(HttpStatusCode.UNAUTHORIZED)
                 .staticResource("/401.html");
     }
 }

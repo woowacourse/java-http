@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import java.util.Map;
 
 import org.apache.catalina.mvc.AbstractController;
+import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
@@ -33,16 +34,19 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest request) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         String sessionId = request.getCookie().getAuthSessionId();
         if (authService.isLogin(sessionId)) {
-            return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+            response.setHttpStatus(HttpStatus.FOUND);
+            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
+            response.addLocation(INDEX_PAGE);
+            return;
         }
-        return HttpResponse.createFileOkResponse(request, REGISTER_PAGE);
+        response.setBody(FileReader.loadFileContent(REGISTER_PAGE));
     }
 
     @Override
-    public HttpResponse doPost(HttpRequest request) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> bodyParams = request.getBody();
         if (hasMissingRequiredParams(bodyParams)) {
             throw new IllegalArgumentException("바디가 제대로 정의되지 않았습니다.");
@@ -53,7 +57,9 @@ public class RegisterController extends AbstractController {
         String email = bodyParams.get(EMAIL);
         registerService.registerUser(account, password, email);
 
-        return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setBody(FileReader.loadFileContent(INDEX_PAGE));
+        response.addLocation(INDEX_PAGE);
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {

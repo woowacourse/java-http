@@ -63,8 +63,9 @@ class RootControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new RootController().doGet(request);
+            new RootController().doGet(request, response);
 
             var expected = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -73,7 +74,8 @@ class RootControllerTest {
                     "",
                     "Hello world!");
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
     }
 }

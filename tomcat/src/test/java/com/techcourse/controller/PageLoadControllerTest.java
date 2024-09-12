@@ -68,8 +68,9 @@ class PageLoadControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new PageLoadController().doGet(request);
+            new PageLoadController().doGet(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/" + path);
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -79,7 +80,8 @@ class PageLoadControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
     }
 }

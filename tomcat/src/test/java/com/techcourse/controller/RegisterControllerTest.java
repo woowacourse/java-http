@@ -78,8 +78,9 @@ class RegisterControllerTest {
                     new RequestHeader(Map.of("Cookie", "JSESSIONID=" + session.getId())),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new RegisterController().doGet(request);
+            new RegisterController().doGet(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -90,7 +91,8 @@ class RegisterControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
 
         @Test
@@ -103,8 +105,9 @@ class RegisterControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new RegisterController().doGet(request);
+            new RegisterController().doGet(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -114,7 +117,8 @@ class RegisterControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
     }
 
@@ -130,8 +134,9 @@ class RegisterControllerTest {
                     new RequestHeader(),
                     new RequestBody(Map.of("account", "kyummii", "password", "password", "email", "kyum@naver.com"))
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new RegisterController().doPost(request);
+            new RegisterController().doPost(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -142,7 +147,8 @@ class RegisterControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
     }
 }

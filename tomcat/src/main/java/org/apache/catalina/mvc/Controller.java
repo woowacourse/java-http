@@ -8,9 +8,9 @@ public interface Controller {
 
     boolean isMatchesRequest(HttpRequest request);
 
-    HttpResponse handleRequest(HttpRequest request);
+    void handleRequest(HttpRequest request, HttpResponse response);
 
-    HttpResponse doGet(HttpRequest request);
+    void doGet(HttpRequest request, HttpResponse response);
 
-    HttpResponse doPost(HttpRequest request);
+    void doPost(HttpRequest request, HttpResponse response);
 }

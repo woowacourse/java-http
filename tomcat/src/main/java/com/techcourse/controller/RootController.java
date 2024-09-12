@@ -3,8 +3,6 @@ package com.techcourse.controller;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
-import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.StatusLine;
 
 public class RootController extends AbstractController {
 
@@ -17,11 +15,7 @@ public class RootController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest request) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                request.getContentType(),
-                DEFAULT_PAGE_CONTENT
-        );
+    public void doGet(HttpRequest request, HttpResponse response) {
+        response.setBody(DEFAULT_PAGE_CONTENT);
     }
 }

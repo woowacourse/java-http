@@ -1,14 +1,13 @@
 package org.apache.catalina.response;
 
 import org.apache.catalina.http.ContentType;
-import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 
 public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
-    private final String body;
+    private String body;
 
     public HttpResponse(StatusLine statusLine, ContentType contentType, String body) {
         this.statusLine = statusLine;
@@ -19,28 +18,29 @@ public class HttpResponse {
         responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 
-    public static HttpResponse createRedirectResponse(HttpRequest request, HttpStatus status, String path) {
+    public static HttpResponse of(HttpRequest request) {
         return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), status),
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
                 request.getContentType(),
-                FileReader.loadFileContent(path)
-        ).addLocation(path);
-    }
-
-    public static HttpResponse createFileOkResponse(HttpRequest request, String path) {
-        return createFileResponse(request, HttpStatus.OK, path);
-    }
-
-    public static HttpResponse createFileResponse(HttpRequest request, HttpStatus status, String path) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), status),
-                request.getContentType(),
-                FileReader.loadFileContent(path)
+                ""
         );
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        statusLine.setHttpStatus(httpStatus);
+    }
+
+    public void setContentType(ContentType contentType) {
+        responseHeader.setContentType(contentType.toString());
     }
 
     public void setCookie(String value) {
         responseHeader.setCookie(value);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 
     public HttpResponse addLocation(String url) {

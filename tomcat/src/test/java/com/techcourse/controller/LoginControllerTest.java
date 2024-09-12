@@ -39,9 +39,8 @@ class LoginControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            LoginController loginController = new LoginController();
 
-            boolean actual = loginController.isMatchesRequest(httpRequest);
+            boolean actual = new LoginController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isTrue();
         }
@@ -60,9 +59,8 @@ class LoginControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            LoginController loginController = new LoginController();
 
-            boolean actual = loginController.isMatchesRequest(httpRequest);
+            boolean actual = new LoginController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isFalse();
         }
@@ -82,8 +80,9 @@ class LoginControllerTest {
                     new RequestHeader(Map.of("Cookie", "JSESSIONID=" + session.getId())),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new LoginController().doGet(request);
+            new LoginController().doGet(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -94,7 +93,8 @@ class LoginControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
 
         @Test
@@ -107,8 +107,9 @@ class LoginControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
+            HttpResponse response = HttpResponse.of(request);
 
-            HttpResponse response = new LoginController().doGet(request);
+            new LoginController().doGet(request, response);
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -118,7 +119,8 @@ class LoginControllerTest {
                     "\r\n" +
                     new String(bytes);
 
-            assertThat(response.toString()).isEqualTo(expected);
+            String actual = response.toString();
+            assertThat(actual).isEqualTo(expected);
         }
 
         @Nested
@@ -134,13 +136,15 @@ class LoginControllerTest {
                         new RequestHeader(),
                         new RequestBody()
                 );
+                HttpResponse response = HttpResponse.of(request);
 
-                HttpResponse response = new LoginController().doGet(request);
+                new LoginController().doGet(request, response);
 
                 final URL resource = getClass().getClassLoader().getResource("static/index.html");
                 byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-                String JSessionId = response.toString().split("JSESSIONID=")[1].split(" \r\n")[0];
-                var expected = "HTTP/1.1 302 Found \r\n" +
+                String actual = response.toString();
+                String JSessionId = actual.split("JSESSIONID=")[1].split(" \r\n")[0];
+                String expected = "HTTP/1.1 302 Found \r\n" +
                         "Content-Type: text/html;charset=utf-8 \r\n" +
                         "Content-Length: " + bytes.length + " \r\n" +
                         "Location: http://localhost:8080/index.html" + " \r\n" +
@@ -148,19 +152,21 @@ class LoginControllerTest {
                         "\r\n" +
                         new String(bytes);
 
-                assertThat(response.toString()).isEqualTo(expected);
+                assertThat(actual).isEqualTo(expected);
             }
 
             @Test
             @DisplayName("실패 : login 시도 실패 시 예외 발생")
-            void doGetSuccessContainParameterFail() throws IOException {
+            void doGetSuccessContainParameterFail() {
                 HttpRequest request = new HttpRequest(
                         new RequestLine("GET /login?account=kyummi&password=password HTTP/1.1"),
                         new RequestHeader(),
                         new RequestBody()
                 );
+                HttpResponse response = HttpResponse.of(request);
+                LoginController loginController = new LoginController();
 
-                assertThatThrownBy(() -> new LoginController().doGet(request))
+                assertThatThrownBy(() -> loginController.doGet(request, response))
                         .isInstanceOf(IllegalStateException.class)
                         .hasMessage("로그인 정보가 잘못되었습니다.");
             }

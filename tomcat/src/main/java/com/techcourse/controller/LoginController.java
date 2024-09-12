@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.mvc.AbstractController;
+import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
@@ -36,13 +37,17 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest request) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         if (authService.isLogin(request.getCookie().getAuthSessionId())) {
-            return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+            response.setHttpStatus(HttpStatus.FOUND);
+            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
+            response.addLocation(INDEX_PAGE);
+            return;
         }
 
         if (request.isEmptyByQueryParam()) {
-            return HttpResponse.createFileOkResponse(request, LOGIN_PAGE);
+            response.setBody(FileReader.loadFileContent(LOGIN_PAGE));
+            return;
         }
 
         Map<String, String> queryParams = request.getQueryParam();
@@ -57,12 +62,14 @@ public class LoginController extends AbstractController {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.addAuthSessionId(session.getId());
 
-            HttpResponse response = HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+            response.setHttpStatus(HttpStatus.FOUND);
+            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
+            response.addLocation(INDEX_PAGE);
             response.setCookie(httpCookie.toString());
-            return response;
-        } else {
-            throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
+            return;
         }
+        throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
+
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {

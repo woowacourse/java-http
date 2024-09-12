@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
@@ -56,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest createRequest(BufferedReader bufferedReader) {
+    private HttpRequest createRequest(BufferedReader bufferedReader) throws IOException {
         final String requestLine = RequestFactory.readRequestLine(bufferedReader);
         final String requestHeaders = RequestFactory.readHeaders(bufferedReader);
         final HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders);
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private String createRawResponse(HttpResponse response) {
-        return ResponseFactory.writeResponse(response);
+    private String createRawResponse(OutputStream outputStream, HttpResponse response) {
+        return ResponseFactory.writeResponse(outputStream, response);
     }
 }

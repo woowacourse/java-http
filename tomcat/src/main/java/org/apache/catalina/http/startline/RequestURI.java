@@ -15,7 +15,7 @@ public class RequestURI {
         return value.startsWith(startsWith);
     }
 
-    public boolean isHome() {
+    public boolean isRoot() {
         return value.equals("/");
     }
 

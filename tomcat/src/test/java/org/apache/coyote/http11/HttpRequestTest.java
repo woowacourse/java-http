@@ -53,7 +53,7 @@ class HttpRequestTest {
 
     @DisplayName("요청 대상이 home이면 true를 반환한다.")
     @Test
-    void isURIHome_true() {
+    void isURIRoot_true() {
         // given
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.GET, new RequestURI("/"), HttpVersion.HTTP11),
@@ -62,12 +62,12 @@ class HttpRequestTest {
         );
 
         // when&then
-        assertThat(request.isURIHome()).isTrue();
+        assertThat(request.isURIRoot()).isTrue();
     }
 
     @DisplayName("요청 대상이 home이 아니면 false를 반환한다.")
     @Test
-    void isURIHome_false() {
+    void isURIRoot_false() {
         // given
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestURI("/login"), HttpVersion.HTTP11),
@@ -76,7 +76,7 @@ class HttpRequestTest {
         );
 
         // when&then
-        assertThat(request.isURIHome()).isFalse();
+        assertThat(request.isURIRoot()).isFalse();
     }
 
     @DisplayName("request uri가 주어진 문자로 시작하는지 아닌지 판별한다.")
@@ -201,7 +201,7 @@ class HttpRequestTest {
         // then
         assertAll(
                 () -> assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(parsedRequest.isURIHome()).isFalse(),
+                () -> assertThat(parsedRequest.isURIRoot()).isFalse(),
                 () -> assertThat(parsedRequest.isURIStatic()).isFalse(),
                 () -> assertThat(parsedRequest.URIStartsWith("/login")).isTrue(),
                 () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP11),

@@ -41,8 +41,8 @@ public class HttpRequestLine {
         return httpMethod.equals(HttpMethod.GET) && requestURI.isResource();
     }
 
-    public boolean isURIHome() {
-        return requestURI.isHome();
+    public boolean isURIRoot() {
+        return requestURI.isRoot();
     }
 
     public boolean URIStartsWith(String startsWith) {

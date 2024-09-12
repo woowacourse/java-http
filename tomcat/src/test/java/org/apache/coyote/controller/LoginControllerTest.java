@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Method;
@@ -29,7 +30,8 @@ class LoginControllerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d; JSESSIONID=" + "0ddf724d-daf9-4ef1-9f13-5e9103a2d0aa");
-        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders);
+        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 
         // when
         HttpResponse httpResponse = loginController.doGet(httpRequest);
@@ -47,7 +49,8 @@ class LoginControllerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
-        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders);
+        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 
         // when
         HttpResponse httpResponse = loginController.doGet(httpRequest);

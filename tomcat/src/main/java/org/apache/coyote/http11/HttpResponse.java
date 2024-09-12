@@ -1,17 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private Map<String, String> responseHeaders;
+    private HttpHeaders httpHeaders;
     private String responseBody;
 
     public HttpResponse() {
-        this.responseHeaders = new HashMap<>();
+        this.httpHeaders = new HttpHeaders();
         this.responseBody = "";
     }
 
@@ -20,15 +16,15 @@ public class HttpResponse {
     }
 
     public void setContentType(String contentType) {
-        responseHeaders.put("Content-Type", contentType + ";charset=utf-8 ");
+        httpHeaders.setField("Content-Type", contentType + ";charset=utf-8 ");
     }
 
     public void setContentLength(int contentLength) {
-        responseHeaders.put("Content-Length", String.valueOf(contentLength));
+        httpHeaders.setField("Content-Length", String.valueOf(contentLength));
     }
 
     public void setLocation(String location) {
-        responseHeaders.put("Location", location);
+        httpHeaders.setField("Location", location);
     }
 
     public void setResponseBody(String responseBody) {
@@ -36,7 +32,7 @@ public class HttpResponse {
     }
 
     public void setCookie(String sessionId) {
-        responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+        httpHeaders.setField("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
     public String getStatusMessage() {
@@ -44,7 +40,7 @@ public class HttpResponse {
     }
 
     public String getContentType() {
-        return this.responseHeaders.get("Content-Type");
+        return this.httpHeaders.findField("Content-Type");
     }
 
     public String getResponse() {
@@ -64,9 +60,7 @@ public class HttpResponse {
     }
 
     private void serializeResponseHeaders(StringBuilder stringBuilder) {
-        for (Entry<String, String> responseHeaders : responseHeaders.entrySet()) {
-            stringBuilder.append(responseHeaders.getKey() + ": " + responseHeaders.getValue() + " ").append("\r\n");
-        }
+        httpHeaders.serializeHeaders(stringBuilder);
     }
 
     private void serializeResponseBody(StringBuilder stringBuilder) {

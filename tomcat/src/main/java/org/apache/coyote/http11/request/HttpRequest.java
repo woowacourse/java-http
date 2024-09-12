@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.exception.HttpFormatException;
 
 public class HttpRequest {
 
@@ -71,7 +73,7 @@ public class HttpRequest {
 
         private void validateRequestHead(List<String> requestLines) {
             if (requestLines.isEmpty()) {
-                throw new IllegalArgumentException("올바르지 않은 HTTP 요청 형식입니다.");
+                throw new HttpFormatException("올바르지 않은 HTTP 요청 형식입니다.");
             }
         }
 
@@ -95,13 +97,13 @@ public class HttpRequest {
                 throw new IllegalArgumentException("HTTP 요청 객체를 생성할 수 없습니다.");
             }
             if (body.length() != getBodyLength()) {
-                throw new IllegalArgumentException("요청 본문 길이가 올바르지 않습니다.");
+                throw new HttpFormatException("요청 본문 길이가 올바르지 않습니다.");
             }
             return new HttpRequest(requestLine, headers, body);
         }
 
         public int getBodyLength() {
-            return headers.getAsInt("Content-Length").orElse(0);
+            return headers.getAsInt(HttpHeader.CONTENT_LENGTH).orElse(0);
         }
     }
 }

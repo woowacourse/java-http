@@ -7,10 +7,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 
 import support.StubSocket;
 
@@ -158,6 +163,35 @@ class Http11ProcessorTest {
                     String.format("Content-Length: %d \r\n", contentBody.getBytes().length),
                     "\r\n",
                     contentBody);
+        }
+
+        @Test
+        @DisplayName("로그인 뷰 테스트 : 이미 로그인이 되어 있을 경우 index.html 로 리다이렉트 시킨다.")
+        void loginViewWhenLoggedIn() throws IOException {
+            // given
+            User user = InMemoryUserRepository.findByAccount("gugu").get();
+            String sessionId = "sessionId";
+            Session session = new Session(sessionId);
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+
+            final String httpRequest = String.join("\r\n",
+                    "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Cookie: JSESSIONID=sessionId",
+                    "",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).contains("HTTP/1.1 301 FOUND \r\n",
+                    "Location: /index.html");
         }
 
         @Test

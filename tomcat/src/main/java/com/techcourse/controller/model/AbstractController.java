@@ -1,22 +1,31 @@
 package com.techcourse.controller.model;
 
-import org.apache.coyote.http11.request.domain.RequestLine;
-import org.apache.coyote.http11.request.domain.RequestMethod;
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.response.model.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestMethod;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest httpRequest) {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
         if (requestLine.isSameMethod(RequestMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (requestLine.isSameMethod(RequestMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        throw new IllegalArgumentException("지원하지 않는 매서드 입니다.");
+        httpResponse.sendError(HttpStatus.NOT_FOUND);
+    }
+
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+    }
+
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
     }
 }

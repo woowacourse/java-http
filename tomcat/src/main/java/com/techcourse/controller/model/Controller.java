@@ -1,15 +1,11 @@
 package com.techcourse.controller.model;
 
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.response.model.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public interface Controller {
 
     boolean canHandle(HttpRequest httpRequest);
 
-    HttpResponse service(HttpRequest httpRequest);
-
-    HttpResponse doPost(HttpRequest httpRequest);
-
-    HttpResponse doGet(HttpRequest httpRequest);
+    void service(HttpRequest httpRequest, HttpResponse httpResponse);
 }

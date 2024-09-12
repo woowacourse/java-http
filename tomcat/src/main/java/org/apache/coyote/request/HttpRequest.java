@@ -1,47 +1,24 @@
 package org.apache.coyote.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.coyote.coockie.HttpCookie;
-import org.apache.coyote.http.HeaderName;
+import java.util.List;
 import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> header;
-    private final HttpCookie httpCookie;
+    private final RequestHeader header;
     private final RequestBody body;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        this.requestLine = new RequestLine(bufferedReader.readLine());
-        this.header = mapHeader(bufferedReader);
-        this.body = mapBody(bufferedReader, header.get(HeaderName.CONTENT_LENGTH.getValue()));
-        this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
+    public HttpRequest(List<String> headerLines, String bodyLine) {
+        this.requestLine = new RequestLine(headerLines.getFirst());
+        this.header = new RequestHeader(headerLines);
+        this.body = mapBody(bodyLine);
     }
 
-    private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> rawHeader = new HashMap<>();
-        String rawLine;
-
-        while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
-            String[] headerEntry = rawLine.split(": ", 2);
-            rawHeader.put(headerEntry[0], headerEntry[1]);
-        }
-
-        return rawHeader;
-    }
-
-    private RequestBody mapBody(BufferedReader bufferedReader, String bodyLength) throws IOException {
+    private RequestBody mapBody(String bodyLine) {
         if (requestLine.isMethod(HttpMethod.POST)) {
-            return new RequestBody(bufferedReader, bodyLength);
+            return new RequestBody(bodyLine);
         }
         return new RequestBody();
     }
@@ -58,51 +35,31 @@ public class HttpRequest {
         return requestLine.getContentType();
     }
 
-    public String get(HeaderName headerName) {
-        return header.get(headerName.getValue());
+    public String getSessionId() {
+        return header.getSessionId();
     }
 
-    public String getCookieResponse() {
-        return httpCookie.getResponse();
-    }
-
-    public String getJESSIONID() {
-        return httpCookie.getJESSIONID();
+    public String getHttpCookie() {
+        return header.getHttpCookie();
     }
 
     public boolean isMethod(HttpMethod httpMethod) {
         return requestLine.isMethod(httpMethod);
     }
 
-    public boolean isPath(String path) {
-        return requestLine.isPath(path);
-    }
-
-    public boolean isPathWithQuery(String path) {
-        return requestLine.isPathWithQuery(path);
-    }
-
     public boolean isStaticRequest() {
         return requestLine.isStaticRequest();
     }
 
-    public boolean hasCookie() {
-        return header.containsKey(HeaderName.COOKIE.getValue());
+    public boolean hasQueryParam() {
+        return requestLine.hasQueryParam();
     }
 
     public boolean hasSession() {
-        return hasCookie() && httpCookie.hasJESSIONID();
-    }
-
-    public boolean hasJESSIONID() {
-        return httpCookie.hasJESSIONID();
+        return header.hasSession();
     }
 
     public RequestBody getBody() {
         return body;
-    }
-
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
     }
 }

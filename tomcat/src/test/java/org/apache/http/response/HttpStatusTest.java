@@ -18,4 +18,15 @@ class HttpStatusTest {
                 () -> assertEquals("500 Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.toString())
         );
     }
+
+    @Test
+    @DisplayName("상태 코드 숫자와 일치하는 HttpStatus 반환")
+    void getHttpStatus() {
+        assertAll(
+                () -> assertEquals(HttpStatus.OK, HttpStatus.getHttpStatus(200)),
+                () -> assertEquals(HttpStatus.NOT_FOUND, HttpStatus.getHttpStatus(404)),
+                () -> assertEquals(HttpStatus.FOUND, HttpStatus.getHttpStatus(302)),
+                () -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.getHttpStatus(500))
+        );
+    }
 }

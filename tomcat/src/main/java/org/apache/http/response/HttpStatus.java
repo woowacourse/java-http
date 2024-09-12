@@ -1,5 +1,7 @@
 package org.apache.http.response;
 
+import java.util.Arrays;
+
 public enum HttpStatus {
     OK(200, "OK"),
 
@@ -17,6 +19,13 @@ public enum HttpStatus {
     HttpStatus(int code, String reason) {
         this.code = code;
         this.reason = reason;
+    }
+
+    public static HttpStatus getHttpStatus(int code) {
+        return Arrays.stream(values())
+                .filter(httpVersion -> httpVersion.code == code)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상태 코드 : " + code + "입니다."));
     }
 
     public int getCode() {

@@ -61,10 +61,6 @@ public class HttpRequest {
         return requestLine.getMethod().equals(method);
     }
 
-    public String getPath() {
-        return requestLine.getPath();
-    }
-
     public String getExtension() {
         return requestLine.getExtension();
     }

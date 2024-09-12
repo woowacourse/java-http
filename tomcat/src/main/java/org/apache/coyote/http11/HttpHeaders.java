@@ -11,7 +11,7 @@ public class HttpHeaders {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String COOKIE = "Cookie";
     public static final String SET_COOKIE = "Set-Cookie";
-    public static final String LOCATION = HttpHeaders.LOCATION;
+    public static final String LOCATION = "Location";
     
     private static final String HEADER_DELIMITER = ":";
     private static final int SPLIT_LIMIT = 2;

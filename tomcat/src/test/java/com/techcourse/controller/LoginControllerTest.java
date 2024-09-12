@@ -1,16 +1,15 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.session.SessionService;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
@@ -30,7 +29,7 @@ class LoginControllerTest {
     private final User user2 = new User("account2", "password2", "email2");
     private final Session session = new Session("sessionId");
     private final SessionManager sessionManager = new SessionManager();
-    private final LoginController loginController = new LoginController();
+    private final LoginController loginController = new LoginController(new SessionService(() -> session));
 
     @BeforeEach
     void saveUser() {
@@ -52,7 +51,6 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /login HTTP/1.1 "),
                 new HttpHeaders(Map.of()),
-                session,
                 "account=account&password=password"
         );
         HttpResponse response = new HttpResponse();
@@ -74,12 +72,14 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /login HTTP/1.1 "),
                 new HttpHeaders(Map.of()),
-                session,
                 body
         );
 
-        assertThatThrownBy(() -> loginController.service(request, new HttpResponse()))
-                .isInstanceOf(UnauthorizedException.class);
+        HttpResponse response = new HttpResponse();
+        loginController.service(request, response);
+
+        HttpResponse expectedResponse = HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
+        assertThat(response).isEqualTo(expectedResponse);
     }
 
     @DisplayName("세션이 존재하는 클라이언트가 로그인 요청 시 올바르게 세션 데이터를 업데이트한다.")
@@ -90,7 +90,6 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /login HTTP/1.1 "),
                 new HttpHeaders(Map.of("Cookie", "JSESSIONID=" + session.getId())),
-                session,
                 "account=account2&password=password2"
         );
         HttpResponse response = new HttpResponse();
@@ -117,7 +116,6 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("GET /login HTTP/1.1 "),
                 new HttpHeaders(Map.of()),
-                new Session("new session"),
                 ""
         );
         HttpResponse response = new HttpResponse();
@@ -145,7 +143,6 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("GET /login HTTP/1.1 "),
                 new HttpHeaders(Map.of()),
-                session,
                 ""
         );
         HttpResponse response = new HttpResponse();

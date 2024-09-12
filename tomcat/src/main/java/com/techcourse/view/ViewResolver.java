@@ -1,5 +1,6 @@
 package com.techcourse.view;
 
+import com.techcourse.exception.ApplicationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.FileNameMap;
@@ -14,42 +15,42 @@ public class ViewResolver {
 
     private static final String DEFAULT_ROUTE = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    public static final String RESOURCE_DIRECTORY = "static";
 
-    private final ResponseBuilder responseBuilder = new ResponseBuilder();
-
-    public HttpResponse resolve(HttpRequest request, HttpResponse response) throws IOException {
+    public HttpResponse resolve(HttpRequest request, HttpResponse response) throws IOException, ApplicationException {
         String path = request.getPath();
-
         if (DEFAULT_ROUTE.equals(path)) {
             response.setStatusCode(HttpStatusCode.OK);
             response.setBody(DEFAULT_RESPONSE_BODY);
             response.setContentType("text/html");
+            response.setContentLength();
             return response;
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + path);
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
         if (resource == null) {
             path += ".html";
         }
 
-        return handleFileExtensionRequest(response, path);
+        return getStaticResourceResponse(response, path);
     }
 
-    private HttpResponse handleFileExtensionRequest(HttpResponse response, String path) throws IOException {
-        URL staticResourceUrl = getClass().getClassLoader().getResource("static" + path);
-        if (staticResourceUrl == null) {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND);
-            response.setBody(responseBuilder.buildNotFoundResponse());
-            response.setContentType("text/html");
+    private HttpResponse getStaticResourceResponse(
+            HttpResponse response, String path) throws IOException, ApplicationException {
+        URL staticResourceUrl = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
+
+        if (staticResourceUrl != null) {
+            File file = new File(staticResourceUrl.getFile());
+            FileNameMap fileNameMap = URLConnection.getFileNameMap();
+            String mimeType = fileNameMap.getContentTypeFor(file.getName());
+
+            response.setStatusCode(HttpStatusCode.OK);
+            response.setBody(new String(Files.readAllBytes(file.toPath())));
+            response.setContentType(mimeType);
+            response.setContentLength();
             return response;
         }
 
-        File file = new File(staticResourceUrl.getFile());
-        FileNameMap fileNameMap = URLConnection.getFileNameMap();
-        String mimeType = fileNameMap.getContentTypeFor(file.getName());
-        response.setStatusCode(HttpStatusCode.OK);
-        response.setBody(new String(Files.readAllBytes(file.toPath())));
-        response.setContentType(mimeType);
-        return response;
+        return null;
     }
 }

@@ -13,7 +13,6 @@ import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequestConvertor {
 
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_DELIMITER = ":";
     private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String BODY_DELIMITER = "&";
@@ -22,13 +21,10 @@ public class HttpRequestConvertor {
     private static final int TUPLE_KEY_INDEX = 0;
     private static final int TUPLE_VALUE_INDEX = 1;
     private static final int HEADER_KEY_INDEX = 0;
-    private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final int REQUEST_LINE_MIN_LENGTH = 3;
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
-        validateRequestLine(requestLine);
         HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
 
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(getHeaders(bufferedReader));
@@ -40,15 +36,6 @@ public class HttpRequestConvertor {
         }
 
         return new HttpRequest(httpRequestLine, httpRequestHeader, session);
-    }
-
-    private static void validateRequestLine(String requestLine) {
-        if (requestLine == null) {
-            throw new IllegalArgumentException("요청이 비어 있습니다");
-        }
-        if (requestLine.split(REQUEST_LINE_DELIMITER).length < REQUEST_LINE_MIN_LENGTH) {
-            throw new IllegalArgumentException("RequestLine이 잘못된 요청입니다");
-        }
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
@@ -81,7 +68,7 @@ public class HttpRequestConvertor {
 
         HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(
                 httpRequestHeader.getHeaderValue(HttpHeaderName.COOKIE));
-        if (!httpCookie.containsCookie(JSESSIONID)) {
+        if (!httpCookie.containsSession()) {
             return createSession();
         }
 
@@ -89,11 +76,11 @@ public class HttpRequestConvertor {
     }
 
     private static Session getOrCreateSession(HttpCookie httpCookie) {
-        String jsessionid = httpCookie.getCookieValue(JSESSIONID);
-        if (!SESSION_MANAGER.containsSession(jsessionid)) {
+        String sessionId = httpCookie.getSessionId();
+        if (!SESSION_MANAGER.containsSession(sessionId)) {
             return createSession();
         }
-        return SESSION_MANAGER.findSession(jsessionid);
+        return SESSION_MANAGER.findSession(sessionId);
     }
 
     private static Session createSession() {

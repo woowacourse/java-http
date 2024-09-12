@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     public HttpCookie() {
@@ -19,7 +21,15 @@ public class HttpCookie {
         return cookies.containsKey(key);
     }
 
+    public boolean containsSession() {
+        return containsCookie(JSESSIONID);
+    }
+
     public String getCookieValue(String key) {
         return cookies.get(key);
+    }
+
+    public String getSessionId() {
+        return getCookieValue(JSESSIONID);
     }
 }

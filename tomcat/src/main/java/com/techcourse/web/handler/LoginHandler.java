@@ -72,13 +72,12 @@ public class LoginHandler implements Handler {
 		String account = body.get("account");
 		String password = body.get("password");
 
-		if (isUserNotExist(account, password)) {
+		User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+		if (isUserNotExist(user, password)) {
 			return redirect(new HttpResponseHeader(), "/401.html");
 		}
 
-		User user = InMemoryUserRepository.findByAccount(account).get();
 		HttpResponseHeader responseHeader = createResponseHeader(request, user);
-
 		return redirect(responseHeader, "/index.html");
 	}
 
@@ -105,17 +104,11 @@ public class LoginHandler implements Handler {
 		return httpCookie == null || !httpCookie.hasJsessionId();
 	}
 
-	private boolean isUserNotExist(String account, String password) {
-		if (account == null) {
-			log.info("account is required");
+	private boolean isUserNotExist(User user, String password) {
+		if (user == null) {
+			log.info("user is not exist");
 			return true;
 		}
-		if (password == null) {
-			log.info("password is required");
-			return true;
-		}
-
-		Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-		return userOptional.map(user -> !user.checkPassword(password)).orElse(true);
+		return !user.checkPassword(password);
 	}
 }

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.file;
 
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.stream.Collectors;
 

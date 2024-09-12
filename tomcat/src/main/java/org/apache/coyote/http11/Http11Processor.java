@@ -3,16 +3,15 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.dispatcher.RequestMapping;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.file.RequestFactory;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.file.ResponseFactory;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

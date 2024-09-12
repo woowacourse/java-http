@@ -2,14 +2,11 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.apache.coyote.http.request.RequestBody;
 
 public class HttpRequestParser {
 
-    public static HttpRequest parse(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
+    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
 
         HttpHeaders headers = new HttpHeaders();
@@ -20,7 +17,7 @@ public class HttpRequestParser {
         int contentLength = headers.getContentLength();
         char[] rawBody = new char[contentLength];
         bufferedReader.read(rawBody, 0, contentLength);
-        String body = new String(rawBody);
+        RequestBody body = new RequestBody(rawBody);
 
         return new HttpRequest(requestLine, headers, body);
     }

@@ -12,6 +12,10 @@ public final class QueryParameters {
         this.parameters = new HashMap<>(parameters);
     }
 
+    public QueryParameters() {
+        this(new HashMap<>());
+    }
+
     public String getSingleValueByKey(String key) {
         if (!parameters.containsKey(key)) {
             throw new IllegalArgumentException(String.format("key %s에 해당되는 쿼리 파라미터가 존재하지 않습니다.", key));

@@ -12,9 +12,13 @@ public class FormParameters {
         this.parameters = new HashMap<>(parameters);
     }
 
+    public FormParameters() {
+        this(new HashMap<>());
+    }
+
     public String getSingleValueByKey(String key) {
         if (!parameters.containsKey(key)) {
-            throw new IllegalArgumentException(String.format("key %s에 해당되는 form 파라미터가 존재하지 않습니다.", key));
+            throw new IllegalArgumentException(String.format("%s에 해당되는 form 파라미터가 존재하지 않습니다.", key));
         }
 
         return parameters.get(key).getFirst();

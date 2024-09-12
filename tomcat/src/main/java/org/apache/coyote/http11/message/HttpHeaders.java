@@ -15,6 +15,10 @@ public final class HttpHeaders {
         this.headers = new HashMap<>(headers);
     }
 
+    public HttpHeaders() {
+        this(new HashMap<>());
+    }
+
     public boolean isHeader(HttpHeaderName headerName, String headerValue) {
         return headerValue.equals(getFieldByHeaderName(headerName).orElse(""));
     }

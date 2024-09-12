@@ -10,6 +10,10 @@ public class HttpUrl {
         this.queryParameters = queryParameters;
     }
 
+    public HttpUrl(String path) {
+        this(path, new QueryParameters());
+    }
+
     public boolean hasQueryString() {
         return queryParameters.hasParameters();
     }

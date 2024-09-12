@@ -3,6 +3,7 @@ package org.apache.coyote.http11.message.response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
@@ -43,6 +44,10 @@ public class HttpResponse {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public Optional<String> getFieldByHeaderName(HttpHeaderName headerName) {
+        return headers.getFieldByHeaderName(headerName);
     }
 
     public void setHeader(HttpHeaderName name, String field) {

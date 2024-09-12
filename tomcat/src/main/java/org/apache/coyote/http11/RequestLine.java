@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.exception.RequestException;
+
 public class RequestLine {
 
     private final String method;
@@ -16,7 +18,7 @@ public class RequestLine {
 
     private void validateRequestPartLength(String[] requestPart) {
         if (requestPart.length != 3) {
-            throw new RuntimeException("RequestLine 양식이 맞지 않습다.");
+            throw new RequestException(HttpStatusCode.BAD_REQUEST, "RequestLine 양식이 맞지 않습다.");
         }
     }
 

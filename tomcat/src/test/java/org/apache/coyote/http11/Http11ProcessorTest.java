@@ -162,13 +162,14 @@ class Http11ProcessorTest {
         @DisplayName("로그인 로직 성공 테스트")
         void loginSuccess() throws IOException {
             // given
+            String requestBody = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=password HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    "Content-Length: " + requestBody.getBytes().length,
                     "",
-                    "");
-
+                    requestBody);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -184,13 +185,15 @@ class Http11ProcessorTest {
         @Test
         @DisplayName("로그인 로직 실패 테스트")
         void loginFailed() throws IOException {
+            String requestBody = "account=gugu&password=wrong";
             // given
             final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    "Content-Length: " + requestBody.getBytes().length,
                     "",
-                    "");
+                    requestBody);
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

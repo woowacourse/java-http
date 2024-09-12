@@ -10,7 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

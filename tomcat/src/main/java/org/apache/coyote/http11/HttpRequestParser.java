@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequestParser {
 

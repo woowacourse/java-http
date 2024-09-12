@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

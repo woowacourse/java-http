@@ -3,11 +3,11 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

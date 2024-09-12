@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public class RequestLine {
 
-	public static final String HTTP_11_VERSION_STRING = "HTTP/1.1";
+	public static final String PROTOCOL_VERSION = "HTTP/1.1";
 	public static final String SPLIT_REGEX = " ";
 	public static final int METHOD_INDEX = 0;
 	public static final int PATH_INDEX = 1;
@@ -49,6 +49,6 @@ public class RequestLine {
 	}
 
 	public boolean isHttp11Version() {
-		return version.equals(HTTP_11_VERSION_STRING);
+		return version.equals(PROTOCOL_VERSION);
 	}
 }

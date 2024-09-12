@@ -109,9 +109,4 @@ public class LoginController extends AbstractController {
                 request.getContentType(),
                 FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
-
-    @Override
-    public HttpResponse doPost(HttpRequest request) {
-        return null;
-    }
 }

@@ -24,9 +24,4 @@ public class RootController extends AbstractController {
                 DEFAULT_PAGE_CONTENT
         );
     }
-
-    @Override
-    public HttpResponse doPost(HttpRequest request) {
-        throw new IllegalArgumentException("해당 요청을 처리하지 못했습니다.");
-    }
 }

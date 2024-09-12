@@ -30,4 +30,14 @@ public abstract class AbstractController implements Controller {
                 DEFAULT_CONTENT_TYPE,
                 FileReader.loadFileContent(BAD_REQUEST_PAGE));
     }
+
+    @Override
+    public HttpResponse doGet(HttpRequest request) {
+        throw new UnsupportedOperationException("해당 요청을 처리하지 못했습니다.");
+    }
+
+    @Override
+    public HttpResponse doPost(HttpRequest request) {
+        throw new UnsupportedOperationException("해당 요청을 처리하지 못했습니다.");
+    }
 }

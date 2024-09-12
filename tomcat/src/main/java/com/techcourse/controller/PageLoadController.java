@@ -23,9 +23,4 @@ public class PageLoadController extends AbstractController {
                 request.getContentType(),
                 FileReader.loadFileContent(request.getPathWithoutQuery()));
     }
-
-    @Override
-    public HttpResponse doPost(HttpRequest request) {
-        throw new IllegalArgumentException("해당 요청을 처리하지 못했습니다.");
-    }
 }

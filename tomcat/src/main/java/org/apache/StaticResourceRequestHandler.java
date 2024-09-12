@@ -6,11 +6,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 

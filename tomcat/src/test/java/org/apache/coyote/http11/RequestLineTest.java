@@ -1,7 +1,9 @@
-package org.apache;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

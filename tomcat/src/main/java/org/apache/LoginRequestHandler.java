@@ -6,13 +6,16 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpRequestBody;
+import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

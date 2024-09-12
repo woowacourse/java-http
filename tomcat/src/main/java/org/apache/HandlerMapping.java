@@ -3,6 +3,8 @@ package org.apache;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.coyote.http11.HttpRequest;
+
 public class HandlerMapping {
 
 	public static List<RequestHandler> handlers = new ArrayList<>();

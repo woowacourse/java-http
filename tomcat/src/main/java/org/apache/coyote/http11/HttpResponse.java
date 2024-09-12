@@ -1,4 +1,4 @@
-package org.apache;
+package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

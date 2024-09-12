@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import support.HttpRequestFixture;

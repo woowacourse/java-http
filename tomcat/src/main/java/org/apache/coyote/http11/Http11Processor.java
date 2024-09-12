@@ -5,7 +5,6 @@ import java.net.Socket;
 
 import org.apache.HandlerMapping;
 import org.apache.HomeRequestHandler;
-import org.apache.HttpRequest;
 import org.apache.LoginRequestHandler;
 import org.apache.RegisterRequestHandler;
 import org.apache.StaticResourceRequestHandler;

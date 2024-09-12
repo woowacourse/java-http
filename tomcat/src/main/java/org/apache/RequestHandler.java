@@ -2,7 +2,8 @@ package org.apache;
 
 import java.io.IOException;
 
-import org.apache.HttpResponse;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public interface RequestHandler {
 

@@ -1,4 +1,4 @@
-package org.apache;
+package org.apache.coyote.http11;
 
 import static org.apache.catalina.Globals.*;
 
@@ -9,11 +9,8 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.StringTokenizer;
 
 public class HttpRequest {
 

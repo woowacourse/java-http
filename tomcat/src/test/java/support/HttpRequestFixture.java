@@ -3,7 +3,7 @@ package support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.apache.HttpRequest;
+import org.apache.coyote.http11.HttpRequest;
 
 public class HttpRequestFixture {
 

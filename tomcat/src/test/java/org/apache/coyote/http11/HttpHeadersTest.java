@@ -1,10 +1,12 @@
-package org.apache;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

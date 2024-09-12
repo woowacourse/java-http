@@ -27,7 +27,7 @@ class HttpRequestMessageReaderTest {
 		String httpRequest = String.join("\r\n",
 			"POST /api/endpoint?hi=hello&bangga= HTTP/1.1 ",
 			"Host: example.com ",
-			"Content-Length: 39 ",
+			"Content-Length: " + body.length(),
 			"Content-Type: application/json ",
 			"Accept: application/json, text/plain, */* ",
 			"",
@@ -36,6 +36,7 @@ class HttpRequestMessageReaderTest {
 		InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
 		HttpRequest request = HttpRequestMessageReader.read(inputStream);
 
+		System.out.println(request.getRequestBody());
 		assertThat(request.getRequestLine()).satisfies(
 			requestLine -> {
 				assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.POST);
@@ -46,7 +47,7 @@ class HttpRequestMessageReaderTest {
 		assertThat(request.getHeaders()).satisfies(
 			headers -> {
 				assertThat(headers.getValue("Host")).containsOnly("example.com");
-				assertThat(headers.getValue("Content-Length")).containsOnly("39");
+				assertThat(headers.getValue("Content-Length")).containsOnly(String.valueOf(body.length()));
 				assertThat(headers.getValue("Content-Type")).containsOnly("application/json");
 				assertThat(headers.getValue("Accept")).containsExactly("application/json", "text/plain", "*/*");
 			}
@@ -54,5 +55,41 @@ class HttpRequestMessageReaderTest {
 		assertThat(request.getRequestBody()).contains("name\": \"John Doe", "age\": 30",
 			"email\": \"john.doe@example.com",
 			"isActive\": true");
+	}
+
+	@DisplayName("Content-Length가 0인 경우 빈 body를 반환한다.")
+	@Test
+	void readEmptyBody() throws IOException {
+		String httpRequest = String.join("\r\n",
+			"GET /api/endpoint?hi=hello&bangga= HTTP/1.1 ",
+			"Host: example.com ",
+			"Content-Length: 0",
+			"Content-Type: application/json ",
+			"Accept: application/json, text/plain, */* ",
+			"");
+
+		InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+		HttpRequest request = HttpRequestMessageReader.read(inputStream);
+
+		assertThat(request.getRequestBody()).isEmpty();
+	}
+
+	@DisplayName("Content-Length와 실제 body의 길이가 다른 경우 예외를 던진다.")
+	@Test
+	void readMismatchContentLength() {
+		String body = "Hello world!";
+		String httpRequest = String.join("\r\n",
+			"POST /api/endpoint?hi=hello&bangga= HTTP/1.1 ",
+			"Host: example.com ",
+			"Content-Length: " + (body.length() + 1),
+			"Content-Type: application/json ",
+			"Accept: application/json, text/plain, */* ",
+			"",
+			body);
+
+		InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+		assertThatThrownBy(() -> HttpRequestMessageReader.read(inputStream))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Content-Length mismatch");
 	}
 }

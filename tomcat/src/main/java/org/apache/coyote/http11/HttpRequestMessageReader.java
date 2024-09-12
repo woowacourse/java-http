@@ -16,18 +16,31 @@ public class HttpRequestMessageReader {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		String requestLine = reader.readLine();
 		List<String> headers = readHeaders(reader);
-		String body = readBody(reader);
+		String body = readBody(reader, getContentLength(headers));
 
 		return new HttpRequest(requestLine, headers, body);
 	}
 
-	private static String readBody(BufferedReader reader) throws IOException {
-		List<String> result = new ArrayList<>();
-		while (reader.ready()) {
-			result.add(reader.readLine());
+	private static int getContentLength(List<String> headers) {
+		return headers.stream()
+				.filter(header -> header.startsWith("Content-Length"))
+				.findFirst()
+				.map(header -> Integer.parseInt(header.split(": ")[1].strip()))
+				.orElse(0);
+	}
+
+	private static String readBody(BufferedReader reader, int contentLength) throws IOException {
+		if (contentLength == 0) {
+			return "";
 		}
 
-		return String.join("\r\n", result);
+		char[] body = new char[contentLength];
+		int readLength = reader.read(body, 0, contentLength);
+		if (readLength != contentLength) {
+			throw new IllegalArgumentException("Content-Length mismatch");
+		}
+
+		return new String(body);
 	}
 
 	private static List<String> readHeaders(BufferedReader reader) throws IOException {

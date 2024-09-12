@@ -2,14 +2,12 @@ package com.techcourse.web.handler;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.request.HttpMethod;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.request.HttpRequestHeader;
 import org.apache.coyote.http11.http.request.HttpRequestLine;
-import org.apache.coyote.http11.http.request.HttpRequestQuery;
 import org.apache.coyote.http11.http.request.HttpRequestUrl;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.apache.coyote.http11.http.response.HttpResponseBody;
@@ -83,21 +81,11 @@ public class LoginHandler implements Handler {
 
 	private HttpResponseHeader createResponseHeader(HttpRequest request, User user) {
 		HttpResponseHeader header = new HttpResponseHeader();
-		String sessionId = addJSessionId(request, header);
+		String sessionId = JsessionIdGenerator.generate();
+		header.addJSessionId(sessionId);
 		SessionManager.createSession(sessionId, user);
 
 		return header;
-	}
-
-	private String addJSessionId(HttpRequest request, HttpResponseHeader responseHeader) {
-		HttpRequestHeader header = request.getHeaders();
-		HttpCookie httpCookie = header.getHttpCookie();
-		if (isNotExistJsessionid(httpCookie)) {
-			String sessionId = JsessionIdGenerator.generate();
-			responseHeader.addJSessionId(sessionId);
-			return sessionId;
-		}
-		return httpCookie.getJsessionid();
 	}
 
 	private boolean isNotExistJsessionid(HttpCookie httpCookie) {

@@ -1,8 +1,8 @@
 package cache.com.example.version;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 

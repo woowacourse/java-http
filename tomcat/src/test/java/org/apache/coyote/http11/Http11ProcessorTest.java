@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

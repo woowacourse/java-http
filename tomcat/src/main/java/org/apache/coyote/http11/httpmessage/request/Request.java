@@ -8,8 +8,8 @@ import java.util.UUID;
 
 import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeaders;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class Request {
 

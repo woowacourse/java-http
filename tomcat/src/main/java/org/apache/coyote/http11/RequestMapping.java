@@ -13,7 +13,7 @@ public class RequestMapping {
         return new RequestMapping(List.of(requestUris), controller);
     }
 
-    public RequestMapping(List<String> mappedRequestUris, Controller controller) {
+    private RequestMapping(List<String> mappedRequestUris, Controller controller) {
         this.mappedRequestUris = mappedRequestUris;
         this.controller = controller;
     }

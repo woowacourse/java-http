@@ -152,7 +152,7 @@ public class HttpRequest {
         return new Cookie(values);
     }
 
-    public Session getSession(boolean create) {
+    public Session getSession() {
         Session session = new Session(UUID.randomUUID().toString());
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);

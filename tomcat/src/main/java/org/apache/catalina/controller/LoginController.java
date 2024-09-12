@@ -72,7 +72,7 @@ public class LoginController extends AbstractController {
     private void login(HttpRequest request, HttpResponse response, User user) {
         if (user.checkPassword(request.getParameter("password"))) {
             log.info("user : {}", user);
-            Session session = request.getSession(true);
+            Session session = request.getSession();
             session.setAttribute("user", user);
             response.addCookie(new Cookie("JSESSIONID", session.getId()));
             response.sendRedirect("/index.html");

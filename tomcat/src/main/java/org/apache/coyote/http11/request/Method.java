@@ -17,6 +17,6 @@ public enum Method {
         return Arrays.stream(Method.values())
                 .filter(method -> method.value.equals(value))
                 .findAny()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("HTTP Method not found: " + value));
     }
 }

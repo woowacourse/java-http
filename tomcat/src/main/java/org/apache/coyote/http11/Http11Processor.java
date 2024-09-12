@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -16,6 +14,7 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,38 +45,31 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            HttpRequestMessageParser headerParser = new HttpRequestMessageParser(bufferedReader);
-            HttpRequestMessage httpRequestMessage = headerParser.parseRequestMessage();
+            HttpRequest httpRequest = HttpRequest.form(inputStream);
 
-            if (httpRequestMessage.isNull()) {
+            if (httpRequest == null) {
                 return;
             }
-            String[] startLineElements = httpRequestMessage.getStartLine().split(" ");
+            String method = httpRequest.getStartLine().getMethod();
             String response = null;
-            if (startLineElements[0].equals("POST")) {
-                response = makePostMethodResponse(httpRequestMessage);
+            if (method.equals("POST")) {
+                response = makePostMethodResponse(httpRequest);
             }
-            if (startLineElements[0].equals("GET")) {
-                response = makeGetMethodResponse(httpRequestMessage);
+            if (method.equals("GET")) {
+                response = makeGetMethodResponse(httpRequest);
             }
             if (response == null) {
                 return;
             }
-
             outputStream.write(response.getBytes());
             outputStream.flush();
-
-            inputStreamReader.close();
-            bufferedReader.close();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String makePostMethodResponse(final HttpRequestMessage httpRequestMessage) {
-        String requestBody = httpRequestMessage.getBody();
+    private String makePostMethodResponse(final HttpRequest httpRequest) {
+        String requestBody = httpRequest.getBody();
         Map<String, String> queryStorage = new HashMap<>();
 
         for (String query : requestBody.split("&")) {
@@ -85,12 +77,13 @@ public class Http11Processor implements Runnable, Processor {
             queryStorage.put(keyValue[0], keyValue[1]);
         }
 
-        String requestTarget = httpRequestMessage.getStartLine().split(" ")[1];
+        String requestTarget = httpRequest.getStartLine().getPath();
         String redirectTarget = "/index.html";
         String uuid = "";
         boolean loginSuccess = false;
         if (requestTarget.equals("/register")) {
-            final User user = new User(queryStorage.get("account"), queryStorage.get("password"), queryStorage.get("email"));
+            final User user = new User(queryStorage.get("account"), queryStorage.get("password"),
+                    queryStorage.get("email"));
             InMemoryUserRepository.save(user);
         }
         if (requestTarget.equals("/login")) {
@@ -104,13 +97,12 @@ public class Http11Processor implements Runnable, Processor {
                 session.setAttribute("user", user);
                 sessionManager.add(session);
                 uuid = userUuid;
-            }
-            else {
+            } else {
                 redirectTarget = "/401.html";
-           }
+            }
         }
         boolean noSession = false;
-        final Map<String, String> headerInfo = httpRequestMessage.getHeaders();
+        final Map<String, String> headerInfo = httpRequest.getHeaders();
         if (headerInfo.containsKey("Cookie")) {
             final HttpCookie httpCookie = new HttpCookie(headerInfo.get("Cookie"));
             if (!httpCookie.existSessionId("JSESSIONID")) {
@@ -136,12 +128,12 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private String makeGetMethodResponse(final HttpRequestMessage httpRequestMessage) throws URISyntaxException, IOException {
+    private String makeGetMethodResponse(final HttpRequest httpRequest) throws URISyntaxException, IOException {
         String statusCode = "200 OK";
 
-        final Map<String, String> headerInfo = httpRequestMessage.getHeaders();
+        final Map<String, String> headerInfo = httpRequest.getHeaders();
 
-        String requestTarget = httpRequestMessage.getStartLine().split(" ")[1];
+        String requestTarget = httpRequest.getStartLine().getPath();
 
         String redirectTarget = "";
         if (requestTarget.equals("/login") && headerInfo.containsKey("Cookie")) {
@@ -178,8 +170,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeContentType(final String requestTarget) {
         if (requestTarget.length() > 3 && requestTarget.endsWith("css")) {
-                return "text/css";
-            }
+            return "text/css";
+        }
         return "text/html";
     }
 

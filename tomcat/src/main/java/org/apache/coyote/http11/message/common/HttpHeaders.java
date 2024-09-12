@@ -2,7 +2,7 @@ package org.apache.coyote.http11.message.common;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpCookies;
 
 public class HttpHeaders {
 
@@ -44,8 +44,8 @@ public class HttpHeaders {
         this.headers.put(key, value);
     }
 
-    public HttpCookie getCookie() {
-        return new HttpCookie(headers.getOrDefault("Cookie", ""));
+    public HttpCookies getCookies() {
+        return new HttpCookies(headers.getOrDefault("Cookie", ""));
     }
 
     public ContentType getContentType() {

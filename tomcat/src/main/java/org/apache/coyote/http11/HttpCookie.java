@@ -1,65 +1,54 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
-    private static final String COOKIE_REGEX = "; ";
     private static final String KEY_VALUE_REGEX = "=";
 
-    private Map<String, String> cookies;
+    private String name;
+    private String value;
+    private boolean httpOnly;
+
+    public HttpCookie(String name) {
+        this(name, "");
+    }
+
+    public HttpCookie(String name, String value) {
+        this.name = name;
+        this.value = value;
+        this.httpOnly = false;
+    }
 
     public HttpCookie() {
-        this(new HashMap<>());
+        this("", "");
     }
 
-    public HttpCookie(Map<String, String> cookies) {
-        this.cookies = cookies;
+    public String getName() {
+        return name;
     }
 
-    public HttpCookie(String cookie) {
-        this(parseCookie(cookie));
+    public void setName(String name) {
+        this.name = name;
     }
 
-    private static Map<String, String> parseCookie(String cookie) {
-        Map<String, String> map = new HashMap<>();
-        String[] parts = cookie.split(COOKIE_REGEX);
-        for (String part : parts) {
-            String[] keyValue = part.trim().split(KEY_VALUE_REGEX);
-            if (keyValue.length == 2) {
-                map.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
-            }
-        }
-        return map;
+    public String getValue() {
+        return value;
     }
 
-    public void addSessionId() {
-        cookies.put(JSESSIONID, String.valueOf(UUID.randomUUID()));
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public String getSessionId() {
-        return cookies.get(JSESSIONID);
-    }
-
-    public String getCookieValue(String name) {
-        return cookies.get(name);
+    public void setHttpOnly(boolean isHttpOnly) {
+        this.httpOnly = isHttpOnly;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : cookies.entrySet()) {
-            if (!sb.isEmpty()) {
-                sb.append(COOKIE_REGEX);
-            }
-            sb.append(entry.getKey())
-                    .append(KEY_VALUE_REGEX)
-                    .append(entry.getValue());
+        sb.append(name).append(KEY_VALUE_REGEX).append(value);
+
+        if (httpOnly) {
+            sb.append("; HttpOnly");
         }
         return sb.toString();
     }

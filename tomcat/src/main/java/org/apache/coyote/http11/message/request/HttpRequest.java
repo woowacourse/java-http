@@ -3,7 +3,7 @@ package org.apache.coyote.http11.message.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
@@ -55,8 +55,8 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
-    public HttpCookie getCookie() {
-        return headers.getCookie();
+    public HttpCookies getCookies() {
+        return headers.getCookies();
     }
 
     public ContentType getContentType() {

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -19,10 +17,6 @@ public class HttpRequest {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
-    }
-
-    public HttpRequestBuilder builder() {
-        return new HttpRequestBuilder();
     }
 
     public HttpMethod getMethod() {
@@ -85,50 +79,5 @@ public class HttpRequest {
                 .add("headers=" + headers)
                 .add("body='" + body + "'")
                 .toString();
-    }
-
-    public static class HttpRequestBuilder {
-
-        private HttpMethod method;
-        private HttpUrl path;
-        private String httpVersion;
-        private Map<String, String> headers;
-        private String body;
-
-        public HttpRequestBuilder() {
-            this.headers = new HashMap<>();
-        }
-
-        public HttpRequestBuilder method(String method) {
-            this.method = HttpMethod.from(method);
-            return this;
-        }
-
-        public HttpRequestBuilder path(String path) {
-            this.path = new HttpUrl(path);
-            return this;
-        }
-
-        public HttpRequestBuilder httpVersion(String httpVersion) {
-            this.httpVersion = httpVersion;
-            return this;
-        }
-
-        public HttpRequestBuilder addHeader(String key, String value) {
-            headers.put(key, value);
-            return this;
-        }
-
-        public HttpRequestBuilder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpRequest build() {
-            HttpRequestStartLine startLine = new HttpRequestStartLine(method, path, httpVersion);
-            HttpRequestHeaders headers = new HttpRequestHeaders(this.headers);
-            HttpRequestBody body = new HttpRequestBody(this.body);
-            return new HttpRequest(startLine, headers, body);
-        }
     }
 }

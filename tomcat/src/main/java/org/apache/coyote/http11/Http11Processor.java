@@ -78,7 +78,8 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> requestHeaders = new HashMap<>();
         String line;
         while (!(line = bufferedReader.readLine()).isEmpty()) {
-            requestHeaders.put(line.split(": ")[0], line.split(": ")[1]);
+            String[] header = line.split(PARAMETER_SEPARATOR);
+            requestHeaders.put(header[0], header[1]);
         }
         return requestHeaders;
     }
@@ -223,8 +224,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private User createUser(String[] requestBody) {
         Map<String, String> userInfo = new HashMap<>();
-        for (String param : requestBody) {
-            userInfo.put(param.split(ASSIGN_OPERATOR)[0], param.split(ASSIGN_OPERATOR)[1]);
+        for (String query : requestBody) {
+            String[] param = query.split(ASSIGN_OPERATOR);
+            userInfo.put(param[0], param[1]);
         }
         return new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
     }

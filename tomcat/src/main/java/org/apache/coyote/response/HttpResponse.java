@@ -1,7 +1,5 @@
 package org.apache.coyote.response;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.protocolVersion.ProtocolVersion;
 import org.apache.coyote.request.HttpRequest;
@@ -11,6 +9,9 @@ import org.apache.coyote.response.responseLine.ResponseLine;
 import org.apache.coyote.util.ContentType;
 import org.apache.coyote.util.HttpStatus;
 import org.apache.coyote.util.ResourceFinder;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class HttpResponse {
 
@@ -57,10 +58,20 @@ public class HttpResponse {
     }
 
     public void sendStaticResourceResponse(HttpRequest httpRequest, HttpStatus httpStatus) {
-        String resource = ResourceFinder.findBy(httpRequest.getResourcePath());
+        String resource = findResource(httpRequest);
 
         setBody(resource, httpStatus, httpRequest.findContentType(), resource.getBytes().length);
         flushBuffer();
+    }
+
+    private String findResource(HttpRequest httpRequest) {
+        String resource = "";
+        try {
+            resource = ResourceFinder.findBy(httpRequest.getResourcePath());
+        } catch (IllegalArgumentException e) {
+            sendError(HttpStatus.NOT_FOUND);
+        }
+        return resource;
     }
 
     public void sendDefaultResponse() {

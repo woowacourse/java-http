@@ -43,20 +43,22 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
 
-        if (httpRequest.getCookie() != null && getSession(httpRequest.getCookie()) != null) {
-            Session session = getSession(httpRequest.getCookie());
+        if (httpRequest.getCookie("JSESSIONID") != null && getSession(httpRequest.getCookie("JSESSIONID")) != null) {
+            Session session = getSession(httpRequest.getCookie("JSESSIONID"));
 
             httpResponse.setStatusLine(FOUND);
             httpResponse.setCookie(session.getId());
             httpResponse.setLocation("/index.html");
-        } else {
-            String responseBody = getResource(httpRequest.getPath());
 
-            httpResponse.setStatusLine(OK);
-            httpResponse.setContentType(httpRequest.getContentType());
-            httpResponse.setResponseBody(responseBody);
-            httpResponse.setContentLength(responseBody.getBytes().length);
+            return httpResponse;
         }
+
+        String responseBody = getResource(httpRequest.getPath());
+
+        httpResponse.setStatusLine(OK);
+        httpResponse.setContentType(httpRequest.getContentType());
+        httpResponse.setResponseBody(responseBody);
+        httpResponse.setContentLength(responseBody.getBytes().length);
 
         return httpResponse;
     }

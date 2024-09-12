@@ -39,6 +39,14 @@ public class HttpResponse {
         responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
+    public String getStatusMessage() {
+        return this.statusLine.getStatusMessage();
+    }
+
+    public String getContentType() {
+        return this.responseHeaders.get("Content-Type");
+    }
+
     public String getResponse() {
         StringBuilder stringBuilder = new StringBuilder();
 

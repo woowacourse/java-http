@@ -15,6 +15,11 @@ public class HttpRequest {
     private final Map<String, String> requestHeaders;
     private String requestBody = ""; // 추후 GET, POST 리팩토링
 
+    public HttpRequest(RequestLine requestLine, Map<String, String> requestHeaders) {
+        this.requestLine = requestLine;
+        this.requestHeaders = requestHeaders;
+    }
+
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -36,6 +41,7 @@ public class HttpRequest {
         String headerLine = bufferedReader.readLine();
 
         while (!("".equals(headerLine)) && headerLine != null) {
+            System.out.println(headerLine);
             String[] headerLineValues = parseWithTrim(headerLine, ":");
             String headerName = headerLineValues[0];
             String headerValue = headerLineValues[1];
@@ -79,11 +85,11 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getCookie() {
+    public String getCookie(String key) {
         String[] cookies = parseWithTrim(requestHeaders.get("Cookie"), ";");
 
         for (String cookie : cookies) {
-            if (cookie.startsWith("JSESSIONID")) {
+            if (cookie.startsWith(key)) {
                 return cookie.split("=")[1];
             }
         }

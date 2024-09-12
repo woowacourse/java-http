@@ -12,6 +12,10 @@ public class StatusLine {
         this.statusMessage = status.getStatusMessage();
     }
 
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
     public String serialize() {
         return version + " " + statusCode + " " + statusMessage + " ";
     }

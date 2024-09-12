@@ -9,9 +9,14 @@ public class RequestLine {
     private String path; //TODO final 필요
     private final String version;
 
+    public RequestLine(Method method, String path, String version) {
+        this.method = method;
+        this.path = path;
+        this.version = version;
+    }
+
     public RequestLine(BufferedReader bufferedReader) throws IOException {
         String[] values = bufferedReader.readLine().split(" ");
-
         this.method = Method.from(values[0]);
         this.path = values[1];
         this.version = values[2];

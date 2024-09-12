@@ -10,8 +10,8 @@ public class StatusLine {
 
     public StatusLine() {
         this.versionOfProtocol = "HTTP/1.1";
-        this.statusCode = StatusCode._200.getCode();
-        this.statusMessage = StatusCode._200.getMessage();
+        this.statusCode = StatusCode.OK.getCode();
+        this.statusMessage = StatusCode.OK.getMessage();
     }
 
     public String getStatusLineResponse() {

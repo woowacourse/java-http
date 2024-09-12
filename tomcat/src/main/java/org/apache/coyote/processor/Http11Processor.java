@@ -52,18 +52,18 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (!httpRequest.isStaticRequest()) {
                     if (httpRequest.isPath("/")) {
-                        httpResponse.setStatusCode(StatusCode._200);
+                        httpResponse.setStatusCode(StatusCode.OK);
                         httpResponse.setBody("/index.html");
                     }
 
                     if (httpRequest.isPath("/login")) {
                         if (httpRequest.hasSession() && sessionManager.isSessionExist(httpRequest.getJESSIONID())) {
-                            httpResponse.setStatusCode(StatusCode._302);
+                            httpResponse.setStatusCode(StatusCode.FOUND);
                             httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                         }
                         if (!httpRequest.hasCookie() || !httpRequest.hasJESSIONID()
                             || !sessionManager.isSessionExist(httpRequest.getJESSIONID())) {
-                            httpResponse.setStatusCode(StatusCode._200);
+                            httpResponse.setStatusCode(StatusCode.OK);
                             httpResponse.setBody("/login.html");
                         }
                     }
@@ -73,11 +73,11 @@ public class Http11Processor implements Runnable, Processor {
                         String password = httpRequest.getQueryParam("password");
                         Optional<User> user = InMemoryUserRepository.findByAccount(account);
                         if (user.isEmpty() || !user.get().checkPassword(password)) {
-                            httpResponse.setStatusCode(StatusCode._401);
+                            httpResponse.setStatusCode(StatusCode.UNAUTHORIZED);
                             httpResponse.setBody("/401.html");
                         }
                         if (user.isPresent() && user.get().checkPassword(password)) {
-                            httpResponse.setStatusCode(StatusCode._302);
+                            httpResponse.setStatusCode(StatusCode.FOUND);
                             httpResponse.setBody("/index.html");
                             httpResponse.generateJSESSIONID();
                             Session session = new Session(httpResponse.getJESSIONID());
@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
                     }
 
                     if (httpRequest.isPath("/register")) {
-                        httpResponse.setStatusCode(StatusCode._200);
+                        httpResponse.setStatusCode(StatusCode.OK);
                         httpResponse.setBody("/register.html");
                     }
                 }
@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
                     String email = requestBody.get("email");
                     InMemoryUserRepository.save(new User(account, password, email));
 
-                    httpResponse.setStatusCode(StatusCode._302);
+                    httpResponse.setStatusCode(StatusCode.FOUND);
                     httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                 }
             }

@@ -18,7 +18,8 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
         String resource = ensureHtmlExtension(request.getPath());
         String responseBody = loadResourceContent(resource);
-        buildOkResponse(responseBody, response);
+        String contentType = response.getContentType(resource);
+        buildOkResponse(responseBody, contentType, response);
     }
 
     @Override
@@ -50,10 +51,10 @@ public class RegisterController extends AbstractController {
         }
     }
 
-    private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
+    private void buildOkResponse(String responseBody, String contentType, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
-                .addHeader("Content-Type", "text/html")
+                .addHeader("Content-Type", contentType)
                 .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 

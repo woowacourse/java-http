@@ -1,6 +1,9 @@
 package org.apache.coyote.http;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +30,7 @@ public class HttpResponse {
     }
 
     public static class HttpResponseBuilder {
+
         private HttpVersion httpVersion;
         private StatusCode statusCode;
         private Map<String, String> headers = new HashMap<>();
@@ -45,6 +49,10 @@ public class HttpResponse {
         public HttpResponseBuilder addHeader(String key, String value) {
             this.headers.put(key, value);
             return this;
+        }
+
+        public String getContentType(String resource) throws IOException {
+            return Files.probeContentType(Path.of(resource));
         }
 
         public HttpResponseBuilder withResponseBody(String responseBody) {

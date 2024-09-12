@@ -18,7 +18,7 @@ public class StaticResourceController extends AbstractController {
 
         try {
             String responseBody = loadResourceContent(resource);
-            String contentType = getContentType(resource);
+            String contentType = response.getContentType(resource);
             buildOkResponse(responseBody, contentType, response);
         } catch (Exception e) {
             buildRedirectResponse("/404.html", response);
@@ -50,19 +50,5 @@ public class StaticResourceController extends AbstractController {
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
         response.withStatusCode(StatusCode.FOUND)
                 .addHeader("Location", location);
-    }
-
-    private String getContentType(String resource) {
-        if (resource.endsWith(".css")) {
-            return "text/css";
-        } else if (resource.endsWith(".js")) {
-            return "application/javascript";
-        } else if (resource.endsWith(".ico")) {
-            return "image/x-icon";
-        } else if (resource.endsWith(".html")) {
-            return "text/html";
-        } else {
-            return "text/plain";
-        }
     }
 }

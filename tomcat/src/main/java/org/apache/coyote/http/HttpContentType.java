@@ -12,12 +12,12 @@ public enum HttpContentType {
     private final String mimeType;
     private final String extension;
 
-    HttpContentType(String mimeType, String extension) {
+    HttpContentType(final String mimeType, final String extension) {
         this.mimeType = mimeType;
         this.extension = extension;
     }
 
-    public static HttpContentType findByExtension(String extension) {
+    public static HttpContentType findByExtension(final String extension) {
         return Stream.of(HttpContentType.values())
                 .filter(type -> extension.endsWith(type.getExtension()))
                 .findFirst()

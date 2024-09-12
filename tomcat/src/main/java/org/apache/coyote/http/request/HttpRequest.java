@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.HttpCookie;
@@ -12,6 +13,7 @@ import org.apache.coyote.http.HttpMethod;
 public class HttpRequest {
 
     private static final String REQUEST_HEADER_SUFFIX = "";
+    private static final String COOKIE_NAME_SESSION_ID = "JSESSIONID";
 
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeader header;
@@ -25,18 +27,16 @@ public class HttpRequest {
     }
 
     private HttpRequestStartLine readStartLine(final BufferedReader bufferedReader) throws IOException {
-        final String startLine = bufferedReader.readLine();
-        if (startLine == null || startLine.isEmpty()) {
-            throw new IllegalArgumentException("요청의 시작줄이 비어있습니다.");
-        }
-        return new HttpRequestStartLine(startLine);
+        return Optional.ofNullable(bufferedReader.readLine())
+                .filter(line -> !line.isEmpty())
+                .map(HttpRequestStartLine::new)
+                .orElseThrow(() -> new IllegalArgumentException("요청의 시작줄이 비어있습니다."));
     }
 
     private HttpRequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (!REQUEST_HEADER_SUFFIX.equals(line)) {
-            line = bufferedReader.readLine();
+        String line;
+        while (!REQUEST_HEADER_SUFFIX.equals(line = bufferedReader.readLine())) {
             lines.add(line);
         }
         return new HttpRequestHeader(lines);
@@ -46,8 +46,7 @@ public class HttpRequest {
         final int contentLength = header.getContentLength();
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        final String bodyLine = new String(buffer);
-        return new HttpRequestBody(bodyLine);
+        return new HttpRequestBody(new String(buffer));
     }
 
     public Session createSession() {
@@ -57,12 +56,10 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        HttpCookie cookie = header.getCookie("JSESSIONID");
-        if (cookie != null) {
-            String sessionId = cookie.getValue();
-            return sessionManager.findSession(sessionId);
-        }
-        return null;
+        return Optional.ofNullable(header.getCookie(COOKIE_NAME_SESSION_ID))
+                .map(HttpCookie::getValue)
+                .map(sessionManager::findSession)
+                .orElse(null);
     }
 
     public HttpMethod getHttpMethod() {

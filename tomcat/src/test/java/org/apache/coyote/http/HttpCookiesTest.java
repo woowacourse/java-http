@@ -32,6 +32,18 @@ public class HttpCookiesTest {
     }
 
     @Test
+    void 첫번째_이퀄에서만_분리된다() {
+        // given
+        String cookieLine = "name=value=extra";
+
+        // when
+        HttpCookies cookies = new HttpCookies(cookieLine);
+
+        // then
+        assertThat(cookies.get("name").getValue()).isEqualTo("value=extra");
+    }
+
+    @Test
     void 새로운_쿠키를_추가할_수_있다() {
         // given
         HttpCookies cookies = new HttpCookies(null);

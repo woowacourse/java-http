@@ -7,7 +7,7 @@ public enum HttpStatusCode {
 
     private final String value;
 
-    HttpStatusCode(String value) {
+    HttpStatusCode(final String value) {
         this.value = value;
     }
 

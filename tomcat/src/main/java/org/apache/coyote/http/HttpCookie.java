@@ -10,7 +10,7 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public static HttpCookie ofJSessionId(String sessionId) {
+    public static HttpCookie ofJSessionId(final String sessionId) {
         return new HttpCookie("JSESSIONID", sessionId);
     }
 

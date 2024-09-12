@@ -2,12 +2,12 @@ package org.apache.coyote.http11.message.request;
 
 import java.util.Objects;
 
-public class HttpRequestInfo {
+public class RequestMapperKey {
 
     private final HttpMethod method;
     private final String urlPath;
 
-    public HttpRequestInfo(HttpMethod method, String urlPath) {
+    public RequestMapperKey(HttpMethod method, String urlPath) {
         this.method = method;
         this.urlPath = urlPath;
     }
@@ -20,7 +20,7 @@ public class HttpRequestInfo {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        HttpRequestInfo that = (HttpRequestInfo) o;
+        RequestMapperKey that = (RequestMapperKey) o;
         return method == that.method && Objects.equals(urlPath, that.urlPath);
     }
 

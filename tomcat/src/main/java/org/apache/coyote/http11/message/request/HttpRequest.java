@@ -65,8 +65,8 @@ public class HttpRequest {
         return url.getQueryParameter(key);
     }
 
-    public HttpRequestInfo getRequestInfo() {
-        return new HttpRequestInfo(method, getUrlPath());
+    public RequestMapperKey getRequestInfo() {
+        return new RequestMapperKey(method, getUrlPath());
     }
 
     public HttpMethod getMethod() {

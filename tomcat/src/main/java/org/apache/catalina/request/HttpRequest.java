@@ -5,12 +5,12 @@ import java.util.Map;
 import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.http.VersionOfProtocol;
 
-public class Request {
+public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
-    public Request(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+    public HttpRequest(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class RequestParserTest {
+class HttpRequestParserTest {
 
     @Nested
     @DisplayName("header 파싱")

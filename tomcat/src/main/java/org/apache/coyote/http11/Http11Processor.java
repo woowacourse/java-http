@@ -18,7 +18,7 @@ import org.apache.catalina.io.FileReader;
 import org.apache.catalina.io.RequestParser;
 import org.apache.catalina.io.RequestReader;
 import org.apache.catalina.request.HttpMethod;
-import org.apache.catalina.request.Request;
+import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.request.RequestBody;
 import org.apache.catalina.request.RequestHeader;
 import org.apache.catalina.request.RequestLine;
@@ -65,9 +65,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            Request request = readAndParserRequest(reader);
+            HttpRequest httpRequest = readAndParserRequest(reader);
 
-            String response = handleRequest(request);
+            String response = handleRequest(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -76,68 +76,68 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Request readAndParserRequest(BufferedReader reader) {
+    private HttpRequest readAndParserRequest(BufferedReader reader) {
         List<String> request = RequestReader.readRequest(reader);
         RequestLine requestLine = new RequestLine(request.getFirst());
         RequestHeader requestHeader = new RequestHeader(RequestParser.parseHeaders(request));
         String body = RequestReader.readBody(reader, requestHeader.getContentLength());
         RequestBody requestBody = new RequestBody(RequestParser.parseParamValues(body));
-        return new Request(requestLine, requestHeader, requestBody);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    private String handleRequest(Request request) {
-        if (request.isSameHttpMethod(HttpMethod.GET)) {
-            return generateResponseForUrl(request).toString();
+    private String handleRequest(HttpRequest httpRequest) {
+        if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
+            return generateResponseForUrl(httpRequest).toString();
         }
-        if (request.isSameHttpMethod(HttpMethod.POST)) {
-            return generateResponseForPostUrl(request).toString();
+        if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
+            return generateResponseForPostUrl(httpRequest).toString();
         }
         log.warn("지원되지 않는 HTTP 메서드입니다.");
         return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
                 "text/html",
                 FileReader.loadFileContent(BAD_REQUEST_PAGE)).toString();
     }
 
-    private HttpResponse generateResponseForUrl(Request request) {
-        String accept = request.getFileType();
-        if (ROOT_PATH.equals(request.getPathWithoutQuery())) {
+    private HttpResponse generateResponseForUrl(HttpRequest httpRequest) {
+        String accept = httpRequest.getFileType();
+        if (ROOT_PATH.equals(httpRequest.getPathWithoutQuery())) {
             return new HttpResponse(
-                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK), accept, DEFAULT_PAGE_CONTENT);
+                    new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.OK), accept, DEFAULT_PAGE_CONTENT);
         }
-        if (!request.checkQueryParamIsEmpty()) {
-            return generateResponseForQueryParam(request);
+        if (!httpRequest.checkQueryParamIsEmpty()) {
+            return generateResponseForQueryParam(httpRequest);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getPathWithoutQuery(), request.getCookie());
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(httpRequest.getPathWithoutQuery(), httpRequest.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             HttpResponse httpResponse = new HttpResponse(
-                    new StatusLine(request.getVersionOfProtocol(), page.getStatus()),
+                    new StatusLine(httpRequest.getVersionOfProtocol(), page.getStatus()),
                     accept,
                     FileReader.loadFileContent(page.getFileName()));
             httpResponse.addLocation(page.getFileName());
             return httpResponse;
         }
         return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
+                new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.OK),
                 accept,
-                FileReader.loadFileContent(request.getPathWithoutQuery()));
+                FileReader.loadFileContent(httpRequest.getPathWithoutQuery()));
     }
 
-    private HttpResponse generateResponseForQueryParam(Request headers) {
+    private HttpResponse generateResponseForQueryParam(HttpRequest headers) {
         if (LOGIN_PATH.equals(headers.getPathWithoutQuery())) {
             return handleLoginRequest(headers);
         }
         throw new RuntimeException("'" + headers.getPathWithoutQuery() + "'는 정의되지 않은 URL입니다.");
     }
 
-    private HttpResponse handleLoginRequest(Request request) {
-        String accept = request.getFileType();
-        Map<String, String> queryParams = request.getQueryParam();
-        if (isMissingRequiredParams(request, queryParams)) {
+    private HttpResponse handleLoginRequest(HttpRequest httpRequest) {
+        String accept = httpRequest.getFileType();
+        Map<String, String> queryParams = httpRequest.getQueryParam();
+        if (isMissingRequiredParams(httpRequest, queryParams)) {
             return new HttpResponse(
-                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                    new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
                     accept,
                     FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
@@ -147,12 +147,12 @@ public class Http11Processor implements Runnable, Processor {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute(session.getId(), user);
             SessionManager.getInstance().add(session);
-            HttpCookie httpCookie = request.getCookie();
+            HttpCookie httpCookie = httpRequest.getCookie();
             String cookie = httpCookie.getCookies(session.getId());
 
             HttpResponse httpResponse
                     = new HttpResponse(
-                    new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
+                    new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.FOUND),
                     accept,
                     FileReader.loadFileContent(INDEX_PAGE));
             httpResponse.setCookie(cookie);
@@ -160,13 +160,13 @@ public class Http11Processor implements Runnable, Processor {
             return httpResponse;
         }
         return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.UNAUTHORIZED),
+                new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.UNAUTHORIZED),
                 accept,
                 FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 
-    private boolean isMissingRequiredParams(Request request, Map<String, String> queryParams) {
-        return request.getQueryParam().size() < 2 ||
+    private boolean isMissingRequiredParams(HttpRequest httpRequest, Map<String, String> queryParams) {
+        return httpRequest.getQueryParam().size() < 2 ||
                 (queryParams.get(ACCOUNT) == null && queryParams.get(PASSWORD) == null);
     }
 
@@ -179,14 +179,14 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private HttpResponse generateResponseForPostUrl(Request request) {
-        String url = request.getPathWithoutQuery();
-        String accept = request.getFileType();
+    private HttpResponse generateResponseForPostUrl(HttpRequest httpRequest) {
+        String url = httpRequest.getPathWithoutQuery();
+        String accept = httpRequest.getFileType();
         if (REGISTER_PATH.equals(url)) {
-            return handleRegistration(request.getVersionOfProtocol(), request.getBody(), accept);
+            return handleRegistration(httpRequest.getVersionOfProtocol(), httpRequest.getBody(), accept);
         }
         return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
+                new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
                 accept,
                 FileReader.loadFileContent(NOT_FOUND_PAGE));
     }

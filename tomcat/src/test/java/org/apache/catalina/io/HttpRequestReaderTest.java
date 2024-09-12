@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 
 import support.StubSocket;
 
-class RequestReaderTest {
+class HttpRequestReaderTest {
 
     @Nested
     @DisplayName("request 읽기")
-    class readRequest {
+    class readHttpRequest {
         @Test
         @DisplayName("성공 : 문자열이 존재한다면 성공")
         void readRequestSuccess() {

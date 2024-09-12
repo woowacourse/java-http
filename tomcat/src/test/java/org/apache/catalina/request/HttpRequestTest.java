@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class RequestTest {
+class HttpRequestTest {
     @Nested
     @DisplayName("생성")
     class Constructor {
@@ -23,14 +23,14 @@ class RequestTest {
             Map<String, String> body = Map.of("body", "hello");
             RequestBody requestBody = new RequestBody(body);
 
-            Request request = new Request(requestLine, requestHeader, requestBody);
+            HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            assertAll(() -> assertThat(request.getQueryParam()).isEqualTo(
+            assertAll(() -> assertThat(httpRequest.getQueryParam()).isEqualTo(
                             Map.of("account", "gugu", "password", "password")),
-                    () -> assertThat(request.getPathWithoutQuery()).isEqualTo("/index"),
-                    () -> assertThat(request.getFileType()).isEqualTo("text/html"),
-                    () -> assertThat(request.getCookie()).isEqualTo(new HttpCookie(Map.of("id", "gugu"))),
-                    () -> assertThat(request.getBody()).isEqualTo(body));
+                    () -> assertThat(httpRequest.getPathWithoutQuery()).isEqualTo("/index"),
+                    () -> assertThat(httpRequest.getFileType()).isEqualTo("text/html"),
+                    () -> assertThat(httpRequest.getCookie()).isEqualTo(new HttpCookie(Map.of("id", "gugu"))),
+                    () -> assertThat(httpRequest.getBody()).isEqualTo(body));
         }
     }
 }

@@ -1,8 +1,12 @@
 package org.apache.coyote.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class QueryParameterParser {
@@ -16,15 +20,29 @@ public class QueryParameterParser {
     }
 
     public static Map<String, List<String>> parse(String queryParameter) {
+        if (queryParameter == null || queryParameter.isBlank()) {
+            return Map.of();
+        }
         return Arrays.stream(queryParameter.split(PARAMETER_DELIMITER))
                 .map(queryString -> queryString.split(KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(
-                        query -> query[PARAMETER_KEY_INDEX],
-                        query -> List.of(query[PARAMETER_VALUE_INDEX]),
-                        (existingList, newList) -> {
-                            existingList.addAll(newList);
-                            return existingList;
-                        }
-                ));
+                .collect(Collectors.toMap(QueryParameterParser::parseKey, QueryParameterParser::parseValue, merge()));
+    }
+
+    private static String parseKey(String[] queryParameter) {
+        return queryParameter[PARAMETER_KEY_INDEX];
+    }
+
+    private static List<String> parseValue(String[] queryParameter) {
+        if (queryParameter.length == 1) {
+            return new ArrayList<>(List.of(""));
+        }
+        return new ArrayList<>(List.of(queryParameter[PARAMETER_VALUE_INDEX]));
+    }
+
+    private static BinaryOperator<List<String>> merge() {
+        return (existingList, newList) -> {
+            existingList.addAll(newList);
+            return existingList;
+        };
     }
 }

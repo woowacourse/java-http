@@ -3,16 +3,13 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.apache.coyote.http11.MapFactory;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class RequestHeader {
-    private static final String HTTP_LINE_SEPARATOR = "\r\n";
+    private static final String ELEMENT_SEPARATOR = "\r\n";
     private static final String KEY_VALUE_SEPARATOR = ": ";
-    private static final int KEY_VALUE_SIZE = 2;
-    private static final int KEY_IDX = 0;
-    private static final int VALUE_IDX = 1;
     private static final String ACCEPT_LINE_SEPARATOR = ",";
     private static final String CONTENT_LENGTH_FIELD = "Content-Length";
     private static final String COOKIE_FIELD = "Cookie";
@@ -25,14 +22,7 @@ public class RequestHeader {
     }
 
     private Map<String, String> createHeader(String inputHeader) {
-        return Arrays.stream(inputHeader.split(HTTP_LINE_SEPARATOR))
-                .map(headerLine -> Arrays.asList(headerLine.split(KEY_VALUE_SEPARATOR)))
-                .filter(keyValue -> keyValue.size() == KEY_VALUE_SIZE)
-                .filter(keyValue -> !keyValue.get(KEY_IDX).isBlank() && !keyValue.get(VALUE_IDX).isBlank())
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue.get(KEY_IDX).trim(),
-                        keyValue -> keyValue.get(VALUE_IDX).trim()
-                ));
+        return MapFactory.create(inputHeader, ELEMENT_SEPARATOR, KEY_VALUE_SEPARATOR);
     }
 
     public int getContentLength() {

@@ -1,12 +1,14 @@
 package org.apache.coyote.http11.cookie;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import org.apache.coyote.http11.MapFactory;
 
 public class HttpCookie {
     private static final String JSESSIONID_KEY = "JSESSIONID";
+    private static final String ELEMENT_SEPARATOR = "; ";
+    private static final String KEY_VALUE_SEPARATOR = "=";
 
     private final Map<String, String> cookie;
 
@@ -15,12 +17,7 @@ public class HttpCookie {
     }
 
     private Map<String, String> convertToCookie(String cookieLines) {
-        return Arrays.stream(cookieLines.split("; "))
-                .map(cookieLine -> cookieLine.split("="))
-                .collect(Collectors.toMap(
-                        entrySet -> entrySet[0],
-                        entrySet -> entrySet[1]
-                ));
+        return MapFactory.create(cookieLines, ELEMENT_SEPARATOR, KEY_VALUE_SEPARATOR);
     }
 
     public String getJSessionId() {

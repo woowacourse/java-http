@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Optional;
-import org.apache.coyote.http11.HttpRequestHeaders;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.controller.login.LoginController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
@@ -49,7 +48,7 @@ class LoginControllerTest extends BaseHttpTest {
         String expected = resolve200Response("html", url);
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET /login HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html;charset=utf-8"))
+                new HttpRequestHeader(Map.of("Content-Type", "text/html;charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 
@@ -66,7 +65,7 @@ class LoginControllerTest extends BaseHttpTest {
 
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET " + "/login?account=testAccount&password=testPassword" + " HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8"))
+                new HttpRequestHeader(Map.of("Content-Type", "text/html; charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 
@@ -84,7 +83,7 @@ class LoginControllerTest extends BaseHttpTest {
 
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET " + "/login?account=wrongAccount&password=wrongPassword" + " HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8"))
+                new HttpRequestHeader(Map.of("Content-Type", "text/html; charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 

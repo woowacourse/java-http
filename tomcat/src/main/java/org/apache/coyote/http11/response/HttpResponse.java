@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpRequestHeaders;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
@@ -14,33 +14,36 @@ public class HttpResponse {
 
     private final ViewResolver viewResolver;
     private final Serializer<HttpResponse> serialzer;
-    private final HttpRequestHeaders headers;
-    private StatusCode statusCode;
+    private final HttpResponseHeader headers;
     private ResponseBody responseBody;
 
     public HttpResponse() {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
-        this.headers = new HttpRequestHeaders();
+        this.headers = new HttpResponseHeader();
     }
 
-    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage, ResponseBody responseBody) {
+    public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage, ResponseBody responseBody) {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
         this.headers = headers;
         this.responseBody = responseBody;
     }
 
-    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage) {
+    public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage) {
         this(headers, statusCode, statusMessage, null);
+    }
+
+    public static HttpResponse ok(String viewUrl) {
+        return null;
     }
 
     public String serialize() {
         return serialzer.serialize(this);
     }
 
-    public HttpResponse statusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
+    public HttpResponse statusCode(StatusCode code) {
+        headers.statusCode(code);
         return this;
     }
 
@@ -72,12 +75,12 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpRequestHeaders getHeaders() {
+    public HttpResponseHeader getHeaders() {
         return headers;
     }
 
     public StatusCode getStatusCode() {
-        return statusCode;
+        return headers.getStatusCode();
     }
 
     public ResponseBody getResponseBody() {

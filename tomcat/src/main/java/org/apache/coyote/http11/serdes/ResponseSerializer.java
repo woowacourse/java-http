@@ -2,9 +2,9 @@ package org.apache.coyote.http11.serdes;
 
 import java.util.Map;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.ResponseBody;
 
 public class ResponseSerializer implements Serializer<HttpResponse> {
@@ -35,7 +35,7 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
         return joiner.toString();
     }
 
-    private String serializeHeader(HttpRequestHeaders headers) {
+    private String serializeHeader(HttpResponseHeader headers) {
         StringJoiner joiner = new StringJoiner(" \r\n", BLANK, " ");
         Map<String, String> payLoads = headers.getPayLoads();
 

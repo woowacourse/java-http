@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.SessionService;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
@@ -78,7 +79,7 @@ class LoginControllerTest {
         HttpResponse response = new HttpResponse();
         loginController.service(request, response);
 
-        HttpResponse expectedResponse = HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
+        HttpResponse expectedResponse = new HttpResponse(HttpStatus.FOUND, Map.of(HttpHeader.LOCATION, "/401.html"));
         assertThat(response).isEqualTo(expectedResponse);
     }
 

@@ -14,7 +14,6 @@ public class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String STATUS_LINE_FORMAT = "%s %d %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
-    private static final String REDIRECTION_HEADER = "Location";
     private static final HttpStatus DEFAULT_REDIRECT_STATUS = HttpStatus.FOUND;
 
     private final Protocol protocol = Protocol.HTTP11;
@@ -40,15 +39,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse createRedirectResponse(HttpStatus httpStatus, String location) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeader.LOCATION, location);
-        return new HttpResponse(
-                httpStatus,
-                headers
-        );
-    }
-
     public void redirectTo(String location) {
         redirectTo(location, DEFAULT_REDIRECT_STATUS);
     }
@@ -59,7 +49,7 @@ public class HttpResponse {
     }
 
     private void addRedirectHeader(String location) {
-        addHeader(REDIRECTION_HEADER, location);
+        addHeader(HttpHeader.LOCATION, location);
     }
 
     public void addCookie(HttpCookie cookie) {

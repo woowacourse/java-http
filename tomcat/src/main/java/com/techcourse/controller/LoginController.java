@@ -20,7 +20,6 @@ import com.techcourse.model.User;
 public class LoginController extends AbstractController {
 
     public static final String LOGIN_PATH = "/login";
-    private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String ACCOUNT = "account";
@@ -49,7 +48,7 @@ public class LoginController extends AbstractController {
 
         Map<String, String> queryParams = request.getQueryParam();
         if (hasMissingRequiredParams(queryParams)) {
-            return getBadRequestResponse(request);
+            throw new IllegalArgumentException("파라미터가 제대로 정의되지 않았습니다.");
         }
         Optional<User> authenticatedUser = getAuthenticatedUser(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
         return authenticatedUser.map(user -> getLoginSuccessResponse(request, user))
@@ -59,13 +58,6 @@ public class LoginController extends AbstractController {
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
         return queryParams.size() < 2 ||
                 queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
-    }
-
-    private static HttpResponse getBadRequestResponse(HttpRequest request) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
-                request.getContentType(),
-                FileReader.loadFileContent(BAD_REQUEST_PAGE));
     }
 
     private Optional<User> getAuthenticatedUser(String account, String password) {

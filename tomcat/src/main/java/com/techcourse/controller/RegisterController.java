@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
-import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
@@ -19,7 +18,6 @@ import com.techcourse.model.User;
 public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PATH = "/register";
-    private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -51,14 +49,10 @@ public class RegisterController extends AbstractController {
     }
 
     private HttpResponse handleRegistration(HttpRequest request) {
-        VersionOfProtocol versionOfProtocol = request.getVersionOfProtocol();
         Map<String, String> bodyParams = request.getBody();
         String account = bodyParams.get(ACCOUNT);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return new HttpResponse(
-                    new StatusLine(versionOfProtocol, HttpStatus.BAD_REQUEST),
-                    request.getContentType(),
-                    FileReader.loadFileContent(BAD_REQUEST_PAGE));
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);

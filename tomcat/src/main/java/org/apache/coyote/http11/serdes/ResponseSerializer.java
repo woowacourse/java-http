@@ -3,7 +3,7 @@ package org.apache.coyote.http11.serdes;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseSerializer implements Serializer<HttpResponse> {
@@ -34,7 +34,7 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
         return joiner.toString();
     }
 
-    private String serializeHeader(HttpHeaders headers) {
+    private String serializeHeader(HttpRequestHeaders headers) {
         StringJoiner joiner = new StringJoiner(" \r\n", BLANK, " ");
         Map<String, String> payLoads = headers.getPayLoads();
 

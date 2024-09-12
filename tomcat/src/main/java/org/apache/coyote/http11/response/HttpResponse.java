@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
@@ -15,7 +15,7 @@ public class HttpResponse {
 
     private final ViewResolver viewResolver;
     private final Serializer<HttpResponse> serialzer;
-    private final HttpHeaders headers;
+    private final HttpRequestHeaders headers;
     private int statusCode;
     private String statusMessage;
     private Optional<String> responseBody;
@@ -23,12 +23,12 @@ public class HttpResponse {
     public HttpResponse() {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
-        this.headers = new HttpHeaders();
+        this.headers = new HttpRequestHeaders();
         this.responseBody = Optional.empty();
 
     }
 
-    public HttpResponse(HttpHeaders headers, int statusCode, String statusMessage, Optional<String> responseBody) {
+    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage, Optional<String> responseBody) {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
         this.headers = headers;
@@ -37,7 +37,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public HttpResponse(HttpHeaders headers, int statusCode, String statusMessage) {
+    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage) {
         this(headers, statusCode, statusMessage, null);
     }
 
@@ -79,7 +79,7 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpHeaders getHeaders() {
+    public HttpRequestHeaders getHeaders() {
         return headers;
     }
 

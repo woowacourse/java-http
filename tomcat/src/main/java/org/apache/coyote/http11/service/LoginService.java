@@ -12,6 +12,7 @@ public class LoginService {
     public static LoginService getInstance() {
         return INSTANCE;
     }
+
     private LoginService() {
     }
 

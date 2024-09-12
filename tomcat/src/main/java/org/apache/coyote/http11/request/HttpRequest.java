@@ -5,26 +5,26 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
     private final Optional<RequestBody> requestBody;
 
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, Optional<RequestBody> requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, Optional<RequestBody> requestBody) {
         this.requestLine = requestLine;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;
     }
 
     public static HttpRequest from(BufferedReader bufferedReader) {
         try {
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-            HttpHeaders httpHeader = HttpHeaders.readRequestHeader(bufferedReader);
+            HttpRequestHeaders httpHeader = HttpRequestHeaders.readRequestHeader(bufferedReader);
             Optional<RequestBody> body = initializeBody(bufferedReader, requestLine, httpHeader);
             return new HttpRequest(requestLine, httpHeader, body);
         } catch (IOException e) {
@@ -36,7 +36,7 @@ public class HttpRequest {
     private static Optional<RequestBody> initializeBody(
             BufferedReader reader,
             RequestLine requestLine,
-            HttpHeaders httpHeader
+            HttpRequestHeaders httpHeader
     ) {
         if (!(requestLine.getMethod() == HttpMethod.POST)) {
             return Optional.empty();
@@ -57,14 +57,14 @@ public class HttpRequest {
     }
 
     public boolean hasCookie(){
-        return httpHeaders.hasCookie();
+        return httpRequestHeaders.hasCookie();
     }
 
     public Cookie getCookie(){
         if(!hasCookie()){
             throw  new IllegalStateException("쿠키가 존재하지 않습니다.");
         }
-        return httpHeaders.getCookie();
+        return httpRequestHeaders.getCookie();
     }
     public RequestLine getRequestLine() {
         return requestLine;

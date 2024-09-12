@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.catalina.parser.RequestParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ class HttpRequestParserTest {
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ");
 
-            Map<String, String> headers = RequestParser.parseHeaders(httpRequest);
+            Map<String, String> headers = HttpRequestParser.parseHeaders(httpRequest);
 
             assertThat(headers).isEqualTo(Map.of("Host", "localhost:8080", "Connection", "keep-alive"));
         }
@@ -37,7 +36,7 @@ class HttpRequestParserTest {
         void parseParamValuesSuccess() {
             final String param = "account=gugu&password=password";
 
-            Map<String, String> actual = RequestParser.parseParamValues(param);
+            Map<String, String> actual = HttpRequestParser.parseParamValues(param);
 
             assertThat(actual).isEqualTo(Map.of("account", "gugu", "password", "password"));
         }

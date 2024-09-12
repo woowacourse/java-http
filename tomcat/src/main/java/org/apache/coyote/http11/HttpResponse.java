@@ -6,98 +6,92 @@ import java.util.Collections;
 import java.util.List;
 
 public class HttpResponse {
-    List<String> headers;
-    byte[] responseBody;
 
-    private HttpResponse(List<String> headers, byte[] responseBody) {
-        this.headers = headers;
-        this.responseBody = responseBody;
-    }
+	private final StatusLine statusLine;
+	private final List<String> headers;
+	private final byte[] responseBody;
 
-    public static HttpResponse ok(String uri, String responseBody) {
-        List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 200 OK ");
-        headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-        headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
+	public HttpResponse(StatusLine statusLine, List<String> headers, byte[] responseBody) {
+		this.statusLine = statusLine;
+		this.headers = headers;
+		this.responseBody = responseBody;
+	}
 
-        return new HttpResponse(headers, responseBody.getBytes(StandardCharsets.UTF_8));
-    }
+	public static HttpResponse ok(String uri, String responseBody) {
+		List<String> headers = new ArrayList<>();
+		headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
+		headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
 
-    public static HttpResponse okWithContentType(byte[] responseBody, String contentType) {
-        List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 200 OK ");
-        headers.add("Content-Type: " + contentType + " ");
-        headers.add("Content-Length: " + responseBody.length + " ");
+		return new HttpResponse(StatusLine.from(HttpStatus.OK), headers, responseBody.getBytes(StandardCharsets.UTF_8));
+	}
 
-        return new HttpResponse(headers, responseBody);
-    }
+	public static HttpResponse okWithContentType(byte[] responseBody, String contentType) {
+		List<String> headers = new ArrayList<>();
+		headers.add("Content-Type: " + contentType + " ");
+		headers.add("Content-Length: " + responseBody.length + " ");
 
-    public static HttpResponse redirect(String uri, String redirectUri) {
-        List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 302 Found ");
-        headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-        headers.add("Content-Length: " + calculateContentLength(redirectUri) + " ");
-        headers.add("Location: " + redirectUri);
+		return new HttpResponse(StatusLine.from(HttpStatus.OK), headers, responseBody);
+	}
 
-        return new HttpResponse(headers, redirectUri.getBytes(StandardCharsets.UTF_8));
-    }
+	public static HttpResponse redirect(String uri, String redirectUri) {
+		List<String> headers = new ArrayList<>();
+		headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
+		headers.add("Content-Length: " + calculateContentLength(redirectUri) + " ");
+		headers.add("Location: " + redirectUri);
 
-    public static HttpResponse notFound() {
-        List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 404 Not Found");
-        headers.add("Content-Type: text/html; charset=UTF-8");
-        String body = "<h1>404 - Not Found</h1>";
-        headers.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length);
+		return new HttpResponse(StatusLine.from(HttpStatus.FOUND), headers,
+			redirectUri.getBytes(StandardCharsets.UTF_8));
+	}
 
-        return new HttpResponse(headers, body.getBytes(StandardCharsets.UTF_8));
-    }
+	public static HttpResponse notFound() {
+		List<String> headers = new ArrayList<>();
+		headers.add("Content-Type: text/html; charset=UTF-8");
+		String body = "<h1>404 - Not Found</h1>";
+		headers.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length);
 
-    private static int calculateContentLength(String content) {
-        return content.getBytes(StandardCharsets.UTF_8).length;
-    }
+		return new HttpResponse(StatusLine.from(HttpStatus.NOT_FOUND), headers, body.getBytes(StandardCharsets.UTF_8));
+	}
 
-    private static String getContentType(String uri) {
-        if (uri.startsWith("/css")) {
-            return "text/css";
-        }
-        return "text/html";
-    }
+	private static int calculateContentLength(String content) {
+		return content.getBytes(StandardCharsets.UTF_8).length;
+	}
 
-    public void setCookie(String key, String value) {
-        for (String header : headers) {
-            if (header.startsWith("Set-Cookie")) {
-                String newCookie = header + " " + key + "=" + value + ";";
-                headers.add(newCookie);
-                headers.remove(header);
-                return;
-            }
-        }
-        headers.add("Set-Cookie: " + key + "=" + value + ";");
-    }
+	private static String getContentType(String uri) {
+		if (uri.startsWith("/css")) {
+			return "text/css";
+		}
+		return "text/html";
+	}
 
-    public List<String> getHeaders() {
-        return Collections.unmodifiableList(headers);
-    }
+	public void setCookie(String key, String value) {
+		for (String header : headers) {
+			if (header.startsWith("Set-Cookie")) {
+				String newCookie = header + " " + key + "=" + value + ";";
+				headers.add(newCookie);
+				headers.remove(header);
+				return;
+			}
+		}
+		headers.add("Set-Cookie: " + key + "=" + value + ";");
+	}
 
-    public String getResponseBody() {
-        return new String(responseBody,StandardCharsets.UTF_8);
-    }
+	public List<String> getHeaders() {
+		return Collections.unmodifiableList(headers);
+	}
 
-    public byte[] getBytes() {
-        String headerString = String.join("\r\n", headers) + "\r\n" + "\r\n";
-        byte[] headerBytes = headerString.getBytes(StandardCharsets.UTF_8);
+	public String getResponseBody() {
+		return new String(responseBody, StandardCharsets.UTF_8);
+	}
 
-        byte[] fullResponse = new byte[headerBytes.length + responseBody.length];
-        System.arraycopy(headerBytes, 0, fullResponse, 0, headerBytes.length);
-        System.arraycopy(responseBody, 0, fullResponse, headerBytes.length, responseBody.length);
+	public byte[] getBytes() {
+		return toString().getBytes(StandardCharsets.UTF_8);
+	}
 
-        return fullResponse;
-    }
-
-    @Override
-    public String toString() {
-        String headersString = String.join("\r\n", headers);
-        String bodyString = new String(responseBody, StandardCharsets.UTF_8);
-        return headersString + "\r\n\r\n" + bodyString;
-    }
+	@Override
+	public String toString() {
+		String statusLineString = statusLine.getLine() + " \r\n";
+		String headersString = String.join("\r\n", headers);
+		String bodyString = new String(responseBody, StandardCharsets.UTF_8);
+		return statusLineString + headersString + "\r\n\r\n" + bodyString;
+	}
 }

@@ -36,6 +36,10 @@ public class RequestLine {
         return requestUrl.contains(".js");
     }
 
+    public boolean hasHtml() {
+        return requestUrl.contains(".html");
+    }
+
     public boolean has401() {
         return requestUrl.contains("401");
     }

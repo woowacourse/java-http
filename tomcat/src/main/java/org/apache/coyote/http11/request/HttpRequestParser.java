@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.response.HttpResponseHeaders;
 
 public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분리
 

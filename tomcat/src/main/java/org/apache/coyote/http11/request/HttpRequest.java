@@ -53,7 +53,7 @@ public class HttpRequest {
     private String getContentTypeByFilePath(String path) {
         FileReader fileReader = FileReader.getInstance();
         String fileExtension = fileReader.getFileExtension(path);
-        if (fileExtension.equals(".js")){
+        if (fileExtension.equals(".js")) {
             return "application/javascript";
         }
         if (fileExtension.equals(".css")) {

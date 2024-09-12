@@ -27,8 +27,8 @@ public class LoginController {
 
     public HttpResponse login(HttpRequest httpRequest) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
-        String filePath = "/login";
         HttpStatusCode statusCode = HttpStatusCode.OK;
+        httpRequest.setHttpRequestPath("/login");
         String account = httpRequest.getRequestBodyValue("account");
         String password = httpRequest.getRequestBodyValue("password");
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
@@ -38,7 +38,7 @@ public class LoginController {
             if (foundUser.checkPassword(password)) {
                 log.info("user : " + foundUser);
                 statusCode = HttpStatusCode.FOUND;
-                filePath = "/index.html";
+                httpRequest.setHttpRequestPath("/index.html");
 
                 String jsessionid = UUID.randomUUID().toString();
                 Session session = new Session(jsessionid);
@@ -47,12 +47,12 @@ public class LoginController {
                 httpResponseHeaders.setCookie("JSESSIONID=" + jsessionid);
             }
         } catch (UserException e) {
-            filePath = "/401.html";
+            httpRequest.setHttpRequestPath("/401.html");
             statusCode = HttpStatusCode.UNAUTHORIZED;
         }
 
         HttpResponseBody httpResponseBody = new HttpResponseBody(
-                fileReader.readFile(filePath));
+                fileReader.readFile(httpRequest.getHttpRequestPath()));
         httpResponseHeaders.setContentType(httpRequest);
         httpResponseHeaders.setContentLength(httpResponseBody);
 

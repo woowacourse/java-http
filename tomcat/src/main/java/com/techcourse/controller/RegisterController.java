@@ -21,7 +21,7 @@ public class RegisterController {
     public HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
         HttpStatusCode statusCode = HttpStatusCode.OK;
-        String filePath = "/index.html";
+        httpRequest.setHttpRequestPath("/index.html");
         String account = httpRequest.getRequestBodyValue("account");
         String email = httpRequest.getRequestBodyValue("email");
         String password = httpRequest.getRequestBodyValue("password");
@@ -30,11 +30,11 @@ public class RegisterController {
             checkDuplicatedUser(user);
             InMemoryUserRepository.save(user);
         } catch (UserException e) {
-            filePath = "/register.html";
+            httpRequest.setHttpRequestPath("/register.html");
             statusCode = HttpStatusCode.BAD_REQUEST;
         }
         HttpResponseBody httpResponseBody = new HttpResponseBody(
-                fileReader.readFile(filePath));
+                fileReader.readFile(httpRequest.getHttpRequestPath()));
 
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         httpResponseHeaders.setContentType(httpRequest);

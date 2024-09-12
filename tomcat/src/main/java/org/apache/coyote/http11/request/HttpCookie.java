@@ -4,8 +4,6 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private static final String DELIMITER = "=";
-
     private final Map<String, String> cookies;
 
     public HttpCookie(Map<String, String> cookies) {

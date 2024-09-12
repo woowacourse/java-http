@@ -1,15 +1,10 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import org.apache.coyote.http11.FileReader;
-import org.apache.coyote.http11.request.HttpCookie;
-import org.apache.coyote.http11.request.HttpCookieExtractor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestHeaders;
 import org.apache.coyote.http11.request.SessionManager;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
@@ -31,7 +26,7 @@ public class StaticPageController {
         }
 
         HttpResponseBody httpResponseBody = new HttpResponseBody(
-            fileReader.readFile(httpRequest.getHttpRequestPath()));
+                fileReader.readFile(httpRequest.getHttpRequestPath()));
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         httpResponseHeaders.setContentType(httpRequest);
         httpResponseHeaders.setContentLength(httpResponseBody);

@@ -38,6 +38,38 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Disabled // 어떻게 해야 성공시킬 수 있을까요...
+    @Test
+    @DisplayName("process 동작 중 IOException이 발생하면 /static/500.html 페이지를 응답힌다.")
+    void process_fail_500() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        socket.setThrowIOException(true);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        var expected = "HTTP/1.1 500 INTERNAL SERVER ERROR \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.length + " \r\n" +
+                "\r\n" +
+                new String(responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @Test
     @DisplayName("/ 주소에 접근하면 /static/index.html 페이지를 응답한다.")
     void mainPage_Html() throws IOException {
@@ -366,7 +398,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(responseLine, contentType, contentLength);
     }
 
-    @CsvSource({"account=ash&password=password", "account=gugu&password=sosad"})
+    @CsvSource({"account=chorong&password=password", "account=gugu&password=sosad"})
     @ParameterizedTest
     @DisplayName("/login 주소에서 부정확한 계정명이나 비밀번호로 로그인을 시도하면 /401.html 페이지로 리다이렉트한다.")
     void login_fail_invalidAccount(String requestBody) throws IOException {

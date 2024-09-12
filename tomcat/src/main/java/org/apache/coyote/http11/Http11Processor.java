@@ -49,6 +49,14 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
+            performProcess(bufferedReader, outputStream);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void performProcess(final BufferedReader bufferedReader, final OutputStream outputStream) throws IOException {
+        try {
             String requestLine = bufferedReader.readLine();
 
             if (requestLine == null) {
@@ -68,9 +76,17 @@ public class Http11Processor implements Runnable, Processor {
             if (method.equals("POST")) {
                 doPost(httpRequestHeaders, bufferedReader, requestURL, outputStream);
             }
-
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
+            handleException(outputStream);
+        }
+    }
+
+    private void handleException(OutputStream outputStream) {
+        try {
+            sendHttpResponse("/static/500.html", outputStream, "500 INTERNAL SERVER ERROR", "text/html;charset=utf-8", "");
+        } catch (IOException e) {
+            log.error("Failed to send error response", e);
         }
     }
 

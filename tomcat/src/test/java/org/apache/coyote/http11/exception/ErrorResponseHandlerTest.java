@@ -31,15 +31,16 @@ public class ErrorResponseHandlerTest {
     void exceptionHandler() {
         // given
         ErrorResponseHandler.getInstance().setResponse(new HttpResponse(outputStream));
-        String errorMessage = "메서드를 지원하지 않습니다";
+        String errorMessage = "잘못된 요청입니다.";
 
         // when
         try {
-            throw new RequestException(HttpStatusCode.METHOD_NOT_ALLOWED, errorMessage);
+            throw new RequestException(HttpStatusCode.BAD_REQUEST, errorMessage);
         } catch (RequestException e) {
+            e.handleErrorResponse();
             String actual = outputStream.toString(StandardCharsets.UTF_8);
             // then
-            assertThat(actual).isEqualTo(errorMessage);
+            assertThat(actual).contains("400", errorMessage);
         }
     }
 }

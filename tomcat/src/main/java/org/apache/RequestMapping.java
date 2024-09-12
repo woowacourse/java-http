@@ -5,15 +5,15 @@ import java.util.List;
 
 import org.apache.coyote.http11.HttpRequest;
 
-public class HandlerMapping {
+public class RequestMapping {
 
-	public static List<RequestHandler> handlers = new ArrayList<>();
+	public static List<Controller> handlers = new ArrayList<>();
 
-	public void register(RequestHandler handler) {
+	public void register(Controller handler) {
 		handlers.add(handler);
 	}
 
-	public RequestHandler getHandler(HttpRequest request) {
+	public Controller getController(HttpRequest request) {
 		return handlers.stream()
 			.filter(handler -> handler.canHandle(request))
 			.findFirst()

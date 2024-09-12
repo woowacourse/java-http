@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 
-import org.apache.HandlerMapping;
-import org.apache.HomeRequestHandler;
-import org.apache.LoginRequestHandler;
-import org.apache.RegisterRequestHandler;
-import org.apache.StaticResourceRequestHandler;
+import org.apache.RequestMapping;
+import org.apache.HomeController;
+import org.apache.LoginController;
+import org.apache.RegisterController;
+import org.apache.StaticResourceController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,15 +20,15 @@ public class Http11Processor implements Runnable, Processor {
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
 	private final Socket connection;
-	private final HandlerMapping handlerMapping;
+	private final RequestMapping requestMapping;
 
 	public Http11Processor(final Socket connection) {
 		this.connection = connection;
-		this.handlerMapping = new HandlerMapping();
-		handlerMapping.register(new StaticResourceRequestHandler());
-		handlerMapping.register(new HomeRequestHandler());
-		handlerMapping.register(new LoginRequestHandler(SessionManager.getInstance()));
-		handlerMapping.register(new RegisterRequestHandler());
+		this.requestMapping = new RequestMapping();
+		requestMapping.register(new StaticResourceController());
+		requestMapping.register(new HomeController());
+		requestMapping.register(new LoginController(SessionManager.getInstance()));
+		requestMapping.register(new RegisterController());
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
 				throw new IOException("not http1.1 request");
 			}
 
-			var response = handlerMapping.getHandler(request).handle(request);
+			var response = requestMapping.getController(request).handle(request);
 
 			outputStream.write(response.getBytes());
 			outputStream.flush();

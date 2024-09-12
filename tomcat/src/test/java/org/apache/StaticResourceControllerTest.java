@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 
 import support.HttpRequestFixture;
 
-class StaticResourceRequestHandlerTest {
+class StaticResourceControllerTest {
 
-	StaticResourceRequestHandler handler = new StaticResourceRequestHandler();
+	StaticResourceController handler = new StaticResourceController();
 
 	@Test
 	void canHandle_true() throws IOException {

@@ -13,7 +13,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class StaticResourceRequestHandler implements RequestHandler {
+public class StaticResourceController implements Controller {
 
 	private static final String[] CAN_HANDLE_SUFFIX = {".html", ".css", ".js", ".ico"};
 

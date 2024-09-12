@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import support.HttpRequestFixture;
 
-class RegisterRequestHandlerTest {
+class RegisterControllerTest {
 
-	RegisterRequestHandler handler = new RegisterRequestHandler();
+	RegisterController handler = new RegisterController();
 
 	@DisplayName("GET 요청의 경우 register.html을 반환한다.")
 	@Test

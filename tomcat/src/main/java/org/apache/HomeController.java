@@ -6,7 +6,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class HomeRequestHandler implements RequestHandler {
+public class HomeController implements Controller {
 
 	private static final String URI_PATTERN = "/";
 

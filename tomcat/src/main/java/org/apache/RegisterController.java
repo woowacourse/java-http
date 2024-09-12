@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterRequestHandler implements RequestHandler {
+public class RegisterController implements Controller {
 
-	private static final Logger log = LoggerFactory.getLogger(RegisterRequestHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
 	private final static String URI_PATTERN = "/register";
 

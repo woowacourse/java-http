@@ -22,15 +22,15 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginRequestHandler implements RequestHandler {
+public class LoginController implements Controller {
 
-	private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
 	private final static String URI_PATTERN = "/login";
 
 	private final SessionManager sessionManager;
 
-	public LoginRequestHandler(SessionManager sessionManager) {
+	public LoginController(SessionManager sessionManager) {
 		this.sessionManager = sessionManager;
 	}
 

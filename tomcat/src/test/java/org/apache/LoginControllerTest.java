@@ -20,14 +20,14 @@ import org.junit.jupiter.api.Test;
 
 import support.HttpRequestFixture;
 
-class LoginRequestHandlerTest {
+class LoginControllerTest {
 
 	@DisplayName("세션이 존재하지 않을 땐 login.html 파일을 반환한다.")
 	@Test
 	void handle_GET_returnLoginHtml() throws IOException {
 		// given
 		SessionManager sessionManager = SessionManager.getInstance();
-		LoginRequestHandler handler = new LoginRequestHandler(sessionManager);
+		LoginController handler = new LoginController(sessionManager);
 		HttpRequest request = HttpRequestFixture.createGetMethod("/login");
 
 		// when
@@ -48,7 +48,7 @@ class LoginRequestHandlerTest {
 		SessionManager sessionManager = SessionManager.getInstance();
 		UUID uuid = UUID.randomUUID();
 		sessionManager.add(new Session(uuid.toString()));
-		LoginRequestHandler handler = new LoginRequestHandler(sessionManager);
+		LoginController handler = new LoginController(sessionManager);
 		HttpRequest request = HttpRequestFixture.createGetMethodWithSessionId("/login", uuid.toString());
 
 		// when
@@ -62,7 +62,7 @@ class LoginRequestHandlerTest {
 	@Test
 	void handle_POST_returnSessionId() throws IOException {
 		// given
-		LoginRequestHandler handler = new LoginRequestHandler(SessionManager.getInstance());
+		LoginController handler = new LoginController(SessionManager.getInstance());
 		HttpRequest request = HttpRequestFixture.createLoginPostMethod();
 
 		// when
@@ -77,7 +77,7 @@ class LoginRequestHandlerTest {
 	@Test
 	void handle_POST_withInvalidPassword() throws IOException {
 		// given
-		LoginRequestHandler handler = new LoginRequestHandler(SessionManager.getInstance());
+		LoginController handler = new LoginController(SessionManager.getInstance());
 		HttpRequest request = HttpRequestFixture.createLoginPostMethodWithInvalidPassword();
 
 		// when

@@ -32,17 +32,6 @@ public class HttpResponse {
         this.headers = new HttpResponseHeader();
     }
 
-    public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage, ResponseBody responseBody) {
-        this.viewResolver = new ViewResolver();
-        this.serializer = new ResponseSerializer(new ResponseHeaderSerializer());
-        this.headers = headers;
-        this.responseBody = responseBody;
-    }
-
-    public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage) {
-        this(headers, statusCode, statusMessage, null);
-    }
-
     public static HttpResponse ok(String viewUrl) {
         return new HttpResponse()
                 .statusCode(StatusCode.OK_200)
@@ -88,7 +77,7 @@ public class HttpResponse {
             throw new IllegalArgumentException("잘못된 view url 입니다.");
         }
 
-        return  TEXT_TYPE_PREFIX + extension[EXTENSION_INDEX] + CHARACTER_ENCODE_POLICY;
+        return TEXT_TYPE_PREFIX + extension[EXTENSION_INDEX] + CHARACTER_ENCODE_POLICY;
     }
 
     public HttpResponseHeader getHeaders() {

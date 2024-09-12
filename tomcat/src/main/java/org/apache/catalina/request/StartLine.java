@@ -5,11 +5,11 @@ public class StartLine {
     public static final String START_LINE_DELIMITER = " ";
 
     private final HttpMethod httpMethod;
-    private final String url;
+    private final String uri;
 
-    private StartLine(HttpMethod httpMethod, String url) {
+    private StartLine(HttpMethod httpMethod, String uri) {
         this.httpMethod = httpMethod;
-        this.url = url;
+        this.uri = uri;
     }
 
     public static StartLine parse(String rawStartLine) {
@@ -21,7 +21,7 @@ public class StartLine {
         return httpMethod;
     }
 
-    public String getUrl() {
-        return url;
+    public String getUri() {
+        return uri;
     }
 }

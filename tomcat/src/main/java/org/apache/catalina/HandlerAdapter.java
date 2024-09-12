@@ -17,10 +17,10 @@ public class HandlerAdapter {
     );
 
     public HttpResponse handle(HttpRequest request) {
-        String url = request.getUrl();
+        String uri = request.getUri();
 
         HttpResponse response = new HttpResponse();
-        mapper.getOrDefault(url, new StaticResourceController())
+        mapper.getOrDefault(uri, new StaticResourceController())
                 .service(request, response);
 
         return response;

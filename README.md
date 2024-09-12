@@ -28,7 +28,13 @@ final URL resource = getClass().getResource("/static/index.html");
 
 정확한 이유가 뭘까요? 🤔
 
-<br><br><br><br><br>
+2. 3단계 리팩토링 단계 전까지는 클래스 분리 없이 모든 코드를 Http11Processor에 억지로 구겨 넣어보려고 합니다. HttpStatus나 HttpRequest, Response 등으로 분리할 수 있는
+   부분이 슬슬 보이고 있는데요. 해당 분리는 모두 3단계에 몰아서 진행해보려고 해요! 코드에 `String[]` 나 과도한 `if`문들, 끝을 모르고 길어지는 메서드 라인들이 점점 늘어가고 있는데, 2단계
+   코드리뷰 때까지는 양해해주셨으면 합니다!
+
+
+3. 세션/쿠키의 디렉토리 위치를 현재는 코요테 밑 `http`에 두고 있는데, 맞는 위치인지 잘 모르겠어요...
+   <br><br><br><br><br>
 
 ### 학습목표
 

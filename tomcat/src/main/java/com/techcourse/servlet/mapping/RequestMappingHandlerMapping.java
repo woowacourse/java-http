@@ -1,6 +1,6 @@
 package com.techcourse.servlet.mapping;
 
-import static org.apache.coyote.http11.HttpProtocol.HTTP_11;
+import static org.apache.coyote.http11.common.HttpProtocol.HTTP_11;
 import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.apache.coyote.http11.request.line.Method.POST;
 

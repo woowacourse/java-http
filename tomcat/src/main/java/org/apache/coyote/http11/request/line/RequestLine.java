@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request.line;
 
-import org.apache.coyote.http11.HttpProtocol;
+import org.apache.coyote.http11.common.HttpProtocol;
 
 public class RequestLine {
 

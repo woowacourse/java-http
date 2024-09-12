@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.response;
 
 import java.util.UUID;
-import org.apache.coyote.http11.HttpHeaderName;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMessageBody;
+import org.apache.coyote.http11.common.HttpHeaderName;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpMessageBody;
 import org.apache.coyote.http11.response.line.HttpStatus;
 import org.apache.coyote.http11.response.line.ResponseLine;
 

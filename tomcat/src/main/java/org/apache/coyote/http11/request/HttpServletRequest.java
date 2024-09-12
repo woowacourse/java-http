@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMessageBody;
-import org.apache.coyote.http11.HttpProtocol;
+import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpMessageBody;
+import org.apache.coyote.http11.common.HttpProtocol;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.request.line.Uri;

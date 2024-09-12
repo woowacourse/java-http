@@ -23,5 +23,4 @@ public class SessionManager {
     public void putSession(String sessionId, Session session) {
         sessions.put(sessionId, session);
     }
-
 }

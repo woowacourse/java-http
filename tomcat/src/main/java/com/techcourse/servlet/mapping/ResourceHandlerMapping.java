@@ -1,8 +1,8 @@
 package com.techcourse.servlet.mapping;
 
 import com.techcourse.servlet.StaticResourceServlet;
-import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.Servlet;
+import org.apache.coyote.http11.common.HttpProtocol;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
 

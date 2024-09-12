@@ -1,7 +1,7 @@
 package com.techcourse.servlet.mapping;
 
 import java.util.Objects;
-import org.apache.coyote.http11.HttpProtocol;
+import org.apache.coyote.http11.common.HttpProtocol;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;

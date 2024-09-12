@@ -1,4 +1,4 @@
-package com.techcourse.servlet.handler;
+package com.techcourse.handler;
 
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.response.HttpResponse;

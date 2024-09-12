@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import com.techcourse.servlet.handler.DispatcherServlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
@@ -17,11 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final DispatcherServlet dispatcherServlet;
+    private final Dispatcher dispatcher;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, Dispatcher dispatcher) {
         this.connection = connection;
-        this.dispatcherServlet = new DispatcherServlet();
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -39,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("http request : {}", request);
             HttpResponse response = HttpResponse.from(request);
 
-            dispatcherServlet.doDispatch(request, response);
+            dispatcher.doDispatch(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();

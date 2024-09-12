@@ -1,8 +1,9 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.techcourse.servlet.DispatcherServlet;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -27,7 +28,7 @@ public class ControllerTest {
         void returnIndexHtml() throws URISyntaxException, IOException {
             String httpRequest = createRequestByHttpMethodAndTarget(HttpMethod.GET, "/");
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
 
             processor.process(socket);
 
@@ -46,7 +47,7 @@ public class ControllerTest {
         void returnLoginHtml() throws URISyntaxException, IOException {
             String httpRequest = createRequestByHttpMethodAndTarget(HttpMethod.GET, "/login");
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
             processor.process(socket);
 
             final URL url = getClass().getClassLoader().getResource("static/login.html");
@@ -64,7 +65,7 @@ public class ControllerTest {
         void returnRegisterHtml() throws URISyntaxException, IOException {
             String httpRequest = createRequestByHttpMethodAndTarget(HttpMethod.GET, "/register");
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
             processor.process(socket);
 
             final URL url = getClass().getClassLoader().getResource("static/register.html");
@@ -96,7 +97,7 @@ public class ControllerTest {
         void loginSuccess() {
             String httpRequest = createPostRequestWithFormData("/login", "account=gugu&password=password");
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
             processor.process(socket);
 
             assertAll(
@@ -111,7 +112,7 @@ public class ControllerTest {
         void loginFail() throws URISyntaxException, IOException {
             String httpRequest = createPostRequestWithFormData("/login", "account=gugu&password=1");
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
             processor.process(socket);
 
             final URL url = getClass().getClassLoader().getResource("static/401.html");
@@ -132,7 +133,7 @@ public class ControllerTest {
                     "account=kaki&email=kaki@email.com&password=123"
             );
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket);
+            Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
             processor.process(socket);
 
             assertAll(

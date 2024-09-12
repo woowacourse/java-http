@@ -27,7 +27,7 @@ class UserServiceTest {
         userService = new UserService();
     }
 
-    @DisplayName("유저 정보를 조회하면 로그에 유저 정보가 기록된다..")
+    @DisplayName("유저 정보를 조회하면 로그에 유저 정보가 기록된다.")
     @Test
     void findUser() {
         //given

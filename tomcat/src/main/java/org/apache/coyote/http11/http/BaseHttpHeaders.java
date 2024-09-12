@@ -5,8 +5,8 @@ import java.util.Map;
 
 public abstract class BaseHttpHeaders {
 
-	protected static final String HEADER_DELIMITER = ": ";
-	protected static final String HEADER_VALUE_DELIMITER = ", ";
+	public static final String HEADER_DELIMITER = ": ";
+	public static final String HEADER_VALUE_DELIMITER = ", ";
 
 	protected final Map<String, List<String>> headers;
 

@@ -11,8 +11,8 @@ import org.apache.coyote.http11.http.HttpHeader;
 
 public class HttpRequestHeader extends BaseHttpHeaders {
 
-	private static final int HEADER_KEY_INDEX = 0;
-	private static final int HEADER_VALUE_INDEX = 1;
+	public static final int HEADER_KEY_INDEX = 0;
+	public static final int HEADER_VALUE_INDEX = 1;
 
 	private final HttpCookie httpCookie;
 

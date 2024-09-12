@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.http.BaseHttpHeaders.*;
+import static org.apache.coyote.http11.http.request.HttpRequestHeader.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +29,7 @@ public class HttpRequestMessageReader {
 		return headers.stream()
 			.filter(header -> header.startsWith(HttpHeader.CONTENT_LENGTH.getName()))
 			.findFirst()
-			.map(header -> Integer.parseInt(header.split(": ")[1].strip()))
+			.map(header -> Integer.parseInt(header.split(HEADER_DELIMITER)[HEADER_VALUE_INDEX].strip()))
 			.orElse(0);
 	}
 

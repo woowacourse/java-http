@@ -9,13 +9,13 @@ import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpRequest {
 
-    private static final String QUERY_PARAM_DELIMITER = "&";
-    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
+    private static final String URLENCODED_DELIMITER = "&";
+    private static final String URLENCODED_VALUE_DELIMITER = "=";
     private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_PATH_INDEX = 1;
-    private static final int QUERY_PARAM_NAME_INDEX = 0;
-    private static final int QUERY_PARAM_VALUE_INDEX = 1;
+    private static final int URLENCODED_NAME_INDEX = 0;
+    private static final int URLENCODED_VALUE_INDEX = 1;
 
     private final HttpMethod method;
     private final String requestUrl;
@@ -54,10 +54,10 @@ public class HttpRequest {
             return new HashMap<>();
         }
 
-        return Arrays.stream(rawBody.split(QUERY_PARAM_DELIMITER))
+        return Arrays.stream(rawBody.split(URLENCODED_DELIMITER))
                 .collect(Collectors.toMap(
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[QUERY_PARAM_NAME_INDEX],
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[QUERY_PARAM_VALUE_INDEX])
+                        s -> s.split(URLENCODED_VALUE_DELIMITER)[URLENCODED_NAME_INDEX],
+                        s -> s.split(URLENCODED_VALUE_DELIMITER)[URLENCODED_VALUE_INDEX])
                 );
     }
 

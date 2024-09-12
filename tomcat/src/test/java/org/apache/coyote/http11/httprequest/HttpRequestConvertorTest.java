@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.apache.coyote.http11.HttpHeaderName;
@@ -15,6 +14,7 @@ import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import support.HttpRequestMaker;
 
 class HttpRequestConvertorTest {
 
@@ -48,9 +48,9 @@ class HttpRequestConvertorTest {
 
     @DisplayName("들어온 요청을 HttpRequest로 변환한다")
     @Test
-    void convertHttpRequest() throws IOException {
+    void convertHttpRequest() {
         String body = "account=gugu&password=1";
-        final String login = String.join("\r\n",
+        final String request = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -58,10 +58,7 @@ class HttpRequestConvertorTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body);
-        InputStream inputStream = new ByteArrayInputStream(login.getBytes());
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
+        HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
@@ -78,12 +75,12 @@ class HttpRequestConvertorTest {
 
     @DisplayName("SessionManager에 저장된 세션이 쿠키로 들어오면 해당 세션을 불러온다")
     @Test
-    void loadSession() throws IOException {
+    void loadSession() {
         SessionManager sessionManager = new SessionManager();
         Session session = new Session("abcdefg");
         sessionManager.add(session);
         String body = "account=gugu&password=1";
-        final String login = String.join("\r\n",
+        final String request = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -92,10 +89,7 @@ class HttpRequestConvertorTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body);
-        InputStream inputStream = new ByteArrayInputStream(login.getBytes());
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
+        HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
@@ -113,9 +107,9 @@ class HttpRequestConvertorTest {
 
     @DisplayName("쿠키에 저장된 세션이 저장되지 않은 세션이면 새로 세션을 생성한다")
     @Test
-    void createSession() throws IOException {
+    void createSession() {
         String body = "account=gugu&password=1";
-        final String login = String.join("\r\n",
+        final String request = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -124,10 +118,7 @@ class HttpRequestConvertorTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body);
-        InputStream inputStream = new ByteArrayInputStream(login.getBytes());
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
+        HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),

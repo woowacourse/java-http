@@ -1,14 +1,10 @@
 package org.apache.catalina.connector;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.StaticResourceController;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.RequestMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +19,14 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    private final RequestMappings requestMappings;
+
+    public Connector(RequestMappings requestMappings) {
+        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final RequestMappings requestMappings, final int port, final int acceptCount) {
+        this.requestMappings = requestMappings;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -70,18 +69,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        RequestMappings requestMappings = makeRequestMapping();
         var processor = new Http11Processor(connection, requestMappings);
         new Thread(processor).start();
-    }
-
-    private RequestMappings makeRequestMapping() {
-        return new RequestMappings(
-                new RequestMapping(new LoginController(), "login", "login.html"),
-                new RequestMapping(new RegisterController(), "register", "register.html"),
-                new RequestMapping(new StaticResourceController(), ".js", ".css", ".html", "/", "/index",
-                        "/index.html")
-        );
     }
 
     public void stop() {

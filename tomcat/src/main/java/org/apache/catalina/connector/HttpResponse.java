@@ -12,6 +12,7 @@ import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 
 public class HttpResponse {
+
     public static final String NEW_LINE = "\r\n";
     private final HttpStatusLine httpStatusLine;
     private final HttpHeaders httpHeaders;

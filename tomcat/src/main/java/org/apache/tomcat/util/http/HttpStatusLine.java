@@ -3,6 +3,7 @@ package org.apache.tomcat.util.http;
 import static org.apache.catalina.connector.HttpResponse.NEW_LINE;
 
 public class HttpStatusLine {
+
     private final HttpVersion version;
     private HttpStatus status;
 

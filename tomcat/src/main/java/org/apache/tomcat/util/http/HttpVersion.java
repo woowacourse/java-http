@@ -3,6 +3,7 @@ package org.apache.tomcat.util.http;
 import java.util.Arrays;
 
 public enum HttpVersion {
+
     HTTP11("HTTP/1.1");
 
     private final String version;

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import org.apache.tomcat.util.http.ResourceURI;
 
 public record FileResource(File file) implements WebResource {
+
     public static final ResourceURI NOT_FOUND_RESOURCE_URI = new ResourceURI("/404.html");
     public static final ResourceURI UN_AUTHORIZED_RESOURCE_URI = new ResourceURI("/401.html");
 

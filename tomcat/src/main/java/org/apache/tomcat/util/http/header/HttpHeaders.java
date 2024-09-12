@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 public class HttpHeaders {
+
     private static final String DELIMITER = ": ";
     private final Map<HttpHeaderType, String> headers;
 

@@ -6,6 +6,7 @@ import org.apache.catalina.servlet.AbstractController;
 import org.apache.tomcat.util.http.ResourceURI;
 
 public class RootController extends AbstractController {
+
     private static final ResourceURI ROOT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override

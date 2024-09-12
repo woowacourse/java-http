@@ -3,6 +3,7 @@ package org.apache.tomcat.util.http;
 import java.util.Arrays;
 
 public enum HttpMethod {
+
     GET,
     POST;
 

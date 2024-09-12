@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.apache.tomcat.util.http.ResourceURI;
 
 public class StandardRoot {
+
     private StandardRoot() {
     }
 

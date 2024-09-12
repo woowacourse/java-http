@@ -1,6 +1,7 @@
 package org.apache.tomcat.util.http.header;
 
 public record HttpHeaderType(String header) {
+
     public static final HttpHeaderType CONTENT_TYPE = new HttpHeaderType("Content-Type");
     public static final HttpHeaderType CONTENT_LENGTH = new HttpHeaderType("Content-Length");
     public static final HttpHeaderType COOKIE = new HttpHeaderType("Cookie");

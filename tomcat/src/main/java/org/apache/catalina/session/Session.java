@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Session {
+
     private static final int DEFAULT_EXPIRATION_TIME_IN_SECONDS = 1800;
     private final String sessionId;
     private final LocalDateTime creationTime;

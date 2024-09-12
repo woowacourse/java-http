@@ -10,6 +10,7 @@ import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
 
 public class RequestMapping {
+
     private static final Map<ResourceURI, Controller> routes = new HashMap<>();
     private static final DefaultServlet DEFAULT_SERVLET = new DefaultServlet();
 

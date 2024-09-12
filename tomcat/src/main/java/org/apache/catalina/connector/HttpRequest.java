@@ -14,6 +14,7 @@ import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.apache.tomcat.util.http.parser.HttpCookieParser;
 
 public record HttpRequest(HttpRequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
+
     public ResourceURI getURI() {
         return requestLine.resourceURI();
     }

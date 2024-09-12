@@ -9,6 +9,7 @@ import org.apache.tomcat.util.http.body.HttpBody;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 
 public class HttpRequestParser {
+
     private HttpRequestParser() {
     }
 

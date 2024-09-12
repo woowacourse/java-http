@@ -9,6 +9,7 @@ import org.apache.tomcat.util.http.HttpVersion;
 import org.apache.tomcat.util.http.ResourceURI;
 
 public class HttpRequestLineParser {
+
     private static final String DELIMITER = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int RESOURCE_URI_INDEX = 1;

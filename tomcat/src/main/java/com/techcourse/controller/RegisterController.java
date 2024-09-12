@@ -16,6 +16,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class RegisterController extends AbstractController {
+
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final ResourceURI REGISTER_RESOURCE_URI = new ResourceURI("/register.html");
     private static final ResourceURI REDIRECT_RESOURCE_URI = new ResourceURI("/index.html");

@@ -10,6 +10,7 @@ import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 
 public class HttpRequestHeaderParser {
+
     private static final String DELIMITER = ":";
 
     private HttpRequestHeaderParser() {

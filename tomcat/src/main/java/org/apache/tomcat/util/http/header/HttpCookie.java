@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpCookie {
+
     public static final String SESSION_ID_IDENTIFICATION = "JSESSIONID";
     public static final String DELIMITER = "=";
 

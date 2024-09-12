@@ -1,6 +1,7 @@
 package org.apache.tomcat.util.http;
 
 public enum HttpStatus {
+
     OK(200),
     FOUND(302);
 

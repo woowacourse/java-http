@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import com.techcourse.controller.RequestMapping;
+import org.apache.catalina.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;

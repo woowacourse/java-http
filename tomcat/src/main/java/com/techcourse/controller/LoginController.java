@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;

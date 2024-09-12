@@ -1,7 +1,10 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http.HttpRequest;
 
 public class RequestMapping {

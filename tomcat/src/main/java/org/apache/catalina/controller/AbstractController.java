@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;

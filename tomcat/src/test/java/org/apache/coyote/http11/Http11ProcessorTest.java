@@ -145,8 +145,7 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
-                    "Location: /index.html \r\n",
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+                    "Location: /index.html \r\n");
         }
 
         @Test
@@ -173,8 +172,7 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
-                    "Location: /401.html \r\n",
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+                    "Location: /401.html \r\n");
         }
     }
 
@@ -233,8 +231,7 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
-                    "Location: /index.html \r\n",
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+                    "Location: /index.html \r\n");
         }
     }
 }

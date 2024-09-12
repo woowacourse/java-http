@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -30,5 +31,16 @@ public abstract class AbstractController implements Controller {
 
     protected void registerHandlers(List<Handler> handlers) {
         this.handlers.addAll(handlers);
+    }
+
+    protected void responseView(HttpRequest request, HttpResponse response) {
+        responseView(HttpStatus.OK, request, response);
+    }
+
+    protected void responseView(HttpStatus status, HttpRequest request, HttpResponse response) {
+        String requestPath = request.getPath();
+        File file = File.createHtml(requestPath);
+        file.addToResponse(response);
+        response.setHttpStatus(status);
     }
 }

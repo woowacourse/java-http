@@ -8,8 +8,6 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +15,6 @@ public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REGISTER_PATH = "/register";
-    private static final String REGISTER_PAGE = "/register.html";
     private static final String REGISTER_SUCCESS_PAGE = "/index.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -32,9 +29,7 @@ public class RegisterController extends AbstractController {
     }
 
     private void doRegisterGet(HttpRequest request, HttpResponse response) {
-        ResponseFile registerFile = ResponseFile.of(REGISTER_PAGE);
-        response.addFile(registerFile);
-        response.setHttpStatus(HttpStatus.OK);
+        responseView(request, response);
     }
 
     private void doRegisterPost(HttpRequest request, HttpResponse response) {

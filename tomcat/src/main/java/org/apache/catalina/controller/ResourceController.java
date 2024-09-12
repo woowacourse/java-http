@@ -4,7 +4,6 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ public class ResourceController implements Controller {
             throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
         }
 
-        ResponseFile responseFile = ResponseFile.of(request.getPath());
+        File responseFile = File.of(request.getPath());
         response.addFile(responseFile);
         response.setHttpStatus(HttpStatus.OK);
     }

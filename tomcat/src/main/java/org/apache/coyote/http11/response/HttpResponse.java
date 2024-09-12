@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.catalina.controller.File;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
@@ -73,7 +74,7 @@ public class HttpResponse {
         setBody("text/plain;charset=utf-8 ", body);
     }
 
-    private void setBody(String contentType, String body) {
+    public void setBody(String contentType, String body) {
         this.body = body;
         int contentLength = body.getBytes().length;
         headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength));
@@ -115,7 +116,7 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
     }
 
-    public void addFile(ResponseFile responseFile) {
+    public void addFile(File responseFile) {
         headers.put("Content-Type", responseFile.getContentType());
         headers.put("Content-Length", String.valueOf(responseFile.getContentLength()));
         body = responseFile.getContent();

@@ -15,7 +15,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseFile;
+import org.apache.catalina.controller.File;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -122,7 +122,7 @@ class LoginControllerTest {
 
         loginController.service(request, response);
 
-        ResponseFile file = ResponseFile.of("/login.html");
+        File file = File.of("/login.html");
         Map<String, String> headers = Map.of(
                 "Content-Type", file.getContentType(),
                 "Content-Length", String.valueOf(file.getContentLength())

@@ -12,13 +12,10 @@ import org.apache.catalina.controller.Handler;
 import org.apache.catalina.session.SessionService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseFile;
 
 public class LoginController extends AbstractSessionController {
 
     private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE = "/login.html";
     private static final String LOGIN_SUCCESS_PAGE = "/index.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -74,9 +71,7 @@ public class LoginController extends AbstractSessionController {
             response.redirectTo(LOGIN_SUCCESS_PAGE);
             return;
         }
-        ResponseFile responseFile = ResponseFile.of(LOGIN_PAGE);
-        response.setHttpStatus(HttpStatus.OK);
-        response.addFile(responseFile);
+        responseView(request, response);
     }
 
     private boolean isLoginUser(HttpRequest request) {

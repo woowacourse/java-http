@@ -11,9 +11,11 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, HttpSession> sessions;
+    private static final SessionManager instance;
 
     static {
         sessions = new HashMap<>();
+        instance = new SessionManager();
     }
 
     private SessionManager() {
@@ -23,7 +25,7 @@ public class SessionManager implements Manager {
         if (sessions == null) {
             throw new IllegalStateException("잘못된 세션 매니져 접근");
         }
-        return new SessionManager();
+        return instance;
     }
 
 

@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest request) {
         if (LOGIN_PATH.equals(request.getPath())) {
-            String id = request.getCookie().getId();
+            String id = request.getCookie().getAuthCookie();
             Optional<Session> session = SessionManager.getInstance().findSession(id);
             if (session.isPresent()) {
                 return getLoginSuccessResponse(request);
@@ -81,10 +81,10 @@ public class LoginController extends AbstractController {
         Session session = createSession(user);
         SessionManager.getInstance().add(session);
         HttpCookie httpCookie = request.getCookie();
-        String cookie = httpCookie.getCookies(session.getId());
+        httpCookie.addAuthCookie(session.getId());
 
         HttpResponse response = getLoginSuccessResponse(request);
-        response.setCookie(cookie);
+        response.setCookie(httpCookie.toString());
         return response;
     }
 

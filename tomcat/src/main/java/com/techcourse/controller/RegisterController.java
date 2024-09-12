@@ -32,7 +32,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        String id = request.getCookie().getId();
+        String id = request.getCookie().getAuthCookie();
         Optional<Session> session = SessionManager.getInstance().findSession(id);
         if (session.isPresent()) {
             return getLoginSuccessResponse(request);

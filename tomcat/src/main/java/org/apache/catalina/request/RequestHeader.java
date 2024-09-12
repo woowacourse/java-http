@@ -18,10 +18,28 @@ public class RequestHeader {
 
     private final Map<String, String> headers;
     private final ContentType contentType;
+    private final HttpCookie httpCookie;
 
     public RequestHeader(Map<String, String> headers) {
         this.headers = new HashMap<>(headers);
         this.contentType = ContentType.of(headers.get(ACCEPT));
+        this.httpCookie = findCookie();
+    }
+
+    private HttpCookie findCookie() {
+        String setCookies = headers.get(COOKIE);
+        if (setCookies == null) {
+            return new HttpCookie(new HashMap<>());
+        }
+        Map<String, String> cookie = Arrays.stream(setCookies.split(COOKIE_SEPARATOR))
+                .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))
+                .filter(parts -> parts.length == 2 && parts[1] != null)
+                .collect(Collectors.toMap(
+                        parts -> parts[0].trim(),
+                        parts -> parts[1].trim()
+                ));
+
+        return new HttpCookie(cookie);
     }
 
     public ContentType getContentType() {
@@ -37,18 +55,6 @@ public class RequestHeader {
     }
 
     public HttpCookie getCookie() {
-        String setCookies = headers.get(COOKIE);
-        if (setCookies == null) {
-            return new HttpCookie(new HashMap<>());
-        }
-        Map<String, String> cookie = Arrays.stream(setCookies.split(COOKIE_SEPARATOR))
-                .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))
-                .filter(parts -> parts.length == 2 && parts[1] != null)
-                .collect(Collectors.toMap(
-                        parts -> parts[0].trim(),
-                        parts -> parts[1].trim()
-                ));
-
-        return new HttpCookie(cookie);
+        return httpCookie;
     }
 }

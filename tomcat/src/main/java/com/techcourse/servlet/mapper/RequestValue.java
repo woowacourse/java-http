@@ -1,4 +1,4 @@
-package org.apache.coyote.mapper;
+package com.techcourse.servlet.mapper;
 
 import org.apache.coyote.http11.HttpMethod;
 

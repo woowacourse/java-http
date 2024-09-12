@@ -11,7 +11,7 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.IdGenerator;
 import org.apache.coyote.util.RequestBodyParser;
-import org.apache.coyote.view.StaticResourceView;
+import com.techcourse.servlet.view.StaticResourceView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

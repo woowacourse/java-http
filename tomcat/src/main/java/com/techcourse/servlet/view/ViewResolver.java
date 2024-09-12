@@ -1,4 +1,4 @@
-package org.apache.coyote.view;
+package com.techcourse.servlet.view;
 
 public interface ViewResolver {
 

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.mapper.DispatcherServlet;
+import com.techcourse.servlet.handler.DispatcherServlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;

@@ -1,10 +1,11 @@
-package org.apache.coyote.mapper;
+package com.techcourse.servlet.handler;
 
+import com.techcourse.servlet.mapper.RequestMapping;
+import com.techcourse.servlet.mapper.ViewMapping;
 import org.apache.coyote.controller.Controller;
-import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.view.ViewResolver;
+import com.techcourse.servlet.view.ViewResolver;
 
 public class DispatcherServlet {
 

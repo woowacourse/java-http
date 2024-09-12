@@ -1,10 +1,9 @@
-package org.apache.coyote.mapper;
+package com.techcourse.servlet.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.view.StaticResourceResolver;
-import org.apache.coyote.view.View;
-import org.apache.coyote.view.ViewResolver;
+import com.techcourse.servlet.view.StaticResourceResolver;
+import com.techcourse.servlet.view.ViewResolver;
 
 public class ViewMapping {
 

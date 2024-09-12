@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11.controller.login;
 
 import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.model.User;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.auth.Session;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.service.LoginService;

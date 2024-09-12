@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11.controller.login;
 
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;

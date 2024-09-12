@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RequestParser {
+public class HttpRequestParser {
 
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
     private static final String HEADER_SEPARATOR = ": ";
 
-    private RequestParser() {}
+    private HttpRequestParser() {}
 
     public static Map<String, String> parseHeaders(List<String> headerLines) {
         return headerLines.stream()

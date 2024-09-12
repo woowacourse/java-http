@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.catalina.http.VersionOfProtocol;
-import org.apache.catalina.parser.RequestParser;
+import org.apache.catalina.parser.HttpRequestParser;
 
 public class RequestLine {
 
@@ -30,7 +30,7 @@ public class RequestLine {
     private Map<String, String> findQueryParams(String path) {
         String[] separationUrl = path.split(QUERY_PARAMETER_DELIMITER, 2);
         if (separationUrl.length >= 2) {
-            return RequestParser.parseParamValues(separationUrl[1]);
+            return HttpRequestParser.parseParamValues(separationUrl[1]);
         }
         return new HashMap<>();
     }

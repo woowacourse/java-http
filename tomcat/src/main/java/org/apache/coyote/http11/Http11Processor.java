@@ -7,11 +7,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 
-import org.apache.catalina.http.ContentType;
 import org.apache.catalina.mvc.Controller;
+import org.apache.catalina.parser.HttpRequestParser;
 import org.apache.catalina.parser.RequestMapping;
-import org.apache.catalina.parser.RequestParser;
-import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.reader.RequestReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.request.RequestBody;
@@ -19,7 +17,6 @@ import org.apache.catalina.request.RequestHeader;
 import org.apache.catalina.request.RequestLine;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.StatusLine;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +24,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final ContentType DEFAULT_CONTENT_TYPE = ContentType.HTML;
+    private static final String BAD_REQUEST_PAGE = "/400.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -63,10 +61,10 @@ public class Http11Processor implements Runnable, Processor {
 
         List<String> request = requestReader.readRequest();
         RequestLine requestLine = new RequestLine(request.getFirst());
-        RequestHeader requestHeader = new RequestHeader(RequestParser.parseHeaders(request));
+        RequestHeader requestHeader = new RequestHeader(HttpRequestParser.parseHeaders(request));
         String body = requestReader.readBody(requestHeader.getContentLength());
 
-        RequestBody requestBody = new RequestBody(RequestParser.parseParamValues(body));
+        RequestBody requestBody = new RequestBody(HttpRequestParser.parseParamValues(body));
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
@@ -74,15 +72,24 @@ public class Http11Processor implements Runnable, Processor {
         try {
             Controller controller = requestMapping.getController(request);
             return controller.handleRequest(request);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return get404HttpResponse(request);
+        } catch (IllegalStateException e) {
+            return get401HttpResponse(request);
+        } catch (RuntimeException e) {
+            return get400HttpResponse(request);
         }
     }
 
+    private static HttpResponse get400HttpResponse(HttpRequest request) {
+        return HttpResponse.createRedirectResponse(request, HttpStatus.BAD_REQUEST, BAD_REQUEST_PAGE);
+    }
+
+    private static HttpResponse get401HttpResponse(HttpRequest request) {
+        return HttpResponse.createFileResponse(request, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PAGE);
+    }
+
     private static HttpResponse get404HttpResponse(HttpRequest request) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.NOT_FOUND),
-                DEFAULT_CONTENT_TYPE,
-                FileReader.loadFileContent(NOT_FOUND_PAGE));
+        return HttpResponse.createRedirectResponse(request, HttpStatus.NOT_FOUND, NOT_FOUND_PAGE);
     }
 }

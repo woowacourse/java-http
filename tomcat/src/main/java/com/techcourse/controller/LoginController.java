@@ -19,7 +19,6 @@ public class LoginController extends AbstractController {
     public static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
 
@@ -62,7 +61,7 @@ public class LoginController extends AbstractController {
             response.setCookie(httpCookie.toString());
             return response;
         } else {
-            return HttpResponse.createFileResponse(request, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PAGE);
+            throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
         }
     }
 

@@ -17,7 +17,7 @@ public class FileReader {
     public static String loadFileContent(String fileName) {
         URL resource = FileReader.class.getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
         if (resource == null) {
-            throw new RuntimeException("'" + fileName + "'이란 페이지를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("'" + fileName + "'이란 페이지를 찾을 수 없습니다.");
         }
         Path path = new File(resource.getPath()).toPath();
 

@@ -14,6 +14,11 @@ import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.coyote.http11.http.session.SessionManager;
+import com.techcourse.web.util.JsessionIdGenerator;
+
 class LoginHandlerTest {
 
 	@DisplayName("/login 으로 시작하는 페이지를 처리한다.")
@@ -26,6 +31,26 @@ class LoginHandlerTest {
 		boolean isSupport = loginHandler.isSupport(requestLine);
 
 		assertThat(isSupport).isTrue();
+	}
+
+	@DisplayName("이미 로그인 된 회원이 GET /login 요청을 보내면 /index.html로 리다이렉트한다.")
+	@Test
+	void alreadyLoggedIn() throws IOException {
+		User user = InMemoryUserRepository.findByAccount("gugu").get();
+		String sessionId = JsessionIdGenerator.generate();
+		SessionManager.createSession(sessionId, user);
+
+		List<String> headers = List.of("Host: example.com", "Accept: text/html", "Cookie: JSESSIONID=" + sessionId);
+		HttpRequest request = new HttpRequest("GET /login HTTP/1.1", headers, null);
+
+		LoginHandler loginHandler = LoginHandler.getInstance();
+
+		assertThat(loginHandler.isSupport(request.getRequestLine())).isTrue();
+		assertThat(loginHandler.handle(request))
+			.extracting("header")
+			.extracting("headers")
+			.extracting("Location")
+			.isEqualTo(List.of("/index.html"));
 	}
 
 	@DisplayName("로그인에 성공하면 /index.html로 리다이렉트한다.")

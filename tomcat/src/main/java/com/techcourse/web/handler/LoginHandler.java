@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.http.session.SessionManager;
 import com.techcourse.web.util.JsessionIdGenerator;
+import com.techcourse.web.util.LoginChecker;
 import com.techcourse.web.util.ResourceLoader;
 
 public class LoginHandler implements Handler {
@@ -46,7 +48,7 @@ public class LoginHandler implements Handler {
 		HttpMethod method = requestLine.getMethod();
 
 		if (method == HttpMethod.GET && LOGIN_PATH.equals(requestUrl.getRequestUrl())) {
-			return loadLoginPage();
+			return loadLoginPage(request);
 		}
 		if (method == HttpMethod.GET && requestUrl.isQueryExist()) {
 			return login(request);
@@ -55,7 +57,10 @@ public class LoginHandler implements Handler {
 		return notFoundResponse();
 	}
 
-	private HttpResponse loadLoginPage() throws IOException {
+	private HttpResponse loadLoginPage(HttpRequest request) throws IOException {
+		if (LoginChecker.isLoggedIn(request)) {
+			return redirect(new HttpResponseHeader(), "/index.html");
+		}
 		HttpResponseBody body = ResourceLoader.getInstance().loadResource("/login.html");
 		return HttpResponse.ok(new HttpResponseHeader(), body);
 	}
@@ -65,30 +70,37 @@ public class LoginHandler implements Handler {
 		String account = query.getValue("account");
 		String password = query.getValue("password");
 
-		HttpResponseHeader responseHeader = new HttpResponseHeader();
-		responseHeader.addHeader("Location", getRedirectLocation(account, password));
-		addJSessionId(request, responseHeader);
+		if (isUserNotExist(account, password)) {
+			return redirect(new HttpResponseHeader(), "/401.html");
+		}
 
-		return HttpResponse.redirect(responseHeader);
+		User user = InMemoryUserRepository.findByAccount(account).get();
+		HttpResponseHeader responseHeader = createResponseHeader(request, user);
+
+		return redirect(responseHeader, "/index.html");
 	}
 
-	private void addJSessionId(HttpRequest request, HttpResponseHeader responseHeader) {
+	private HttpResponseHeader createResponseHeader(HttpRequest request, User user) {
+		HttpResponseHeader header = new HttpResponseHeader();
+		String sessionId = addJSessionId(request, header);
+		SessionManager.createSession(sessionId, user);
+
+		return header;
+	}
+
+	private String addJSessionId(HttpRequest request, HttpResponseHeader responseHeader) {
 		HttpRequestHeader header = request.getHeaders();
 		HttpCookie httpCookie = header.getHttpCookie();
 		if (isNotExistJsessionid(httpCookie)) {
-			responseHeader.addJSessionId(JsessionIdGenerator.generate());
+			String sessionId = JsessionIdGenerator.generate();
+			responseHeader.addJSessionId(sessionId);
+			return sessionId;
 		}
+		return httpCookie.getJsessionid();
 	}
 
 	private boolean isNotExistJsessionid(HttpCookie httpCookie) {
 		return httpCookie == null || !httpCookie.hasJsessionId();
-	}
-
-	private String getRedirectLocation(String account, String password) {
-		if (isUserNotExist(account, password)) {
-			return "/401.html";
-		}
-		return "/index.html";
 	}
 
 	private boolean isUserNotExist(String account, String password) {

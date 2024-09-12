@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.common;
 
 import java.util.List;
 
 public class Version {
+
     private static final String PROTOCOL_NAME = "HTTP";
     private static final String DELIMITER = "[/.]";
 

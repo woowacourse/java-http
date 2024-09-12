@@ -1,27 +1,24 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.component.HttpRequest;
-import org.apache.coyote.http11.component.HttpResponse;
-import org.apache.coyote.http11.component.ResponseHeader;
-import org.apache.coyote.http11.component.ResponseLine;
-import org.apache.coyote.http11.component.StatusCode;
-import org.apache.coyote.http11.component.Version;
+import org.apache.coyote.http11.component.exceptionhandler.ExceptionHandlerMapper;
+import org.apache.coyote.http11.component.handler.HandlerMapper;
+import org.apache.coyote.http11.component.request.HttpRequest;
+import org.apache.coyote.http11.component.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.exception.UncheckedServletException;
-
 public class Http11Processor implements Runnable, Processor {
+
+    private static final String CRLF = "\r\n";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -41,61 +38,60 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             final var inputStreamReader = new InputStreamReader(inputStream);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
+            final var plaintext = parseLines(bufferedReader);
 
-            final var plaintext = bufferedReader.readLine();
-
-            if (plaintext == null) {
-                return;
-            }
-
-            final HttpRequest httpRequest = new HttpRequest(plaintext);
-
-            if (httpRequest.getUri().toString().equals("/")) {
-                renderWelcome(outputStream);
-            } else if (httpRequest.getUri().getPath().equals("/login")) {
-                renderLogin(httpRequest.getUri().toString(), outputStream);
-            } else {
-                renderOther(httpRequest.getUri().toString(), outputStream);
-            }
-
-        } catch (final IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            final HttpResponse response = handleHttp(plaintext);
+            outputStream.write(response.getResponseBytes());
+            outputStream.flush();
+        } catch (final IOException exception) {
+            log.error("[I/O ERROR] : {}", exception.getMessage());
         }
     }
 
-    private void renderWelcome(final OutputStream outputStream) throws IOException {
-        final String resource = "Hello world!";
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resource.getBytes().length + " ",
-                "",
-                resource);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private HttpResponse handleHttp(final String plaintext) {
+        try {
+            final var request = new HttpRequest(plaintext);
+            final var handler = HandlerMapper.get(request.getPath());
+            return handler.handle(request);
+        } catch (final Exception exception) {
+            log.warn("[KNOWN ERROR] : {}", exception.getMessage());
+            final var handler = ExceptionHandlerMapper.get(exception.getClass());
+            return handler.handle();
+        }
     }
 
-    private void renderLogin(final String path, final OutputStream outputStream) throws IOException {
-        final var split = path.split("\\?")[0];
-        final var resource = getClass().getClassLoader().getResource("static/" + split + ".html");
-        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
-        final var responseHeader = new ResponseHeader();
-        final var response = new HttpResponse(ok, responseHeader,
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        outputStream.write(response.getResponseText().getBytes());
-        outputStream.flush();
+    private String parseLines(final BufferedReader bufferedReader) throws IOException {
+        final var collector = new ArrayList<String>();
+        var line = bufferedReader.readLine();
+        var contentLength = 0;
+        while (!Objects.isNull(line) && !line.isBlank()) {
+            collector.add(line);
+            line = bufferedReader.readLine();
+            contentLength = findContentLength(line);
+        }
+        collector.add("");
+        collector.addAll(parseBody(bufferedReader, contentLength));
+
+        return String.join(CRLF, collector);
     }
 
-    private void renderOther(final String path, final OutputStream outputStream) throws IOException {
-        final var resource = getClass().getClassLoader().getResource("static/" + path);
-        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
-        final var responseHeader = new ResponseHeader();
-        final var response = new HttpResponse(ok, responseHeader,
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        outputStream.write(response.getResponseText().getBytes());
-        outputStream.flush();
+    private int findContentLength(final String line) {
+        if (line.startsWith("Content-Length")) {
+            final List<String> content = List.of(line.replaceAll(" ", "").split(":"));
+            return Integer.parseInt(content.getLast());
+        }
+        return 0;
+    }
+
+    private List<String> parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength > 0) {
+            var buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return List.of(new String(buffer).split(CRLF));
+        }
+        return List.of();
     }
 
 }

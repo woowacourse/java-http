@@ -1,11 +1,10 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.response;
 
 import java.util.stream.Collectors;
 
-public class ResponseHeader extends Headers {
+import org.apache.coyote.http11.component.common.Headers;
 
-    public ResponseHeader() {
-    }
+public class ResponseHeader extends Headers {
 
     public void put(final String key, final String value) {
         super.values.put(key, value);
@@ -16,7 +15,7 @@ public class ResponseHeader extends Headers {
         return super.values
                 .keySet()
                 .stream()
-                .map(key -> key + KEY_VALUE_DELIMITER + super.getValue(key))
+                .map(key -> key + KEY_VALUE_DELIMITER + " " + super.getValue(key))
                 .collect(Collectors.joining(PARAMETER_DELIMITER));
     }
 }

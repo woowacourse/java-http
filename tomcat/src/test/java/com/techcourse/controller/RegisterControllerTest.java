@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
-import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +31,9 @@ class RegisterControllerTest {
         // given
         String path = "/register";
         String queryKey1 = "account";
-        String queryValue1 = "gugu";
-        String queryKey2 = "account";
-        String queryValue2 = "gugu";
+        String queryValue1 = "gugu1";
+        String queryKey2 = "email";
+        String queryValue2 = "gugu@email.com";
         String queryKey3 = "password";
         String queryValue3 = "password";
 
@@ -56,9 +55,10 @@ class RegisterControllerTest {
 
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
         HttpRequest request = new HttpRequest(inputStream);
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse httpResponse = registerController.service(request, new SessionManager());
+        registerController.service(request, response);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -66,9 +66,9 @@ class RegisterControllerTest {
         String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
-                () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedLocation.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
+                () -> assertThat(response.toByte()).contains(expectedRequestLine.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedLocation.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedContentType.getBytes())
         );
     }
 }

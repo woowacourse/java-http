@@ -1,4 +1,4 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlet;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,25 +6,25 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.controller.http.ContentType;
-import org.apache.catalina.controller.http.request.HttpRequest;
-import org.apache.catalina.controller.http.response.HttpResponse;
+import org.apache.catalina.servlet.http.ContentType;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 
 /**
  * 정적 리소스를 관리하는 서블릿입니다.
  */
-public class DefaultController implements Controller {
+public class DefaultServlet implements Servlet {
 
-    private static DefaultController instance;
+    private static DefaultServlet instance;
 
-    public static DefaultController getInstance() {
+    public static DefaultServlet getInstance() {
         if (instance == null) {
-            instance = new DefaultController();
+            instance = new DefaultServlet();
         }
         return instance;
     }
 
-    private DefaultController() {}
+    private DefaultServlet() {}
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

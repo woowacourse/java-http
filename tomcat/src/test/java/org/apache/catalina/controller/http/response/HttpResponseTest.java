@@ -3,6 +3,7 @@ package org.apache.catalina.controller.http.response;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

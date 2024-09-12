@@ -3,21 +3,21 @@ package org.apache.catalina.mapper;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
-import org.apache.catalina.controller.DefaultController;
-import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.RegisterController;
-import org.apache.catalina.controller.Controller;
+import org.apache.catalina.servlet.DefaultServlet;
+import org.apache.catalina.servlet.LoginServlet;
+import org.apache.catalina.servlet.RegisterServlet;
+import org.apache.catalina.servlet.Servlet;
 
 /**
  * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)
  */
 public class ControllerMapper {
 
-    private static final Map<Pattern, Controller> values = Map.of(
-            Pattern.compile(".*\\..*"), DefaultController.getInstance(),
-            Pattern.compile("/"), DefaultController.getInstance(),
-            Pattern.compile("^/login$"), LoginController.getInstance(),
-            Pattern.compile("^/register$"), RegisterController.getInstance()
+    private static final Map<Pattern, Servlet> values = Map.of(
+            Pattern.compile(".*\\..*"), DefaultServlet.getInstance(),
+            Pattern.compile("/"), DefaultServlet.getInstance(),
+            Pattern.compile("^/login$"), LoginServlet.getInstance(),
+            Pattern.compile("^/register$"), RegisterServlet.getInstance()
     );
 
     private static ControllerMapper instance;
@@ -31,7 +31,7 @@ public class ControllerMapper {
         return instance;
     }
 
-    public Controller getServlet(String url) {
+    public Servlet getServlet(String url) {
         return values.entrySet().stream()
                 .filter(servlet -> servlet.getKey().matcher(url).matches())
                 .findFirst()

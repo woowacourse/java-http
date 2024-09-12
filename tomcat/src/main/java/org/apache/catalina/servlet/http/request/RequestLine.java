@@ -1,11 +1,11 @@
-package org.apache.catalina.controller.http.request;
+package org.apache.catalina.servlet.http.request;
 
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.catalina.controller.http.HttpVersion;
+import org.apache.catalina.servlet.http.HttpVersion;
 
 public class RequestLine {
 

@@ -1,4 +1,4 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,25 +8,25 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.controller.http.Cookie;
-import org.apache.catalina.controller.http.Session;
-import org.apache.catalina.controller.http.SessionManager;
-import org.apache.catalina.controller.http.request.HttpRequest;
-import org.apache.catalina.controller.http.response.HttpResponse;
+import org.apache.catalina.servlet.http.Cookie;
+import org.apache.catalina.servlet.http.Session;
+import org.apache.catalina.servlet.http.SessionManager;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController extends AbstractController {
+public class LoginServlet extends AbstractServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
-    private static LoginController instance;
+    private static LoginServlet instance;
 
-    private LoginController() {}
+    private LoginServlet() {}
 
-    public static LoginController getInstance() {
+    public static LoginServlet getInstance() {
         if (instance == null) {
-            instance = new LoginController();
+            instance = new LoginServlet();
         }
         return instance;
     }

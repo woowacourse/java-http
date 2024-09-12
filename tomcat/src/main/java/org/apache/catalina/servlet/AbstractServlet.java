@@ -1,11 +1,11 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlet;
 
 import java.io.IOException;
-import org.apache.catalina.controller.http.request.HttpMethod;
-import org.apache.catalina.controller.http.request.HttpRequest;
-import org.apache.catalina.controller.http.response.HttpResponse;
+import org.apache.catalina.servlet.http.request.HttpMethod;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 
-public abstract class AbstractController implements Controller {
+public abstract class AbstractServlet implements Servlet {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws IOException {

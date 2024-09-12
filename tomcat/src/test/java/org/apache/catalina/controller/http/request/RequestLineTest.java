@@ -3,7 +3,9 @@ package org.apache.catalina.controller.http.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-import org.apache.catalina.controller.http.HttpVersion;
+import org.apache.catalina.servlet.http.HttpVersion;
+import org.apache.catalina.servlet.http.request.HttpMethod;
+import org.apache.catalina.servlet.http.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

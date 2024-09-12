@@ -1,4 +1,4 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,19 +8,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.controller.http.request.HttpRequest;
-import org.apache.catalina.controller.http.response.HttpResponse;
-import org.apache.catalina.controller.http.response.HttpStatus;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
+import org.apache.catalina.servlet.http.response.HttpStatus;
 
-public class RegisterController extends AbstractController {
+public class RegisterServlet extends AbstractServlet {
 
-    private static RegisterController instance;
+    private static RegisterServlet instance;
 
-    private RegisterController() {}
+    private RegisterServlet() {}
 
-    public static RegisterController getInstance() {
+    public static RegisterServlet getInstance() {
         if (instance == null) {
-            instance = new RegisterController();
+            instance = new RegisterServlet();
         }
         return instance;
     }

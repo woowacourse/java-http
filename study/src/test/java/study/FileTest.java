@@ -3,11 +3,19 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -28,7 +36,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL url = ClassLoader.getSystemClassLoader().getResource(fileName);
+        final String actual = url.toString();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +49,21 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = classloader.getResourceAsStream(fileName);
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final List<String> actual = new ArrayList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            actual.add(line);
+        }
+        System.out.println("actual = " + actual);
 
         assertThat(actual).containsOnly("nextstep");
     }

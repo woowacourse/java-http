@@ -2,6 +2,10 @@ package org.apache.catalina.response;
 
 import org.apache.catalina.Cookie;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,6 +37,7 @@ public class HttpResponse {
 
     public void setBody(String body) {
         this.body = body;
+        setContentLength(body.getBytes().length);
     }
 
     public Map<Header, Object> getHeaders() {
@@ -45,5 +50,43 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void forward(String path) {
+        setStatusLine(Status.OK);
+        setContentType(ContentType.of(path));
+        String body = getBody(path);
+        setBody(body);
+    }
+
+    public void sendRedirect(String path) {
+        setStatusLine(Status.FOUND);
+        setLocation(path);
+        setContentType(ContentType.of(path));
+        String body = getBody(path);
+        setBody(body);
+    }
+
+    private String getBody(String path) {
+        int extension = path.lastIndexOf(".");
+        path = "static" + path;
+        if (extension == -1) {
+            path += ".html";
+        }
+        return readFile(path);
+    }
+
+    private String readFile(String path) {
+        URL url = getClass().getClassLoader().getResource(path);
+        if (url == null) {
+            return readFile("static/404.html");
+        }
+        File file = new File(url.getFile());
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes);
+        } catch (IOException e) {
+            return readFile("static/500.html");
+        }
     }
 }

@@ -1,13 +1,10 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
-import org.apache.catalina.ResourceResolver;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 
 public abstract class MappingController implements Controller {
-
-    protected final ResourceResolver resourceResolver = new ResourceResolver();
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

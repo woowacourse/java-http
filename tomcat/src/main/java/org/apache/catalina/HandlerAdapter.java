@@ -1,9 +1,6 @@
 package org.apache.catalina;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.StaticResourceController;
+import org.apache.catalina.controller.*;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 
@@ -13,16 +10,14 @@ public class HandlerAdapter {
 
     private final Map<String, Controller> mapper = Map.of(
             "/login", new LoginController(),
-            "/register", new RegisterController()
+            "/register", new RegisterController(),
+            "/", new HelloWorldController()
     );
 
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         String uri = request.getUri();
 
-        HttpResponse response = new HttpResponse();
         mapper.getOrDefault(uri, new StaticResourceController())
                 .service(request, response);
-
-        return response;
     }
 }

@@ -12,6 +12,7 @@ public enum MimeType {
     JPG(".jpg", "image/jpeg"),
     JPEG(".jpeg", "image/jpeg"),
     GIF(".gif", "image/gif"),
+    SVG(".svg", "image/svg+xml"),
     DEFAULT("", "application/octet-stream");
 
     private final String extension;

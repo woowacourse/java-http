@@ -29,7 +29,7 @@ public enum HttpStatusCode {
         return name();
     }
 
-    public String toString() {
+    public String concatCodeAndStatus() {
         return code + " " + name();
     }
 }

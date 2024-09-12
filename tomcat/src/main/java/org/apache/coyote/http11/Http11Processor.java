@@ -12,7 +12,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String[] determineGetResponse(String url, String version, Map<String, String> requestHeaders) {
         String[] result = new String[2];
-        result[0] = version + " " + OK.toString() + " ";
+        result[0] = version + " " + OK.concatCodeAndStatus() + " ";
         if (url.endsWith("html") || url.endsWith("js") || url.endsWith("css")) {
             result[1] = "static" + url;
             return result;
@@ -189,7 +188,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String createResponseHeader(String version, HttpStatusCode statusCode, String location) {
         return String.join("\r\n",
-                version + " " + statusCode.toString() + " ",
+                version + " " + statusCode.concatCodeAndStatus() + " ",
                 "Location: " + location + " ");
     }
 

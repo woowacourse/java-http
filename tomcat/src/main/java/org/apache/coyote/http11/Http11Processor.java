@@ -6,6 +6,7 @@ import org.apache.catalina.controller.AbstractController;
 import com.techcourse.exception.ApplicationException;
 import org.apache.catalina.controller.HandlerMapping;
 import com.techcourse.view.ViewResolver;
+import org.apache.catalina.exception.ControllerException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.HttpConnectorException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -47,6 +48,9 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e, this);
         } catch (HttpConnectorException e) {
             // todo: 500 error page
+            log.error(e.getMessage(), e, this);
+        } catch (ControllerException e) {
+            // todo: map to proper error page
             log.error(e.getMessage(), e, this);
         } catch (ApplicationException e) {
             // todo: map to proper error page

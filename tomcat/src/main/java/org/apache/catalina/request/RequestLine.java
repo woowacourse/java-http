@@ -51,6 +51,10 @@ public class RequestLine {
         return path.split(QUERY_PARAMETER_DELIMITER, 2)[0];
     }
 
+    public String getPath() {
+        return path;
+    }
+
     public VersionOfProtocol getVersionOfProtocol() {
         return versionOfProtocol;
     }

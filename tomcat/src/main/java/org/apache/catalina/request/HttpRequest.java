@@ -32,6 +32,10 @@ public class HttpRequest {
         return requestLine.getPathWithoutQuery();
     }
 
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
     public Map<String, String> getQueryParam() {
         return requestLine.getQueryParam();
     }

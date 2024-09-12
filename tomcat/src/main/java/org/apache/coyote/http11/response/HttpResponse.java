@@ -53,12 +53,12 @@ public class HttpResponse {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("%s %d %s \r\n", versionOfProtocol.value(), statusCode.value(), statusMessage.value()));
 		headers.headers().forEach((key, value) -> {
-			sb.append(String.format("%s: %s\r\n", key, value));
+			sb.append(String.format("%s: %s \r\n", key, value));
 		});
 		sb.append("\r\n");
 		if (body != null) {
 			sb.append(body.value());
-			sb.append("\r\n");
+			// sb.append("\r\n");
 		}
 		return sb.toString();
 	}
@@ -91,7 +91,7 @@ public class HttpResponse {
 		} catch (AccessDeniedException | NullPointerException exception) {
 			this.body = new Body("Hello, World!");
 
-			this.headers.add("Content-Type", "text/plain; charset=utf-8");
+			this.headers.add("Content-Type", "text/html;charset=utf-8");
 			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
 		}
 	}

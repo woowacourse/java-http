@@ -52,7 +52,7 @@ public class LoginController extends AbstractController {
 			response.setStatusCode(302);
 			response.setStatusMessage("Found");
 			response.setHeaders(Map.of(
-				"Location", "http://localhost:8080" + "index.html"
+				"Location", "http://localhost:8080/index.html"
 			));
 		}
 	}

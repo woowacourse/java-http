@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 import org.apache.catalina.http.HttpRequest;
 import org.apache.catalina.http.HttpResponse;
-import org.apache.catalina.http.body.HttpResponseBody;
-import org.apache.catalina.http.header.HttpHeaders;
-import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.servlet.ServletContainer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -34,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
-            HttpResponse response = createResponse(request);
+            HttpResponse response = new HttpResponse(request.getHttpVersion());
             ServletContainer servletContainer = ServletContainer.getInstance();
             servletContainer.service(request, response);
 
@@ -43,13 +40,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpResponse createResponse(HttpRequest request) {
-        return new HttpResponse(
-                new HttpResponseLine(request.getHttpVersion()),
-                new HttpHeaders(),
-                new HttpResponseBody()
-        );
     }
 }

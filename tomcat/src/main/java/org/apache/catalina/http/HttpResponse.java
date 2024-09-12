@@ -6,6 +6,7 @@ import org.apache.catalina.http.header.HttpHeader;
 import org.apache.catalina.http.header.HttpHeaders;
 import org.apache.catalina.http.startline.HttpResponseLine;
 import org.apache.catalina.http.startline.HttpStatus;
+import org.apache.catalina.http.startline.HttpVersion;
 import org.apache.catalina.session.Session;
 
 public class HttpResponse {
@@ -18,6 +19,10 @@ public class HttpResponse {
         this.httpResponseLine = httpResponseLine;
         this.httpHeaders = httpHeaders;
         this.httpResponseBody = httpResponseBody;
+    }
+
+    public HttpResponse(HttpVersion httpVersion) {
+        this(new HttpResponseLine(httpVersion), new HttpHeaders(), new HttpResponseBody());
     }
 
     public byte[] getBytes() {

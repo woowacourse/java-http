@@ -74,8 +74,8 @@ public class HttpResponse {
         return resource;
     }
 
-    public void sendBodyResponse(String body, HttpStatus httpStatus, ContentType contentType) {
-        setBody(body, httpStatus, contentType);
+    public void sendBodyResponse(String body, ContentType contentType) {
+        setBody(body, HttpStatus.OK, contentType);
         flushBuffer();
     }
 

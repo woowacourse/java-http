@@ -22,6 +22,6 @@ public class DefaultController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.sendBodyResponse(DEFAULT_BODY, HttpStatus.OK, ContentType.PLAIN);
+        httpResponse.sendBodyResponse(DEFAULT_BODY, ContentType.PLAIN);
     }
 }

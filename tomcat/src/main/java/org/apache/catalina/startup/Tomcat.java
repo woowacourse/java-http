@@ -1,8 +1,8 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import org.apache.catalina.DefaultDispatcher;
-import org.apache.catalina.RequestMapper;
+import org.apache.catalina.route.DefaultDispatcher;
+import org.apache.catalina.route.RequestMapper;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.Dispatcher;
 import org.slf4j.Logger;

@@ -5,24 +5,28 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestParser {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
+public class HttpRequest {
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String COOKIE = "Cookie";
+    public static final String QUERYSTRING_SEPARATOR = "&";
+    public static final String KEY_VALUE_SEPARATOR = "=";
+    public static final int QUERY_PARAMETER_KEY_INDEX = 0;
+    public static final int QUERY_PARAMETER_VALUE_INDEX = 1;
 
-    private final String[] requestLine;
+    private final RequestLine requestLine;
     private final Map<String, String> header;
     private final String body;
     private final HttpCookie httpCookie;
 
-    public RequestParser(BufferedReader bufferedReader) throws IOException {
+    public HttpRequest(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         log.info("requestLine : {}", line);
-        this.requestLine = line.split(" ");
+        this.requestLine = new RequestLine(line);
         this.header = extractHeader(bufferedReader);
         this.httpCookie = new HttpCookie(extractCookie());
         this.body = extractBody(bufferedReader);
@@ -56,16 +60,28 @@ public class RequestParser {
         return "";
     }
 
+    public Optional<Map<String, String>> parseQueryString() {
+        if (body.isEmpty()) {
+            return Optional.empty();
+        }
+        String[] queryParameters = body.split(QUERYSTRING_SEPARATOR);
+        Map<String, String> keyValue = new HashMap<>();
+        for (String queryParameter : queryParameters) {
+            if (!queryParameter.contains(KEY_VALUE_SEPARATOR)) {
+                return Optional.empty();
+            }
+            String[] pair = queryParameter.split(KEY_VALUE_SEPARATOR, -1);
+            keyValue.put(pair[QUERY_PARAMETER_KEY_INDEX], pair[QUERY_PARAMETER_VALUE_INDEX]);
+        }
+        return Optional.of(keyValue);
+    }
+
     public String getMethod() {
-        return requestLine[0];
+        return requestLine.getMethod();
     }
 
-    public String getRequestUri() {
-        return requestLine[1];
-    }
-
-    public String getBody() {
-        return body;
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getCookie(String cookieName) {

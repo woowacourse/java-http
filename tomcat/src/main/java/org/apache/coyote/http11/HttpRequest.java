@@ -6,13 +6,13 @@ import java.io.IOException;
 public class HttpRequest {
 
     private final HttpRequestFirstLine firstLine;
-    private final Header header;
+    private final HttpRequestHeader header;
     private final HttpCookie cookie;
     private final String body;
 
     public HttpRequest(BufferedReader reader) throws IOException {
         firstLine = new HttpRequestFirstLine(reader.readLine());
-        header = new Header(reader);
+        header = new HttpRequestHeader(reader);
         cookie = new HttpCookie(header.getOrDefault("Cookie", ""));
         body = parseBody(reader);
     }

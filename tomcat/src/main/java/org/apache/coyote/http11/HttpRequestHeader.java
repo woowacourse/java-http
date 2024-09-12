@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Header {
+public class HttpRequestHeader {
 
     private final Map<String, String> header = new HashMap<>();
 
-    public Header(BufferedReader reader) throws IOException {
+    public HttpRequestHeader(BufferedReader reader) throws IOException {
         String readLine;
         while (!"".equals(readLine = reader.readLine())) {
             String[] split = readLine.split(": ");

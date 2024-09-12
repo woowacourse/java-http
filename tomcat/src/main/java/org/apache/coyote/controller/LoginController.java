@@ -2,7 +2,6 @@ package org.apache.coyote.controller;
 
 import java.util.UUID;
 
-import org.apache.coyote.Controller;
 import org.apache.coyote.component.HttpCookie;
 import org.apache.coyote.component.HttpHeaderField;
 import org.apache.coyote.component.HttpStatusCode;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginController extends AbstractController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String USER_SESSION_KEY = "user";

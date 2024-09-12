@@ -9,7 +9,8 @@ import java.nio.file.Files;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.http.response.HttpResponseGenerator;
+import org.apache.http.header.HttpHeaderName;
+import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +29,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addHeader(HttpHeaderName.CONTENT_TYPE, "text/plain")
+                .body("Hello world!")
+                .okBuild();
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
@@ -57,18 +55,16 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5128 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final HttpResponse httpResponse = HttpResponse.builder()
+                .addHeader(HttpHeaderName.CONTENT_TYPE, "text/html")
+                .body(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+                .okBuild();
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
-    @DisplayName("login Get 요청 처리: 세션이 없는 경우 login html 반환")
-    void login_Get_WhenExistsSession() throws IOException {
+    @DisplayName("login Get 요청 처리: 세션이 없는 경우 login html 로 리다이렉트")
+    void login_Get_WhenExistsSession() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -84,14 +80,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3797 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final HttpResponse httpResponse = HttpResponse.builder().foundBuild("/login.html");
+        assertThat(socket.output()).isEqualTo(httpResponse.toString());
     }
 
     @Test
@@ -112,8 +102,11 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
-        assertThat(socket.output()).isEqualTo(
-                HttpResponseGenerator.getFoundResponse("/index.html"));
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
+
+        // clear
+        sessionManager.remove(new Session("1"));
     }
 
     @Test
@@ -125,6 +118,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Length: 30",
                 "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
                 "account=gugu&password=password");
 
@@ -135,14 +129,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("/index.html"),
-                "Set-Cookie: JSESSIONID=");
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html", "Set-Cookie: JSESSIONID=");
     }
 
     @Test
-    @DisplayName("register Get 요청 처리: 성공 시 register html")
-    void register_Get() throws IOException {
+    @DisplayName("register Get 요청 처리: 성공 시 register html 리다이렉트")
+    void register_Get() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1",
@@ -156,14 +148,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 4319 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /register.html");
     }
 
     @Test
@@ -175,6 +160,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Length: 49",
                 "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
                 "account=gugu&email=hi@naver.com&password=password");
 
@@ -185,7 +171,6 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("/index.html"));
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
     }
 }

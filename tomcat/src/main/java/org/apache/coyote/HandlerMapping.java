@@ -1,14 +1,17 @@
 package org.apache.coyote;
 
-import org.apache.coyote.handler.Handler;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.handler.RootEndPointHandler;
-import org.apache.coyote.handler.StaticResourceHandler;
-import org.apache.coyote.handler.exception.InternalServerErrorHandler;
-import org.apache.coyote.handler.exception.NotFoundHandler;
-import org.apache.coyote.handler.exception.UnAuthorizationHandler;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.exception.NotFoundException;
+import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.http.request.HttpRequest;
+
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootEndPointController;
+import com.techcourse.controller.exception.InternalServerErrorController;
+import com.techcourse.controller.exception.NotFoundController;
+import com.techcourse.controller.exception.UnAuthorizationController;
 
 
 public class HandlerMapping {
@@ -23,37 +26,37 @@ public class HandlerMapping {
         return INSTANCE;
     }
 
-    public Handler getHandler(final HttpRequest httpRequest) {
+    public Controller getHandler(final HttpRequest httpRequest) {
         return getHandlerByEndPoint(httpRequest);
     }
 
-    private Handler getHandlerByEndPoint(final HttpRequest httpRequest) {
+    private Controller getHandlerByEndPoint(final HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
 
         if (path.equals(PATH_DELIMITER)) {
-            return RootEndPointHandler.getInstance();
+            return RootEndPointController.getInstance();
         }
 
-        if (path.contains("login")) {
-            return LoginHandler.getInstance();
+        if (path.equals("/login")) {
+            return LoginController.getInstance();
         }
 
-        if (path.contains("register")) {
-            return RegisterHandler.getInstance();
+        if (path.equals("/register")) {
+            return RegisterController.getInstance();
         }
 
-        return StaticResourceHandler.getInstance();
+        return StaticResourceController.getInstance();
     }
 
-    public Handler getHandlerByException(final Exception exception) {
+    public Controller getHandlerByException(final Exception exception) {
         if (exception instanceof NotFoundException) {
-            return NotFoundHandler.getInstance();
+            return NotFoundController.getInstance();
         }
 
         if (exception instanceof UnauthorizedException) {
-            return UnAuthorizationHandler.getInstance();
+            return UnAuthorizationController.getInstance();
         }
 
-        return InternalServerErrorHandler.getInstance();
+        return InternalServerErrorController.getInstance();
     }
 }

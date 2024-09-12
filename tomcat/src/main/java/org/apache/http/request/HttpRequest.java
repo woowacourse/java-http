@@ -1,77 +1,85 @@
 package org.apache.http.request;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
+import org.apache.http.HttpVersion;
+import org.apache.http.MimeType;
 import org.apache.http.header.HttpHeader;
-import org.apache.http.header.StandardHttpHeader;
+import org.apache.http.header.HttpHeaderName;
+import org.apache.http.header.HttpHeaders;
 
 public class HttpRequest {
-    private final HttpMethod method;
-    private final String path;
-    private final String version;
-    private final HttpHeader[] headers;
+
+    private static final String FORM_DATA_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_VALUE_COUNT = 2;
+    private static final int KEY_ORDER = 0;
+    private static final int VALUE_ORDER = 1;
+
+    private final RequestLine requestLine;
+    private final HttpHeaders headers;
     private final String body;
     private final HttpCookie httpCookie;
 
-    public HttpRequest(String method, String path, String version, HttpHeader[] headers, String body) {
-        this.method = HttpMethod.valueOf(method);
-        this.path = path;
-        this.version = version;
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.httpCookie = parseCookie(headers);
+        this.httpCookie = headers != null ? headers.parseCookie() : null;
     }
 
-    private HttpCookie parseCookie(HttpHeader[] headers) {
-        return Optional.ofNullable(headers)
-                .flatMap(hs -> Arrays.stream(hs)
-                        .filter(header -> StandardHttpHeader.COOKIE.equalsIgnoreCase(header.getKey()))
-                        .findFirst()
-                        .map(header -> HttpCookie.of(header.getValue())))
+    public HttpRequest(RequestLine requestLine) {
+        this.requestLine = requestLine;
+        this.headers = null;
+        this.body = null;
+        this.httpCookie = null;
+    }
+
+    public String getFormBodyByKey(String key) {
+        validateContentTypeFormLogin();
+        return Arrays.stream(body.split(FORM_DATA_DELIMITER))
+                .map(param -> param.split(KEY_VALUE_DELIMITER, KEY_VALUE_COUNT))
+                .filter(keyValue -> keyValue.length == KEY_VALUE_COUNT && keyValue[KEY_ORDER].equals(key))
+                .map(keyValue -> keyValue[VALUE_ORDER])
+                .findFirst()
                 .orElse(null);
     }
 
-    public String getFormBody(String key) {
-        final String[] params = this.body.split("&");
-        for (int i = 0; i < params.length; i++) {
-            String[] keyAndValue = params[i].split("=");
-            if (keyAndValue[0].equals(key)) {
-                return keyAndValue[1];
-            }
+    private void validateContentTypeFormLogin() {
+        String requestContentType = getHeaderValue(HttpHeaderName.CONTENT_TYPE.getValue());
+        if (MimeType.APPLICATION_X_WWW_FORM_URLENCODED != MimeType.getMimeType(requestContentType)) {
+            throw new UnsupportedOperationException("application/x-www-form-urlencoded 형식이 아닌 미디어 타입입니다.");
         }
-        return null;
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {
-        return this.method == httpMethod;
+        return requestLine.hasSameMethod(httpMethod);
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public String getVersion() {
-        return version;
+    public HttpVersion getVersion() {
+        return requestLine.getVersion();
     }
 
-    public HttpHeader[] getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 
-    public String getHeader(String key) {
-        for (HttpHeader header : headers) {
-            if (header.getKey().equals(key)) {
-                return header.getValue();
-            }
-        }
-        throw new IllegalArgumentException("존재 하지 않는 Header " + key + "입니다.");
+    public String getHeaderValue(String key) {
+        return headers.getHeaders().stream()
+                .filter(httpHeader -> httpHeader.getKey().equalsIgnoreCase(key))
+                .map(HttpHeader::getValue)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 Header " + key + "입니다."));
     }
 
     public String getBody() {

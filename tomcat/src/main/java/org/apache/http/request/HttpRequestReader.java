@@ -3,12 +3,12 @@ package org.apache.http.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.http.header.HttpHeader;
-import org.apache.http.header.StandardHttpHeader;
+import org.apache.http.header.HttpHeaderName;
+import org.apache.http.header.HttpHeaders;
 
 public class HttpRequestReader {
 
@@ -16,15 +16,10 @@ public class HttpRequestReader {
     }
 
     public static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final String request = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+        final HttpHeaders headers = new HttpHeaders(readRequestHeaders(bufferedReader));
 
-        final String[] requestStartLine = request.split(" ");
-        final String method = requestStartLine[0];
-        final String path = requestStartLine[1];
-        final String version = requestStartLine[2];
-
-        final HttpHeader[] headers = readRequestHeaders(bufferedReader);
-        return new HttpRequest(method, path, version, headers, readRequestBody(headers, bufferedReader));
+        return new HttpRequest(requestLine, headers, readRequestBody(headers, bufferedReader));
     }
 
     private static HttpHeader[] readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -40,9 +35,10 @@ public class HttpRequestReader {
         return headers.toArray(HttpHeader[]::new);
     }
 
-    private static String readRequestBody(final HttpHeader[] headers, final BufferedReader bufferedReader) throws IOException {
-        Optional<HttpHeader> httpHeader = Arrays.stream(headers)
-                .filter(header -> StandardHttpHeader.CONTENT_LENGTH.equalsIgnoreCase(header.getKey()))
+    private static String readRequestBody(final HttpHeaders headers, final BufferedReader bufferedReader)
+            throws IOException {
+        Optional<HttpHeader> httpHeader = headers.getHeaders().stream()
+                .filter(header -> HttpHeaderName.CONTENT_LENGTH == header.getKey())
                 .findFirst();
 
         if (httpHeader.isEmpty()) {

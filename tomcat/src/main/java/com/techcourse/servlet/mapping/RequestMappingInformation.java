@@ -22,12 +22,6 @@ public class RequestMappingInformation {
         return new RequestMappingInformation(request.getMethod(), request.getUriPath(), request.getProtocol());
     }
 
-    public boolean matches(HttpServletRequest request) {
-        return request.methodEquals(httpMethod) &&
-                request.uriEquals(uri) &&
-                request.protocolEquals(httpProtocol);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

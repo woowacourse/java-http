@@ -4,7 +4,6 @@ import static org.apache.coyote.http11.common.HttpProtocol.HTTP_11;
 import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.apache.coyote.http11.request.line.Method.POST;
 
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.servlet.GreetingServlet;
 import com.techcourse.servlet.LoginPageServlet;
 import com.techcourse.servlet.LoginServlet;
@@ -29,16 +28,13 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
 
     @Override
     public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
-        RequestMappingInformation requestMappingInformation = RequestMappingInformation.from(httpServletRequest);
-        return handlers.containsKey(requestMappingInformation);
+        RequestMappingInformation mappingKey = RequestMappingInformation.from(httpServletRequest);
+        return handlers.containsKey(mappingKey);
     }
 
     @Override
     public Servlet getHandler(HttpServletRequest httpServletRequest) {
-        return handlers.keySet().stream()
-                .filter(mappingInformation -> mappingInformation.matches(httpServletRequest))
-                .map(handlers::get)
-                .findAny()
-                .orElseThrow(() -> new UncheckedServletException("요청을 처리할 수 있는 핸들러가 없습니다"));
+        RequestMappingInformation mappingKey = RequestMappingInformation.from(httpServletRequest);
+        return handlers.get(mappingKey);
     }
 }

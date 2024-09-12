@@ -25,7 +25,7 @@ class RequestMappingTest {
         @Test
         @DisplayName("성공 : request에 대응하는 컨트롤러 조회")
         void getControllerSuccess() {
-            RequestMapping requestMapping = RequestMapping.getInstance();
+            RequestMapping requestMapping = new RequestMapping();
             HttpRequest request = new HttpRequest(
                     new RequestLine("GET / HTTP/1.1"), new RequestHeader(Map.of()), new RequestBody(Map.of()));
 
@@ -37,7 +37,7 @@ class RequestMappingTest {
         @Test
         @DisplayName("실패 : request에 대응하는 컨트롤러가 없으면 예외 발생")
         void getControllerFail() {
-            RequestMapping requestMapping = RequestMapping.getInstance();
+            RequestMapping requestMapping = new RequestMapping();
             HttpRequest request = new HttpRequest(
                     new RequestLine("GET /hello HTTP/1.1"), new RequestHeader(Map.of()), new RequestBody(Map.of()));
 

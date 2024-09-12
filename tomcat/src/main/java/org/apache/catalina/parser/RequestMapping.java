@@ -8,13 +8,10 @@ import org.apache.catalina.request.HttpRequest;
 import com.techcourse.controller.RootController;
 
 public class RequestMapping {
-    private static final List<Controller> controllers = List.of(new RootController());
-    private static final RequestMapping instance = new RequestMapping();
+    private final List<Controller> controllers;
 
-    private RequestMapping() {}
-
-    public static RequestMapping getInstance() {
-        return instance;
+    public RequestMapping() {
+        this.controllers = List.of(new RootController());
     }
 
     public Controller getController(HttpRequest request) {

@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Objects;
 import org.apache.coyote.controller.AbstractController;
+import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -23,9 +23,11 @@ public class LoginController extends AbstractController {
         String account = getAccountFromRequest(request);
         String password = getPasswordFromRequest(request);
         User user = getUser(account, password);
-        request.getSession().setAttribute(USER_FIELD, user);
+        Session session = request.getSession();
+        session.setAttribute(USER_FIELD, user);
         response.sendRedirect(INDEX_PAGE);
-        response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId());
+        response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + session.getId());
+        response.setCookie(new Cookie("JSESSIONID=" + session.getId()));
     }
 
     private String getAccountFromRequest(HttpRequest request) {

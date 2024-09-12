@@ -17,7 +17,7 @@ public class HttpResponse {
     private final String protocol;
     private StatusCode status;
     private final Map<String, String> headers;
-    private final Cookie cookies;
+    private Cookie cookies;
     private String body;
 
     private HttpResponse(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
@@ -86,6 +86,10 @@ public class HttpResponse {
 
     private String getBodyLines() {
         return LINE_SEPARATOR + body;
+    }
+
+    public void setCookie(Cookie cookie) {
+        this.cookies = cookie;
     }
 
     @Override

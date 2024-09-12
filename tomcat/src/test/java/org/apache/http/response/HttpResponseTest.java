@@ -64,7 +64,7 @@ class HttpResponseTest {
     @DisplayName("Location 추가")
     void testAddLocation() {
         HttpResponse response = HttpResponse.builder()
-                .addLocation("/new-location")
+                .location("/new-location")
                 .build();
 
         HttpHeader locationHeader = response.getHeaders().getHeader(HttpHeaderName.LOCATION);

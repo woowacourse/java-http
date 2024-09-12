@@ -20,8 +20,8 @@ import com.techcourse.model.User;
 public class LoginController extends AbstractController {
 
     public static final String LOGIN_PATH = "/login";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
 
@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        if (LOGIN_PATH.equals(request.getPath())) {
+        if (request.isEmptyByQueryParam()) {
             String id = request.getCookie().getAuthCookie();
             Optional<Session> session = SessionManager.getInstance().findSession(id);
             if (session.isPresent()) {

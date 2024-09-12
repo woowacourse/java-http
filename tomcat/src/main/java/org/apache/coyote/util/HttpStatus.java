@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.domain;
+package org.apache.coyote.util;
 
 public enum HttpStatus {
 
@@ -7,6 +7,7 @@ public enum HttpStatus {
     ACCEPTED(202, "Accepted"),
     NO_CONTENT(204, "No Content"),
 
+    FOUND(302, "Found"),
     NOT_MODIFIED(304, "Not Modified"),
 
     BAD_REQUEST(400, "Bad Request"),
@@ -21,6 +22,7 @@ public enum HttpStatus {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     HTTP_VERSION_NOT_FOUND(500, "HTTP Version Not Supported");
 
+    private static final String HTTP_STATUS_COMBINATOR = " ";
 
     private final int statusCode;
     private final String statusMessage;
@@ -31,6 +33,10 @@ public enum HttpStatus {
     }
 
     public String getCombinedHttpStatus() {
-        return statusCode + " " + statusMessage;
+        return statusCode + HTTP_STATUS_COMBINATOR + statusMessage;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }

@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private String createRawResponse(OutputStream outputStream, HttpResponse response) {
-        return ResponseFactory.writeResponse(outputStream, response);
+    private String createRawResponse(HttpResponse response) {
+        return ResponseFactory.writeResponse(response);
     }
 }

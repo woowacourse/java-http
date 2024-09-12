@@ -2,6 +2,7 @@ package org.apache.http;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,10 @@ public class HttpCookie {
 
     public HttpCookie(Map<String, String> cookie) {
         this.cookie = cookie;
+    }
+
+    public HttpCookie(String key, String value) {
+        this.cookie = new HashMap<>(Map.of(key, value));
     }
 
     public static HttpCookie from(String cookie) {
@@ -35,6 +40,11 @@ public class HttpCookie {
                         pair -> pair[KEY_ORDER].trim(),
                         pair -> pair[VALUE_ORDER].trim(),
                         (v1, v2) -> v1));
+    }
+
+    public HttpCookie add(String key, String value) {
+        cookie.put(key, value);
+        return this;
     }
 
     public String getValue(String key) {

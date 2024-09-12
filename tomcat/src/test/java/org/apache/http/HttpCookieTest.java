@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class HttpCookieTest {
+
     @Nested
     @DisplayName("HttpCookie 생성")
     class from {
@@ -35,6 +36,23 @@ class HttpCookieTest {
                     () -> assertEquals("value", httpCookie.getValue("name")),
                     () -> assertEquals("", httpCookie.getValue("session")),
                     () -> assertNull(httpCookie.getValue("flag"))
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("쿠키 추가")
+    class add {
+
+        @Test
+        @DisplayName("쿠키 추가 성공")
+        void add() {
+            HttpCookie httpCookie = new HttpCookie("name", "value");
+            httpCookie.add("session", "");
+
+            assertAll(
+                    () -> assertEquals("value", httpCookie.getValue("name")),
+                    () -> assertEquals("", httpCookie.getValue("session"))
             );
         }
     }

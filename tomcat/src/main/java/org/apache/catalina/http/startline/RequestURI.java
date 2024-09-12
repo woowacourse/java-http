@@ -3,13 +3,7 @@ package org.apache.catalina.http.startline;
 import java.util.Objects;
 import org.apache.catalina.util.ResourceReader;
 
-public class RequestURI {
-
-    private final String value;
-
-    public RequestURI(String value) {
-        this.value = value;
-    }
+public record RequestURI(String value) {
 
     public boolean startsWith(String startsWith) {
         return value.startsWith(startsWith);
@@ -17,10 +11,6 @@ public class RequestURI {
 
     public boolean isRoot() {
         return value.equals("/");
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public boolean isResource() {

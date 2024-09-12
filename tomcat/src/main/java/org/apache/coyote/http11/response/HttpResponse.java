@@ -5,12 +5,12 @@ import java.util.Map;
 public class HttpResponse {
     private final StatusLine statusLine;
     private final HttpResponseHeader responseHeader;
-    private final HttpResponseBody responseBody;
+    private String responseBody;
 
     private HttpResponse() {
         statusLine = StatusLine.defaultStatusLine();
         responseHeader = new HttpResponseHeader();
-        responseBody = new HttpResponseBody();
+        responseBody = "";
     }
 
     public static HttpResponse defaultResponse() {
@@ -19,10 +19,6 @@ public class HttpResponse {
 
     public void addHeader(String key, String value) {
         responseHeader.put(key, value);
-    }
-
-    public void addBody(String body) {
-        responseBody.setBody(body);
     }
 
     public StatusLine getStatusLine() {
@@ -34,7 +30,11 @@ public class HttpResponse {
     }
 
     public String getResponseBody() {
-        return responseBody.getBody();
+        return responseBody;
+    }
+
+    public void setResponseBody(String body) {
+        this.responseBody = body;
     }
 
     public void setStatusLine(String version, HttpStatusCode httpStatusCode) {

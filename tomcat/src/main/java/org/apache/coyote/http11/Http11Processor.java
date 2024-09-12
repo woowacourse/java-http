@@ -116,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/")) {
             httpResponse.addHeader("Content-Length", Integer.toString("Hello world!".length()));
             httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
-            httpResponse.addBody("Hello world!");
+            httpResponse.setResponseBody("Hello world!");
             writeHttpResponse(httpResponse, responseWriter);
             return;
         }
@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = Files.probeContentType(file.toPath());
         response.addHeader("Content-Length", Long.toString(file.length()));
         response.addHeader("Content-Type", ContentTypes.getContentType(contentType));
-        response.addBody(responseBody);
+        response.setResponseBody(responseBody);
     }
 
     private void redirect(HttpRequest request, HttpResponse response, String path) {

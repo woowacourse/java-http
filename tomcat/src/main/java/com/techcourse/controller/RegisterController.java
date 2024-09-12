@@ -23,10 +23,18 @@ public class RegisterController extends AbstractController {
         String email = request.getQueryParamFromBody("email");
         String password = request.getQueryParamFromBody("password");
 
-        User user = new User(account, password, email);
+        validateDuplicateAccount(account);
 
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         response.sendRedirect(REGISTER_SUCCESS_PAGE);
+    }
+
+    private void validateDuplicateAccount(String account) {
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(foundUser -> {
+                    throw new IllegalArgumentException("중복된 account 입니다.");
+                });
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -57,9 +57,9 @@ class RegisterControllerTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 50 ",
+                "Content-Length: 48 ",
                 "",
-                "account=gugu&password=password&email=abc@naver.com"
+                "account=aa&password=password&email=abc@naver.com"
         );
         InputStream inputStream = new ByteArrayInputStream(register.getBytes());
         HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
@@ -75,5 +75,26 @@ class RegisterControllerTest {
                         ""
                 )
         );
+    }
+
+    @DisplayName("중복된 account로 회원가입할 수 없다.")
+    @Test
+    void doPostDuplicate() throws IOException {
+        RegisterController registerController = new RegisterController();
+        String register = String.join(
+                "\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 50 ",
+                "",
+                "account=gugu&password=password&email=abc@naver.com"
+        );
+        InputStream inputStream = new ByteArrayInputStream(register.getBytes());
+        HttpRequest httpRequest = Http11Request.of(inputStream, () -> "abcdefg");
+        HttpResponse httpResponse = Http11Response.create();
+
+        assertThatThrownBy(() -> registerController.doPost(httpRequest, httpResponse))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

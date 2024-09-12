@@ -51,7 +51,7 @@ class RegisterControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        registerController.handle(httpRequest, httpResponse);
+        registerController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
@@ -76,7 +76,7 @@ class RegisterControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        registerController.handle(httpRequest, httpResponse);
+        registerController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
@@ -98,7 +98,7 @@ class RegisterControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        registerController.handle(httpRequest, httpResponse);
+        registerController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";

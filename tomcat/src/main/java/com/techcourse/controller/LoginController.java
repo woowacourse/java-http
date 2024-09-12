@@ -18,7 +18,7 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class LoginController extends Controller {
+public class LoginController extends AbstractController {
     private static final LoginController instance = new LoginController();
     private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
@@ -34,29 +34,24 @@ public class LoginController extends Controller {
     }
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         try {
-            operate(request, response);
+            RequestBody requestBody = request.getBody();
+            String account = requestBody.getAttribute("account");
+            String password = requestBody.getAttribute("password");
+
+            User user = userService.login(account, password);
+            log.info("User found: {}", user);
+
+            Session session = getSession(request, user);
+            response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+
+            redirect("index.html", response);
         } catch (UnauthorizedException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
             redirect("401.html", response);
         }
-    }
-
-    @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        RequestBody requestBody = request.getBody();
-        String account = requestBody.getAttribute("account");
-        String password = requestBody.getAttribute("password");
-
-        User user = userService.login(account, password);
-        log.info("User found: {}", user);
-
-        Session session = getSession(request, user);
-        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
-
-        redirect("index.html", response);
     }
 
     private Session getSession(HttpRequest request, User user) throws IOException {

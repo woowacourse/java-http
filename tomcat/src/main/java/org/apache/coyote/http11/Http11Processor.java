@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse();
             log.info("Requested endpoint: {}, Method: {}", request.getURI(), request.getHttpMethod());
 
-            frontController.handle(request, response);
+            frontController.service(request, response);
 
             outputStream.write(response.serialize().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
@@ -27,7 +26,7 @@ class FrontControllerTest {
 
     @DisplayName("올바른 리소스에 대해 200 응답을 반환한다.")
     @Test
-    void findResource() throws IOException {
+    void findResource() throws Exception {
         // given
         RequestLine requestLine = RequestLine.from("GET /css/styles.css HTTP/1.1");
         HttpHeaders headers = HttpHeaders.from(List.of(
@@ -38,7 +37,7 @@ class FrontControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        frontController.handle(httpRequest, httpResponse);
+        frontController.service(httpRequest, httpResponse);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
@@ -57,7 +56,7 @@ class FrontControllerTest {
 
     @DisplayName("존재하지 않는 리소스에 접근하면 404 응답을 반환한다.")
     @Test
-    void wrongURL() throws IOException {
+    void wrongURL() throws Exception {
         // given
         RequestLine requestLine = RequestLine.from("GET /unknown.html HTTP/1.1 ");
         HttpHeaders headers = HttpHeaders.from(List.of(
@@ -68,7 +67,7 @@ class FrontControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        frontController.handle(httpRequest, httpResponse);
+        frontController.service(httpRequest, httpResponse);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
@@ -85,11 +84,11 @@ class FrontControllerTest {
         );
     }
 
-    @DisplayName("잘못된 메서드로 요청하면 405 응답을 반환한다.")
+    @DisplayName("잘못된 요청을 하면 500 응답을 반환한다.")
     @Test
-    void wrongMethod() throws IOException {
+    void wrongMethod() throws Exception {
         // given
-        RequestLine requestLine = RequestLine.from("WRONG /login HTTP/1.1 ");
+        RequestLine requestLine = RequestLine.from("POST /index.html HTTP/1.1 ");
         HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive "
@@ -98,13 +97,13 @@ class FrontControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        frontController.handle(httpRequest, httpResponse);
+        frontController.service(httpRequest, httpResponse);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/405.html");
-        String expectedResponseLine = "HTTP/1.1 405 METHOD NOT ALLOWED \r\n";
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        String expectedResponseLine = "HTTP/1.1 500 INTERNAL SERVER ERROR \r\n";
         String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
-        String expectedContentLength = "Content-Length: 2190 \r\n";
+        String expectedContentLength = "Content-Length: 2357 \r\n";
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(httpResponse.serialize()).contains(

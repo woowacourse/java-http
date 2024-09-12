@@ -17,7 +17,7 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(method -> method.value.equalsIgnoreCase(value))
                 .findFirst()
-                .orElse(NONE);
+                .orElseThrow(() -> new IllegalArgumentException("Invalid method: "+ value));
     }
 
     public boolean isPost() {

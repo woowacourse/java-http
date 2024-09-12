@@ -13,7 +13,7 @@ import com.techcourse.exception.InvalidRegisterException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class RegisterController extends Controller {
+public class RegisterController extends AbstractController {
     private static final RegisterController instance = new RegisterController();
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private final UserService userService = new UserService();
@@ -26,27 +26,22 @@ public class RegisterController extends Controller {
     }
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         try {
-            operate(request, response);
+            RequestBody requestBody = request.getBody();
+            String account = requestBody.getAttribute("account");
+            String password = requestBody.getAttribute("password");
+            String email = requestBody.getAttribute("email");
+
+            User user = userService.register(account, password, email);
+            log.info("User registered: {}", user);
+
+            redirect("index.html", response);
         } catch (InvalidRegisterException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
             redirect("400.html", response);
         }
-    }
-
-    @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        RequestBody requestBody = request.getBody();
-        String account = requestBody.getAttribute("account");
-        String password = requestBody.getAttribute("password");
-        String email = requestBody.getAttribute("email");
-
-        User user = userService.register(account, password, email);
-        log.info("User registered: {}", user);
-
-        redirect("index.html", response);
     }
 
     @Override

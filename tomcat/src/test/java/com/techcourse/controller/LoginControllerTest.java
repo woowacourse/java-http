@@ -60,7 +60,7 @@ class LoginControllerTest {
 
 
         // when
-        loginController.handle(httpRequest, httpResponse);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND";
@@ -94,7 +94,7 @@ class LoginControllerTest {
                 .thenReturn(Optional.of(mockUser));
 
         // when
-        loginController.handle(httpRequest, httpResponse);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
@@ -119,7 +119,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        loginController.handle(httpRequest, httpResponse);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND \r\n";
@@ -149,7 +149,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        loginController.handle(httpRequest, httpResponse);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         String expectedResponseLine = "HTTP/1.1 302 FOUND";

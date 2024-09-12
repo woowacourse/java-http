@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
@@ -26,11 +27,9 @@ class HttpMethodTest {
         // given
         String method = "WRONG";
 
-        // when
-        HttpMethod result = HttpMethod.of(method);
-
-        // then
-        assertThat(result).isEqualTo(HttpMethod.NONE);
+        // when & then
+        assertThatThrownBy(() ->  HttpMethod.of(method))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("POST 메서드가 맞으면 참을 반환한다.")

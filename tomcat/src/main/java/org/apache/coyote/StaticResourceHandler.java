@@ -9,7 +9,7 @@ import org.apache.coyote.util.FileExtension;
 
 public class StaticResourceHandler {
 
-    public void service(HttpRequest request, HttpResponse response) {
+    public void handle(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
         try {
             response.setBody(ResourceReader.read(path));

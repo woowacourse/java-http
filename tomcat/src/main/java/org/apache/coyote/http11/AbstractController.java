@@ -2,12 +2,13 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.Controller;
 
-public class Controller {
+public class AbstractController implements Controller {
 
     private Map<String, MethodHandler> methodMapping = new HashMap<>();
 
-    protected Controller() {
+    protected AbstractController() {
         methodMapping.put("GET", this::doGet);
         methodMapping.put("POST", this::doPost);
     }

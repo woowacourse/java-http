@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -13,7 +13,7 @@ import org.apache.coyote.http11.QueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginPageController extends Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
     private static final String USER_SESSION_INFO_NAME = "user";

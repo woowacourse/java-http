@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.body;
+package org.apache.catalina.http.body;
 
 public class HttpResponseBody {
 
@@ -8,7 +8,7 @@ public class HttpResponseBody {
         this.value = "";
     }
 
-    public CharSequence getValue() {
+    public String getValue() {
         return value;
     }
 

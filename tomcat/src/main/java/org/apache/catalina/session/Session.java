@@ -1,10 +1,12 @@
-package com.techcourse.session;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class Session {
+
+    public static final String KEY = "JSESSIONID";
 
     private final String id;
     private final Map<String, Object> attributes;

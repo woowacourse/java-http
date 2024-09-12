@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.header;
+package org.apache.catalina.http.header;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +9,6 @@ public class HttpCookies {
 
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
-
-    private static final String SESSION_KEY = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
@@ -35,17 +33,17 @@ public class HttpCookies {
         return new HttpCookies(cookies);
     }
 
-    public String stringify() {
+    public String read() {
         StringJoiner joiner = new StringJoiner(COOKIE_SEPARATOR);
         cookies.forEach((key, value) -> joiner.add(key + KEY_VALUE_SEPARATOR + value));
         return joiner.toString();
     }
 
-    public void addSession(String session) {
-        cookies.put(SESSION_KEY, session);
+    public void add(String key, String value) {
+        cookies.put(key, value);
     }
 
-    public Optional<String> getSession() {
-        return Optional.ofNullable(cookies.get(SESSION_KEY));
+    public Optional<String> get(String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 }

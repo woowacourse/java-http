@@ -33,10 +33,6 @@ public class RequestLine {
         return requestURI.getQueryString();
     }
 
-    public String getPath() {
-        return requestURI.getPath();
-    }
-
     public String getExtension() {
         return requestURI.getExtension();
     }

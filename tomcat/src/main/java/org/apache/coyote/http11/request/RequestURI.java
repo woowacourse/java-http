@@ -32,10 +32,6 @@ public class RequestURI {
         return extension;
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public Map<String, String> getQueryString() {
         return queryString;
     }

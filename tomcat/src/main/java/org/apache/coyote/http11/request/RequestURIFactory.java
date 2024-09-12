@@ -24,7 +24,7 @@ public class RequestURIFactory {
         try {
             return new URI(value);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid URI: " + value);
+            throw new IllegalArgumentException("잘못된 URI 형식입니다.", e);
         }
     }
 

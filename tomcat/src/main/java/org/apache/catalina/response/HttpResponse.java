@@ -48,8 +48,9 @@ public class HttpResponse {
         return this;
     }
 
-    public void addHeader(String key, String value) {
+    public HttpResponse addHeader(String key, String value) {
         responseHeader.add(key, value);
+        return this;
     }
 
     @Override

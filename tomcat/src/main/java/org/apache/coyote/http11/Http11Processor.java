@@ -112,16 +112,12 @@ public class Http11Processor implements Runnable, Processor {
             byte[] fileBytes = Files.readAllBytes(path);
             String contentType = URLConnection.guessContentTypeFromName(path.toString());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + fileBytes.length + " ",
-                    "",
-                    "");
+            HttpResponse response = new HttpResponse(StatusCode.OK);
+            response.addHeader("Content-Type", contentType + ";charset=utf-8");
+            response.addHeader("Content-Length", String.valueOf(fileBytes.length));
+            response.setBody(fileBytes);
 
-            outputStream.write(response.getBytes());
-            outputStream.write(fileBytes);
-
+            outputStream.write(response.buildResponse());
             outputStream.flush();
         } catch (FileNotFoundException e) {
             redirect("/404.html", outputStream);
@@ -148,14 +144,11 @@ public class Http11Processor implements Runnable, Processor {
             session.setAttribute("user", user);
             sessionManager.add(session);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 302 OK ",
-                    "Location: /index.html ",
-                    "Set-Cookie: JSESSIONID=" + sessionId + " ",
-                    "",
-                    "");
+            HttpResponse response = new HttpResponse(StatusCode.FOUND);
+            response.addHeader("Location", "/index.html");
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.buildResponse());
             outputStream.flush();
         } catch (Exception e) {
             redirect("/401.html", outputStream);
@@ -163,27 +156,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void getRootRequest(OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
+        String body = "Hello world!";
 
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        HttpResponse response = new HttpResponse(StatusCode.OK);
+        response.addHeader("Content-Type", "text/html;charset=utf-8");
+        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        response.setBody(body);
 
-        outputStream.write(response.getBytes());
+        outputStream.write(response.buildResponse());
         outputStream.flush();
     }
 
     private void redirect(String url, OutputStream outputStream) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 OK ",
-                "Location: " + url + " ",
-                "",
-                "");
+        HttpResponse response = new HttpResponse(StatusCode.FOUND);
+        response.addHeader("Location", url);
 
-        outputStream.write(response.getBytes());
+        outputStream.write(response.buildResponse());
         outputStream.flush();
     }
 

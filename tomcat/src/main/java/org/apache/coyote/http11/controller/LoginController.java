@@ -7,7 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponseNew;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.QueryParam;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     private static final String USER_SESSION_INFO_NAME = "user";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponseNew response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         HttpCookies cookies = request.getCookies();
         String sessionId = cookies.getSessionId();
         if (!sessionId.isEmpty()) {
@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
         loginCheck(queryParam, response);
     }
 
-    private void findUserFromSession(String sessionId, HttpResponseNew response) {
+    private void findUserFromSession(String sessionId, HttpResponse response) {
         Session session = SessionManager.getInstance().findSessionById(sessionId);
         User user = (User) session.findValue(USER_SESSION_INFO_NAME);
         logger.info("session user : {}", user);
@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
                 .staticResource("/index.html");
     }
 
-    private void loginCheck(QueryParam queryParam, HttpResponseNew response) {
+    private void loginCheck(QueryParam queryParam, HttpResponse response) {
         if (queryParam.getValue("account").isEmpty() &&
                 queryParam.getValue("password").isEmpty()) {
             response.statusCode(HttpStatusCode.OK)
@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
         login(queryParam, response);
     }
 
-    private void login(QueryParam queryParam, HttpResponseNew response) {
+    private void login(QueryParam queryParam, HttpResponse response) {
         String account = queryParam.getValue("account");
         String password = queryParam.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
@@ -57,13 +57,13 @@ public class LoginController extends AbstractController {
         loginFail(response);
     }
 
-    private void loginSuccess(User account, HttpResponseNew response) {
+    private void loginSuccess(User account, HttpResponse response) {
         response.statusCode(HttpStatusCode.FOUND)
                 .createSession(USER_SESSION_INFO_NAME, account)
                 .redirect("index.html");
     }
 
-    private void loginFail(HttpResponseNew response) {
+    private void loginFail(HttpResponse response) {
         response.statusCode(HttpStatusCode.UNAUTHORIZED)
                 .staticResource("/401.html");
     }

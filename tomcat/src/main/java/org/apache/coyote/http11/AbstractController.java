@@ -13,7 +13,7 @@ public class AbstractController implements Controller {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponseNew response) {
+    public void service(HttpRequest request, HttpResponse response) {
         String method = request.getMethod().toUpperCase();
         MethodHandler handler = methodMapping.get(method);
         if (handler != null) {
@@ -24,16 +24,16 @@ public class AbstractController implements Controller {
         }
     }
 
-    private void handleMethodNotAllowed(HttpResponseNew response) {
+    private void handleMethodNotAllowed(HttpResponse response) {
         response.statusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
                 .responseBody("");
     }
 
-    protected void doGet(HttpRequest request, HttpResponseNew response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         handleMethodNotAllowed(response);
     }
 
-    protected void doPost(HttpRequest request, HttpResponseNew response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         handleMethodNotAllowed(response);
     }
 }

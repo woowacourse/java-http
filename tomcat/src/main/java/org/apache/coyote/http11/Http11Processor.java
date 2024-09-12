@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = reader.getHttpRequest();
 
             HttpRequestHandler handler = new HttpRequestHandler();
-            HttpResponseNew response = new HttpResponseNew(outputStream);
+            HttpResponse response = new HttpResponse(outputStream);
 
             handler.handle(request, response);
         } catch (IOException | UncheckedServletException e) {

@@ -2,12 +2,29 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpResponseTest {
+
+    private ByteArrayOutputStream outputStream;
+
+    @BeforeEach
+    void setUp() {
+        outputStream = new ByteArrayOutputStream();
+    }
+
+    @AfterEach
+    void cleanUp() throws IOException {
+        outputStream.close();
+    }
 
     @DisplayName("HTTP response 값을 생성한다.")
     @Test
@@ -21,13 +38,12 @@ class HttpResponseTest {
                 "",
                 body
         );
+        HttpResponse response = new HttpResponse(outputStream);
 
         // when
-        String actual = HttpResponse
-                .builder()
-                .statusCode(HttpStatusCode.OK)
-                .responseBody(body)
-                .build();
+        response.statusCode(HttpStatusCode.OK)
+                .responseBody(body);
+        String actual = outputStream.toString(StandardCharsets.UTF_8);
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -42,11 +58,14 @@ class HttpResponseTest {
     })
     @ParameterizedTest
     void buildStaticResource(String path, String contentType) {
+        // given
+        HttpResponse response = new HttpResponse(outputStream);
+
         // when
-        String actual = HttpResponse.builder()
-                .statusCode(HttpStatusCode.OK)
-                .staticResource(path)
-                .build();
+        response.statusCode(HttpStatusCode.OK)
+                .staticResource(path);
+
+        String actual = outputStream.toString(StandardCharsets.UTF_8);
 
         // then
         assertThat(actual).contains(contentType);
@@ -63,15 +82,32 @@ class HttpResponseTest {
                 "Content-Length: 0 ",
                 "\r\n"
         );
+        HttpResponse response = new HttpResponse(outputStream);
 
         // when
-        String actual = HttpResponse
-                .builder()
-                .statusCode(HttpStatusCode.FOUND)
-                .redirect("index.html")
-                .build();
+        response.statusCode(HttpStatusCode.FOUND)
+                .redirect("index.html");
+
+        String actual = outputStream.toString(StandardCharsets.UTF_8);
 
         // then
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("세션 id를 응답할 수 있다.")
+    @Test
+    void setSession() {
+        // given
+        HttpResponse response = new HttpResponse(outputStream);
+
+        // when
+        response.statusCode(HttpStatusCode.OK)
+                .createSession("name", "value")
+                .responseBody("test body");
+
+        String actual = outputStream.toString(StandardCharsets.UTF_8);
+
+        // then
+        assertThat(actual).contains("Set-Cookie");
     }
 }

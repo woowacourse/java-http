@@ -21,7 +21,7 @@ public class HttpRequestHandler {
         );
     }
 
-    public void handle(HttpRequest request, HttpResponseNew response) {
+    public void handle(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
         Controller controller = controllerResolver.get(path);
         if (controller != null) {

@@ -1,5 +1,5 @@
 package org.apache.coyote.http11;
 
 public interface MethodHandler {
-    void handle(HttpRequest request, HttpResponseNew response);
+    void handle(HttpRequest request, HttpResponse response);
 }

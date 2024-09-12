@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponseNew;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.QueryParam;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class RegisterController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponseNew response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         QueryParam param = request.getQueryParam();
         User newAccount = new User(param.getValue("account"), param.getValue("password"), param.getValue("email"));
         logger.info("user : {}", newAccount);

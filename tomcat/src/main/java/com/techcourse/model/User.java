@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import java.util.Objects;
+
 public class User {
 
     private final Long id;
@@ -24,6 +26,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public boolean isValid() {
+        return Objects.nonNull(account) && Objects.nonNull(password) && Objects.nonNull(email);
     }
 
     @Override

@@ -2,13 +2,21 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
     private final HttpResponseHeader header;
     private byte[] body;
 
     public HttpResponse(StatusCode statusCode) {
         this.statusCode = statusCode;
         this.header = new HttpResponseHeader();
+    }
+
+    public HttpResponse() {
+        this.header = new HttpResponseHeader();
+    }
+
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public void addHeader(String key, String value) {

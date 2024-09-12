@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분리
+public class HttpRequestParser {
 
     private static final String DELIMITER_REQUEST_LINE = " ";
 
@@ -18,8 +18,6 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
     private static final String DELIMITER_PARAMETER_VALUE = "=";
 
     private static final String EMPTY_LINE = "";
-
-    private static final String KEY_JSESSIONID = "JSESSIONID";
 
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
@@ -62,13 +60,7 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
             return new QueryString(queryStrings);
         }
         String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
-        String[] rawQueryStrings = queryString.split(DELIMITER_PARAMETER_SET);
-        for (String rawQueryString : rawQueryStrings) {
-            String[] splittedQueryString = rawQueryString.split(DELIMITER_PARAMETER_VALUE);
-            String key = splittedQueryString[0];
-            String value = splittedQueryString[1];
-            queryStrings.put(key, value);
-        }
+        splitMultipleStrings(queryStrings, queryString.split(DELIMITER_PARAMETER_SET), DELIMITER_PARAMETER_VALUE);
         return new QueryString(queryStrings);
     }
 
@@ -81,10 +73,7 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
 
         String headerLine = bufferedReader.readLine();
         while (!EMPTY_LINE.equals(headerLine)) {
-            int delimiterHeaderIndex = headerLine.indexOf(DELIMITER_HEADER);
-            String key = headerLine.substring(0, delimiterHeaderIndex);
-            String value = headerLine.substring(delimiterHeaderIndex + 2);
-            headers.put(key, value);
+            splitSingleString(headers, headerLine, DELIMITER_HEADER);
             headerLine = bufferedReader.readLine();
         }
         return new HttpRequestHeaders(headers);
@@ -97,14 +86,23 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
         if (contentLength > 0) {
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            String[] requestBodySets = new String(buffer).split(DELIMITER_PARAMETER_SET);
-            for (String requestBodySet : requestBodySets) {
-                int delimiterIndex = requestBodySet.indexOf(DELIMITER_PARAMETER_VALUE);
-                String key = requestBodySet.substring(0, delimiterIndex);
-                String value = requestBodySet.substring(delimiterIndex + 1);
-                requestBody.put(key, value);
-            }
+            splitMultipleStrings(requestBody,
+                    new String(buffer).split(DELIMITER_PARAMETER_SET), DELIMITER_PARAMETER_VALUE);
         }
         return new HttpRequestBody(requestBody);
+    }
+
+    private void splitMultipleStrings(Map<String, String> set, String[] rawStrings, String delimiter) {
+        for (String rawString : rawStrings) {
+            splitSingleString(set, rawString, delimiter);
+        }
+    }
+
+    private void splitSingleString(Map<String, String> set, String rawString, String delimiter) {
+        int delimiterIndex = rawString.indexOf(delimiter);
+        int delimiterLength = delimiter.length();
+        String key = rawString.substring(0, delimiterIndex);
+        String value = rawString.substring(delimiterIndex + delimiterLength);
+        set.put(key, value);
     }
 }

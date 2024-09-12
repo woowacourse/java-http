@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.coyote.http11.http.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 
 public class HttpRequestMessageReader {
@@ -23,7 +24,7 @@ public class HttpRequestMessageReader {
 
 	private static int getContentLength(List<String> headers) {
 		return headers.stream()
-			.filter(header -> header.startsWith("Content-Length"))
+			.filter(header -> header.startsWith(HttpHeader.CONTENT_LENGTH.getName()))
 			.findFirst()
 			.map(header -> Integer.parseInt(header.split(": ")[1].strip()))
 			.orElse(0);

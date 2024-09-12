@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.http.response;
 
+import org.apache.coyote.http11.http.HttpHeader;
+
 public class HttpResponse {
 
 	private static final String HTTP_VERSION = "HTTP/1.1";
@@ -40,7 +42,7 @@ public class HttpResponse {
 	}
 
 	private String createResponseMessageWithoutBody() {
-		header.addHeader("Content-Length", "0");
+		header.addHeader(HttpHeader.CONTENT_LENGTH.getName(), "0");
 		return String.join("\r\n"
 			, startLine.toResponseMessage()
 			, header.toResponseMessage()
@@ -50,8 +52,8 @@ public class HttpResponse {
 
 	private String createResponseMessage() {
 		String contentCharset = ";charset=utf-8";
-		header.addHeader("Content-Type", body.getContentType() + contentCharset);
-		header.addHeader("Content-Length", String.valueOf(body.getContentLength()));
+		header.addHeader(HttpHeader.CONTENT_TYPE.getName(), body.getContentType() + contentCharset);
+		header.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(body.getContentLength()));
 
 		return String.join("\r\n"
 			, startLine.toResponseMessage()

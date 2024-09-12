@@ -2,6 +2,7 @@ package com.techcourse.web.handler;
 
 import java.io.IOException;
 
+import org.apache.coyote.http11.http.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.request.HttpRequestLine;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -22,7 +23,7 @@ public interface Handler {
 	}
 
 	default HttpResponse redirect(HttpResponseHeader header, String location) {
-		header.addHeader("Location", location);
+		header.addHeader(HttpHeader.LOCATION.getName(), location);
 		return HttpResponse.redirect(header);
 	}
 }

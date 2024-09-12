@@ -5,10 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.coyote.http11.http.BaseHttpHeaders;
+import org.apache.coyote.http11.http.HttpHeader;
 
 public class HttpResponseHeader extends BaseHttpHeaders {
 
-	private static final String SET_COOKIE = "Set-Cookie";
 	private static final String JSESSIONID = "JSESSIONID=";
 
 	public HttpResponseHeader() {
@@ -24,7 +24,7 @@ public class HttpResponseHeader extends BaseHttpHeaders {
 	}
 
 	public void addJSessionId(String sessionId) {
-		addHeader(SET_COOKIE, JSESSIONID + sessionId);
+		addHeader(HttpHeader.SET_COOKIE.getName(), JSESSIONID + sessionId);
 	}
 
 	public String toResponseMessage() {

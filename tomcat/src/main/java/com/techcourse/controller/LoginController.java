@@ -1,97 +1,117 @@
 package com.techcourse.controller;
 
+import static com.techcourse.controller.PagePath.INDEX_PAGE;
+import static com.techcourse.controller.PagePath.LOGIN_PAGE;
+import static com.techcourse.controller.PagePath.UNAUTHORIZED_PAGE;
+import static org.apache.coyote.http11.HttpCookie.JSESSIONID;
+
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.MissingRequestBodyException;
 import com.techcourse.model.User;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.was.Controller.AbstractController;
+import org.was.Controller.ResponseResult;
 import org.was.session.Session;
 import org.was.session.SessionManager;
-import org.was.view.View;
-import org.was.view.ViewResolver;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.was.Controller.AbstractController;
 
 public class LoginController extends AbstractController {
 
-    @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        Session session = extractSession(request);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                responseLoginSuccess(response, session);
-                return;
-            }
-        }
-        responseLoginPage(request, response);
-    }
+    private static final String USER_ATTRIBUTE = "user";
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
-        if (!request.hasBodyData()) {
-            throw new IllegalArgumentException("Query string is missing in the request");
-        }
-
+    protected ResponseResult doPost(HttpRequest request) {
         Map<String, String> requestFormData = request.getFormData();
+        if (requestFormData.isEmpty()) {
+            return responseMissingBody();
+        }
         String userName = requestFormData.get("account");
         String password = requestFormData.get("password");
 
         Optional<User> account = InMemoryUserRepository.findByAccount(userName);
+
         if (account.isEmpty()) {
-            responseLoginFail(response);
+            return responseLoginFail();
+        }
+
+        User user = account.get();
+        if (user.checkPassword(password)) {
+            return responseLoginSuccess(user);
         } else {
-            User user = account.get();
-            if (user.checkPassword(password)) {
-                Session session = saveSession(user);
-                responseLoginSuccess(response, session);
-            } else {
-                responseLoginFail(response);
-            }
+            return responseLoginFail();
         }
     }
 
-    private Session extractSession(HttpRequest request) {
-        String cookie = request.getCookie();
-        if (cookie == null) {
-            Map<String, String> cookies = new HashMap<>();
-            for (String cookieParts : cookie.split(" ")) {
-                String[] keyAndValue = cookieParts.split("=");
-                cookies.put(keyAndValue[0], keyAndValue[1]);
-            }
+    private ResponseResult responseLoginSuccess(User user) {
+        Session session = createSession(user);
+        String cookieValue = createSessionCookie(session);
 
-            String jsessionId = cookies.get("JSESSIONID");
-            return SessionManager.findSession(jsessionId);
-        }
-
-        return null;
+        return ResponseResult
+                .status(HttpStatusCode.FOUND)
+                .header(HttpHeaders.LOCATION.getName(), INDEX_PAGE.getPath())
+                .header(HttpHeaders.COOKIE.getName(), cookieValue)
+                .build();
     }
 
-    private Session saveSession(User user) {
+    private Session createSession(User user) {
         Session session = new Session();
-        session.setAttribute("user", user);
+        session.setAttribute(USER_ATTRIBUTE, user);
         SessionManager.add(session);
         return session;
     }
 
-    private void responseLoginPage(HttpRequest request, HttpResponse response) throws IOException {
-        View view = ViewResolver.getView("/login.html");
-        response.setStatus200();
-        response.setResponseBody(view.getContent());
-        response.setContentType(request.getContentType());
+    private String createSessionCookie(Session session) {
+        HttpCookie cookie = HttpCookie.ofJSessionId(session.getId());
+        return JSESSIONID + "=" + cookie.getJSessionId();
     }
 
-    private void responseLoginSuccess(HttpResponse response, Session session) {
-        response.setStatus302();
-        response.setLocation("/index.html");
-        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+    @Override
+    protected ResponseResult doGet(HttpRequest request) {
+        if (checkLoginSession(request)) {
+            return responseRedirectIndex();
+        }
+
+        return responseLoginPage();
     }
 
-    private void responseLoginFail(HttpResponse response) {
-        response.setStatus302();
-        response.setLocation("/401.html");
+    private boolean checkLoginSession(HttpRequest request) {
+        HttpCookie cookie = request.getCookie();
+        if (cookie == null || cookie.getJSessionId() == null) {
+            return false;
+        }
+
+        String jSessionId = cookie.getJSessionId();
+        Session session = SessionManager.findSession(jSessionId);
+        return session != null && session.hasAttribute(USER_ATTRIBUTE);
+    }
+
+    private ResponseResult responseMissingBody() {
+        return ResponseResult
+                .status(HttpStatusCode.BAD_REQUEST)
+                .body(new MissingRequestBodyException().getMessage());
+    }
+
+    private ResponseResult responseLoginFail() {
+        return ResponseResult
+                .status(HttpStatusCode.UNAUTHORIZED)
+                .header(HttpHeaders.LOCATION.getName(), UNAUTHORIZED_PAGE.getPath())
+                .build();
+    }
+
+    private ResponseResult responseRedirectIndex() {
+        return ResponseResult
+                .status(HttpStatusCode.FOUND)
+                .header(HttpHeaders.LOCATION.getName(), INDEX_PAGE.getPath())
+                .build();
+    }
+
+    private ResponseResult responseLoginPage() {
+        return ResponseResult
+                .status(HttpStatusCode.OK)
+                .path(LOGIN_PAGE.getPath());
     }
 }

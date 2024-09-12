@@ -5,9 +5,21 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private Map<String, String> cookies = new HashMap<>();
+
+    private HttpCookie() {
+    }
+
+    public HttpCookie(String cookie) {
+        if (cookie != null) {
+            for (String cookieParts : cookie.split(" ")) {
+                String[] keyAndValue = cookieParts.split("=");
+                cookies.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+    }
 
     public static HttpCookie ofJSessionId(String sessionId) {
         HttpCookie cookie = new HttpCookie();
@@ -15,10 +27,11 @@ public class HttpCookie {
         return cookie;
     }
 
-    private HttpCookie() {
+    public boolean isEmpty() {
+        return cookies.isEmpty();
     }
 
-    public String getJsessionId() {
+    public String getJSessionId() {
         return cookies.get(JSESSIONID);
     }
 }

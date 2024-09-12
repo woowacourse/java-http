@@ -4,7 +4,10 @@ public enum HttpHeaders {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    LOCATION("Location")
+    ACCEPT("Accept"),
+    LOCATION("Location"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie"),
     ;
 
     private final String name;

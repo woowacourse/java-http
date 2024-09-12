@@ -18,6 +18,10 @@ public class Session {
         return id;
     }
 
+    public boolean hasAttribute(String name) {
+        return values.containsKey(name);
+    }
+
     public Object getAttribute(String name) {
         return values.get(name);
     }

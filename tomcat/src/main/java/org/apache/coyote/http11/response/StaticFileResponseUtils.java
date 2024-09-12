@@ -10,7 +10,7 @@ public class StaticFileResponseUtils {
             Map.entry("css", "text/css;charset=utf-8"),
             Map.entry("js", "text/javascript;charset=utf-8"),
             Map.entry("svg", "image/svg+xml;charset=utf-8"));
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
 
     private StaticFileResponseUtils() {
     }

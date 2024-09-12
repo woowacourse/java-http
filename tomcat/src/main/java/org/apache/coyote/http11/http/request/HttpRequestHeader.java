@@ -30,7 +30,7 @@ public class HttpRequestHeader extends BaseHttpHeaders {
 			return null;
 		}
 
-		LinkedHashMap<String, List<String>> result = new LinkedHashMap<>();
+		Map<String, List<String>> result = new LinkedHashMap<>();
 		headers.stream()
 			.filter(header -> !header.startsWith(HttpHeader.COOKIE.getName()))
 			.forEach(h -> {

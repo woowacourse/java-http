@@ -7,8 +7,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.route.DefaultDispatcher;
 import org.apache.catalina.route.RequestMapper;
+import org.apache.catalina.route.RequestMapping;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,89 @@ class Http11ProcessorTest {
     void process() {
         // given
         StubSocket socket = new StubSocket();
+        RequestMapping requestMapping = new RequestMapper();
+        requestMapping.register(new AbstractController() {
+            @Override
+            protected void doGet(HttpRequest request, HttpResponse response) {
+                response.setBody("Hello, World!");
+            }
+
+            @Override
+            protected void doPost(HttpRequest request, HttpResponse response) {
+            }
+
+            @Override
+            public String matchedPath() {
+                return "/";
+            }
+        });
+        Http11Processor processor = new Http11Processor(socket, new DefaultDispatcher(requestMapping));
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Length: 13",
+                "",
+                "Hello, World!"
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("요청에 대한 핸들러가 없을 경우 404 응답을 반환한다.")
+    @Test
+    void notFound() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "\r\n"
+        );
+        StubSocket socket = new StubSocket(httpRequest);
+        RequestMapping requestMapping = new RequestMapper();
+        requestMapping.register(new AbstractController() {
+            @Override
+            protected void doGet(HttpRequest request, HttpResponse response) {
+                response.setBody("Hello, World!");
+            }
+
+            @Override
+            protected void doPost(HttpRequest request, HttpResponse response) {
+            }
+
+            @Override
+            public String matchedPath() {
+                return "/";
+            }
+        });
+        Http11Processor processor = new Http11Processor(socket, new DefaultDispatcher(requestMapping));
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Length: 13",
+                "",
+                "Hello, World!"
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("허용되지 않은 HTTP 메서드를 요청할 경우 405 응답을 반환한다.")
+    @Test
+    void notAllowedMethod() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "PATCH /index.html HTTP/1.1 ",
+                "\r\n"
+        );
+
+        StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = getProcessor(socket);
 
         // when
@@ -30,7 +117,7 @@ class Http11ProcessorTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 404 Not Found",
+                "HTTP/1.1 405 Method Not Allowed",
                 "Content-Length: 0",
                 "", "");
 

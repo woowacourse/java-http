@@ -14,7 +14,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    void process() throws IOException {
+    void process() {
         final var socket = new StubSocket();
         final var requestMapping = new RequestMapping();
         final var dispatcher = new FrameworkDispatcher(requestMapping);

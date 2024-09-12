@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private final Map<String, Session> SESSIONS = new HashMap<>();
 
     public SessionManager() {
     }
@@ -24,5 +24,9 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public int size() {
+        return SESSIONS.size();
     }
 }

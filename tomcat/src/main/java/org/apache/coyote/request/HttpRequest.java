@@ -33,6 +33,10 @@ public class HttpRequest {
     }
 
     public String getSession() {
+        if (!hasSession()) {
+            throw new UncheckedServletException("세션이 존재하지 않습니다.");
+        }
+
         return findCookie()
                 .map(HttpCookie::getSession)
                 .orElseThrow(() -> new UncheckedServletException("쿠키가 존재하지 않습니다."));

@@ -39,7 +39,7 @@ public class RegisterController extends AbstractController {
         if (authService.isLogin(sessionId)) {
             response.setHttpStatus(HttpStatus.FOUND);
             response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-            response.addLocation(INDEX_PAGE);
+            response.setRedirection(INDEX_PAGE);
             return;
         }
         response.setBody(FileReader.loadFileContent(REGISTER_PAGE));
@@ -59,7 +59,7 @@ public class RegisterController extends AbstractController {
 
         response.setHttpStatus(HttpStatus.FOUND);
         response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-        response.addLocation(INDEX_PAGE);
+        response.setRedirection(INDEX_PAGE);
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {

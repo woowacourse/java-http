@@ -34,7 +34,7 @@ class HttpRequestParserTest {
         @Test
         @DisplayName("성공 : 키-값 형식으로 파싱 성공")
         void parseParamValuesSuccess() {
-            final String param = "account=gugu&password=password";
+            final List<String> param = List.of("account=gugu", "password=password");
 
             Map<String, String> actual = HttpRequestParser.parseParamValues(param);
 

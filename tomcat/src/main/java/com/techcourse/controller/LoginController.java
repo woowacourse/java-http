@@ -41,7 +41,7 @@ public class LoginController extends AbstractController {
         if (authService.isLogin(request.getCookie().getAuthSessionId())) {
             response.setHttpStatus(HttpStatus.FOUND);
             response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-            response.addLocation(INDEX_PAGE);
+            response.setRedirection(INDEX_PAGE);
             return;
         }
 
@@ -64,7 +64,7 @@ public class LoginController extends AbstractController {
 
             response.setHttpStatus(HttpStatus.FOUND);
             response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-            response.addLocation(INDEX_PAGE);
+            response.setRedirection(INDEX_PAGE);
             response.setCookie(httpCookie.toString());
             return;
         }

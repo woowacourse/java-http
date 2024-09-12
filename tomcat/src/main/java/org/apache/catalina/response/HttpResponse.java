@@ -5,6 +5,7 @@ import org.apache.catalina.request.HttpRequest;
 
 public class HttpResponse {
 
+    public static final String BASE_URL = "http://localhost:8080";
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private String body;
@@ -43,14 +44,12 @@ public class HttpResponse {
         responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 
-    public HttpResponse addLocation(String url) {
-        responseHeader.setRedirection("http://localhost:8080" + url);
-        return this;
+    public void setRedirection(String url) {
+        responseHeader.setRedirection(BASE_URL + url);
     }
 
-    public HttpResponse addHeader(String key, String value) {
+    public void addHeader(String key, String value) {
         responseHeader.add(key, value);
-        return this;
     }
 
     @Override

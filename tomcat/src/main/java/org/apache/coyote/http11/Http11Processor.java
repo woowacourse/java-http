@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
@@ -66,7 +67,8 @@ public class Http11Processor implements Runnable, Processor {
         RequestHeader requestHeader = new RequestHeader(HttpRequestParser.parseHeaders(request));
         String body = requestReader.readBody(requestHeader.getContentLength());
 
-        RequestBody requestBody = new RequestBody(HttpRequestParser.parseParamValues(body));
+        List<String> params = List.of(body.split(QUERY_PARAMETER_SEPARATOR));
+        RequestBody requestBody = new RequestBody(HttpRequestParser.parseParamValues(params));
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 

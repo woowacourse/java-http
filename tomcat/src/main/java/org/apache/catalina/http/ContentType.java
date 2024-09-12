@@ -1,6 +1,7 @@
 package org.apache.catalina.http;
 
 import java.util.Arrays;
+import java.util.List;
 
 public enum ContentType {
 
@@ -11,7 +12,9 @@ public enum ContentType {
     ;
 
     private static final String DEFAULT_CHARSET = "charset=utf-8";
-    public static final String COMMA = ",";
+    private static final String MEDIA_TYPE_CHARSET_DELIMITER = ";";
+    public static final String CONTENT_TYPE_SEPARATOR = ",";
+    public static final int CONTENT_TYPE_INDEX = 0;
     private final String value;
     private final String fileExtension;
 
@@ -24,9 +27,8 @@ public enum ContentType {
         if (acceptHeader == null) {
             return ContentType.HTML;
         }
-
-        String[] types = acceptHeader.split(COMMA);
-        String contentType = types[0].trim();
+        List<String> types = List.of(acceptHeader.split(CONTENT_TYPE_SEPARATOR));
+        String contentType = types.get(CONTENT_TYPE_INDEX).trim();
 
         return Arrays.stream(values()).filter(value -> value.value.equals(contentType))
                 .findAny()
@@ -40,6 +42,6 @@ public enum ContentType {
 
     @Override
     public String toString() {
-        return value + ";" + DEFAULT_CHARSET;
+        return value + MEDIA_TYPE_CHARSET_DELIMITER + DEFAULT_CHARSET;
     }
 }

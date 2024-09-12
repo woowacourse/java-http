@@ -50,7 +50,9 @@ public class HttpRequest {
     }
 
     public boolean hasSession() {
-        return getSession().isPresent();
+        HttpCookie cookie = headers.getCookie();
+        return SessionManager.getInstance()
+                .findSession(cookie.getJsessionid()) != null;
     }
 
     public HttpCookie getCookie() {
@@ -81,9 +83,12 @@ public class HttpRequest {
         return headers.getFieldByHeaderName(name);
     }
 
-    public Optional<Session> getSession() {
+    public Session getSession() {
         HttpCookie cookie = headers.getCookie();
-        return Optional.ofNullable(SessionManager.getInstance()
-                .findSession(cookie.getJsessionid()));
+        Session session = Optional.ofNullable(SessionManager.getInstance().findSession(cookie.getJsessionid()))
+                .orElse(Session.create());
+        SessionManager.getInstance().add(session);
+
+        return session;
     }
 }

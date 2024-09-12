@@ -4,12 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.service.UserService;
 import java.io.IOException;
-import java.util.UUID;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.request.FormParameters;
@@ -122,7 +118,7 @@ class LoginPostControllerTest {
     }
 
     @Test
-    @DisplayName("세션이 없는 경우 로그인에 성공하고 Set-Cookie에 세션이 설정된다.")
+    @DisplayName("로그인에 성공하고 Set-Cookie에 세션이 설정된다.")
     void loginWithoutSessionTest() throws IOException {
         // given
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -147,40 +143,6 @@ class LoginPostControllerTest {
                         .contains("http://localhost:8080/index.html"),
                 () -> assertThat(response.getFieldByHeaderName(HttpHeaderName.SET_COOKIE).get())
                         .startsWith("JSESSIONID=")
-        );
-    }
-
-    @Test
-    @DisplayName("세션이 있는 경우 로그인에 성공한다.")
-    void loginWithSessionTest() throws IOException {
-        // given
-        UUID uuid = UUID.randomUUID();
-        Session session = new Session(uuid.toString());
-        session.setAttribute("user", InMemoryUserRepository.findByAccountAndPassword("gugu", "password"));
-        SessionManager.getInstance().add(session);
-
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setHeader(HttpHeaderName.HOST, "localhost:8080");
-        requestHeaders.setHeader(HttpHeaderName.CONNECTION, "keep-alive");
-        requestHeaders.setHeader(HttpHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded");
-        requestHeaders.setHeader(HttpHeaderName.COOKIE, "JSESSIONID=" + uuid);
-        byte[] requestBody = "account=gugu&password=password".getBytes();
-
-        FormParameters formParameters = HttpBodyParser.parseToFormParameters(requestBody, requestHeaders);
-
-        HttpRequest request =
-                new HttpRequest(HttpMethod.POST, new HttpUrl("/login"), requestHeaders,
-                        new HttpRequestBody(requestBody, formParameters));
-
-        // when
-        HttpResponse response = controller.handle(request);
-
-        // then
-        assertAll(
-                () -> assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(response.getFieldByHeaderName(HttpHeaderName.LOCATION))
-                        .contains("http://localhost:8080/index.html"),
-                () -> assertThat(response.getFieldByHeaderName(HttpHeaderName.SET_COOKIE)).isEmpty()
         );
     }
 }

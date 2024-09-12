@@ -5,9 +5,7 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.HttpHandler;
-import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
@@ -34,11 +32,9 @@ public class LoginPostController implements HttpHandler {
             log.info("로그인 성공! account: {}", user.getAccount());
 
             response = HttpResponse.found(INDEX_HTML_URL);
-
-            if (!request.hasSession()) {
-                Session session = addSession(user);
-                response.setCookie(HttpCookie.from(session));
-            }
+            Session session = request.getSession();
+            session.setAttribute("user", user);
+            response.setSessionCookie(session);
         } catch (UnauthorizedException e) {
             response = HttpResponse.found(UNAUTHORIZED_HTML_URL);
         }
@@ -57,14 +53,5 @@ public class LoginPostController implements HttpHandler {
         String password = request.getFormParameter("password");
 
         return service.findUserByAccountAndPassword(account, password);
-    }
-
-    private Session addSession(User user) {
-        Session session = Session.create();
-        session.setAttribute("user", user);
-        SessionManager.getInstance()
-                .add(session);
-
-        return session;
     }
 }

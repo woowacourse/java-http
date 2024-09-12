@@ -2,6 +2,7 @@ package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.apache.coyote.http11.exception.HttpFormatException;
 
 public class HttpCookie {
@@ -57,5 +58,22 @@ public class HttpCookie {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpCookie that = (HttpCookie) o;
+        return Objects.equals(name, that.name) && Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
     }
 }

@@ -57,15 +57,13 @@ public class LoginController extends AbstractController {
 
     private void getLoginPageWithLogin(final HttpResponse response) {
         final String path = "/index.html";
-        final String body = viewResolver.resolve(path);
         response.setStatusCode(HttpStatusCode.OK);
-        response.setContent(path, body);
+        response.setContent(path);
     }
 
     private void getLoginPageWithoutLogin(final HttpResponse response) {
         final String path = "/login.html";
-        final String body = viewResolver.resolve(path);
         response.setStatusCode(HttpStatusCode.OK);
-        response.setContent(path, body);
+        response.setContent(path);
     }
 }

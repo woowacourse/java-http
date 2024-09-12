@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http.HttpContentType;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ public class Http11ParserTest {
         // given
         HttpResponse response = new HttpResponse();
         response.setStatusCode(HttpStatusCode.OK);
-        response.setContent(".html", "Hello world!");
+        response.setContent(HttpContentType.HTML, "Hello world!");
 
         // when
         String actualResponse = Http11Parser.writeHttpResponse(response);

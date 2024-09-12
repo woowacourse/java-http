@@ -3,6 +3,7 @@ package org.apache.coyote.http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import org.apache.coyote.http.HttpContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpStatusCode;
 import org.junit.jupiter.api.Test;
@@ -53,11 +54,11 @@ public class HttpResponseTest {
     void 콘텐츠를_설정할_수_있다() {
         // given
         HttpResponse response = new HttpResponse();
-        String path = "/index.html";
+        HttpContentType type = HttpContentType.HTML;
         String content = "<html><body>Hello World</body></html>";
 
         // when
-        response.setContent(path, content);
+        response.setContent(type, content);
 
         // then
         Map<String, String> headers = response.getHeader();
@@ -71,12 +72,12 @@ public class HttpResponseTest {
         // given
         HttpResponse response = new HttpResponse();
         HttpCookie cookie = new HttpCookie("sessionId", "abc123");
-        String path = "/index.html";
+        HttpContentType type = HttpContentType.HTML;
         String content = "<html><body>Hello World</body></html>";
 
         // when
         response.setCookie(cookie);
-        response.setContent(path, content);
+        response.setContent(type, content);
 
         // then
         Map<String, String> headers = response.getHeader();

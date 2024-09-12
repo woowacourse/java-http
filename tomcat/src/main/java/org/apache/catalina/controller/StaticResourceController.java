@@ -13,9 +13,8 @@ public class StaticResourceController implements Controller {
     public void service(final HttpRequest request, final HttpResponse response) {
         try {
             final String path = request.getRequestURI();
-            final String body = viewResolver.resolve(path);
             response.setStatusCode(HttpStatusCode.OK);
-            response.setContent(path, body);
+            response.setContent(path);
         } catch (IllegalArgumentException e) {
             response.setStatusCode(HttpStatusCode.NOT_FOUND);
         }

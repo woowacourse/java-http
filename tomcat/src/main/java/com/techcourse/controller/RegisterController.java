@@ -31,8 +31,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String path = "/register.html";
-        final String body = viewResolver.resolve(path);
         response.setStatusCode(HttpStatusCode.OK);
-        response.setContent(path, body);
+        response.setContent(path);
     }
 }

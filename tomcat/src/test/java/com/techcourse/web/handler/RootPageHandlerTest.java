@@ -41,7 +41,7 @@ class RootPageHandlerTest {
 
 	@DisplayName("/ 요청을 처리한다.")
 	@Test
-	void isSupportWithQuery() throws IOException {
+	void handle() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
 		HttpRequest request = new HttpRequest("GET / HTTP/1.1", headers, null);
 

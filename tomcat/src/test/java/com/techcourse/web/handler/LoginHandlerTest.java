@@ -101,7 +101,7 @@ class LoginHandlerTest {
 
 	@DisplayName("로그인에 실패하면 /401.html 로 리다이렉트한다.")
 	@Test
-	void isSupportWithQueryFail() throws IOException {
+	void handle_whenLoginFailed() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
 		HttpRequest request = new HttpRequest("GET /login?account=hi&password=hellofail HTTP/1.1", headers, null);
 

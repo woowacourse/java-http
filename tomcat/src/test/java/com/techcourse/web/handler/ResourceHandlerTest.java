@@ -37,19 +37,17 @@ class ResourceHandlerTest {
 
 		ResourceHandler handler = ResourceHandler.getInstance();
 
-		// then
 		assertThat(handler.isSupport(request.getRequestLine())).isFalse();
 	}
 
 	@DisplayName("정적 리소스에 대한 요청을 처리한다.")
 	@Test
-	void isSupportWithQuery() throws IOException {
+	void handle() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
 		HttpRequest request = new HttpRequest("GET /index.html HTTP/1.1", headers, null);
 
 		ResourceHandler handler = ResourceHandler.getInstance();
 
-		// then
 		HttpResponse response = handler.handle(request);
 		assertThat(handler.isSupport(request.getRequestLine())).isTrue();
 		assertThat(response)

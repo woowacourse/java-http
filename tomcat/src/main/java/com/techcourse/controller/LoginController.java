@@ -2,15 +2,12 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.servlet.handler.LoginHandler;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +28,7 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Optional<String> account = request.getQueryParameter("account");
         Optional<String> password = request.getQueryParameter("password");
-        if (account.isEmpty() || password.isEmpty() || isExistUser(account.get(), password.get())) {
+        if (account.isEmpty() || password.isEmpty() || notExistUser(account.get(), password.get())) {
             setUnauthorized(response);
             return;
         }
@@ -42,9 +39,9 @@ public class LoginController extends AbstractController {
         response.sendStaticResource(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
-    private boolean isExistUser(String account, String password) {
+    private boolean notExistUser(String account, String password) {
         return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .isPresent();
+                .isEmpty();
     }
 
     private void doLogin(String account, String password, HttpResponse response) {

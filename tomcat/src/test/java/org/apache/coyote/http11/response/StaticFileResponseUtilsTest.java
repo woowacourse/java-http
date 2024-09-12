@@ -24,32 +24,4 @@ class StaticFileResponseUtilsTest {
 
         assertThat(actual).isFalse();
     }
-
-    @Test
-    void createResponseTest_whenLoadHtml() {
-        String filePath = "/test.html";
-        int expectedStatus = 200;
-        Map<String, String> expectedHeaders = Map.of(
-                "Content-Type", "text/html;charset=utf-8",
-                "Content-Length", "35");
-
-        HttpResponse actual = StaticFileResponseUtils.createResponse(filePath);
-
-        assertThat(actual.getStatusCode()).isEqualTo(expectedStatus);
-        assertThat(actual.getHeaders()).isEqualTo(expectedHeaders);
-    }
-
-    @Test
-    void createResponseTest_whenLoadCss() {
-        String filePath = "/test.css";
-        int expectedStatus = 200;
-        Map<String, String> expectedHeaders = Map.of(
-                "Content-Type", "text/css;charset=utf-8",
-                "Content-Length", "19");
-
-        HttpResponse actual = StaticFileResponseUtils.createResponse(filePath);
-
-        assertThat(actual.getStatusCode()).isEqualTo(expectedStatus);
-        assertThat(actual.getHeaders()).isEqualTo(expectedHeaders);
-    }
 }

@@ -12,18 +12,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestCreator;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseWriter;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.view.View;
 import org.apache.coyote.http11.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final View NOT_FOUND_RESPONSE_VIEW = View.htmlBuilder()
-            .status(HttpStatus.NOT_FOUND)
-            .staticResource("/404.html")
-            .build();
 
     private final Socket connection;
     private final ServletContainer servletContainer;
@@ -53,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse response(HttpRequest request) throws IOException {
-        HttpResponse response = new HttpResponse();
+        HttpResponse response = HttpResponse.notFound();
         servletContainer.service(request, response);
         return response;
     }

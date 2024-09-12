@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -15,7 +13,7 @@ public class HttpResponse {
     private HttpStatus status;
     private String body;
 
-    public HttpResponse(HttpStatus status, HttpResponseHeaders headers, String body) {
+    public HttpResponse(HttpResponseHeaders headers, HttpStatus status, String body) {
         this.headers = headers;
         this.status = status;
         this.body = body;
@@ -29,14 +27,15 @@ public class HttpResponse {
         headers.addContentLength(body.getBytes().length);
     }
 
-    public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder();
+    public static HttpResponse notFound() {
+        return new HttpResponse(new HttpResponseHeaders(), HttpStatus.NOT_FOUND,
+                StaticFileResponseUtils.makeResponseBody("/404.html"));
     }
 
     public void sendTextFiles(String text) {
         status = HttpStatus.OK;
         body = text;
-        headers.addContentType("text/html");
+        headers.addContentType("text/html;charset=utf-8");
         headers.addContentLength(body.getBytes().length);
     }
 
@@ -110,56 +109,5 @@ public class HttpResponse {
                 .add("headers=" + headers)
                 .add("body='" + body + "'")
                 .toString();
-    }
-
-    public static class HttpResponseBuilder {
-        private HttpStatus status;
-        private Map<String, String> headers;
-        private String body;
-
-        private HttpResponseBuilder() {
-            this.headers = new HashMap<>();
-            this.body = "";
-        }
-
-        public HttpResponseBuilder ok() {
-            status = HttpStatus.OK;
-            return this;
-        }
-
-        public HttpResponseBuilder found() {
-            status = HttpStatus.FOUND;
-            return this;
-        }
-
-        public HttpResponseBuilder status(HttpStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public HttpResponseBuilder addHeaders(Map<String, String> addedHeaders) {
-            headers.putAll(addedHeaders);
-            return this;
-        }
-
-        public HttpResponseBuilder contentType(String type) {
-            headers.put("Content-Type", type);
-            return this;
-        }
-
-        public HttpResponseBuilder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponse build() {
-            setContentLength();
-            return new HttpResponse(status, new HttpResponseHeaders(headers), body);
-        }
-
-        private void setContentLength() {
-            int contentLength = body.getBytes(StandardCharsets.UTF_8).length;
-            headers.put("Content-Length", String.valueOf(contentLength));
-        }
     }
 }

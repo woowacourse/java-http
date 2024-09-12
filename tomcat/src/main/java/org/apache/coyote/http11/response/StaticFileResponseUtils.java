@@ -19,12 +19,6 @@ public class StaticFileResponseUtils {
         return StaticFileUtils.isExistStaticFile(resourceFilePath);
     }
 
-    public static HttpResponse createResponse(String resourceFilePath) {
-        String responseBody = makeResponseBody(resourceFilePath);
-        String contentType = getContentType(resourceFilePath);
-        return makeResponse(contentType, responseBody);
-    }
-
     public static String makeResponseBody(String resourceFilePath) {
         return StaticFileUtils.readStaticFile(resourceFilePath);
     }
@@ -40,13 +34,5 @@ public class StaticFileResponseUtils {
             return EXTENSION_TO_CONTENT_TYPE.get(extension);
         }
         return DEFAULT_CONTENT_TYPE;
-    }
-
-    private static HttpResponse makeResponse(String contentType, String responseBody) {
-        return HttpResponse.builder()
-                .ok()
-                .contentType(contentType)
-                .body(responseBody)
-                .build();
     }
 }

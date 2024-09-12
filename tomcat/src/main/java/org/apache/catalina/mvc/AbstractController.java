@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
-    private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
     public static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String BAD_REQUEST_PAGE = "/400.html";
 

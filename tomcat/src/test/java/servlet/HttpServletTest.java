@@ -1,7 +1,9 @@
 package servlet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.*;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URL;
@@ -17,6 +19,7 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import support.FixedIdGenerator;
 
@@ -161,7 +164,10 @@ class HttpServletTest {
                 "Location: /index \r\n" +
                 "\r\n";
 
-        assertThat(new String(response.getBytes())).isEqualTo(expected);
+        assertSoftly(softly -> {
+            softly.assertThat(new String(response.getBytes())).isEqualTo(expected);
+            softly.assertThat(InMemoryUserRepository.findByAccount("prin")).isPresent();
+        });
     }
 
     @Test

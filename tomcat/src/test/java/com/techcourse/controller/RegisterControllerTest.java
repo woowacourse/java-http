@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
@@ -30,7 +29,6 @@ class RegisterControllerTest {
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /register HTTP/1.1 "),
                 new HttpHeaders(Map.of("Content-Length", String.valueOf(contentLength))),
-                new Session("new session"),
                 body
         );
         HttpResponse response = new HttpResponse();

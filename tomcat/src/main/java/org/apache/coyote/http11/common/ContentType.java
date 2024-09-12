@@ -25,4 +25,8 @@ public enum ContentType {
 		}
 		return ContentType.APPLICATION_JSON;
 	}
+
+	public String getValue() {
+		return value;
+	}
 }

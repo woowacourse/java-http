@@ -2,6 +2,7 @@ package org.apache.coyote.http11.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 public record Body(String value) {
 	private static final String CONTENT_LENGTH = "Content-Length";
@@ -24,4 +25,10 @@ public record Body(String value) {
 		return this.value.getBytes().length;
 	}
 
+	public Properties parseProperty() {
+		Properties properties = new Properties();
+		Arrays.asList(value.split("&"))
+			.forEach(properties::add);
+		return properties;
+	}
 }

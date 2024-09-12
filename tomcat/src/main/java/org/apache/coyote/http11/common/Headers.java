@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Headers {
-	private final Map<String, String> headers;
+public record Headers(Map<String, String> headers) {
 
-	public Headers(Map<String, String> headers) {
-		this.headers = headers;
+	public Headers() {
+		this(new HashMap<>());
 	}
 
 	public static Headers request(BufferedReader reader) throws IOException {
@@ -22,11 +21,11 @@ public class Headers {
 		return new Headers(headers);
 	}
 
-	public String getValue(String key) {
-		return headers.get(key);
+	public void add(String key, String value) {
+		headers.put(key, value);
 	}
 
-	public Map<String, String> getHeaders() {
-		return headers;
+	public String getValue(String key) {
+		return headers.get(key);
 	}
 }

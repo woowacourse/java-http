@@ -1,11 +1,11 @@
 package org.apache.coyote.cookie;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpCookieTest {
 

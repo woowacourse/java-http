@@ -1,12 +1,13 @@
 package org.apache.coyote.request;
 
+import org.apache.catalina.session.Session;
+import org.apache.coyote.request.body.RequestBody;
+import org.apache.coyote.request.header.RequestHeader;
+import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.util.ContentType;
+
 import java.util.Objects;
 import java.util.UUID;
-import org.apache.coyote.request.body.RequestBody;
-import org.apache.coyote.request.requestLine.RequestLine;
-import org.apache.coyote.request.header.RequestHeader;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.util.ContentType;
 
 public class HttpRequest {
 

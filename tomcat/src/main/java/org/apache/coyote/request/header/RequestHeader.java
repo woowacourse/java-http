@@ -1,7 +1,7 @@
 package org.apache.coyote.request.header;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.cookie.HttpCookie;
-import org.apache.coyote.session.Session;
 import org.apache.coyote.util.ContentType;
 import org.apache.coyote.util.HttpHeaders;
 import org.apache.coyote.util.MapMaker;

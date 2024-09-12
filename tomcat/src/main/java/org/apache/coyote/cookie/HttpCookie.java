@@ -1,7 +1,7 @@
 package org.apache.coyote.cookie;
 
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.util.MapMaker;
 
 import java.util.List;

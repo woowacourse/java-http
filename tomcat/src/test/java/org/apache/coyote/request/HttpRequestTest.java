@@ -1,15 +1,13 @@
 package org.apache.coyote.request;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.fixture.HttpRequestFixture;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.util.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class HttpRequestTest {
 

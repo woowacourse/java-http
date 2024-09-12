@@ -4,11 +4,11 @@ import com.techcourse.controller.model.AbstractController;
 import com.techcourse.model.User;
 import com.techcourse.param.LoginParam;
 import com.techcourse.service.UserService;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.util.HttpStatus;
 
 import java.util.Optional;

@@ -1,9 +1,11 @@
 package org.apache.coyote.session;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SessionManagerTest {
 

@@ -12,6 +12,7 @@ import util.ResourceFileLoader;
 
 public class RegisterController extends AbstractController {
 
+    public static final String ROOT_LOCATION = "http://localhost:8080/";
     private final String JAVA_SESSION_ID = "JSESSIONID";
 
     @Override
@@ -20,7 +21,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setHttpStatus(HttpStatus.OK);
         response.setContentType(ContentType.TEXT_HTML);
         response.setResponseBody(ResourceFileLoader.loadStaticFileToString("/register.html"));
@@ -34,7 +35,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        httpResponse.sendRedirect("http://localhost:8080/");
+        httpResponse.sendRedirect(ROOT_LOCATION);
 
         HttpCookie httpCookie = new HttpCookie(JAVA_SESSION_ID, user.getId().toString());
         httpResponse.setCookie(httpCookie);

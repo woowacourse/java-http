@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processStaticResourceResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void processStaticResourceResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
         String responseBody = ResourceFileLoader.loadStaticFileToString(httpRequest.getRequestPath());
         httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setContentType(ContentType.toContentType(httpRequest.getRequestPath().split("\\.")[1]));

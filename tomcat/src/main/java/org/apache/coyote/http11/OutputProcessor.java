@@ -6,7 +6,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class OutputProcessor {
 
-
     public void process(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
         String response = httpResponse.toHttpForm();
 

@@ -16,16 +16,16 @@ import util.ResourceFileLoader;
 
 public class LoginController extends AbstractController {
 
-    private static final String HOME_LOCATION = "http://localhost:8080/";
+    private static final String ROOT_LOCATION = "http://localhost:8080/";
     private final String JAVA_SESSION_ID = "JSESSIONID";
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         processLogin(response, request.getRequestBody());
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         processLoginPage(request, response);
     }
 
@@ -40,9 +40,9 @@ public class LoginController extends AbstractController {
                 );
     }
 
-    private void processLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void processLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (isAlreadyLogin(httpRequest)) {
-            httpResponse.sendRedirect(HOME_LOCATION);
+            httpResponse.sendRedirect(ROOT_LOCATION);
             return;
         }
         httpResponse.setContentType(ContentType.TEXT_HTML);
@@ -87,7 +87,7 @@ public class LoginController extends AbstractController {
         session.setAttribute("user", user);
         SessionManager.getInstance().add(session);
 
-        httpResponse.sendRedirect("http://localhost:8080/");
+        httpResponse.sendRedirect(ROOT_LOCATION);
 
         HttpCookie httpCookie = new HttpCookie(JAVA_SESSION_ID, user.getId().toString());
         httpResponse.setCookie(httpCookie);

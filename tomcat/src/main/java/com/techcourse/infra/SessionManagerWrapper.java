@@ -17,10 +17,6 @@ public class SessionManagerWrapper {
         manager.add(session);
     }
 
-    public Optional<Session> findById(String sessionId) {
-        return Optional.ofNullable(manager.findSession(sessionId));
-    }
-
     public Optional<Session> findBySessionCookie(Http11Cookie sessionCookie) {
         if (sessionCookie.isSessionCookie()) {
             return findById(sessionCookie.value());
@@ -28,7 +24,7 @@ public class SessionManagerWrapper {
         return Optional.empty();
     }
 
-    public void remove(Session session) {
-        manager.remove(session);
+    private Optional<Session> findById(String sessionId) {
+        return Optional.ofNullable(manager.findSession(sessionId));
     }
 }

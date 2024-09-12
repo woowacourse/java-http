@@ -31,6 +31,7 @@ public class LoginController {
         HttpStatusCode statusCode = HttpStatusCode.OK;
         String account = httpRequest.getRequestBodyValue("account");
         String password = httpRequest.getRequestBodyValue("password");
+        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         try {
             User foundUser = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
@@ -43,6 +44,7 @@ public class LoginController {
                 Session session = new Session(jsessionid);
                 session.setAttribute("user", foundUser);
                 SessionManager.add(session.getId(), session);
+                httpResponseHeaders.setCookie("JSESSIONID=" + jsessionid);
             }
         } catch (UserException e) {
             filePath = "/401.html";
@@ -51,15 +53,9 @@ public class LoginController {
 
         HttpResponseBody httpResponseBody = new HttpResponseBody(
                 fileReader.readFile(filePath));
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         httpResponseHeaders.setContentType(httpRequest);
         httpResponseHeaders.setContentLength(httpResponseBody);
 
-        String jsessionid = httpRequest.getJSESSIONID();
-        if (jsessionid.isEmpty()) {
-            jsessionid = UUID.randomUUID().toString();
-        }
-        httpResponseHeaders.setCookie("JSESSION=" + jsessionid);
         return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
     }
 }

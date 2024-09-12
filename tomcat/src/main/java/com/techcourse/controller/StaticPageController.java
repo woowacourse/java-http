@@ -24,7 +24,7 @@ public class StaticPageController {
     public HttpResponse getStaticPage(HttpRequest httpRequest) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
         HttpStatusCode statusCode = HttpStatusCode.OK;
-
+        String id = httpRequest.getJSESSIONID();
         if (httpRequest.getHttpRequestPath().equals("/login") && checkLogin(httpRequest)) {
             statusCode = HttpStatusCode.FOUND;
             httpRequest.setHttpRequestPath("/index.html");

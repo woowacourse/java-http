@@ -62,16 +62,8 @@ public class HttpRequest {
         return "text/html";
     }
 
-    public String getQueryParameter(String key) {
-        return queryString.getValue(key);
-    }
-
     public String getRequestBodyValue(String key) {
         return httpRequestBody.getValue(key);
-    }
-
-    public boolean isParameterEmpty() {
-        return queryString.isEmpty();
     }
 
     public String getJSESSIONID() {

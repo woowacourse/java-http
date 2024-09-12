@@ -8,6 +8,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -46,29 +47,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            RequestMapper requestMapper = new RequestMapper();
-            HttpRequestParser httpRequestParser = new HttpRequestParser();
-            HttpResponseParser httpResponseParser = new HttpResponseParser();
-            FileReader fileReader = FileReader.getInstance();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-
-            String requestedFilePath = httpRequest.getHttpRequestPath();
-            HttpStatusCode httpStatusCode = HttpStatusCode.OK;
-
-            HttpResponse httpResponse = requestMapper.mapRequest(httpRequest);
-            String response = httpResponseParser.parseResponse(httpResponse);
+            String response = getResponse(inputStream);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }
+    private static String getResponse(InputStream inputStream) throws IOException, URISyntaxException {
+        RequestMapper requestMapper = new RequestMapper();
+        HttpRequestParser httpRequestParser = new HttpRequestParser();
+        HttpResponseParser httpResponseParser = new HttpResponseParser();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
 
-    private HttpResponse mapToHttpResponse(HttpStatusCode code, HttpRequest request, HttpResponseBody responseBody) {
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
-        httpResponseHeaders.setContentType(request);
-        httpResponseHeaders.setContentLength(responseBody);
-        return new HttpResponse(code, httpResponseHeaders, responseBody);
+        HttpResponse httpResponse = requestMapper.mapRequest(httpRequest);
+        return httpResponseParser.parseResponse(httpResponse);
     }
 }

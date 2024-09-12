@@ -9,13 +9,8 @@ public class HttpResponseHeader {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String RESPONSE_LINE_DELIMITER = " \r\n";
-    private static final int HEADER_VALUE_START_INDEX = 1;
 
     private final Map<HttpHeaderName, String> headers;
-
-    public HttpResponseHeader(Map<HttpHeaderName, String> headers) {
-        this.headers = headers;
-    }
 
     public HttpResponseHeader() {
         this.headers = new HashMap<>();

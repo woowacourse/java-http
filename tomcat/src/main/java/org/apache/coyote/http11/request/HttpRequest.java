@@ -7,11 +7,9 @@ import org.apache.coyote.http11.request.requestLine.MethodType;
 
 public class HttpRequest {
 
-    private static final String REQUEST_SEPARATOR = System.lineSeparator();
-
-    private final HttpRequestLine httpRequestLine;
-    private final HttpRequestHeader httpRequestHeader;
-    private final HttpRequestBody httpRequestBody;
+    private HttpRequestLine httpRequestLine;
+    private HttpRequestHeader httpRequestHeader;
+    private HttpRequestBody httpRequestBody;
 
     public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader,
                        HttpRequestBody httpRequestBody) {

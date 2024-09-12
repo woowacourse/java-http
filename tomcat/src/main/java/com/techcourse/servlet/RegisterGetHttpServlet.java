@@ -1,11 +1,10 @@
 package com.techcourse.servlet;
 
 import org.apache.catalina.servlet.HttpServlet;
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.StaticResourceServer;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.StaticResourceLoader;
 
 public class RegisterGetHttpServlet implements HttpServlet {
 
@@ -16,9 +15,6 @@ public class RegisterGetHttpServlet implements HttpServlet {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        // TODO: 404 on ResourceNotFound
-        byte[] body = StaticResourceLoader.load("/register.html");
-        response.setContentType(ContentType.TEXT_HTML);
-        response.ok(body);
+        StaticResourceServer.load(response, "/register.html");
     }
 }

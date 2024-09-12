@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.coyote.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +18,16 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final ServletContainer servletContainer;
+
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(ServletContainer servletContainer) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, servletContainer);
     }
 
-    public Connector(int port, int acceptCount) {
+    public Connector(int port, int acceptCount, ServletContainer servletContainer) {
+        this.servletContainer = servletContainer;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -66,7 +70,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(servletContainer, connection);
         new Thread(processor).start();
     }
 

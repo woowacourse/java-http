@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.ServletContainer;
 import org.apache.coyote.http11.handler.DefaultResourceHandler;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +18,12 @@ import com.techcourse.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private final ServletContainer servletContainer;
     private final RequestHandler requestHandler;
     private final Socket connection;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(ServletContainer servletContainer, Socket connection) {
+        this.servletContainer = servletContainer;
         this.connection = connection;
         this.requestHandler = new DefaultResourceHandler();
     }
@@ -39,12 +43,22 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.readFrom(requestBufferedReader);
             log.info("request : {}", httpRequest);
-            String response = getResponse(httpRequest);
+            HttpResponse httpResponse = null;
 
-            outputStream.write(response.getBytes());
+            service(httpRequest, httpResponse);
+
+            outputStream.write(httpResponse.toHttpMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+        try {
+            servletContainer.service(httpRequest, httpResponse);
+        } catch (Exception e) {
+            //todo 예외 처리
         }
     }
 

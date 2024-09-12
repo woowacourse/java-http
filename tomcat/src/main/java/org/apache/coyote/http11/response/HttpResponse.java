@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.response.StatusCode.FOUND;
+import static org.apache.coyote.http11.response.StatusCode.OK;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,20 +17,20 @@ public class HttpResponse {
     public static final String STATIC_PATH = "static";
     public static final String LINE_BREAK = "\n";
     private static final String DELIMITER = "\r\n";
-    private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK ";
-    private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 Found ";
+    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String EMPTY_LINE = "";
+    private static final String BLANK = " ";
 
     private String statusLine = "";
     private final List<HttpHeader> headers = new ArrayList<>();
     private String body = "";
 
     public void ok() {
-        statusLine = OK_STATUS_LINE;
+        statusLine = HTTP_VERSION + BLANK + OK.getValue() + BLANK;
     }
 
     public void found() {
-        statusLine = FOUND_STATUS_LINE;
+        statusLine = HTTP_VERSION + BLANK + FOUND.getValue() + BLANK;
     }
 
     public byte[] getBytes() {

@@ -1,17 +1,19 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.response;
 
 import java.util.Arrays;
 
 public enum HttpStatusCode {
-    OK(200),
-    CREATED(201),
-    FOUND(302),
-    UNAUTHORIZED(401);
+    OK(200, "Ok"),
+    CREATED(201, "Created"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized");
 
     private final int code;
+    private final String reasonPhrase;
 
-    HttpStatusCode(int code) {
+    HttpStatusCode(int code, String reasonPhrase) {
         this.code = code;
+        this.reasonPhrase = reasonPhrase;
     }
 
     public static HttpStatusCode valueOf(int code) {

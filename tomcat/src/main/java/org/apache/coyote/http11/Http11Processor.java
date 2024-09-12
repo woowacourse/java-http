@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.HttpMethod.GET;
 import static org.apache.coyote.http11.request.HttpMethod.POST;
-import static org.apache.coyote.http11.domain.HttpStatusCode.FOUND;
-import static org.apache.coyote.http11.domain.HttpStatusCode.OK;
+import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
+import static org.apache.coyote.http11.response.HttpStatusCode.OK;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.Cookie;
-import org.apache.coyote.http11.domain.HttpStatusCode;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;

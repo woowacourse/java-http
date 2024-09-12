@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionContext;
 
-public class Session implements HttpSession{
+public class Session implements HttpSession {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();

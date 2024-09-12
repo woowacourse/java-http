@@ -9,6 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
 
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

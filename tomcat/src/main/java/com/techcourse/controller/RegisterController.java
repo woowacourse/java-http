@@ -50,9 +50,10 @@ public class RegisterController extends AbstractController {
     }
 
     private void validateRegisterAccount(String account) {
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            log.warn("이미 존재하는 사용자입니다: " + account);
-            throw new IllegalArgumentException("중복된 계정을 생성할 수 없습니다.");
-        }
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent((user) -> {
+                    log.warn("이미 존재하는 사용자입니다:" + user.getAccount());
+                    throw new IllegalArgumentException("중복된 계정을 생성할 수 없습니다.");
+                });
     }
 }

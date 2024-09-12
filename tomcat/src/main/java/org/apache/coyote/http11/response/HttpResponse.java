@@ -58,7 +58,6 @@ public class HttpResponse {
 		sb.append("\r\n");
 		if (body != null) {
 			sb.append(body.value());
-			// sb.append("\r\n");
 		}
 		return sb.toString();
 	}

@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import static org.apache.coyote.http.HttpCookie.JSESSIONID;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,8 +15,9 @@ public class HttpHeaders implements HttpComponent {
     public static final String ACCEPT = "Accept";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE = "Cookie";
     public static final String LOCATION = "Location";
-    private static final String SET_COOKIE = "Set-Cookie";
+    public static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> headers;
 
@@ -40,6 +43,29 @@ public class HttpHeaders implements HttpComponent {
         return null;
     }
 
+    public HttpCookies getCookies() {
+        if (headers.containsKey(COOKIE)) {
+            return new HttpCookies(headers.get(COOKIE));
+        }
+        return null;
+    }
+
+    public HttpCookie getCookie(final String name) {
+        HttpCookies cookies = getCookies();
+        if (cookies != null) {
+            return cookies.get(name);
+        }
+        return null;
+    }
+
+    public String getSessionId() {
+        HttpCookie cookie = getCookie(JSESSIONID);
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        return null;
+    }
+
     public void setContentType(final String contentType) {
         headers.put(CONTENT_TYPE, contentType);
     }
@@ -52,7 +78,7 @@ public class HttpHeaders implements HttpComponent {
         headers.put(LOCATION, location);
     }
 
-    public void setCookie(final Cookie cookie) {
+    public void setCookie(final HttpCookie cookie) {
         headers.put(SET_COOKIE, cookie.asString());
     }
 

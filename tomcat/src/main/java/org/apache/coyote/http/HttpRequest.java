@@ -3,6 +3,10 @@ package org.apache.coyote.http;
 import java.io.IOException;
 import java.util.StringJoiner;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+
 public class HttpRequest implements HttpComponent {
 
     private final HttpRequestLine requestLine;
@@ -34,6 +38,28 @@ public class HttpRequest implements HttpComponent {
 
     public String getAccept() {
         return headers.get(HttpHeaders.ACCEPT);
+    }
+
+    public HttpCookies getCookies() {
+        return headers.getCookies();
+    }
+
+    public Session getSession() {
+        return getSession(true);
+    }
+
+    public Session getSession(boolean create) {
+        Manager manager = SessionManager.getInstance();
+        String sessionId = headers.getSessionId();
+        Session session = null;
+        if (sessionId != null) {
+            session = manager.findSession(sessionId);
+        }
+        if (create && session == null) {
+            session = new Session();
+            manager.add(session);
+        }
+        return session;
     }
 
     public HttpBody getBody() {

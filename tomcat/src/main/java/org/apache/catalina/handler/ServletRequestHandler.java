@@ -64,7 +64,8 @@ public class ServletRequestHandler {
     private HttpResponse handleGetLoginPageWithLogin() {
         final String path = "/index.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
@@ -72,7 +73,8 @@ public class ServletRequestHandler {
     private HttpResponse handleGetLoginPageWithoutLogin() {
         final String path = "/login.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
@@ -80,14 +82,16 @@ public class ServletRequestHandler {
     private HttpResponse handleGetRegisterPage() {
         final String path = "/register.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
 
     private HttpResponse handleGetRootPage() {
         final String body = "Hello world!";
-        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(DEFAULT_HTML_PATH, body);
         return response;
     }
@@ -95,7 +99,8 @@ public class ServletRequestHandler {
     private HttpResponse handleGetStaticPage(final HttpRequest request) {
         final String path = request.getRequestURI();
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
@@ -127,7 +132,8 @@ public class ServletRequestHandler {
     private HttpResponse handlePostLoginSuccess(final Session session) {
         final String location = "/index.html";
         final HttpCookie cookie = HttpCookie.ofJSessionId(session.getId());
-        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.FOUND);
         response.setLocation(location);
         response.setCookie(cookie);
         return response;
@@ -135,7 +141,8 @@ public class ServletRequestHandler {
 
     private HttpResponse handlePostLoginFailed() {
         final String location = "/401.html";
-        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.FOUND);
         response.setLocation(location);
         return response;
     }
@@ -153,7 +160,8 @@ public class ServletRequestHandler {
 
     private HttpResponse handlePostRegisterSuccess() {
         final String location = "/index.html";
-        final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        final HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.FOUND);
         response.setLocation(location);
         return response;
     }

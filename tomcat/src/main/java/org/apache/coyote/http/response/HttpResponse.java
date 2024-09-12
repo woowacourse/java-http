@@ -11,10 +11,14 @@ public class HttpResponse {
     private final HttpResponseHeader header;
     private final HttpResponseBody body;
 
-    public HttpResponse(HttpStatusCode statusCode) {
-        this.startLine = new HttpResponseStartLine(statusCode);
+    public HttpResponse() {
+        this.startLine = new HttpResponseStartLine();
         this.header = new HttpResponseHeader();
         this.body = new HttpResponseBody();
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        startLine.setStatusCode(statusCode);
     }
 
     public void setLocation(String location) {

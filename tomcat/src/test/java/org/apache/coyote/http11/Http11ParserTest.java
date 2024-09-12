@@ -11,7 +11,8 @@ public class Http11ParserTest {
     @Test
     void HTTP_응답을_직렬화할_수_있다() {
         // given
-        HttpResponse response = new HttpResponse(HttpStatusCode.OK);
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.OK);
         response.setContent(".html", "Hello world!");
 
         // when
@@ -32,7 +33,8 @@ public class Http11ParserTest {
     @Test
     void 본문이_없는_HTTP_응답을_직렬화할_수_있다() {
         // given
-        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(HttpStatusCode.FOUND);
         response.setLocation("/index.html");
 
         // when

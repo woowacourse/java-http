@@ -49,15 +49,7 @@ public class HttpRequestConvertor {
     }
 
     private static String parseHeaderValue(String[] requestLine) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i < requestLine.length; i++) {
-            sb.append(requestLine[i].strip());
-            if (i != requestLine.length - 1) {
-                sb.append(HEADER_DELIMITER);
-            }
-        }
-
-        return sb.toString();
+        return String.join(HEADER_DELIMITER, Arrays.copyOfRange(requestLine, 1, requestLine.length)).strip();
     }
 
     private static Session getOrCreateSession(HttpRequestHeader httpRequestHeader) {

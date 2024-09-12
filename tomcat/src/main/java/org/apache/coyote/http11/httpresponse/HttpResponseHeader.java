@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpresponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpHeaderName;
 
 public class HttpResponseHeader {
@@ -25,24 +26,9 @@ public class HttpResponseHeader {
     }
 
     public String getString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        int size = headers.keySet().size();
-        int i = HEADER_VALUE_START_INDEX;
-        for (HttpHeaderName key : headers.keySet()) {
-            if (i < size) {
-                stringBuilder.append(key.getName())
-                        .append(HEADER_DELIMITER)
-                        .append(headers.get(key))
-                        .append(RESPONSE_LINE_DELIMITER);
-                i++;
-                continue;
-            }
-            stringBuilder.append(key.getName())
-                    .append(HEADER_DELIMITER)
-                    .append(headers.get(key));
-        }
-
-        return stringBuilder.toString();
+        return headers.keySet().stream()
+                .map(key -> key.getName() + HEADER_DELIMITER + headers.get(key))
+                .collect(Collectors.joining(RESPONSE_LINE_DELIMITER));
     }
 
     public Map<HttpHeaderName, String> getHeaders() {

@@ -1,0 +1,7 @@
+package org.apache.coyote.http11.request;
+
+public class RequestBody {
+    public RequestBody(String s, String body) {
+
+    }
+}

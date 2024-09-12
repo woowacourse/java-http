@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.data.ContentType;
@@ -44,9 +45,9 @@ public class HttpRequestParser {
                 httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
             }
         }
-        HttpCookie httpCookie = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
+        List<HttpCookie> httpCookies = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
         return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
-                httpRequestParameter, httpCookie);
+                httpRequestParameter, httpCookies);
     }
 
     private static Map<String, String> parseRawHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -78,17 +79,5 @@ public class HttpRequestParser {
                         keyValue -> keyValue[1]
                 ));
         return new HttpRequestParameter(paramMap);
-    }
-
-    private static Map<String, String> parseRequestCookies(String rawRequestCookies) {
-        if (rawRequestCookies == null) {
-            return Map.of();
-        }
-        return Arrays.stream(rawRequestCookies.split(";"))
-                .map(String::trim)
-                .map(pair -> pair.split("="))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1]));
     }
 }

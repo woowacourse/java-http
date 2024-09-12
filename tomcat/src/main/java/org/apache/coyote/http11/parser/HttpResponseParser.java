@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.parser;
 
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.data.HttpResponse;
 
 public class HttpResponseParser {
@@ -15,9 +16,12 @@ public class HttpResponseParser {
             headerBuilder.append("Content-Length: ")
                     .append(httpResponse.getResponseBody().getBytes().length).append(" \r\n");
         }
-        String cookies = HttpCookieParser.formatCookiesForResponse(httpResponse.getHttpCookie());
+        String cookies = httpResponse.getHttpCookies().stream()
+                .map(HttpCookieParser::formatCookieForResponse)
+                .map(cookie -> "Set-Cookie: " + cookie + "\r\n")
+                .collect(Collectors.joining());
         if (!cookies.isEmpty()) {
-            headerBuilder.append("Set-Cookie: ").append(cookies).append(" \r\n");
+            headerBuilder.append(cookies).append(" \r\n");
         }
         if (httpResponse.getRedirectUrl() != null) {
             headerBuilder.append("Location: ").append(httpResponse.getRedirectUrl()).append(" \r\n");

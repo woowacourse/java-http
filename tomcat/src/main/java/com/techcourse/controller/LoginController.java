@@ -2,8 +2,10 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import java.io.IOException;
+import java.util.Map;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.data.ContentType;
+import org.apache.coyote.http11.data.HttpCookie;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpRequestParameter;
 import org.apache.coyote.http11.data.HttpResponse;
@@ -26,14 +28,14 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String redirectUrl = "/index.html";
         HttpRequestParameter requestParameter = request.getHttpRequestParameter();
         try {
             String sessionId = UserService.login(requestParameter);
+            HttpCookie httpCookie = new HttpCookie("JSESSIONID", sessionId, Map.of("Max-Age", "600"));
+            response.addCookie(httpCookie);
             response.addHttpStatusCode(HttpStatusCode.FOUND)
-                    .addCookie("JSESSIONID", sessionId)
-                    .addCookie("Max-Age", "600")
-                    .addRedirectUrl(redirectUrl);
+                    .addCookie(httpCookie)
+                    .addRedirectUrl("/index.html");
         } catch (IllegalArgumentException e) {
             response.addHttpStatusCode(HttpStatusCode.FOUND)
                     .addRedirectUrl("/401.html");

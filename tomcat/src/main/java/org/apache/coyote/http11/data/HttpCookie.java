@@ -4,25 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpCookie {
-    private final Map<String, String> cookies;
+    private final String name;
+    private final String value;
+    private final Map<String, String> attributes;
 
-    public HttpCookie() {
-        this.cookies = new HashMap<>();
+    public HttpCookie(String name, String value, Map<String, String> attributes) {
+        this.name = name;
+        this.value = value;
+        this.attributes = new HashMap<>(attributes);
     }
 
-    public HttpCookie(Map<String, String> cookies) {
-        this.cookies = new HashMap<>(cookies);
+    public String getName() {
+        return name;
     }
 
-    public void setValue(String key, String value) {
-        cookies.put(key, value);
+    public String getValue() {
+        return value;
     }
 
-    public String getValue(String key) {
-        return cookies.get(key);
-    }
-
-    public Map<String, String> getCookies() {
-        return new HashMap<>(cookies);
+    public Map<String, String> getAttributes() {
+        return new HashMap<>(attributes);
     }
 }

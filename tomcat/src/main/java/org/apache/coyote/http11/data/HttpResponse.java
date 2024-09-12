@@ -1,17 +1,20 @@
 package org.apache.coyote.http11.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HttpResponse {
     private HttpVersion httpVersion;
     private HttpStatusCode httpStatusCode;
     private ContentType contentType;
     private int contentLength;
-    private HttpCookie httpCookie;
+    private List<HttpCookie> httpCookies;
     private String responseBody;
     private String redirectUrl;
 
     public HttpResponse(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-        this.httpCookie = new HttpCookie();
+        this.httpCookies = new ArrayList<>();
     }
 
     public HttpResponse addHttpStatusCode(HttpStatusCode httpStatusCode) {
@@ -29,8 +32,8 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addCookie(String key, String value) {
-        this.httpCookie.setValue(key, value);
+    public HttpResponse addCookie(HttpCookie httpCookie) {
+        this.httpCookies.add(httpCookie);
         return this;
     }
 
@@ -60,8 +63,8 @@ public class HttpResponse {
         return contentLength;
     }
 
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
+    public List<HttpCookie> getHttpCookies() {
+        return new ArrayList<>(httpCookies);
     }
 
     public String getResponseBody() {

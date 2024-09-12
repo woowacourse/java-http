@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HttpRequest {
     private static final String SESSION_ID_KEY = "JSESSIONID";
 
@@ -10,11 +13,11 @@ public class HttpRequest {
     private final ContentType contentType;
     private final Integer contentLength;
     private final HttpRequestParameter httpRequestParameter;
-    private final HttpCookie httpCookie;
+    private final List<HttpCookie> httpCookies;
 
     public HttpRequest(HttpMethod httpMethod, String path, HttpVersion httpVersion, String requestBody,
                        ContentType contentType, Integer contentLength, HttpRequestParameter httpRequestParameter,
-                       HttpCookie httpCookie) {
+                       List<HttpCookie> httpCookies) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.httpVersion = httpVersion;
@@ -22,11 +25,15 @@ public class HttpRequest {
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.httpRequestParameter = httpRequestParameter;
-        this.httpCookie = httpCookie;
+        this.httpCookies = new ArrayList<>(httpCookies);
     }
 
     public String getSessionId() {
-        return httpCookie.getValue(SESSION_ID_KEY);
+        return httpCookies.stream()
+                .filter(cookie -> cookie.getName().equals(SESSION_ID_KEY))
+                .findAny()
+                .map(HttpCookie::getValue)
+                .orElse(null);
     }
 
     public HttpMethod getHttpMethod() {

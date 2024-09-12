@@ -1,9 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.model.Controller;
-import org.apache.coyote.http11.request.mapper.RequestMapping;
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.response.model.HttpResponse;
+import java.util.Optional;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.mapper.RequestMapping;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.HttpStatus;
 
 public class RequestProcessor {
 
@@ -13,8 +15,15 @@ public class RequestProcessor {
         this.requestMapping = new RequestMapping();
     }
 
-    public HttpResponse process(HttpRequest httpRequest) {
-        Controller controller = requestMapping.findController(httpRequest);
-        return controller.service(httpRequest);
+    public void process(HttpRequest httpRequest, HttpResponse httpResponse) {
+        Optional<Controller> mappedController = requestMapping.findController(httpRequest);
+
+        if (mappedController.isEmpty()) {
+            httpResponse.sendError(HttpStatus.NOT_FOUND);
+        }
+        if (mappedController.isPresent()) {
+            Controller controller = mappedController.get();
+            controller.service(httpRequest, httpResponse);
+        }
     }
 }

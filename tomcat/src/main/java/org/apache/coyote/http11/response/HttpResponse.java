@@ -21,10 +21,6 @@ public class HttpResponse {
         header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
-    public void setStatusLine(StatusLine statusLine) {
-        this.statusLine = statusLine;
-    }
-
     public void setMimeType(MimeType mimeType) {
         header.setContentType(mimeType);
     }
@@ -35,10 +31,6 @@ public class HttpResponse {
 
     public void setCookie(String cookie) {
         header.setCookie(cookie);
-    }
-
-    public void setHeader(ResponseHeader header) {
-        this.header = header;
     }
 
     public void setBody(ResponseBody body) {

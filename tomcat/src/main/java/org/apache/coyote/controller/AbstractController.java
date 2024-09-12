@@ -17,10 +17,10 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) {
         ForwardResult result = execute(request, response);
 
-        MimeType mimeType = MimeType.from(FileExtension.HTML);
+        MimeType mimeType = MimeType.from(FileExtension.from(request.getPath()));
         response.setMimeType(mimeType);
 
-        if (result.statusCode().isRedirection()) {
+        if (result.isRedirection()) {
             response.setLocation(result.path());
             response.setStatus(result.statusCode());
             response.setBody("".getBytes());

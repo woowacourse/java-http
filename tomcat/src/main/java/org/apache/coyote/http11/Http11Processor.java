@@ -17,6 +17,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeaders;
@@ -45,6 +46,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            RequestMapper requestMapper = new RequestMapper();
             HttpRequestParser httpRequestParser = new HttpRequestParser();
             HttpResponseParser httpResponseParser = new HttpResponseParser();
             FileReader fileReader = FileReader.getInstance();
@@ -54,21 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestedFilePath = httpRequest.getHttpRequestPath();
             HttpStatusCode httpStatusCode = HttpStatusCode.OK;
 
-            HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    fileReader.readFile(requestedFilePath));
-            HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
-            if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
-                httpResponse = StaticPageController.getStaticPage(httpRequest);
-            }
-            if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
-                if (httpRequest.getHttpRequestPath().contains("/login")) {
-                    httpResponse = LoginController.login(httpRequest);
-                }
-                if (httpRequest.getHttpRequestPath().contains("/register")) {
-                    httpResponse = RegisterController.register(httpRequest);
-                }
-            }
-
+            HttpResponse httpResponse = requestMapper.mapRequest(httpRequest);
             String response = httpResponseParser.parseResponse(httpResponse);
             outputStream.write(response.getBytes());
             outputStream.flush();

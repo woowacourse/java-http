@@ -15,7 +15,10 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RegisterController {
 
-    public static HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public RegisterController() {
+    }
+
+    public HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
         HttpStatusCode statusCode = HttpStatusCode.OK;
         String filePath = "/index.html";
@@ -39,7 +42,7 @@ public class RegisterController {
         return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
     }
 
-    private static void checkDuplicatedUser(User user) {
+    private void checkDuplicatedUser(User user) {
         String userAccount = user.getAccount();
         InMemoryUserRepository.findByAccount(userAccount)
                 .ifPresent(foundUser -> {

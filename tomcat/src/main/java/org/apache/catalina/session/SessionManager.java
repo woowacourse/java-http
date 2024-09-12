@@ -15,7 +15,6 @@ public class SessionManager implements Manager {
     }
 
     private static class SessionManagerHolder {
-
         private static final SessionManager INSTANCE = new SessionManager();
     }
 

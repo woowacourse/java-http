@@ -17,11 +17,14 @@ public record HttpResponse(
 
     private static final String CRLF = "\r\n";
     private static final ProtocolVersion DEFAULT_PROTOCOL = ProtocolVersion.HTTP11;
-    private static final String DELIMITER_COOKIE = "; ";
-    private static final String DELIMITER_HEADER = ": ";
+    private static final String DELIMITER_SEMICOLON = "; ";
+    private static final String DELIMITER_COLON = ": ";
     private static final String DELIMITER_SPACE = " ";
     private static final String HEADER_NAME_SET_COOKIE = "Set-Cookie: ";
     private static final String HEADER_NAME_CONTENT_LENGTH = "Content-Length: ";
+    private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_NAME_LOCATION = "Location";
+    private static final String HEADER_VALUE_CONTENT_TYPE_CHARSET = "charset=utf-8";
 
     public static Builder builder() {
         return new Builder().protocolVersion(DEFAULT_PROTOCOL)
@@ -58,7 +61,7 @@ public record HttpResponse(
 
     private void buildHeaders(StringBuilder builder) {
         headers.forEach((key, value) -> builder.append(CRLF)
-                .append(key).append(DELIMITER_HEADER)
+                .append(key).append(DELIMITER_COLON)
                 .append(value).append(DELIMITER_SPACE));
     }
 
@@ -66,7 +69,7 @@ public record HttpResponse(
         if (!cookies.isEmpty()) {
             String cookiesMessage = cookies.entrySet().stream()
                     .map(Entry::toString)
-                    .collect(Collectors.joining(DELIMITER_COOKIE));
+                    .collect(Collectors.joining(DELIMITER_SEMICOLON));
             builder.append(CRLF)
                     .append(HEADER_NAME_SET_COOKIE).append(cookiesMessage).append(DELIMITER_SPACE);
         }
@@ -106,12 +109,13 @@ public record HttpResponse(
         }
 
         public Builder contentType(String value) {
-            headers.put("Content-Type", value + ";charset=utf-8");
+            headers.put(HEADER_NAME_CONTENT_TYPE,
+                    String.join(DELIMITER_SEMICOLON, value, HEADER_VALUE_CONTENT_TYPE_CHARSET));
             return this;
         }
 
         public Builder location(String value) {
-            headers.put("Location", value);
+            headers.put(HEADER_NAME_LOCATION, value);
             return this;
         }
 

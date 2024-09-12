@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.SessionManager;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeaders;

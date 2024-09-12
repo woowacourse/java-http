@@ -1,10 +1,12 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticPageController;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RequestMapper {

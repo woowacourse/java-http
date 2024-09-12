@@ -10,7 +10,6 @@ import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
-import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseParser;
 import org.slf4j.Logger;

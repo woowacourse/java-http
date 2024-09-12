@@ -1,44 +1,39 @@
 package com.techcourse.handler;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.catalina.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FrontController {
+public class FrontController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
+    public static final List<String> ALLOWED_STATIC_RESOURCES = List.of("html", "css", "js", "png", "jpg", "ico", "svg");
 
-    private final Map<String, RequestHandler> handlers = new HashMap<>();
+    private final HandlerMapping handlerMapping;
 
-    public FrontController() {
-        handlers.put("/", new IndexHandler());
-        handlers.put("/login", new LoginHandler());
-        handlers.put("/register", new RegisterHandler());
-        handlers.put("/user", new UserHandler());
+    public FrontController(HandlerMapping handlerMapping) {
+        this.handlerMapping = handlerMapping;
     }
 
-    public void handleRequest(HttpRequest request, HttpResponse response) throws IOException {
-        RequestHandler handler = handlers.get(request.getPath());
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
+        Controller handler = handlerMapping.getController(request);
         log.debug("Request Line: {}", request.getRequestLine());
         log.debug("Body: {}", request.getParams());
 
         if (handler != null) {
-            handler.handle(request, response);
+            handler.service(request, response);
             return;
         }
 
-        List<String> allowedStaticResources = List.of("html", "css", "js", "png", "jpg", "ico", "svg");
-        if (allowedStaticResources.contains(request.getExtension())) {
-            new StaticResourceHandler().handle(request, response);
+        if (ALLOWED_STATIC_RESOURCES.contains(request.getExtension())) {
+            new StaticResourceHandler().service(request, response);
             return;
         }
 
-        response.sendRedirect("/404.html");
-        response.write();
+        new NotFoundHandler().service(request, response);
     }
 }

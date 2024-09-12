@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
         String account = getAccountFromRequest(request);
         String password = getPasswordFromRequest(request);
         User user = getUser(account, password);
-        Session session = request.getSession();
+        Session session = getSession(request);
         session.setAttribute(USER_FIELD, user);
         response.sendRedirect(INDEX_PAGE);
         response.setHeader(Header.SET_COOKIE.value(), "JSESSIONID=" + session.getId());
@@ -54,11 +54,12 @@ public class LoginController extends AbstractController {
     }
 
     private boolean userLoggedIn(HttpRequest request) {
-        Session session = request.getSession();
+        Session session = getSession(request);
         Object user = session.getAttribute(USER_FIELD);
         if (user == null) {
             return false;
         }
+        // todo: method extract
         return InMemoryUserRepository.findByAccount(((User) user).getAccount())
                 .isPresent();
     }

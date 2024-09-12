@@ -1,11 +1,18 @@
 package org.apache.catalina.controller;
 
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
+
+    private static final String JSESSIONID = "JSESSIONID";
+
+    private static final SessionManager sessionManager = new SessionManager();
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -26,6 +33,19 @@ public abstract class AbstractController implements Controller {
 
     protected final byte[] readStaticResource(String path) {
         return StaticResourceReader.readResource(getClass().getClassLoader(), path);
+    }
+
+    protected final Session getSession(HttpRequest request) {
+        return request.getCookie()
+                .get(JSESSIONID)
+                .map(sessionManager::findSession)
+                .orElseGet(this::createNewSession);
+    }
+
+    private Session createNewSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        sessionManager.add(session);
+        return session;
     }
 
     protected final String getRequiredParameter(HttpRequest request, String parameterName) {

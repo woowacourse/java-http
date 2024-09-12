@@ -1,21 +1,15 @@
 package org.apache.coyote.http.request;
 
-import java.util.UUID;
 import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.HttpMethod;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
-
-    private static final SessionManager sessionManager = new SessionManager();
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
     private final RequestParameters parameters;
     private final Cookie cookie;
     private final RequestBody body;
-    private final Session session;
 
     public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters,
                        RequestBody body) {
@@ -24,28 +18,11 @@ public class HttpRequest {
         this.cookie = parseCookie();
         this.body = body;
         this.parameters = parameters;
-        this.session = parseSession();
     }
 
     private Cookie parseCookie() {
         String cookies = headers.getCookies();
         return new Cookie(cookies);
-    }
-
-    private Session parseSession() {
-        return cookie.get("JSESSIONID").map(id -> {
-            Session findSession = sessionManager.findSession(id);
-            if (findSession != null) {
-                return findSession;
-            }
-            Session session = new Session(id);
-            sessionManager.add(session);
-            return session;
-        }).orElseGet(() -> {
-            Session session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-            return session;
-        });
     }
 
     public HttpMethod getHttpMethod() {
@@ -56,16 +33,16 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
-    public RequestBody getBody() {
-        return body;
-    }
-
     public String getParameter(String key) {
         return parameters.getValue(key);
     }
 
-    public Session getSession() {
-        return session;
+    public Cookie getCookie() {
+        return cookie;
+    }
+
+    public RequestBody getBody() {
+        return body;
     }
 
     @Override
@@ -76,7 +53,6 @@ public class HttpRequest {
                ", parameters=" + parameters +
                ", cookie=" + cookie +
                ", body='" + body + '\'' +
-               ", session=" + session +
                '}';
     }
 }

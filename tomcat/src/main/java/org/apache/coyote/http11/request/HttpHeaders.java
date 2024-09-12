@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.OptionalInt;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.cookie.RequestCookies;
+import org.apache.coyote.http11.exception.HttpFormatException;
 
 public class HttpHeaders {
 
     private static final String HEADER_SEPARATOR = ": ";
+    private static final int SPLIT_HEADER_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -26,7 +28,7 @@ public class HttpHeaders {
         Map<String, String> map = new HashMap<>();
         for (String header : headers) {
             if (!isValidHeader(header)) {
-                continue;
+                throw new HttpFormatException("올바르지 않은 헤더 형식입니다.");
             }
             String[] splitHeader = header.split(HEADER_SEPARATOR);
             map.put(splitHeader[KEY_INDEX], splitHeader[VALUE_INDEX]);
@@ -36,11 +38,10 @@ public class HttpHeaders {
 
     private static boolean isValidHeader(String header) {
         List<String> splitHeader = Arrays.stream(header.split(HEADER_SEPARATOR)).toList();
-        if (splitHeader.size() != 2) {
+        if (splitHeader.size() != SPLIT_HEADER_SIZE) {
             return false;
         }
-        return splitHeader.stream()
-                .noneMatch(String::isBlank);
+        return splitHeader.stream().noneMatch(String::isBlank);
     }
 
     public String get(String key) {

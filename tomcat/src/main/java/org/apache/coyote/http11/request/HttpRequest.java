@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import javax.annotation.Nullable;
 import org.apache.catalina.cookie.Cookie;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
 
@@ -45,8 +47,17 @@ public class HttpRequest {
                 .orElse(false);
     }
 
+    @Nullable
+    public String getContentType() {
+        return headers.getContentType();
+    }
+
     public Cookie getCookie() {
         return headers.getCookie();
+    }
+
+    public Optional<Session> getSession() {
+        return getCookie().getSession();
     }
 
     public String getBody() {

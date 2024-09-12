@@ -40,8 +40,15 @@ public class HttpResponse {
         headers.addContentLength(body.getBytes().length);
     }
 
-    public void sendStaticFiles(String filePath) {
+    public void sendStaticResource(String filePath) {
         status = HttpStatus.OK;
+        body = StaticFileResponseUtils.makeResponseBody(filePath);
+        headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendStaticResource(HttpStatus status, String filePath) {
+        this.status = status;
         body = StaticFileResponseUtils.makeResponseBody(filePath);
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
         headers.addContentLength(body.getBytes().length);

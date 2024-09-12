@@ -4,26 +4,33 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import javax.annotation.Nullable;
 import org.apache.catalina.cookie.Cookie;
 import org.apache.catalina.cookie.CookieUtils;
 
 public class HttpRequestHeaders {
-
+    private static final String CONTENT_TYPE = "Content-Type";
     private static final String COOKIE = "Cookie";
+
     private final Map<String, String> headers;
 
     public HttpRequestHeaders(Map<String, String> headers) {
         this.headers = Map.copyOf(headers);
     }
 
-    public Optional<String> getHeader(String key) {
-        return Optional.ofNullable(headers.get(key));
+    @Nullable
+    public String getContentType() {
+        return headers.get(CONTENT_TYPE);
     }
 
     public Cookie getCookie() {
         return getHeader(COOKIE)
                 .map(CookieUtils::createCookie)
                 .orElse(new Cookie());
+    }
+
+    public Optional<String> getHeader(String key) {
+        return Optional.ofNullable(headers.get(key));
     }
 
     @Override

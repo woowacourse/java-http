@@ -45,4 +45,8 @@ public class HttpCookies {
     public String getJsessionId() {
         return values.get(JSESSIONID).getValue();
     }
+
+    public Map<String, HttpCookie> getCookies() {
+        return values;
+    }
 }

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -27,11 +26,9 @@ class HttpCookiesTest {
 
     @NullAndEmptySource
     @ParameterizedTest
-    @DisplayName("빈 쿠키 헤더가 들어왔을 때 예외를 반환한다.")
+    @DisplayName("빈 쿠키 헤더가 들어왔을 때 빈 쿠키를 반환한다.")
     void from_fail_InvalidCookieHeader(String cookieHeader) {
         //when, then
-        assertThatThrownBy(() -> HttpCookies.from(cookieHeader))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 헤더");
+        assertThat(HttpCookies.from(cookieHeader).getCookies()).isEmpty();
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +18,7 @@ class HttpResponseTest {
         // given
         OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse response = new HttpResponse(outputStream);
-        response.addStatusLine("HTTP/1.1 200 OK");
+        response.addStatusLine(HttpStatusCode.OK);
         response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
         response.addHeader(HttpHeader.CONTENT_LENGTH, "12");
 
@@ -42,7 +42,7 @@ class HttpResponseTest {
         // given
         OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse response = new HttpResponse(outputStream);
-        response.addStatusLine("HTTP/1.1 200 OK");
+        response.addStatusLine(HttpStatusCode.OK);
         response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
         response.addHeader(HttpHeader.CONTENT_LENGTH, "12");
         response.addBody("Hello world!");

@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

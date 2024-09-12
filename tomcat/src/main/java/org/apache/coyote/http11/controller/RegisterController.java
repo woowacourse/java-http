@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

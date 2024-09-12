@@ -7,7 +7,8 @@ import java.nio.file.Files;
 
 import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public abstract class AbstractController implements Controller {
 
@@ -25,7 +26,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void redirectTo(HttpResponse response, String location) throws IOException {
-        response.addStatusLine("HTTP/1.1 302 Found");
+        response.addStatusLine(HttpStatusCode.FOUND);
         response.addHeader(HttpHeader.LOCATION, "http://localhost:8080" + location);
         response.writeResponse();
     }
@@ -34,12 +35,12 @@ public abstract class AbstractController implements Controller {
         String path = addHtmlExtension(request.getPath());
         String body = getStaticFileContent(path);
         if (body == null) {
-            response.addStatusLine("HTTP/1.1 204 No Content");
+            response.addStatusLine(HttpStatusCode.NO_CONTENT);
             response.addHeader(HttpHeader.CONTENT_LENGTH, "0");
             response.writeResponse();
             return;
         }
-        response.addStatusLine("HTTP/1.1 200 OK");
+        response.addStatusLine(HttpStatusCode.OK);
         response.addHeader(HttpHeader.CONTENT_TYPE, "text/" + getFileExtension(path) + ";charset=utf-8");
         response.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.addBody(body);

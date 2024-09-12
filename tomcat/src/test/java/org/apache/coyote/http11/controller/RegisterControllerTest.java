@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

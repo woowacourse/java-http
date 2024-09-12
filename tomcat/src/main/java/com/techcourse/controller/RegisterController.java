@@ -14,12 +14,12 @@ public class RegisterController extends Controller {
     public void doGet(HttpRequest request, HttpResponse response) {
         String sessionId = CookieManager.getCookieValue(request.getHeaderValue("Cookie"), "JSESSIONID");
         if (sessionId == null) {
-            response.setBodyWithStaticResource("/login.html");
+            response.setBodyWithStaticResource("/register.html");
             return;
         }
         User user = SessionStorage.get(sessionId);
         if (user == null) {
-            response.setBodyWithStaticResource("/login.html");
+            response.setBodyWithStaticResource("/register.html");
             return;
         }
 

@@ -15,10 +15,12 @@ public class LoginController extends Controller {
         String sessionId = CookieManager.getCookieValue(request.getHeaderValue("Cookie"), "JSESSIONID");
         if (sessionId == null) {
             response.setBodyWithStaticResource("/login.html");
+            return;
         }
         User user = SessionStorage.get(sessionId);
         if (user == null) {
             response.setBodyWithStaticResource("/login.html");
+            return;
         }
 
         log.info(user.toString());

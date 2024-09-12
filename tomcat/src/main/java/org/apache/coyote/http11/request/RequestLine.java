@@ -10,7 +10,11 @@ public class RequestLine {
     private String path;
     private Map<String, String> queryParameters = new HashMap<>();
 
-    public RequestLine(String requestLine) {
+    public static RequestLine create(String requestLine) {
+        String[] splitRequestLine = requestLine.split(" ");
+        String method = splitRequestLine[0];
+        String path = splitRequestLine[1];
+
         String inputQueryString = "";
         int queryStringIndex = requestLine.indexOf("?");
         if (queryStringIndex >= 0) {
@@ -19,6 +23,7 @@ public class RequestLine {
                     .replace("?", "");
         }
 
+        Map<String, String> queryParameters = new HashMap<>();
         Arrays.stream(inputQueryString.split("&"))
                 .forEach(queryParameterEntry -> {
                     String[] split = queryParameterEntry.split("=");
@@ -26,6 +31,14 @@ public class RequestLine {
                         queryParameters.put(split[0], split[1]);
                     }
                 });
+
+        return new RequestLine(method, path, queryParameters);
+    }
+
+    private RequestLine(String method, String path, Map<String, String> queryParameters) {
+        this.method = method;
+        this.path = path;
+        this.queryParameters = queryParameters;
     }
 
     public boolean isGetRequest() {
@@ -34,5 +47,9 @@ public class RequestLine {
 
     public boolean isPostRequest() {
         return "POST".equals(method);
+    }
+
+    public String getPath() {
+        return this.path;
     }
 }

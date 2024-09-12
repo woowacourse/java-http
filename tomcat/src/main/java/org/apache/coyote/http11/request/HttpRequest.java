@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,8 +11,8 @@ public class HttpRequest {
     private RequestHeaders requestHeaders;
     private RequestBody requestBody;
 
-    public static HttpRequest create(InputStream inputStream) {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+    public static HttpRequest create(BufferedReader bufferedReader) {
+        try {
             Map<String, String> headers = new HashMap<>();
 
             String requestLine = bufferedReader.readLine();
@@ -35,9 +33,9 @@ public class HttpRequest {
             }
 
             return new HttpRequest(
-                    new RequestLine(requestLine),
+                    RequestLine.create(requestLine),
                     new RequestHeaders(headers),
-                    new RequestBody(headers.get("Content-Type"), body)
+                    RequestBody.create(body)
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,6 +61,10 @@ public class HttpRequest {
     }
 
     public String parseBodyParameter(String key) {
-        return null;
+        return requestBody.getParameter(key);
+    }
+
+    public String getUri() {
+        return requestLine.getPath();
     }
 }

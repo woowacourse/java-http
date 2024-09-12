@@ -53,6 +53,6 @@ public class HttpRequestQuery {
 		if (query == null) {
 			return false;
 		}
-		return query.containsKey(key);
+		return !query.containsKey(key);
 	}
 }

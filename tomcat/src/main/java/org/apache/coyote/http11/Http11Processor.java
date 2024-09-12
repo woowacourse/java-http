@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
@@ -31,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
             HttpResponse response = new HttpResponse(outputStream);
 

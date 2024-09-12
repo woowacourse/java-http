@@ -16,6 +16,9 @@ public class RequestMapping {
     private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
     private static final Controller staticResourceController = StaticResourceController.getInstance();
     private static final Controller homePageController = HomePageController.getInstance();
+    private static final String PATH_SEPARATOR = "/";
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final int PATH_FIRST_SEGMENT_INDEX = 1;
 
     static {
         controllers.put("login", LoginController.getInstance());
@@ -31,12 +34,12 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest request) {
         String path = request.getPath();
-        if ("/".equals(path)) {
+        if (PATH_SEPARATOR.equals(path)) {
             return homePageController;
         }
-        if (path.contains(".")) {
+        if (path.contains(FILE_EXTENSION_SEPARATOR)) {
             return staticResourceController;
         }
-        return controllers.get(path.split("/")[1]);
+        return controllers.get(path.split(PATH_SEPARATOR)[PATH_FIRST_SEGMENT_INDEX]);
     }
 }

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.Set;
 
-public class ContentTypes {
+public class MimeTypes {
     public static final Set<String> textFiles = Set.of(
             "text/plain",
             "text/html",
@@ -13,7 +13,7 @@ public class ContentTypes {
             "text/markdown"
     );
 
-    public static String getContentType(String contentType) {
+    public static String getMimeTypes(String contentType) {
         if (textFiles.contains(contentType)) {
             return contentType + ";charset=utf-8";
         }

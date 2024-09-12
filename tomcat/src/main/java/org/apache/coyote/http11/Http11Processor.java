@@ -24,7 +24,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
-import org.apache.coyote.http11.response.ContentTypes;
+import org.apache.coyote.http11.response.MimeTypes;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
         var responseBody = Files.readString(file.toPath());
         String contentType = Files.probeContentType(file.toPath());
         response.addHeader("Content-Length", Long.toString(file.length()));
-        response.addHeader("Content-Type", ContentTypes.getContentType(contentType));
+        response.addHeader("Content-Type", MimeTypes.getMimeTypes(contentType));
         response.setResponseBody(responseBody);
     }
 

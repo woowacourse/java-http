@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -175,7 +175,7 @@ class Http11ProcessorTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID="+jSessionId,
+                "Cookie: JSESSIONID=" + jSessionId,
                 "",
                 "");
         StubSocket socket2 = new StubSocket(httpGetLoginRequest);

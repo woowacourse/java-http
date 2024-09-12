@@ -9,7 +9,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -55,8 +54,8 @@ public class Http11Processor implements Runnable, Processor {
             String resourceExtension = getExtension(resourceName);
 
             if (!request.hasCookieFrom("JSESSIONID")) {
-                Map<String, String> parameter = Map.of("JSESSIONID", UUID.randomUUID().toString());
-                response.setHttpCookie(new HttpCookie(parameter));
+                String sessionId = UUID.randomUUID().toString();
+                response.setHttpCookie(HttpCookie.ofJSessionId(sessionId));
             }
             response.setResponseBody(responseBody);
             response.setContentType(resourceExtension);

@@ -1,10 +1,10 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResourceController extends AbstractController {
+public class DefaultController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

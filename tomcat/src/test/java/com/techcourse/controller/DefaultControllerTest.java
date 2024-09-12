@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class ResourceControllerTest {
+class DefaultControllerTest {
 
     @DisplayName("정적 리소스를 요청한다.")
     @Test

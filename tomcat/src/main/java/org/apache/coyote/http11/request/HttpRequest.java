@@ -56,7 +56,7 @@ public record HttpRequest(
         }
         return Arrays.stream(query.split(DELIMITER_PARAMETER_ENTRY))
                 .map(keyValue -> keyValue.split(DELIMITER_VALUE))
-                .filter(entry -> entry.length == 2)
+                .filter(HttpRequest::isLengthTwo)
                 .collect(Collectors.toMap(
                         entry -> entry[0],
                         entry -> URLDecoder.decode(entry[1], Charset.defaultCharset())
@@ -71,10 +71,13 @@ public record HttpRequest(
 
         return lines.stream()
                 .limit(endHeaderIndex)
-                .map(String::trim)
                 .map(line -> line.split(DELIMITER_HEADER))
-                .filter(entry -> entry.length == 2)
-                .collect(Collectors.toMap(entry -> entry[0], entry -> entry[1]));
+                .filter(HttpRequest::isLengthTwo)
+                .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
+    }
+
+    private static boolean isLengthTwo(String[] entry) {
+        return entry.length == 2;
     }
 
     private static Map<String, String> extractCookies(String cookieMessage) {
@@ -84,7 +87,7 @@ public record HttpRequest(
 
         return Arrays.stream(cookieMessage.split(DELIMITER_COOKIE))
                 .map(cookie -> cookie.split(DELIMITER_VALUE))
-                .filter(entry -> entry.length == 2)
+                .filter(entry -> isLengthTwo(entry))
                 .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
     }
 

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.coyote.CharsetType;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.http11.HttpCookie;
 
 public class ResponseHeader {
 
@@ -34,6 +35,19 @@ public class ResponseHeader {
             contentType += CHARSET + CharsetType.UTF_8.getCharset();
         }
         addHeader(CONTENT_TYPE, contentType);
+    }
+
+    public boolean existsSession() {
+        if (!header.containsKey(SET_COOKIE)) {
+            return false;
+        }
+
+        HttpCookie cookies = getCookies();
+        return cookies.containsJSessionId();
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(header.get(SET_COOKIE));
     }
 
     public String toHeaderString() {

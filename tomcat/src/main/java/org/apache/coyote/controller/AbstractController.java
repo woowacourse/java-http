@@ -21,12 +21,22 @@ public abstract class AbstractController implements Controller {
         response.setMimeType(mimeType);
 
         if (result.isRedirection()) {
-            response.setLocation(result.path());
-            response.setStatus(result.statusCode());
-            response.setBody("".getBytes());
+            handleRedirection(response, result);
             return;
         }
 
+        handleResponse(response, result);
+    }
+
+    protected abstract ForwardResult execute(HttpRequest request, HttpResponse response);
+
+    private void handleRedirection(HttpResponse response, ForwardResult result) {
+        response.setLocation(result.path());
+        response.setStatus(result.statusCode());
+        response.setBody("".getBytes());
+    }
+
+    private void handleResponse(HttpResponse response, ForwardResult result) {
         try {
             byte[] body = ResourceReader.read(result.path());
             response.setStatus(HttpStatusCode.OK);
@@ -37,6 +47,4 @@ public abstract class AbstractController implements Controller {
             response.setBody("No File Found".getBytes());
         }
     }
-
-    protected abstract ForwardResult execute(HttpRequest request, HttpResponse response);
 }

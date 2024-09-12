@@ -25,7 +25,6 @@ public class LoginController {
     }
 
     public void login(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        FileReader fileReader = FileReader.getInstance();
         String account = request.getRequestBodyValue("account");
         String password = request.getRequestBodyValue("password");
         try {
@@ -33,13 +32,9 @@ public class LoginController {
                     .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
             loginProcess(password, foundUser, response);
         } catch (UserException e) {
-            request.setHttpRequestPath("/401.html");
-            response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
+            setFailResponse(request, response);
         }
-
-        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
-        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
-        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
+        setResponseContent(request,response);
     }
 
     private void loginProcess(String password, User user, HttpResponse response) {
@@ -62,6 +57,18 @@ public class LoginController {
     private void redirect(HttpResponse response, String path) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setHttpResponseHeader("Location", path);
+    }
+
+    private void setFailResponse(HttpRequest request, HttpResponse response) {
+        request.setHttpRequestPath("/401.html");
+        response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
+    }
+
+    private void setResponseContent(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+        FileReader fileReader = FileReader.getInstance();
+        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
+        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
+        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
     public static LoginController getInstance() {

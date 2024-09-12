@@ -18,7 +18,6 @@ public class RegisterController {
     }
 
     public void register(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        FileReader fileReader = FileReader.getInstance();
         String account = request.getRequestBodyValue("account");
         String email = request.getRequestBodyValue("email");
         String password = request.getRequestBodyValue("password");
@@ -28,13 +27,9 @@ public class RegisterController {
             InMemoryUserRepository.save(user);
             redirect(response, "/index.html");
         } catch (UserException e) {
-            request.setHttpRequestPath("/register.html");
-            response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
+            setFailResponse(request, response);
         }
-
-        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
-        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
-        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
+        setResponseContent(request, response);
     }
 
     private void checkDuplicatedUser(User user) {
@@ -48,6 +43,18 @@ public class RegisterController {
     private void redirect(HttpResponse response, String path) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setHttpResponseHeader("Location", path);
+    }
+
+    private void setFailResponse(HttpRequest request, HttpResponse response) {
+        request.setHttpRequestPath("/register.html");
+        response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
+    }
+
+    private void setResponseContent(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+        FileReader fileReader = FileReader.getInstance();
+        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
+        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
+        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
     public static RegisterController getInstance() {

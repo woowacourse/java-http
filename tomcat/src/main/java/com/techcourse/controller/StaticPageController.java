@@ -16,15 +16,11 @@ public class StaticPageController {
     }
 
     public void getStaticPage(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        FileReader fileReader = FileReader.getInstance();
         response.setHttpStatusCode(HttpStatusCode.OK);
         if (request.getHttpRequestPath().equals("/login") && checkLogin(request)) {
             redirect(response, "/index.html");
         }
-
-        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
-        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
-        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
+        setResponseContent(request, response);
     }
 
     private boolean checkLogin(HttpRequest request) {
@@ -38,6 +34,13 @@ public class StaticPageController {
     private void redirect(HttpResponse response, String path) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setHttpResponseHeader("Location", path);
+    }
+
+    private void setResponseContent(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+        FileReader fileReader = FileReader.getInstance();
+        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
+        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
+        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
     public static StaticPageController getInstance() {

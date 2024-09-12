@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.ForwardResult;
-import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,6 +24,6 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return new ForwardResult(HttpStatusCode.FOUND, "index.html");
+        return ForwardResult.ofRedirect("index.html");
     }
 }

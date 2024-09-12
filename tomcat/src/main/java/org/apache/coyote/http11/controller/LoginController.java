@@ -9,7 +9,7 @@ import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.QueryParam;
+import org.apache.coyote.http11.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
         if (!sessionId.isEmpty()) {
             findUserFromSession(sessionId, response);
         }
-        QueryParam queryParam = request.getQueryParam();
+        Parameter queryParam = request.getParameter();
         loginCheck(queryParam, response);
     }
 
@@ -37,18 +37,18 @@ public class LoginController extends AbstractController {
                 .staticResource("/index.html");
     }
 
-    private void loginCheck(QueryParam queryParam, HttpResponse response) {
-        if (queryParam.getValue("account").isEmpty() &&
-                queryParam.getValue("password").isEmpty()) {
+    private void loginCheck(Parameter parameter, HttpResponse response) {
+        if (parameter.getValue("account").isEmpty() &&
+                parameter.getValue("password").isEmpty()) {
             response.statusCode(HttpStatusCode.OK)
                     .staticResource("/login.html");
         }
-        login(queryParam, response);
+        login(parameter, response);
     }
 
-    private void login(QueryParam queryParam, HttpResponse response) {
-        String account = queryParam.getValue("account");
-        String password = queryParam.getValue("password");
+    private void login(Parameter parameter, HttpResponse response) {
+        String account = parameter.getValue("account");
+        String password = parameter.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("계정 정보가 존재하지 않습니다."));
         if (user.checkPassword(password)) {

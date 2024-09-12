@@ -6,7 +6,7 @@ import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.QueryParam;
+import org.apache.coyote.http11.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        QueryParam param = request.getQueryParam();
+        Parameter param = request.getParameter();
         User newAccount = new User(param.getValue("account"), param.getValue("password"), param.getValue("email"));
         logger.info("user : {}", newAccount);
         InMemoryUserRepository.save(newAccount);

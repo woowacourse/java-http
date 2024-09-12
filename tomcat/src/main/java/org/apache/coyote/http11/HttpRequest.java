@@ -35,17 +35,23 @@ public class HttpRequest {
         return url.substring(0, index);
     }
 
-    public QueryParam getQueryParam() {
+    public Parameter getParameter() {
         String method = requestLine.getMethod();
         if ("GET".equals(method)) {
-            return new QueryParam(parseQueryString(requestLine.getUrl()));
+            return getParameterFromUrl(getUrl());
         }
-        return new QueryParam(responseBody);
+        return getParameterFromBody(responseBody);
     }
 
-    private String parseQueryString(String uri) {
-        int index = uri.indexOf("?");
-        return uri.substring(index + 1);
+
+    private Parameter getParameterFromUrl(String url) {
+        QueryParamParser parser = new QueryParamParser(url);
+        return parser.getParameter();
+    }
+
+    private Parameter getParameterFromBody(String responseBody) {
+        FormUrlEncodedParser parser = new FormUrlEncodedParser(responseBody);
+        return parser.getParameter();
     }
 
     public HttpCookies getCookies() {

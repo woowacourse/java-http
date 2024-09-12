@@ -7,7 +7,6 @@ import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.request.HttpRequest;
 
 import com.techcourse.service.UserService;
 
@@ -21,8 +20,8 @@ public class RequestMapping {
         controllerMapper.put("/register", new RegisterController(userService));
     }
 
-    public Controller getController(HttpRequest request) {
-        return Optional.ofNullable(controllerMapper.get(request.getRequestUrl()))
+    public Controller getController(String requestUrl) {
+        return Optional.ofNullable(controllerMapper.get(requestUrl))
                 .orElse(new AbstractController());
     }
 }

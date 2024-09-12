@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
+
 import java.util.Objects;
 
 import org.apache.catalina.session.Session;
@@ -28,7 +30,7 @@ public record HttpRequest(HttpRequestLine requestLine, HttpHeaders httpHeaders, 
     }
 
     public Session getSession(boolean create) {
-        String sessionId = getCookie().get(HttpCookie.SESSION_ID_IDENTIFICATION);
+        String sessionId = getCookie().get(SESSION_ID_IDENTIFICATION);
         SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(sessionId);
         if (Objects.nonNull(session)) {

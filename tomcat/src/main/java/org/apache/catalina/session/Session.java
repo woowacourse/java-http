@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public class Session {
 
+    public static final String SESSION_ID_IDENTIFICATION = "JSESSIONID";
     private static final int DEFAULT_EXPIRATION_TIME_IN_SECONDS = 1800;
     private final String sessionId;
     private final LocalDateTime creationTime;
@@ -37,7 +38,7 @@ public class Session {
         return sessionId;
     }
 
-    public boolean isNew(){
+    public boolean isNew() {
         return attributes.isEmpty();
     }
 }

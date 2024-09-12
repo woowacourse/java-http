@@ -59,8 +59,7 @@ public class LoginController extends AbstractController {
         if (session.isNew()) {
             session.setAttributes("userAccount", user.getAccount());
             new SessionManager().add(session);
-            response.addHeader(HttpHeaderType.SET_COOKIE,
-                    HttpCookie.SESSION_ID_IDENTIFICATION + HttpCookie.DELIMITER + session.getSessionId());
+            response.addHeader(HttpHeaderType.SET_COOKIE, HttpCookie.getCookieString(session));
         }
         response.sendRedirect(REDIRECT_RESOURCE_URI);
     }

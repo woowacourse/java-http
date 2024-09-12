@@ -49,7 +49,7 @@ class LoginControllerTest {
         new SessionManager().add(session);
         LoginController controller = new LoginController();
         HttpRequest httpRequest = new HttpRequest(new HttpRequestLine(HttpMethod.GET, new ResourceURI("/login"), HttpVersion.HTTP11),
-                new HttpHeaders(Map.of(HttpHeaderType.COOKIE, HttpCookie.SESSION_ID_IDENTIFICATION + HttpCookie.DELIMITER + session.getSessionId())), HttpBody.none());
+                new HttpHeaders(Map.of(HttpHeaderType.COOKIE, HttpCookie.getCookieString(session))), HttpBody.none());
         HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP11);
 
         controller.service(httpRequest, httpResponse);

@@ -2,9 +2,12 @@ package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private static final UserService INSTANCE = new UserService();
 
     private UserService() {
@@ -30,6 +33,6 @@ public class UserService {
     public void registerUser(String account, String password, String email) {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        System.out.println("회원가입 성공: " + user.getAccount());
+        LOGGER.info("회원가입 성공: {}", user.getAccount());
     }
 }

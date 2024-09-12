@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String USER = "user";
@@ -69,7 +69,7 @@ public class LoginController extends AbstractController {
         response.setStatusLine(HttpStatus.FOUND);
         response.setHeader(HttpHeaderField.LOCATION.getName(), INDEX_HTML);
         response.setHeader(HttpHeaderField.SET_COOKIE.getName(), httpCookie.toString());
-        log.info("User logged in: {}", user);
+        LOGGER.info("로그인한 회원: {}", user);
     }
 
     @Override

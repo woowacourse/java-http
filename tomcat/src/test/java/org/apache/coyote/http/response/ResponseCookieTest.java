@@ -14,8 +14,9 @@ class ResponseCookieTest {
     @Test
     void ResponseCookie를_조립한다() {
         // given
+        Session session = manager.createSession("656cef62-e3c4-40bc-a8df-94732920ed46");
         ResponseCookie responseCookie = new ResponseCookie();
-        responseCookie.addSessionCookie(new Session("656cef62-e3c4-40bc-a8df-94732920ed46", manager));
+        responseCookie.addSessionCookie(session);
 
         // when
         StringBuilder builder = new StringBuilder();

@@ -34,10 +34,11 @@ class ResponseHeadersTest {
     @Test
     void 쿠키가_있다면_Set_Cookie_헤더도_함께_조립한다() {
         // given
+        Session session = manager.createSession("656cef62-e3c4-40bc-a8df-94732920ed46");
         ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.setContentType("text/html");
         responseHeaders.setContentLength(1024);
-        responseHeaders.addSessionCookie(new Session("656cef62-e3c4-40bc-a8df-94732920ed46", manager));
+        responseHeaders.addSessionCookie(session);
 
         // when
         StringBuilder builder = new StringBuilder();

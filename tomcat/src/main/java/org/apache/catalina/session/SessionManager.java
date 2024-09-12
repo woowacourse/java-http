@@ -46,7 +46,9 @@ public class SessionManager implements Manager {
         if (sessionId == null) {
             sessionId = idGenerator.generate();
         }
-        return new Session(sessionId, this);
+        Session session = new Session(sessionId, this);
+        session.setCreateTime(System.currentTimeMillis());
+        return session;
     }
 
     @Override

@@ -16,19 +16,16 @@ public class Session {
 
     private final int maxInactiveInterval;
 
+    private long createTime;
+
     private long lastAccessedTime;
 
-    public Session(String id, Manager manager) {
+    protected Session(String id, Manager manager) {
         this.id = id;
         this.attributes = new HashMap<>();
         this.manager = manager;
         this.manager.add(this);
-        this.lastAccessedTime = System.currentTimeMillis();
         this.maxInactiveInterval = DEFAULT_MAX_INACTIVE_INTERVAL_SECOND;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public void setAttribute(String name, Object value) {
@@ -67,5 +64,14 @@ public class Session {
 
     public void access() {
         this.lastAccessedTime = System.currentTimeMillis();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setCreateTime(long time) {
+        this.createTime = time;
+        this.lastAccessedTime = time;
     }
 }

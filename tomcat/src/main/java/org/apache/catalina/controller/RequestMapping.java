@@ -5,7 +5,7 @@ import java.util.Map;
 import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 

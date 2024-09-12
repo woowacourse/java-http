@@ -30,12 +30,25 @@ class LoginControllerTest {
     @Nested
     @DisplayName("관련된 컨트롤러 여부")
     class isMatchesRequest {
-        @ParameterizedTest
-        @ValueSource(strings = {"/login", "/login?account=gugu&password=password"})
-        @DisplayName("성공 : 연관된 path일 경우 true 반환")
-        void isMatchesRequestReturnTrue(String path) {
+        @Test
+        @DisplayName("성공 : GET /login일 경우 true 반환")
+        void isMatchesRequestGETReturnTrue() {
             HttpRequest httpRequest = new HttpRequest(
-                    new RequestLine("GET " + path + " HTTP/1.1"),
+                    new RequestLine("GET /login HTTP/1.1"),
+                    new RequestHeader(),
+                    new RequestBody()
+            );
+
+            boolean actual = new LoginController().isMatchesRequest(httpRequest);
+
+            assertThat(actual).isTrue();
+        }
+
+        @Test
+        @DisplayName("성공 : POST /login?account=gugu&password=password일 경우 true 반환")
+        void isMatchesRequestPOSTReturnTrue() {
+            HttpRequest httpRequest = new HttpRequest(
+                    new RequestLine("POST /login?account=gugu&password=password HTTP/1.1"),
                     new RequestHeader(),
                     new RequestBody()
             );
@@ -52,7 +65,7 @@ class LoginControllerTest {
                 "login?account=gugu&password=password",
                 "/login2?account=gugu&password=password",
         })
-        @DisplayName("성공 : 연관되지 않은 path일 경우 false 반환")
+        @DisplayName("성공 : GET이면서 연관되지 않은 path일 경우 false 반환")
         void isMatchesRequestReturnFalse(String path) {
             HttpRequest httpRequest = new HttpRequest(
                     new RequestLine("GET " + path + " HTTP/1.1"),
@@ -64,6 +77,26 @@ class LoginControllerTest {
 
             assertThat(actual).isFalse();
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "login",
+            "/login2",
+            "login?account=gugu&password=password",
+            "/login2?account=gugu&password=password",
+    })
+    @DisplayName("성공 : POST이면서 연관되지 않은 path일 경우 false 반환")
+    void isMatchesRequestReturnFalse(String path) {
+        HttpRequest httpRequest = new HttpRequest(
+                new RequestLine("POST " + path + " HTTP/1.1"),
+                new RequestHeader(),
+                new RequestBody()
+        );
+
+        boolean actual = new LoginController().isMatchesRequest(httpRequest);
+
+        assertThat(actual).isFalse();
     }
 
     @Nested

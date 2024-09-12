@@ -1,8 +1,7 @@
 package com.techcourse.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,19 +24,20 @@ class LoginServiceTest {
             InMemoryUserRepository.save(expected);
             LoginService loginService = new LoginService();
 
-            Optional<User> actual = loginService.login("kyum", "password");
+            User actual = loginService.login("kyum", "password");
 
-            assertThat(actual).hasValue(expected);
+            assertThat(actual).isEqualTo(expected);
         }
 
         @Test
-        @DisplayName("성공 : 유저가 있는 경우 user 반환")
+        @DisplayName("실패 : 유저가 있는 경우 예외 발생")
         void loginReturnOptional() {
             LoginService loginService = new LoginService();
 
-            Optional<User> actual = loginService.login("kyum2", "password2");
+            assertThatThrownBy(() -> loginService.login("kyum2", "password2"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("로그인 정보가 잘못되었습니다.");
 
-            assertThat(actual).isEmpty();
         }
     }
 }

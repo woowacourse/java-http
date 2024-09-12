@@ -3,23 +3,28 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestCookie;
+import org.apache.coyote.http11.request.RequestMethod;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -36,104 +41,83 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
-             OutputStream outputStream = connection.getOutputStream()) {
+             OutputStream outputStream = connection.getOutputStream();
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader reader = new BufferedReader(inputStreamReader)) {
 
-            HttpRequest request = HttpRequestExtractor.extract(inputStream);
-            HttpResponse response = new HttpResponse();
+            Request request = new Request(reader);
+            Response response = new Response();
             execute(request, response);
 
-            outputStream.write(response.parseResponse().getBytes());
+            outputStream.write(response.buildHttpMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void execute(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        String httpMethod = request.getMethod();
-        String path = request.getPath();
-        log.info("request = {} {}", httpMethod, path);
-
-        if (path.equals("/login") && httpMethod.equals("GET")) {
-            checkLogin(request, response);
-        }
-        if (path.equals("/login") && httpMethod.equals("POST")) {
-            doLogin(request, response);
+    private void execute(Request request, Response response) throws IOException, URISyntaxException {
+        log.info("request path = {}", request.getPath());
+        if (request.hasPath("/") && request.hasMethod(RequestMethod.GET)) {
+            getWelcome(response);
             return;
         }
-        if (path.equals("/register") && httpMethod.equals("POST")) {
-            doRegister(request, response);
+        if (request.hasPath("/login") && request.hasMethod(RequestMethod.GET)) {
+            getLogin(request, response);
             return;
         }
-
-        String responseBody = decideResponseBody(request);
-        response.setBody(responseBody);
-
-        response.addHeader("Content-Type", decideContentTypeHeader(request));
-        response.addHeader("Content-Length", decideContentLengthHeader(response));
+        if (request.hasPath("/login") && request.hasMethod(RequestMethod.POST)) {
+            postLogin(request, response);
+            return;
+        }
+        if (request.hasPath("/register") && request.hasMethod(RequestMethod.POST)) {
+            postRegister(request, response);
+            return;
+        }
+        showStaticResource(request, response);
     }
 
-    private void checkLogin(HttpRequest request, HttpResponse response) {
-        HttpCookie cookies = request.extractCookie();
-        if (!cookies.containsCookie("JSESSIONID")) {
-            return;
-        }
-        String jSessionId = cookies.getCookie("JSESSIONID");
-        boolean isLogin = SessionManager.containsSession(jSessionId);
-        if (isLogin) {
-            response.sendRedirection("/index.html");
+    private void getWelcome(Response response) throws URISyntaxException, IOException {
+        response.addFileBody("/default.html");
+    }
+
+    private void getLogin(Request request, Response response) throws URISyntaxException, IOException {
+        response.addFileBody("/login.html");
+        Optional<RequestCookie> loginCookie = request.getLoginCookie();
+        if (loginCookie.isPresent()) {
+            RequestCookie cookie = loginCookie.get();
+            boolean isLogin = sessionManager.contains(cookie.getValue());
+            if (isLogin) {
+                response.sendRedirection("/index.html");
+            }
         }
     }
 
-    private void doLogin(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        String requestBody = request.getBody();
-        Map<String, String> fields = new HashMap<>();
-        String[] rawFields = requestBody.split("&");
-        for (String rawField : rawFields) {
-            String key = rawField.split("=")[0];
-            String value = rawField.split("=")[1];
-            fields.put(key, value);
-        }
-
-        String account = fields.get("account");
-        String password = fields.get("password");
+    private void postLogin(Request request, Response response) throws IOException, URISyntaxException {
+        RequestBody requestBody = request.getBody();
+        Map<String, String> userInfo = requestBody.parseQuery();
+        String account = userInfo.getOrDefault("account", "");
+        String password = userInfo.getOrDefault("password", "");
 
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
-        if (rawUser.isEmpty()) {
+        if (rawUser.isEmpty() || !rawUser.get().checkPassword(password)) {
             response.setStatusUnauthorized();
-            response.setBody(FileReader.readResourceFile("/401.html"));
+            response.addFileBody("/401.html");
             return;
         }
         User user = rawUser.get();
-        if (!user.checkPassword(password)) {
-            response.setStatusUnauthorized();
-            response.setBody(FileReader.readResourceFile("/401.html"));
-            return;
-        }
         log.info("user: {}", user);
+        String newSessionId = sessionManager.create("user", user);
+        response.addLoginCookie(newSessionId);
         response.sendRedirection("/index.html");
-
-        String jSessionId = UUID.randomUUID().toString();
-        Session session = new Session(jSessionId);
-        session.setAttribute("user", user);
-        SessionManager.addSession(session.getId(), session);
-        response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 
-    private void doRegister(HttpRequest request, HttpResponse response) {
-        String requestBody = request.getBody();
-
-        Map<String, String> fields = new HashMap<>();
-        String[] rawFields = requestBody.split("&");
-        for (String rawField : rawFields) {
-            String key = rawField.split("=")[0];
-            String value = rawField.split("=")[1];
-            fields.put(key, value);
-        }
-
-        String account = fields.get("account");
-        String email = fields.get("email");
-        String password = fields.get("password");
+    private void postRegister(Request request, Response response) {
+        RequestBody requestBody = request.getBody();
+        Map<String, String> userInfo = requestBody.parseQuery();
+        String account = userInfo.get("account");
+        String email = userInfo.get("email");
+        String password = userInfo.get("password");
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -141,41 +125,12 @@ public class Http11Processor implements Runnable, Processor {
         response.sendRedirection("/index.html");
     }
 
-    // 아래는 응답 생성 관련
-
-    private String decideResponseBody(HttpRequest request) throws IOException, URISyntaxException {
+    private void showStaticResource(Request request, Response response) throws URISyntaxException, IOException {
         String requestPath = request.getPath();
-        if (requestPath.equals("/")) {
-            return FileReader.readResourceFile("/default.html");
-        }
-        String filePath = chooseFilePath(requestPath);
-        try {
-            return FileReader.readResourceFile(filePath);
-        } catch (IllegalArgumentException e) {
-            return "";
-        }
-    }
-
-    private String chooseFilePath(String requestPath) {
         if (requestPath.contains(".")) {
-            return "/" + requestPath;
+            response.addFileBody(requestPath);
+            return;
         }
-        return "/" + requestPath + ".html";
-    }
-
-    private String decideContentTypeHeader(HttpRequest request) {
-        Map<String, String> headers = request.getHeaders();
-        String accepts = headers.getOrDefault("Accept", "");
-        String mediaType = Arrays.stream(accepts.split(","))
-                .filter(accept -> accept.startsWith("text/"))
-                .findFirst()
-                .orElse("text/html")
-                .split("/")[1];
-        return String.format("text/%s;charset=utf-8", mediaType);
-    }
-
-    private String decideContentLengthHeader(HttpResponse response) {
-        String responseBody = response.getBody();
-        return String.valueOf(responseBody.getBytes().length);
+        response.addFileBody(requestPath + ".html");
     }
 }

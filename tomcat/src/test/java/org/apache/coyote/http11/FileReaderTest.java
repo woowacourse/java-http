@@ -10,14 +10,12 @@ import org.junit.jupiter.api.Test;
 class FileReaderTest {
 
     @Test
-    void should_readFileContentInResource_when_readResourceFile() {
-        // given & when
-        String fileContent;
-        try {
-            fileContent = FileReader.readResourceFile("/default.html");
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
+    void should_readFileContentInResource_when_readResourceFile() throws URISyntaxException, IOException {
+        // given
+        FileReader fileReader = new FileReader();
+
+        // when
+        String fileContent = fileReader.readResourceFile("/default.html");
 
         // then
         String expected = "Hello world!";
@@ -26,7 +24,11 @@ class FileReaderTest {
 
     @Test
     void should_throwException_when_readInvalidResourceFile() {
-        assertThatThrownBy(() -> FileReader.readResourceFile("/invalid.html"))
+        // given
+        FileReader fileReader = new FileReader();
+
+        // when & then
+        assertThatThrownBy(() -> fileReader.readResourceFile("/invalid.html"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("파일 경로가 유효하지 않습니다.");
     }

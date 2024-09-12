@@ -10,7 +10,7 @@ public class FileReader {
 
     private static final String PREFIX_STATIC_RESOURCES = "/static";
 
-    public static String readResourceFile(String filePath) throws URISyntaxException, IOException {
+    public String readResourceFile(String filePath) throws URISyntaxException, IOException {
         URL resource = FileReader.class.getResource(PREFIX_STATIC_RESOURCES + filePath);
         if (resource == null) {
             throw new IllegalArgumentException("파일 경로가 유효하지 않습니다.");

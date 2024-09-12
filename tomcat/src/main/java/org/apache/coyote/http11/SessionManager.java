@@ -7,11 +7,14 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public static void addSession(String key, Session session) {
-        SESSIONS.put(key, session);
+    public String create(String key, Object value) {
+        Session session = new Session();
+        session.setAttribute(key, value);
+        SESSIONS.put(session.getId(), session);
+        return session.getId();
     }
 
-    public static boolean containsSession(String id) {
+    public boolean contains(String id) {
         return SESSIONS.containsKey(id);
     }
 }

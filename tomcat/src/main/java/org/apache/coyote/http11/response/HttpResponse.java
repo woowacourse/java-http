@@ -39,8 +39,9 @@ public class HttpResponse {
         header.put("Set-Cookie", cookie.toHttpForm());
     }
 
-    public void setLocation(String location) {
+    public void sendRedirect(String location) {
         header.put("Location", location);
+        setHttpStatus(HttpStatus.FOUND);
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {

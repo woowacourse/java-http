@@ -52,8 +52,7 @@ public class LoginController extends AbstractController {
         session.setAttribute("user", user);
         SessionManager.getInstance().add(session);
 
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.setLocation("http://localhost:8080/");
+        httpResponse.sendRedirect("http://localhost:8080/");
 
         HttpCookie httpCookie = new HttpCookie(JAVA_SESSION_ID, user.getId().toString());
         httpResponse.setCookie(httpCookie);

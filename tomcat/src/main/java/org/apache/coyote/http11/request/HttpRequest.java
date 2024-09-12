@@ -59,7 +59,7 @@ public class HttpRequest {
         return body.findByKey(key);
     }
 
-    public boolean sessionNotExists() {
+    public boolean checkSessionNotExists() {
         String cookieString = headers.getCookieString();
 
         if (cookieString == null) {
@@ -71,13 +71,13 @@ public class HttpRequest {
     }
 
     public Session getSession(boolean createIfNotExists) {
-        if (sessionNotExists() && createIfNotExists) {
+        if (checkSessionNotExists() && createIfNotExists) {
             Session session = new Session();
             SessionManager.getInstance().add(session);
             return session;
         }
 
-        if (sessionNotExists()) {
+        if (checkSessionNotExists()) {
             return null;
         }
 

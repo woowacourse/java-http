@@ -48,7 +48,7 @@ public class LoginController extends AbstractController {
     }
 
     private void initializeSessionIfNotExists(HttpRequest request, HttpResponse response, User user) {
-        if (request.sessionNotExists()) {
+        if (request.checkSessionNotExists()) {
             Session session = request.getSession(true);
             session.setAttribute(SESSION_USER_ATTRIBUTE, user);
             response.setCookie(Cookie.createSessionCookie(session.getId()));

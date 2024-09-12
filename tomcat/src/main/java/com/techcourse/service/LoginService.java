@@ -7,11 +7,11 @@ import com.techcourse.model.User;
 
 public class LoginService {
 
-    public Optional<User> login(String account, String password) {
+    public User login(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            return user;
+            return user.get();
         }
-        return Optional.empty();
+        throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
     }
 }

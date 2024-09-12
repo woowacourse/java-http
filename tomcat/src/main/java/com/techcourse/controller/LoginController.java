@@ -1,12 +1,12 @@
 package com.techcourse.controller;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.reader.FileReader;
+import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
@@ -33,7 +33,8 @@ public class LoginController extends AbstractController {
 
     @Override
     public boolean isMatchesRequest(HttpRequest request) {
-        return LOGIN_PATH.equals(request.getPathWithoutQuery());
+        return (request.isSameHttpMethod(HttpMethod.GET) && LOGIN_PATH.equals(request.getPath())) ||
+                (request.isSameHttpMethod(HttpMethod.POST) && LOGIN_PATH.equals(request.getPathWithoutQuery()));
     }
 
     @Override
@@ -44,15 +45,7 @@ public class LoginController extends AbstractController {
             response.setRedirection(INDEX_PAGE);
             return;
         }
-
-        if (request.isEmptyByQueryParam()) {
-            response.setBody(FileReader.loadFileContent(LOGIN_PAGE));
-        }
-    }
-
-    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
-        return queryParams.size() < 2 ||
-                queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
+        response.setBody(FileReader.loadFileContent(LOGIN_PAGE));
     }
 
     @Override
@@ -61,20 +54,23 @@ public class LoginController extends AbstractController {
         if (hasMissingRequiredParams(queryParams)) {
             throw new IllegalArgumentException("파라미터가 제대로 정의되지 않았습니다.");
         }
+        User user = loginService.login(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
+        loginAndSetResponse(response, user);
+    }
 
-        Optional<User> authenticatedUser = loginService.login(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
-        if (authenticatedUser.isPresent()) {
-            User user = authenticatedUser.get();
-            Session session = authService.createSession(user);
-            HttpCookie httpCookie = new HttpCookie();
-            httpCookie.addAuthSessionId(session.getId());
+    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
+        return queryParams.size() < 2 ||
+                queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
+    }
 
-            response.setHttpStatus(HttpStatus.FOUND);
-            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-            response.setRedirection(INDEX_PAGE);
-            response.setCookie(httpCookie.toString());
-            return;
-        }
-        throw new IllegalStateException("로그인 정보가 잘못되었습니다.");
+    private void loginAndSetResponse(HttpResponse response, User user) {
+        Session session = authService.createSession(user);
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.addAuthSessionId(session.getId());
+
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setBody(FileReader.loadFileContent(INDEX_PAGE));
+        response.setRedirection(INDEX_PAGE);
+        response.setCookie(httpCookie.toString());
     }
 }

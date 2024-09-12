@@ -8,32 +8,16 @@ public class ResponseHeaders {
 
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public boolean hasLocation() {
-        return headers.containsKey("Location");
+    public boolean has(HttpHeader httpHeader) {
+        return headers.containsKey(httpHeader.getName());
     }
 
-    public String getLocation() {
-        return headers.get("Location");
+    public void put(HttpHeader httpHeader, String header) {
+        headers.put(httpHeader.getName(), header);
     }
 
-    public void setCookie(String cookie) {
-        headers.put("Set-Cookie", cookie);
-    }
-
-    public void setContentType(String contentType) {
-        if ("text/html".equals(contentType)) {
-            headers.put("Content-Type", contentType + ";charset=utf-8");
-            return;
-        }
-        headers.put("Content-Type", contentType);
-    }
-
-    public void setLocation(String location) {
-        headers.put("Location", location);
-    }
-
-    public void setContentLength(int length) {
-        headers.put("Content-Length", String.valueOf(length));
+    public String get(HttpHeader httpHeader) {
+        return headers.get(httpHeader.getName());
     }
 
     public String getMessage() {

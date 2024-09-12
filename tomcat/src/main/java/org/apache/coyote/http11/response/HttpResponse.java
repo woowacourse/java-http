@@ -2,42 +2,52 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
+    private static final String TYPE_OF_HTML = "text/html";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+
     private final StatusLine statusLine;
     private final ResponseHeaders headers;
     private String body;
 
-    public HttpResponse(HttpStatusCode httpStatusCode) {
-        this.statusLine = new StatusLine(httpStatusCode);
+    public HttpResponse() {
+        this.statusLine = new StatusLine();
         this.headers = new ResponseHeaders();
         this.body = null;
     }
 
-    public boolean hasLocation() {
-        return headers.hasLocation();
-    }
-
     public void sendRedirect(String location) {
-        headers.setLocation(location);
+        statusLine.setHttpStatusCode(HttpStatusCode.FOUND);
+        headers.put(HttpHeader.LOCATION, location);
     }
 
-    public void addCookie(String cookie) {
-        headers.setCookie(cookie);
+    public boolean hasLocation() {
+        return headers.has(HttpHeader.LOCATION);
+    }
+
+    public void setCookie(String cookie) {
+        headers.put(HttpHeader.SET_COOKIE, cookie);
     }
 
     public void setContentType(String contentType) {
-        headers.setContentType(contentType);
+        HttpHeader contentTypeHeader = HttpHeader.CONTENT_TYPE;
+
+        if (TYPE_OF_HTML.equals(contentType)) {
+            headers.put(contentTypeHeader, contentType + CHARSET_UTF_8);
+            return;
+        }
+        headers.put(contentTypeHeader, contentType);
     }
 
-    public String getLocation() {
-        return headers.getLocation();
-    }
-
-    public void setContentLength(int length) {
-        headers.setContentLength(length);
+    public void setContentLength(int contentLength) {
+        headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getLocation() {
+        return headers.get(HttpHeader.LOCATION);
     }
 
     public String getResponse() {

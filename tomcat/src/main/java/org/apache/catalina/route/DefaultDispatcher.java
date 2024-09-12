@@ -60,7 +60,7 @@ public class DefaultDispatcher implements Dispatcher {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new IllegalArgumentException("Controller must have a default constructor");
+            throw new IllegalArgumentException("컨트롤러를 인스턴스화 할 수 없습니다.:" + clazz, e);
         }
     }
 }

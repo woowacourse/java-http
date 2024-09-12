@@ -37,8 +37,8 @@ public class RegisterRequestHandler implements RequestHandler {
 			return HttpResponse.ok(httpRequest.getUri(), responseBody);
 		}
 		var redirectUri = "/401.html";
-		Map<String, String> params = httpRequest.getPayload();
-		boolean isSucceed = register(params.get("account"), params.get("password"), params.get("email"));
+		HttpRequestBody body = httpRequest.getRequestBody();
+		boolean isSucceed = register(body.get("account"), body.get("password"), body.get("email"));
 		if (isSucceed) {
 			redirectUri = "/index.html";
 		}

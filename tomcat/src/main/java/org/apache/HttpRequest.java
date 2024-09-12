@@ -13,14 +13,14 @@ import java.util.StringTokenizer;
 public class HttpRequest {
 
     private final Map<String, String> headers;
-    private final Map<String, String> payload;
+    private final HttpRequestBody requestBody;
     private final HttpMethod method;
     private final String uri;
     private final String httpVersion;
 
-    private HttpRequest(Map<String, String> headers, Map<String, String> payload, HttpMethod method, String uri, String httpVersion) {
+    private HttpRequest(Map<String, String> headers, HttpRequestBody requestBody, HttpMethod method, String uri, String httpVersion) {
         this.headers = headers;
-        this.payload = payload;
+        this.requestBody = requestBody;
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -33,7 +33,7 @@ public class HttpRequest {
 
         String firstLine = reader.readLine();
         StringTokenizer tokenizer = new StringTokenizer(firstLine);
-        String method = tokenizer.nextToken();
+        HttpMethod method = HttpMethod.from(tokenizer.nextToken());
         String uri = tokenizer.nextToken();
         String httpVersion = tokenizer.nextToken();
 
@@ -45,42 +45,26 @@ public class HttpRequest {
             headers.put(key, value);
         }
 
-        Map<String, String> payload = new HashMap<>();
-        if (method.equals("POST")) {
+        HttpRequestBody body = HttpRequestBody.empty();
+        if (method == HttpMethod.POST) {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
-            char[] body = new char[contentLength];
+            char[] unparsedBody = new char[contentLength];
             if (contentLength > 0) {
-                reader.read(body, 0, contentLength);
+                reader.read(unparsedBody, 0, contentLength);
             }
 
-            String requestBody = new String(body);
-            String decodedBody = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
-            payload = parseQueryString(decodedBody);
+            String requestBody = new String(unparsedBody);
+            String decodedBodyLine = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
+            body = HttpRequestBody.from(decodedBodyLine);
         }
 
         return new HttpRequest(
                 headers,
-                payload,
-                HttpMethod.from(method),
+                body,
+                method,
                 uri,
                 httpVersion
         );
-    }
-
-    private static Map<String, String> parseQueryString(String body) {
-        Map<String, String> parameters = new HashMap<>();
-        String[] pairs = body.split("&");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=", 2);
-
-            String key = keyValue[0];
-            String value = keyValue.length > 1 ? keyValue[1] : "";
-
-            parameters.put(key, value);
-        }
-
-        return parameters;
     }
 
     public String getSessionIdFromCookie() {
@@ -99,11 +83,11 @@ public class HttpRequest {
         return httpVersion.equals("HTTP/1.1");
     }
 
-    public Map<String, String> getPayload() {
-        if (method.equals("GET")) {
+    public HttpRequestBody getRequestBody() {
+        if (method == HttpMethod.GET) {
             throw new IllegalArgumentException("GET method don't have payload");
         }
-        return payload;
+        return requestBody;
     }
 
     public boolean hasMethod(HttpMethod method) {

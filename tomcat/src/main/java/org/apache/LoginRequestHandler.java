@@ -51,8 +51,8 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 		var redirectUri = "/401.html";
 		try {
-			Map<String, String> payload = httpRequest.getPayload();
-			User user = login(payload.get("account"), payload.get("password"));
+			HttpRequestBody body = httpRequest.getRequestBody();
+			User user = login(body.get("account"), body.get("password"));
 			UUID uuid = UUID.randomUUID();
 			Session session = new Session(uuid.toString());
 			session.setAttribute("user", user);

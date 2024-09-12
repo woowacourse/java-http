@@ -50,8 +50,15 @@ public class SessionManager implements Manager {
     public String getSessionId(final HttpSession session) {
         return sessions.keySet()
                 .stream()
-                .filter(sessionKey -> sessions.get(sessionKey).getId().equals(session.getId()))
+                .filter(sessionKey -> isSameValueAsKey(session, sessionKey))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션"));
+    }
+
+    private boolean isSameValueAsKey(final HttpSession httpSession, final String key) {
+        final var storedSessionId = httpSession.getId();
+        final var requestHttpSession = sessions.get(key);
+        final var requestSessionId = requestHttpSession.getId();
+        return storedSessionId.equals(requestSessionId);
     }
 }

@@ -16,8 +16,11 @@ class LoginHandlerTest {
         // given
         final var request = new HttpRequest(
                 String.join("\r\n",
-                        "GET /login?account=gugu&password=password HTTP/1.1 ",
+                        "POST /login HTTP/1.1 ",
                         "Host: http://localhost:8080",
+                        "Content-type: application/x-www-form-urlencoded",
+                        "",
+                        "account=gugu&password=password",
                         "")
         );
         final var loginHandler = new LoginHandler("/login");
@@ -38,8 +41,11 @@ class LoginHandlerTest {
         // given
         final var request = new HttpRequest(
                 String.join("\r\n",
-                        "GET /login?account=gugu&password=password HTTP/1.1 ",
+                        "POST /login HTTP/1.1 ",
                         "Host: http://localhost:8080",
+                        "Content-type: application/x-www-form-urlencoded",
+                        "",
+                        "account=gugu&password=password",
                         "")
         );
         final var loginHandler = new LoginHandler("/login");
@@ -58,8 +64,11 @@ class LoginHandlerTest {
         // given
         final var request = new HttpRequest(
                 String.join("\r\n",
-                        "GET /login?account=gugu1&password=password HTTP/1.1 ",
+                        "POST /login HTTP/1.1 ",
                         "Host: http://localhost:8080",
+                        "Content-type: application/x-www-form-urlencoded",
+                        "",
+                        "account=gugu1&password=password",
                         "")
         );
         final var loginHandler = new LoginHandler("/login");
@@ -75,8 +84,11 @@ class LoginHandlerTest {
         // given
         final var request = new HttpRequest(
                 String.join("\r\n",
-                        "GET /login?account=gugu1&password=password1 HTTP/1.1 ",
+                        "POST /login HTTP/1.1 ",
                         "Host: http://localhost:8080",
+                        "Content-type: application/x-www-form-urlencoded",
+                        "",
+                        "account=gugu&password=password2",
                         "")
         );
         final var loginHandler = new LoginHandler("login");

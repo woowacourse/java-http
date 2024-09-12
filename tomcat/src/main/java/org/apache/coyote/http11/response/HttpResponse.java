@@ -3,10 +3,10 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.Http11Cookie;
 
 public class HttpResponse {
-    private final String path;
-    private final String fileType;
-    private final HttpStatusCode httpStatusCode;
-    private final Http11Cookie http11Cookie;
+    private String path;
+    private String fileType;
+    private HttpStatusCode httpStatusCode;
+    private Http11Cookie http11Cookie;
     private String responseBody;
 
     public HttpResponse(String path, String fileType, HttpStatusCode httpStatusCode, Http11Cookie http11Cookie, String responseBody) {
@@ -15,6 +15,14 @@ public class HttpResponse {
         this.httpStatusCode = httpStatusCode;
         this.http11Cookie = http11Cookie;
         this.responseBody = responseBody;
+    }
+
+    public HttpResponse() {
+        this.path = null;
+        this.fileType = null;
+        this.httpStatusCode = null;
+        this.http11Cookie = null;
+        this.responseBody = null;
     }
 
     @Override
@@ -31,6 +39,7 @@ public class HttpResponse {
     private String response2xx() {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
+                includeCookie(),
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -41,18 +50,15 @@ public class HttpResponse {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
                 includeCookie(),
-                "Location: " + path,
-                "Content-Type: text/" + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "Location: http://localhost:8080" + path,
+                "Content-Type: text/" + fileType + ";charset=utf-8 ");
     }
 
     private String includeCookie() {
         if (http11Cookie != null) {
             return "Set-Cookie:" + http11Cookie.toString() + " ";
         }
-        return "";
+        return null;
     }
 
     public String getPath() {
@@ -73,5 +79,21 @@ public class HttpResponse {
 
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
+
+    public void setHttp11Cookie(Http11Cookie http11Cookie) {
+        this.http11Cookie = http11Cookie;
     }
 }

@@ -26,6 +26,11 @@ public class HttpResponse {
 		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.FOUND), responseHeader, null);
 	}
 
+	public static HttpResponse badRequest(HttpResponseHeader httpResponseHeader) {
+		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.BAD_REQUEST), httpResponseHeader,
+			null);
+	}
+
 	public String toResponseMessage() {
 		if (body == null) {
 			return createResponseMessageWithoutBody();

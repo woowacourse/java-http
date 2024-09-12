@@ -8,10 +8,23 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateIsNotEmptyValue(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    private void validateIsNotEmptyValue(String account, String password, String email) {
+        if (account == null || account.isBlank()) {
+            throw new IllegalArgumentException("Account is empty");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password is empty");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email is empty");
+        }
     }
 
     public User(String account, String password, String email) {

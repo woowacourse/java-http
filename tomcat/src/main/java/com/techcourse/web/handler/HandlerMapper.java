@@ -14,6 +14,7 @@ public class HandlerMapper {
 		handlers.add(RootPageHandler.getInstance());
 		handlers.add(ResourceHandler.getInstance());
 		handlers.add(LoginHandler.getInstance());
+		handlers.add(RegisterHandler.getInstance());
 	}
 
 	public static Handler findHandler(HttpRequest httpRequest) {

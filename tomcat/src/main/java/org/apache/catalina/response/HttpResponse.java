@@ -1,6 +1,8 @@
 package org.apache.catalina.response;
 
 import org.apache.catalina.http.ContentType;
+import org.apache.catalina.reader.FileReader;
+import org.apache.catalina.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -15,6 +17,26 @@ public class HttpResponse {
 
         responseHeader.setContentType(contentType.toString());
         responseHeader.setContentLength(String.valueOf(body.getBytes().length));
+    }
+
+    public static HttpResponse createRedirectResponse(HttpRequest request, HttpStatus status, String path) {
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), status),
+                request.getContentType(),
+                FileReader.loadFileContent(path)
+        ).addLocation(path);
+    }
+
+    public static HttpResponse createFileOkResponse(HttpRequest request, String path) {
+        return createFileResponse(request, HttpStatus.OK, path);
+    }
+
+    public static HttpResponse createFileResponse(HttpRequest request, HttpStatus status, String path) {
+        return new HttpResponse(
+                new StatusLine(request.getVersionOfProtocol(), status),
+                request.getContentType(),
+                FileReader.loadFileContent(path)
+        );
     }
 
     public void setCookie(String value) {

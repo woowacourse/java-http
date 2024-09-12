@@ -6,11 +6,9 @@ import java.util.Optional;
 import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.mvc.AbstractController;
-import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.StatusLine;
 
 import com.techcourse.model.User;
 import com.techcourse.service.AuthService;
@@ -41,11 +39,11 @@ public class LoginController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest request) {
         if (authService.isLogin(request.getCookie())) {
-            return createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+            return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
         }
 
         if (request.isEmptyByQueryParam()) {
-            return createFileResponse(request, LOGIN_PAGE);
+            return HttpResponse.createFileOkResponse(request, LOGIN_PAGE);
         }
 
         Map<String, String> queryParams = request.getQueryParam();
@@ -60,36 +58,16 @@ public class LoginController extends AbstractController {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.addAuthSessionId(session.getId());
 
-            HttpResponse response = createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+            HttpResponse response = HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
             response.setCookie(httpCookie.toString());
             return response;
         } else {
-            return createFileResponse(request, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PAGE);
+            return HttpResponse.createFileResponse(request, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PAGE);
         }
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
         return queryParams.size() < 2 ||
                 queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
-    }
-
-    private HttpResponse createRedirectResponse(HttpRequest request, HttpStatus status, String path) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), status),
-                request.getContentType(),
-                FileReader.loadFileContent(path)
-        ).addLocation(path);
-    }
-
-    private HttpResponse createFileResponse(HttpRequest request, String path) {
-        return createFileResponse(request, HttpStatus.OK, path);
-    }
-
-    private HttpResponse createFileResponse(HttpRequest request, HttpStatus status, String path) {
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), status),
-                request.getContentType(),
-                FileReader.loadFileContent(path)
-        );
     }
 }

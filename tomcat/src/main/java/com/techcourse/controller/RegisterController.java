@@ -6,11 +6,9 @@ import java.util.Optional;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.mvc.AbstractController;
-import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.StatusLine;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -18,6 +16,7 @@ import com.techcourse.model.User;
 public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PATH = "/register";
+    private static final String REGISTER_PAGE = "/register.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -35,10 +34,7 @@ public class RegisterController extends AbstractController {
         if (session.isPresent()) {
             return getLoginSuccessResponse(request);
         }
-        return new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
-                request.getContentType(),
-                FileReader.loadFileContent(request.getPath() + ".html"));
+        return HttpResponse.createFileOkResponse(request, REGISTER_PAGE);
     }
 
     @Override
@@ -60,11 +56,6 @@ public class RegisterController extends AbstractController {
     }
 
     private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
-        HttpResponse response = new HttpResponse(
-                new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
-                request.getContentType(),
-                FileReader.loadFileContent(INDEX_PAGE));
-        response.addLocation(INDEX_PAGE);
-        return response;
+        return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
     }
 }

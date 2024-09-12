@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import org.apache.coyote.http.session.HttpSession;
+import org.apache.catalina.session.Session;
 
 import java.io.IOException;
 
@@ -25,14 +25,14 @@ import java.io.IOException;
 public interface Manager {
 
     /**
-     * Add this HttpSession to the set of active Sessions for this Manager.
+     * Add this Session to the set of active Sessions for this Manager.
      *
-     * @param session HttpSession to be added
+     * @param session Session to be added
      */
-    void add(HttpSession session);
+    void add(Session session);
 
     /**
-     * Return the active HttpSession, associated with this Manager, with the
+     * Return the active Session, associated with this Manager, with the
      * specified session id (if any); otherwise return <code>null</code>.
      *
      * @param id The session id for the session to be returned
@@ -43,12 +43,12 @@ public interface Manager {
      * @throws IOException           if an input/output error occurs while
      *                               processing this request
      */
-    HttpSession findSession(String id) throws IOException;
+    Session findSession(String id) throws IOException;
 
     /**
-     * Remove this HttpSession from the active Sessions for this Manager.
+     * Remove this Session from the active Sessions for this Manager.
      *
-     * @param session HttpSession to be removed
+     * @param session Session to be removed
      */
-    void remove(HttpSession session);
+    void remove(Session session);
 }

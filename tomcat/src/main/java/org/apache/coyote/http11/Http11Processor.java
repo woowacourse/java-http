@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.domain.User;
 import com.techcourse.model.dto.UserRegistration;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.session.HttpSession;
-import org.apache.coyote.http.session.HttpSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final HttpSessionManager httpSessionManager = HttpSessionManager.getInstance();
+    private final SessionManager sessionManager = SessionManager.getInstance();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -106,7 +106,7 @@ public class Http11Processor implements Runnable, Processor {
     private void login(final Map<String, String> httpRequestHeaders, final OutputStream outputStream, final String requestBody) throws IOException {
         String cookies = httpRequestHeaders.get("Cookie");
 
-        Optional<HttpSession> httpSession = loginPost(requestBody);
+        Optional<Session> httpSession = loginPost(requestBody);
         String[] result = loginGet(httpSession.isPresent());
         String path = determineResourcePath(result[1])[1];
         String httpStatus = result[0];
@@ -235,7 +235,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private Optional<HttpSession> loginPost(String requestBody) {
+    private Optional<Session> loginPost(String requestBody) {
         Map<String, String> userInfo = parseUserInfo(requestBody);
         UUID uuid = null;
 
@@ -246,7 +246,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (uuid != null) {
-            return Optional.ofNullable(HttpSessionManager.getInstance().findSession(uuid.toString()));
+            return Optional.ofNullable(SessionManager.getInstance().findSession(uuid.toString()));
         }
 
         return Optional.empty();
@@ -305,10 +305,10 @@ public class Http11Processor implements Runnable, Processor {
     private UUID createNewSession(final User user) {
         UUID uuid = UUID.randomUUID();
 
-        HttpSession session = new HttpSession(uuid);
+        Session session = new Session(uuid);
         session.setAttribute("user", user);
 
-        httpSessionManager.add(session);
+        sessionManager.add(session);
 
         return uuid;
     }

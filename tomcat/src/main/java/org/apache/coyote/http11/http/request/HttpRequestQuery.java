@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.http.request;
 
+import static org.reflections.Reflections.*;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +46,8 @@ public class HttpRequestQuery {
 
 	public String getValue(String key) {
 		if (isNotExistKey(key)) {
-			throw new IllegalArgumentException("Key not found. key: " + key);
+			log.info("Key not found: {}", key);
+			return null;
 		}
 		return query.get(key);
 	}
@@ -54,5 +57,18 @@ public class HttpRequestQuery {
 			return false;
 		}
 		return !query.containsKey(key);
+	}
+
+	public boolean isExist() {
+		return query != null;
+	}
+
+	public String toUrl() {
+		if (query == null) {
+			return "";
+		}
+		return query.entrySet().stream()
+			.map(e -> e.getKey() + QUERY_KEY_VALUE_DELIMITER + e.getValue())
+			.collect(Collectors.joining(QUERY_PARAM_DELIMITER));
 	}
 }

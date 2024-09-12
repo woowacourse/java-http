@@ -26,10 +26,6 @@ public class HttpRequestLine {
 		);
 	}
 
-	public boolean isSameMethod(HttpMethod method) {
-		return this.method == method;
-	}
-
 	public HttpMethod getMethod() {
 		return method;
 	}
@@ -42,16 +38,11 @@ public class HttpRequestLine {
 		return httpRequestUrl.getQuery();
 	}
 
-	public String getHttpVersion() {
-		return httpVersion;
+	public HttpRequestUrl getHttpRequestUrl() {
+		return httpRequestUrl;
 	}
 
-	@Override
-	public String toString() {
-		return "HttpRequestLine{" +
-			"method='" + method + '\'' +
-			", requestUrl=" + httpRequestUrl +
-			", httpVersion='" + httpVersion + '\'' +
-			'}';
+	public String getHttpVersion() {
+		return httpVersion;
 	}
 }

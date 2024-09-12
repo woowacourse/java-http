@@ -18,6 +18,10 @@ public class HttpRequestUrl {
 		this.httpRequestQuery = HttpRequestQuery.from(query);
 	}
 
+	public boolean isQueryExist() {
+		return httpRequestQuery.isExist();
+	}
+
 	public String getPath() {
 		return path;
 	}
@@ -26,11 +30,10 @@ public class HttpRequestUrl {
 		return httpRequestQuery;
 	}
 
-	@Override
-	public String toString() {
-		return "RequestUrl{" +
-			"path='" + path + '\'' +
-			", query=" + httpRequestQuery +
-			'}';
+	public String getRequestUrl() {
+		if (httpRequestQuery.isExist()) {
+			return path + "?" + httpRequestQuery.toUrl();
+		}
+		return path;
 	}
 }

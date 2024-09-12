@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.Cookie;
@@ -10,9 +9,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestControllerMapper;
 import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.Http11RequestBody;
 import org.apache.coyote.http11.response.Http11Response;
-import org.apache.coyote.http11.response.Http11ResponseHeaders;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 

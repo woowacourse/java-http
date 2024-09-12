@@ -27,10 +27,14 @@ public class Http11Response {
 
     public byte[] getBytes() {
         setFirstLine();
-        return String.join(" \r\n",
-                firstLine,
-                headers.asString(),
-                responseBody).getBytes();
+        StringBuilder sb = new StringBuilder();
+        sb.append(firstLine)
+                .append(" \r\n")
+                .append(headers.asString())
+                .append("\r\n\r\n")
+                .append(responseBody);
+
+        return sb.toString().getBytes();
     }
 
     private void setFirstLine() {

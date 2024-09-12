@@ -12,17 +12,12 @@ public class HttpRequest {
     private final RequestBody body;
 
     public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters,
-                       RequestBody body) {
+                       Cookie cookie, RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.cookie = parseCookie();
+        this.cookie = cookie;
         this.body = body;
         this.parameters = parameters;
-    }
-
-    private Cookie parseCookie() {
-        String cookies = headers.getCookies();
-        return new Cookie(cookies);
     }
 
     public HttpMethod getHttpMethod() {
@@ -31,6 +26,10 @@ public class HttpRequest {
 
     public String getUri() {
         return requestLine.getUri();
+    }
+
+    public RequestHeaders getHeader() {
+        return headers;
     }
 
     public String getParameter(String key) {

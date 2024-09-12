@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
@@ -15,8 +16,9 @@ public class RequestGenerator {
         RequestLine requestLine = parseRequestLine(firstLine);
         RequestHeaders requestHeaders = readHeaders(reader);
         RequestParameters requestParameters = parseParameters(firstLine);
+        Cookie cookie = requestHeaders.parseCookie();
         RequestBody requestBody = readRequestBody(reader, requestHeaders.getContentLength());
-        return new HttpRequest(requestLine, requestHeaders, requestParameters, requestBody);
+        return new HttpRequest(requestLine, requestHeaders, requestParameters, cookie, requestBody);
     }
 
     private static RequestLine parseRequestLine(String line) {

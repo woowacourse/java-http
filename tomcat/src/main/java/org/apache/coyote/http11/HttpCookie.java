@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,13 +30,33 @@ public class HttpCookie {
 
     private Map<String, String> parse(String rawCookies) {
         if (rawCookies == null) {
-            return Collections.emptyMap();
+            throw new UncheckedServletException("cookie는 null일 수 없습니다.");
         }
 
         return Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
-                .map(cookie -> cookie.split(NAME_VALUE_DELIMITER))
-                .filter(data -> data.length == 2)
-                .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+                .collect(Collectors.toMap(this::parseCookieName, this::parseCookieValue));
+    }
+
+    private String parseCookieName(String rawCookie) {
+        validateCookieFormat(rawCookie);
+        return rawCookie.substring(0, rawCookie.indexOf(NAME_VALUE_DELIMITER));
+    }
+
+    private String parseCookieValue(String rawCookie) {
+        validateCookieFormat(rawCookie);
+        return rawCookie.substring(rawCookie.indexOf(NAME_VALUE_DELIMITER) + NAME_VALUE_DELIMITER.length());
+    }
+
+    private void validateCookieFormat(String rawCookie) {
+        if (rawCookie == null || rawCookie.isBlank()) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+        }
+        if (!rawCookie.contains(NAME_VALUE_DELIMITER)) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+        }
+        if (rawCookie.startsWith(NAME_VALUE_DELIMITER)) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+        }
     }
 
     public String buildMessage() {

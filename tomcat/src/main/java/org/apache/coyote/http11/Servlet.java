@@ -4,9 +4,7 @@ import java.io.IOException;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 
-public interface HttpRequestHandler {
+public interface Servlet {
 
-    boolean supports(HttpServletRequest request);
-
-    HttpServletResponse handle(HttpServletRequest request) throws IOException;
+    void handle(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

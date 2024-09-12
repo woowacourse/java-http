@@ -4,12 +4,20 @@ import org.apache.coyote.http11.HttpProtocol;
 
 public class ResponseLine {
 
-    private final HttpStatus httpStatus;
-    private final HttpProtocol protocol;
+    private HttpStatus httpStatus;
+    private HttpProtocol protocol;
 
     public ResponseLine(HttpStatus httpStatus, HttpProtocol protocol) {
         this.httpStatus = httpStatus;
         this.protocol = protocol;
+    }
+
+    public static ResponseLine createEmptyResponseLine() {
+        return new ResponseLine(null, HttpProtocol.HTTP_11);
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public static ResponseLine createOkResponseLine() {

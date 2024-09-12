@@ -41,8 +41,8 @@ public class Http11Processor implements Runnable, Processor {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             HttpServletRequest httpServletRequest = parseHttpRequest(bufferedReader);
-            HttpRequestHandler httpRequestHandler = dispatcherServlet.mappedHandler(httpServletRequest);
-            HttpServletResponse httpServletResponse = httpRequestHandler.handle(httpServletRequest);
+            HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
+            dispatcherServlet.doDispatch(httpServletRequest, httpServletResponse);
 
             httpServletResponse.flush(outputStream);
         } catch (IOException | UncheckedServletException e) {

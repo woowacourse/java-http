@@ -4,26 +4,27 @@ import static org.apache.coyote.http11.HttpProtocol.HTTP_11;
 import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.apache.coyote.http11.request.line.Method.POST;
 
-import com.techcourse.controller.GreetingController;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.page.LoginPageController;
+import com.techcourse.controller.GreetingServlet;
+import com.techcourse.controller.LoginServlet;
+import com.techcourse.controller.RegisterServlet;
+import com.techcourse.controller.page.LoginPageServlet;
+import com.techcourse.controller.page.RegisterPageServlet;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.http11.HttpRequestHandler;
+import org.apache.coyote.http11.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 
 public class RequestMappingHandlerMapping implements HandlerMapping {
 
-    private final Map<RequestMappingInformation, HttpRequestHandler> handlers = new ConcurrentHashMap<>();
+    private final Map<RequestMappingInformation, Servlet> handlers = new ConcurrentHashMap<>();
 
     public RequestMappingHandlerMapping() {
-        handlers.put(new RequestMappingInformation(GET, "/", HTTP_11), new GreetingController());
-        handlers.put(new RequestMappingInformation(GET, "/login", HTTP_11), new LoginPageController());
-        handlers.put(new RequestMappingInformation(POST, "/login", HTTP_11), new LoginController());
-        handlers.put(new RequestMappingInformation(GET, "/register", HTTP_11), new RegisterController());
-        handlers.put(new RequestMappingInformation(POST, "/register", HTTP_11), new LoginPageController());
+        handlers.put(new RequestMappingInformation(GET, "/", HTTP_11), new GreetingServlet());
+        handlers.put(new RequestMappingInformation(GET, "/login", HTTP_11), new LoginPageServlet());
+        handlers.put(new RequestMappingInformation(POST, "/login", HTTP_11), new LoginServlet());
+        handlers.put(new RequestMappingInformation(GET, "/register", HTTP_11), new RegisterPageServlet());
+        handlers.put(new RequestMappingInformation(POST, "/register", HTTP_11), new RegisterServlet());
     }
 
     @Override
@@ -33,7 +34,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
     }
 
     @Override
-    public HttpRequestHandler getHandler(HttpServletRequest httpServletRequest) {
+    public Servlet getHandler(HttpServletRequest httpServletRequest) {
         return handlers.keySet().stream()
                 .filter(mappingInformation -> mappingInformation.matches(httpServletRequest))
                 .map(handlers::get)

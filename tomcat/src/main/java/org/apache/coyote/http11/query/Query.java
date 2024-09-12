@@ -10,7 +10,6 @@ public class Query {
 
     private static final String pairRegex = "([a-zA-Z0-9]+)=([a-zA-Z0-9]+)";
     private static final Pattern pairPattern = Pattern.compile(pairRegex);
-
     private static final String QUERY_DELIMITER = "&";
 
     private final Map<String, String> store;
@@ -22,14 +21,18 @@ public class Query {
     public static Query create(String queries) {
         Map<String, String> queryMap = new HashMap<>();
         for (String query : queries.split(QUERY_DELIMITER)) {
-            Matcher pairMatcher = pairPattern.matcher(query);
-            while (pairMatcher.find()) {
-                String key = pairMatcher.group(1);
-                String value = pairMatcher.group(2);
-                queryMap.put(key, value);
-            }
+            handleQueryPair(query, queryMap);
         }
         return new Query(queryMap);
+    }
+
+    private static void handleQueryPair(String query, Map<String, String> queryMap) {
+        Matcher pairMatcher = pairPattern.matcher(query);
+        while (pairMatcher.find()) {
+            String key = pairMatcher.group(1);
+            String value = pairMatcher.group(2);
+            queryMap.put(key, value);
+        }
     }
 
     public String findByKey(String key) {

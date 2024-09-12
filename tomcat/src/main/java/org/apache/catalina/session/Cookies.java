@@ -13,7 +13,7 @@ public class Cookies {
     private static final int COOKIE_VALUE_INDEX = 1;
     private static final String DELIMITER = "=";
 
-    private Map<String, String> store;
+    private final Map<String, String> store;
 
     public Cookies() {
         store = new HashMap<>();
@@ -22,10 +22,14 @@ public class Cookies {
     public void add(String cookies) {
         for (String cookie : cookies.split(";")) {
             String[] split = cookie.trim().split(DELIMITER);
-            if (split.length != COOKIE_FORMAT_LENGTH) {
-                throw new BadRequestException("쿠키 형식이 잘못되었습니다.");
-            }
+            validateCookieFormat(split);
             store.put(split[COOKIE_KEY_INDEX], split[COOKIE_VALUE_INDEX]);
+        }
+    }
+
+    private static void validateCookieFormat(String[] split) {
+        if (split.length != COOKIE_FORMAT_LENGTH) {
+            throw new BadRequestException("쿠키 형식이 잘못되었습니다.");
         }
     }
 

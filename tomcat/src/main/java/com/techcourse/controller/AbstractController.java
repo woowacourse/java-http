@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.exception.client.BadRequestException;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -8,11 +9,11 @@ public abstract class AbstractController implements Controller{
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        if (request.isGet()) {
+        if (request.isSameMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;
         }
-        if (request.isPost()) {
+        if (request.isSameMethod(HttpMethod.POST)) {
             doPost(request, response);
             return;
         }

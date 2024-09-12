@@ -43,25 +43,6 @@ public class HttpRequest {
         return startLine.isSameMethod(method);
     }
 
-    public boolean isGet() {
-        return startLine.isGet();
-    }
-
-    public boolean isPost() {
-        return startLine.isPost();
-    }
-
-    public String findFromQueryParam(String key) {
-        return startLine.findQuery(key);
-    }
-
-    public Optional<String> findFromHeader(String key) {
-        if (httpHeaders == null) {
-            return Optional.empty();
-        }
-        return httpHeaders.findByKey(key);
-    }
-
     public String findFromBody(String key) {
         return body.findByKey(key);
     }

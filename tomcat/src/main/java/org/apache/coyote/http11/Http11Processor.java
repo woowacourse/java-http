@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.ControllerAdviser;
 import com.techcourse.controller.FrontController;
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int BUFFER_SIZE = 1024;
 
     private final Socket connection;
 
@@ -31,9 +32,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         HttpRequest request = null;
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedInputStream = new BufferedInputStream(inputStream)) {
 
-            request = createRequest(inputStream);
+            request = createRequest(bufferedInputStream);
             log.info("[REQUEST] = {}", request);
             HttpResponse response = createResponse(request);
 
@@ -46,10 +48,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest createRequest(InputStream inputStream) {
+    private HttpRequest createRequest(BufferedInputStream bufferedInputStream) {
         try {
-            byte[] bytes = new byte[18000]; // TODO refactor
-            int readByteCount = inputStream.read(bytes);
+            byte[] bytes = new byte[BUFFER_SIZE];
+            int readByteCount = bufferedInputStream.read(bytes);
             String requestString = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
             return HttpRequest.create(requestString);
         } catch (IOException e) {

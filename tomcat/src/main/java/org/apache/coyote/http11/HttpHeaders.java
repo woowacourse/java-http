@@ -69,10 +69,6 @@ public class HttpHeaders {
         store.put(key, value);
     }
 
-//    public Optional<String> findCookie() {
-//        return cookies.findCookie();
-//    }
-
     public Optional<String> findByKey(String key) {
         String value = store.get(key);
         return Optional.ofNullable(value);

@@ -25,11 +25,4 @@ public abstract class MappingController implements Controller {
 
     protected void doPost(HttpRequest request, HttpResponse response) {
     }
-
-    protected String getContentType(String contentType) {
-        if (contentType.endsWith(".css")) {
-            return "text/css ";
-        }
-        return "text/html;charset=utf-8 ";
-    }
 }

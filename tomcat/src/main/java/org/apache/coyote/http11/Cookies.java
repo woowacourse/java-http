@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Constants.NAME_INDEX;
+import static org.apache.coyote.http11.Constants.VALID_PARAMETER_PAIR_LENGTH;
+import static org.apache.coyote.http11.Constants.VALUE_INDEX;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -21,10 +25,10 @@ public class Cookies {
     public Cookies(String cookieHeader) {
         this.cookies = Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
                 .map(cookies -> cookies.split(COOKIE_SEPARATOR))
-                .filter(cookie -> cookie.length == Constants.VALID_PARAMETER_PAIR_LENGTH)
+                .filter(cookie -> cookie.length == VALID_PARAMETER_PAIR_LENGTH)
                 .collect(Collectors.toMap(
-                        cookie -> cookie[Constants.NAME_INDEX],
-                        cookie -> cookie[Constants.VALUE_INDEX])
+                        cookie -> cookie[NAME_INDEX],
+                        cookie -> cookie[VALUE_INDEX])
                 );
     }
 

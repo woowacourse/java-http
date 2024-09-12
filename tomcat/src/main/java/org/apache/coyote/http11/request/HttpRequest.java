@@ -18,7 +18,8 @@ public record HttpRequest(
         Map<String, String> parameters,
         Map<String, String> headers,
         Map<String, String> cookies,
-        String body) {
+        String body
+) {
 
     private static final String DELIMITER_COOKIE = "; ";
     private static final String DELIMITER_HEADER = ": ";

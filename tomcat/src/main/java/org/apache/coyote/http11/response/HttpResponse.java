@@ -12,7 +12,8 @@ public record HttpResponse(
         Status status,
         Map<String, String> headers,
         Map<String, String> cookies,
-        byte[] body) {
+        byte[] body
+) {
 
     private static final String CRLF = "\r\n";
     private static final ProtocolVersion DEFAULT_PROTOCOL = ProtocolVersion.HTTP11;

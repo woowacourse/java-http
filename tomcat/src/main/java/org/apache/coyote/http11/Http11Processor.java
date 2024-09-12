@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.ControllerMapper;
 import org.apache.coyote.http.Dispatcher;
 import org.apache.coyote.http.HttpMessageGenerator;
 import org.apache.coyote.http.request.HttpRequest;
@@ -19,11 +20,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Dispatcher dispatcher = new Dispatcher();
     private final Socket connection;
+    private final Dispatcher dispatcher;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.dispatcher = new Dispatcher(ControllerMapper.getControllers());
     }
 
     @Override

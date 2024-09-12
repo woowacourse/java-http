@@ -1,8 +1,5 @@
 package org.apache.coyote.http;
 
-import com.techcourse.controller.BasicController;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.http.request.HttpRequest;
@@ -18,12 +15,14 @@ public class Dispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
-    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+    private final Map<String, Controller> controllers;
+
+    public Dispatcher(Map<String, Controller> controllers) {
+        this.controllers = controllers;
+    }
 
     public Dispatcher() {
-        controllers.put("/", new BasicController());
-        controllers.put("/login", new LoginController());
-        controllers.put("/register", new RegisterController());
+        this(new ConcurrentHashMap<>());
     }
 
     public void dispatch(HttpRequest request, HttpResponse response) {

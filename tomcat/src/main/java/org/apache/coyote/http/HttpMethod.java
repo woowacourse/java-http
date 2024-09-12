@@ -6,7 +6,7 @@ public enum HttpMethod {
     POST,
     ;
 
-    public static HttpMethod of(String method) {
+    public static HttpMethod from(String method) {
         return valueOf(method);
     }
 

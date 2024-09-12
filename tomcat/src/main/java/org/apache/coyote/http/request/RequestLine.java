@@ -11,7 +11,7 @@ public class RequestLine {
     private final String protocol;
 
     public RequestLine(String method, String path, String protocol) {
-        this(HttpMethod.of(method), path, protocol);
+        this(HttpMethod.from(method), path, protocol);
     }
 
     public RequestLine(HttpMethod method, String uri, String protocol) {

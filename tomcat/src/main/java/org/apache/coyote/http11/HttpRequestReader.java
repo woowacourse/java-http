@@ -24,7 +24,7 @@ public class HttpRequestReader {
 
     private static RequestLine parseRequestLine(String line) {
         String[] token = line.split(" ");
-        HttpMethod httpMethod = HttpMethod.of(token[0]);
+        HttpMethod httpMethod = HttpMethod.from(token[0]);
         String uri = parseUri(token[1]);
         String protocol = token[2];
         return new RequestLine(httpMethod, uri, protocol);

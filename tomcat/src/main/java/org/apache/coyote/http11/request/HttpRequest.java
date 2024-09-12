@@ -46,8 +46,12 @@ public class HttpRequest {
         return Optional.of(RequestBody.read(reader, httpHeader.contentLength()));
     }
 
-    public boolean isMethod(HttpMethod method) {
-        return method == requestLine.getMethod();
+    public boolean isGet() {
+        return requestLine.getMethod() == HttpMethod.GET;
+    }
+
+    public boolean isPost() {
+        return requestLine.getMethod() == HttpMethod.POST;
     }
 
     public boolean isQueryStringRequest() {

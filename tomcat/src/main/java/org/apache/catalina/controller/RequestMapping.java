@@ -4,7 +4,6 @@ import com.techcourse.controller.IndexController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.Arrays;
-import org.apache.coyote.http.request.HttpRequest;
 
 public enum RequestMapping {
 
@@ -21,11 +20,15 @@ public enum RequestMapping {
         this.controller = controller;
     }
 
-    public static Controller getController(HttpRequest request) {
+    public static Controller getController(String path) {
         return Arrays.stream(values())
-                .filter(requestMapping -> requestMapping.path.equals(request.getUri()))
-                .map(requestMapping -> requestMapping.controller)
+                .filter(mapper -> isPathMatched(mapper, path))
+                .map(mapper -> mapper.controller)
                 .findFirst()
                 .orElse(StaticResourceController.INSTANCE);
+    }
+
+    private static boolean isPathMatched(RequestMapping requestMapping, String path) {
+        return requestMapping.path.equals(path);
     }
 }

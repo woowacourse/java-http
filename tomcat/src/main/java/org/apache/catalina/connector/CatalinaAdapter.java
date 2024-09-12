@@ -16,7 +16,8 @@ public class CatalinaAdapter implements Adapter {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         try {
-            Controller controller = RequestMapping.getController(request);
+            String uri = request.getUri();
+            Controller controller = RequestMapping.getController(uri);
             controller.service(request, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

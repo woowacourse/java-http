@@ -2,31 +2,23 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.request.RequestBody;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private String body;
+    private final RequestBody body;
 
-    public HttpRequest(String rawRequestLine, HttpHeaders headers, String body) {
+    public HttpRequest(String rawRequestLine, HttpHeaders headers, RequestBody body) {
         this.requestLine = new RequestLine(rawRequestLine);
         this.headers = headers;
         this.body = body;
     }
 
-    public boolean isGetMethod() {
-        return requestLine.getMethod().isGet();
-    }
-
-    public boolean isPostMethod() {
-        return requestLine.getMethod().isPost();
-    }
-
-    public Optional<String> findCookieByName(String name) {
-        return headers.findCookieByName(name);
+    public HttpRequestMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getPath() {
@@ -52,22 +44,20 @@ public class HttpRequest {
         return requestLine.getProtocolVersion();
     }
 
-    public Map<String, String> getBody() {
-        if (body.isEmpty()) {
-            return Map.of();
-        }
-
-        return Arrays.stream(body.split("&"))
-                .map(query -> query.split("=", 2))
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+    public HttpCookies getCookies() {
+        return headers.getCookies();
     }
 
-    public String build() {
-        return requestLine.build() + "\r\n" + headers.build() + "\r\n\r\n" + body;
+    public RequestBody getBody() {
+        return body;
+    }
+
+    public String render() {
+        return requestLine.render() + " \r\n" + headers.render() + "\r\n\r\n" + body;
     }
 
     @Override
     public String toString() {
-        return build();
+        return render();
     }
 }

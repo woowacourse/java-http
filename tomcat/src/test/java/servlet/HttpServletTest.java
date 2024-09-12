@@ -142,6 +142,35 @@ class HttpServletTest {
     }
 
     @Test
+    void POST_login을_호출했을_때_로그인에_실패한다() throws IOException {
+        // given
+        RequestLine requestLine = new RequestLine("POST /login HTTP/1.1");
+        Map<String, String> headers = Map.of(
+                "Host", "localhost:8080",
+                "Connection", "keep-alive",
+                "Content-Type", "application/x-www-form-urlencoded",
+                "Content-Length", "29"
+        );
+        RequestHeaders requestHeaders = new RequestHeaders(headers);
+        RequestBody requestBody = RequestBody.from("account=gugu&password=wrong");
+        Request request = new Request(requestLine, requestHeaders, requestBody);
+        Response response = new Response();
+
+        // when
+        httpServlet.service(request, response);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2426 \r\n" +
+                "\r\n" +
+                Files.readString(Paths.get(resource.getFile()), StandardCharsets.UTF_8);
+
+        assertThat(new String(response.getBytes())).isEqualTo(expected);
+    }
+
+    @Test
     void POST_register를_호출한다() throws IOException {
         // given
         RequestLine requestLine = new RequestLine("POST /register HTTP/1.1");
@@ -218,6 +247,33 @@ class HttpServletTest {
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: 211991 \r\n" +
+                "\r\n" +
+                Files.readString(Paths.get(resource.getFile()), StandardCharsets.UTF_8);
+
+        assertThat(new String(response.getBytes())).isEqualTo(expected);
+    }
+
+    @Test
+    void GET_존재하지_않은_경로를_호출한다() throws IOException {
+        // given
+        RequestLine requestLine = new RequestLine("GET /wrong HTTP/1.1");
+        Map<String, String> headers = Map.of(
+                "Host", "localhost:8080",
+                "Connection", "keep-alive"
+        );
+        RequestHeaders requestHeaders = new RequestHeaders(headers);
+        RequestBody requestBody = RequestBody.from(null);
+        Request request = new Request(requestLine, requestHeaders, requestBody);
+        Response response = new Response();
+
+        // when
+        httpServlet.service(request, response);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2426 \r\n" +
                 "\r\n" +
                 Files.readString(Paths.get(resource.getFile()), StandardCharsets.UTF_8);
 

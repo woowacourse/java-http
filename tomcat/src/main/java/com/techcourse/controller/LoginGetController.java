@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import java.io.IOException;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.handler.ViewHttpHandler;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -23,7 +24,7 @@ public class LoginGetController implements HttpHandler {
         }
 
         HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
-        response.setHeader("Location", "http://localhost:8080/index.html");
+        response.setHeader(HttpHeaderName.LOCATION, "http://localhost:8080/index.html");
 
         return response;
     }

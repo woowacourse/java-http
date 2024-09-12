@@ -15,7 +15,7 @@ public final class HttpHeaders {
         this.headers = new HashMap<>(headers);
     }
 
-    public boolean isHeader(String headerName, String headerValue) {
+    public boolean isHeader(HttpHeaderName headerName, String headerValue) {
         return headerValue.equals(getFieldByHeaderName(headerName).orElse(""));
     }
 
@@ -23,8 +23,8 @@ public final class HttpHeaders {
         return headers.containsKey(header);
     }
 
-    public Optional<String> getFieldByHeaderName(String headerName) {
-        List<String> fields = Optional.ofNullable(headers.get(headerName))
+    public Optional<String> getFieldByHeaderName(HttpHeaderName headerName) {
+        List<String> fields = Optional.ofNullable(headers.get(headerName.getName()))
                 .orElse(new ArrayList<>());
 
         if (fields.size() > 1) {
@@ -35,15 +35,15 @@ public final class HttpHeaders {
                 .findFirst();
     }
 
-    public void setHeader(String name, String field) {
-        if (!headers.containsKey(name)) {
-            headers.put(name, new ArrayList<>());
+    public void setHeader(HttpHeaderName name, String field) {
+        if (!headers.containsKey(name.getName())) {
+            headers.put(name.getName(), new ArrayList<>());
         }
-        headers.get(name).add(field);
+        headers.get(name.getName()).add(field);
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(headers.getOrDefault("Cookie", new ArrayList<>()));
+        return HttpCookie.from(headers.getOrDefault(HttpHeaderName.COOKIE.getName(), new ArrayList<>()));
     }
 
     public Map<String, List<String>> getHeaders() {

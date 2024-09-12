@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpHeadersParser;
 
@@ -72,7 +73,7 @@ public class HttpRequestReader {
     }
 
     private byte[] readBody(HttpHeaders headers) {
-        return headers.getFieldByHeaderName("Content-Length")
+        return headers.getFieldByHeaderName(HttpHeaderName.CONTENT_LENGTH)
                 .map(Integer::parseInt)
                 .map(this::readBody)
                 .orElse(EMPTY_BODY);

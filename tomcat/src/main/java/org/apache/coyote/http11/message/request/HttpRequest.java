@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.HttpCookie;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
@@ -72,7 +73,7 @@ public class HttpRequest {
         return url.getPath();
     }
 
-    public Optional<String> getHeaderFieldByName(String name) {
+    public Optional<String> getHeaderFieldByName(HttpHeaderName name) {
         return headers.getFieldByHeaderName(name);
     }
 

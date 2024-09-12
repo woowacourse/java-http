@@ -8,6 +8,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.message.HttpCookie;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -39,7 +40,7 @@ public class LoginPostController implements HttpHandler {
             // TODO: 빌더로 생성해보기
             HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
 
-            response.setHeader("Location", "http://localhost:8080/index.html");
+            response.setHeader(HttpHeaderName.LOCATION, "http://localhost:8080/index.html");
             if (!request.hasSession()) {
                 Session session = addSession(user);
                 setCookie(response, session);
@@ -49,7 +50,7 @@ public class LoginPostController implements HttpHandler {
         } catch (UnauthorizedException e) {
             // TODO: 예외 처리 한곳에 모으기
             HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
-            response.setHeader("Location", "http://localhost:8080/401.html");
+            response.setHeader(HttpHeaderName.LOCATION, "http://localhost:8080/401.html");
 
             return response;
         }

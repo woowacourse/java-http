@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
@@ -22,7 +23,7 @@ public class ResourceToHttpBodyConverter {
 
         HttpResponse response = HttpResponse.of(HttpStatus.OK, Files.readAllBytes(path));
         String contentType = probeContentType(path);
-        response.setHeader("Content-Type", contentType);
+        response.setHeader(HttpHeaderName.CONTENT_TYPE, contentType);
 
         return response;
     }

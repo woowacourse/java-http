@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpBodyParser {
@@ -21,7 +22,7 @@ public class HttpBodyParser {
     }
 
     public static FormParameters parseToFormParameters(byte[] body, HttpHeaders headers) {
-        if (body.length == 0 || !headers.isHeader("Content-Type", "application/x-www-form-urlencoded")) {
+        if (body.length == 0 || !headers.isHeader(HttpHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded")) {
             return new FormParameters(new HashMap<>());
         }
 

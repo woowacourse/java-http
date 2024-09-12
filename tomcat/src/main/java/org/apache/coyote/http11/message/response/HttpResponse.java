@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.message.HttpCookie;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
@@ -22,7 +23,7 @@ public class HttpResponse {
 
     public static HttpResponse of(HttpStatus status, byte[] body) {
         HttpHeaders headers = new HttpHeaders(Map.of(
-                "Content-Length", List.of(String.valueOf(body.length))
+                HttpHeaderName.CONTENT_LENGTH.getName(), List.of(String.valueOf(body.length))
         ));
         return new HttpResponse(status, headers, body);
     }
@@ -44,12 +45,12 @@ public class HttpResponse {
         return headers;
     }
 
-    public void setHeader(String name, String field) {
+    public void setHeader(HttpHeaderName name, String field) {
         headers.setHeader(name, field);
     }
 
     public void setCookie(HttpCookie cookie) {
-        headers.setHeader("Set-Cookie", cookie.stringify());
+        headers.setHeader(HttpHeaderName.SET_COOKIE, cookie.stringify());
     }
 
     public void setStatus(HttpStatus status) {

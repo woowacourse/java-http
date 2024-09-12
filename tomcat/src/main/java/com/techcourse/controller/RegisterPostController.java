@@ -7,6 +7,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.message.HttpCookie;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -36,7 +37,7 @@ public class RegisterPostController implements HttpHandler {
         log.info("회원가입 성공! account: {}, email: {}", user.getAccount(), email);
 
         HttpResponse response = HttpResponse.from(HttpStatus.FOUND);
-        response.setHeader("Location", "http://localhost:8080/index.html");
+        response.setHeader(HttpHeaderName.LOCATION, "http://localhost:8080/index.html");
         if (!request.hasSession()) {
             Session session = addSession(user);
             setCookie(response, session);

@@ -2,27 +2,30 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
+import org.apache.catalina.response.Status;
 
 import java.util.Map;
 
-public class RegisterController implements Controller {
+public class RegisterController extends MappingController {
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) {
-        if (httpRequest.getHttpMethod() == HttpMethod.GET) {
-            return new HttpResponse(200, httpRequest.getUrl());
-        }
-        if (httpRequest.getHttpMethod() == HttpMethod.POST) {
-            Map<String, String> payload = httpRequest.getBody();
-            User user = new User(payload.get("account"), payload.get("password"), payload.get("email"));
-            InMemoryUserRepository.save(user);
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(Status.OK);
+        response.setContentType("text/html;charset=utf-8 ");
+        response.setBodyUri(request.getUrl());
+    }
 
-            return new HttpResponse(302, "/index.html");
-        }
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        Map<String, String> requestBody = request.getBody();
+        User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+        InMemoryUserRepository.save(user);
 
-        return new HttpResponse(400);
+        response.setStatus(Status.FOUND);
+        response.setLocation("/index.html");
+        response.setContentType("text/html;charset=utf-8 ");
+        response.setBodyUri("/index.html");
     }
 }

@@ -7,20 +7,22 @@ import com.techcourse.controller.StaticResourceController;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class HandlerAdapter {
 
-    private final Map<String, Controller> handler = Map.of(
+    private final Map<String, Controller> mapper = Map.of(
             "/login", new LoginController(),
             "/register", new RegisterController()
     );
 
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        String url = httpRequest.getUrl();
-        Controller controller = handler.getOrDefault(url, new StaticResourceController());
+    public HttpResponse handle(HttpRequest request) {
+        String url = request.getUrl();
 
-        return controller.execute(httpRequest);
+        HttpResponse response = new HttpResponse();
+        mapper.getOrDefault(url, new StaticResourceController())
+                .service(request, response);
+
+        return response;
     }
 }

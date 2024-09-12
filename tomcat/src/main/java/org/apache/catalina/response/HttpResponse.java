@@ -2,39 +2,47 @@ package org.apache.catalina.response;
 
 import org.apache.catalina.Cookie;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpResponse {
 
-    private final int statusCode;
-    private final Cookie cookie;
-    private final String resource;
+    private Status status;
+    private final Map<Header, Object> headers = new HashMap<>();
+    private ResponseBody responseBody;
 
-    public HttpResponse(int statusCode) {
-        this.statusCode = statusCode;
-        this.resource = null;
-        this.cookie = null;
+    public HttpResponse() {
     }
 
-    public HttpResponse(int statusCode, String resource) {
-        this.statusCode = statusCode;
-        this.resource = resource;
-        this.cookie = null;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
-    public HttpResponse(int statusCode, String resource, Cookie cookie) {
-        this.statusCode = statusCode;
-        this.resource = resource;
-        this.cookie = cookie;
+    public void setLocation(String location) {
+        headers.put(Header.LOCATION, location);
     }
 
-    public String getResource() {
-        return resource;
+    public void setCookie(Cookie cookie) {
+        headers.put(Header.SET_COOKIE, cookie);
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public void setContentType(String contentType) {
+        headers.put(Header.CONTENT_TYPE, contentType);
     }
 
-    public Cookie getCookie() {
-        return cookie;
+    public void setBodyUri(String url) {
+        responseBody = new ResponseBody(url);
+    }
+
+    public Map<Header, Object> getHeaders() {
+        return headers;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getResponseBodyURI() {
+        return responseBody.getUri();
     }
 }

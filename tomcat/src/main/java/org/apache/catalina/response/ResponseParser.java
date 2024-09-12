@@ -1,9 +1,12 @@
 package org.apache.catalina.response;
 
-import org.apache.catalina.Cookie;
 import org.apache.catalina.ResourceResolver;
 
+import java.util.Map;
+
 public class ResponseParser {
+
+    private static final String HEADER_FORMAT = "%s: %s \r\n";
 
     private final ResourceResolver resourceResolver;
 
@@ -12,31 +15,19 @@ public class ResponseParser {
     }
 
     public String parse(HttpResponse response) {
-        String responseBody = resourceResolver.resolve(response.getResource());
-
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("HTTP/1.1 %d OK ", response.getStatusCode())).append("\r\n");
+        stringBuilder.append(String.format("HTTP/1.1 %d OK ", response.getStatus().code())).append("\r\n");
 
-        Cookie cookie = response.getCookie();
-        if (cookie != null) {
-            stringBuilder.append("Set-Cookie: JSESSIONID=" + cookie.getValue("JSESSIONID") + "\r\n");
+        Map<Header, Object> headers = response.getHeaders();
+        for (Header header : headers.keySet()) {
+            stringBuilder.append(String.format(HEADER_FORMAT, header.value(), headers.get(header)));
         }
 
-        if (response.getStatusCode() == 302) {
-            stringBuilder.append("Location: " + response.getResource() + "\r\n");
-        }
-
-        stringBuilder.append("Content-Length: " + responseBody.getBytes().length + " ").append("\r\n")
-                .append("Content-Type: " + getContentType(response.getResource())).append("\r\n")
-                .append("\r\n").append(responseBody);
+        String responseBody = resourceResolver.resolve(response.getResponseBodyURI());
+        stringBuilder.append("Content-Length: " + responseBody.getBytes().length + " \r\n")
+                .append("\r\n")
+                .append(responseBody);
 
         return stringBuilder.toString();
-    }
-
-    private String getContentType(String contentType) {
-        if (contentType.endsWith(".css")) {
-            return "text/css ";
-        }
-        return "text/html;charset=utf-8 ";
     }
 }

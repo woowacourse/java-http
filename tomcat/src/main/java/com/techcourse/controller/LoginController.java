@@ -1,61 +1,45 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import org.apache.catalina.Cookie;
-import org.apache.catalina.request.HttpMethod;
+import com.techcourse.service.UserService;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.catalina.response.Status;
 
-import java.util.Map;
-import java.util.Optional;
+public class LoginController extends MappingController {
 
-public class LoginController implements Controller {
+    private final UserService userService;
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-
-    private final SessionManager sessionManager = SessionManager.getInstance();
+    public LoginController() {
+        this.userService = new UserService();
+    }
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) {
-        HttpMethod httpMethod = httpRequest.getHttpMethod();
-        if (httpMethod == HttpMethod.GET) {
-            return getLoginPage(httpRequest);
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        if (userService.existsUser(request)) {
+            response.setStatus(Status.UNAUTHORIZED);
+            response.setLocation("/index.html");
+            response.setContentType("text/html;charset=utf-8");
+            response.setBodyUri("/index.html");
+            return;
         }
-        if (httpMethod == HttpMethod.POST) {
-            return login(httpRequest);
-        }
-        return new HttpResponse(401);
+        response.setStatus(Status.OK);
+        response.setContentType("text/html;charset=utf-8");
+        response.setBodyUri("/login.html");
     }
 
-    private HttpResponse login(HttpRequest httpRequest) {
-        Map<String, String> params = httpRequest.getBody();
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
-        if (optionalUser.isEmpty()) {
-            return new HttpResponse(302, "/401.html");
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        boolean successLogin = userService.login(request, response);
+        if (successLogin) {
+            response.setStatus(Status.FOUND);
+            response.setLocation("/index.html");
+            response.setContentType("text/html;charset=utf-8");
+            response.setBodyUri("/index.html");
+            return;
         }
-        User user = optionalUser.get();
-        if (user.checkPassword(params.get("password"))) {
-            Session session = new Session();
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            log.info("{}", user);
-            Cookie cookie = new Cookie(Map.of("JSESSIONID", session.getId()));
-            return new HttpResponse(302, "/index.html", cookie);
-        }
-        return new HttpResponse(302, "/401.html");
-    }
-
-    public HttpResponse getLoginPage(HttpRequest httpRequest) {
-        String sessionId = httpRequest.getSessionId();
-        Session session = sessionManager.findSession(sessionId);
-        if (session.isPresent() && session.getAttribute("user") != null) {
-            return new HttpResponse(302, "/index.html");
-        }
-        return new HttpResponse(200, httpRequest.getUrl());
+        response.setStatus(Status.UNAUTHORIZED);
+        response.setLocation("/401.html");
+        response.setContentType("text/html;charset=utf-8");
+        response.setBodyUri("/401.html");
     }
 }

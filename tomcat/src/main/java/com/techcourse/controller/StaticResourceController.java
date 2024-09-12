@@ -2,11 +2,14 @@ package com.techcourse.controller;
 
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
+import org.apache.catalina.response.Status;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends MappingController {
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) {
-        return new HttpResponse(200, httpRequest.getUrl());
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(Status.OK);
+        response.setBodyUri(request.getUrl());
+        response.setContentType(getContentType(request.getUrl()));
     }
 }

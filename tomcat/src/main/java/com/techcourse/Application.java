@@ -1,5 +1,6 @@
 package com.techcourse;
 
+import com.techcourse.controller.ErrorController;
 import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.NotFoundController;
@@ -18,13 +19,16 @@ public class Application {
     );
 
     public static void main(String[] args) {
-        Tomcat tomcat = new Tomcat(getDispatcher());
+        Tomcat tomcat = new Tomcat(setupDispatcher());
         tomcat.start();
     }
 
-    private static Dispatcher getDispatcher() {
+    private static Dispatcher setupDispatcher() {
         RequestMapper requestMapper = new RequestMapper();
         requestMapper.registerControllers(CONTROLLER_CLASSES);
-        return new DefaultDispatcher(requestMapper, new NotFoundController());
+        DefaultDispatcher dispatcher = new DefaultDispatcher(requestMapper);
+        dispatcher.setNotFoundHandler(NotFoundController.class);
+        dispatcher.setUnresolvedErrorHandler(ErrorController.class);
+        return dispatcher;
     }
 }

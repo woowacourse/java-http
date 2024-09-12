@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
+    private static final RequestMapping requestMapping = new RequestMapping();
 
     private final Socket connection;
 
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
 //            log.debug(request.toString());
 
             HttpResponse.Builder responseBuilder = HttpResponse.builder();
-            REQUEST_MAPPING.getController(request)
+            requestMapping.getController(request)
                     .service(request, responseBuilder);
             HttpResponse response = responseBuilder.build();
 //            log.debug(response.toString());

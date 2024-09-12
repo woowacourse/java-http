@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.apache.coyote.http11.file.MimeTypeMaker;
 
-import com.techcourse.model.User;
-
 public class HttpRequest {
     private static final String ALL_MIME_TYPE = "*/*";
     private static final String CHARSET_UTF8 = ";charset=utf-8";
@@ -55,10 +53,6 @@ public class HttpRequest {
 
     private String getExtension() {
         return requestLine.getExtension();
-    }
-
-    public User getUser() {
-        return body.getUser();
     }
 
     public Map<String, String> getUserInformation() {

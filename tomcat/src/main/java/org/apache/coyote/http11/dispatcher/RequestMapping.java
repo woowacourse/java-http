@@ -9,13 +9,16 @@ import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class RequestMapping {
+import com.techcourse.service.UserService;
 
+public class RequestMapping {
     private final ConcurrentHashMap<String, Controller> controllerMapper = new ConcurrentHashMap<>();
 
+    private final UserService userService = new UserService();
+
     public RequestMapping() {
-        controllerMapper.put("/login", new LoginController());
-        controllerMapper.put("/register", new RegisterController());
+        controllerMapper.put("/login", new LoginController(userService));
+        controllerMapper.put("/register", new RegisterController(userService));
     }
 
     public Controller getController(HttpRequest request) {

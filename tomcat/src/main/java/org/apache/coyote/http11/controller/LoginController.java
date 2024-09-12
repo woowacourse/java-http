@@ -4,19 +4,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 
 public class LoginController extends AbstractController {
 
     private final SessionManager sessionManager;
+    private final UserService userService;
 
-    public LoginController() {
+    public LoginController(UserService userService) {
         this.sessionManager = SessionManager.getInstance();
+        this.userService = userService;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         super.doPost(request, response);
 
-        User user = request.getUser();
+        User user = userService.authenticateUser(request.getUserInformation());
         if (isLoginFail(user)) {
             response.setFieldValue("Location", "/401.html");
             return;

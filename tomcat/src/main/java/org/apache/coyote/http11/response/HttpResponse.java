@@ -24,13 +24,6 @@ public final class HttpResponse {
         statusCode = Http11StatusCode.OK;
     }
 
-    public boolean isHtml() {
-        return headers.stream()
-                .filter(header -> header.key().equals("Content-Type"))
-                .map(Http11Header::value)
-                .anyMatch(value -> value.contains(ContentType.HTML.getRawContentType()));
-    }
-
     public byte[] toBytes() {
         String headers = makeHeaders();
         String cookieHeader = makeCookieHeader();
@@ -67,22 +60,22 @@ public final class HttpResponse {
         return response;
     }
 
-    public void addHeader(Http11Header header) {
-        headers.add(header);
-    }
-
     public void addCookie(Http11Cookie cookie) {
         cookies.add(cookie);
-    }
-
-    public void setStatusCode(Http11StatusCode statusCode) {
-        this.statusCode = statusCode;
     }
 
     public void setRedirect(String redirectUri) {
         addHeader(new Http11Header("Location", redirectUri));
         setStatusCode(Http11StatusCode.FOUND);
         body = new byte[0];
+    }
+
+    private void addHeader(Http11Header header) {
+        headers.add(header);
+    }
+
+    private void setStatusCode(Http11StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public void setBodyAndContentType(Path path) {
@@ -97,9 +90,5 @@ public final class HttpResponse {
         } catch (IOException e) {
             return new byte[0];
         }
-    }
-
-    public byte[] getBody() {
-        return body;
     }
 }

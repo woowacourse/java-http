@@ -25,6 +25,10 @@ public class HttpRequest {
         this.body = body;
     }
 
+    public HttpRequest(HttpMethod method, HttpUrl url) {
+        this(method, url, new HttpHeaders(), new HttpRequestBody());
+    }
+
     public static HttpRequest of(String requestLine, HttpHeaders headers, HttpRequestBody body) {
         String[] requestLineElements = requestLine.split(REQUEST_LINE_DELIMITER);
         HttpMethod method = HttpMethod.from(requestLineElements[HTTP_METHOD_INDEX]);

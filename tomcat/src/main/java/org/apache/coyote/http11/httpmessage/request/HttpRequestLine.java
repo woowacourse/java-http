@@ -16,6 +16,10 @@ public record HttpRequestLine(
         return new HttpRequestLine(HttpMethod.findByName(token[0]), token[1], token[2]);
     }
 
+    public boolean isGet() {
+        return this.httpMethod == HttpMethod.GET;
+    }
+
     public boolean isPost() {
         return httpMethod == HttpMethod.POST;
     }

@@ -70,6 +70,10 @@ public class HttpRequest {
         return this.session;
     }
 
+    public boolean isGet() {
+        return httpRequestLine.isGet();
+    }
+
     public boolean isPost() {
         return httpRequestLine.isPost();
     }

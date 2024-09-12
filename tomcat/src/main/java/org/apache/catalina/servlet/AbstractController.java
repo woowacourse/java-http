@@ -7,9 +7,15 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        // http method 분기문
+        if (request.isGet()) {
+            doGet(request, response);
+        }
+        if (request.isPost()) {
+            doPost(request, response);
+        }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
+
+    protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
 }

@@ -2,10 +2,10 @@ package org.apache.coyote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.exception.NotFoundException;
-import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.exception.NotFoundException;
+import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpVersion;
 import org.apache.http.header.HttpHeaders;

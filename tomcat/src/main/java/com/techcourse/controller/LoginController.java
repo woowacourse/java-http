@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.controller.AbstractController;
+import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.http.HttpCookie;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;

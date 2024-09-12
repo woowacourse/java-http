@@ -2,8 +2,9 @@ package com.techcourse.controller;
 
 import static org.apache.coyote.http.MediaType.TEXT_HTML;
 
-import org.apache.coyote.http.Cookie;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http.HttpBody;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpQueryParams;
 import org.apache.coyote.http.HttpRequest;
@@ -49,32 +50,24 @@ public class LoginController implements Controller {
     }
 
     private HttpResponseBuilder post(final HttpRequest request) {
-        if (login(request) != null) {
-            HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.FOUND);
+        HttpBody body = request.getBody();
+        String content = body.getContent();
+        HttpQueryParams queryParams = new HttpQueryParams(content);
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+        if ((user != null) && user.checkPassword(password)) {
+            log.info("user: {}", user);
+            Session session = request.getSession();
+            session.setAttribute("user", user);
             return HttpResponse.builder()
-                    .statusLine(statusLine)
-                    .contentType(TEXT_HTML.defaultCharset())
-                    .setCookie(new Cookie(Cookie.JSESSIONID, "656cef62-e3c4-40bc-a8df-94732920ed46"))
-                    .location("/index.html");
+                    .setCookie(HttpCookie.ofJSessionId(session.getId()))
+                    .redirect("/index.html");
         }
         HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.UNAUTHORIZED);
         return HttpResponse.builder()
                 .statusLine(statusLine)
                 .contentType(TEXT_HTML.defaultCharset())
                 .location("/login.html");
-    }
-
-    private User login(final HttpRequest request) {
-        HttpBody body = request.getBody();
-        String content = body.getContent();
-        HttpQueryParams query = new HttpQueryParams(content);
-        String account = query.get("account");
-        String password = query.get("password");
-        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-        if ((user != null) && user.checkPassword(password)) {
-            log.info("user: {}", user);
-            return user;
-        }
-        return null;
     }
 }

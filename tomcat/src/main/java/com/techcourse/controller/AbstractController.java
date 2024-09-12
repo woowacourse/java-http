@@ -1,4 +1,4 @@
-package com.techcourse;
+package com.techcourse.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

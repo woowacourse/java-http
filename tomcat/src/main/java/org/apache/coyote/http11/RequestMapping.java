@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.Controller;
-import com.techcourse.LoginController;
-import com.techcourse.RegisterController;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

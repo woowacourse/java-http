@@ -3,7 +3,6 @@ package org.apache.catalina.controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ public class ResourceController implements Controller {
         }
 
         File responseFile = File.of(request.getPath());
-        response.addFile(responseFile);
-        response.setHttpStatus(HttpStatus.OK);
+        responseFile.addToResponse(response);
     }
 }

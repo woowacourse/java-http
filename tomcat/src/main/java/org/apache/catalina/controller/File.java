@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.exception.FileException;
+import org.apache.catalina.exception.FileException;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class File {
     private static final String RESOURCE_PREFIX = "static/";
     private static final String HTML_SUFFIX = ".html";
+    private static final String CONTENT_TYPE_SUFFIX = ";charset=utf-8";
     private static final ClassLoader CLASS_LOADER = File.class.getClassLoader();
     private static final Logger log = LoggerFactory.getLogger(File.class);
 
@@ -42,7 +44,7 @@ public class File {
         Path resourceFilePath = resourceFile.toPath();
 
         try {
-            String contentType = Files.probeContentType(resourceFilePath) + ";charset=utf-8";
+            String contentType = Files.probeContentType(resourceFilePath) + CONTENT_TYPE_SUFFIX;
             String responseBody = new String(Files.readAllBytes(resourceFilePath));
             return new File(contentType, responseBody);
         } catch (IOException e) {
@@ -53,6 +55,7 @@ public class File {
 
     public void addToResponse(HttpResponse response) {
         response.setBody(contentType, content);
+        response.setHttpStatus(HttpStatus.OK);
     }
 
     public String getContentType() {

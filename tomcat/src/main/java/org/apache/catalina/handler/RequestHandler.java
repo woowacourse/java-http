@@ -2,7 +2,7 @@ package org.apache.catalina.handler;
 
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
-import org.apache.coyote.http11.exception.FileException;
+import org.apache.catalina.exception.FileException;
 import org.apache.coyote.http11.handler.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

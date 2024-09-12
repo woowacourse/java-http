@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.catalina.controller.File;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpResponse {
 
+    private static final String TEXT_CONTENT_TYPE = "text/plain;charset=utf-8 ";
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String STATUS_LINE_FORMAT = "%s %d %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
@@ -61,7 +61,7 @@ public class HttpResponse {
     }
 
     public void setTextBody(String body) {
-        setBody("text/plain;charset=utf-8 ", body);
+        setBody(TEXT_CONTENT_TYPE, body);
     }
 
     public void setBody(String contentType, String body) {
@@ -104,12 +104,6 @@ public class HttpResponse {
 
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-    }
-
-    public void addFile(File responseFile) {
-        headers.put("Content-Type", responseFile.getContentType());
-        headers.put("Content-Length", String.valueOf(responseFile.getContentLength()));
-        body = responseFile.getContent();
     }
 
     @Override

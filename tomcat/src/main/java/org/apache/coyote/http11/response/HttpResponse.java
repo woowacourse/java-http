@@ -1,7 +1,13 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.header.HeaderContent.CONTENT_LENGTH;
+import static org.apache.coyote.http11.header.HeaderContent.CONTENT_TYPE;
+import static org.apache.coyote.http11.header.HeaderContent.LOCATION;
+import static org.apache.coyote.http11.header.HeaderContent.SET_COOKIE;
+
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.header.HttpResponseHeader;
 import org.apache.coyote.http11.serdes.ResponseHeaderSerializer;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
@@ -46,7 +52,7 @@ public class HttpResponse {
         return this;
     }
 
-    public boolean hasResponseBody(){
+    public boolean hasResponseBody() {
         return responseBody != null;
     }
 
@@ -60,8 +66,8 @@ public class HttpResponse {
     }
 
     public HttpResponse location(String location) {
-        headers.location(location);
-        headers.contentType(null);
+        headers.put(LOCATION, location);
+        headers.put(CONTENT_TYPE, null);
         return this;
     }
 
@@ -69,13 +75,13 @@ public class HttpResponse {
         String[] extension = url.split(CONTENT_TYPE_DELIMITER);
         if (extension.length >= 2) {
             String parsedType = "text/" + extension[1] + ";" + CHARACTER_ENCODE_POLICY;
-            headers.contentType(parsedType);
+            headers.put(CONTENT_TYPE, parsedType);
         }
         return this;
     }
 
     public HttpResponse setCookie(Cookie cookie) {
-        headers.setCookie(cookie);
+        headers.put(SET_COOKIE, cookie.serialize());
         return this;
     }
 
@@ -83,7 +89,7 @@ public class HttpResponse {
         String responseBody = viewResolver.findResponseFile(viewUrl);
         this.responseBody = new ResponseBody(responseBody);
         contentType(viewUrl);
-        headers.contentLength(responseBody.getBytes().length);
+        headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
         return this;
     }
 

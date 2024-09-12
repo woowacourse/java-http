@@ -3,8 +3,9 @@ package org.apache.coyote.http11.serdes;
 import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.header.HeaderContent;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseHeader;
+import org.apache.coyote.http11.header.HttpResponseHeader;
 
 public class ResponseHeaderSerializer implements Serializer<HttpResponseHeader> {
     private static final String PROTOCOL_AND_VERSION = "HTTP/" + HttpResponse.DEFAULT_VERSION.getVersion() + " ";
@@ -33,11 +34,11 @@ public class ResponseHeaderSerializer implements Serializer<HttpResponseHeader> 
         return joiner.toString();
     }
 
-    private String resolvePayLoads(Map<String, String> payLoads) {
+    private String resolvePayLoads(Map<HeaderContent, String> payLoads) {
         StringJoiner joiner = new StringJoiner(SPACE + CRLF, BLANK, " ");
 
         payLoads.keySet()
-                .forEach(key -> joiner.add(key + HEADER_PAYLOAD_DELIMITER + payLoads.get(key)));
+                .forEach(key -> joiner.add(key.getMessage() + HEADER_PAYLOAD_DELIMITER + payLoads.get(key)));
 
         return joiner.toString();
     }

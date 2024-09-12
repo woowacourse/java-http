@@ -1,8 +1,10 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.header;
+
+import static org.apache.coyote.http11.header.HeaderContent.CONTENT_LENGTH;
+import static org.apache.coyote.http11.header.HeaderContent.COOKIE;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
@@ -35,8 +37,8 @@ public class HttpRequestHeader {
     }
 
     private static Cookie initializeCookie(Map<String, String> payLoad) {
-        if (payLoad.containsKey("Cookie")) {
-            String rawValue = payLoad.get("Cookie");
+        if (payLoad.containsKey(COOKIE.getMessage())) {
+            String rawValue = payLoad.get(COOKIE.getMessage());
             return Cookie.read(rawValue);
         }
         return null;
@@ -47,7 +49,7 @@ public class HttpRequestHeader {
     }
 
     public int contentLength() {
-        return Integer.parseInt(payLoads.get("Content-Length"));
+        return Integer.parseInt(payLoads.get(CONTENT_LENGTH.getMessage()));
     }
 
     public Cookie getCookie() {

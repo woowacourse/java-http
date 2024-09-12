@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.header.HttpRequestHeader;
 
 public class HttpRequest {
 

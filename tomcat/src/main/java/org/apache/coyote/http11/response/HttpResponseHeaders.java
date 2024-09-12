@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeaders;
 
 public class HttpResponseHeaders {
 
@@ -17,6 +18,10 @@ public class HttpResponseHeaders {
 
     public void setContentLength(HttpResponseBody responseBody) {
         this.headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
+    }
+
+    public void setCookie(String cookie) {
+        this.headers.put("Set-Cookie", cookie);
     }
 
     public String[] getKeys() {

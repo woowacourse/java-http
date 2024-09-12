@@ -20,6 +20,8 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
 
     private static final String EMPTY_LINE = "";
 
+    private static final String KEY_JSESSIONID = "JSESSIONID";
+
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
@@ -29,11 +31,15 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
         QueryString queryString = parseQueryString(requestLine);
         HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
         HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
+        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
         if (httpMethod.equals(HttpMethod.POST)) {
             httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
         }
-
-        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpRequestHeaders, httpRequestBody);
+        if (!httpRequestHeaders.getCookies().equals(EMPTY_LINE)) {
+            httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
+        }
+        return new HttpRequest(httpMethod, httpRequestPath, queryString,
+                httpRequestHeaders, httpRequestBody, httpCookie);
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {

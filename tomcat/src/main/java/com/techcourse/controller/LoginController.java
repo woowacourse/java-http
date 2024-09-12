@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.UUID;
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -43,6 +44,11 @@ public class LoginController {
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
         httpResponseHeaders.setContentType(httpRequest);
         httpResponseHeaders.setContentLength(httpResponseBody);
+        String jsessionid = httpRequest.getJSESSIONID();
+        if (jsessionid.isEmpty()) {
+            jsessionid = UUID.randomUUID().toString();
+        }
+        httpResponseHeaders.setCookie("JSESSION=" + jsessionid);
         return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
     }
 }

@@ -14,16 +14,20 @@ public class HttpRequest {
 
     private HttpRequestPath httpRequestPath;
 
+    private HttpCookie httpCookie;
+
     public HttpRequest(HttpMethod httpMethod,
                        HttpRequestPath httpRequestPath,
                        QueryString queryString,
                        HttpRequestHeaders httpRequestHeaders,
-                       HttpRequestBody httpRequestBody) {
+                       HttpRequestBody httpRequestBody,
+                       HttpCookie httpCookie) {
         this.httpMethod = httpMethod;
         this.httpRequestPath = httpRequestPath;
         this.queryString = queryString;
         this.httpRequestHeaders = httpRequestHeaders;
         this.httpRequestBody = httpRequestBody;
+        this.httpCookie = httpCookie;
     }
 
     public void setHttpRequestPath(String filePath) {
@@ -68,5 +72,9 @@ public class HttpRequest {
 
     public boolean isParameterEmpty() {
         return queryString.isEmpty();
+    }
+
+    public String getJSESSIONID() {
+        return httpCookie.getCookieValue("JSESSIONID");
     }
 }

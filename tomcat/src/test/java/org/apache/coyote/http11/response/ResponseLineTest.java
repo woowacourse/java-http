@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;

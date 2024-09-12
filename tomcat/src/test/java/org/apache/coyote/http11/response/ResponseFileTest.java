@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.net.URL;
 import java.util.Objects;

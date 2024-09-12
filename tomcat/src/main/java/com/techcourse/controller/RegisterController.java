@@ -39,7 +39,7 @@ public class RegisterController extends AbstractController {
         System.out.println("account = " + account);
         System.out.println("password = " + password);
         System.out.println("email = " + email);
-        if (account.isBlank() || password.isBlank() || email.isBlank()) { // TODO: 예외처리 개선
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
             throw new IllegalArgumentException("올바르지 않은 request body 형식입니다.");
         }
         InMemoryUserRepository.save(new User(account, password, email));

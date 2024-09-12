@@ -34,10 +34,6 @@ public class RequestLine {
         return uri.split("\\?")[0];
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
     @Override
     public String toString() {
         return "HttpLine{" +

@@ -10,28 +10,29 @@ import org.apache.coyote.request.HttpRequest;
 
 public class RequestReader {
 
-    public static HttpRequest readRequest(InputStream inputStream) throws IOException {
+    public static HttpRequest readRequest(InputStream inputStream) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         List<String> headerLines = new ArrayList<>();
         String rawLine;
-        int contentLength = 0;
         int headerCount = 0;
-        boolean isBody = false;
-        while ((rawLine = bufferedReader.readLine()) != null) {
-            headerLines.add(rawLine);
-            if (rawLine.isEmpty()) {
-                isBody = true;
+        try {
+            boolean isBody = false;
+            while ((rawLine = bufferedReader.readLine()) != null) {
+                headerLines.add(rawLine);
+                if (rawLine.isEmpty()) {
+                    isBody = true;
+                }
+                if (!isBody) {
+                    headerCount++;
+                }
             }
-            if (!isBody) {
-                headerCount++;
-            }
-            if (rawLine.startsWith("Content-Length")) {
-                contentLength = Integer.parseInt(rawLine.split(": ")[1]);
-            }
+        } catch (IOException e) {
+            throw new InternalError("Internal error when read input");
         }
         String bodyLine = headerLines.get(headerCount + 1);
+
         return new HttpRequest(headerLines, bodyLine);
     }
 }

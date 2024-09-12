@@ -24,7 +24,7 @@ public class Dispatcher {
         this.staticController = new StaticController();
     }
 
-    public void run(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    public void run(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.addHeader(HeaderName.CONTENT_TYPE, httpRequest.getContentType());
         httpResponse.addHeader(HeaderName.SET_COOKIE, httpRequest.getHttpCookie());
 

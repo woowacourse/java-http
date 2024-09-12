@@ -31,7 +31,7 @@ public class HttpRequest {
         return requestLine.getQueryParam(paramName);
     }
 
-    public String getContentType() throws IOException {
+    public String getContentType() {
         return requestLine.getContentType();
     }
 

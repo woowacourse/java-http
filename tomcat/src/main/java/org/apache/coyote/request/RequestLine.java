@@ -36,8 +36,12 @@ public class RequestLine {
         return this.httpMethod == httpMethod;
     }
 
-    public String getContentType() throws IOException {
-        return Files.probeContentType(new File(path).toPath());
+    public String getContentType() {
+        try {
+            return Files.probeContentType(new File(path).toPath());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Not found path");
+        }
     }
 
     public boolean isStaticRequest() {

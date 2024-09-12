@@ -7,7 +7,7 @@ import org.apache.coyote.response.HttpResponse;
 public class HomeController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatusCode(StatusCode.OK);
         response.setBody("/index.html");
     }

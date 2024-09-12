@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -7,7 +8,7 @@ public class ResponseBody {
 
     public static final String STATIC_PATH = "/static";
 
-    private final String content;
+    private String content;
 
     public ResponseBody() {
         this.content = "";
@@ -15,10 +16,14 @@ public class ResponseBody {
 
     public void setBody(String resource) {
         StringBuilder rawBody = new StringBuilder();
-        Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());
-
-        Files.readAllLines(path)
-                .forEach(line -> rawBody.append(line).append("\r\n"));
+        try {
+            Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());
+            Files.readAllLines(path)
+                    .forEach(line -> rawBody.append(line).append("\r\n"));
+        } catch (NullPointerException | IOException e) {
+            throw new IllegalArgumentException("Not found resource");
+        }
+        content = rawBody.toString();
     }
 
     public int getLength() {

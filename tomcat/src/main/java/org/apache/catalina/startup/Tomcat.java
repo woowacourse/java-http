@@ -1,23 +1,17 @@
 package org.apache.catalina.startup;
 
-import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final Dispatcher dispatcher;
-
-    public Tomcat(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
-
     public void start() {
-        var connector = new Connector(dispatcher);
+        var connector = new Connector();
         connector.start();
 
         try {

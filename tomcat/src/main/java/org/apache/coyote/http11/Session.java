@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.model.User;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionContext;
@@ -7,6 +8,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session implements HttpSession {
 
@@ -109,5 +111,13 @@ public class Session implements HttpSession {
     @Override
     public boolean isNew() {
         return isNew;
+    }
+
+    public Optional<User> getUser() {
+        return Optional.ofNullable((User) getAttribute("user")) ;
+    }
+
+    public void setUser(User user) {
+        setAttribute("user", user);
     }
 }

@@ -18,11 +18,6 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public boolean pointsTo(HttpMethod httpMethod, String path) {
-        return httpMethod == requestLine.getMethod()
-               && path.equals(requestLine.getPath());
-    }
-
     public RequestBody getRequestBody() {
         return requestBody;
     }

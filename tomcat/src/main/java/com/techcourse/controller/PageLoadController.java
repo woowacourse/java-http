@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import org.apache.catalina.http.ContentType;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
@@ -11,9 +12,7 @@ public class PageLoadController extends AbstractController {
 
     @Override
     public boolean isMatchesRequest(HttpRequest request) {
-        return request.getPath().endsWith(".css") ||
-                request.getPath().endsWith(".js") ||
-                request.getPath().endsWith(".html");
+        return ContentType.isValidFileExtension(request.getPath());
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ErrorController;
 import org.apache.catalina.controller.RequestMapper;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.CoyoteException;
@@ -82,7 +83,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handle(HttpRequest request, HttpResponse response) {
-        Controller controller = requestMapper.getController(request);
-        controller.service(request, response);
+        try {
+            Controller controller = requestMapper.getController(request);
+            controller.service(request, response);
+        } catch (Exception e) {
+            ErrorController errorController = new ErrorController();
+            errorController.service(request, response);
+        }
     }
 }

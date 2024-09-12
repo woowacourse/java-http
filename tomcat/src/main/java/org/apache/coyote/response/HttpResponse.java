@@ -12,6 +12,7 @@ public class HttpResponse {
 
     private static final String UNAUTHORIZED_FILENAME = "401.html";
     private static final String NOT_FOUND_FILENAME = "404.html";
+    private static final String INTERNAL_SERVER_ERROR_FILENAME = "500.html";
     private static final String CRLF = "\r\n";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String EMPTY_LINE = "";
@@ -51,6 +52,12 @@ public class HttpResponse {
             setContentType(ContentType.fromFileName(NOT_FOUND_FILENAME));
             setResponseBody(FILE_READER.read(NOT_FOUND_FILENAME));
         }
+    }
+
+    public void setInternalServerError() {
+        httpStatusCode = HttpStatusCode.INTERNAL_SERVER_ERROR;
+        setContentType(ContentType.fromFileName(INTERNAL_SERVER_ERROR_FILENAME));
+        setResponseBody(FILE_READER.read(INTERNAL_SERVER_ERROR_FILENAME));
     }
 
     private void setResponseBody(String rawBody) {

@@ -30,7 +30,7 @@ public class DispatcherServlet {
 
     public void doDispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Servlet handler = findHandler(request);
-        handler.handle(request, response);
+        handler.doService(request, response);
     }
 
     private Servlet findHandler(HttpServletRequest request) {

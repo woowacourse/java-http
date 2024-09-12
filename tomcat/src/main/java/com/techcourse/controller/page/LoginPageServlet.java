@@ -14,7 +14,7 @@ public class LoginPageServlet implements Servlet {
     private static final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (sessionManager.hasSession(request.getSessionId())) {
             response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
             return;

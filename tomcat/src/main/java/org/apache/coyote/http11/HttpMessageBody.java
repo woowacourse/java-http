@@ -14,10 +14,6 @@ public class HttpMessageBody {
         return new HttpMessageBody("");
     }
 
-    public byte[] getBytes() {
-        return body.getBytes();
-    }
-
     public void write(String message) {
         body = message;
     }

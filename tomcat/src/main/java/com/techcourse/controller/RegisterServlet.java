@@ -18,7 +18,7 @@ public class RegisterServlet implements Servlet {
 
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String account = request.getFormData(ACCOUNT_FORM_DATA);
         String password = request.getFormData(PASSWORD_FORM_DATA);
         String email = request.getFormData(EMAIL_FORM_DATA);

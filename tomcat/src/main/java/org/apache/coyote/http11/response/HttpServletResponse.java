@@ -50,14 +50,6 @@ public class HttpServletResponse {
         httpHeaders.putHeader(HttpHeaderName.LOCATION, uri);
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        responseLine.setHttpStatus(httpStatus);
-    }
-
-    public void putHeader(HttpHeaderName name, String value) {
-        httpHeaders.putHeader(name, value);
-    }
-
     public void flush(OutputStream outputStream) throws IOException {
         outputStream.write(resolveHttpMessage().getBytes());
         outputStream.flush();

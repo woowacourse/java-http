@@ -12,14 +12,6 @@ public class Session {
         this.sessionId = sessionId;
     }
 
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public Object getAttribute(String name) {
-        return attributes.get(name);
-    }
-
     public void setAttributes(String name, Object value) {
         attributes.put(name, value);
     }

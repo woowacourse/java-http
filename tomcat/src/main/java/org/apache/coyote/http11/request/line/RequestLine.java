@@ -27,9 +27,6 @@ public class RequestLine {
         return uri.getPath();
     }
 
-    public String getQueryParameter(String name) {
-        return uri.getQueryParameter(name);
-    }
 
     public boolean isMethod(Method target) {
         return method.equals(target);
@@ -45,10 +42,6 @@ public class RequestLine {
 
     public boolean isUriHome() {
         return uri.isHome();
-    }
-
-    public boolean isUriStartsWith(final Uri target) {
-        return uri.isStartsWith(target);
     }
 
     public HttpProtocol getProtocol() {

@@ -6,5 +6,5 @@ import org.apache.coyote.http11.response.HttpServletResponse;
 
 public interface Servlet {
 
-    void handle(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    void doService(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

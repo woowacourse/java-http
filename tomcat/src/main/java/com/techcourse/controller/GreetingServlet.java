@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpServletResponse;
 public class GreetingServlet implements Servlet {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.ok("Hello world!", "plain");
     }
 }

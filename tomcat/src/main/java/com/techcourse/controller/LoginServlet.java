@@ -21,7 +21,7 @@ public class LoginServlet implements Servlet {
     private static final String PASSWORD = "password";
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String account = request.getFormData(ACCOUNT);
         String password = request.getFormData(PASSWORD);
 

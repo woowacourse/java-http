@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class HttpCookies {
 
-    private static final String COOKIE = "Cookie";
     private static final String COOKIE_DELIMETER = "; ";
     private static final String COOKIE_KEY_VALUE_DELIMETER = "=";
 

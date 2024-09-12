@@ -22,6 +22,10 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
+    public boolean isRedirection() {
+        return statusCode.isRedirection();
+    }
+
     public String getReponseString() {
         return version.getVersionString() + RESPONSE_SPACE + statusCode.toStatus() + RESPONSE_SPACE;
     }

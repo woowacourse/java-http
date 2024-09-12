@@ -31,10 +31,6 @@ public class HttpResponse {
         header.setContentType(mimeType);
     }
 
-    public void setLocation(String location) {
-        header.setLocation(location);
-    }
-
     public void setCookie(String cookie) {
         header.setCookie(cookie);
     }
@@ -57,6 +53,10 @@ public class HttpResponse {
         return new Session(cookies.getJsessionid());
     }
 
+    public boolean isRedirection() {
+        return statusLine.isRedirection();
+    }
+
     public byte[] toByte() {
         StringJoiner stringJoiner = new StringJoiner(CRLF);
 
@@ -76,6 +76,14 @@ public class HttpResponse {
         System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
         System.arraycopy(body.getBody(), 0, response, headerBytes.length, body.getBodyLength());
         return response;
+    }
+
+    public String getLocation() {
+        return header.getLocation();
+    }
+
+    public void setLocation(String location) {
+        header.setLocation(location);
     }
 
     @Override

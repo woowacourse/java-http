@@ -88,6 +88,7 @@ class LoginControllerTest {
         loginController.service(request, response);
 
         // then
+        System.out.println(response);
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
         String expectedLocationHeader = "Location: " + "/401.html";
         String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();

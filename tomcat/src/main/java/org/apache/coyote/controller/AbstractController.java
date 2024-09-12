@@ -3,7 +3,7 @@ package org.apache.coyote.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import org.apache.coyote.ForwardResult;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.file.ResourceReader;
@@ -15,31 +15,42 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        ForwardResult result = execute(request, response);
+        HttpMethod method = request.getMethod();
 
-        MimeType mimeType = MimeType.from(FileExtension.from(request.getPath()));
-        response.setMimeType(mimeType);
-
-        if (result.isRedirection()) {
-            handleRedirection(response, result);
-            return;
+        if (HttpMethod.GET.equals(method)) {
+            doGet(request, response);
+        } else if (HttpMethod.POST.equals(method)) {
+            doPost(request, response);
+        } else {
+            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
         }
 
-        handleResponse(response, result);
+        if (response.isRedirection()) {
+            handleRedirection(response);
+            return;
+        }
+        handleResponse(response);
     }
 
-    protected abstract ForwardResult execute(HttpRequest request, HttpResponse response);
+    protected void doGet(HttpRequest request, HttpResponse response) {
+    }
 
-    private void handleRedirection(HttpResponse response, ForwardResult result) {
-        response.setLocation(result.path());
-        response.setStatus(result.statusCode());
+    protected void doPost(HttpRequest request, HttpResponse response) {
+    }
+
+    private void handleRedirection(HttpResponse response) {
+        String location = response.getLocation();
+        response.setLocation(location);
+        response.setMimeType(MimeType.from(FileExtension.from(location)));
         response.setBody("".getBytes());
     }
 
-    private void handleResponse(HttpResponse response, ForwardResult result) {
+    private void handleResponse(HttpResponse response) {
         try {
-            byte[] body = ResourceReader.read(result.path());
+            String location = response.getLocation();
+            byte[] body = ResourceReader.read(location);
             response.setStatus(HttpStatusCode.OK);
+            response.setMimeType(MimeType.from(FileExtension.from(location)));
             response.setBody(Arrays.toString(body).getBytes());
         } catch (URISyntaxException | IOException e) {
             response.setMimeType(MimeType.OTHER);

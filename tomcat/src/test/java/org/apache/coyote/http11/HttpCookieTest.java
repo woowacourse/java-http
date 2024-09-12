@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.exception.CoyoteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,7 +46,7 @@ class HttpCookieTest {
     @EmptySource
     void construct_Fail_InvalidFormat(String rawCookies) {
         assertThatThrownBy(() -> new HttpCookie(rawCookies))
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
     }
 
@@ -54,7 +54,7 @@ class HttpCookieTest {
     @Test
     void construct_Fail_DuplicatedCookieNames() {
         assertThatThrownBy(() -> new HttpCookie("a=a; a=b"))
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("쿠키의 이름은 중복될 수 없습니다.");
     }
 

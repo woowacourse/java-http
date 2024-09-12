@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Optional;
+import org.apache.coyote.exception.CoyoteException;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpHeaderType;
@@ -34,12 +34,12 @@ public class HttpRequest {
 
     public String getSession() {
         if (!hasSession()) {
-            throw new UncheckedServletException("세션이 존재하지 않습니다.");
+            throw new CoyoteException("세션이 존재하지 않습니다.");
         }
 
         return findCookie()
                 .map(HttpCookie::getSession)
-                .orElseThrow(() -> new UncheckedServletException("쿠키가 존재하지 않습니다."));
+                .orElseThrow(() -> new CoyoteException("쿠키가 존재하지 않습니다."));
     }
 
     private Optional<HttpCookie> findCookie() {

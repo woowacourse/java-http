@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.List;
+import org.apache.coyote.exception.CoyoteException;
 import org.apache.coyote.http11.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,7 +66,7 @@ class HttpRequestTest {
 
         // when & then
         assertThatThrownBy(httpRequest::getSession)
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("세션이 존재하지 않습니다.");
     }
 

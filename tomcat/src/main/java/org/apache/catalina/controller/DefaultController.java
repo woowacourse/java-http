@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.exception.CatalinaException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -27,7 +27,7 @@ public class DefaultController extends AbstractController {
 
     private String parseFileName(String path) {
         if (!path.startsWith(PATH_PREFIX)) {
-            throw new UncheckedServletException("요청 URI는 %s로 시작해야 합니다.".formatted(PATH_PREFIX));
+            throw new CatalinaException("요청 URI는 %s로 시작해야 합니다.".formatted(PATH_PREFIX));
         }
 
         String fileName = path.substring(path.indexOf(PATH_PREFIX) + PATH_PREFIX.length());

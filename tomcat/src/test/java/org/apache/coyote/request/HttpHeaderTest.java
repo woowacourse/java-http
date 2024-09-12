@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.List;
+import org.apache.coyote.exception.CoyoteException;
 import org.apache.coyote.http11.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class HttpHeaderTest {
     void construct_Fail(String invalidHeader) {
         List<String> headers = List.of("Host: localhost:8080", invalidHeader);
         assertThatThrownBy(() -> new HttpHeader(headers))
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
     }
 
@@ -76,7 +76,7 @@ class HttpHeaderTest {
 
         // when & then
         assertThatThrownBy(() -> httpHeader.get("Hos"))
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("Hos 헤더가 존재하지 않습니다.");
     }
 

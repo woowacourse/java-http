@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.CoyoteException;
 
 public class HttpHeader {
 
@@ -20,11 +20,10 @@ public class HttpHeader {
 
     public HttpHeader(List<String> rawHeaders) {
         if (rawHeaders == null) {
-            throw new UncheckedServletException("헤더는 null일 수 없습니다.");
+            throw new CoyoteException("헤더는 null일 수 없습니다.");
         }
 
-        this.headers = rawHeaders.stream()
-                .collect(Collectors.toMap(this::parseFieldName, this::parseFieldValue));
+        this.headers = rawHeaders.stream().collect(Collectors.toMap(this::parseFieldName, this::parseFieldValue));
     }
 
     private String parseFieldName(String rawHeader) {
@@ -34,19 +33,18 @@ public class HttpHeader {
 
     private String parseFieldValue(String rawHeader) {
         validateHeaderFormat(rawHeader);
-        return rawHeader.substring(rawHeader.indexOf(DELIMITER) + DELIMITER.length())
-                .trim();
+        return rawHeader.substring(rawHeader.indexOf(DELIMITER) + DELIMITER.length()).trim();
     }
 
     private void validateHeaderFormat(String rawHeader) {
         if (rawHeader == null || rawHeader.isBlank()) {
-            throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
         if (!rawHeader.contains(DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
         if (rawHeader.startsWith(DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
         }
     }
 
@@ -55,7 +53,7 @@ public class HttpHeader {
     }
 
     public String get(String name) {
-        return find(name).orElseThrow(() -> new UncheckedServletException(name + " 헤더가 존재하지 않습니다."));
+        return find(name).orElseThrow(() -> new CoyoteException(name + " 헤더가 존재하지 않습니다."));
     }
 
     public boolean contains(String name) {
@@ -67,8 +65,7 @@ public class HttpHeader {
     }
 
     public String buildMessage() {
-        return headers.keySet().stream()
-                .map(key -> key + DELIMITER + " " + headers.get(key))
+        return headers.keySet().stream().map(key -> key + DELIMITER + " " + headers.get(key))
                 .collect(Collectors.joining(CRLF));
     }
 }

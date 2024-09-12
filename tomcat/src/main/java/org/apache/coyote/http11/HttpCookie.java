@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.CoyoteException;
 
 public class HttpCookie {
 
@@ -31,7 +31,7 @@ public class HttpCookie {
 
     private Map<String, String> parse(String rawCookies) {
         if (rawCookies == null) {
-            throw new UncheckedServletException("cookie는 null일 수 없습니다.");
+            throw new CoyoteException("cookie는 null일 수 없습니다.");
         }
 
         return toMap(rawCookies);
@@ -43,7 +43,7 @@ public class HttpCookie {
                     .map(String::trim)
                     .collect(Collectors.toMap(this::parseCookieName, this::parseCookieValue));
         } catch (IllegalStateException e) {
-            throw new UncheckedServletException("쿠키의 이름은 중복될 수 없습니다.");
+            throw new CoyoteException("쿠키의 이름은 중복될 수 없습니다.");
         }
     }
 
@@ -59,13 +59,13 @@ public class HttpCookie {
 
     private void validateCookieFormat(String rawCookie) {
         if (rawCookie == null || rawCookie.isBlank()) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
         }
         if (!rawCookie.contains(NAME_VALUE_DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
         }
         if (rawCookie.startsWith(NAME_VALUE_DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
         }
     }
 

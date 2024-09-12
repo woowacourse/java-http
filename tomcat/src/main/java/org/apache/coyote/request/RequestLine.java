@@ -1,10 +1,10 @@
 package org.apache.coyote.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.CoyoteException;
 
 public class RequestLine {
 
@@ -41,19 +41,19 @@ public class RequestLine {
 
     private void validateHttpVersion(String httpVersion) {
         if (!httpVersion.equals(HTTP_VERSION)) {
-            throw new UncheckedServletException("HTTP 버전은 %s 만 허용됩니다.".formatted(HTTP_VERSION));
+            throw new CoyoteException("HTTP 버전은 %s 만 허용됩니다.".formatted(HTTP_VERSION));
         }
     }
 
     private void validateUri(String uri) {
         if (!uri.startsWith(PATH_PREFIX)) {
-            throw new UncheckedServletException("URI는 %s 로 시작해야 합니다.".formatted(PATH_PREFIX));
+            throw new CoyoteException("URI는 %s 로 시작해야 합니다.".formatted(PATH_PREFIX));
         }
     }
 
     private void validateParameterCount(String rawRequestLine) {
         if (rawRequestLine.split(DELIMITER).length != PARAMETER_COUNT) {
-            throw new UncheckedServletException(String.format("Request line의 인자는 %d개여야 합니다.", PARAMETER_COUNT));
+            throw new CoyoteException(String.format("Request line의 인자는 %d개여야 합니다.", PARAMETER_COUNT));
         }
     }
 
@@ -89,13 +89,13 @@ public class RequestLine {
 
     private void validateQueryFormat(String queryString) {
         if (queryString == null || queryString.isBlank()) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
         }
         if (!queryString.contains(QUERY_NAME_VALUE_DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
         }
         if (queryString.startsWith(QUERY_NAME_VALUE_DELIMITER) || queryString.endsWith(QUERY_NAME_VALUE_DELIMITER)) {
-            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+            throw new CoyoteException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
         }
     }
 

@@ -1,11 +1,11 @@
 package org.apache.coyote.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.CoyoteException;
 
 public class RequestBody {
 
@@ -37,11 +37,11 @@ public class RequestBody {
 
     private void validateBodyFormat(String rawData) {
         if (rawData == null || rawData.isBlank()) {
-            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+            throw new CoyoteException("올바르지 않은 Request Body 형식입니다.");
         }
 
         if (!rawData.contains(NAME_VALUE_DELIMITER) || rawData.startsWith(NAME_VALUE_DELIMITER)) {
-            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+            throw new CoyoteException("올바르지 않은 Request Body 형식입니다.");
         }
     }
 

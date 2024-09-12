@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.exception.CoyoteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,7 +43,7 @@ class RequestBodyTest {
     @ValueSource(strings = {"name=lee&age20", "name=lee&", "&name=lee", " "})
     void construct_Fail(String rawRequestBody) {
         assertThatThrownBy(() -> new RequestBody(rawRequestBody))
-                .isInstanceOf(UncheckedServletException.class)
+                .isInstanceOf(CoyoteException.class)
                 .hasMessage("올바르지 않은 Request Body 형식입니다.");
     }
 

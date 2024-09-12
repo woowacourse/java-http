@@ -18,10 +18,6 @@ public class HttpHeader {
         this.headers = new HashMap<>();
     }
 
-    public HttpHeader(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
     public HttpHeader(List<String> rawHeaders) {
         if (rawHeaders == null) {
             throw new UncheckedServletException("헤더는 null일 수 없습니다.");

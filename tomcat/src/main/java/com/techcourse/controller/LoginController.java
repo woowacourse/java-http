@@ -15,7 +15,6 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionService;
-import org.apache.util.ResourceReader;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
 
@@ -27,7 +26,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         String body = request.getBody();
-        Parser parser = BodyParserFactory.getParser(ContentType.FORM_DATA);
+        ContentType contentType = request.getContentType();
+        Parser parser = BodyParserFactory.getParser(contentType);
 
         Map<String, String> params = parser.parse(body);
         String account = params.get("account");
@@ -49,11 +49,9 @@ public class LoginController extends AbstractController {
 
     private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
         String path = "static/401.html";
-        String file = ResourceReader.readResource(path);
 
+        response.setStaticBody(path);
         response.setStatusLine(HttpStatus.UNAUTHORIZED);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(file);
     }
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {
@@ -79,9 +77,7 @@ public class LoginController extends AbstractController {
         HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
 
         String path = determinePagePath(cookie);
-        String resource = ResourceReader.readResource(path);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(resource);
+        response.setStaticBody(path);
     }
 
     private String determinePagePath(HttpCookie sessionCookie) {

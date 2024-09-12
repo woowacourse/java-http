@@ -3,11 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.service.UserService;
 import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
-import org.apache.util.ResourceReader;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
 
@@ -27,20 +25,16 @@ public class RegisterController extends AbstractController {
         userService.registerUser(account, password, email);
 
         String path = "static/index.html";
-        String resource = ResourceReader.readResource(path);
 
         response.setStatusLine(HttpStatus.OK);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(resource);
+        response.setStaticBody(path);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = "static/register.html";
-        String resource = ResourceReader.readResource(path);
 
         response.setStatusLine(HttpStatus.OK);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(resource);
+        response.setStaticBody(path);
     }
 }

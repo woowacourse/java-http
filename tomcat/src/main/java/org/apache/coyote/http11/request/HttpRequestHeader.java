@@ -14,9 +14,14 @@ public record HttpRequestHeader(
 
     public HttpRequestHeader(String request) {
         this(
-                new HttpRequestLine(request.split(System.lineSeparator())[0]),
+                extractRequestLine(request),
                 extractHeaders(request)
         );
+    }
+
+    private static HttpRequestLine extractRequestLine(String requestHeader) {
+        String firstLine = requestHeader.split(System.lineSeparator())[0];
+        return new HttpRequestLine(firstLine);
     }
 
     private static Map<String, String> extractHeaders(String requestHeader) {
@@ -32,14 +37,6 @@ public record HttpRequestHeader(
         return headers.containsKey(CONTENT_LENGTH);
     }
 
-    public int getContentLength() {
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
-    }
-
-    public String getContentType() {
-        return headers.get(CONTENT_TYPE);
-    }
-
     public Map<String, String> getCookies() {
         String cookie = headers.get(COOKIE);
         if (cookie == null) {
@@ -53,15 +50,19 @@ public record HttpRequestHeader(
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
     }
 
+    public int getContentLength() {
+        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+    }
+
+    public String getContentType() {
+        return headers.get(CONTENT_TYPE);
+    }
+
     public HttpMethod getHttpMethod() {
         return this.requestLine.httpMethod();
     }
 
     public String getPath() {
         return this.requestLine.path();
-    }
-
-    public String getQueryStringValue(String key) {
-        return this.requestLine.queryString().get(key);
     }
 }

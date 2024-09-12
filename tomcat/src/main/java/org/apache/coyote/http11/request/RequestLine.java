@@ -12,10 +12,14 @@ public class RequestLine {
     private static final String QUERY_START = "\\?";
     private static final String SPACE_DELIMITER = " ";
     private static final String URL_NO_QUERY = "?";
+
     private static final int QUERY_LINE_INDEX = 1;
     private static final int METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
     private static final int VERSION_INDEX = 2;
+
+    private static final int EXPECTED_REQUEST_LINE_TOKENS = 3;
+    private static final int QUERY_PARAM_PARTS = 2;
 
     private final HttpMethod method;
     private final String path;
@@ -39,6 +43,9 @@ public class RequestLine {
 
     public static RequestLine from(String requestLine) {
         String[] requestLineToken = requestLine.split(SPACE_DELIMITER);
+        if (requestLineToken.length != EXPECTED_REQUEST_LINE_TOKENS) {
+            throw new IllegalArgumentException("적절하지 않은 요청 라인입니다.");
+        }
 
         HttpMethod method = HttpMethod.from(requestLineToken[METHOD_INDEX]);
         String url = requestLineToken[URL_INDEX];
@@ -67,7 +74,9 @@ public class RequestLine {
         String[] queryList = queryLine.split(QUERY_DELIMITER);
         for (String query : queryList) {
             String[] queryParam = query.split(PARAM_DELIMITER);
-            queryParams.put(queryParam[0], queryParam[1]);
+            if (queryParam.length == QUERY_PARAM_PARTS) {
+                queryParams.put(queryParam[0], queryParam[1]);
+            }
         }
 
         return queryParams;

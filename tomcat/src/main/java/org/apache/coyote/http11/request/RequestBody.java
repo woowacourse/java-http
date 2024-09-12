@@ -13,6 +13,7 @@ public class RequestBody {
     private static final int LIMIT_SPLIT = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int BODY_PAIR_SIZE = 2;
 
     private final Map<String, String> body;
 
@@ -27,7 +28,7 @@ public class RequestBody {
         }
         return pairs.stream()
                 .map(pair -> pair.split(KEY_VALUE_DELIMITER, LIMIT_SPLIT))
-                .filter(pair -> pair.length == 2)
+                .filter(pair -> pair.length == BODY_PAIR_SIZE)
                 .collect(Collectors.toMap(splitStrings -> splitStrings[KEY_INDEX],
                         splitStrings -> splitStrings[VALUE_INDEX])
                 );

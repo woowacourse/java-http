@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {
 
-	@DisplayName("GET /register 요청을 처리한다.")
+	@DisplayName("GET /register 요청을 처리할 수 있다.")
 	@Test
 	void isSupport_WhenRequestMethodIsGet() {
 		HttpRequest request = new HttpRequest("GET /register HTTP/1.1", null, null);
@@ -23,7 +23,7 @@ class RegisterControllerTest {
 		assertThat(isSupport).isTrue();
 	}
 
-	@DisplayName("POST /register 요청을 처리한다.")
+	@DisplayName("POST /register 요청을 처리할 수 있다.")
 	@Test
 	void isSupport_WhenRequestMethodIsPost() {
 		HttpRequest request = new HttpRequest("POST /register HTTP/1.1", null, null);
@@ -32,6 +32,21 @@ class RegisterControllerTest {
 		boolean isSupport = controller.isSupport(request);
 
 		assertThat(isSupport).isTrue();
+	}
+
+	@DisplayName("회원가입 페이지를 반환한다.")
+	@Test
+	void doGet() throws Exception {
+		HttpRequest request = new HttpRequest("GET /register HTTP/1.1", List.of(), null);
+		HttpResponse response = new HttpResponse();
+
+		Controller controller = RegisterController.getInstance();
+		controller.service(request, response);
+
+		assertThat(response)
+			.extracting("startLine")
+			.extracting("statusCode")
+			.isEqualTo(HttpStatusCode.OK);
 	}
 
 	@DisplayName("회원가입에 성공한다.")

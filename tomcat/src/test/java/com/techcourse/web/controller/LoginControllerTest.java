@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
+import org.apache.coyote.http11.http.response.HttpStatusCode;
 import org.apache.coyote.http11.http.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,21 @@ class LoginControllerTest {
 		boolean isSupport = controller.isSupport(request);
 
 		assertThat(isSupport).isTrue();
+	}
+
+	@DisplayName("로그인 페이지를 반환한다.")
+	@Test
+	void doGet() throws Exception {
+		HttpRequest request = new HttpRequest("GET /login HTTP/1.1", List.of(), null);
+		HttpResponse response = new HttpResponse();
+
+		Controller controller = LoginController.getInstance();
+		controller.service(request, response);
+
+		assertThat(response)
+			.extracting("startLine")
+			.extracting("statusCode")
+			.isEqualTo(HttpStatusCode.OK);
 	}
 
 	@DisplayName("이미 로그인 된 회원이 GET /login 요청을 보내면 /index.html로 리다이렉트한다.")

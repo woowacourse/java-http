@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class HttpCookie {
     private static final String JSESSIONID_KEY = "JSESSIONID";
 
-    private Map<String, String> cookie;
+    private final Map<String, String> cookie;
 
     public HttpCookie(String cookieLines) {
         this.cookie = convertToCookie(cookieLines);

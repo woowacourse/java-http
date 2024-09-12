@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -35,7 +34,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

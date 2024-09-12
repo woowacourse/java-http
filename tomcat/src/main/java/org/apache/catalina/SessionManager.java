@@ -1,7 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.Manager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +8,8 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public SessionManager() {}
+    public SessionManager() {
+    }
 
     @Override
     public void add(Session session) {
@@ -25,5 +24,9 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public int size() {
+        return SESSIONS.size();
     }
 }

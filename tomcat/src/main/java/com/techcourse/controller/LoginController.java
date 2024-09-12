@@ -43,11 +43,10 @@ public class LoginController extends AbstractController {
 
         if (findUserByInfo(account, password)) {
             handleSuccessfulLogin(response, account);
+            return;
         }
 
-        if (!findUserByInfo(account, password)) {
-            handleFailedLogin(response);
-        }
+        handleFailedLogin(response);
     }
 
     private void handleCookieRequest(HttpCookie httpCookie, String responseBody, HttpResponse.HttpResponseBuilder response) {

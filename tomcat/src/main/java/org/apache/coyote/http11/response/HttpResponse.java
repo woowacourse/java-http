@@ -23,32 +23,6 @@ public class HttpResponse {
 		this.headers = new Headers();
 	}
 
-	public HttpResponse(
-		String versionOfProtocol,
-		int statusCode,
-		String statusMessage,
-		Map<String, String> headers
-	) {
-		this.versionOfProtocol = new VersionOfProtocol(versionOfProtocol);
-		this.statusCode = new StatusCode(statusCode);
-		this.statusMessage = new StatusMessage(statusMessage);
-		this.headers = new Headers(headers);
-	}
-
-	public HttpResponse(
-		String versionOfProtocol,
-		int statusCode,
-		String statusMessage,
-		Map<String, String> headers,
-		String body
-	) {
-		this.versionOfProtocol = new VersionOfProtocol(versionOfProtocol);
-		this.statusCode = new StatusCode(statusCode);
-		this.statusMessage = new StatusMessage(statusMessage);
-		this.headers = new Headers(headers);
-		this.body = new Body(body);
-	}
-
 	public String toPlainText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("%s %d %s \r\n", versionOfProtocol.value(), statusCode.value(), statusMessage.value()));
@@ -93,5 +67,25 @@ public class HttpResponse {
 			this.headers.add("Content-Type", "text/html;charset=utf-8");
 			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
 		}
+	}
+
+	public VersionOfProtocol getVersionOfProtocol() {
+		return versionOfProtocol;
+	}
+
+	public StatusCode getStatusCode() {
+		return statusCode;
+	}
+
+	public StatusMessage getStatusMessage() {
+		return statusMessage;
+	}
+
+	public Headers getHeaders() {
+		return headers;
+	}
+
+	public Body getBody() {
+		return body;
 	}
 }

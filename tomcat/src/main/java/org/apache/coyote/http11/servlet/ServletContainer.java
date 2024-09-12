@@ -3,10 +3,6 @@ package org.apache.coyote.http11.servlet;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.coyote.http11.controller.LoginServlet;
-import org.apache.coyote.http11.controller.RegisterServlet;
-import org.apache.coyote.http11.controller.Servlet;
-import org.apache.coyote.http11.controller.StaticServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Path;
 import org.apache.coyote.http11.response.HttpResponse;

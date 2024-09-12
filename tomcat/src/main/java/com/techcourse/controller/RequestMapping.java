@@ -19,6 +19,7 @@ public class RequestMapping {
 
     public Optional<Controller> getController(HttpRequest request) {
         URI requestUri = request.getUri();
-        return Optional.ofNullable(mappings.get(requestUri));
+        Controller controller = mappings.get(requestUri);
+        return Optional.ofNullable(controller);
     }
 }

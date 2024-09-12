@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
 import com.techcourse.controller.RequestMapping;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.converter.MessageConverter;
 import org.apache.coyote.http11.file.FileFinder;
@@ -52,13 +50,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void delegateDataProcess(HttpRequest request, HttpResponse response) throws Exception {
+    private void delegateDataProcess(HttpRequest request, HttpResponse response) {
         RequestMapping requestMapping = new RequestMapping();
-        Optional<Controller> optionalController = requestMapping.getController(request);
-        if (optionalController.isPresent()) {
-            Controller controller = optionalController.get();
-            controller.service(request, response);
-        }
+        requestMapping.getController(request)
+                .ifPresent(controller -> controller.service(request, response));
     }
 
     private void processWhenHasNoRedirect(HttpResponse response, HttpRequest request) throws IOException {

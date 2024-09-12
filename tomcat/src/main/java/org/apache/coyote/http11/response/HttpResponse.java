@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.util.StaticFileResponseUtils;
 
 public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
@@ -29,7 +30,7 @@ public class HttpResponse {
 
     public static HttpResponse notFound() {
         return new HttpResponse(new HttpResponseHeaders(), HttpStatus.NOT_FOUND,
-                StaticFileResponseUtils.makeResponseBody("/404.html"));
+                StaticFileResponseUtils.readStaticFile("/404.html"));
     }
 
     public void sendTextFiles(String text) {
@@ -41,14 +42,14 @@ public class HttpResponse {
 
     public void sendStaticResource(String filePath) {
         status = HttpStatus.OK;
-        body = StaticFileResponseUtils.makeResponseBody(filePath);
+        body = StaticFileResponseUtils.readStaticFile(filePath);
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
         headers.addContentLength(body.getBytes().length);
     }
 
     public void sendStaticResource(HttpStatus status, String filePath) {
         this.status = status;
-        body = StaticFileResponseUtils.makeResponseBody(filePath);
+        body = StaticFileResponseUtils.readStaticFile(filePath);
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
         headers.addContentLength(body.getBytes().length);
     }

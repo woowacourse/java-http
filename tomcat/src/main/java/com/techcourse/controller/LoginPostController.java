@@ -28,22 +28,22 @@ public class LoginPostController implements HttpHandler {
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         validateFormParameters(request);
-
+        HttpResponse response;
         try {
             User user = findUser(request);
             log.info("로그인 성공! account: {}", user.getAccount());
 
-            HttpResponse response = HttpResponse.found(INDEX_HTML_URL);
+            response = HttpResponse.found(INDEX_HTML_URL);
 
             if (!request.hasSession()) {
                 Session session = addSession(user);
                 response.setCookie(HttpCookie.from(session));
             }
-
-            return response;
         } catch (UnauthorizedException e) {
-            return HttpResponse.found(UNAUTHORIZED_HTML_URL);
+            response = HttpResponse.found(UNAUTHORIZED_HTML_URL);
         }
+
+        return response;
     }
 
     private void validateFormParameters(HttpRequest request) {

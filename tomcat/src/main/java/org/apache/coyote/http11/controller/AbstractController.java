@@ -7,7 +7,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class AbstractController implements Controller {
     private static final String POST_METHOD = "POST";
     private static final String GET_METHOD = "GET";
-    private static final String CHARSET_UTF8 = ";charset=UTF-8";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -34,6 +33,6 @@ public class AbstractController implements Controller {
         String responseBody = RequestFactory.getResponseBody(request);
         response.setBody(responseBody);
         response.setFieldValue("Content-Length", String.valueOf(responseBody.length()));
-        response.setFieldValue("Content-Type", request.getMimeType() + CHARSET_UTF8);
+        response.setFieldValue("Content-Type", request.getMimeType());
     }
 }

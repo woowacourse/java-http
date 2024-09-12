@@ -11,6 +11,7 @@ import com.techcourse.model.User;
 
 public class HttpRequest {
     private static final String ALL_MIME_TYPE = "*/*";
+    private static final String CHARSET_UTF8 = ";charset=UTF-8";
 
     private final RequestLine requestLine;
     private final RequestHeader headers;
@@ -50,9 +51,9 @@ public class HttpRequest {
         String mimeType = headers.getMimeType();
         if (mimeType.isBlank() || mimeType.equals(ALL_MIME_TYPE)) {
             String extension = getExtension();
-            return MimeTypeMaker.getMimeTypeFromExtension(extension);
+            mimeType = MimeTypeMaker.getMimeTypeFromExtension(extension);
         }
-        return mimeType;
+        return mimeType + CHARSET_UTF8;
     }
 
     private String getExtension() {

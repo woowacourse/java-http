@@ -11,7 +11,7 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestGeneratorTest {
+class HttpRequestReaderTest {
 
     @DisplayName("Request 생성 테스트")
     @Test
@@ -29,7 +29,7 @@ class RequestGeneratorTest {
                         """));
 
         // when
-        HttpRequest request = RequestGenerator.accept(reader);
+        HttpRequest request = HttpRequestReader.accept(reader);
 
         // then
         assertAll(

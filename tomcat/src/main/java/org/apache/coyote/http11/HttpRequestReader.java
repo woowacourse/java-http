@@ -9,7 +9,7 @@ import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.request.RequestParameters;
 
-public class RequestGenerator {
+public class HttpRequestReader {
 
     public static HttpRequest accept(BufferedReader reader) throws IOException {
         String firstLine = reader.readLine();

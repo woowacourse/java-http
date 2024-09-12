@@ -1,7 +1,10 @@
 package org.apache.coyote.util;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import org.apache.coyote.request.HttpRequestBody;
 
@@ -20,10 +23,26 @@ public class RequestBodyParser {
             return Arrays.stream(body.value().split(FORM_DATA_DELIMITER))
                     .map(data -> data.split(KEY_VALUE_DELIMITER))
                     .collect(Collectors.toMap(
-                            query -> query[KEY_INDEX],
-                            query -> query[VALUE_INDEX]
+                            RequestBodyParser::parseKey,
+                            RequestBodyParser::parseValue,
+                            mergeOfFormDataDuplicateParameter()
                     ));
         }
         return Map.of();
+    }
+
+    private static String parseKey(String[] queryParameter) {
+        return queryParameter[KEY_INDEX];
+    }
+
+    private static String parseValue(String[] queryParameter) {
+        if (queryParameter.length == 1) {
+            return "";
+        }
+        return queryParameter[VALUE_INDEX];
+    }
+
+    private static BinaryOperator<String> mergeOfFormDataDuplicateParameter() {
+        return (existsValue, newValue) -> newValue;
     }
 }

@@ -6,10 +6,17 @@ import java.util.Map;
 import org.apache.coyote.session.Session;
 
 public class SessionManager implements Manager {
-    // static!
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static SessionManager instance;
 
-    public SessionManager() {
+    private SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        if (instance == null) {
+            return new SessionManager();
+        }
+        return instance;
     }
 
     @Override

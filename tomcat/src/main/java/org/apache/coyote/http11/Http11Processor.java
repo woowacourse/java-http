@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +85,6 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while (!(line = bufferedReader.readLine()).isEmpty()) {
             String[] header = line.split(HEADER_DELIMITER);
-            System.out.println(header[0]);
             requestHeaders.put(header[0], header[1]);
         }
         return Collections.unmodifiableMap(requestHeaders);
@@ -97,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
             OutputStream outputStream
     ) throws IOException {
         if (url.equals("/")) {
-            createHttpResponse(
+            writeHttpResponse(
                     "Hello world!",
                     createHttpResponseHeader(version + " 200 OK ", "text/html", "Hello world!"),
                     outputStream);
@@ -109,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = Files.probeContentType(path);
 
         String responseHeader = createHttpResponseHeader(result[0], contentType, responseBody);
-        createHttpResponse(responseBody, responseHeader, outputStream);
+        writeHttpResponse(responseBody, responseHeader, outputStream);
     }
 
     private String[] determineGetResponse(String url, String version, Map<String, String> requestHeaders) {
@@ -140,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader,
             OutputStream outputStream
     ) throws IOException {
-        String[] requestBody = readRequestBody(requestHeaders, reader);
+        Map<String, String> requestBody = readRequestBody(requestHeaders, reader);
         String[] responseHeaderAndPath = determinePostResponse(url, version, requestBody);
 
         final Path path = getPath(responseHeaderAndPath);
@@ -148,10 +148,10 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = Files.probeContentType(path);
 
         String responseHeader = createHttpResponseHeader(responseHeaderAndPath[0], contentType, responseBody);
-        createHttpResponse(responseBody, responseHeader, outputStream);
+        writeHttpResponse(responseBody, responseHeader, outputStream);
     }
 
-    private String[] determinePostResponse(String url, String version, String[] requestBody) {
+    private String[] determinePostResponse(String url, String version, Map<String, String> requestBody) {
         String[] result = new String[2];
         if (url.startsWith("/login")) {
             result = doLogin(version, requestBody);
@@ -162,13 +162,13 @@ public class Http11Processor implements Runnable, Processor {
         return result;
     }
 
-    private String[] doLogin(String version, String[] requestBody) {
+    private String[] doLogin(String version, Map<String, String> requestBody) {
         String[] result = new String[2];
         result[0] = createResponseHeader(version, FOUND, "/index.html");
         result[1] = "static/index.html";
 
-        String account = requestBody[0].split(ASSIGN_OPERATOR)[1];
-        String password = requestBody[1].split(ASSIGN_OPERATOR)[1];
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
@@ -217,14 +217,21 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", user);
     }
 
-    private String[] readRequestBody(Map<String, String> requestHeaders, BufferedReader reader) throws IOException {
+    private Map<String, String> readRequestBody(Map<String, String> requestHeaders, BufferedReader reader) throws IOException {
+        Map<String, String> result = new HashMap<>();
         int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        return new String(buffer).split(PARAMETER_SEPARATOR);
+        String[] params = new String(buffer).split(PARAMETER_SEPARATOR);
+        for(String param: params) {
+            String[] body = param.split(ASSIGN_OPERATOR);
+            result.put(body[0], body[1]);
+        }
+
+        return result;
     }
 
-    private String[] doRegister(String version, String[] requestBody) {
+    private String[] doRegister(String version, Map<String, String> requestBody) {
         String[] result = new String[2];
         result[0] = createResponseHeader(version, FOUND, "/index.html");
         result[1] = "static/index.html";
@@ -234,13 +241,8 @@ public class Http11Processor implements Runnable, Processor {
         return result;
     }
 
-    private User createUser(String[] requestBody) {
-        Map<String, String> userInfo = new HashMap<>();
-        for (String query : requestBody) {
-            String[] param = query.split(ASSIGN_OPERATOR);
-            userInfo.put(param[0], param[1]);
-        }
-        return new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
+    private User createUser(Map<String, String> requestBody) {
+        return new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
     }
 
     private static String createHttpResponseHeader(String responseHeader, String contentType, String responseBody) {
@@ -250,7 +252,7 @@ public class Http11Processor implements Runnable, Processor {
                 CONTENT_LENGTH + HEADER_DELIMITER + responseBody.getBytes().length + " ");
     }
 
-    private void createHttpResponse(String responseBody, String responseHeader, OutputStream outputStream)
+    private void writeHttpResponse(String responseBody, String responseHeader, OutputStream outputStream)
             throws IOException {
         final var response = String.join("\r\n",
                 responseHeader,

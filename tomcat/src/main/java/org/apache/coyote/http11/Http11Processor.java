@@ -20,6 +20,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String SERVER_ERR_PAGE = "/500.html";
+
     private final Socket connection;
     private final SessionIdGenerator generator;
 
@@ -59,9 +62,9 @@ public class Http11Processor implements Runnable, Processor {
             Controller handler = findHandler(request);
             handler.service(request, response);
         } catch (HandlerNotFoundException e) {
-            response.sendRedirect("/404.html");
+            response.sendRedirect(NOT_FOUND_PAGE);
         } catch (Exception e) {
-            response.sendRedirect("/500.html");
+            response.sendRedirect(SERVER_ERR_PAGE);
         }
     }
 

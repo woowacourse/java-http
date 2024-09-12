@@ -9,8 +9,12 @@ import org.apache.coyote.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static final String REGISTER_SUCCESS_PAGE = "/index.html";
+    private static final String REGISTER_PAGE = "/register.html";
+    private static final String REGISTER_PATH = "/register";
+
     public RegisterController() {
-        super("/register");
+        super(REGISTER_PATH);
     }
 
     @Override
@@ -22,11 +26,11 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        response.sendRedirect("/index.html");
+        response.sendRedirect(REGISTER_SUCCESS_PAGE);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.addStaticBody("/register.html");
+        response.addStaticBody(REGISTER_PAGE);
     }
 }

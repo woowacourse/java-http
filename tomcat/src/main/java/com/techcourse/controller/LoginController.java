@@ -10,10 +10,14 @@ import org.apache.coyote.session.Session;
 
 public class LoginController extends AbstractController {
 
-    public static final String SESSION_USER_KEY = "user";
+    private static final String SESSION_USER_KEY = "user";
+    private static final String LOGIN_FAIL_PAGE = "/401.html";
+    private static final String LOGIN_SUCCESS_PAGE = "/index.html";
+    private static final String LOGIN_PAGE = "/login.html";
+    public static final String LOGIN_PATH = "/login";
 
     public LoginController() {
-        super("/login");
+        super(LOGIN_PATH);
     }
 
     @Override
@@ -28,9 +32,9 @@ public class LoginController extends AbstractController {
                                 acceptLogin(request, response, user);
                                 return;
                             }
-                            response.sendRedirect("/401.html");
+                            response.sendRedirect(LOGIN_FAIL_PAGE);
                         },
-                        () -> response.sendRedirect("/401.html")
+                        () -> response.sendRedirect(LOGIN_FAIL_PAGE)
                 );
     }
 
@@ -38,16 +42,16 @@ public class LoginController extends AbstractController {
         Session session = request.getSession();
         session.setAttribute(SESSION_USER_KEY, user);
         response.addCookie(Session.SESSION_COOKIE_KEY, session.getId());
-        response.sendRedirect("/index.html");
+        response.sendRedirect(LOGIN_SUCCESS_PAGE);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (hasUser(request)) {
-            response.sendRedirect("/index.html");
+            response.sendRedirect(LOGIN_SUCCESS_PAGE);
             return;
         }
-        response.addStaticBody("/login.html");
+        response.addStaticBody(LOGIN_PAGE);
     }
 
     private boolean hasUser(HttpRequest request) {

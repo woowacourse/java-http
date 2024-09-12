@@ -15,6 +15,10 @@ import org.apache.coyote.http11.HttpHeaderName;
 
 public class Http11Response implements HttpResponse {
 
+    private static final String RESOURCE_PATH_PREFIX = "static";
+    private static final String COOKIE_DELIMITER = "=";
+    private static final String DEFAULT_CHARSET = ";charset=utf-8";
+
     private Http11ResponseStartLine startLine;
     private final Http11ResponseHeaders headers;
     private String body;
@@ -38,7 +42,7 @@ public class Http11Response implements HttpResponse {
 
     @Override
     public void addStaticBody(String name) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + name);
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_PATH_PREFIX + name);
         if (resource == null) {
             throw new IllegalArgumentException("존재하지 않는 자원입니다.");
         }
@@ -50,12 +54,12 @@ public class Http11Response implements HttpResponse {
 
     @Override
     public void addCookie(String key, String value) {
-        addHeader(SET_COOKIE, key + "=" + value);
+        addHeader(SET_COOKIE, key + COOKIE_DELIMITER + value);
     }
 
     @Override
     public void addContentType(String accept) {
-        addHeader(CONTENT_TYPE, accept + ";charset=utf-8");
+        addHeader(CONTENT_TYPE, accept + DEFAULT_CHARSET);
     }
 
     @Override

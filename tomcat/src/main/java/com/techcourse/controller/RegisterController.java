@@ -27,7 +27,7 @@ public class RegisterController extends AbstractController {
             responseBuilder.status(Status.BAD_REQUEST);
             return;
         }
-        if (existAccount(body.get("account"))) {
+        if (existsAccount(body.get("account"))) {
             responseBuilder.status(Status.CONFLICT);
             return;
         }
@@ -40,7 +40,7 @@ public class RegisterController extends AbstractController {
                 !body.containsKey("email");
     }
 
-    private boolean existAccount(String account) {
+    private boolean existsAccount(String account) {
         return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 

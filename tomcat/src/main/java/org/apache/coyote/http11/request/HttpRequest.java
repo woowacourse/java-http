@@ -100,13 +100,13 @@ public record HttpRequest(
     }
 
     private static String extractBody(List<String> lines) {
-        if (lines.size() > 1 && existBodySeparatorEmptyLine(lines)) {
+        if (lines.size() > 1 && existsBodySeparatorEmptyLine(lines)) {
             return lines.getLast();
         }
         return null;
     }
 
-    private static boolean existBodySeparatorEmptyLine(List<String> lines) {
+    private static boolean existsBodySeparatorEmptyLine(List<String> lines) {
         return lines.get(lines.size() - 2).isEmpty();
     }
 

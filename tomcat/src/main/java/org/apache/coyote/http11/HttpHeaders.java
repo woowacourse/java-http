@@ -57,6 +57,11 @@ public class HttpHeaders {
         fields.put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
+    public void setCookie(HttpCookie cookie) {
+        cookies.add(cookie);
+        fields.put(SET_COOKIE, cookie.headerFormat());
+    }
+
     public long getContentLength() {
         String contentLength = fields.get(CONTENT_LENGTH);
         if (contentLength == null) {
@@ -76,10 +81,5 @@ public class HttpHeaders {
     @Override
     public String toString() {
         return fields.toString();
-    }
-
-    public void setCookie(HttpCookie cookie) {
-        cookies.add(cookie);
-        fields.put(SET_COOKIE, cookie.headerFormat());
     }
 }

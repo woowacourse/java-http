@@ -38,16 +38,23 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
-            HttpRequest request = httpRequestReader.read();
-            HttpResponse response = requestHandler.handle(request);
-            String formattedResponse = response.toResponse();
-
-            outputStream.write(formattedResponse.getBytes());
-            outputStream.flush();
+            HttpRequest request = readRequest(bufferedReader);
+            sendResponse(request, outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+    
+    private HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
+        HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
+        return httpRequestReader.read();
+    }
+    
+    private void sendResponse(HttpRequest request, OutputStream outputStream) throws IOException {
+        HttpResponse response = requestHandler.handle(request);
+        String formattedResponse = response.toResponse();
+        
+        outputStream.write(formattedResponse.getBytes());
+        outputStream.flush();
     }
 }

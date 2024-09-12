@@ -31,7 +31,7 @@ public class AbstractController implements Controller {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatusLine("200", "OK");
 
-        String responseBody = ResponseFactory.getResponseBody(request);
+        String responseBody = ResponseFactory.getResponseBody(request.getRequestUri());
         response.setBody(responseBody);
         response.setFieldValue("Content-Length", String.valueOf(responseBody.length()));
         response.setFieldValue("Content-Type", request.getMimeType());

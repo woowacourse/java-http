@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseFactory {
@@ -43,8 +42,7 @@ public class ResponseFactory {
         return response.getBody();
     }
 
-    public static String getResponseBody(HttpRequest request) throws IOException {
-        String requestUri = request.getRequestUri();
+    public static String getResponseBody(String requestUri) throws IOException {
         ClassLoader classLoader = RequestFactory.class.getClassLoader();
         URL resourceUrl = classLoader.getResource(STATIC_PATH + requestUri);
         if (Objects.isNull(resourceUrl)) {

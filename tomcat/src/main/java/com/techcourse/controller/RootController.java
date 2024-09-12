@@ -12,8 +12,8 @@ public class RootController extends AbstractController {
     private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
 
     @Override
-    public boolean matchesRequest(HttpRequest httpRequest) {
-        return ROOT_PATH.equals(httpRequest.getPath());
+    public boolean matchesRequest(HttpRequest request) {
+        return ROOT_PATH.equals(request.getPath());
     }
 
     @Override

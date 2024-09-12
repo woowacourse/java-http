@@ -26,7 +26,7 @@ public class HttpRequestReceiver {
         return new HttpRequest(header, body);
     }
 
-    private static String receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
+    private String receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
         StringBuilder sb = new StringBuilder();
         while (true) {
             String input = bufferedReader.readLine();
@@ -38,7 +38,7 @@ public class HttpRequestReceiver {
         return sb.toString();
     }
 
-    private static String receiveRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+    private String receiveRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] bodyChars = new char[contentLength];
         bufferedReader.read(bodyChars, 0, contentLength);
         return new String(bodyChars);

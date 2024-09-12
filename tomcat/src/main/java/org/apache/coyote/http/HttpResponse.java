@@ -1,12 +1,14 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.http.HttpVersion.HTTP_1_1;
-
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+
+    private static final String LINE_BREAK = "\r\n";
+    private static final String SPACE = " ";
+    private static final String HEADER_SEPARATOR = ": ";
 
     private final HttpVersion httpVersion;
     private final StatusCode statusCode;
@@ -21,7 +23,7 @@ public class HttpResponse {
     }
 
     public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder().withHttpVersion(HTTP_1_1);
+        return new HttpResponseBuilder().withHttpVersion(HttpVersion.HTTP_1_1);
     }
 
     public static class HttpResponseBuilder {
@@ -58,19 +60,35 @@ public class HttpResponse {
     public byte[] getBytes() {
         StringBuilder responseBuilder = new StringBuilder();
 
-        responseBuilder.append(httpVersion.getVersion()).append(" ")
-                .append(statusCode.getStatusCode()).append(" ").append("\r\n");
+        appendStatusLine(responseBuilder, httpVersion, statusCode);
+        appendHeaders(responseBuilder, headers);
+        appendBody(responseBuilder, responseBody);
 
+        return responseBuilder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    private void appendStatusLine(StringBuilder responseBuilder, HttpVersion httpVersion, StatusCode statusCode) {
+        responseBuilder.append(httpVersion.getVersion())
+                .append(SPACE)
+                .append(statusCode.getStatusCode())
+                .append(SPACE)
+                .append(LINE_BREAK);
+    }
+
+    private void appendHeaders(StringBuilder responseBuilder, Map<String, String> headers) {
         for (Map.Entry<String, String> header : headers.entrySet()) {
-            responseBuilder.append(header.getKey()).append(": ").append(header.getValue()).append(" ").append("\r\n");
+            responseBuilder.append(header.getKey())
+                    .append(HEADER_SEPARATOR)
+                    .append(header.getValue())
+                    .append(SPACE)
+                    .append(LINE_BREAK);
         }
+        responseBuilder.append(LINE_BREAK);
+    }
 
-        responseBuilder.append("\r\n");
-
+    private void appendBody(StringBuilder responseBuilder, String responseBody) {
         if (responseBody != null && !responseBody.isEmpty()) {
             responseBuilder.append(responseBody);
         }
-
-        return responseBuilder.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.catalina.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.stream.Stream;
 import org.apache.coyote.http11.response.ResponseFile;
@@ -39,5 +40,16 @@ class StaticResourceReaderTest {
                 Arguments.of("/index.html", true),
                 Arguments.of("/notfound.html", false)
         );
+    }
+
+    @DisplayName("존재하지 않는 리소스를 읽으려고 시도하면 예외가 발생한다.")
+    @Test
+    void readNotExistResource() {
+        // given
+        String path = "/some/path/to/not/exist";
+
+        // when & then
+        assertThatThrownBy(() -> StaticResourceReader.read(path))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

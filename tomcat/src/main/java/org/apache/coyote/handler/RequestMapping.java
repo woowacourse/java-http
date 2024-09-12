@@ -1,13 +1,14 @@
 package org.apache.coyote.handler;
 
 import java.util.Objects;
+import org.apache.coyote.http11.request.HttpMethod;
 
 public class RequestMapping {
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String path;
 
-    public RequestMapping(String httpMethod, String path) {
+    public RequestMapping(HttpMethod httpMethod, String path) {
         this.httpMethod = httpMethod;
         this.path = path;
     }

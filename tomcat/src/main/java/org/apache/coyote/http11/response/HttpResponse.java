@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.Map;
 
@@ -24,6 +24,7 @@ public record HttpResponse(
         stringBuilder
                 .append(System.lineSeparator())
                 .append(body);
+
         return stringBuilder.toString();
     }
 }

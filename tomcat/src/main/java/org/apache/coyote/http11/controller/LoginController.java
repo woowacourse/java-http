@@ -3,7 +3,7 @@ package org.apache.coyote.http11.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.Http11Cookie;
-import org.apache.coyote.http11.Session;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;

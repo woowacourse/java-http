@@ -39,8 +39,7 @@ public class HttpResponse {
 
     private String response2xx() {
         return String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
-                includeCookie(),
+                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase() + " ",
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -49,7 +48,7 @@ public class HttpResponse {
 
     private String response3xx() {
         return String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase(),
+                "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getStatusPhrase() + " ",
                 includeCookie(),
                 "Location: http://localhost:8080" + path,
                 "Content-Type: text/" + fileType + ";charset=utf-8 ");

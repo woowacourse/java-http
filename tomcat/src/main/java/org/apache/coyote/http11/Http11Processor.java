@@ -42,8 +42,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(request);
             delegateDataProcess(request, response);
             processWhenHasNoRedirect(response, request);
-            MessageConverter.convertHttpResponseToMessage(response);
-            bufferedWriter.write(MessageConverter.convertHttpResponseToMessage(response));
+            String httpResponseMessage = MessageConverter.convertHttpResponseToMessage(response);
+            bufferedWriter.write(httpResponseMessage);
             bufferedWriter.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

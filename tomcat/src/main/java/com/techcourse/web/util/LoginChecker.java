@@ -14,7 +14,7 @@ public class LoginChecker {
 		}
 
 		String sessionId = cookie.getJsessionid();
-		if (sessionId == null) {
+		if (sessionId == null || sessionId.isBlank()) {
 			return false;
 		}
 

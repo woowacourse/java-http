@@ -21,60 +21,59 @@ public class LoginController extends AbstractController {
     private static final String SESSION_USER_NAME = "user";
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (validateUserInput(httpRequest)) {
             log.error("입력하지 않은 항목이 있습니다.");
-            return redirectPage(httpRequest, LOGIN_PATH);
+            redirectPage(httpRequest, httpResponse, LOGIN_PATH);
+            return;
         }
-        return acceptLogin(httpRequest);
+        acceptLogin(httpRequest, httpResponse);
     }
 
     private boolean validateUserInput(HttpRequest httpRequest) {
         return !httpRequest.containsBody(ACCOUNT) || !httpRequest.containsBody(PASSWORD);
     }
 
-    private HttpResponse acceptLogin(HttpRequest httpRequest) {
+    private void acceptLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 계정입니다"));
         if (user.checkPassword(password)) {
-            return redirectWithCookie(httpRequest, user);
+            redirectWithCookie(httpRequest, httpResponse, user);
+            return;
         }
         log.error("비밀번호 불일치");
         throw new UnauthorizedException("존재하지 않는 계정입니다");
     }
 
-    private static HttpResponse redirectWithCookie(HttpRequest httpRequest, User user) {
+    private void redirectWithCookie(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
         Session session = httpRequest.getSession();
         session.setAttribute(SESSION_USER_NAME, user);
         log.info(user.toString());
-        return HttpResponse.found(httpRequest)
-                .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
-                .location(INDEX_PATH)
-                .build();
+        httpResponse.found(httpRequest);
+        httpResponse.setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId());
+        httpResponse.location(INDEX_PATH);
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         Session session = httpRequest.getSession();
         if (!session.hasAttribute(SESSION_USER_NAME)) {
-            return HttpResponse.ok(httpRequest)
-                    .staticResource(LOGIN_PATH)
-                    .build();
+            httpResponse.ok(httpRequest);
+            httpResponse.staticResource(LOGIN_PATH);
+            return;
         }
         User user = (User) session.getAttribute(SESSION_USER_NAME);
         log.info(user.toString());
-        return HttpResponse.found(httpRequest)
-                .setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId())
-                .location(INDEX_PATH)
-                .build();
+        httpResponse.found(httpRequest);
+        httpResponse.setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId());
+        httpResponse.location(INDEX_PATH);
     }
 
-    private HttpResponse redirectPage(HttpRequest httpRequest, String path) {
-        return HttpResponse.found(httpRequest)
-                .location(path)
-                .build();
+    private void redirectPage(HttpRequest httpRequest, HttpResponse httpResponse, String path) {
+        httpResponse.found(httpRequest);
+        httpResponse.location(path);
     }
 }

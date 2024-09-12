@@ -20,8 +20,9 @@ class HttpResponseTest {
                 "Connection: keep-alive ",
                 "");
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        assertThatThrownBy(() -> HttpResponse.ok(httpRequest).staticResource("/ln"))
+        assertThatThrownBy(() -> httpResponse.staticResource("/ln"))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -34,14 +35,14 @@ class HttpResponseTest {
                 "Connection: keep-alive ",
                 "");
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = HttpResponse.found(httpRequest)
-                .location("/index")
-                .setCookie("JSESSIONID=abcde")
-                .contentLength("89")
-                .contentType("test")
-                .responseBody("testResponseBody")
-                .build();
+        httpResponse.found(httpRequest);
+        httpResponse.location("/index");
+        httpResponse.setCookie("JSESSIONID=abcde");
+        httpResponse.contentLength("89");
+        httpResponse.contentType("test");
+        httpResponse.responseBody("testResponseBody");
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found".getBytes())

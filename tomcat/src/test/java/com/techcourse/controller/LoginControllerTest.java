@@ -31,10 +31,11 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(login);
+        HttpResponse httpResponse = new HttpResponse();
         String id = httpRequest.getSession().getId();
 
         LoginController loginController = new LoginController();
-        HttpResponse httpResponse = loginController.doPost(httpRequest);
+        loginController.doPost(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found ".getBytes())
@@ -55,10 +56,11 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(login);
+        HttpResponse httpResponse = new HttpResponse();
 
         LoginController loginController = new LoginController();
 
-        assertThatThrownBy(() -> loginController.doPost(httpRequest))
+        assertThatThrownBy(() -> loginController.doPost(httpRequest, httpResponse))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -75,10 +77,11 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(login);
+        HttpResponse httpResponse = new HttpResponse();
 
         LoginController loginController = new LoginController();
 
-        assertThatThrownBy(() -> loginController.doPost(httpRequest))
+        assertThatThrownBy(() -> loginController.doPost(httpRequest, httpResponse))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -97,7 +100,8 @@ class LoginControllerTest {
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(login);
 
         LoginController loginController = new LoginController();
-        HttpResponse httpResponse = loginController.doPost(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginController.doPost(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found ".getBytes())
@@ -117,7 +121,8 @@ class LoginControllerTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         LoginController loginController = new LoginController();
-        HttpResponse httpResponse = loginController.doGet(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginController.doGet(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 200 OK ".getBytes())
@@ -141,7 +146,8 @@ class LoginControllerTest {
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(login);
 
         LoginController loginController = new LoginController();
-        HttpResponse httpResponse = loginController.doGet(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginController.doGet(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 200 OK ".getBytes())

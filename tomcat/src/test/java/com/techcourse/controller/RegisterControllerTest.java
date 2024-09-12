@@ -27,9 +27,10 @@ class RegisterControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(register);
+        HttpResponse httpResponse = new HttpResponse();
 
         RegisterController registerController = new RegisterController();
-        HttpResponse httpResponse = registerController.doPost(httpRequest);
+        registerController.doPost(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found ".getBytes())
@@ -49,9 +50,10 @@ class RegisterControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(register);
+        HttpResponse httpResponse = new HttpResponse();
 
         RegisterController registerController = new RegisterController();
-        HttpResponse httpResponse = registerController.doPost(httpRequest);
+        registerController.doPost(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found ".getBytes())
@@ -71,9 +73,10 @@ class RegisterControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(register);
+        HttpResponse httpResponse = new HttpResponse();
 
         RegisterController registerController = new RegisterController();
-        HttpResponse httpResponse = registerController.doPost(httpRequest);
+        registerController.doPost(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 302 Found ".getBytes())
@@ -89,11 +92,12 @@ class RegisterControllerTest {
                 "Connection: keep-alive ",
                 "");
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(register);
+        HttpResponse httpResponse = new HttpResponse();
 
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         RegisterController registerController = new RegisterController();
-        HttpResponse httpResponse = registerController.doGet(httpRequest);
+        registerController.doGet(httpRequest, httpResponse);
 
         assertThat(httpResponse.getBytes())
                 .contains("HTTP/1.1 200 OK ".getBytes())

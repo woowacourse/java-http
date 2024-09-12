@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httpresponse;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaderName;
 
@@ -12,6 +13,14 @@ public class HttpResponseHeader {
 
     public HttpResponseHeader(Map<HttpHeaderName, String> headers) {
         this.headers = headers;
+    }
+
+    public HttpResponseHeader() {
+        this.headers = new HashMap<>();
+    }
+
+    public void addHeader(HttpHeaderName headerName, String value) {
+        headers.put(headerName, value);
     }
 
     public String getString() {

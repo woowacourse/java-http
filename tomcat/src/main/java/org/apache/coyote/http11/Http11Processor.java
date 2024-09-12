@@ -1,14 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.httprequest.HttpRequest;
@@ -40,39 +39,40 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (
                 final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()
+                final var outputStream = connection.getOutputStream()
         ) {
             var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
 
-            HttpResponse httpResponse = getHttpResponse(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
+            getHttpResponse(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse getHttpResponse(HttpRequest httpRequest) throws IOException, URISyntaxException {
+    private void getHttpResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             if (isStaticResource(httpRequest)) {
-                return HttpResponse.ok(httpRequest)
-                        .staticResource(httpRequest.getPath())
-                        .build();
+                httpResponse.ok(httpRequest);
+                httpResponse.staticResource(httpRequest.getPath());
+                return;
             }
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(httpRequest);
 
-            return controller.service(httpRequest);
+            controller.service(httpRequest, httpResponse);
         } catch (NotFoundException e) {
-            return HttpResponse.found(httpRequest)
-                    .location(NOT_FOUND_PATH)
-                    .build();
+            httpResponse.found(httpRequest);
+            httpResponse.location(NOT_FOUND_PATH);
         } catch (UnauthorizedException e) {
-            return HttpResponse.found(httpRequest)
-                    .location(UNAUTHORIZED_PATH)
-                    .build();
+            httpResponse.found(httpRequest);
+            httpResponse.location(UNAUTHORIZED_PATH);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

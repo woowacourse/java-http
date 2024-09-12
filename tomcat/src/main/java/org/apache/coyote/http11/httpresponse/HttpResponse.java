@@ -5,8 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.http11.CharSet;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -20,9 +18,9 @@ public class HttpResponse {
     private static final String HTML_EXTENSION = ".html";
     private static final String STATIC_PATH = "static";
 
-    private final HttpStatusLine httpStatusLine;
+    private HttpStatusLine httpStatusLine;
     private final HttpResponseHeader httpResponseHeader;
-    private final HttpResponseBody httpResponseBody;
+    private HttpResponseBody httpResponseBody;
 
     private HttpResponse(
             HttpStatusLine httpStatusLine,
@@ -34,16 +32,78 @@ public class HttpResponse {
         this.httpResponseBody = httpResponseBody;
     }
 
-    public static HttpResponseBuilder ok(HttpRequest httpRequest) {
-        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK));
+    public HttpResponse() {
+        this(null, new HttpResponseHeader(), null);
     }
 
-    public static HttpResponseBuilder found(HttpRequest httpRequest) {
-        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND));
+    public void ok(HttpRequest httpRequest) {
+        this.httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
     }
 
-    public static HttpResponseBuilder unauthorized(HttpRequest httpRequest) {
-        return new HttpResponseBuilder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED));
+    public void found(HttpRequest httpRequest) {
+        this.httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
+    }
+
+    public void unauthorized(HttpRequest httpRequest) {
+        this.httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED);
+    }
+
+    public void addHeader(HttpHeaderName headerName, String value) {
+        httpResponseHeader.addHeader(headerName, value);
+    }
+
+    public void location(String path) {
+        addHeader(HttpHeaderName.LOCATION, path);
+    }
+
+    public void setCookie(String cookie) {
+        addHeader(HttpHeaderName.SET_COOKIE, cookie);
+    }
+
+    public void contentLength(String contentLength) {
+        addHeader(HttpHeaderName.CONTENT_LENGTH, contentLength);
+    }
+
+    public void contentType(String contentType) {
+        addHeader(HttpHeaderName.CONTENT_TYPE, contentType);
+    }
+
+    public void responseBody(String responseBody) {
+        this.httpResponseBody = new HttpResponseBody(responseBody);
+    }
+
+    public void staticResource(String path) {
+        try {
+            path = settingExtension(path);
+            String fileName = STATIC_PATH + path;
+            var resourceUrl = getClass().getClassLoader().getResource(fileName);
+            validateResourceUrl(resourceUrl);
+            Path filePath = Path.of(resourceUrl.toURI());
+            String responseBody = new String(Files.readAllBytes(filePath));
+
+            setHttpHeader(filePath, responseBody);
+            this.httpResponseBody = new HttpResponseBody(responseBody);
+        } catch (URISyntaxException | IOException e) {
+            throw new IllegalArgumentException(e.getMessage() + e);
+        }
+    }
+
+    private String settingExtension(String path) {
+        if (!path.contains(EXTENSION_DELIMITER)) {
+            path += HTML_EXTENSION;
+        }
+        return path;
+    }
+
+    private void validateResourceUrl(URL resourceUrl) {
+        if (resourceUrl == null) {
+            throw new NotFoundException("존재하지 않는 경로입니다.");
+        }
+    }
+
+    private void setHttpHeader(Path filePath, String responseBody) throws IOException {
+        contentType(Files.probeContentType(filePath) + CharSet.UTF_8.getCharset());
+        contentLength(String.valueOf(responseBody.getBytes().length));
     }
 
     public byte[] getBytes() {
@@ -75,80 +135,5 @@ public class HttpResponse {
 
     public HttpResponseBody getHttpResponseBody() {
         return httpResponseBody;
-    }
-
-    public static class HttpResponseBuilder {
-        private final HttpStatusLine httpStatusLine;
-        private final Map<HttpHeaderName, String> headers;
-        private HttpResponseBody httpResponseBody;
-
-        public HttpResponseBuilder(HttpStatusLine httpStatusLine) {
-            this.httpStatusLine = httpStatusLine;
-            this.headers = new HashMap<>();
-        }
-
-        public HttpResponseBuilder location(String location) {
-            headers.put(HttpHeaderName.LOCATION, location);
-            return this;
-        }
-
-        public HttpResponseBuilder contentType(String contentType) {
-            headers.put(HttpHeaderName.CONTENT_TYPE, contentType);
-            return this;
-        }
-
-        public HttpResponseBuilder contentLength(String contentLength) {
-            headers.put(HttpHeaderName.CONTENT_LENGTH, contentLength);
-            return this;
-        }
-
-        public HttpResponseBuilder setCookie(String setCookie) {
-            headers.put(HttpHeaderName.SET_COOKIE, setCookie);
-            return this;
-        }
-
-        public HttpResponseBuilder staticResource(String path) {
-            try {
-                path = settingExtension(path);
-                String fileName = STATIC_PATH + path;
-                var resourceUrl = getClass().getClassLoader().getResource(fileName);
-                validateResourceUrl(resourceUrl);
-                Path filePath = Path.of(resourceUrl.toURI());
-                String responseBody = new String(Files.readAllBytes(filePath));
-
-                setHttpHeader(filePath, responseBody);
-                this.httpResponseBody = new HttpResponseBody(responseBody);
-                return this;
-            } catch (URISyntaxException | IOException e) {
-                throw new IllegalArgumentException(e.getMessage() + e);
-            }
-        }
-
-        private static String settingExtension(String path) {
-            if (!path.contains(EXTENSION_DELIMITER)) {
-                path += HTML_EXTENSION;
-            }
-            return path;
-        }
-
-        private static void validateResourceUrl(URL resourceUrl) {
-            if (resourceUrl == null) {
-                throw new NotFoundException("존재하지 않는 경로입니다.");
-            }
-        }
-
-        private void setHttpHeader(Path filePath, String responseBody) throws IOException {
-            contentType(Files.probeContentType(filePath) + CharSet.UTF_8.getCharset());
-            contentLength(String.valueOf(responseBody.getBytes().length));
-        }
-
-        public HttpResponseBuilder responseBody(String responseBody) {
-            this.httpResponseBody = new HttpResponseBody(responseBody);
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(httpStatusLine, new HttpResponseHeader(headers), httpResponseBody);
-        }
     }
 }

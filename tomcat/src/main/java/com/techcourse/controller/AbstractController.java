@@ -7,18 +7,18 @@ import org.apache.coyote.http11.httpresponse.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest httpRequest) {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.isMethod(HttpMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
         }
         if (httpRequest.isMethod(HttpMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
         }
 
         throw new IllegalArgumentException("유효하지 않은 메소드입니다.");
     }
 
-    abstract protected HttpResponse doPost(HttpRequest httpRequest);
+    abstract protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
 
-    abstract protected HttpResponse doGet(HttpRequest httpRequest);
+    abstract protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse);
 }

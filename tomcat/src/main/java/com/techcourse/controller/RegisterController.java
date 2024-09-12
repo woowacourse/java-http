@@ -17,27 +17,29 @@ public class RegisterController extends AbstractController {
     private static final String INDEX_PATH = "/index.html";
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (validateUserInput(httpRequest)) {
             log.error("입력하지 않은 항목이 있습니다.");
-            return redirectPage(httpRequest, REGISTER_PATH);
+            redirectPage(httpRequest, httpResponse, REGISTER_PATH);
+            return;
         }
-        return acceptRegister(httpRequest);
+        acceptRegister(httpRequest, httpResponse);
     }
 
-    private HttpResponse acceptRegister(HttpRequest httpRequest) {
+    private void acceptRegister(HttpRequest httpRequest, HttpResponse httpResponse) {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
         String email = httpRequest.getBodyValue(EMAIL);
 
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
-            return redirectPage(httpRequest, REGISTER_PATH);
+            redirectPage(httpRequest, httpResponse, REGISTER_PATH);
+            return;
         }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return redirectPage(httpRequest, INDEX_PATH);
+        redirectPage(httpRequest, httpResponse, INDEX_PATH);
     }
 
     private boolean validateUserInput(HttpRequest httpRequest) {
@@ -47,15 +49,13 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) {
-        return HttpResponse.ok(httpRequest)
-                .staticResource(httpRequest.getPath())
-                .build();
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.ok(httpRequest);
+        httpResponse.staticResource(httpRequest.getPath());
     }
 
-    private HttpResponse redirectPage(HttpRequest httpRequest, String path) {
-        return HttpResponse.found(httpRequest)
-                .location(path)
-                .build();
+    private void redirectPage(HttpRequest httpRequest, HttpResponse httpResponse, String path) {
+        httpResponse.found(httpRequest);
+        httpResponse.location(path);
     }
 }

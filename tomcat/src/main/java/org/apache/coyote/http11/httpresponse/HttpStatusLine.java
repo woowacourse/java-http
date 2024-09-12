@@ -4,8 +4,6 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpStatusLine {
 
-    private static final String STATUS_LINE_DELIMITER = " ";
-
     private final String version;
     private final HttpStatusCode httpStatusCode;
 

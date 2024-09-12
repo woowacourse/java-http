@@ -7,7 +7,6 @@ public class Error401Handler implements ErrorHandler {
 
     @Override
     public HttpResponse handle() {
-        return new HttpResponse().statusCode(StatusCode.OK_200)
-                .viewUrl("/401.html");
+        return HttpResponse.ok("/401.html");
     }
 }

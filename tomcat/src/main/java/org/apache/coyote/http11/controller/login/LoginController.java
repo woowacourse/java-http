@@ -11,7 +11,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.service.LoginService;
 
-
 public class LoginController implements Controller {
 
     public static LoginController INSTANCE = new LoginController();
@@ -49,9 +48,7 @@ public class LoginController implements Controller {
             throw new SecurityException("잘못된 세션 정보입니다.");
         }
 
-        httpResponse
-                .statusCode(StatusCode.FOUND_302)
-                .location("/index.html");
+        httpResponse.redirect("/index.html");
     }
 
     public void checkLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -60,9 +57,7 @@ public class LoginController implements Controller {
         User user = loginService.findByAccount(parameters.get("account"));
         Cookie userSessionCookie = makeUserSessionCookie(user);
 
-        httpResponse
-                .statusCode(StatusCode.FOUND_302)
-                .location("/index.html")
+        httpResponse.redirect("/index.html")
                 .setCookie(userSessionCookie);
     }
 

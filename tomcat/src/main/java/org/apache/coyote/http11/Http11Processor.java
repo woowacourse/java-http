@@ -67,9 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse resolveViewResponse(HttpRequest httpRequest) {
-        return new HttpResponse()
-                .statusCode(StatusCode.OK_200)
-                .viewUrl(httpRequest.getRequestUri());
+        return HttpResponse.ok(httpRequest.getRequestUri());
     }
 
     private HttpResponse resolveHandlerResponse(HttpRequest httpRequest) {

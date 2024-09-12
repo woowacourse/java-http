@@ -9,6 +9,11 @@ public class HttpResponseHeader {
     private StatusCode statusCode;
     private final Map<String, String> payLoads;
 
+    public HttpResponseHeader(StatusCode statusCode) {
+        this.statusCode = statusCode;
+        this.payLoads = new LinkedHashMap<>();
+    }
+
     public HttpResponseHeader() {
         payLoads = new LinkedHashMap<>();
     }

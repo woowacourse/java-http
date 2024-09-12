@@ -25,8 +25,7 @@ public class UserController implements Controller {
             User user = userResolver.resolve(httpRequest.getRequestBody());
             userService.save(user);
 
-            httpResponse.statusCode(StatusCode.FOUND_302)
-                    .location("/index.html");
+            httpResponse.redirect("/index.html");
             return;
         }
 

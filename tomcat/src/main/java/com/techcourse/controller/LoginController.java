@@ -24,10 +24,15 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (validateUserInput(httpRequest)) {
             log.error("입력하지 않은 항목이 있습니다.");
-            redirectPage(httpRequest, httpResponse, LOGIN_PATH);
+            redirectLoginPage(httpRequest, httpResponse);
             return;
         }
         acceptLogin(httpRequest, httpResponse);
+    }
+
+    private void redirectLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.found(httpRequest);
+        httpResponse.location(LOGIN_PATH);
     }
 
     private boolean validateUserInput(HttpRequest httpRequest) {
@@ -70,10 +75,5 @@ public class LoginController extends AbstractController {
         httpResponse.found(httpRequest);
         httpResponse.setCookie(JSESSIONID + COOKIE_DELIMITER + session.getId());
         httpResponse.location(INDEX_PATH);
-    }
-
-    private void redirectPage(HttpRequest httpRequest, HttpResponse httpResponse, String path) {
-        httpResponse.found(httpRequest);
-        httpResponse.location(path);
     }
 }

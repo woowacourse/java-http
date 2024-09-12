@@ -4,6 +4,8 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpStatusLine {
 
+    private static final String STATUS_LINE_FORMAT = "%s %s %s ";
+
     private final String version;
     private final HttpStatusCode httpStatusCode;
 
@@ -13,7 +15,7 @@ public class HttpStatusLine {
     }
 
     public String getString() {
-        return "%s %s %s ".formatted(version, httpStatusCode.getCode(), httpStatusCode.getMessage());
+        return STATUS_LINE_FORMAT.formatted(version, httpStatusCode.getCode(), httpStatusCode.getMessage());
     }
 
     public String getVersion() {

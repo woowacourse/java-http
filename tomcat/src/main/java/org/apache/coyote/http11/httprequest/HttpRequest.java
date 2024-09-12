@@ -32,10 +32,6 @@ public class HttpRequest {
         return httpRequestLine.isMethod(method);
     }
 
-    public boolean isPath(String path) {
-        return httpRequestLine.isPath(path);
-    }
-
     public boolean containsHeader(String key) {
         return httpRequestHeader.containsHeader(key);
     }

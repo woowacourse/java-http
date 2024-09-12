@@ -18,12 +18,13 @@ public class HttpRequestConvertor {
     private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String BODY_DELIMITER = "&";
     private static final String TUPLE_DELIMITER = "=";
-    private static final int TUPLE_MIN_LENGTH = 2;
+    private static final int BODY_TUPLE_MIN_LENGTH = 2;
     private static final int TUPLE_KEY_INDEX = 0;
     private static final int TUPLE_VALUE_INDEX = 1;
     private static final int HEADER_KEY_INDEX = 0;
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int REQUEST_LINE_MIN_LENGTH = 3;
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
@@ -45,7 +46,7 @@ public class HttpRequestConvertor {
         if (requestLine == null) {
             throw new IllegalArgumentException("요청이 비어 있습니다");
         }
-        if (requestLine.split(REQUEST_LINE_DELIMITER).length < 3) {
+        if (requestLine.split(REQUEST_LINE_DELIMITER).length < REQUEST_LINE_MIN_LENGTH) {
             throw new IllegalArgumentException("RequestLine이 잘못된 요청입니다");
         }
     }
@@ -116,7 +117,7 @@ public class HttpRequestConvertor {
     private static Map<String, String> extractBody(String requestBody) {
         String[] tokens = requestBody.split(BODY_DELIMITER);
         return Arrays.stream(tokens)
-                .filter(token -> token.split(TUPLE_DELIMITER).length >= TUPLE_MIN_LENGTH)
+                .filter(token -> token.split(TUPLE_DELIMITER).length >= BODY_TUPLE_MIN_LENGTH)
                 .map(token -> token.split(TUPLE_DELIMITER))
                 .collect(Collectors.toMap(
                         token -> token[TUPLE_KEY_INDEX],

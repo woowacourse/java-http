@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,27 +6,28 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.message.common.HttpHeaders;
 
 public class HttpRequest {
 
-    private final HttpLine httpLine;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final String body;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    public HttpRequest(InputStream inputStream) throws IOException { //TODO : 파싱 클래스 분리
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        httpLine = generateHttpLine(bufferedReader);
+        requestLine = generateHttpLine(bufferedReader);
         headers = generateHeaders(bufferedReader);
         body = generateBody(bufferedReader);
     }
 
-    private HttpLine generateHttpLine(BufferedReader bufferedReader) throws IOException {
+    private RequestLine generateHttpLine(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         if (line == null) {
             throw new IllegalArgumentException("HTTP line은 null일 수 없습니다.");
         }
-        return new HttpLine(line);
+        return new RequestLine(line);
     }
 
     private HttpHeaders generateHeaders(BufferedReader bufferedReader) throws IOException {
@@ -46,15 +47,19 @@ public class HttpRequest {
     }
 
     public boolean isGetMethod() {
-        return httpLine.isGet();
+        return requestLine.isGet();
     }
 
     public boolean isPostMethod() {
-        return httpLine.isPost();
+        return requestLine.isPost();
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
     }
 
     public String getPath() {
-        return httpLine.getPath();
+        return requestLine.getPath();
     }
 
     public String getCookies() {
@@ -66,13 +71,13 @@ public class HttpRequest {
     }
 
     public String getProtocolVersion() {
-        return httpLine.getProtocolVersion();
+        return requestLine.getProtocolVersion();
     }
 
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "httpLine=" + httpLine +
+                "httpLine=" + requestLine +
                 ", headers=" + headers +
                 ", body='" + body + '\'' +
                 '}';

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.common;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -14,6 +14,10 @@ public class HttpHeaders {
 
     private final Map<String, String> headers = new HashMap<>();
 
+    public HttpHeaders() {
+        add("Content-Length", "0");
+    }
+
     public HttpHeaders(List<String> lines) {
         lines.forEach(this::parse);
     }
@@ -25,6 +29,10 @@ public class HttpHeaders {
             throw new IllegalArgumentException("잘못된 header 형식입니다.");
         }
         headers.put(words[0].strip(), words[1].strip());
+    }
+
+    public void add(String header, String value) {
+        headers.put(header, value);
     }
 
     public int getContentLength() {

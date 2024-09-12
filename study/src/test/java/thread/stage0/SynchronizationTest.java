@@ -28,7 +28,7 @@ class SynchronizationTest {
     @Test
     void testSynchronized() throws InterruptedException {
         var executorService = Executors.newFixedThreadPool(3);
-        SynchronizedMethods synchronizedMethods = new SynchronizedMethods();
+        var synchronizedMethods = new SynchronizedMethods();
 
         IntStream.range(0, 1000)
                 .forEach(count -> executorService.submit(synchronizedMethods::calculate));
@@ -41,7 +41,7 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public synchronized void calculate() {
+        public void calculate() {
             setSum(getSum() + 1);
         }
 

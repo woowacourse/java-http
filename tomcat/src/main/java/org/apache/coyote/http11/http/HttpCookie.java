@@ -40,13 +40,6 @@ public class HttpCookie {
 		this.cookie = cookie;
 	}
 
-	public String getValue(String key) {
-		if (isNotExistKey(key)) {
-			throw new IllegalArgumentException("Key not found. key: " + key);
-		}
-		return cookie.get(key);
-	}
-
 	private boolean isNotExistKey(String key) {
 		return !cookie.containsKey(key);
 	}

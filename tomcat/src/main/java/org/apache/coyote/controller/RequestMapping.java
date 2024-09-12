@@ -8,6 +8,7 @@ import com.techcourse.controller.RegisterPageController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.HttpMethod;
+import org.apache.coyote.StaticResourceHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestKey;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -28,7 +29,7 @@ public class RequestMapping {
         HttpResponse response = new HttpResponse();
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
-            new StaticResourceController().service(request, response);
+            new StaticResourceHandler().service(request, response);
             return response;
         }
         Controller controller = getController(request.getMethod(), path);

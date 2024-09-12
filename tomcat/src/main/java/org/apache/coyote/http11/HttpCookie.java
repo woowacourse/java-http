@@ -76,7 +76,7 @@ public class HttpCookie {
     }
 
     public boolean hasSession() {
-        return cookies.containsKey(JSESSIONID);
+        return cookies.containsKey(JSESSIONID) && !cookies.get(JSESSIONID).isBlank();
     }
 
     public String getSession() {

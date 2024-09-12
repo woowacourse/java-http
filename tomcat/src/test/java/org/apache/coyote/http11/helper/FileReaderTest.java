@@ -1,11 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.helper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.apache.coyote.http11.helper.FileReader;
 import org.junit.jupiter.api.Test;
 
 class FileReaderTest {
@@ -31,6 +30,6 @@ class FileReaderTest {
         // when & then
         assertThatThrownBy(() -> fileReader.readResourceFile("/invalid.html"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("파일 경로가 유효하지 않습니다.");
+                .hasMessage("존재하지 않는 파일입니다.");
     }
 }

@@ -12,10 +12,17 @@ public class QueryParser {
         Map<String, String> result = new HashMap<>();
         String[] tokens = rawQuery.split(DELIMITER_OF_QUERY);
         for (String token : tokens) {
+            validateQueryFormat(token);
             String key = token.split(DELIMITER_OF_KEY_VALUE)[0];
             String value = token.split(DELIMITER_OF_KEY_VALUE)[1];
             result.put(key, value);
         }
         return result;
+    }
+
+    private void validateQueryFormat(String raw) {
+        if (!raw.contains(DELIMITER_OF_KEY_VALUE)) {
+            throw new IllegalArgumentException("유효하지 않은 형태의 쿼리스트링입니다.");
+        }
     }
 }

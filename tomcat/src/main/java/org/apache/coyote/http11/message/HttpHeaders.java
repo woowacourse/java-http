@@ -40,10 +40,8 @@ public final class HttpHeaders {
     }
 
     public void setHeader(HttpHeaderName name, String field) {
-        if (!headers.containsKey(name.getName())) {
-            headers.put(name.getName(), new ArrayList<>());
-        }
-        headers.get(name.getName()).add(field);
+        headers.computeIfAbsent(name.getName(), key -> new ArrayList<>())
+                .add(field);
     }
 
     public HttpCookie getCookie() {

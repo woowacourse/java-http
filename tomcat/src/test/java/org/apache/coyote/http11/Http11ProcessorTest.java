@@ -13,6 +13,8 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static final String ROOT_LOCATION = "http://localhost:8080/\r\n";
+
     @DisplayName("uri가 / 일경우 index.html을 반환한다.")
     @Test
     void response_index_html_When_request_default() throws IOException {
@@ -74,13 +76,11 @@ class Http11ProcessorTest {
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        String defaultLocation = "http://localhost:8080";
-
         // when
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(defaultLocation);
+        assertThat(socket.output()).contains(ROOT_LOCATION);
     }
 
     @DisplayName("/login Post요청시, 실패 -> 401페이지 반환")
@@ -124,13 +124,11 @@ class Http11ProcessorTest {
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        String defaultLocation = "http://localhost:8080";
-
         // when
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(defaultLocation);
+        assertThat(socket.output()).contains(ROOT_LOCATION);
     }
 
     @DisplayName("/register Get요청시, 성공-> index페이지 반환")
@@ -187,6 +185,6 @@ class Http11ProcessorTest {
         processor2.process(socket2);
 
         //then
-        assertThat(socket2.output()).contains("http://localhost:8080");
+        assertThat(socket2.output()).contains(ROOT_LOCATION);
     }
 }

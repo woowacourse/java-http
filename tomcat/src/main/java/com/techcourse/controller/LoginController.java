@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
@@ -30,18 +29,15 @@ public class LoginController extends AbstractController {
         processLoginPage(request, response);
     }
 
-    private void processLogin(HttpResponse response, Map<String, String> requestBody) throws IOException {
+    private void processLogin(HttpResponse response, Map<String, String> requestBody) {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.checkPassword(password)) {
-                loginSuccess(response, user);
-                return;
-            }
-        }
-        loginFail(response);
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> loginSuccess(response, user),
+                        () -> loginFail(response)
+                );
     }
 
     private void processLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
@@ -74,21 +70,16 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isContainJSessionId(List<HttpCookie> cookies) {
-        for (HttpCookie cookie : cookies) {
-            if (cookie.getName().equals(JAVA_SESSION_ID)) {
-                return true;
-            }
-        }
-        return false;
+        return cookies.stream()
+                .anyMatch((cookie) -> cookie.getName().equals(JAVA_SESSION_ID));
     }
 
     private String getJSessionId(List<HttpCookie> cookies) {
-        for (HttpCookie cookie : cookies) {
-            if (cookie.getName().equals(JAVA_SESSION_ID)) {
-                return cookie.getValue();
-            }
-        }
-        throw new IllegalStateException("Cookie에 JSessionId가 존재하지 않습니다.");
+        return cookies.stream()
+                .filter((cookie) -> cookie.getName().equals(JAVA_SESSION_ID))
+                .map(HttpCookie::getValue)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Cookie에 JSessionId가 존재하지 않습니다."));
     }
 
     private void loginSuccess(HttpResponse httpResponse, User user) {
@@ -102,7 +93,7 @@ public class LoginController extends AbstractController {
         httpResponse.setCookie(httpCookie);
     }
 
-    private void loginFail(HttpResponse httpResponse) throws IOException {
+    private void loginFail(HttpResponse httpResponse) {
         httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
         httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/401.html"));
     }

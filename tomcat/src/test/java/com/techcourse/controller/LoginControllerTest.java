@@ -134,7 +134,7 @@ class LoginControllerTest {
     @DisplayName("쿠키에 유저 정보가 저장된 세션이 있으면 index.html 페이지로 이동한다")
     @Test
     void existSessionLogin() {
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.getInstance();
         Session session = new Session("abcdefg");
         sessionManager.add(session);
         final String login = String.join("\r\n",

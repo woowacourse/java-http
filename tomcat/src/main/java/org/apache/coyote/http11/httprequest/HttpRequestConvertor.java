@@ -20,7 +20,7 @@ public class HttpRequestConvertor {
     private static final String TUPLE_DELIMITER = "=";
     private static final int TUPLE_KEY_INDEX = 0;
     private static final int TUPLE_VALUE_INDEX = 1;
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();

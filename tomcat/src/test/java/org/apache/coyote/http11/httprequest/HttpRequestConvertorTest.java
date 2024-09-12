@@ -76,7 +76,7 @@ class HttpRequestConvertorTest {
     @DisplayName("SessionManager에 저장된 세션이 쿠키로 들어오면 해당 세션을 불러온다")
     @Test
     void loadSession() {
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.getInstance();
         Session session = new Session("abcdefg");
         sessionManager.add(session);
         String body = "account=gugu&password=1";

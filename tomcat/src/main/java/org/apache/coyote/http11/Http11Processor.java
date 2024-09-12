@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.Request;
@@ -54,16 +52,14 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = ControllerMapper.find(request.getPath());
             controller.service(request, response);
         } catch (IllegalArgumentException e) {
-            showStaticResource(request, response);
+            response.addFileBody(selectResourceFilePath(request.getPath()));
         }
     }
 
-    private void showStaticResource(Request request, Response response) throws URISyntaxException, IOException {
-        String requestPath = request.getPath();
+    private String selectResourceFilePath(String requestPath) {
         if (requestPath.contains(".")) {
-            response.addFileBody(requestPath);
-            return;
+            return requestPath;
         }
-        response.addFileBody(requestPath + ".html");
-    } // TODO
+        return requestPath + ".html";
+    }
 }

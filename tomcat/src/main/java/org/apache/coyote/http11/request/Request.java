@@ -23,7 +23,7 @@ public class Request {
 
     private int getContentLength() {
         return headers.getContentLength()
-                .map(header -> Integer.parseInt(header.getValue())) // TODO: remove getValue
+                .map(header -> Integer.parseInt(header.getValue()))
                 .orElse(CONTENT_LENGTH_WHEN_EMPTY_BODY);
     }
 

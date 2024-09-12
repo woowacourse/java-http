@@ -18,6 +18,7 @@ public class ResponseFactoryTest {
         // given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setVersion("HTTP/1.1");
         httpResponse.setStatusLine("200", "OK");
         httpResponse.setFieldValue("Content-Length", "5506");
         httpResponse.setFieldValue("Content-Type", "text/html;charset=utf-8");

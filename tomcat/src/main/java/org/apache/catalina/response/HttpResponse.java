@@ -19,37 +19,12 @@ public class HttpResponse {
         this.statusLine = new StatusLine(status);
     }
 
-    public void setLocation(String location) {
-        headers.put(Header.LOCATION, location);
-    }
-
     public void setCookie(Cookie cookie) {
         headers.put(Header.SET_COOKIE, cookie);
     }
 
     public void setContentType(ContentType contentType) {
         headers.put(Header.CONTENT_TYPE, contentType);
-    }
-
-    public void setContentLength(int contentLength) {
-        headers.put(Header.CONTENT_LENGTH, contentLength);
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-        setContentLength(body.getBytes().length);
-    }
-
-    public Map<Header, Object> getHeaders() {
-        return headers;
-    }
-
-    public StatusLine getStatusLine() {
-        return statusLine;
-    }
-
-    public String getBody() {
-        return body;
     }
 
     public void forward(String path) {
@@ -65,6 +40,31 @@ public class HttpResponse {
         setContentType(ContentType.of(path));
         String body = getBody(path);
         setBody(body);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        setContentLength(body.getBytes().length);
+    }
+
+    private void setContentLength(int contentLength) {
+        headers.put(Header.CONTENT_LENGTH, contentLength);
+    }
+
+    private void setLocation(String location) {
+        headers.put(Header.LOCATION, location);
+    }
+
+    public Map<Header, Object> getHeaders() {
+        return headers;
+    }
+
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     private String getBody(String path) {

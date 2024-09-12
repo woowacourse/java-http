@@ -7,6 +7,8 @@ public class QueryParser {
 
     private static final String DELIMITER_OF_QUERY = "&";
     private static final String DELIMITER_OF_KEY_VALUE = "=";
+    private static final int INDEX_OF_QUERY_KEY = 0;
+    private static final int INDEX_OF_QUERY_VALUE = 1;
 
     private static QueryParser INSTANCE;
 
@@ -25,8 +27,8 @@ public class QueryParser {
         String[] tokens = rawQuery.split(DELIMITER_OF_QUERY);
         for (String token : tokens) {
             validateQueryFormat(token);
-            String key = token.split(DELIMITER_OF_KEY_VALUE)[0];
-            String value = token.split(DELIMITER_OF_KEY_VALUE)[1];
+            String key = token.split(DELIMITER_OF_KEY_VALUE)[INDEX_OF_QUERY_KEY];
+            String value = token.split(DELIMITER_OF_KEY_VALUE)[INDEX_OF_QUERY_VALUE];
             result.put(key, value);
         }
         return result;

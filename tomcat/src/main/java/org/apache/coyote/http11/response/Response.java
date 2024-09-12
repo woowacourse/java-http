@@ -6,6 +6,8 @@ import java.util.StringJoiner;
 
 public class Response {
 
+    private static final float DEFAULT_VERSION = 1.1F;
+    private static final ResponseStatus DEFAULT_STATUS = ResponseStatus.OK;
     private static final String FORMAT_OF_RESPONSE_LINE = "HTTP/%.1f %s ";
     private static final String HTTP_MESSAGE_LINE_SEPARATOR = "\r\n";
     private static final String HTTP_MESSAGE_EMPTY_LINE = "";
@@ -17,8 +19,8 @@ public class Response {
     private final ResponseBody body;
 
     public Response() {
-        this.version = 1.1F;
-        this.status = ResponseStatus.OK;
+        this.version = DEFAULT_VERSION;
+        this.status = DEFAULT_STATUS;
         this.headers = new ResponseHeaders();
         this.cookies = new ResponseCookies();
         this.body = new ResponseBody();

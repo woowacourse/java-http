@@ -15,7 +15,4 @@ public class RequestParams {
             this.requestParams.add(new RequestParam(token));
         }
     }
-
-    public RequestParams() {
-    }
 }

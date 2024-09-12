@@ -7,6 +7,8 @@ import org.apache.coyote.http11.helper.FileReader;
 
 public class ResponseBody {
 
+    private static final String EMPTY_BODY = "";
+
     private final FileReader fileReader;
     private String value;
 
@@ -18,13 +20,13 @@ public class ResponseBody {
         try {
             this.value = fileReader.readResourceFile(filePath);
         } catch (IllegalArgumentException e) {
-            this.value = "";
+            this.value = EMPTY_BODY;
         }
     }
 
     public int getLength() {
         if (value == null) {
-            return 0;
+            return EMPTY_BODY.length();
         }
         return value.getBytes().length;
     }

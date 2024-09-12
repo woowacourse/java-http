@@ -8,7 +8,20 @@ import java.util.stream.Collectors;
 
 public class RequestLine {
 
+    private static final String DELIMITER = " ";
+    private static final String PATH_PREFIX = "/";
+    private static final String HTTP_VERSION = "HTTP/1.1";
+
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
     private static final int PARAMETER_COUNT = 3;
+
+    private static final String QUERY_PARAMETER_PREFIX = "?";
+    private static final String QUERY_PARAMETER_DELIMITER = "&";
+    private static final String QUERY_NAME_VALUE_DELIMITER = "=";
+
+    private static final int SPLIT_LIMIT = -1;
 
     private final HttpMethod method;
     private final String path;
@@ -16,49 +29,74 @@ public class RequestLine {
 
     public RequestLine(String rawRequestLine) {
         validateParameterCount(rawRequestLine);
-        String[] parameters = rawRequestLine.split(" ");
+        String[] parameters = rawRequestLine.split(DELIMITER);
 
-        validateUri(parameters[1]);
-        validateHttpVersion(parameters[2]);
+        validateUri(parameters[URI_INDEX]);
+        validateHttpVersion(parameters[HTTP_VERSION_INDEX]);
 
-        this.method = HttpMethod.from(parameters[0]);
-        this.path = parsePath(parameters[1]);
-        this.queryParameters = parseQueryParams(parameters[1]);
+        this.method = HttpMethod.from(parameters[METHOD_INDEX]);
+        this.path = parsePath(parameters[URI_INDEX]);
+        this.queryParameters = parseQueryParameters(parameters[URI_INDEX]);
     }
 
     private void validateHttpVersion(String httpVersion) {
-        if (!httpVersion.equals("HTTP/1.1")) {
-            throw new UncheckedServletException("HTTP 버전은 HTTP/1.1 만 허용됩니다.");
+        if (!httpVersion.equals(HTTP_VERSION)) {
+            throw new UncheckedServletException("HTTP 버전은 %s 만 허용됩니다.".formatted(HTTP_VERSION));
         }
     }
 
     private void validateUri(String uri) {
-        if (!uri.startsWith("/")) {
-            throw new UncheckedServletException("URI는 / 로 시작해야 합니다.");
+        if (!uri.startsWith(PATH_PREFIX)) {
+            throw new UncheckedServletException("URI는 %s 로 시작해야 합니다.".formatted(PATH_PREFIX));
         }
     }
 
     private void validateParameterCount(String rawRequestLine) {
-        if (rawRequestLine.split(" ").length != PARAMETER_COUNT) {
+        if (rawRequestLine.split(DELIMITER).length != PARAMETER_COUNT) {
             throw new UncheckedServletException(String.format("Request line의 인자는 %d개여야 합니다.", PARAMETER_COUNT));
         }
     }
 
     private String parsePath(String uri) {
-        return uri.split("\\?")[0];
+        if (uri.contains(QUERY_PARAMETER_PREFIX)) {
+            return uri.substring(0, uri.indexOf(QUERY_PARAMETER_PREFIX));
+        }
+
+        return uri;
     }
 
-    private Map<String, String> parseQueryParams(String uri) {
-        if (!uri.contains("?")) {
+    private Map<String, String> parseQueryParameters(String uri) {
+        if (!uri.contains(QUERY_PARAMETER_PREFIX)) {
             return Collections.emptyMap();
         }
 
-        String queryString = uri.split("\\?")[1];
+        String queryString = uri.substring(uri.indexOf(QUERY_PARAMETER_PREFIX) + QUERY_PARAMETER_PREFIX.length());
 
-        return Arrays.stream(queryString.split("&"))
-                .map(rawQuery -> rawQuery.split("="))
-                .filter(query -> query.length == 2)
-                .collect(Collectors.toMap(query -> query[0], query -> query[1]));
+        return Arrays.stream(queryString.split(QUERY_PARAMETER_DELIMITER, SPLIT_LIMIT))
+                .collect(Collectors.toMap(this::parseKey, this::parseValue));
+    }
+
+    public String parseKey(String queryString) {
+        validateQueryFormat(queryString);
+        return queryString.substring(0, queryString.indexOf(QUERY_NAME_VALUE_DELIMITER));
+    }
+
+    public String parseValue(String queryString) {
+        validateQueryFormat(queryString);
+        return queryString.substring(
+                queryString.indexOf(QUERY_NAME_VALUE_DELIMITER) + QUERY_NAME_VALUE_DELIMITER.length());
+    }
+
+    private void validateQueryFormat(String queryString) {
+        if (queryString == null || queryString.isBlank()) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+        }
+        if (!queryString.contains(QUERY_NAME_VALUE_DELIMITER)) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+        }
+        if (queryString.startsWith(QUERY_NAME_VALUE_DELIMITER) || queryString.endsWith(QUERY_NAME_VALUE_DELIMITER)) {
+            throw new UncheckedServletException("형식이 올바르지 않은 쿼리가 포함되어 있습니다.");
+        }
     }
 
     public boolean hasMethod(HttpMethod httpMethod) {

@@ -21,7 +21,7 @@ public class HttpCookie {
         }
     }
 
-    public static HttpCookie ofJSessionId(String sessionId) {
+    public HttpCookie ofJSessionId(String sessionId) {
         HttpCookie cookie = new HttpCookie();
         cookie.cookies.put(JSESSIONID, sessionId);
         return cookie;

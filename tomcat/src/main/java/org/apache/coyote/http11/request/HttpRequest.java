@@ -44,11 +44,15 @@ public class HttpRequest {
         return requestBody.getFormData();
     }
 
+    public Map<String, String> getHeader() {
+        return header.getHeaders();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
-    public Map<String, String> getHeader() {
-        return header.getHeaders();
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

@@ -34,8 +34,8 @@ public class HttpRequest {
 
     public String getSession() {
         return findCookie()
-                .orElseThrow(() -> new UncheckedServletException("쿠키가 존재하지 않습니다."))
-                .getSession();
+                .map(HttpCookie::getSession)
+                .orElseThrow(() -> new UncheckedServletException("쿠키가 존재하지 않습니다."));
     }
 
     private Optional<HttpCookie> findCookie() {

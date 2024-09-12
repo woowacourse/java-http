@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String AUTH_COOKIE_KEY = "JSESSIONID";
+    private static final String QUERY_KEY_VALUE_DELIMITER = "=";
+    private static final String QUERY_END_DELIMITER = "; ";
     private final Map<String, String> cookies;
 
     public HttpCookie() {
@@ -46,8 +48,8 @@ public class HttpCookie {
     @Override
     public String toString() {
         return cookies.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
+                .map(entry -> entry.getKey() + QUERY_KEY_VALUE_DELIMITER + entry.getValue())
+                .collect(Collectors.joining(QUERY_END_DELIMITER));
     }
 
     @Override

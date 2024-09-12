@@ -25,7 +25,6 @@ public class RequestReader {
                 readRequest.add(line);
             }
         } catch (IOException e) {
-            log.error("요청 헤더를 읽는 도중 오류가 발생했습니다.");
             throw new RuntimeException("요청 헤더를 읽는 도중 오류가 발생했습니다.");
         }
         validateRequestLines(readRequest);

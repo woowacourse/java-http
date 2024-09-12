@@ -22,10 +22,6 @@ public class HttpRequest {
         return requestLine.isSameHttpMethod(httpMethod);
     }
 
-    public boolean isEmptyByQueryParam() {
-        return requestLine.getQueryParam().isEmpty();
-    }
-
     public VersionOfProtocol getVersionOfProtocol() {
         return requestLine.getVersionOfProtocol();
     }

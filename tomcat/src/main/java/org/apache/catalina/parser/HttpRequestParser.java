@@ -16,20 +16,21 @@ public class HttpRequestParser {
     private HttpRequestParser() {}
 
     public static Map<String, String> parseHeaders(List<String> headerLines) {
-        return headerLines.stream()
+        List<String> params = headerLines.stream()
                 .skip(REQUEST_LINE_INDEX)
-                .map(line -> List.of(line.split(HEADER_SEPARATOR, PART_COUNT)))
-                .filter(parts -> parts.size() == PART_COUNT)
-                .collect(Collectors.toMap(
-                        parts -> parts.get(KEY_INDEX).trim(),
-                        parts -> parts.get(VALUE_INDEX).trim()
-                ));
+                .toList();
+        return parseParamValues(params, HEADER_SEPARATOR);
+
     }
 
     public static Map<String, String> parseParamValues(List<String> params) {
+        return parseParamValues(params, QUERY_KEY_VALUE_DELIMITER);
+    }
+
+    private static Map<String, String> parseParamValues(List<String> params, String delimiter) {
         return params.stream()
-                .map(param -> List.of(param.split(QUERY_KEY_VALUE_DELIMITER, PART_COUNT)))
-                .filter(parts -> parts.size() == PART_COUNT && parts.get(VALUE_INDEX) != null)
+                .map(param -> List.of(param.split(delimiter, PART_COUNT)))
+                .filter(parts -> parts.size() == PART_COUNT)
                 .collect(Collectors.toMap(
                         parts -> parts.get(KEY_INDEX).trim(),
                         parts -> parts.get(VALUE_INDEX).trim()

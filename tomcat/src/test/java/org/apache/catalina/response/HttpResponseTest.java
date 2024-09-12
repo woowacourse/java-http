@@ -28,7 +28,7 @@ class HttpResponseTest {
         );
     }
 
-    @DisplayName("응답을 redirect하면 응답코드는 304이며 path 경로를 location 헤더에 저장한다.")
+    @DisplayName("응답을 redirect하면 path 경로를 location 헤더에 저장한다.")
     @Test
     void sendRedirect() throws IOException {
 
@@ -39,7 +39,6 @@ class HttpResponseTest {
         String body = new String(Files.readAllBytes(file.toPath()));
         assertAll(
                 () -> assertThat(httpResponse.getBody()).isEqualTo(body),
-                () -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(302),
                 () -> assertThat(httpResponse.getHeaders().get(Header.LOCATION)).isEqualTo("/index.html"),
                 () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
                 () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length)

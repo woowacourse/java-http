@@ -35,7 +35,6 @@ public class HttpResponse {
     }
 
     public void sendRedirect(String path) {
-        setStatusLine(Status.FOUND);
         setLocation(path);
         setContentType(ContentType.of(path));
         String body = getBody(path);

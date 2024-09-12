@@ -8,8 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
+    public static final String HEADER_DELIMITER = ": ";
+    public static final String QUERY_STRING_DELIMITER = "&";
+    public static final String QUERY_TOKEN_DELIMITER = "=";
+    public static final int NAME_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String requestBody;
@@ -27,8 +34,8 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
-    private static RequestLine parseRequestLine(final BufferedReader bufferedReader) throws IOException {
-        return RequestLine.of(bufferedReader.readLine());
+    private static RequestLine parseRequestLine(final BufferedReader reader) throws IOException {
+        return RequestLine.of(reader.readLine());
     }
 
     private static Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
@@ -36,8 +43,8 @@ public class HttpRequest {
         var header = reader.readLine();
 
         while (!"".equals(header)) {
-            final var tokens = header.split(": ");
-            headers.put(tokens[0], tokens[1]);
+            final var tokens = header.split(HEADER_DELIMITER);
+            headers.put(tokens[NAME_INDEX], tokens[VALUE_INDEX]);
             header = reader.readLine();
         }
 
@@ -54,7 +61,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getRequestMethod() {
+    public HttpMethod getRequestMethod() {
         return requestLine.getMethod();
     }
 
@@ -68,14 +75,17 @@ public class HttpRequest {
 
     public HttpCookie getCookies() {
         final String cookieString = headers.getOrDefault("Cookie", "");
-        return new HttpCookie(cookieString);
+        return HttpCookie.from(cookieString);
     }
 
     public Map<String, String> parseRequestQuery() {
-        final var params = requestBody.split("&");
+        if ("".equals(requestBody)) {
+            return new HashMap<>();
+        }
+        final var params = requestBody.split(QUERY_STRING_DELIMITER);
 
         return Arrays.stream(params)
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(token -> token[0], token -> token[1]));
+                .map(param -> param.split(QUERY_TOKEN_DELIMITER))
+                .collect(Collectors.toMap(token -> token[NAME_INDEX], token -> token[VALUE_INDEX]));
     }
 }

@@ -1,16 +1,18 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.response.ResponseBody;
+import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.web.handler.Handler;
+import com.techcourse.web.handler.HandlerMapper;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -33,26 +35,21 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-			String requestLine = reader.readLine();
-			String requestUrl = requestLine.split(" ")[1];
+			String httpResponseMessage = createHttpResponseMessage(inputStream);
 
-			ResponseBody responseBody = ResourceLoader.getInstance().loadResource(requestUrl);
-
-			final var response = String.join("\r\n",
-				"HTTP/1.1 200 OK ",
-				"Content-Type: " + responseBody.getContentType() + ";charset=utf-8" + " ",
-				"Content-Length: " + responseBody.getContentLength() + " ",
-				"",
-				new String(responseBody.getContent())
-			);
-
-			// 바디(바이너리 또는 텍스트 데이터)를 전송
-			outputStream.write(response.getBytes());
+			outputStream.write(httpResponseMessage.getBytes());
 			outputStream.flush();
-
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	private String createHttpResponseMessage(InputStream inputStream) throws IOException {
+		HttpRequest request = HttpRequestMessageReader.read(inputStream);
+		log.info("request: {}", request);
+		Handler handler = HandlerMapper.findHandler(request);
+		HttpResponse response = handler.handle(request);
+
+		return response.toResponseMessage();
 	}
 }

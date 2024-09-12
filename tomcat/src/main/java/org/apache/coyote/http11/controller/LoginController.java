@@ -10,7 +10,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.service.LoginService;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final LoginController INSTANCE = new LoginController();
 
@@ -29,7 +29,12 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new UnsupportedOperationException(httpRequest.getRequestUri() + "지원하지 않는 요청입니다.");
+    }
+
+    @Override
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         if(httpRequest.isQueryStringRequest()){
             checkLogin(httpRequest, httpResponse);
             return;
@@ -41,14 +46,15 @@ public class LoginController implements Controller {
         }
 
         loginView(httpResponse);
+
     }
 
-    public void loginView(HttpResponse httpResponse) {
+    private void loginView(HttpResponse httpResponse) {
         httpResponse.statusCode(StatusCode.OK_200)
                 .viewUrl("/login.html");
     }
 
-    public void checkSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void checkSession(HttpRequest httpRequest, HttpResponse httpResponse) {
         Cookie cookie = httpRequest.getCookie();
         String jsessionid = cookie.getByKey("JSESSIONID");
 
@@ -59,7 +65,7 @@ public class LoginController implements Controller {
         httpResponse.redirect("/index.html");
     }
 
-    public void checkLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void checkLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> parameters = httpRequest.getQueryParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
         User user = loginService.findByAccount(parameters.get("account"));

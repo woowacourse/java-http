@@ -8,7 +8,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse){
         if(httpRequest.isGet()){
-            doPost(httpRequest, httpResponse);
+            doGet(httpRequest, httpResponse);
         }
 
         if(httpRequest.isPost()){

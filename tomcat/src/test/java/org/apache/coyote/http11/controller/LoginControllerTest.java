@@ -45,10 +45,13 @@ class LoginControllerTest extends BaseHttpTest {
     void loginView() throws URISyntaxException, IOException {
         URL url = getClass().getClassLoader().getResource("static/login.html");
         String expected = resolve200Response("html", url);
-
+        HttpRequest validLoginRequest = new HttpRequest(
+                new RequestLine("GET /login HTTP/1.1 "),
+                new HttpRequestHeader(Map.of("Content-Type", "text/html;charset=utf-8"))
+        );
         HttpResponse response = new HttpResponse();
 
-        controller.loginView(response);
+        controller.service(validLoginRequest, response);
 
         assertThat(response.serialize()).isEqualTo(expected);
     }
@@ -65,7 +68,7 @@ class LoginControllerTest extends BaseHttpTest {
         );
         HttpResponse response = new HttpResponse();
 
-        controller.checkLogin(validLoginRequest, response);
+        controller.service(validLoginRequest, response);
 
         String expected = resolve302Response("/index.html");
         assertThat(response.serialize()).contains(expected);
@@ -83,7 +86,7 @@ class LoginControllerTest extends BaseHttpTest {
         );
         HttpResponse response = new HttpResponse();
 
-        assertThatThrownBy(() -> controller.checkLogin(validLoginRequest, response))
+        assertThatThrownBy(() -> controller.service(validLoginRequest, response))
                 .isInstanceOf(SecurityException.class);
     }
 }

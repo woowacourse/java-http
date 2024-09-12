@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.controller.login.LoginController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -46,13 +45,10 @@ class LoginControllerTest extends BaseHttpTest {
     void loginView() throws URISyntaxException, IOException {
         URL url = getClass().getClassLoader().getResource("static/login.html");
         String expected = resolve200Response("html", url);
-        HttpRequest validLoginRequest = new HttpRequest(
-                new RequestLine("GET /login HTTP/1.1 "),
-                new HttpRequestHeader(Map.of("Content-Type", "text/html;charset=utf-8"))
-        );
+
         HttpResponse response = new HttpResponse();
 
-        controller.loginView(validLoginRequest, response);
+        controller.loginView(response);
 
         assertThat(response.serialize()).isEqualTo(expected);
     }

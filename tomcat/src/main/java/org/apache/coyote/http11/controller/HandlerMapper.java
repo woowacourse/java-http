@@ -3,7 +3,6 @@ package org.apache.coyote.http11.controller;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.apache.coyote.http11.controller.login.LoginController;
 
 public enum HandlerMapper {
     LOGIN_CONTROLLER(uri -> LoginController.getInstance().canHandle(uri), LoginController.getInstance()),

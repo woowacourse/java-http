@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller.login;
+package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.model.User;
@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.auth.Session;
-import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.service.LoginService;
@@ -31,12 +30,19 @@ public class LoginController implements Controller {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        LoginControllerAdapter.adapt(httpRequest, httpResponse);
+        if(httpRequest.isQueryStringRequest()){
+            checkLogin(httpRequest, httpResponse);
+        }
+
+        if(httpRequest.hasCookie() && httpRequest.getCookie().has("JSESSIONID")){
+            checkSession(httpRequest, httpResponse);
+        }
+
+        loginView(httpResponse);
     }
 
-    public void loginView(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse
-                .statusCode(StatusCode.OK_200)
+    public void loginView(HttpResponse httpResponse) {
+        httpResponse.statusCode(StatusCode.OK_200)
                 .viewUrl("/login.html");
     }
 

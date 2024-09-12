@@ -26,6 +26,6 @@ public class ExceptionHandler {
     private void handleDefaultException(Exception e, HttpResponse response) {
         log.error(e.getMessage(), e);
         response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        response.setTextBody("서버에 문제가 발생헀습니다.");
+        response.setTextBody("서버에 문제가 발생했습니다.");
     }
 }

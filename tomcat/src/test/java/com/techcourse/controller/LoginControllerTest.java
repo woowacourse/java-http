@@ -11,6 +11,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.SessionService;
 import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
@@ -60,13 +61,15 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of("Location", "/index.html",
-                        "Set-Cookie", "JSESSIONID=" + session.getId())
+                Map.of(
+                        HttpHeader.LOCATION, "/index.html",
+                        HttpHeader.SET_COOKIE, HttpCookie.ofSession(session.getId()).toResponse()
+                )
         );
         assertThat(response).isEqualTo(expectedResponse);
     }
 
-    @DisplayName("로그인 실패 시 예외가 발생한다.")
+    @DisplayName("로그인 실패 시 401 페이지로 리다이렉트한다.")
     @ParameterizedTest()
     @ValueSource(strings = {"account=account1&password=password", "account=account1&password=password"})
     void loginFail(String body) {
@@ -79,7 +82,10 @@ class LoginControllerTest {
         HttpResponse response = new HttpResponse();
         loginController.service(request, response);
 
-        HttpResponse expectedResponse = new HttpResponse(HttpStatus.FOUND, Map.of(HttpHeader.LOCATION, "/401.html"));
+        HttpResponse expectedResponse = new HttpResponse(
+                HttpStatus.FOUND,
+                Map.of(HttpHeader.LOCATION, "/401.html")
+        );
         assertThat(response).isEqualTo(expectedResponse);
     }
 
@@ -90,7 +96,7 @@ class LoginControllerTest {
         sessionManager.add(session);
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /login HTTP/1.1 "),
-                new HttpHeaders(Map.of("Cookie", "JSESSIONID=" + session.getId())),
+                new HttpHeaders(Map.of(HttpHeader.COOKIE, "JSESSIONID=" + session.getId())),
                 "account=account2&password=password2"
         );
         HttpResponse response = new HttpResponse();
@@ -99,7 +105,7 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of("Location", "/index.html")
+                Map.of(HttpHeader.LOCATION, "/index.html")
         );
         assertAll(
                 () -> assertThat(response).isEqualTo(expectedResponse),
@@ -125,8 +131,8 @@ class LoginControllerTest {
 
         File file = File.of("/login.html");
         Map<String, String> headers = Map.of(
-                "Content-Type", file.getContentType(),
-                "Content-Length", String.valueOf(file.getContentLength())
+                HttpHeader.CONTENT_TYPE, file.getContentType(),
+                HttpHeader.CONTENT_LENGTH, String.valueOf(file.getContentLength())
         );
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.OK,
@@ -152,7 +158,7 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of("Location", "/index.html")
+                Map.of(HttpHeader.LOCATION, "/index.html")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }

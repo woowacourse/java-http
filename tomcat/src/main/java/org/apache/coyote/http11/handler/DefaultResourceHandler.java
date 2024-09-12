@@ -51,9 +51,9 @@ public class DefaultResourceHandler implements RequestHandler {
     }
 
     private Response login(Request request) throws NoSuchUserException {
-        QueryParameters queryParams = QueryParameters.parseFrom(request.getBody());
-        String account = queryParams.getParam("account");
-        String password = queryParams.getParam("password");
+        RequestParameters requestParams = RequestParameters.parseFrom(request.getBody());
+        String account = requestParams.getParam("account");
+        String password = requestParams.getParam("password");
         User user = InMemoryUserRepository.fetchByAccount(account);
         if (user.checkPassword(password)) {
             Session session = request.getSession(true);
@@ -72,7 +72,7 @@ public class DefaultResourceHandler implements RequestHandler {
 
     private String registerResponse(Request request) throws IOException {
         if (request.isPost()) {
-            QueryParameters methodRequest = QueryParameters.parseFrom(request.getBody());
+            RequestParameters methodRequest = RequestParameters.parseFrom(request.getBody());
             User user = register(methodRequest);
             Session session = request.getSession(true);
             session.setAttribute("user", user);
@@ -90,12 +90,12 @@ public class DefaultResourceHandler implements RequestHandler {
                 .toHttpMessage();
     }
 
-    private User register(QueryParameters queryParams) {
-        String account = queryParams.getParam("account");
+    private User register(RequestParameters requestParams) {
+        String account = requestParams.getParam("account");
         User user = new User(
                 account,
-                queryParams.getParam("password"),
-                queryParams.getParam("email")
+                requestParams.getParam("password"),
+                requestParams.getParam("email")
         );
         InMemoryUserRepository.save(user);
         return InMemoryUserRepository.fetchByAccount(account);

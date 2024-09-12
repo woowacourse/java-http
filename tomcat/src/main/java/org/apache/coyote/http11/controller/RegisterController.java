@@ -50,7 +50,7 @@ public class RegisterController extends AbstractController {
         if (resource == null) {
             throw new IllegalArgumentException("Resource not found");
         }
-        
+
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         response.setResponseBody(responseBody);
         response.setHttpStatusCode(HttpStatusCode.FOUND);

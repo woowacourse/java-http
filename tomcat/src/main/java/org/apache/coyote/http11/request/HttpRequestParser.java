@@ -51,7 +51,8 @@ public class HttpRequestParser {
 
         Map<String, List<String>> body = parser.parsingBody(parser.body);
 
-        return new HttpRequest(method, path, parser.parsingCookie(parser.headers.get("Cookie")), queryParams, fileType, body);
+        return new HttpRequest(method, path, parser.parsingCookie(parser.headers.get("Cookie")), queryParams, fileType,
+                body);
     }
 
     private String readPath(String requestLine) {

@@ -23,6 +23,7 @@ public class Session {
     public Object getAttribute(final String name) {
         return values.get(name);
     }
+
     public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }

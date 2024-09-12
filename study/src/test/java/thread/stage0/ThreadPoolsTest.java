@@ -3,21 +3,17 @@ package thread.stage0;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 스레드 풀은 무엇이고 어떻게 동작할까?
- * 테스트를 통과시키고 왜 해당 결과가 나왔는지 생각해보자.
- *
- * Thread Pools
- * https://docs.oracle.com/javase/tutorial/essential/concurrency/pools.html
- *
- * Introduction to Thread Pools in Java
- * https://www.baeldung.com/thread-pool-java-and-guava
+ * 스레드 풀은 무엇이고 어떻게 동작할까? 테스트를 통과시키고 왜 해당 결과가 나왔는지 생각해보자.
+ * <p>
+ * Thread Pools https://docs.oracle.com/javase/tutorial/essential/concurrency/pools.html
+ * <p>
+ * Introduction to Thread Pools in Java https://www.baeldung.com/thread-pool-java-and-guava
  */
 class ThreadPoolsTest {
 

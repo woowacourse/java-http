@@ -9,7 +9,8 @@ public class HttpResponse {
     private Http11Cookie http11Cookie;
     private String responseBody;
 
-    public HttpResponse(String path, String fileType, HttpStatusCode httpStatusCode, Http11Cookie http11Cookie, String responseBody) {
+    public HttpResponse(String path, String fileType, HttpStatusCode httpStatusCode, Http11Cookie http11Cookie,
+                        String responseBody) {
         this.path = path;
         this.fileType = fileType;
         this.httpStatusCode = httpStatusCode;
@@ -65,12 +66,24 @@ public class HttpResponse {
         return path;
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public String getFileType() {
         return fileType;
     }
 
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
     public Http11Cookie getHttp11Cookie() {
         return http11Cookie;
+    }
+
+    public void setHttp11Cookie(Http11Cookie http11Cookie) {
+        this.http11Cookie = http11Cookie;
     }
 
     public String getResponseBody() {
@@ -81,19 +94,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
     public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
-    }
-
-    public void setHttp11Cookie(Http11Cookie http11Cookie) {
-        this.http11Cookie = http11Cookie;
     }
 }

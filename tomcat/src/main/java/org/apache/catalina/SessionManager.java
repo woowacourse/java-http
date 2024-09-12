@@ -9,7 +9,8 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public SessionManager() {}
+    public SessionManager() {
+    }
 
     @Override
     public void add(Session session) {

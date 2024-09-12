@@ -1,8 +1,10 @@
 package com.techcourse.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Map;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -12,19 +14,13 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
-import org.junit.jupiter.api.AfterEach;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import support.FixedIdGenerator;
 
 class LoginControllerTest {
 
     private final LoginController loginController = LoginController.getInstance();
-
-    private final Manager manager = SessionManager.getInstance();
-
-    @AfterEach
-    void tearDown() {
-        manager.clear();
-    }
 
     @Test
     void GET_요청_시_login_경로를_반환한다() {
@@ -49,7 +45,8 @@ class LoginControllerTest {
     @Test
     void GET_요청_시_이미_로그인되어_있을_경우_index_경로로_리다이렉트한다() {
         // given
-        Session session = new Session("1234", manager);
+        Manager manager = SessionManager.getInstance();
+        Session session = manager.createSession("1234");
         session.setAttribute("user", new User("gugu", "password", "email"));
 
         RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
@@ -113,6 +110,9 @@ class LoginControllerTest {
     @Test
     void POST_요청_시_로그인_시도_후_성공하면_세션을_저장하고_index_경로로_리다이렉트한다() {
         // given
+        Manager manager = SessionManager.getInstance();
+        manager.setIdGenerator(new FixedIdGenerator());
+
         RequestLine requestLine = new RequestLine("POST /login HTTP/1.1");
         Map<String, String> headers = Map.of(
                 "Host", "localhost:8080",
@@ -129,8 +129,14 @@ class LoginControllerTest {
         loginController.postLogin(request, response);
 
         // then
-        // todo session
-        assertThat(response.getViewName()).isEqualTo("/index");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.getViewName()).isEqualTo("/index");
+            try {
+                softly.assertThat(manager.findSession(FixedIdGenerator.FIXED_ID)).isNotNull();
+            } catch (IOException e) {
+                fail();
+            }
+        });
     }
 
     @Test

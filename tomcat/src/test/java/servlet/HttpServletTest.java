@@ -17,19 +17,12 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import support.FixedIdGenerator;
 
 class HttpServletTest {
 
     private final HttpServlet httpServlet = HttpServlet.getInstance();
-
-    private final Manager manager = SessionManager.getInstance();
-
-    @AfterEach
-    void tearDown() {
-        manager.clear();
-    }
 
     @Test
     void GET_login을_호출한다() throws IOException {
@@ -61,6 +54,9 @@ class HttpServletTest {
     @Test
     void query_parameter를_포함한_GET_login을_호출한다() throws IOException {
         // given
+        Manager manager = SessionManager.getInstance();
+        manager.setIdGenerator(new FixedIdGenerator());
+
         RequestLine requestLine = new RequestLine("GET /login?account=gugu&password=password HTTP/1.1");
         Map<String, String> headers = Map.of(
                 "Host", "localhost:8080",
@@ -75,9 +71,8 @@ class HttpServletTest {
         httpServlet.service(request, response);
 
         // then
-        // todo session generator
         String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Set-Cookie: JSESSIONID=1234 \r\n" +
+                "Set-Cookie: JSESSIONID=fixed-id \r\n" +
                 "Location: /index \r\n" +
                 "\r\n";
 
@@ -87,8 +82,8 @@ class HttpServletTest {
     @Test
     void 이미_로그인한_후_GET_login을_호출한다() throws IOException {
         // given
-        // todo
-        Session session = new Session("1234", manager);
+        Manager manager = SessionManager.getInstance();
+        Session session = manager.createSession("1234");
         session.setAttribute("user", new User("gugu", "password", "email"));
 
         RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
@@ -116,6 +111,9 @@ class HttpServletTest {
     @Test
     void POST_login을_호출한다() throws IOException {
         // given
+        Manager manager = SessionManager.getInstance();
+        manager.setIdGenerator(new FixedIdGenerator());
+
         RequestLine requestLine = new RequestLine("POST /login HTTP/1.1");
         Map<String, String> headers = Map.of(
                 "Host", "localhost:8080",
@@ -132,9 +130,8 @@ class HttpServletTest {
         httpServlet.service(request, response);
 
         // then
-        // todo session generator
         String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Set-Cookie: JSESSIONID=1234 \r\n" +
+                "Set-Cookie: JSESSIONID=fixed-id \r\n" +
                 "Location: /index \r\n" +
                 "\r\n";
 

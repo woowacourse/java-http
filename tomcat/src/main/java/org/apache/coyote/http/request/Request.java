@@ -51,7 +51,7 @@ public class Request {
     }
 
     public Session getSession(boolean create) {
-        String sessionId = headers.findJSessionId().orElse(null); // todo id generator
+        String sessionId = headers.findJSessionId().orElse(null);
         Session session = getSession(sessionId);
         if (session != null) {
             return session;

@@ -2,15 +2,21 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.IdGenerator;
 import org.apache.catalina.Manager;
+import org.apache.catalina.util.RandomIdGenerator;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final RandomIdGenerator DEFAULT_ID_GENERATOR = new RandomIdGenerator();
 
     private static SessionManager INSTANCE;
 
+    private IdGenerator idGenerator;
+
     private SessionManager() {
+        this.idGenerator = DEFAULT_ID_GENERATOR;
     }
 
     public static SessionManager getInstance() {
@@ -22,26 +28,29 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(Session session) {
-        sessions.put(session.getId(), session);
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(String id) {
-        return sessions.get(id);
+        return SESSIONS.get(id);
     }
 
     @Override
     public void remove(Session session) {
-        sessions.remove(session.getId());
+        SESSIONS.remove(session.getId());
     }
 
     @Override
     public Session createSession(String sessionId) {
+        if (sessionId == null) {
+            sessionId = idGenerator.generate();
+        }
         return new Session(sessionId, this);
     }
 
     @Override
-    public void clear() {
-        sessions.clear();
+    public void setIdGenerator(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
     }
 }

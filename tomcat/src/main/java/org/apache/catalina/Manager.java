@@ -50,5 +50,5 @@ public interface Manager {
 
     Session createSession(String sessionId);
 
-    void clear();
+    void setIdGenerator(IdGenerator idGenerator);
 }

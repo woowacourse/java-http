@@ -23,13 +23,22 @@ public class HttpCookies {
 
     private static Map<String, String> parseCookies(String cookiesString) {
         String[] cookieParts = cookiesString.split("; ");
+
         if (cookieParts.length == 0) {
             return new HashMap<>();
         }
 
         return Arrays.stream(cookieParts)
-                .map(part -> part.split("="))
+                .map(HttpCookies::getCookieKeyValue)
                 .collect(Collectors.toMap(part -> part[0], part -> part[1]));
+    }
+
+    private static String[] getCookieKeyValue(String part) {
+        String[] cookie = part.split("=");
+        if (cookie.length != 2) {
+            throw new IllegalArgumentException("잘못된 형식의 쿠키 문자열입니다.");
+        }
+        return cookie;
     }
 
     public void setCookie(String key, String value) {

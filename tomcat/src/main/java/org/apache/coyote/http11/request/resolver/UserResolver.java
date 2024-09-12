@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.RequestBody;
 
-public class UserResolver<T> implements RequestBodyResolver<User> {
+public class UserResolver implements RequestBodyResolver<User> {
 
     private static final String USER_REGISTRATION_INFO_DELIMITER = "&";
     private static final String INFO_ELEMENT_DELIMITER = "=";

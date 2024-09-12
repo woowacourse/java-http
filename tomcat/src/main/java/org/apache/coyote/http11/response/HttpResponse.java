@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.serdes.ResponseHeaderSerializer;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
 
@@ -18,13 +19,13 @@ public class HttpResponse {
 
     public HttpResponse() {
         this.viewResolver = new ViewResolver();
-        this.serialzer = new ResponseSerializer();
+        this.serialzer = new ResponseSerializer(new ResponseHeaderSerializer());
         this.headers = new HttpResponseHeader();
     }
 
     public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage, ResponseBody responseBody) {
         this.viewResolver = new ViewResolver();
-        this.serialzer = new ResponseSerializer();
+        this.serialzer = new ResponseSerializer(new ResponseHeaderSerializer());
         this.headers = headers;
         this.responseBody = responseBody;
     }
@@ -43,6 +44,10 @@ public class HttpResponse {
         this.statusCode(StatusCode.FOUND_302);
         this.location(redirectUrl);
         return this;
+    }
+
+    public boolean hasResponseBody(){
+        return responseBody != null;
     }
 
     public String serialize() {

@@ -50,7 +50,8 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-        HttpResponse httpResponse = requestMapper.mapRequest(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        requestMapper.mapRequest(httpRequest, httpResponse);
         return httpResponseParser.parseResponse(httpResponse);
     }
 }

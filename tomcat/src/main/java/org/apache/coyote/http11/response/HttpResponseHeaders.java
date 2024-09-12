@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -7,8 +8,8 @@ public class HttpResponseHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpResponseHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    public HttpResponseHeaders() {
+        this.headers = new HashMap<>();
     }
 
     public void setContentType(HttpRequest request) {
@@ -21,6 +22,10 @@ public class HttpResponseHeaders {
 
     public void setCookie(String cookie) {
         this.headers.put("Set-Cookie", cookie);
+    }
+
+    public void setAttribute(String key, String value) {
+        this.headers.put(key, value);
     }
 
     public String[] getKeys() {

@@ -25,16 +25,18 @@ public class RequestMapper {
         this.staticPageController = StaticPageController.getInstance();
     }
 
-    public HttpResponse mapRequest(HttpRequest request) throws URISyntaxException, IOException {
+    public void mapRequest(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         if (request.getHttpMethod().equals(HttpMethod.POST)) {
             if (request.getHttpRequestPath().contains("/login")) {
-                return loginController.login(request);
+                loginController.login(request, response);
             }
             if (request.getHttpRequestPath().contains("/register")) {
-                return registerController.register(request);
+                registerController.register(request, response);
             }
         }
-        return staticPageController.getStaticPage(request);
+        if (request.getHttpMethod().equals(HttpMethod.GET)) {
+            staticPageController.getStaticPage(request, response);
+        }
     }
 
     public static RequestMapper getInstance() {

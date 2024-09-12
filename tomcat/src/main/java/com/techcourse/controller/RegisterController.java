@@ -5,12 +5,9 @@ import com.techcourse.exception.UserException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseBody;
-import org.apache.coyote.http11.response.HttpResponseHeaders;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RegisterController {
@@ -20,28 +17,24 @@ public class RegisterController {
     private RegisterController() {
     }
 
-    public HttpResponse register(HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public void register(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
-        HttpStatusCode statusCode = HttpStatusCode.OK;
-        httpRequest.setHttpRequestPath("/index.html");
-        String account = httpRequest.getRequestBodyValue("account");
-        String email = httpRequest.getRequestBodyValue("email");
-        String password = httpRequest.getRequestBodyValue("password");
+        request.setHttpRequestPath("/index.html");
+        String account = request.getRequestBodyValue("account");
+        String email = request.getRequestBodyValue("email");
+        String password = request.getRequestBodyValue("password");
         try {
             User user = new User(account, password, email);
             checkDuplicatedUser(user);
             InMemoryUserRepository.save(user);
         } catch (UserException e) {
-            httpRequest.setHttpRequestPath("/register.html");
-            statusCode = HttpStatusCode.BAD_REQUEST;
+            request.setHttpRequestPath("/register.html");
+            response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
         }
-        HttpResponseBody httpResponseBody = new HttpResponseBody(
-                fileReader.readFile(httpRequest.getHttpRequestPath()));
 
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
-        httpResponseHeaders.setContentType(httpRequest);
-        httpResponseHeaders.setContentLength(httpResponseBody);
-        return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
+        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
+        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
+        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
     private void checkDuplicatedUser(User user) {

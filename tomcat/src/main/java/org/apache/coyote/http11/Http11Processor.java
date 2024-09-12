@@ -39,9 +39,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()) {
+            HttpRequest request = readRequest(new BufferedReader(new InputStreamReader(inputStream)));
             HttpResponse response = new HttpResponse();
-            handle(readRequest(new BufferedReader(new InputStreamReader(inputStream))), response);
-
+            handle(request, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -50,11 +50,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest readRequest(BufferedReader reader) throws IOException {
-        return new HttpRequest(
-                new RequestLine(reader.readLine()),
-                new HttpHeader(readRequestHeaders(reader)),
-                readRequestBody(reader, new HttpHeader(readRequestHeaders(reader)))
-        );
+        RequestLine requestLine = new RequestLine(reader.readLine());
+        HttpHeader requestHeader = new HttpHeader(readRequestHeaders(reader));
+        RequestBody requestBody = readRequestBody(reader, requestHeader);
+
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     private List<String> readRequestHeaders(BufferedReader reader) throws IOException {

@@ -29,7 +29,7 @@ public class RegisterRequestHandler implements RequestHandler {
 
 	@Override
 	public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-		if (httpRequest.getMethod().equals("GET")) {
+		if (httpRequest.hasMethod(HttpMethod.GET)) {
 			URL resource = Http11Processor.class.getClassLoader().getResource("static/register.html");
 			File file = new File(resource.getPath());
 			final Path path = file.toPath();

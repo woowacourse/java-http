@@ -18,7 +18,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
 	@Override
 	public boolean canHandle(HttpRequest request) {
-		return "GET".equals(request.getMethod()) &&
+		return request.hasMethod(HttpMethod.GET) &&
 			Stream.of(CAN_HANDLE_SUFFIX).anyMatch(suffix -> request.getUri().endsWith(suffix));
 	}
 

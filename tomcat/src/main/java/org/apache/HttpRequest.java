@@ -14,11 +14,11 @@ public class HttpRequest {
 
     private final Map<String, String> headers;
     private final Map<String, String> payload;
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String httpVersion;
 
-    private HttpRequest(Map<String, String> headers, Map<String, String> payload, String method, String uri, String httpVersion) {
+    private HttpRequest(Map<String, String> headers, Map<String, String> payload, HttpMethod method, String uri, String httpVersion) {
         this.headers = headers;
         this.payload = payload;
         this.method = method;
@@ -61,7 +61,7 @@ public class HttpRequest {
         return new HttpRequest(
                 headers,
                 payload,
-                method,
+                HttpMethod.from(method),
                 uri,
                 httpVersion
         );
@@ -106,8 +106,8 @@ public class HttpRequest {
         return payload;
     }
 
-    public String getMethod() {
-        return method;
+    public boolean hasMethod(HttpMethod method) {
+        return this.method == method;
     }
 
     public String getUri() {

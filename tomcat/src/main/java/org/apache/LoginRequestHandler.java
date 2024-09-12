@@ -38,7 +38,7 @@ public class LoginRequestHandler implements RequestHandler {
 
 	@Override
 	public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-		if (httpRequest.getMethod().equals("GET")) {
+		if (httpRequest.hasMethod(HttpMethod.GET)) {
 			String sessionId = httpRequest.getSessionIdFromCookie();
 			if (sessionId == null || sessionManager.findSession(sessionId) == null) {
 				URL resource = Http11Processor.class.getClassLoader().getResource("static/login.html");

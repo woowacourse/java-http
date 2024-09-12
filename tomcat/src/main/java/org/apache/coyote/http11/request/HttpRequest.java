@@ -22,62 +22,51 @@ public class HttpRequest {
     private static final String JS = ".js";
     private static final String HTML = ".html";
 
-    private final HttpMethod method;
-    private final String path;
-    private final String version;
+    private final HttpRequestLine httpRequestLine;
     private final Map<String, String> headers;
     private final String body;
 
-    public HttpRequest(HttpMethod method, String path, String version, Map<String, String> headers, String body) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
+    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, String body) {
+        this.httpRequestLine = httpRequestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String startLine = bufferedReader.readLine();
 
-        String[] parsedStartLine = HttpRequestParser.parseStartLine(startLine);
-        HttpMethod method = HttpMethod.from(parsedStartLine[0]);
-        String path = parsedStartLine[1];
-        String version = parsedStartLine[2];
+        HttpRequestLine requestLine = HttpRequestLine.from(bufferedReader.readLine());
 
         Map<String, String> headers = new HashMap<>();
-        while (!startLine.isEmpty()) {
-            String line = bufferedReader.readLine();
-            if (line.isEmpty()) {
-                break;
-            }
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(HEADER_SPLIT_DELIMITER, 2);
             headers.put(headerParts[0], headerParts[1]);
         }
 
-        if (method.isPost()) {
+        if (requestLine.isPost()) {
             int contentLength = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String body = new String(buffer);
-            return new HttpRequest(method, path, version, headers, body);
+            return new HttpRequest(requestLine, headers, body);
         }
 
-        return new HttpRequest(method, path, version, headers, null);
+        return new HttpRequest(requestLine, headers, null);
     }
 
     public boolean isGet() {
-        return method.isGet();
+        return httpRequestLine.isGet();
     }
 
     public boolean isPost() {
-        return method.isPost();
+        return httpRequestLine.isPost();
     }
 
     public byte[] toHttpResponseBody() throws URISyntaxException, IOException {
-        URL url = getClass().getClassLoader().getResource(loadResourceName(path));
+        URL url = getClass().getClassLoader().getResource(loadResourceName(httpRequestLine.getPath()));
         if (url == null) {
-            throw new IllegalArgumentException("존재하지 않는 리소스 입니다." + path);
+            throw new IllegalArgumentException("존재하지 않는 리소스 입니다." + httpRequestLine.getPath());
         }
 
         Path path = Path.of(url.toURI());
@@ -95,25 +84,25 @@ public class HttpRequest {
     }
 
     public String getContentType() {
-        if (path.endsWith(CSS)) {
+        if (httpRequestLine.getPath().endsWith(CSS)) {
             return ContentType.CSS;
         }
-        if (path.endsWith(JS)) {
+        if (httpRequestLine.getPath().endsWith(JS)) {
             return ContentType.JAVASCRIPT;
         }
         return ContentType.HTML;
     }
 
     public HttpMethod getHttpMethod() {
-        return method;
+        return httpRequestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return httpRequestLine.getPath();
     }
 
     public String getVersion() {
-        return version;
+        return httpRequestLine.getVersion();
     }
 
     public Map<String, String> getHeaders() {

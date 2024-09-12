@@ -77,7 +77,7 @@ class QueryParameterParserTest {
 
     @DisplayName("value가 없는 복수의 쿼리파라미터로 이뤄진 문자열을 파싱한다.")
     @Test
-    void parse_ShouldHandleMultipleKeysWithEmptyValues() {
+    void parseNoValues() {
         String queryParameter = "key1=&key2=";
 
         Map<String, List<String>> result = QueryParameterParser.parse(queryParameter);

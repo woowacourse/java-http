@@ -13,6 +13,14 @@ public class UserController extends AbstractController {
     private final RequestBodyResolver<User> userResolver = new UserResolver();
     private final UserService userService = UserService.getInstance();
 
+    private static final UserController INSTANCE = new UserController();
+
+    public static UserController getInstance() {
+        return INSTANCE;
+    }
+
+    private UserController() {}
+
     @Override
     public boolean canHandle(String url) {
         return url.contains("register");

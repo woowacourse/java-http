@@ -44,7 +44,7 @@ public class Http11Request {
         return new Http11Request(
                 Http11RequestMethod.from(method),
                 headers,
-                uri,
+                uri.split("\\?")[0],
                 Http11RequestParser.parseQuery(uri),
                 body);
 

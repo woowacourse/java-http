@@ -2,9 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
     private static StaticResourceController instance = new StaticResourceController();
 
@@ -16,7 +15,11 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public HttpResponse process(HttpRequest request) {
-        return new HttpResponse(HttpStatusCode.OK);
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        throw new IllegalArgumentException("요청을 처리할 수 없습니다.");
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
     }
 }

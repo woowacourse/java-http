@@ -2,7 +2,6 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
@@ -11,25 +10,21 @@ import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterController extends Controller {
+public class RegisterAbstractController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterAbstractController.class);
 
     @Override
-    public HttpResponse process(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         String account = request.body().getAttribute("account");
         String email = request.body().getAttribute("email");
         String password = request.body().getAttribute("password");
 
         User user = InMemoryUserRepository.save(new User(account, password, email));
-        log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
         String sessionId = SessionManager.add(new Session(user));
+        log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
 
-        return new HttpResponse(
-                HttpStatusCode.REDIRECT,
-                Map.of("Location", "/index.html",
-                        "Set-Cookie", "JSESSIONID=" + sessionId),
-                null
-        );
+        response.setStatusCode(HttpStatusCode.REDIRECT);
+        response.setCookie("JSESSIONID", sessionId);
     }
 }

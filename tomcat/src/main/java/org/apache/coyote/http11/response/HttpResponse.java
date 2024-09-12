@@ -1,11 +1,44 @@
 package org.apache.coyote.http11.response;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public record HttpResponse(
-        HttpStatusCode statusCode,
-        Map<String, String> headers,
-        String body) {
+public class HttpResponse {
+
+    private HttpStatusCode statusCode;
+    private final Map<String, String> headers = new HashMap<>();
+    private String body;
+
+    public HttpResponse() {
+    }
+
+    public HttpStatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setCookie(String cookieKey, String cookieValue) {
+        this.headers.put("Set-Cookie", cookieKey + "=" + cookieValue);
+    }
+
+    public void setLocation(String location) {
+        this.headers.put("Location", location);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
 
     @Override
     public String toString() {

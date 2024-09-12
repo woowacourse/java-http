@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 
 public class ViewResolver {
 
-    private static final String GET_METHOD = "GET";
     private static final String DEFAULT_ROUTE = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
@@ -20,13 +20,13 @@ public class ViewResolver {
     }
 
     public String resolve(HttpRequestHeader request) throws IOException {
-        if (GET_METHOD.equals(request.getHttpMethod())
+        if (HttpMethod.GET.equals(request.getHttpMethod())
                 && (request.getPath().startsWith("/login") || request.getPath().startsWith("/register"))
                 && (request.getCookies() != null && request.getCookies().get("JSESSIONID") != null)) {
             return responseBuilder.buildRedirectResponse("/index.html");
         }
 
-        if (GET_METHOD.equals(request.getHttpMethod())) {
+        if (HttpMethod.GET.equals(request.getHttpMethod())) {
             return handleGetRequest(request.getPath());
         }
 

@@ -4,7 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.handler.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -48,10 +48,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(HttpRequest request) throws IOException {
-        Controller controller = handlerMapping.getController(request.header());
+        AbstractController controller = handlerMapping.getController(request.header());
         if (controller != null) {
-            HttpResponse httpResponse = controller.process(request);
-            return httpResponse.toString();
+            HttpResponse response = new HttpResponse();
+            controller.service(request, response);
+            return response.toString();
         }
 
         return viewResolver.resolve(request.header());

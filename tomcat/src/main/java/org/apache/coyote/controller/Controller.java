@@ -3,7 +3,7 @@ package org.apache.coyote.controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class Controller {
+public interface Controller {
 
-    public abstract HttpResponse process(HttpRequest request);
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
 import com.techcourse.controller.StaticResourceController;
@@ -35,7 +36,7 @@ public class RequestMapping {
             return new StaticResourceController();
         }
         if (controller == null) {
-            throw new NoSuchMethodException("해당하는 컨트롤러가 없습니다.");
+            return new NotFoundController();
         }
         return controller;
     }

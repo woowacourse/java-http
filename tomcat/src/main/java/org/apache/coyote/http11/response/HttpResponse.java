@@ -33,6 +33,15 @@ public class HttpResponse {
         httpHeader.putHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
+    public void setNotFound(String protocol) throws IOException {
+        URL path = getClass().getClassLoader().getResource("static" + "/404.html");
+        body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
+        statusLine = new StatusLine(protocol, "404", "Not Found");
+
+        httpHeader.putHeader("Content-Type", "text/html;charset=utf-8");
+        httpHeader.putHeader("Content-Length", String.valueOf(body.getBytes().length));
+    }
+
     public void setLoginFail(String protocol) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + "/500.html");
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));

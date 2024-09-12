@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
     }
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {
-        HttpCookie httpCookie = new HttpCookie("JSESSIONID");
+        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
         Session session = new Session();
 
         httpCookie.setValue(session.getId());
@@ -75,7 +75,7 @@ public class LoginController extends AbstractController {
         response.setStatusLine(HttpStatus.OK);
 
         HttpCookies cookies = request.getCookies();
-        HttpCookie cookie = cookies.getCookie("JSESSIONID");
+        HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
 
         String path = determinePagePath(cookie);
         String resource = ResourceReader.readResource(path);

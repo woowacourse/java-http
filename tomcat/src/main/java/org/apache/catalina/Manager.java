@@ -21,6 +21,8 @@ import org.apache.catalina.session.Session;
  */
 public interface Manager {
 
+    Session createSession();
+
     /**
      * Add this Session to the set of active Sessions for this Manager.
      *

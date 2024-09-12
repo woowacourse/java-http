@@ -227,7 +227,7 @@ public class Http11Processor implements Runnable, Processor {
             result.put(body[0], body[1]);
         }
 
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     private String[] doRegister(String version, Map<String, String> requestBody) {

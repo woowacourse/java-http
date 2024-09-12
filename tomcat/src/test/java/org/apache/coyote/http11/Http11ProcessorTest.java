@@ -37,7 +37,8 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
-                "Hello world!");
+                "Hello world!",
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -65,7 +66,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())) + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -96,7 +97,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + fileContent.length + " \r\n" +
                 "\r\n" +
-                new String(fileContent);
+                new String(fileContent) + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -106,7 +107,7 @@ class Http11ProcessorTest {
     void alreadyLogin() throws IOException {
         // given
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
-        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        session.addAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 
@@ -127,7 +128,7 @@ class Http11ProcessorTest {
         // then
         assertAll(
                 () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
-                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+                () -> assertThat(socket.output()).contains("Location: /index.html")
         );
     }
 
@@ -136,7 +137,7 @@ class Http11ProcessorTest {
     void invalidJsessionLogin() throws IOException {
         // given
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
-        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        session.addAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 
@@ -163,7 +164,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + fileContent.length + " \r\n" +
                 "\r\n" +
-                new String(fileContent);
+                new String(fileContent) + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -193,7 +194,7 @@ class Http11ProcessorTest {
         assertAll(
                 () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
                 () -> assertThat(socket.output()).contains("Set-Cookie: JSESSIONID="),
-                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+                () -> assertThat(socket.output()).contains("Location: /index.html")
         );
     }
 
@@ -220,7 +221,7 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/401.html \r\n" +
+                "Location: /401.html \r\n" +
                 "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -248,7 +249,7 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n";
         assertAll(
                 () -> assertThat(socket.output()).isEqualTo(expected),

@@ -8,6 +8,9 @@ public class SessionManager implements Manager {
     private static final SessionManager instance = new SessionManager();
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
+    private SessionManager() {
+    }
+
     public static SessionManager getInstance() {
         return instance;
     }
@@ -28,8 +31,5 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final String id) {
         sessions.remove(id);
-    }
-
-    private SessionManager() {
     }
 }

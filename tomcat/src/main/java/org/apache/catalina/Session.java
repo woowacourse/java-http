@@ -12,27 +12,27 @@ public class Session {
         this.id = id;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
-
-    public void setAttribute(final String name, final Object value) {
+    public void addAttribute(final String name, final Object value) {
         values.put(name, value);
-    }
-
-    public void removeAttribute(final String name) {
-        values.remove(name);
     }
 
     public boolean doesExistAttribute(String name) {
         return values.containsKey(name);
     }
 
+    public void removeAttribute(final String name) {
+        values.remove(name);
+    }
+
     public void invalidate() {
         values.clear();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Object getAttribute(final String name) {
+        return values.get(name);
     }
 }

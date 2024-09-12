@@ -31,14 +31,14 @@ public class RegisterController extends AbstractController {
         String account = parsed.get("account");
         String password = parsed.get("password");
         String email = parsed.get("email");
-        User user = new User(account, password, email);
-        if (user.isValid()) {
+        try {
+            User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             log.info("save user: {}", user);
             response.sendRedirect(REDIRECT_RESOURCE_URI);
-            return;
+        } catch (IllegalArgumentException e) {
+            log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
+            response.sendRedirect(NOT_FOUND_RESOURCE_URI);
         }
-        log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
-        response.sendRedirect(NOT_FOUND_RESOURCE_URI);
     }
 }

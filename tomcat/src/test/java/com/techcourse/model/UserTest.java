@@ -1,6 +1,6 @@
 package com.techcourse.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,9 +12,21 @@ class UserTest {
     @Test
     void isValid() {
         assertAll(
-                () -> assertThat(new User(null, null, null).isValid()).isFalse(),
-                () -> assertThat(new User(null, "password", null).isValid()).isFalse(),
-                () -> assertThat(new User("hotea", "password", "dbswn990@gmail.com").isValid()).isTrue()
+                () -> assertThatThrownBy(() -> new User(null, null, null))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("사용자 필수 정보가 누락되었습니다."),
+                () -> assertThatThrownBy(() -> new User(null, "", null))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("사용자 필수 정보가 누락되었습니다."),
+                () -> assertThatThrownBy(() -> new User(null, null, "  "))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("사용자 필수 정보가 누락되었습니다."),
+                () -> assertThatThrownBy(() -> new User(" ", null, null))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("사용자 필수 정보가 누락되었습니다."),
+                () -> assertThatThrownBy(() -> new User("", "", ""))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("사용자 필수 정보가 누락되었습니다.")
         );
     }
 }

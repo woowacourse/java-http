@@ -11,4 +11,8 @@ public enum HttpMethod {
     CONNECT,
     PATCH,
     ;
+
+    public boolean isSameMethod(HttpMethod httpMethod) {
+        return this == httpMethod;
+    }
 }

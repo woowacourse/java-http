@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestCookie;
 import org.apache.coyote.http11.response.Response;
 
@@ -29,14 +28,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(Request request, Response response) throws Exception {
-        RequestBody requestBody = request.getBody();
-        Map<String, String> userInfo = requestBody.parseQuery();
-        String account = userInfo.getOrDefault("account", "");
-        String password = userInfo.getOrDefault("password", "");
+        Map<String, String> userInfo = request.parseBody();
+        String account = userInfo.get("account");
+        String password = userInfo.get("password");
 
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty() || !rawUser.get().checkPassword(password)) {
-            response.setStatusUnauthorized();
+            response.unauthorized();
             response.addFileBody("/401.html");
             return;
         }

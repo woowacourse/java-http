@@ -24,7 +24,7 @@ public class Response {
         this.body = new ResponseBody();
     }
 
-    public void setStatusUnauthorized() {
+    public void unauthorized() {
         this.status = ResponseStatus.UNAUTHORIZED;
     }
 

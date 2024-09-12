@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 public class Request {
@@ -31,6 +32,10 @@ public class Request {
         return cookies.getLoginCookie();
     }
 
+    public Map<String, String> parseBody() {
+        return body.parseQuery();
+    }
+
     public boolean hasPath(String path) {
         return requestLine.hasPath(path);
     }
@@ -41,10 +46,6 @@ public class Request {
 
     public boolean hasPostMethod() {
         return requestLine.hasPostMethod();
-    }
-
-    public RequestBody getBody() {
-        return body;
     }
 
     public String getPath() {

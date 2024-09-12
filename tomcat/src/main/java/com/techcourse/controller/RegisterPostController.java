@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 public class RegisterPostController implements HttpHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterPostController.class);
+    private static final String INDEX_HTML_URL = "http://localhost:8080/index.html";
 
     private final UserService service;
 
@@ -29,7 +30,7 @@ public class RegisterPostController implements HttpHandler {
         User user = saveUser(request);
         log.info("회원가입 성공! account: {}, email: {}", user.getAccount(), user.getEmail());
 
-        HttpResponse response = HttpResponse.found("http://localhost:8080/index.html");
+        HttpResponse response = HttpResponse.found(INDEX_HTML_URL);
         if (!request.hasSession()) {
             Session session = addSession(user);
             response.setCookie(HttpCookie.from(session));

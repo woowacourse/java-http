@@ -14,6 +14,8 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 public abstract class AbstractController implements Controller {
 
     private static final String FILE_EXTENSION_SEPARATOR_REGEX = "\\.";
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -34,7 +36,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void serveStaticFile(HttpRequest request, HttpResponse response) throws IOException {
-        String path = addHtmlExtension(request.getPath());
+        String path = addDefaultExtensionIfMissing(request.getPath());
         String body = getStaticFileContent(path);
         if (body == null) {
             String notFoundPage = getStaticFileContent("/404.html");
@@ -52,9 +54,9 @@ public abstract class AbstractController implements Controller {
         response.writeResponse();
     }
 
-    private String addHtmlExtension(String path) {
-        if (!path.contains(".")) {
-            return path + ".html";
+    private String addDefaultExtensionIfMissing(String path) {
+        if (!path.contains(FILE_EXTENSION_SEPARATOR)) {
+            return path + DEFAULT_FILE_EXTENSION;
         }
         return path;
     }

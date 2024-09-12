@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse.Builder responseBuilder) {
         Map<String, String> body = request.extractUrlEncodedBody();
-        if (isValidBody(body)) {
+        if (isInvalidBody(body)) {
             responseBuilder.status(Status.BAD_REQUEST);
             return;
         }
@@ -34,7 +34,7 @@ public class RegisterController extends AbstractController {
         postProcess(responseBuilder, body);
     }
 
-    private boolean isValidBody(Map<String, String> body) {
+    private boolean isInvalidBody(Map<String, String> body) {
         return !body.containsKey("account") ||
                 !body.containsKey("password") ||
                 !body.containsKey("email");

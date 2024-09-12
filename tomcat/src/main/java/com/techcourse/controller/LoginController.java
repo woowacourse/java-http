@@ -5,7 +5,7 @@ import static org.reflections.Reflections.log;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
+import java.util.Map;
 import org.apache.catalina.session.JSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,24 +24,32 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
         if (SessionManager.getInstance().getSession(request) != null) {
-            processSessionLogin(responseBuilder);
-            return;
-        }
-        if (request.hasParameters(List.of("account", "password"))) {
-            processAccountLogin(request, responseBuilder);
+            responseBuilder.status(Status.FOUND)
+                    .location("/index.html");
             return;
         }
         resourceController.doGet(request.updatePath("login.html"), responseBuilder);
     }
 
-    private void processSessionLogin(Builder responseBuilder) {
-        responseBuilder.status(Status.FOUND)
-                .location("/index.html");
+    @Override
+    protected void doPost(HttpRequest request, Builder responseBuilder) {
+        Map<String, String> body = request.extractUrlEncodedBody();
+        if (isInvalidBody(body)) {
+            responseBuilder.status(Status.FOUND)
+                    .location("/login");
+            return;
+        }
+        processAccountLogin(body, responseBuilder);
     }
 
-    private void processAccountLogin(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        String account = request.parameters().get("account");
-        String password = request.parameters().get("password");
+    private boolean isInvalidBody(Map<String, String> body) {
+        return !body.containsKey("account") ||
+                !body.containsKey("password");
+    }
+
+    private void processAccountLogin(Map<String, String> body, HttpResponse.Builder responseBuilder) {
+        String account = body.get("account");
+        String password = body.get("password");
 
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

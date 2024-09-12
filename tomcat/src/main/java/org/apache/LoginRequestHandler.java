@@ -39,8 +39,8 @@ public class LoginRequestHandler implements RequestHandler {
 	@Override
 	public HttpResponse handle(HttpRequest httpRequest) throws IOException {
 		if (httpRequest.hasMethod(HttpMethod.GET)) {
-			String sessionId = httpRequest.getSessionIdFromCookie();
-			if (sessionId == null || sessionManager.findSession(sessionId) == null) {
+			Optional<String> sessionId = httpRequest.getSessionIdFromCookie();
+			if (sessionId.isEmpty() || sessionManager.findSession(sessionId.get()) == null) {
 				URL resource = Http11Processor.class.getClassLoader().getResource("static/login.html");
 				File file = new File(resource.getPath());
 				final Path path = file.toPath();

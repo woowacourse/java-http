@@ -1,22 +1,27 @@
 package org.apache;
 
+import static org.apache.catalina.Globals.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
     private final HttpRequestBody requestBody;
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> headers, HttpRequestBody requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpRequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
@@ -24,23 +29,20 @@ public class HttpRequest {
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        Map<String, String> headers = new HashMap<>();
-
 
         String firstLine = reader.readLine();
         RequestLine requestLine = RequestLine.from(firstLine);
 
         String line;
+        List<String> headerLines = new ArrayList<>();
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] strings = line.split(": ");
-            String key = strings[0];
-            String value = strings[1].trim();
-            headers.put(key, value);
+            headerLines.add(line);
         }
+        HttpHeaders headers = HttpHeaders.from(headerLines);
 
         HttpRequestBody body = HttpRequestBody.empty();
         if (requestLine.getMethod() == HttpMethod.POST) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            int contentLength = Integer.parseInt(headers.getHeader(HttpHeader.CONTENT_LENGTH).get());
             char[] unparsedBody = new char[contentLength];
             if (contentLength > 0) {
                 reader.read(unparsedBody, 0, contentLength);
@@ -58,16 +60,8 @@ public class HttpRequest {
         );
     }
 
-    public String getSessionIdFromCookie() {
-        if (headers.get("Cookie") != null) {
-            String[] cookies = headers.get("Cookie").split("; ");
-            for (String cookie : cookies) {
-                if (cookie.startsWith("JSESSIONID=")) {
-                    return cookie.substring("JSESSIONID=".length());
-                }
-            }
-        }
-        return null;
+    public Optional<String> getSessionIdFromCookie() {
+        return headers.getCookie(SESSION_COOKIE_NAME);
     }
 
     public boolean isHttp11VersionRequest() {

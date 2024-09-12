@@ -14,10 +14,10 @@ class RequestMappingsTest {
     void findController() {
         Controller firstController = new AbstractController() {
         };
-        RequestMapping first = RequestMapping.from(firstController, "first");
+        RequestMapping first = new RequestMapping(firstController, "first");
         Controller secondController = new AbstractController() {
         };
-        RequestMapping second = RequestMapping.from(secondController, "second", "first");
+        RequestMapping second = new RequestMapping(secondController, "second", "first");
 
         RequestMappings requestMappings = new RequestMappings(first, second);
 
@@ -32,10 +32,10 @@ class RequestMappingsTest {
     void findControllerFail() {
         Controller firstController = new AbstractController() {
         };
-        RequestMapping first = RequestMapping.from(firstController, "first");
+        RequestMapping first = new RequestMapping(firstController, "first");
         Controller secondController = new AbstractController() {
         };
-        RequestMapping second = RequestMapping.from(secondController, "second", "first");
+        RequestMapping second = new RequestMapping(secondController, "second", "first");
 
         RequestMappings requestMappings = new RequestMappings(first, second);
 

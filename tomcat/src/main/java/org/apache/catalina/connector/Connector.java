@@ -77,9 +77,9 @@ public class Connector implements Runnable {
 
     private RequestMappings makeRequestMapping() {
         return new RequestMappings(
-                RequestMapping.from(new LoginController(), "login", "login.html"),
-                RequestMapping.from(new RegisterController(), "register", "register.html"),
-                RequestMapping.from(new StaticResourceController(), ".js", ".css", ".html", "/", "/index",
+                new RequestMapping(new LoginController(), "login", "login.html"),
+                new RequestMapping(new RegisterController(), "register", "register.html"),
+                new RequestMapping(new StaticResourceController(), ".js", ".css", ".html", "/", "/index",
                         "/index.html")
         );
     }

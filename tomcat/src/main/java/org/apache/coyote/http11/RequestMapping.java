@@ -8,13 +8,9 @@ public class RequestMapping {
     private final List<String> mappedRequestUris;
 
     private final Controller controller;
-
-    public static RequestMapping from(Controller controller, String... requestUris) {
-        return new RequestMapping(List.of(requestUris), controller);
-    }
-
-    private RequestMapping(List<String> mappedRequestUris, Controller controller) {
-        this.mappedRequestUris = mappedRequestUris;
+    
+    public RequestMapping(Controller controller, String... requestUris) {
+        this.mappedRequestUris = List.of(requestUris);
         this.controller = controller;
     }
 

@@ -14,7 +14,7 @@ class RequestMappingTest {
     void getControllerIfMapped() {
         AbstractController controller = new AbstractController() {
         };
-        RequestMapping requestMapping = RequestMapping.from(controller, "path1", "path2");
+        RequestMapping requestMapping = new RequestMapping(controller, "path1", "path2");
 
         Optional<Controller> result = requestMapping.getControllerIfMapped("/alpha/path1/beta");
 
@@ -27,7 +27,7 @@ class RequestMappingTest {
     void getControllerIfMappedWhenNotMatch() {
         AbstractController controller = new AbstractController() {
         };
-        RequestMapping requestMapping = RequestMapping.from(controller, "path1", "path2");
+        RequestMapping requestMapping = new RequestMapping(controller, "path1", "path2");
 
         Optional<Controller> result = requestMapping.getControllerIfMapped("/alpha/path456/beta");
 

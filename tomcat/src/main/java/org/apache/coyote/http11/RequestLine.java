@@ -27,8 +27,4 @@ public class RequestLine {
     public String getUrl() {
         return url;
     }
-
-    public String getVersion() {
-        return version;
-    }
 }

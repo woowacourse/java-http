@@ -1,17 +1,18 @@
-package org.apache.coyote.http11.request.converter;
+package org.apache.coyote.request.converter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.domain.body.RequestBody;
-import org.apache.coyote.http11.domain.header.RequestHeader;
-import org.apache.coyote.http11.request.domain.RequestLine;
-import org.apache.coyote.http11.request.model.HttpRequest;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.body.RequestBody;
+import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.header.RequestHeader;
 
 public final class HttpRequestConverter {
 
-    public static final String END_OF_HEADER = "";
+    public static final int ZERO = 0;
+    public static final int OFF_SET = 0;
 
     private HttpRequestConverter() {
     }
@@ -37,12 +38,12 @@ public final class HttpRequestConverter {
     private static RequestBody toRequestBody(BufferedReader bufferedReader, int bodyLength) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (bodyLength == 0) {
+        if (bodyLength == ZERO) {
             return null;
         }
         char[] buffer = new char[bodyLength];
-        int readCount = bufferedReader.read(buffer, 0, bodyLength);
-        stringBuilder.append(buffer, 0, readCount);
+        int readCount = bufferedReader.read(buffer, OFF_SET, bodyLength);
+        stringBuilder.append(buffer, OFF_SET, readCount);
 
         return new RequestBody(stringBuilder.toString());
     }

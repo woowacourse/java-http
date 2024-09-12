@@ -113,7 +113,7 @@ class HttpRequestConvertorTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=abcdefg",
+                "Cookie: JSESSIONID=abcd",
                 "Content-Length: " + body.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",

@@ -62,9 +62,9 @@ public class HttpRequestParser { // TODO : 매직넘버 제거 및 메서드 분
             return new QueryString(queryStrings);
         }
         String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
-        String[] queryStringInfos = queryString.split(DELIMITER_PARAMETER_SET);
-        for (String queryStringInfo : queryStringInfos) { // TODO : 불용어 제거
-            String[] splittedQueryString = queryStringInfo.split(DELIMITER_PARAMETER_VALUE);
+        String[] rawQueryStrings = queryString.split(DELIMITER_PARAMETER_SET);
+        for (String rawQueryString : rawQueryStrings) {
+            String[] splittedQueryString = rawQueryString.split(DELIMITER_PARAMETER_VALUE);
             String key = splittedQueryString[0];
             String value = splittedQueryString[1];
             queryStrings.put(key, value);

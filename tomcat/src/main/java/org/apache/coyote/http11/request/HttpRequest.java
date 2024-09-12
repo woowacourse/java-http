@@ -39,10 +39,6 @@ public class HttpRequest {
         return requestBody.getFormData();
     }
 
-    public boolean hasBodyData() {
-        return requestBody != null;
-    }
-
     public RequestLine getRequestLine() {
         return requestLine;
     }

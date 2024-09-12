@@ -2,7 +2,7 @@ package org.apache.coyote.http;
 
 public enum HttpStatusCode {
 
-    SUCCESS("200 OK"),
+    OK("200 OK"),
     FOUND("302 Found");
 
     private final String value;

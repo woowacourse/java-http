@@ -12,7 +12,7 @@ public class HttpResponseTest {
     @Test
     void 상태코드를_설정할_수_있다() {
         // given
-        HttpStatusCode statusCode = HttpStatusCode.SUCCESS;
+        HttpStatusCode statusCode = HttpStatusCode.OK;
 
         // when
         HttpResponse httpResponse = new HttpResponse(statusCode);
@@ -38,7 +38,7 @@ public class HttpResponseTest {
     @Test
     void 쿠키를_설정할_수_있다() {
         // given
-        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.SUCCESS);
+        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.OK);
         HttpCookie cookie = new HttpCookie("sessionId", "abc123");
 
         // when
@@ -52,7 +52,7 @@ public class HttpResponseTest {
     @Test
     void 콘텐츠를_설정할_수_있다() {
         // given
-        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.SUCCESS);
+        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.OK);
         String path = "/index.html";
         String content = "<html><body>Hello World</body></html>";
 
@@ -69,7 +69,7 @@ public class HttpResponseTest {
     @Test
     void 헤더를_파싱할_수_있다() {
         // given
-        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.SUCCESS);
+        HttpResponse httpResponse = new HttpResponse(HttpStatusCode.OK);
         HttpCookie cookie = new HttpCookie("sessionId", "abc123");
         String path = "/index.html";
         String content = "<html><body>Hello World</body></html>";

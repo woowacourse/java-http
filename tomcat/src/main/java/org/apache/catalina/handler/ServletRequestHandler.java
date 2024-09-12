@@ -64,7 +64,7 @@ public class ServletRequestHandler {
     private HttpResponse handleGetLoginPageWithLogin() {
         final String path = "/index.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
@@ -72,7 +72,7 @@ public class ServletRequestHandler {
     private HttpResponse handleGetLoginPageWithoutLogin() {
         final String path = "/login.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
@@ -80,14 +80,14 @@ public class ServletRequestHandler {
     private HttpResponse handleGetRegisterPage() {
         final String path = "/register.html";
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }
 
     private HttpResponse handleGetRootPage() {
         final String body = "Hello world!";
-        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
         response.setContent(DEFAULT_HTML_PATH, body);
         return response;
     }
@@ -95,7 +95,7 @@ public class ServletRequestHandler {
     private HttpResponse handleGetStaticPage(final HttpRequest request) {
         final String path = request.getRequestURI();
         final String body = viewResolver.resolve(path);
-        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.OK);
         response.setContent(path, body);
         return response;
     }

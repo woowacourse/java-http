@@ -41,7 +41,8 @@ public class HttpRequest {
                 readBytes += bufferedReader.read(buffer);
                 bodyBuilder.append(buffer, 0, readBytes);
             }
-            this.body = new HttpBody(bodyBuilder.toString());
+            String content = bodyBuilder.toString();
+            this.body = new HttpBody(content.getBytes());
         } catch (IOException e) {
             // IOException on reading lines using inputstream, parsing uri
             // IndexOutOfBoundsException on missing tokens in request-line and header

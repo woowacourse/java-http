@@ -17,6 +17,20 @@ public class HttpResponse {
         this(new HttpHeaders(), null, HttpBody.empty());
     }
 
+    public void redirectTo(String path) {
+        setStatusCode(StatusCode.FOUND);
+        setLocation(path);
+    }
+
+    public void ok() {
+        setStatusCode(StatusCode.OK);
+    }
+
+    public void ok(byte[] body) {
+        setStatusCode(StatusCode.OK);
+        setBody(body);
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
     }
@@ -37,9 +51,9 @@ public class HttpResponse {
         this.statusCode = statusCode;
     }
 
-    public void setBody(String content) {
+    public void setBody(byte[] content) {
         body = new HttpBody(content);
-        headers.setContentLength(content.getBytes().length);
+        headers.setContentLength(body.getContentLength());
     }
 
     public void setContentType(ContentType contentType) {

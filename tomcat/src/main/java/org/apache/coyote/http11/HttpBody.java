@@ -1,30 +1,28 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
+
 public class HttpBody {
 
-    private final String content;
+    private final byte[] content;
 
-    public HttpBody(String content) {
+    public HttpBody(byte[] content) {
         if (content == null) {
-            this.content = "";
+            this.content = new byte[0];
             return;
         }
         this.content = content;
     }
 
-    public HttpBody(byte[] content) {
-        this(new String(content));
-    }
-
     public static HttpBody empty() {
-        return new HttpBody("");
+        return new HttpBody(new byte[0]);
     }
 
     public long getContentLength() {
-        return content.getBytes().length;
+        return content.length;
     }
 
     public String getContent() {
-        return content;
+        return new String(content, StandardCharsets.UTF_8);
     }
 }

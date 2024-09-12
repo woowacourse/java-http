@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,14 @@ public class HttpRequest {
             }
         }
         return "";
+    }
+
+    public String getParameter(String key) {
+        return Arrays.stream(requestBody.split("&"))
+                .filter(param -> param.startsWith(key + "="))
+                .map(param -> param.split("=")[1])
+                .findFirst()
+                .orElse("");
     }
 
     public boolean containsHeaders(String header) {

@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
@@ -39,9 +38,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        String requestBody = request.getRequestBody();
-        String account = getParameter(requestBody, "account");
-        String password = getParameter(requestBody, "password");
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
 
         if (findUserByInfo(account, password)) {
             handleSuccessfulLogin(response, account);
@@ -81,14 +79,6 @@ public class LoginController extends AbstractController {
 
     private void handleFailedLogin(HttpResponse.HttpResponseBuilder response) {
         buildRedirectResponse("/401.html", response);
-    }
-
-    private String getParameter(String requestBody, String key) {
-        return Arrays.stream(requestBody.split("&"))
-                .filter(param -> param.startsWith(key + "="))
-                .map(param -> param.split("=")[1])
-                .findFirst()
-                .orElse("");
     }
 
     private boolean findUserByInfo(String account, String password) {

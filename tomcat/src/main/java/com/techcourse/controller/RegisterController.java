@@ -24,10 +24,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        String requestBody = request.getRequestBody();
-        String account = requestBody.split("&")[0].split("=")[1];
-        String email = requestBody.split("&")[1].split("=")[1];
-        String password = requestBody.split("&")[2].split("=")[1];
+        String account = request.getParameter("account");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         buildRedirectResponse("/index.html", response);

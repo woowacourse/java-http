@@ -179,7 +179,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info(user.toString());
 
         String sessionId = UUID.randomUUID().toString();
-        createSession(user, createCookie(sessionId));
+        createSession(user, createCookie(JSESSIONID, sessionId));
         result[0] = String.join("\r\n",
                 result[0],
                 SET_COOKIE + HEADER_DELIMITER + JSESSIONID + "=" + sessionId);
@@ -202,9 +202,9 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private Cookie createCookie(String sessionId) {
+    private Cookie createCookie(String name, String value) {
         Cookie cookie = new Cookie();
-        cookie.setCookie(JSESSIONID, sessionId);
+        cookie.setCookie(name, value);
         return cookie;
     }
 

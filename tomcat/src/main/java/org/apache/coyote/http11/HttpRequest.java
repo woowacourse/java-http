@@ -51,6 +51,14 @@ public class HttpRequest {
         }
     }
 
+    public boolean hasPath(String path) {
+        return requestLine.hasPath(path);
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return requestLine.hasMethod(httpMethod);
+    }
+
     public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
@@ -59,16 +67,8 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
-    public boolean hasPath(String path) {
-        return requestLine.hasPath(path);
-    }
-
     public HttpHeaders getHeaders() {
         return headers;
-    }
-
-    public boolean hasMethod(HttpMethod httpMethod) {
-        return requestLine.hasMethod(httpMethod);
     }
 
     public String getParameter(String name) {

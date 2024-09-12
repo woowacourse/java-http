@@ -6,6 +6,9 @@ public class RequestLine {
 
     private static final String SP = " ";
     private static final int TOKEN_LENGTH = 3;
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
 
     private final HttpMethod method;
     private final URI uri;
@@ -17,15 +20,19 @@ public class RequestLine {
         if (tokens.length != TOKEN_LENGTH) {
             throw new IllegalArgumentException("Request-Line should have 3 tokens");
         }
-        this.method = HttpMethod.from(tokens[0]);
-        this.uri = URI.create(tokens[1]);
+        this.method = HttpMethod.from(tokens[METHOD_INDEX]);
+        this.uri = URI.create(tokens[URI_INDEX]);
         this.queryParameters = new QueryParameters(uri.getQuery());
-        this.version = tokens[2];
+        this.version = tokens[VERSION_INDEX];
     }
 
     public boolean hasPath(String path) {
         String requestLinePath = uri.getPath();
         return requestLinePath.equals(path);
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return method == httpMethod;
     }
 
     public HttpMethod getMethod() {
@@ -36,16 +43,12 @@ public class RequestLine {
         return uri;
     }
 
-    public String getQueryParameter(String name) {
-        return queryParameters.get(name);
-    }
-
     public String getVersion() {
         return version;
     }
 
-    public boolean hasMethod(HttpMethod httpMethod) {
-        return method == httpMethod;
+    public String getQueryParameter(String name) {
+        return queryParameters.get(name);
     }
 
     @Override

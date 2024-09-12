@@ -22,10 +22,6 @@ public class HttpResponse {
         setLocation(path);
     }
 
-    public void ok() {
-        setStatusCode(StatusCode.OK);
-    }
-
     public void ok(byte[] body) {
         setStatusCode(StatusCode.OK);
         setBody(body);

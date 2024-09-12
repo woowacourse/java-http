@@ -45,6 +45,22 @@ public class HttpHeaders {
         return fields.get(name);
     }
 
+    public long getContentLength() {
+        String contentLength = fields.get(CONTENT_LENGTH);
+        if (contentLength == null) {
+            return 0L;
+        }
+        return Long.parseLong(contentLength);
+    }
+
+    public Map<String, String> getFields() {
+        return Collections.unmodifiableMap(fields);
+    }
+
+    public HttpCookie getCookie(String name) {
+        return cookies.get(name);
+    }
+
     public void setContentType(ContentType contentType) {
         fields.put(CONTENT_TYPE, contentType.getMediaType());
     }
@@ -60,22 +76,6 @@ public class HttpHeaders {
     public void setCookie(HttpCookie cookie) {
         cookies.add(cookie);
         fields.put(SET_COOKIE, cookie.headerFormat());
-    }
-
-    public long getContentLength() {
-        String contentLength = fields.get(CONTENT_LENGTH);
-        if (contentLength == null) {
-            return 0L;
-        }
-        return Long.parseLong(contentLength);
-    }
-
-    public Map<String, String> getFields() {
-        return Collections.unmodifiableMap(fields);
-    }
-
-    public HttpCookie getCookie(String name) {
-        return cookies.get(name);
     }
 
     @Override

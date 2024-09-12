@@ -14,6 +14,7 @@ import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.HttpVersion;
 import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
-            Handler handler = RequestMapper.getHandler(httpRequest);
-
-            HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
-                    .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
-            if (handler != null) {
-                httpResponse = handler.doHandle(httpRequest, httpResponse);
-            }
+            HttpResponse httpResponse = requestResponse(httpRequest);
 
             String response = HttpResponseParser.parse(httpResponse);
             outputStream.write(response.getBytes());
@@ -54,5 +49,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse requestResponse(HttpRequest request) throws IOException {
+        String sessionId = request.getSessionId();
+        if (sessionId != null && SessionManager.findSession(sessionId) == null) {
+            return new HttpResponse(HttpVersion.HTTP_1_1)
+                    .addHttpStatusCode(HttpStatusCode.FOUND)
+                    .addRedirectUrl("/login.html");
+        }
+        Controller controller = RequestMapping.getHandler(request);
+        if (controller == null) {
+            return new HttpResponse(HttpVersion.HTTP_1_1)
+                    .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
+        }
+        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
+        controller.service(request, response);
+        return response;
     }
 }

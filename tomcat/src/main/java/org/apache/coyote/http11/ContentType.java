@@ -25,12 +25,6 @@ public class ContentType {
         return null;
     }
 
-    public static ContentType from(String postfix) {
-        MediaType mediaType = MediaType.findByPostfix(postfix)
-                .orElseThrow(() -> new IllegalArgumentException(postfix + "로 끝나는 미디어 타입이 없습니다."));
-        return new ContentType(mediaType, null);
-    }
-
     public MediaType getMediaType() {
         return mediaType;
     }

@@ -2,7 +2,6 @@ package com.techcourse.web.util;
 
 import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.request.HttpRequest;
-
 import org.apache.coyote.http11.http.session.Session;
 import org.apache.coyote.http11.http.session.SessionManager;
 

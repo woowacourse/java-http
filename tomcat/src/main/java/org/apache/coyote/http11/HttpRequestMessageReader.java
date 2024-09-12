@@ -23,10 +23,10 @@ public class HttpRequestMessageReader {
 
 	private static int getContentLength(List<String> headers) {
 		return headers.stream()
-				.filter(header -> header.startsWith("Content-Length"))
-				.findFirst()
-				.map(header -> Integer.parseInt(header.split(": ")[1].strip()))
-				.orElse(0);
+			.filter(header -> header.startsWith("Content-Length"))
+			.findFirst()
+			.map(header -> Integer.parseInt(header.split(": ")[1].strip()))
+			.orElse(0);
 	}
 
 	private static String readBody(BufferedReader reader, int contentLength) throws IOException {

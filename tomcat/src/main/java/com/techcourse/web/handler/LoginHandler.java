@@ -13,12 +13,12 @@ import org.apache.coyote.http11.http.request.HttpRequestUrl;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.apache.coyote.http11.http.response.HttpResponseBody;
 import org.apache.coyote.http11.http.response.HttpResponseHeader;
+import org.apache.coyote.http11.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.http.session.SessionManager;
 import com.techcourse.web.util.JsessionIdGenerator;
 import com.techcourse.web.util.LoginChecker;
 import com.techcourse.web.util.ResourceLoader;

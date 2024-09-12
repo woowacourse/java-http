@@ -10,8 +10,7 @@ public class MessageConverter {
 
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
-    private static final String SPACE = " ";
-    private static final String STATUS_LINE_DELIMITER = " ";
+    private static final String ELEMENT_DELIMITER = " ";
 
     private MessageConverter() {
     }
@@ -33,7 +32,7 @@ public class MessageConverter {
         String httpVersion = statusLine.getHttpVersion();
         HttpStatus httpStatus = statusLine.getHttpStatus();
         return String.join(
-                STATUS_LINE_DELIMITER,
+                ELEMENT_DELIMITER,
                 httpVersion,
                 String.valueOf(httpStatus.getCode()),
                 httpStatus.getValue(),
@@ -48,6 +47,6 @@ public class MessageConverter {
     }
 
     private static String formatHeaderEntry(Map.Entry<String, String> entry) {
-        return entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE;
+        return entry.getKey() + HEADER_DELIMITER + entry.getValue() + ELEMENT_DELIMITER;
     }
 }

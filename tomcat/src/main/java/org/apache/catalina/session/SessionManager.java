@@ -17,8 +17,4 @@ public class SessionManager {
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);
     }
-
-    public void remove(Session session) {
-        SESSIONS.remove(session.getId());
-    }
 }

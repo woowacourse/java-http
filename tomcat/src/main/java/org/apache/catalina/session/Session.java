@@ -28,11 +28,4 @@ public class Session {
     public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }
-
-    public void removeAttribute(final String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-    }
 }

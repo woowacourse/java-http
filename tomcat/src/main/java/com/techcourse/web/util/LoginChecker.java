@@ -9,6 +9,9 @@ public class LoginChecker {
 
 	public static boolean isLoggedIn(HttpRequest request) {
 		HttpCookie cookie = request.getHeaders().getHttpCookie();
+		if (cookie == null) {
+			return false;
+		}
 
 		String sessionId = cookie.getJsessionid();
 		if (sessionId == null) {

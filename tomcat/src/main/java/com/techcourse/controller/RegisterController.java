@@ -9,6 +9,7 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class RegisterController extends AbstractController {
 
+    private static final String PATH = "/register";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
@@ -17,6 +18,10 @@ public class RegisterController extends AbstractController {
     private static final String REGISTER_HTML = "/register.html";
 
     private final UserService userService = UserService.getInstance();
+
+    public RegisterController() {
+        super(PATH);
+    }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

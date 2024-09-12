@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
+import java.net.URI;
+
 public class HttpRequestLine {
 
     private static final int METHOD_INDEX = 0;
@@ -8,7 +10,7 @@ public class HttpRequestLine {
     private static final String SPACE = " ";
 
     private final HttpMethod method;
-    private final String uri;
+    private final URI uri;
     private final String httpVersion;
 
     public HttpRequestLine(String startLine) {
@@ -19,7 +21,7 @@ public class HttpRequestLine {
         );
     }
 
-    public HttpRequestLine(HttpMethod method, String uri, String httpVersion) {
+    public HttpRequestLine(HttpMethod method, URI uri, String httpVersion) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -30,9 +32,9 @@ public class HttpRequestLine {
         return HttpMethod.valueOf(parts[METHOD_INDEX].toUpperCase());
     }
 
-    private static String parsePath(String startLine) {
+    private static URI parsePath(String startLine) {
         String[] parts = parseStartLine(startLine);
-        return parts[PATH_INDEX];
+        return URI.create(parts[PATH_INDEX]);
     }
 
     private static String parseHttpVersion(String startLine) {
@@ -48,11 +50,11 @@ public class HttpRequestLine {
         return method;
     }
 
-    public String getUri() {
+    public URI getUri() {
         return uri;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public boolean hasPath(String path) {
+        return uri.getPath().equals(path);
     }
 }

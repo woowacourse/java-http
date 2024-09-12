@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpCookies;
@@ -63,8 +64,12 @@ public class HttpRequest {
         return parser.parse(this.getBody());
     }
 
-    public String getPath() {
+    public URI getUri() {
         return startLine.getUri();
+    }
+
+    public boolean hasPath(String path) {
+        return startLine.hasPath(path);
     }
 
     public HttpCookies getCookies() {

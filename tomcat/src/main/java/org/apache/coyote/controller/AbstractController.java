@@ -7,6 +7,12 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
+    protected String path;
+
+    protected AbstractController(String path) {
+        this.path = path;
+    }
+
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         HttpMethod method = request.getMethod();
@@ -20,6 +26,11 @@ public abstract class AbstractController implements Controller {
             default:
                 response.setStatusLine(HttpStatus.METHOD_NOT_ALLOWED);
         }
+    }
+
+    @Override
+    public boolean canControl(HttpRequest request) {
+        return request.hasPath(path);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

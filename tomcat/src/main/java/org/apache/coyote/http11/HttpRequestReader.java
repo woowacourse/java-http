@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.coyote.http.Cookie;
+import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
@@ -23,7 +24,18 @@ public class HttpRequestReader {
 
     private static RequestLine parseRequestLine(String line) {
         String[] token = line.split(" ");
-        return new RequestLine(token[0], token[1], token[2]);
+        HttpMethod httpMethod = HttpMethod.of(token[0]);
+        String uri = parseUri(token[1]);
+        String protocol = token[2];
+        return new RequestLine(httpMethod, uri, protocol);
+    }
+
+    private static String parseUri(String path) {
+        if (path.contains("?")) {
+            int endIndex = path.indexOf("?");
+            return path.substring(0, endIndex);
+        }
+        return path;
     }
 
     private static RequestHeaders readHeaders(BufferedReader reader) {

@@ -16,6 +16,7 @@ import org.apache.coyote.http11.HttpCookie;
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ":";
+    private static final String END_OF_INPUT = "";
 
     private final RequestLine requestLine;
     private final RequestHeader header;
@@ -33,7 +34,7 @@ public class HttpRequest {
     private RequestHeader parseHeader(BufferedReader bufferedReader) throws IOException {
         RequestHeader header = new RequestHeader();
         String readLine = bufferedReader.readLine();
-        while (readLine != null && !readLine.equals("")) {
+        while (readLine != null && !readLine.equals(END_OF_INPUT)) {
             String[] headerToken = readLine.split(HEADER_DELIMITER);
             String value = reconstructHeaderValue(Arrays.copyOfRange(headerToken, 1, headerToken.length));
             header.addHeader(headerToken[0], value);
@@ -70,24 +71,12 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getUrl() {
-        return requestLine.getUrl();
-    }
-
     public HttpVersion getVersion() {
         return requestLine.getVersion();
     }
 
     public RequestHeader getHeaders() {
         return header;
-    }
-
-    public Map<String, String> getQueryParams() {
-        return requestLine.getQueryParams();
-    }
-
-    public boolean isBodyEmpty() {
-        return body.isEmpty();
     }
 
     public Session getSession() {

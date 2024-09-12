@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
@@ -7,6 +8,9 @@ import org.apache.coyote.Session;
 import org.apache.coyote.http11.HttpCookie;
 
 public class HttpResponse {
+
+    private static final String CRLF = "\r\n";
+    private static final String CHARSET = StandardCharsets.UTF_8.name();
 
     private StatusLine statusLine;
     private ResponseHeader header;
@@ -54,22 +58,24 @@ public class HttpResponse {
     }
 
     public byte[] toByte() {
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        StringJoiner stringJoiner = new StringJoiner(CRLF);
 
         stringJoiner.add(statusLine.getReponseString());
         stringJoiner.add(header.toHeaderString());
-        stringJoiner.add("\r\n");
+        stringJoiner.add(CRLF);
 
-        byte[] headerBytes = stringJoiner.toString().getBytes();
+        byte[] headerBytes = stringJoiner.toString().getBytes(StandardCharsets.UTF_8);
         if (!body.isEmpty()) {
-            byte[] response = new byte[headerBytes.length + body.getBodyLength()];
-
-            System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
-            System.arraycopy(body.getBody(), 0, response, headerBytes.length, body.getBodyLength());
-
-            return response;
+            return copyBytes(headerBytes);
         }
         return headerBytes;
+    }
+
+    private byte[] copyBytes(byte[] headerBytes) {
+        byte[] response = new byte[headerBytes.length + body.getBodyLength()];
+        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
+        System.arraycopy(body.getBody(), 0, response, headerBytes.length, body.getBodyLength());
+        return response;
     }
 
     @Override

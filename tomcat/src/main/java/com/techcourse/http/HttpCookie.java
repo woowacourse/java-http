@@ -1,6 +1,6 @@
 package com.techcourse.http;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 
@@ -14,7 +14,7 @@ public class HttpCookie {
     private boolean httpOnly;
 
     public HttpCookie() {
-        this.cookies = new HashMap<>();
+        this.cookies = new LinkedHashMap<>();
         this.httpOnly = false;
     }
 

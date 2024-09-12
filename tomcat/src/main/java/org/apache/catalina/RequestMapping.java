@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import com.techcourse.controller.HelloController;
+import com.techcourse.controller.DashBoardController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
@@ -12,10 +12,10 @@ import org.apache.coyote.http11.Controller;
 public class RequestMapping {
 
     private static final Map<String, Controller> controllers = new HashMap<>();
-    private final Controller staticResourceController = new StaticResourceController();
+    private static final Controller staticResourceController = new StaticResourceController();
 
     static {
-        controllers.put("/", new HelloController());
+        controllers.put("/", new DashBoardController());
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
     }

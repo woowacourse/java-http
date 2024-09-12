@@ -49,7 +49,6 @@ public class HttpResponse {
         if (!body.isBlank()) {
             headers.setContentLength(body.getBytes().length);
         }
-
         return "%s %d %s \r\n%s\r\n%s"
                 .formatted(
                         HTTP_VERSION,

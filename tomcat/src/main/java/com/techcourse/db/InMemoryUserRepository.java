@@ -1,27 +1,35 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryUserRepository {
 
+    private static final InMemoryUserRepository INSTANCE = new InMemoryUserRepository();
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
+    private final AtomicLong id = new AtomicLong();
+
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        INSTANCE.save(new User("gugu", "password", "hkkang@woowahan.com"));
+    }
+
+    public static InMemoryUserRepository getInstance() {
+        return INSTANCE;
+    }
+
+    public void save(User user) {
+        user.setId(id.getAndIncrement());
         database.put(user.getAccount(), user);
     }
 
-    public static void save(User user) {
-        database.put(user.getAccount(), user);
-    }
-
-    public static Optional<User> findByAccount(String account) {
+    public Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

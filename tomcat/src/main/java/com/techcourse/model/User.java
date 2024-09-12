@@ -2,12 +2,14 @@ package com.techcourse.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
 public class User {
 
-    private final Long id;
+    @Setter
+    private Long id;
     private final String account;
     private final String password;
     private final String email;

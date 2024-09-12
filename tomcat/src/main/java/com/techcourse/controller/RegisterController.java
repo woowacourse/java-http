@@ -11,6 +11,8 @@ import org.apache.coyote.http11.AbstractController;
 
 public class RegisterController extends AbstractController {
 
+    private final InMemoryUserRepository inMemoryUserRepository = InMemoryUserRepository.getInstance();
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String registerHtml = StaticResourceProvider.getStaticResource("/register.html");
@@ -25,7 +27,7 @@ public class RegisterController extends AbstractController {
             return;
         }
 
-        InMemoryUserRepository.save(new User(
+        inMemoryUserRepository.save(new User(
                 request.getParameter("account"),
                 request.getParameter("password"),
                 request.getParameter("email")

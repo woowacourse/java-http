@@ -18,9 +18,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final RequestMapping requestMapping = new RequestMapping();
     private static final String JSESSIONID = "JSESSIONID";
 
-    private final RequestMapping requestMapping = new RequestMapping();
     private final Socket connection;
 
     public Http11Processor(Socket connection) {
@@ -39,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequestParser.parse(inputStream);
             HttpResponse response = new HttpResponse();
+
             service(request, response);
 
             outputStream.write(response.build());
@@ -54,12 +55,13 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = requestMapping.getController(request);
             controller.service(request, response);
         } catch (IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("URI {}, error {}", request.getUri(), e.getMessage(), e);
             response.clear();
             response.notFound()
                     .setBody(StaticResourceProvider.getStaticResource("/404.html"));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+//            log.error(e.getMessage(), e);
+            log.error("URI {}, error {}", request.getUri(), e.getMessage(), e);
             response.clear();
             response.internalServerError()
                     .setBody(StaticResourceProvider.getStaticResource("/500.html"));

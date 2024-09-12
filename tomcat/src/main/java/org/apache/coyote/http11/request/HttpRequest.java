@@ -45,14 +45,10 @@ public class HttpRequest {
     public String getMimeType() {
         String mimeType = headers.getMimeType();
         if (mimeType.isBlank() || mimeType.equals(ALL_MIME_TYPE)) {
-            String extension = getExtension();
+            String extension = requestLine.getExtension();
             mimeType = MimeTypeMaker.getMimeTypeFromExtension(extension);
         }
         return mimeType + CHARSET_UTF8;
-    }
-
-    private String getExtension() {
-        return requestLine.getExtension();
     }
 
     public Map<String, String> getUserInformation() {

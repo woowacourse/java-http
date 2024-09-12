@@ -7,8 +7,7 @@ public class RequestUri {
     private static final String ROOT = "/";
     private static final String DOT = ".";
     private static final String DELIMITER = "\\.";
-    private static final String DEFAULT_EXTENSION = ".html";
-    private static final String DEFAULT_MIME_TYPE = "html";
+    private static final String DEFAULT_EXTENSION = "html";
 
     private final String requestUri;
 
@@ -20,7 +19,7 @@ public class RequestUri {
         if (isRoot(uri) || containsDot(uri)) {
             return uri;
         }
-        return uri + DEFAULT_EXTENSION;
+        return uri + DOT + DEFAULT_EXTENSION;
     }
 
     private boolean isRoot(String uri) {
@@ -41,17 +40,21 @@ public class RequestUri {
             return requestUri;
         }
 
-        return String.join(DELIMITER, parts.subList(0, parts.size() - 1));
+        return String.join(DOT, parts.subList(0, parts.size() - 1));
+    }
+
+    public String getExtension() {
+        if (isRoot() || !containsDot()) {
+            return DEFAULT_EXTENSION;
+        }
+        return Arrays.asList(requestUri.split(DELIMITER)).getLast();
     }
 
     private boolean isRoot() {
         return requestUri.equals(ROOT);
     }
 
-    public String getExtension() {
-        if (isRoot()) {
-            return DEFAULT_MIME_TYPE;
-        }
-        return Arrays.asList(requestUri.split(DELIMITER)).getLast();
+    private boolean containsDot() {
+        return requestUri.contains(DOT);
     }
 }

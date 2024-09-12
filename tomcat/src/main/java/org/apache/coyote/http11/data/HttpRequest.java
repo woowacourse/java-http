@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HttpRequest {
-    private static final String SESSION_ID_KEY = "JSESSIONID";
+    public static final String SESSION_ID_COOKIE_KEY = "JSESSIONID";
 
     private final HttpMethod httpMethod;
     private final String path;
@@ -30,7 +30,7 @@ public class HttpRequest {
 
     public String getSessionId() {
         return httpCookies.stream()
-                .filter(cookie -> cookie.getName().equals(SESSION_ID_KEY))
+                .filter(cookie -> cookie.getName().equals(SESSION_ID_COOKIE_KEY))
                 .findAny()
                 .map(HttpCookie::getValue)
                 .orElse(null);

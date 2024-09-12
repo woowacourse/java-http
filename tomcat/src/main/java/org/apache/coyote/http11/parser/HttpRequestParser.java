@@ -33,20 +33,20 @@ public class HttpRequestParser {
         Map<String, String> rawHttpRequestHeader = parseRawHttpRequestHeader(bufferedReader);
         ContentType contentType = null;
         Integer contentLength = null;
-        String rawRequestBody = null;
+        String requestBody = null;
         HttpRequestParameter httpRequestParameter = null;
         if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PATCH) {
             String rawContentType = rawHttpRequestHeader.get("Content-Type");
             contentType = new ContentType(rawContentType);
             String rawContentLength = rawHttpRequestHeader.get("Content-Length");
             contentLength = Integer.valueOf(rawContentLength);
-            rawRequestBody = parseHttpRequestBody(contentLength, bufferedReader);
+            requestBody = parseHttpRequestBody(contentLength, bufferedReader);
             if (contentType.getMediaType() == MediaType.URLENC) {
-                httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
+                httpRequestParameter = parseHttpRequestParameter(requestBody);
             }
         }
         List<HttpCookie> httpCookies = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
-        return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
+        return new HttpRequest(httpMethod, path, httpVersion, requestBody, contentType, contentLength,
                 httpRequestParameter, httpCookies);
     }
 

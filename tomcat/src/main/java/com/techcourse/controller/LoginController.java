@@ -31,8 +31,7 @@ public class LoginController extends AbstractController {
         HttpRequestParameter requestParameter = request.getHttpRequestParameter();
         try {
             String sessionId = UserService.login(requestParameter);
-            HttpCookie httpCookie = new HttpCookie("JSESSIONID", sessionId, Map.of("Max-Age", "600"));
-            response.addCookie(httpCookie);
+            HttpCookie httpCookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, sessionId, Map.of("Max-Age", "600"));
             response.addHttpStatusCode(HttpStatusCode.FOUND)
                     .addCookie(httpCookie)
                     .addRedirectUrl("/index.html");

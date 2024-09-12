@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class HttpHeader {
 
-    public static final String HEADER_DELIMITER = ":";
+    public static final String HEADER_DELIMITER = ": ";
     private static final int REQUEST_LINE_INDEX = 1;
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
@@ -47,7 +47,7 @@ public class HttpHeader {
         List<String> httpHeader = new ArrayList<>();
 
         for (Entry<String, String> entry : headers.entrySet()) {
-            httpHeader.add(entry.getKey() + HEADER_DELIMITER + " " + entry.getValue() + " ");
+            httpHeader.add(entry.getKey() + HEADER_DELIMITER + entry.getValue() + " ");
         }
 
         return String.join("\r\n", httpHeader);

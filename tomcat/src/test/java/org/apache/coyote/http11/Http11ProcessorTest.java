@@ -240,7 +240,7 @@ class Http11ProcessorTest {
         @DisplayName("성공 : 회원가입 성공으로 index.html로 리다이렉션")
         void registerSuccess() throws IOException {
             // given
-            final String body = "account=kyum&password=password&email=kyum@naver.com";
+            final String body = "account=kyum3&password=password&email=kyum@naver.com";
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
                     "Host: localhost:8080 ",

@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
 
     public LoginController() {
         this.authService = new AuthService();
-        this.loginService = new LoginService(authService);
+        this.loginService = new LoginService();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        if (authService.isLogin(request.getCookie())) {
+        if (authService.isLogin(request.getCookie().getAuthSessionId())) {
             return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
         }
 

@@ -35,7 +35,7 @@ public class RegisterController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest request) {
         String sessionId = request.getCookie().getAuthSessionId();
-        if (authService.isLoggedIn(sessionId)) {
+        if (authService.isLogin(sessionId)) {
             return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
         }
         return HttpResponse.createFileOkResponse(request, REGISTER_PAGE);

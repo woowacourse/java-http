@@ -1,37 +1,45 @@
 package com.techcourse.controller;
 
 import com.techcourse.model.User;
-import com.techcourse.service.SessionService;
 import com.techcourse.service.LoginService;
-import java.util.Optional;
+import org.apache.catalina.session.Cookies;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.view.ViewResolver;
 
-public class LoginController implements Controller{
+public class LoginController extends AbstractController{
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (alreadyLogin(request)) {
             redirectMain(request, response);
-            return;
-        }
-        if (request.hasQuery()) {
-            requestLogin(request, response);
             return;
         }
         requestLoginPage(request, response);
     }
 
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        if (alreadyLogin(request) || request.hasNoBody()) {
+            redirectMain(request, response);
+            return;
+        }
+        requestLogin(request, response);
+    }
+
     private static boolean alreadyLogin(HttpRequest request) {
-        Optional<String> optionalCookie = request.findFromHeader("Cookie");
-        return optionalCookie.filter(SessionService::hasSession).isPresent();
+        Session session = request.getSession(false);
+        if (session == null || !session.hasValue("user")) {
+            return false;
+        }
+        return true;
     }
 
     private static void redirectMain(HttpRequest request, HttpResponse response) {
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
         setRedirectHeaderToMain(response);
     }
 
@@ -40,18 +48,19 @@ public class LoginController implements Controller{
         response.addHeader("Location", "/index.html");
     }
 
-    private static void requestLogin(HttpRequest request, HttpResponse response) {
-        User user = LoginService.login(request.findFromQueryParam("account"),
-                request.findFromQueryParam("password"));
-        response.setHeaders(HttpHeaders.of(request, response));
-        response.addHeader("Set-Cookie", SessionService.createCookie(user));
-        log.info("[Login Success] = {}", user);
-        setRedirectHeaderToMain(response);
-    }
-
     private void requestLoginPage(HttpRequest request, HttpResponse response) {
         response.setView(ViewResolver.getView("login.html"));
         response.setStatus(HttpStatus.OK);
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
+    }
+
+    private static void requestLogin(HttpRequest request, HttpResponse response) {
+        User user = LoginService.login(request.findFromBody("account"),
+                request.findFromBody("password"));
+        Session session = request.getSession(true);
+        session.setAttribute("user", user);
+        response.setHeaders(HttpHeaders.create(request, response));
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
+        setRedirectHeaderToMain(response);
     }
 }

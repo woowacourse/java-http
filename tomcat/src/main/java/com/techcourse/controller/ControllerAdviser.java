@@ -5,6 +5,9 @@ import com.techcourse.exception.client.BadRequestException;
 import com.techcourse.exception.client.NotFoundException;
 import com.techcourse.exception.client.UnauthorizedException;
 import com.techcourse.exception.server.InternalServerException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -13,26 +16,31 @@ import org.apache.coyote.view.ViewResolver;
 
 public class ControllerAdviser {
 
-    private ControllerAdviser() {}
+    private static final Map<Class<? extends UncheckedServletException>, Consumer<HttpResponse>> exceptionStatusMap = new ConcurrentHashMap<>();
+
+    static {
+        exceptionStatusMap.put(BadRequestException.class,
+                (response) -> response.setStatus(HttpStatus.BAD_REQUEST));
+        exceptionStatusMap.put(UnauthorizedException.class,
+                (response -> setErrorResponse(response, HttpStatus.UNAUTHORIZED, "401.html")));
+        exceptionStatusMap.put(NotFoundException.class,
+                (response -> setErrorResponse(response, HttpStatus.NOT_FOUND, "404.html")));
+        exceptionStatusMap.put(InternalServerException.class,
+                (response -> setErrorResponse(response, HttpStatus.INTERNAL_SERVER_EXCEPTION, "500.html")));
+    }
 
     public static void service(UncheckedServletException exception, HttpRequest request, HttpResponse response) {
-        if (exception instanceof BadRequestException) {
-            response.setStatus(HttpStatus.BAD_REQUEST);
-            response.setView(ViewResolver.getView("400.html"));
+        Consumer<HttpResponse> handler = exceptionStatusMap.get(exception.getClass());
+        if (handler == null) {
+            handler = (httpResponse) ->
+                    setErrorResponse(httpResponse, HttpStatus.INTERNAL_SERVER_EXCEPTION, "500.html");
         }
-        if (exception instanceof UnauthorizedException) {
-            response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.setView(ViewResolver.getView("401.html"));
-        }
-        if (exception instanceof NotFoundException) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setView(ViewResolver.getView("404.html"));
-        }
-        if (exception instanceof InternalServerException) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_EXCEPTION);
-            response.setView(ViewResolver.getView("500.html"));
-        }
+        handler.accept(response);
+        response.setHeaders(HttpHeaders.create(request, response));
+    }
 
-        response.setHeaders(HttpHeaders.of(request, response));
+    private static void setErrorResponse(HttpResponse response, HttpStatus httpStatus, String viewName) {
+        response.setStatus(httpStatus);
+        response.setView(ViewResolver.getView(viewName));
     }
 }

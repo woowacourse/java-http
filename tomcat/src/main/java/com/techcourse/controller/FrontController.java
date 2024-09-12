@@ -8,14 +8,19 @@ public class FrontController {
 
     private static FrontController instance = new FrontController();
 
+    private final RequestMapping requestMapping;
+
+    private FrontController() {
+        requestMapping = new RequestMapping();
+    }
+
     public static FrontController getInstance() {
         return instance;
     }
 
     public void service(HttpRequest request, HttpResponse response) {
         try {
-            String path = request.getPath();
-            Controller controller = ControllerMapper.findByPath(path);
+            Controller controller = requestMapping.getController(request);
             controller.service(request, response);
         } catch (UncheckedServletException e) {
             ControllerAdviser.service(e, request, response);

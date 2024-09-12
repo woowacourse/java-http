@@ -6,6 +6,8 @@ import com.techcourse.model.User;
 
 public class LoginService {
 
+    private LoginService() {}
+
     public static User login(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 계정입니다."));

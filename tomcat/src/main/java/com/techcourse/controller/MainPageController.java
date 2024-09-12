@@ -7,11 +7,12 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.view.ViewResolver;
 
-public class MainPageController implements Controller{
+public class MainPageController extends AbstractController{
+
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setView(ViewResolver.getView("index.html"));
         response.setStatus(HttpStatus.OK);
-        response.setHeaders(HttpHeaders.of(response.getView(), ContentType.findByPath(request.getPath())));
+        response.setHeaders(HttpHeaders.create(response.getView(), ContentType.findByPath(request.getPath())));
     }
 }

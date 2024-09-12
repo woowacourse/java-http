@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.catalina.session.Cookies;
 import org.apache.coyote.view.View;
 
 public class HttpHeaders {
@@ -16,26 +17,33 @@ public class HttpHeaders {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String DELIMITER = ": ";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String UTF_8 = ";charset=utf-8";
+    private static final String COOKIE = "Cookie";
 
-    private Map<String, String> store;
+    private final Map<String, String> store;
+    private final Cookies cookies;
 
     public HttpHeaders() {
         store = new LinkedHashMap<>();
+        cookies = new Cookies();
     }
 
     public HttpHeaders(Map<String, String> store) {
         this.store = store;
+        cookies = new Cookies();
     }
 
-    public static HttpHeaders of(HttpRequest request, HttpResponse response) {
-        return of(response.getView(), ContentType.findByPath(request.getPath()));
+    public static HttpHeaders create(HttpRequest request, HttpResponse response) {
+        return create(response.getView(), ContentType.findByPath(request.getPath()));
     }
 
-    public static HttpHeaders of(View view, ContentType contentType) {
+    public static HttpHeaders create(View view, ContentType contentType) {
         Map<String, String> store = new LinkedHashMap<>();
         if (view != null && contentType != null) {
-            store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
-            store.put("Content-Length", String.valueOf(view.getContent().getBytes().length));
+            store.put(CONTENT_TYPE, contentType.getValue() + UTF_8);
+            store.put(CONTENT_LENGTH, String.valueOf(view.getContent().getBytes().length));
         }
         return new HttpHeaders(store);
     }
@@ -47,7 +55,14 @@ public class HttpHeaders {
             throw new BadRequestException("잘못된 형식의 헤더입니다. = " + raw);
         }
         String[] split = raw.split(DELIMITER);
+        if (split[KEY_INDEX].equals(COOKIE)) {
+            handleCookie(split[VALUE_INDEX]);
+        }
         store.put(split[KEY_INDEX], split[VALUE_INDEX]);
+    }
+
+    private void handleCookie(String cookie) {
+        cookies.add(cookie);
     }
 
     public void add(String key, String value) {
@@ -57,6 +72,10 @@ public class HttpHeaders {
     public Optional<String> findByKey(String key) {
         String value = store.get(key);
         return Optional.ofNullable(value);
+    }
+
+    public Optional<String> findSessionId() {
+        return cookies.findSessionId();
     }
 
     public List<String> getHeaders() {

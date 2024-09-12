@@ -51,6 +51,7 @@ class GreetingControllerTest {
                 .expectHeader().valueEquals(HttpHeaders.TRANSFER_ENCODING, "chunked")
                 .expectBody(String.class).returnResult();
 
+        log.info("response header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 
@@ -63,7 +64,7 @@ class GreetingControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().exists(HttpHeaders.ETAG)
                 .expectBody(String.class).returnResult();
-
+        log.info("response header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 

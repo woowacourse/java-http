@@ -20,7 +20,7 @@ class RegisterControllerTest {
         @Test
         void 페이지를_반환한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /register HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
@@ -32,14 +32,14 @@ class RegisterControllerTest {
             // then
             Assertions.assertAll(
                     () -> assertThat(response.getCode()).isEqualTo(HttpStatus.OK.getCode()),
-                    () -> assertThat(response.getView().getContent()).isEqualTo(ViewResolver.getView("register.html").getContent())
+                    () -> assertThat(response.getView()).isEqualTo(ViewResolver.getView("register.html"))
             );
         }
 
         @Test
         void 회원가입_POST_요청을_처리한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "POST /register HTTP/1.1 ");
             Query query = Query.create("account=tacan&email=tacam@gmail.com&password=1234");
             HttpRequest request = new HttpRequest(startLine, null, query);
@@ -50,9 +50,7 @@ class RegisterControllerTest {
             controller.service(request, response);
 
             // then
-            Assertions.assertAll(
-                    () -> assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode())
-            );
+            assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode());
         }
     }
 }

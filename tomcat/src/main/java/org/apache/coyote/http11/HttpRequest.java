@@ -1,10 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.query.Query;
 
 public class HttpRequest {
+
     private static final int START_LINE_INDEX = 0;
+    private static final String DELIMITER = "\r\n";
 
     private HttpRequestStartLine startLine;
     private HttpHeaders httpHeaders;
@@ -17,9 +22,9 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest createByString(String raw) {
-        String[] lines = raw.split("\r\n");
-        HttpRequestStartLine startLine = HttpRequestStartLine.createByString(lines[START_LINE_INDEX]);
+    public static HttpRequest create(String raw) {
+        String[] lines = raw.split(DELIMITER);
+        HttpRequestStartLine startLine = HttpRequestStartLine.create(lines[START_LINE_INDEX]);
         HttpHeaders headers = new HttpHeaders();
         Query body = null;
         int i = 1;
@@ -38,28 +43,33 @@ public class HttpRequest {
         return startLine.isSameMethod(method);
     }
 
-    public String findFromQueryParam(String key) {
-        return startLine.findQuery(key);
-    }
-
-    public Optional<String> findFromHeader(String key) {
-        if (httpHeaders == null) {
-            return Optional.empty();
-        }
-        return httpHeaders.findByKey(key);
-    }
-
     public String findFromBody(String key) {
         return body.findByKey(key);
     }
 
-    public boolean hasQuery() {
-        return startLine.hasQuery();
+    public boolean hasNoBody() {
+        return body == null;
     }
-
 
     public String getPath() {
         return startLine.getPath();
+    }
+
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        if (create) {
+            return createSession(sessionManager);
+        }
+        Optional<String> sessionId = httpHeaders.findSessionId();
+        return sessionId.map(sessionManager::findSession)
+                .orElse(null);
+    }
+
+    private static Session createSession(SessionManager sessionManager) {
+        String uuid = UUID.randomUUID().toString();
+        Session session = new Session(uuid);
+        sessionManager.add(session);
+        return session;
     }
 
     @Override

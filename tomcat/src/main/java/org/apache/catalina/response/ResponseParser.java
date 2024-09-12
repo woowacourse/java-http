@@ -23,12 +23,7 @@ public class ResponseParser {
                     header.value(),
                     headers.get(header)));
         }
-
-        String body = response.getBody();
-        responseJoiner.add(String.format(HEADER_FORMAT,
-                        Header.CONTENT_LENGTH.value(),
-                        body.getBytes().length))
-                .add(LINE_SEPARATOR + body);
+        responseJoiner.add(LINE_SEPARATOR + response.getBody());
 
         return responseJoiner.toString();
     }

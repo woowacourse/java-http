@@ -22,6 +22,7 @@ public class LoginController extends MappingController {
             response.setStatusLine(Status.UNAUTHORIZED);
             response.setLocation(path);
             response.setContentType(ContentType.of(path));
+            response.setContentLength(body.getBytes().length);
             response.setBody(body);
             return;
         }
@@ -29,6 +30,7 @@ public class LoginController extends MappingController {
         String body = resourceResolver.resolve(path);
         response.setStatusLine(Status.OK);
         response.setContentType(ContentType.of(path));
+        response.setContentLength(body.getBytes().length);
         response.setBody(body);
     }
 
@@ -41,6 +43,7 @@ public class LoginController extends MappingController {
             response.setStatusLine(Status.FOUND);
             response.setLocation(path);
             response.setContentType(ContentType.of(path));
+            response.setContentLength(body.getBytes().length);
             response.setBody(body);
             return;
         }
@@ -49,6 +52,7 @@ public class LoginController extends MappingController {
         response.setStatusLine(Status.UNAUTHORIZED);
         response.setLocation(path);
         response.setContentType(ContentType.of(path));
+        response.setContentLength(body.getBytes().length);
         response.setBody(body);
     }
 }

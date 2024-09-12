@@ -2,17 +2,14 @@ package org.apache.catalina.response;
 
 import org.apache.catalina.Cookie;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private final Map<Header, Object> headers = new HashMap<>();
+    private final Map<Header, Object> headers = new LinkedHashMap<>();
     private String body;
-
-    public HttpResponse() {
-    }
 
     public void setStatusLine(Status status) {
         this.statusLine = new StatusLine(status);
@@ -28,6 +25,10 @@ public class HttpResponse {
 
     public void setContentType(ContentType contentType) {
         headers.put(Header.CONTENT_TYPE, contentType);
+    }
+
+    public void setContentLength(int contentLength) {
+        headers.put(Header.CONTENT_LENGTH, contentLength);
     }
 
     public void setBody(String body) {

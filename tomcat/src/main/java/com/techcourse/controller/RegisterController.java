@@ -19,6 +19,7 @@ public class RegisterController extends MappingController {
         String body = resourceResolver.resolve(request.getUri());
         response.setStatusLine(Status.OK);
         response.setContentType(ContentType.of(request.getUri()));
+        response.setContentLength(body.getBytes().length);
         response.setBody(body);
     }
 
@@ -31,6 +32,7 @@ public class RegisterController extends MappingController {
         response.setStatusLine(Status.FOUND);
         response.setLocation(path);
         response.setContentType(ContentType.of(path));
+        response.setContentLength(body.getBytes().length);
         response.setBody(body);
     }
 }

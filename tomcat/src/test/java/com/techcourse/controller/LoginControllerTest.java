@@ -25,10 +25,10 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인 페이지 조회한다.")
     void doGet() throws IOException {
-        HttpRequest request = makeRequest(new LinkedHashMap<>());
+        HttpRequest request = makeRequest(Http11Method.GET, new LinkedHashMap<>());
         HttpResponse response = new HttpResponse();
 
-        loginController.doGet(request, response);
+        loginController.service(request, response);
 
         String responseAsString = new String(response.toBytes());
         Http11ResourceFinder resourceFinder = new Http11ResourceFinder();
@@ -38,9 +38,9 @@ class LoginControllerTest {
         assertThat(responseAsString).contains(expected);
     }
 
-    private HttpRequest makeRequest(LinkedHashMap<String, String> body) {
+    private HttpRequest makeRequest(Http11Method method, LinkedHashMap<String, String> body) {
         return new HttpRequest(
-                Http11Method.GET,
+                method,
                 "/login.html",
                 new ArrayList<>(),
                 new ArrayList<>(),
@@ -52,12 +52,12 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인 상태에서 로그인 페이지 조회시 index 페이지로 리다이렉트 한다.")
     void doGetWhenLogin() throws IOException {
-        HttpRequest request = makeRequest(new LinkedHashMap<>());
+        HttpRequest request = makeRequest(Http11Method.GET, new LinkedHashMap<>());
         HttpResponse response = new HttpResponse();
 
         Mockito.when(loginController.isLogin(request)).thenReturn(true);
 
-        loginController.doGet(request, response);
+        loginController.service(request, response);
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(Http11StatusCode.FOUND),
@@ -72,10 +72,10 @@ class LoginControllerTest {
         body.putLast("account", "gugu");
         body.putLast("password", "password");
 
-        HttpRequest request = makeRequest(body);
+        HttpRequest request = makeRequest(Http11Method.POST, body);
         HttpResponse response = new HttpResponse();
 
-        loginController.doPost(request, response);
+        loginController.service(request, response);
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(Http11StatusCode.FOUND),
@@ -90,10 +90,10 @@ class LoginControllerTest {
         body.putLast("account", "gugu");
         body.putLast("password", "wrong");
 
-        HttpRequest request = makeRequest(body);
+        HttpRequest request = makeRequest(Http11Method.POST, body);
         HttpResponse response = new HttpResponse();
 
-        loginController.doPost(request, response);
+        loginController.service(request, response);
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(Http11StatusCode.FOUND),

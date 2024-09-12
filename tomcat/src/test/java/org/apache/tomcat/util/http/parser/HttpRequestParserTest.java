@@ -28,21 +28,17 @@ class HttpRequestParserTest {
         HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
 
         HttpRequestLine requestLine = httpRequest.requestLine();
+        HttpHeaders headers = httpRequest.httpHeaders();
+        HttpBody body = httpRequest.httpBody();
 
         assertAll(
                 () -> assertThat("GET").isEqualTo(requestLine.httpMethod().name()),
                 () -> assertThat("/index.html").isEqualTo(requestLine.resourceURI().uri()),
-                () -> assertThat("HTTP/1.1").isEqualTo(requestLine.httpVersion().getVersion())
-        );
-
-        HttpHeaders headers = httpRequest.httpHeaders();
-        assertAll(
+                () -> assertThat("HTTP/1.1").isEqualTo(requestLine.httpVersion().getVersion()),
                 () -> assertThat("localhost").isEqualTo(headers.get(new HttpHeaderType("Host"))),
                 () -> assertThat("text/html").isEqualTo(headers.get(new HttpHeaderType("Content-Type"))),
-                () -> assertThat("0").isEqualTo(headers.get(new HttpHeaderType("Content-Length")))
+                () -> assertThat("0").isEqualTo(headers.get(new HttpHeaderType("Content-Length"))),
+                () -> assertThat("").isEqualTo(body.body())
         );
-
-        HttpBody body = httpRequest.httpBody();
-        assertThat("").isEqualTo(body.body());
     }
 }

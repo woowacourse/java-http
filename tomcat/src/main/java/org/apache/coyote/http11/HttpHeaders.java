@@ -9,10 +9,13 @@ public class HttpHeaders {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
     private static final String HEADER_DELIMITER = ":";
     private static final int SPLIT_LIMIT = 2;
+    private static final int HEADER_FIELD_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> fields = new HashMap<>();
     private final HttpCookies cookies;
@@ -21,9 +24,11 @@ public class HttpHeaders {
         headerLines.stream()
                 .map(headerLine -> headerLine.split(HEADER_DELIMITER, SPLIT_LIMIT))
                 .filter(headerToken -> headerToken.length == SPLIT_LIMIT)
-                .forEach(headerToken -> fields.put(headerToken[0].trim(), headerToken[1].trim()));
+                .forEach(headerToken ->
+                        fields.put(headerToken[HEADER_FIELD_INDEX].trim(), headerToken[HEADER_VALUE_INDEX].trim())
+                );
 
-        String cookieLine = fields.remove("Cookie");
+        String cookieLine = fields.remove(COOKIE);
         cookies = new HttpCookies(cookieLine);
     }
 

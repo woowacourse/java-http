@@ -4,26 +4,30 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.RequestCookie;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private final SessionManager sessionManager;
+
+    public LoginController() {
+        this.sessionManager = SessionManager.getInstance();
+    }
 
     @Override
     protected void doGet(Request request, Response response) throws Exception {
         response.addFileBody("/login.html");
-        Optional<RequestCookie> loginCookie = request.getLoginCookie();
-        if (loginCookie.isPresent()) {
-            RequestCookie cookie = loginCookie.get();
-            boolean isLogin = SESSION_MANAGER.contains(cookie.getValue());
-            if (isLogin) {
-                response.sendRedirection("/index.html");
-            }
+        if (isLoginActive(request)) {
+            response.sendRedirection("/index.html");
         }
+    }
+
+    private boolean isLoginActive(Request request) {
+        boolean hasLoginCookie = request.hasLoginCookie();
+        String loginSessionId = request.getLoginCookie().getValue();
+        return hasLoginCookie && sessionManager.contains(loginSessionId);
     }
 
     @Override
@@ -39,9 +43,9 @@ public class LoginController extends AbstractController {
             return;
         }
         User user = rawUser.get();
-        log.info("user: {}", user);
-        String newSessionId = SESSION_MANAGER.create("user", user);
-        response.addLoginCookie(newSessionId);
+        log.info("로그인 사용자 정보: {}", user);
+        String sessionId = sessionManager.create("user", user);
+        response.addLoginCookie(sessionId);
         response.sendRedirection("/index.html");
     }
 }

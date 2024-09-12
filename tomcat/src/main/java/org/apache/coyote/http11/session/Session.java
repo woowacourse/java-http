@@ -13,11 +13,15 @@ public class Session {
         this.id = UUID.randomUUID().toString();
     }
 
-    public String getId() {
-        return this.id;
+    public void addAttribute(String key, Object value) {
+        values.put(key, value);
     }
 
-    public void setAttribute(String name, Object value) {
-        values.put(name, value);
+    public boolean hasId(String id) {
+        return this.id.equals(id);
+    }
+
+    public String getId() {
+        return this.id;
     }
 }

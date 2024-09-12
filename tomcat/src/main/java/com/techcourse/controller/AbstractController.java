@@ -7,13 +7,15 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String SUPPORT_POST_CONTENT_TYPE = "application/x-www-form-urlencoded";
+
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.getMethod() == HttpMethod.GET) {
+        if (HttpMethod.GET == request.getMethod()) {
             doGet(request, response);
             return;
         }
-        if (request.getMethod() == HttpMethod.POST) {
+        if (HttpMethod.POST == request.getMethod() && SUPPORT_POST_CONTENT_TYPE.equals(request.getContentType())) {
             doPost(request, response);
             return;
         }

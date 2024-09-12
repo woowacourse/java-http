@@ -20,7 +20,7 @@ public class HttpRequestCreator {
         HttpRequestHeaders headers = createHeaders(headersText);
 
         String contentLength = headers.getHeader("Content-Length").orElse("0");
-        String body = readBody(reader, contentLength);
+        HttpRequestBody body = readBody(reader, contentLength);
         return new HttpRequest(startLine, headers, body);
     }
 
@@ -51,14 +51,14 @@ public class HttpRequestCreator {
         return new HttpRequestHeaders(headers);
     }
 
-    private static String readBody(BufferedReader reader, String contentLength) throws IOException {
+    private static HttpRequestBody readBody(BufferedReader reader, String contentLength) throws IOException {
         try {
             int bodyLength = Integer.parseInt(contentLength);
             char[] buffer = new char[bodyLength];
             reader.read(buffer, 0, bodyLength);
-            return String.valueOf(buffer);
+            return new HttpRequestBody(String.valueOf(buffer));
         } catch (NumberFormatException e) {
-            return "";
+            return new HttpRequestBody();
         }
     }
 }

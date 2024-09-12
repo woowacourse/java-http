@@ -1,13 +1,13 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +26,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        Optional<String> account = request.getQueryParameter("account");
-        Optional<String> password = request.getQueryParameter("password");
+        Optional<String> account = request.getParameter("account");
+        Optional<String> password = request.getParameter("password");
         if (account.isEmpty() || password.isEmpty() || notExistUser(account.get(), password.get())) {
-            setUnauthorized(response);
+            response.sendRedirect("/401.html");
             return;
         }
         doLogin(account.get(), password.get(), response);
-    }
-
-    private void setUnauthorized(HttpResponse response) {
-        response.sendStaticResource(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     private boolean notExistUser(String account, String password) {
@@ -47,6 +43,7 @@ public class LoginController extends AbstractController {
     private void doLogin(String account, String password, HttpResponse response) {
         User user = InMemoryUserRepository.findByAccountAndPassword(account, password)
                 .orElseThrow();
+        log.info("user = {}", user);
         Session session = createUserSession(user);
 
         response.sendRedirect("/index.html");

@@ -13,9 +13,9 @@ public class HttpRequest {
 
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeaders headers;
-    private final String body;
+    private final HttpRequestBody body;
 
-    public HttpRequest(HttpRequestStartLine startLine, HttpRequestHeaders headers, String body) {
+    public HttpRequest(HttpRequestStartLine startLine, HttpRequestHeaders headers, HttpRequestBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -33,12 +33,11 @@ public class HttpRequest {
         return startLine.getPath();
     }
 
-    public Optional<String> getQueryParameter(String key) {
+    public Optional<String> getParameter(String key) {
+        if (HttpMethod.POST == getMethod() && "application/x-www-form-urlencoded".equals(headers.getContentType())) {
+            return body.getParameter(key);
+        }
         return startLine.getQueryParameter(key);
-    }
-
-    public Map<String, String> getQueryParameters() {
-        return startLine.getQueryParameters();
     }
 
     public boolean matchHeader(String key, String expectedValue) {
@@ -58,10 +57,6 @@ public class HttpRequest {
 
     public Optional<Session> getSession() {
         return getCookie().getSession();
-    }
-
-    public String getBody() {
-        return body;
     }
 
     @Override
@@ -132,6 +127,7 @@ public class HttpRequest {
         public HttpRequest build() {
             HttpRequestStartLine startLine = new HttpRequestStartLine(method, path, httpVersion);
             HttpRequestHeaders headers = new HttpRequestHeaders(this.headers);
+            HttpRequestBody body = new HttpRequestBody(this.body);
             return new HttpRequest(startLine, headers, body);
         }
     }

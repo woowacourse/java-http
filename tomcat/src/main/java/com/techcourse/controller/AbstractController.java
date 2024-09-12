@@ -12,6 +12,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     protected static final SessionManagerWrapper SESSION_MANAGER = new SessionManagerWrapper(new SessionManager());
+    protected static final String SESSION_USER_ATTRIBUTE_NAME = "user";
 
     @Override
     public final void service(HttpRequest request, HttpResponse response) {
@@ -43,7 +44,9 @@ public abstract class AbstractController implements Controller {
     }
 
     private boolean sessionNotFound(HttpRequest request) {
-        return request.findSessionCookie().flatMap(SESSION_MANAGER::findBySessionCookie).isEmpty();
+        return request.findSessionCookie()
+                .flatMap(SESSION_MANAGER::findBySessionCookie)
+                .isEmpty();
     }
 
     protected final boolean isLogin(HttpRequest request) {
@@ -51,11 +54,11 @@ public abstract class AbstractController implements Controller {
                 .flatMap(SESSION_MANAGER::findBySessionCookie)
                 .map(session -> session.hasAttribute("user"))
                 .orElse(false);
-
     }
 
     protected final <T> void addSessionAttribute(HttpRequest request, String key, T value) {
-        request.findSessionCookie().flatMap(SESSION_MANAGER::findBySessionCookie)
+        request.findSessionCookie()
+                .flatMap(SESSION_MANAGER::findBySessionCookie)
                 .ifPresent(session -> session.setAttribute(key, value));
     }
 

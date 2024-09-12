@@ -14,13 +14,12 @@ import org.apache.coyote.http11.session.SessionManager;
 public class HttpRequestConvertor {
 
     private static final String HEADER_DELIMITER = ":";
-    private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+    private static final int HEADER_KEY_INDEX = 0;
     private static final String BODY_DELIMITER = "&";
-    private static final String TUPLE_DELIMITER = "=";
     private static final int BODY_TUPLE_MIN_LENGTH = 2;
+    private static final String TUPLE_DELIMITER = "=";
     private static final int TUPLE_KEY_INDEX = 0;
     private static final int TUPLE_VALUE_INDEX = 1;
-    private static final int HEADER_KEY_INDEX = 0;
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) throws IOException {
@@ -113,7 +112,6 @@ public class HttpRequestConvertor {
     }
 
     private static boolean isExistRequestBody(HttpRequestHeader httpRequestHeader) {
-        return httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH)
-                && httpRequestHeader.getHeaderValue(HttpHeaderName.CONTENT_TYPE).equals(BODY_FORM_CONTENT_TYPE);
+        return httpRequestHeader.containsHeader(HttpHeaderName.CONTENT_LENGTH) && httpRequestHeader.existRequestBody();
     }
 }

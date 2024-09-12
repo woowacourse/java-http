@@ -5,6 +5,8 @@ import org.apache.coyote.http11.HttpHeaderName;
 
 public class HttpRequestHeader {
 
+    private static final String BODY_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+
     private final Map<String, String> headers;
 
     public HttpRequestHeader(Map<String, String> headers) {
@@ -17,6 +19,10 @@ public class HttpRequestHeader {
 
     public boolean containsHeader(HttpHeaderName httpHeaderName) {
         return headers.containsKey(httpHeaderName.getName());
+    }
+
+    public boolean existRequestBody() {
+        return getHeaderValue(HttpHeaderName.CONTENT_LENGTH).equals(BODY_FORM_CONTENT_TYPE);
     }
 
     public String getHeaderValue(String key) {

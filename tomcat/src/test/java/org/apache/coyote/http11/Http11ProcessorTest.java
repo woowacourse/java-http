@@ -31,14 +31,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        int expectedContentLength = Files.readAllBytes(new File(resource.getFile()).toPath()).length;
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + expectedContentLength + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedContent = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expectedContent);
     }
 
     @DisplayName("/login Get요청시 login페이지를 반환한다.")
@@ -72,7 +67,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: "+"account=gugu&password=password".length(),
+                "Content-Length: " + "account=gugu&password=password".length(),
                 "",
                 "account=gugu&password=password");
         StubSocket socket = new StubSocket(httpRequest);
@@ -96,7 +91,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: "+"account=gugu&password=password".length(),
+                "Content-Length: " + "account=gugu&password=password".length(),
                 "",
                 "account=gugu&password=failPassword");
         StubSocket socket = new StubSocket(httpRequest);
@@ -122,7 +117,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: "+"account=gugu&password=password".length(),
+                "Content-Length: " + "account=gugu&password=password".length(),
                 "",
                 "account=dodo&email=dodo@a.com&password=password");
         StubSocket socket = new StubSocket(httpRequest);

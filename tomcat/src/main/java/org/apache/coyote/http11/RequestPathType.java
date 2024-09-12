@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 public enum RequestPathType {
 
     API,
-    RESOURCE,
+    STATIC_RESOURCE,
     ;
 
     public static RequestPathType reqeustPathToRequestPathType(String requestPath) {
@@ -12,7 +12,7 @@ public enum RequestPathType {
             return API;
         }
         if (splitRequestPath.length == 2) {
-            return RESOURCE;
+            return STATIC_RESOURCE;
         }
         throw new IllegalArgumentException("존재하지 않는 PathType입니다.");
     }
@@ -21,7 +21,7 @@ public enum RequestPathType {
         return this == API;
     }
 
-    public boolean isResource() {
-        return this == RESOURCE;
+    public boolean isStaticResource() {
+        return this == STATIC_RESOURCE;
     }
 }

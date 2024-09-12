@@ -8,6 +8,8 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
+    private final String DEFAULT_CONTENT_ENCODING_TYPE = "utf-8";
+
     private HttpResponseStatusLine statusLine;
     private Map<String, String> header;
     private String body;
@@ -23,11 +25,12 @@ public class HttpResponse {
     }
 
     public static HttpResponse createEmptyResponse() {
-        return new HttpResponse(new HttpResponseStatusLine(HttpStatus.OK),)
+        return new HttpResponse(new HttpResponseStatusLine(HttpStatus.OK), new HashMap<>(), "");
     }
 
     public void setContentType(ContentType contentType) {
-        header.put("Content-Type", contentType.getValueToHttpHeaderForm());
+        header.put("Content-Type",
+                contentType.getValueToHttpHeaderForm() + ";" + "charset=" + DEFAULT_CONTENT_ENCODING_TYPE);
     }
 
     public void setResponseBody(String content) {
@@ -47,7 +50,7 @@ public class HttpResponse {
         String httpFormHeader = header.entrySet()
                 .stream()
                 .map((singleHeader) -> singleHeader.getKey() + ": " + singleHeader.getValue())
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\r\n"));
 
         return String.join("\r\n",
                 statusLine.toResponseForm(),

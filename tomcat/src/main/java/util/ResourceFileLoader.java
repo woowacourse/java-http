@@ -7,13 +7,8 @@ import java.nio.file.Files;
 
 public class ResourceFileLoader {
 
-    public static String loadFileToString(String fileName) throws IOException {
-        URL resource = ResourceFileLoader.class.getClassLoader().getResource(fileName);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    public static String loadStaticFileToString(String fileName) throws IOException {
-        URL resource = ResourceFileLoader.class.getClassLoader().getResource("static/" + fileName);
+    public static String loadStaticFileToString(String filePath) throws IOException {
+        URL resource = ResourceFileLoader.class.getClassLoader().getResource("static" + filePath);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

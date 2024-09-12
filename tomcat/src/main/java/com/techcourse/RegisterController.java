@@ -18,10 +18,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.OK);
         response.setHttpStatus(HttpStatus.OK);
-        httpResponse.setContentType(ContentType.text_html);
-        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("register.html"));
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setResponseBody(ResourceFileLoader.loadStaticFileToString("/register.html"));
     }
 
     private void processRegisterPost(Map<String, String> requestBody, HttpResponse httpResponse) {

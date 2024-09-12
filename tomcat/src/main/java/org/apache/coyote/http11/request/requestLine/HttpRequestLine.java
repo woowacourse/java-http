@@ -7,7 +7,7 @@ public class HttpRequestLine {
     private final static String REQUEST_LINE_SEPARATOR = " ";
 
     private final MethodType methodType;
-    private final Path path;
+    private Path path;
     private final HttpVersion httpVersion;
 
     private HttpRequestLine(MethodType methodType, Path path, HttpVersion httpVersion) {
@@ -37,5 +37,9 @@ public class HttpRequestLine {
 
     public MethodType getMethodType() {
         return methodType;
+    }
+
+    public void setPath(String path) {
+        this.path = new Path(path);
     }
 }

@@ -1,34 +1,31 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import com.techcourse.Controller;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.ResourceFileLoader;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ResourceProcessor resourceProcessor;
-    private final ApiProcessor apiProcessor;
+    private final RequestMapping requestMapping;
+    private final RequestProcessor requestProcessor;
+    private final OutputProcessor outputProcessor;
 
     public Http11Processor(final Socket connection) {
-        this.resourceProcessor = new ResourceProcessor();
-        this.apiProcessor = new ApiProcessor();
         this.connection = connection;
+        this.requestMapping = new RequestMapping();
+        this.requestProcessor = new RequestProcessor();
+        this.outputProcessor = new OutputProcessor();
     }
 
     @Override
@@ -41,50 +38,30 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = getHttpRequest(inputStream);
+
+            HttpRequest httpRequest = HttpRequest.createEmptyHttpRequest();
+            requestProcessor.process(inputStream, httpRequest);
             HttpResponse httpResponse = HttpResponse.createEmptyResponse();
+
             RequestPathType requestPathType = httpRequest.getRequestPathType();
-            if (requestPathType.isAPI()) {
-                apiProcessor.process(httpRequest, httpResponse);
+            if (requestPathType.isStaticResource()) {
+                processStaticResourceResponse(httpRequest, httpResponse);
             }
-            if (requestPathType.isResource()) {
-                resourceProcessor.process(connection, httpRequest.getRequestPath());
+            if (requestPathType.isAPI()) {
+                Controller controller = requestMapping.getController(httpRequest);
+                controller.service(httpRequest, httpResponse);
             }
 
+            outputProcessor.process(outputStream, httpResponse);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequestLine httpRequestLine = HttpRequestLine.toHttpRequestLine(br.readLine());
-        HttpRequestHeader httpRequestHeader = getHttpRequestHeader(br);
-
-        HttpRequestBody httpRequestBody = null;
-        if (httpRequestLine.getMethodType().isPost()) {
-            httpRequestBody = getHttpRequestBody(httpRequestHeader, br);
-        }
-
-        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
-    }
-
-    private HttpRequestBody getHttpRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader br)
-            throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeader.getContentLength());
-        char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        return HttpRequestBody.toHttpRequestBody(requestBody, httpRequestHeader.getContentType());
-    }
-
-    private HttpRequestHeader getHttpRequestHeader(BufferedReader br) throws IOException {
-        List<String> requestHeaderLines = new ArrayList<>();
-        String line;
-        while ((line = br.readLine()) != null && !line.equals("")) {
-            requestHeaderLines.add(line);
-        }
-        return HttpRequestHeader.toHttpRequestHeader(requestHeaderLines);
+    private void processStaticResourceResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        String responseBody = ResourceFileLoader.loadStaticFileToString(httpRequest.getRequestPath());
+        httpResponse.setHttpStatus(HttpStatus.OK);
+        httpResponse.setContentType(ContentType.toContentType(httpRequest.getRequestPath().split("\\.")[1]));
+        httpResponse.setResponseBody(responseBody);
     }
 }

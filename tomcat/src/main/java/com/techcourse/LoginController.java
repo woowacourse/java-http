@@ -3,7 +3,6 @@ package com.techcourse;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
@@ -18,45 +17,44 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        processLogin(request.getRequestBody());
+        processLogin(response, request.getRequestBody());
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        processLoginPage();
+        processLoginPage(response);
     }
 
-    private void processLogin(Map<String, String> requestBody) throws IOException {
+    private void processLogin(HttpResponse response, Map<String, String> requestBody) throws IOException {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.checkPassword(password)) {
-                loginSuccess(user);
+                loginSuccess(response, user);
                 return;
             }
         }
-        loginFail();
+        loginFail(response);
     }
 
-    private void processLoginPage() throws IOException {
-        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.OK);
-        httpResponse.setContentType(ContentType.text_html);
-        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("login.html"));
+    private void processLoginPage(HttpResponse httpResponse) throws IOException {
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/login.html"));
     }
 
-    private void loginSuccess(User user) throws IOException {
+    private void loginSuccess(HttpResponse httpResponse, User user) throws IOException {
         Session session = new Session(user.getId().toString());
         session.setAttribute("user", user);
         SessionManager.getInstance().add(session);
-        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.FOUND);
+        httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.setLocation("http://localhost:8080/");
         httpResponse.setCookie("JSESSIONID=" + user.getId().toString());
     }
 
-    private void loginFail() throws IOException {
-        HttpResponse httpResponse = HttpResponse.createHttpResponse(HttpStatus.UNAUTHORIZED);
-        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("401.html"));
+    private void loginFail(HttpResponse httpResponse) throws IOException {
+        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/401.html"));
     }
 }

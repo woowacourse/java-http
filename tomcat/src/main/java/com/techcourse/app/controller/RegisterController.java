@@ -29,10 +29,8 @@ public class RegisterController extends AbstractController {
             response.setRedirect("/register.html");
             return;
         }
-
+        
         userService.register(account, password, email);
-
         response.setRedirect("/index.html");
     }
-
 }

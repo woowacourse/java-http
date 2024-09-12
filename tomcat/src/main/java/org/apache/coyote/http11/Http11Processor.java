@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.RequestMapping;
+import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.converter.MessageConverter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.parser.HttpRequestParser;
@@ -42,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             String httpResponseMessage = MessageConverter.convertHttpResponseToMessage(response);
             bufferedWriter.write(httpResponseMessage);
             bufferedWriter.flush();
-        } catch (Exception e) {
+        } catch (IOException | UncheckedHttpException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

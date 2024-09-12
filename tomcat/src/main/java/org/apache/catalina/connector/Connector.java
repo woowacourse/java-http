@@ -77,6 +77,7 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
+        threadPool.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {

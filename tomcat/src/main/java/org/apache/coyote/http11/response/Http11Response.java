@@ -20,7 +20,7 @@ public class Http11Response {
     public Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
                 Http11ResponseHeaders.builder()
-                        .addHeader("Content-type", HttpMimeType.from(fileExtensions).asString())
+                        .addHeader("Content-Type", HttpMimeType.from(fileExtensions).asString())
                         .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
                         .build());
     }

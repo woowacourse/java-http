@@ -9,7 +9,7 @@ public class PageLoadController extends AbstractController {
 
     @Override
     public boolean isMatchesRequest(HttpRequest request) {
-        return ContentType.isValidFileExtension(request.getPath());
+        return request.getPath().startsWith("/") && ContentType.isValidFileExtension(request.getPath());
     }
 
     @Override

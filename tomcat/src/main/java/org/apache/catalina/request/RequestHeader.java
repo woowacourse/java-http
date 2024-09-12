@@ -20,6 +20,12 @@ public class RequestHeader {
     private final ContentType contentType;
     private final HttpCookie httpCookie;
 
+    public RequestHeader() {
+        this.headers = new HashMap<>();
+        this.contentType = ContentType.of(null);
+        this.httpCookie = new HttpCookie();
+    }
+
     public RequestHeader(Map<String, String> headers) {
         this.headers = new HashMap<>(headers);
         this.contentType = ContentType.of(headers.get(ACCEPT));
@@ -29,7 +35,7 @@ public class RequestHeader {
     private HttpCookie findCookie() {
         String setCookies = headers.get(COOKIE);
         if (setCookies == null) {
-            return new HttpCookie(new HashMap<>());
+            return new HttpCookie();
         }
         Map<String, String> cookie = Arrays.stream(setCookies.split(COOKIE_SEPARATOR))
                 .map(param -> param.split(QUERY_KEY_VALUE_DELIMITER, 2))

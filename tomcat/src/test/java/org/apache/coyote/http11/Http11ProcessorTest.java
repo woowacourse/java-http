@@ -48,11 +48,12 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private RequestMappings makeRequestMapping() {
+    private static RequestMappings makeRequestMapping() {
         return new RequestMappings(
                 new RequestMapping(new LoginController(), "/login", "/login.html"),
                 new RequestMapping(new RegisterController(), "/register", "/register.html"),
-                new RequestMapping(new StaticResourceController(), "/*.js", "/*.css", "/", "/index", "/index.html")
+                new RequestMapping(new StaticResourceController(), "*.js", "*.css", "*.html", "/", "/index",
+                        "/index.html", "", "*")
         );
     }
 }

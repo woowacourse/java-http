@@ -16,7 +16,7 @@ class RequestMappingTest {
         };
         RequestMapping requestMapping = new RequestMapping(controller, "path1", "path2");
 
-        Optional<Controller> result = requestMapping.getControllerIfMapped("/alpha/path1/beta");
+        Optional<Controller> result = requestMapping.getControllerIfMapped("path1");
 
         assertThat(result.orElseThrow(() -> new RuntimeException("매핑된 컨트롤러가 없습니다. 메서드 구현을 확인해 주세요.")))
                 .isEqualTo(controller);

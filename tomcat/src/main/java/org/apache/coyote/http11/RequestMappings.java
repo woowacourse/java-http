@@ -20,6 +20,6 @@ public class RequestMappings {
                 .map(requestMapping -> requestMapping.getControllerIfMapped(requestUri))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("매칭되는 컨트롤러가 없습니다."));
     }
 }

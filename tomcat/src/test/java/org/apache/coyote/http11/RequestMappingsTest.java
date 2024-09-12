@@ -21,7 +21,7 @@ class RequestMappingsTest {
 
         RequestMappings requestMappings = new RequestMappings(first, second);
 
-        Controller controller = requestMappings.findController("path/first");
+        Controller controller = requestMappings.findController("first");
 
         assertThat(controller)
                 .isEqualTo(firstController);

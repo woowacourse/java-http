@@ -24,9 +24,9 @@ public class RegisterController extends AbstractController {
     }
 
     private User createUserFromRequest(HttpRequest request) {
-        String account = getRequiredParameter(request, ACCOUNT_FIELD);
-        String password = getRequiredParameter(request, PASSWORD_FIELD);
-        String email = request.getParameter(EMAIL_FIELD);
+        String account = getRequiredBodyField(request, ACCOUNT_FIELD);
+        String password = getRequiredBodyField(request, PASSWORD_FIELD);
+        String email = getRequiredBodyField(request, EMAIL_FIELD);
         return new User(account, password, email);
     }
 

@@ -1,49 +1,61 @@
 package org.apache.catalina.connector;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.catalina.webresources.StandardRoot;
+import org.apache.catalina.webresources.WebResource;
 import org.apache.tomcat.util.http.HttpStatus;
+import org.apache.tomcat.util.http.HttpStatusLine;
+import org.apache.tomcat.util.http.HttpVersion;
+import org.apache.tomcat.util.http.ResourceURI;
+import org.apache.tomcat.util.http.body.HttpBody;
+import org.apache.tomcat.util.http.header.HttpContentType;
+import org.apache.tomcat.util.http.header.HttpHeaderType;
+import org.apache.tomcat.util.http.header.HttpHeaders;
 
 public class HttpResponse {
-    private final String httpVersion;
-    private HttpStatus httpStatus;
-    private Map<String, String> headers = new HashMap<>();
-    private String body;
+    public static final String NEW_LINE = "\r\n";
+    private final HttpStatusLine httpStatusLine;
+    private final HttpHeaders httpHeaders;
+    private HttpBody httpBody;
 
-    public HttpResponse(String httpVersion) {
-        this.httpVersion = httpVersion;
+    public HttpResponse(HttpVersion httpVersion) {
+        this.httpStatusLine = new HttpStatusLine(httpVersion);
+        this.httpHeaders = new HttpHeaders();
     }
 
-    public void addHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
+    private void addHttpStatus(HttpStatus httpStatus) {
+        httpStatusLine.setStatus(httpStatus);
     }
 
-    public void addHeader(String headerName, String headerValue) {
-        if (headerName.equals("Content-Type") && headerValue.equals("text/html")) {
-            headerValue = headerValue + ";charset=utf-8";
+    private void setBody(String body) {
+        this.httpBody = new HttpBody(body);
+        addHeader(HttpHeaderType.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    }
+
+    public void addHeader(HttpHeaderType header, String headerValue) {
+        if (header.equals(HttpHeaderType.CONTENT_TYPE)) {
+            headerValue = HttpContentType.encoding(headerValue);
         }
-        headers.put(headerName, headerValue);
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-        addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpHeaders.put(header, headerValue);
     }
 
     public String buildResponse() {
-        StringBuilder response = new StringBuilder();
-        if (Objects.isNull(httpStatus)) {
-            return StringUtils.EMPTY;
-        }
-        response.append(httpVersion).append(" ").append(httpStatus.getCode()).append(" ").append(httpStatus.name())
-                .append("\r\n");
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
-        }
-        response.append("\r\n").append(body);
-        return response.toString();
+        return httpStatusLine.buildResponse() +
+                httpHeaders.buildResponse() +
+                NEW_LINE + httpBody.buildResponse();
+    }
+
+    public void sendRedirect(ResourceURI redirectResourceURI) {
+        WebResource webResource = StandardRoot.getResource(redirectResourceURI);
+        this.addHttpStatus(HttpStatus.FOUND);
+        this.addHeader(HttpHeaderType.CONTENT_TYPE, webResource.getContentType());
+        this.addHeader(HttpHeaderType.LOCATION, webResource.getURL());
+        this.setBody(webResource.getContent());
+    }
+
+    public void writeStaticResource(ResourceURI resourceURI) {
+        WebResource webResource = StandardRoot.getResource(resourceURI);
+        this.addHttpStatus(HttpStatus.OK);
+        this.addHeader(HttpHeaderType.CONTENT_TYPE, webResource.getContentType());
+        this.setBody(webResource.getContent());
     }
 }

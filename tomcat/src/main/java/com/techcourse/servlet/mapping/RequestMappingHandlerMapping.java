@@ -4,12 +4,12 @@ import static org.apache.coyote.http11.HttpProtocol.HTTP_11;
 import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.apache.coyote.http11.request.line.Method.POST;
 
-import com.techcourse.controller.GreetingServlet;
-import com.techcourse.controller.LoginServlet;
-import com.techcourse.controller.RegisterServlet;
-import com.techcourse.controller.page.LoginPageServlet;
-import com.techcourse.controller.page.RegisterPageServlet;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.servlet.GreetingServlet;
+import com.techcourse.servlet.LoginPageServlet;
+import com.techcourse.servlet.LoginServlet;
+import com.techcourse.servlet.RegisterPageServlet;
+import com.techcourse.servlet.RegisterServlet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.Servlet;

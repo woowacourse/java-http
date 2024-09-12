@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

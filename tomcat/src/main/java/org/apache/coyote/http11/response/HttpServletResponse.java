@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpHeaders;
@@ -50,12 +48,7 @@ public class HttpServletResponse {
         httpHeaders.putHeader(HttpHeaderName.LOCATION, uri);
     }
 
-    public void flush(OutputStream outputStream) throws IOException {
-        outputStream.write(resolveHttpMessage().getBytes());
-        outputStream.flush();
-    }
-
-    private String resolveHttpMessage() {
+    public String resolveHttpMessage() {
         String lineMessage = responseLine.resolveLineMessage();
         String headersMessage = httpHeaders.resolveHeadersMessage();
         String bodyMessage = httpMessageBody.resolveBodyMessage();

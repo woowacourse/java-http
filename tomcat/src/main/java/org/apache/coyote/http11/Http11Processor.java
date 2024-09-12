@@ -42,9 +42,10 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpServletRequest httpServletRequest = parseHttpRequest(bufferedReader);
             HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
+
             dispatcherServlet.doDispatch(httpServletRequest, httpServletResponse);
 
-            httpServletResponse.flush(outputStream);
+            flushResponseMessage(httpServletResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -78,5 +79,12 @@ public class Http11Processor implements Runnable, Processor {
         bufferedReader.read(buffer, 0, bodyLength);
         String requestBody = new String(buffer);
         return new HttpMessageBody(requestBody);
+    }
+
+    private void flushResponseMessage(HttpServletResponse httpServletResponse, OutputStream outputStream)
+            throws IOException {
+        byte[] httpMessage = httpServletResponse.resolveHttpMessage().getBytes();
+        outputStream.write(httpMessage);
+        outputStream.flush();
     }
 }

@@ -1,7 +1,6 @@
 package com.techcourse.servlet.mapping;
 
-import com.techcourse.controller.StaticResourceServlet;
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.servlet.StaticResourceServlet;
 import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
@@ -17,18 +16,15 @@ public class ResourceHandlerMapping implements HandlerMapping {
 
     @Override
     public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
-        return isResourceRequest(httpServletRequest);
+        return isAvailableResourceRequest(httpServletRequest);
     }
 
     @Override
     public Servlet getHandler(HttpServletRequest request) {
-        if (isResourceRequest(request)) {
-            return staticResourceServlet;
-        }
-        throw new UncheckedServletException("요청을 처리할 수 있는 핸들러가 없습니다");
+        return staticResourceServlet;
     }
 
-    private boolean isResourceRequest(HttpServletRequest request) {
+    private boolean isAvailableResourceRequest(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 !request.isUriHome() &&

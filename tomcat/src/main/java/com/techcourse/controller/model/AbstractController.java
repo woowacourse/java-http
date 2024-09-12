@@ -23,9 +23,7 @@ public abstract class AbstractController implements Controller {
         httpResponse.sendError(HttpStatus.NOT_FOUND);
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-    }
+    protected abstract void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
 
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-    }
+    protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);
 }

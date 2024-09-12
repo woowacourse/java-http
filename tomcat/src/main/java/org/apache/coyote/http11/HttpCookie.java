@@ -11,6 +11,8 @@ public class HttpCookie {
 
     public static final String COOKIE_VALUE_DELIMITER = "=";
     private static final String COOKIE_DELIMITER = "; ";
+    private static final int COOKIE_NAME_INDEX = 0;
+    private static final int COOKIE_VALUE_INDEX = 1;
 
     private final Map<String, String> cookies;
 
@@ -27,8 +29,8 @@ public class HttpCookie {
 
         Map<String, String> cookies = Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
                 .collect(Collectors.toMap(
-                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[0],
-                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[1])
+                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_NAME_INDEX],
+                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_VALUE_INDEX])
                 );
 
         return new HttpCookie(cookies);

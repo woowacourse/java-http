@@ -7,6 +7,7 @@ import org.apache.coyote.http11.header.HttpHeaderName;
 public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1 ";
+    private static final String CRLF = "\r\n";
 
     private final HttpHeader httpHeader;
     private HttpStatus httpStatus;
@@ -26,9 +27,9 @@ public class HttpResponse {
         String statusLine = PROTOCOL + httpStatus.getValue() + " " + httpStatus.getReason() + " ";
 
         if (body == null) {
-            return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "");
+            return String.join(CRLF, statusLine, httpHeader.toHttpHeader(), "");
         }
-        return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "", body);
+        return String.join(CRLF, statusLine, httpHeader.toHttpHeader(), "", body);
     }
 
     public void setBody(ResourceFile responseBody) {

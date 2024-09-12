@@ -9,9 +9,10 @@ public class ResourceReader {
 
     private static final String RESOURCE_PATH = "static";
     private static final String QUERY_PARAM_DELIMITER = "\\?";
+    private static final int PATH_INDEX = 0;
 
     public static ResourceFile readResource(String resourceUri) throws IOException {
-        String path = resourceUri.split(QUERY_PARAM_DELIMITER)[0];
+        String path = resourceUri.split(QUERY_PARAM_DELIMITER)[PATH_INDEX];
         Path resourcePath = getResourcePath(path);
         String body = Files.readString(resourcePath);
         String contentType = Files.probeContentType(resourcePath);

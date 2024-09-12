@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 public class HttpHeader {
 
     public static final String HEADER_DELIMITER = ":";
+    private static final int REQUEST_LINE_INDEX = 1;
+    private static final int HEADER_NAME_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -23,10 +26,10 @@ public class HttpHeader {
 
     public static HttpHeader from(List<String> request) {
         Map<String, String> headers = request.stream()
-                .skip(1)
+                        .skip(REQUEST_LINE_INDEX)
                 .collect(Collectors.toMap(
-                        r -> r.split(HEADER_DELIMITER)[0],
-                        r -> r.split(HEADER_DELIMITER)[1].trim())
+                        r -> r.split(HEADER_DELIMITER)[HEADER_NAME_INDEX],
+                        r -> r.split(HEADER_DELIMITER)[HEADER_VALUE_INDEX].trim())
                 );
 
         return new HttpHeader(headers);

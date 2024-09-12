@@ -12,6 +12,10 @@ public class HttpRequest {
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
     private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int REQUEST_METHOD_INDEX = 0;
+    private static final int REQUEST_PATH_INDEX = 1;
+    private static final int QUERY_PARAM_NAME_INDEX = 0;
+    private static final int QUERY_PARAM_VALUE_INDEX = 1;
 
     private final HttpMethod method;
     private final String requestUrl;
@@ -35,8 +39,8 @@ public class HttpRequest {
 
     public static HttpRequest of(List<String> header, String rawBody) {
         String[] requestLine = header.getFirst().split(REQUEST_LINE_DELIMITER);
-        HttpMethod method = HttpMethod.valueOf(requestLine[0]);
-        String requestUrl = requestLine[1];
+        HttpMethod method = HttpMethod.valueOf(requestLine[REQUEST_METHOD_INDEX]);
+        String requestUrl = requestLine[REQUEST_PATH_INDEX];
 
         HttpHeader httpHeader = HttpHeader.from(header);
         HttpCookie httpCookie = HttpCookie.from(httpHeader);
@@ -52,8 +56,8 @@ public class HttpRequest {
 
         return Arrays.stream(rawBody.split(QUERY_PARAM_DELIMITER))
                 .collect(Collectors.toMap(
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[0],
-                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[1])
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[QUERY_PARAM_NAME_INDEX],
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMITER)[QUERY_PARAM_VALUE_INDEX])
                 );
     }
 

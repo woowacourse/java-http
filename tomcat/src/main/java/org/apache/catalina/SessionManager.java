@@ -1,7 +1,6 @@
 package org.apache.catalina;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +15,7 @@ public class SessionManager implements Manager {
     }
 
     private static class SessionManagerHolder {
+
         private static final SessionManager INSTANCE = new SessionManager();
     }
 
@@ -36,11 +36,15 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
-    public List<String> getSessions() {
-        return List.copyOf(SESSIONS.keySet());
+    public Map<String, Session> getStore() {
+        return SESSIONS;
     }
 
     public Optional<Session> getSession(String id) {
         return Optional.ofNullable(SESSIONS.get(id));
+    }
+
+    public void clear() {
+        SESSIONS.clear();
     }
 }

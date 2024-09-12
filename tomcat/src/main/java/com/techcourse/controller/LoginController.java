@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
         sessionManager.getSession(request.getSessionId())
                 .map(s -> s.getAttribute(SESSION_KEY_USER))
                 .ifPresentOrElse(
-                        user -> response.sendRedirect("index.html"),
+                        user -> response.sendRedirect("/index.html"),
                         () -> response.setStatus(HttpStatusCode.OK).setBody(loginPage)
                 );
     }

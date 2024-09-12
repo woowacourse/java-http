@@ -15,6 +15,7 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT_FIELD = "account";
     private static final String PASSWORD_FIELD = "password";
+    private static final String USER_ATTRIBUTE_NAME = "user";
 
     private final SessionManager sessionManager;
 
@@ -33,7 +34,9 @@ public class LoginController extends AbstractController {
         if (InMemoryUserRepository.exists(account, password)) {
             User user = InMemoryUserRepository.getByAccount(account);
             String sessionId = sessionManager.generateId();
-            sessionManager.add(sessionId, Session.ofUser(user));
+            Session session = new Session();
+            session.setAttribute(USER_ATTRIBUTE_NAME, user);
+            sessionManager.add(sessionId, session);
             response.setRedirect("/index.html");
             response.setCookie(HttpCookie.ofSessionId(sessionId));
             return;

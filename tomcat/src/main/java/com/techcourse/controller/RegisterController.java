@@ -19,6 +19,7 @@ public class RegisterController extends AbstractController {
 
     private static final String REGISTER_FILE_NAME = "register.html";
     private static final String INDEX_PATH = "/index.html";
+    private static final String USER_ATTRIBUTE_NAME = "user";
 
     private final SessionManager sessionManager;
 
@@ -39,7 +40,9 @@ public class RegisterController extends AbstractController {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             String sessionId = sessionManager.generateId();
-            sessionManager.add(sessionId, Session.ofUser(user));
+            Session session = new Session();
+            session.setAttribute(USER_ATTRIBUTE_NAME, user);
+            sessionManager.add(sessionId, session);
             response.setRedirect(INDEX_PATH);
             response.setCookie(HttpCookie.ofSessionId(sessionId));
         }

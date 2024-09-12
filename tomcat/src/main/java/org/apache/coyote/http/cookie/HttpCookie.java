@@ -9,7 +9,11 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public String getJSessionId() {
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
         return value;
     }
 }

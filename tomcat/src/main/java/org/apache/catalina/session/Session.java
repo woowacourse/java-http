@@ -2,18 +2,17 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Session {
 
-    private final UUID id;
+    private final String id;
     private final Map<String, Object> attributes = new HashMap<>();
 
-    public Session(final UUID id) {
+    public Session(final String id) {
         this.id = id;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

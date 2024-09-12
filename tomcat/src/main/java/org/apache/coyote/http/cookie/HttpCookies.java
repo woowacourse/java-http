@@ -1,7 +1,7 @@
 package org.apache.coyote.http.cookie;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,15 +16,13 @@ public class HttpCookies {
 
     private final Map<String, HttpCookie> values;
 
-    //TODO: 쿠키 사용해서 JSESSIONID 쿠키 생성, JSESSIONID 검증
-
     private HttpCookies(Map<String, HttpCookie> values) {
         this.values = values;
     }
 
     public static HttpCookies from(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) {
-            return new HttpCookies(Collections.emptyMap());
+            return new HttpCookies(new HashMap<>());
         }
 
         return new HttpCookies(Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
@@ -36,7 +34,15 @@ public class HttpCookies {
         );
     }
 
-    public String getJsessionid() {
-        return values.get(JSESSIONID).getJSessionId();
+    public void addCookie(HttpCookie httpCookie) {
+        values.put(httpCookie.getName(), httpCookie);
+    }
+
+    public boolean hasJsessionId() {
+        return values.containsKey(JSESSIONID);
+    }
+
+    public String getJsessionId() {
+        return values.get(JSESSIONID).getValue();
     }
 }

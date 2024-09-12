@@ -1,16 +1,21 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -370,9 +375,48 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인된 상태에서 /login 주소에 접근하면 /index.html 페이지로 리다이렉트한다.")
-    void login_redirect_when_alreadyLogined() throws IOException {
+    void login_redirect_when_alreadyLogined() throws IOException, NoSuchFieldException, IllegalAccessException {
         // given
-        String cookie = "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        String sessionId = UUID.randomUUID().toString();
+        String cookie = "Cookie: JSESSIONID=" + sessionId;
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                cookie + " ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        SessionManager mockSessionManager = Mockito.mock(SessionManager.class);
+        Session session = new Session(sessionId);
+        Mockito.when(mockSessionManager.findSession(sessionId)).thenReturn(session);
+
+        Field sessionManagerField = Http11Processor.class.getDeclaredField("sessionManager");
+        sessionManagerField.setAccessible(true);
+        sessionManagerField.set(processor, mockSessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        String responseLine = "HTTP/1.1 302 FOUND";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 JSESSIONID로 /login 주소에 접근하면 /login.html 페이지를 응답한다.")
+    void login_invalidSessionId() throws IOException {
+        // given
+        String cookie = "Cookie: JSESSIONID=asdf";
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -388,7 +432,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         String responseLine = "HTTP/1.1 200 OK";
@@ -421,7 +465,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        String responseLine = "HTTP/1.1 401 UNAUTHORIZED";
+        String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
         String contentLength = "Content-Length: " + responseBody.length;
 
@@ -451,7 +495,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        String responseLine = "HTTP/1.1 201 CREATED";
+        String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
         String contentLength = "Content-Length: " + responseBody.length;
 

@@ -32,7 +32,7 @@ public class Cookie {
         return getValueBy("JSESSIONID");
     }
 
-    public boolean containsSessionId() {
+    public boolean containsSession() {
         if (values.containsKey("JSESSIONID")) {
             return true;
         }

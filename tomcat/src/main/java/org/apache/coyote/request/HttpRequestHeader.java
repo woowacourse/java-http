@@ -36,7 +36,7 @@ public class HttpRequestHeader {
     public boolean hasSession() {
         if (hasCookie()) {
             Cookie cookie = CookieUtil.read(values.get(HttpMessageBodyInfo.COOKIE.getValue()));
-            return cookie.containsSessionId();
+            return cookie.containsSession();
         }
         return false;
     }

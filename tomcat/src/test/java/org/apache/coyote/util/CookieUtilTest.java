@@ -1,5 +1,6 @@
 package org.apache.coyote.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
@@ -61,5 +62,27 @@ class CookieUtilTest {
                 "key3", "value3"
         );
         assertEquals(expectedCookies, cookie.getValues());
+    }
+
+    @DisplayName("세션이 존재하면 true를 반환한다.")
+    @Test
+    void containsSessionIsTrue() {
+        List<String> values = List.of("JSESSIONID=abc123");
+        Cookie cookie = CookieUtil.read(values);
+
+        boolean exists = cookie.containsSession();
+
+        assertThat(exists).isTrue();
+    }
+
+    @DisplayName("세션이 존재하면 false를 반환한다.")
+    @Test
+    void containsSessionIsFalse() {
+        List<String> values = List.of("key=abc123");
+        Cookie cookie = CookieUtil.read(values);
+
+        boolean exists = cookie.containsSession();
+
+        assertThat(exists).isFalse();
     }
 }

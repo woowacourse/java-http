@@ -288,18 +288,16 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
 
-        return loginUser.filter(user -> user.checkPassword(password))
-                .map(
-                        user -> {
-                            UUID uuid = createNewSession(user);
-                            log.info("로그인 성공. user : {}", user);
-                            return uuid;
-                        }
-                )
-                .orElseGet(() -> {
-                    log.info(account + "의 비밀번호가 잘못 입력되었습니다.");
-                    return null;
-                });
+        User user = loginUser.get();
+
+        if (user.checkPassword(password)) {
+            UUID uuid = createNewSession(user);
+            log.info("로그인 성공. user : {}", user);
+            return uuid;
+        }
+
+        log.info(account + "의 비밀번호가 잘못 입력되었습니다.");
+        return null;
     }
 
     private UUID createNewSession(final User user) {

@@ -9,6 +9,7 @@ import org.apache.catalina.cookie.CookieUtils;
 
 public class HttpRequestHeaders {
 
+    private static final String COOKIE = "Cookie";
     private final Map<String, String> headers;
 
     public HttpRequestHeaders(Map<String, String> headers) {
@@ -20,7 +21,7 @@ public class HttpRequestHeaders {
     }
 
     public Cookie getCookie() {
-        return getHeader("Cookie")
+        return getHeader(COOKIE)
                 .map(CookieUtils::createCookie)
                 .orElse(new Cookie());
     }

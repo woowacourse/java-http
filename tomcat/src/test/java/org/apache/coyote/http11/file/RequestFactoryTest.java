@@ -40,12 +40,12 @@ public class RequestFactoryTest {
 
         // then
         final String expectedRequestLine = "POST /login HTTP/1.1";
-        final String expectedRequestHeaders =
-                "Host: localhost:8080\r\n" +
-                        "Connection: keep-alive\r\n" +
-                        "Content-Length: 30\r\n" +
-                        "Content-Type: application/x-www-form-urlencoded\r\n" +
-                        "Accept: */*\r\n";
+        final String expectedRequestHeaders = String.join(HTTP_LINE_SEPARATOR,
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*\r\n");
         final String expectedRequestBody = "account=gugu&password=password";
 
         assertAll(

@@ -16,7 +16,7 @@ public class ResponseParser {
 
     public String parse(HttpResponse response) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("HTTP/1.1 %d OK ", response.getStatus().code())).append("\r\n");
+        stringBuilder.append(String.format("HTTP/1.1 %d %s ", response.getStatus().code(), response.getStatus())).append("\r\n");
 
         Map<Header, Object> headers = response.getHeaders();
         for (Header header : headers.keySet()) {

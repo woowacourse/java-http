@@ -39,12 +39,7 @@ public class LoginController {
                 log.info("user : " + foundUser);
                 statusCode = HttpStatusCode.FOUND;
                 httpRequest.setHttpRequestPath("/index.html");
-
-                String jsessionid = UUID.randomUUID().toString();
-                Session session = new Session(jsessionid);
-                session.setAttribute("user", foundUser);
-                SessionManager.add(session.getId(), session);
-                httpResponseHeaders.setCookie("JSESSIONID=" + jsessionid);
+                setSessionAtResponseHeader(foundUser, httpResponseHeaders);
             }
         } catch (UserException e) {
             httpRequest.setHttpRequestPath("/401.html");
@@ -57,5 +52,13 @@ public class LoginController {
         httpResponseHeaders.setContentLength(httpResponseBody);
 
         return new HttpResponse(statusCode, httpResponseHeaders, httpResponseBody);
+    }
+
+    private void setSessionAtResponseHeader(User user, HttpResponseHeaders httpResponseHeaders) {
+        String jsessionid = UUID.randomUUID().toString();
+        Session session = new Session(jsessionid);
+        session.setAttribute("user", user);
+        SessionManager.add(session.getId(), session);
+        httpResponseHeaders.setCookie("JSESSIONID=" + jsessionid);
     }
 }

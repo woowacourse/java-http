@@ -22,6 +22,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.14.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
     implementation 'pl.allegro.tech.boot:handlebars-spring-boot-starter:0.4.1'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core:3.26.0'

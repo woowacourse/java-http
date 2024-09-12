@@ -56,10 +56,10 @@ public class HttpResponse {
         return String.valueOf(response);
     }
 
-    private Map<String, String> mapHeader(HttpRequest httpRequest, ResourceType resourceType) {
+    private Map<String, String> mapHeader(HttpRequest httpRequest, ResourceType resourceType) throws IOException {
         Map<String, String> headerEntry = new HashMap<>();
         headerEntry.put(HeaderName.SET_COOKIE.getValue(), httpRequest.getCookieResponse());
-        headerEntry.put(HeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType().getResponse());
+        headerEntry.put(HeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType());
         if (resourceType == ResourceType.STATIC) {
             headerEntry.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
         }

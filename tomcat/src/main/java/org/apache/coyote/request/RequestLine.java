@@ -1,8 +1,12 @@
 package org.apache.coyote.request;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.FileNameMap;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpMethod;
 
 public class RequestLine {
@@ -68,12 +72,13 @@ public class RequestLine {
         return mappedQueryParams;
     }
 
-    public ContentType getContentType() {
-        return ContentType.findByPath(path);
+    public String getContentType() throws IOException {
+        return Files.probeContentType(new File(path).toPath());
     }
 
     public boolean isStaticRequest() {
-        return ContentType.isStaticFile(path);
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        return fileNameMap.getContentTypeFor(path) != null;
     }
 
     public boolean isPath(String path) {

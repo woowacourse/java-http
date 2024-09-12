@@ -6,9 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http.ContentType;
-import org.apache.coyote.http.HeaderName;
 import org.apache.coyote.coockie.HttpCookie;
+import org.apache.coyote.http.HeaderName;
 import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
@@ -60,7 +59,7 @@ public class HttpRequest {
         return requestLine.isPathWithQuery(path);
     }
 
-    public ContentType getContentType() {
+    public String getContentType() throws IOException {
         return requestLine.getContentType();
     }
 

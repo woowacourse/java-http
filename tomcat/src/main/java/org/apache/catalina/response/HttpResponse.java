@@ -3,8 +3,6 @@ package org.apache.catalina.response;
 import org.apache.catalina.http.ContentType;
 
 public class HttpResponse {
-    private static final String DEFAULT_CHARSET = "charset=utf-8";
-
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private final String body;
@@ -14,7 +12,7 @@ public class HttpResponse {
         this.responseHeader = new ResponseHeader();
         this.body = body;
 
-        responseHeader.setContentType(contentType.getValue() + ";" + DEFAULT_CHARSET);
+        responseHeader.setContentType(contentType.toString());
         responseHeader.setContentLength(String.valueOf(body.getBytes().length));
     }
 

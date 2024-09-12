@@ -9,15 +9,12 @@ public enum ContentType {
     PLAIN("text/plain"),
     ;
 
+    private static final String DEFAULT_CHARSET = "charset=utf-8";
     public static final String COMMA = ",";
     private final String value;
 
     ContentType(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static ContentType of(String acceptHeader) {
@@ -31,5 +28,10 @@ public enum ContentType {
         return Arrays.stream(values()).filter(value -> value.value.equals(contentType))
                 .findAny()
                 .orElse(ContentType.HTML);
+    }
+
+    @Override
+    public String toString() {
+        return value + ";" + DEFAULT_CHARSET;
     }
 }

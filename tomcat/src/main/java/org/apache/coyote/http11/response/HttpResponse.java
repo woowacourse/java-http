@@ -16,22 +16,25 @@ public class HttpResponse {
 
     public static final HttpVersion DEFAULT_VERSION = new HttpVersion(1.1);
     public static final String CONTENT_TYPE_DELIMITER = "\\.";
-    private static final String CHARACTER_ENCODE_POLICY = "charset=utf-8";
+    private static final String CHARACTER_ENCODE_POLICY = ";charset=utf-8";
+    public static final int PARSED_CONTENT_TYPE_LENGTH = 2;
+    public static final int EXTENSION_INDEX = 1;
+    public static final String TEXT_TYPE_PREFIX = "text/";
 
     private final ViewResolver viewResolver;
-    private final Serializer<HttpResponse> serialzer;
+    private final Serializer<HttpResponse> serializer;
     private final HttpResponseHeader headers;
     private ResponseBody responseBody;
 
     public HttpResponse() {
         this.viewResolver = new ViewResolver();
-        this.serialzer = new ResponseSerializer(new ResponseHeaderSerializer());
+        this.serializer = new ResponseSerializer(new ResponseHeaderSerializer());
         this.headers = new HttpResponseHeader();
     }
 
     public HttpResponse(HttpResponseHeader headers, int statusCode, String statusMessage, ResponseBody responseBody) {
         this.viewResolver = new ViewResolver();
-        this.serialzer = new ResponseSerializer(new ResponseHeaderSerializer());
+        this.serializer = new ResponseSerializer(new ResponseHeaderSerializer());
         this.headers = headers;
         this.responseBody = responseBody;
     }
@@ -48,7 +51,8 @@ public class HttpResponse {
 
     public HttpResponse redirect(String redirectUrl) {
         this.statusCode(StatusCode.FOUND_302);
-        this.location(redirectUrl);
+        headers.put(LOCATION, redirectUrl);
+        headers.put(CONTENT_TYPE, null);
         return this;
     }
 
@@ -57,26 +61,11 @@ public class HttpResponse {
     }
 
     public String serialize() {
-        return serialzer.serialize(this);
+        return serializer.serialize(this);
     }
 
     public HttpResponse statusCode(StatusCode code) {
         headers.statusCode(code);
-        return this;
-    }
-
-    public HttpResponse location(String location) {
-        headers.put(LOCATION, location);
-        headers.put(CONTENT_TYPE, null);
-        return this;
-    }
-
-    public HttpResponse contentType(String url) {
-        String[] extension = url.split(CONTENT_TYPE_DELIMITER);
-        if (extension.length >= 2) {
-            String parsedType = "text/" + extension[1] + ";" + CHARACTER_ENCODE_POLICY;
-            headers.put(CONTENT_TYPE, parsedType);
-        }
         return this;
     }
 
@@ -88,17 +77,22 @@ public class HttpResponse {
     public HttpResponse viewUrl(String viewUrl) {
         String responseBody = viewResolver.findResponseFile(viewUrl);
         this.responseBody = new ResponseBody(responseBody);
-        contentType(viewUrl);
+        headers.put(CONTENT_TYPE, parseContentType(viewUrl));
         headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
         return this;
     }
 
-    public HttpResponseHeader getHeaders() {
-        return headers;
+    private String parseContentType(String url) {
+        String[] extension = url.split(CONTENT_TYPE_DELIMITER);
+        if (extension.length != PARSED_CONTENT_TYPE_LENGTH) {
+            throw new IllegalArgumentException("잘못된 view url 입니다.");
+        }
+
+        return  TEXT_TYPE_PREFIX + extension[EXTENSION_INDEX] + CHARACTER_ENCODE_POLICY;
     }
 
-    public StatusCode getStatusCode() {
-        return headers.getStatusCode();
+    public HttpResponseHeader getHeaders() {
+        return headers;
     }
 
     public ResponseBody getResponseBody() {

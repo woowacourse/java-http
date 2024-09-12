@@ -15,6 +15,7 @@ public class GreetingController {
     public ResponseEntity<String> index() {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache().cachePrivate())
+                .header(HttpHeaders.CONTENT_ENCODING, "gzip")
                 .body("index");
     }
 
@@ -32,8 +33,9 @@ public class GreetingController {
     }
 
     @GetMapping("/etag")
-    public String etag() {
-        return "index";
+    public ResponseEntity<String> etag() {
+        return ResponseEntity.ok()
+                .body("index");
     }
 
     @GetMapping("/resource-versioning")

@@ -53,7 +53,7 @@ public class LoginController extends AbstractController {
         return ResponseResult
                 .status(HttpStatusCode.FOUND)
                 .header(HttpHeaders.LOCATION.getName(), INDEX_PAGE.getPath())
-                .header(HttpHeaders.COOKIE.getName(), cookieValue)
+                .header(HttpHeaders.SET_COOKIE.getName(), cookieValue)
                 .build();
     }
 
@@ -97,7 +97,7 @@ public class LoginController extends AbstractController {
 
     private ResponseResult responseLoginFail() {
         return ResponseResult
-                .status(HttpStatusCode.UNAUTHORIZED)
+                .status(HttpStatusCode.FOUND)
                 .header(HttpHeaders.LOCATION.getName(), UNAUTHORIZED_PAGE.getPath())
                 .build();
     }

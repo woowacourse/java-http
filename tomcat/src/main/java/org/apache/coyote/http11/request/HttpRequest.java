@@ -9,8 +9,12 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String HEADER_KEY_VALUE_SEPARATOR = ":";
+    private static final String QUERY_STRING_SEPARATOR = "&";
+    private static final String QUERY_STRING_KEY_VALUE_SEPARATOR = "=";
+
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final Map<HttpHeader, String> headers;
     private final String body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -20,21 +24,21 @@ public class HttpRequest {
         this.body = parseBody(bufferedReader);
     }
 
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private Map<HttpHeader, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<HttpHeader, String> headers = new HashMap<>();
         while (true) {
             String header = bufferedReader.readLine();
             if (header.isBlank()) {
                 break;
             }
-            String[] splitHeader = header.split(":");
-            headers.put(splitHeader[0].trim(), splitHeader[1].trim());
+            String[] headerKeyValue = header.split(HEADER_KEY_VALUE_SEPARATOR);
+            headers.put(HttpHeader.findByName(headerKeyValue[0].trim()), headerKeyValue[1].trim());
         }
         return headers;
     }
 
     private String parseBody(BufferedReader bufferedReader) throws IOException {
-        String rawContentLength = headers.get("Content-Length");
+        String rawContentLength = headers.get(HttpHeader.CONTENT_LENGTH.getName());
         if (rawContentLength == null) {
             return null;
         }
@@ -62,14 +66,14 @@ public class HttpRequest {
     }
 
     public Map<String, String> getBodyQueryString() {
-        Map<String, String> queryStringPairs = new HashMap<>();
-        for (String pairs : body.split("&")) {
-            String[] pair = pairs.split("=");
-            if (pair.length == 2) {
-                queryStringPairs.put(pair[0], pair[1]);
+        Map<String, String> queryStrings = new HashMap<>();
+        for (String queryString : body.split(QUERY_STRING_SEPARATOR)) {
+            String[] queryStringKeyValue = queryString.split(QUERY_STRING_KEY_VALUE_SEPARATOR);
+            if (queryStringKeyValue.length == 2) {
+                queryStrings.put(queryStringKeyValue[0], queryStringKeyValue[1]);
             }
         }
 
-        return queryStringPairs;
+        return queryStrings;
     }
 }

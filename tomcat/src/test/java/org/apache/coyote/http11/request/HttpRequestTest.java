@@ -9,7 +9,6 @@ import java.io.StringReader;
 import java.util.Set;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.catalina.session.UuidSessionGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +27,12 @@ class HttpRequestTest {
                 "",
                 "body");
         BufferedReader bufferedReader = new BufferedReader(new StringReader(rawRequest));
-        HttpRequest request = new HttpRequestReader(bufferedReader, new UuidSessionGenerator())
-                .read();
+        HttpRequest request = new HttpRequestReader(bufferedReader).read();
 
         assertAll(
                 () -> assertThat(request.getPath()).isEqualTo("/hello"),
                 () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(request.getSession()).isEqualTo(session),
+                () -> assertThat(request.getSessionId()).isEqualTo("1234"),
                 () -> assertThat(request.getBody()).isEqualTo("body"),
                 () -> assertThat(request.getQuery("me")).isEqualTo("potato"),
                 () -> assertThat(request.getQuery("you")).isEqualTo("gamja"),

@@ -1,25 +1,18 @@
 package org.apache.coyote.http11.request;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.apache.catalina.session.SessionGenerator;
-import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
-    private final static SessionManager SESSION_MANAGER = new SessionManager();
-
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private final HttpSession session;
     private final String body;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpSession session, String body) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String body) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.session = session;
         this.body = body;
     }
 
@@ -56,27 +49,24 @@ public class HttpRequest {
         return requestLine.getQueryKeys();
     }
 
-    public HttpSession getSession() {
-        return session;
+    public String getSessionId() {
+        return headers.getSessionId();
+    }
+
+    public void addSession(String sessionId) {
+        headers.addSession(sessionId);
     }
 
     public static class Builder {
-        private final SessionGenerator sessionGenerator;
+
         private RequestLine requestLine;
         private HttpHeaders headers;
-        private HttpSession session;
         private String body = "";
 
-        public Builder(SessionGenerator sessionGenerator) {
-            this.sessionGenerator = sessionGenerator;
-        }
-
-        public Builder requestHead(List<String> requestHead) {
+        public Builder(List<String> requestHead) {
             validateRequestHead(requestHead);
             this.requestLine = createRequestLine(requestHead);
             this.headers = createHeaders(requestHead);
-            this.session = createSession();
-            return this;
         }
 
         private void validateRequestHead(List<String> requestLines) {
@@ -95,27 +85,19 @@ public class HttpRequest {
             return HttpHeaders.of(headers);
         }
 
-        private HttpSession createSession() {
-            String sessionId = headers.getSessionId();
-            if (sessionId == null || SESSION_MANAGER.findSession(sessionId) == null) {
-                return sessionGenerator.create();
-            }
-            return SESSION_MANAGER.findSession(sessionId);
-        }
-
         public Builder body(String body) {
             this.body = body;
             return this;
         }
 
         public HttpRequest build() {
-            if (requestLine == null || headers == null || session == null) {
+            if (requestLine == null || headers == null) {
                 throw new IllegalArgumentException("HTTP 요청 객체를 생성할 수 없습니다.");
             }
             if (body.length() != getBodyLength()) {
                 throw new IllegalArgumentException("요청 본문 길이가 올바르지 않습니다.");
             }
-            return new HttpRequest(requestLine, headers, session, body);
+            return new HttpRequest(requestLine, headers, body);
         }
 
         public int getBodyLength() {

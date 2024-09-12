@@ -5,19 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.cookie.RequestCookies;
 
 public class HttpHeaders {
 
     private static final String HEADER_SEPARATOR = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final String COOKIE_KEY = "Cookie";
-    private static final String SESSION_KEY = "JSESSIONID";
 
     private final Map<String, String> values;
+    private final RequestCookies cookies;
 
     public HttpHeaders(Map<String, String> values) {
         this.values = values;
+        this.cookies = RequestCookies.of(values.get(HttpHeader.COOKIE));
     }
 
     public static HttpHeaders of(List<String> headers) {
@@ -58,7 +60,14 @@ public class HttpHeaders {
     }
 
     public String getSessionId() {
-        RequestCookies requestCookies = RequestCookies.of(values.get(COOKIE_KEY));
-        return requestCookies.get(SESSION_KEY);
+        return cookies.getSessionId();
+    }
+
+    public String getCookie(String cookieName) {
+        return cookies.get(cookieName);
+    }
+
+    public void addSession(String sessionId) {
+        cookies.addSession(sessionId);
     }
 }

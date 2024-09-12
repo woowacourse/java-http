@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpResponse {
 
@@ -12,7 +14,6 @@ public class HttpResponse {
     private static final String STATUS_LINE_FORMAT = "%s %d %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String REDIRECTION_HEADER = "Location";
-    private static final String COOKIE_HEADER = "Set-Cookie";
     private static final HttpStatus DEFAULT_REDIRECT_STATUS = HttpStatus.FOUND;
 
     private final Protocol protocol = Protocol.HTTP11;
@@ -40,23 +41,10 @@ public class HttpResponse {
 
     public static HttpResponse createRedirectResponse(HttpStatus httpStatus, String location) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Location", location);
+        headers.put(HttpHeader.LOCATION, location);
         return new HttpResponse(
                 httpStatus,
                 headers
-        );
-    }
-
-    public static HttpResponse createTextResponse(HttpStatus httpStatus, String responseBody) {
-        Map<String, String> headers = new HashMap<>();
-        int contentLength = responseBody.getBytes().length;
-        headers.put("Content-Type", "text/plain;charset=utf-8 ");
-        headers.put("Content-Length", String.valueOf(contentLength));
-
-        return new HttpResponse(
-                httpStatus,
-                headers,
-                responseBody
         );
     }
 
@@ -73,12 +61,23 @@ public class HttpResponse {
         addHeader(REDIRECTION_HEADER, location);
     }
 
-    public void addCookie(ResponseCookie cookie) {
-        addHeader(COOKIE_HEADER, cookie.toResponse());
+    public void addCookie(HttpCookie cookie) {
+        addHeader(HttpHeader.SET_COOKIE, cookie.toResponse());
     }
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
+    }
+
+    public void setTextBody(String body) {
+        setBody("text/plain;charset=utf-8 ", body);
+    }
+
+    private void setBody(String contentType, String body) {
+        this.body = body;
+        int contentLength = body.getBytes().length;
+        headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength));
+        headers.put(HttpHeader.CONTENT_TYPE, contentType);
     }
 
     public String toResponse() {
@@ -138,5 +137,15 @@ public class HttpResponse {
     @Override
     public int hashCode() {
         return Objects.hash(protocol, httpStatus, headers, body);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "protocol=" + protocol +
+                ", httpStatus=" + httpStatus +
+                ", headers=" + headers +
+                ", body='" + body + '\'' +
+                '}';
     }
 }

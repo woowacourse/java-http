@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import org.apache.coyote.http11.message.common.FileExtension;
+import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -9,7 +10,6 @@ import org.apache.util.ResourceReader;
 public class StaticResourceController extends AbstractController {
 
     private static final String STATIC_PREFIX = "static";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
@@ -20,7 +20,7 @@ public class StaticResourceController extends AbstractController {
 
         response.setStatusLine(HttpStatus.OK);
         response.setContentType(FileExtension.getFileExtension(extension).getContentType());
-        response.setHeader(CONTENT_LENGTH_HEADER, String.valueOf(resource.getBytes().length));
+        response.setHeader(HttpHeaderField.CONTENT_LENGTH.getName(), String.valueOf(resource.getBytes().length));
         response.setBody(resource);
     }
 

@@ -9,6 +9,7 @@ import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
+import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -63,8 +64,8 @@ public class LoginController extends AbstractController {
         httpCookie.setHttpOnly(true);
 
         response.setStatusLine(HttpStatus.FOUND);
-        response.setHeader("Location", "/index.html");
-        response.setHeader("Set-Cookie", httpCookie.toString());
+        response.setHeader(HttpHeaderField.LOCATION.getName(), "/index.html");
+        response.setHeader(HttpHeaderField.SET_COOKIE.getName(), httpCookie.toString());
 
         sessionService.registerSession(session.getId(), user);
         System.out.println(user);

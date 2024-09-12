@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message.response;
 
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
+import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 
 public class HttpResponse {
@@ -29,7 +30,7 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType contentType) {
-        this.headers.setHeaders("Content-Type", contentType.getType());
+        this.headers.setHeaders(HttpHeaderField.CONTENT_TYPE.getName(), contentType.getType());
     }
 
     public void setBody(String body) {

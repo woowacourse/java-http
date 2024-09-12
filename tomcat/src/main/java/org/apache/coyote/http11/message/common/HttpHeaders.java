@@ -37,7 +37,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+        return Integer.parseInt(headers.getOrDefault(HttpHeaderField.CONTENT_LENGTH.getName(), "0"));
     }
 
     public void setHeaders(String key, String value) {
@@ -45,11 +45,11 @@ public class HttpHeaders {
     }
 
     public HttpCookies getCookies() {
-        return new HttpCookies(headers.getOrDefault("Cookie", ""));
+        return new HttpCookies(headers.getOrDefault(HttpHeaderField.COOKIE.getName(), ""));
     }
 
     public ContentType getContentType() {
-        return ContentType.from(headers.getOrDefault("Content-Type", ""));
+        return ContentType.from(headers.getOrDefault(HttpHeaderField.CONTENT_TYPE.getName(), ""));
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.exception.ReceivingRequestFailedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestLine;
 
 public class HttpRequestReceiver {
 
@@ -18,13 +19,18 @@ public class HttpRequestReceiver {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
+            HttpRequestLine requestLine = receiveRequestLine(bufferedReader);
             HttpRequestHeader header = receiveRequestHeader(bufferedReader);
             HttpRequestBody body = receiveRequestBody(header, bufferedReader);
 
-            return new HttpRequest(header, body);
+            return new HttpRequest(requestLine, header, body);
         } catch (IOException e) {
             throw new ReceivingRequestFailedException();
         }
+    }
+
+    private HttpRequestLine receiveRequestLine(BufferedReader bufferedReader) throws IOException {
+        return new HttpRequestLine(bufferedReader.readLine());
     }
 
     private HttpRequestHeader receiveRequestHeader(BufferedReader bufferedReader) throws IOException {

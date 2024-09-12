@@ -12,7 +12,7 @@ public record HttpRequestLine(
         Map<String, String> queryString,
         String version) {
 
-    HttpRequestLine(String requestLine) {
+    public HttpRequestLine(String requestLine) {
         this(
                 extractHttpMethod(requestLine),
                 extractPath(requestLine),

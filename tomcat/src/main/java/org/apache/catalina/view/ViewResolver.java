@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class ViewResolver {
 
@@ -15,15 +15,17 @@ public class ViewResolver {
     private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ContentTypeConverter contentTypeConverter = new ContentTypeConverter();
 
-    public String resolve(HttpRequestHeader request) throws IOException {
-        if (HttpMethod.GET.equals(request.getHttpMethod())
-                && (request.getPath().startsWith("/login") || request.getPath().startsWith("/register"))
-                && (request.getCookies() != null && request.getCookies().get("JSESSIONID") != null)) {
+    public String resolve(HttpRequest request) throws IOException {
+        HttpMethod httpMethod = request.requestLine().httpMethod();
+        String path = request.requestLine().path();
+        if (HttpMethod.GET.equals(httpMethod)
+                && (path.startsWith("/login") || path.startsWith("/register"))
+                && (request.header().getCookies() != null && request.header().getCookies().get("JSESSIONID") != null)) {
             return responseBuilder.buildRedirectResponse("/index.html");
         }
 
-        if (HttpMethod.GET.equals(request.getHttpMethod())) {
-            return handleGetRequest(request.getPath());
+        if (HttpMethod.GET.equals(httpMethod)) {
+            return handleGetRequest(path);
         }
 
         return responseBuilder.buildNotFoundResponse();

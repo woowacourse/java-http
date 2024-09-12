@@ -5,7 +5,7 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.LogInController;
 import org.apache.catalina.controller.RegisterAbstractController;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerMapping {
 
@@ -14,7 +14,8 @@ public class HandlerMapping {
             new RequestMapping(HttpMethod.POST, "/register"), new RegisterAbstractController()
     );
 
-    public AbstractController getController(HttpRequestHeader request) {
-        return HANDLER_MAPPER.get(new RequestMapping(request.getHttpMethod(), request.getPath()));
+    public AbstractController getController(HttpRequest request) {
+        return HANDLER_MAPPER.get(new RequestMapping(
+                request.requestLine().httpMethod(), request.requestLine().path()));
     }
 }

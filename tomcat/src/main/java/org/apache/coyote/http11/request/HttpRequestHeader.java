@@ -4,9 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record HttpRequestHeader(
-        HttpRequestLine requestLine,
-        Map<String, String> headers) {
+public record HttpRequestHeader(Map<String, String> headers) {
 
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
@@ -14,7 +12,6 @@ public record HttpRequestHeader(
 
     public HttpRequestHeader(String request) {
         this(
-                extractRequestLine(request),
                 extractHeaders(request)
         );
     }
@@ -56,13 +53,5 @@ public record HttpRequestHeader(
 
     public String getContentType() {
         return headers.get(CONTENT_TYPE);
-    }
-
-    public HttpMethod getHttpMethod() {
-        return this.requestLine.httpMethod();
-    }
-
-    public String getPath() {
-        return this.requestLine.path();
     }
 }

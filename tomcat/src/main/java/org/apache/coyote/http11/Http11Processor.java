@@ -55,13 +55,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(HttpRequest request) throws IOException, ApplicationException {
-        AbstractController controller = handlerMapping.getController(request.header());
+        AbstractController controller = handlerMapping.getController(request);
         if (controller != null) {
             HttpResponse response = new HttpResponse();
             controller.service(request, response);
             return response.toString();
         }
 
-        return viewResolver.resolve(request.header());
+        return viewResolver.resolve(request);
     }
 }

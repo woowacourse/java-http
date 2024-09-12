@@ -43,10 +43,10 @@ public class HttpRequestConvertor {
 
     private static void validateRequestLine(String requestLine) {
         if (requestLine == null) {
-            throw new IllegalArgumentException("요청이 비어 있습니다.");
+            throw new IllegalArgumentException("요청이 비어 있습니다");
         }
         if (requestLine.split(REQUEST_LINE_DELIMITER).length < 3) {
-            throw new IllegalArgumentException("RequestLine이 잘못된 요청입니다.");
+            throw new IllegalArgumentException("RequestLine이 잘못된 요청입니다");
         }
     }
 
@@ -65,6 +65,9 @@ public class HttpRequestConvertor {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < requestLine.length; i++) {
             sb.append(requestLine[i].strip());
+            if (i != requestLine.length - 1) {
+                sb.append(HEADER_DELIMITER);
+            }
         }
 
         return sb.toString();

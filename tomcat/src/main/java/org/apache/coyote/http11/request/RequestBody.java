@@ -5,6 +5,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RequestBody {
+    private static final String ELEMENT_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY_VALUE_SIZE = 2;
+    private static final int KEY_IDX = 0;
+    private static final int VALUE_IDX = 1;
 
     private String body;
 
@@ -17,13 +22,13 @@ public class RequestBody {
     }
 
     public Map<String, String> getUserInformation() {
-        return Arrays.stream(body.split("&"))
-                .map(line -> Arrays.asList(line.split("=")))
-                .filter(keyValue -> keyValue.size() == 2)
-                .filter(keyValue -> !keyValue.get(0).isBlank() && !keyValue.get(1).isBlank())
+        return Arrays.stream(body.split(ELEMENT_SEPARATOR))
+                .map(element -> Arrays.asList(element.split(KEY_VALUE_SEPARATOR)))
+                .filter(keyValue -> keyValue.size() == KEY_VALUE_SIZE)
+                .filter(keyValue -> !keyValue.get(KEY_IDX).isBlank() && !keyValue.get(VALUE_IDX).isBlank())
                 .collect(Collectors.toMap(
-                        keyValue -> keyValue.get(0).trim(),
-                        keyValue -> keyValue.get(1).trim()
+                        keyValue -> keyValue.get(KEY_IDX).trim(),
+                        keyValue -> keyValue.get(VALUE_IDX).trim()
                 ));
     }
 }

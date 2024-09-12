@@ -37,8 +37,11 @@ public abstract class AbstractController implements Controller {
         String path = addHtmlExtension(request.getPath());
         String body = getStaticFileContent(path);
         if (body == null) {
-            response.addStatusLine(HttpStatusCode.NO_CONTENT);
-            response.addHeader(HttpHeader.CONTENT_LENGTH, "0");
+            String notFoundPage = getStaticFileContent("/404.html");
+            response.addStatusLine(HttpStatusCode.OK);
+            response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
+            response.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(notFoundPage.getBytes().length));
+            response.addBody(notFoundPage);
             response.writeResponse();
             return;
         }

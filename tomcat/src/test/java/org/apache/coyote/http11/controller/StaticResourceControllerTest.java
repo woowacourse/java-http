@@ -56,7 +56,7 @@ class StaticResourceControllerTest {
         outputStream.close();
     }
 
-    @DisplayName("존재하지 않는 자원을 요청 시 204 상태코드를 응답한다.")
+    @DisplayName("존재하지 않는 자원을 요청 시 404.html을 응답한다.")
     @Test
     void getNoContent() throws Exception {
         // given
@@ -76,9 +76,15 @@ class StaticResourceControllerTest {
         staticResourceController.service(request, response);
 
         // then
-        String expected = "HTTP/1.1 204 No Content \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        byte[] fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + fileContent.length + " ",
+                "",
+                new String(fileContent),
+                "");
         assertThat(outputStream.toString()).isEqualTo(expected);
         inputStream.close();
         outputStream.close();

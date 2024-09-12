@@ -18,11 +18,10 @@ public class RequestMapping {
     private static final Controller HOME_PAGE_CONTROLLER = HomePageController.getInstance();
     private static final String PATH_SEPARATOR = "/";
     private static final String FILE_EXTENSION_SEPARATOR = ".";
-    private static final int PATH_FIRST_SEGMENT_INDEX = 1;
 
     static {
-        controllers.put("login", LoginController.getInstance());
-        controllers.put("register", RegisterController.getInstance());
+        controllers.put("/login", LoginController.getInstance());
+        controllers.put("/register", RegisterController.getInstance());
     }
 
     private RequestMapping() {
@@ -37,9 +36,10 @@ public class RequestMapping {
         if (PATH_SEPARATOR.equals(path)) {
             return HOME_PAGE_CONTROLLER;
         }
-        if (path.contains(FILE_EXTENSION_SEPARATOR)) {
+        Controller controller;
+        if (path.contains(FILE_EXTENSION_SEPARATOR) || (controller = controllers.get(path)) == null) {
             return STATIC_RESOURCE_CONTROLLER;
         }
-        return controllers.get(path.split(PATH_SEPARATOR)[PATH_FIRST_SEGMENT_INDEX]);
+        return controller;
     }
 }

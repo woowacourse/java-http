@@ -19,4 +19,9 @@ public class StaticResourceController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         serveStaticFile(request, response);
     }
+
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) throws IOException {
+        serveStaticFile(request, response);
+    }
 }

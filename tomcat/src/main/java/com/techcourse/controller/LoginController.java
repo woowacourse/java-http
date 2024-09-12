@@ -14,14 +14,18 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionService;
+import org.apache.coyote.session.SessionManager;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
     private final UserService userService = UserService.getInstance();
-    private final SessionService sessionService = SessionService.getInstance();
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
@@ -55,18 +59,18 @@ public class LoginController extends AbstractController {
     }
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {
-        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
         Session session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
 
+        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
         httpCookie.setValue(session.getId());
         httpCookie.setHttpOnly(true);
 
         response.setStatusLine(HttpStatus.FOUND);
         response.setHeader(HttpHeaderField.LOCATION.getName(), "/index.html");
         response.setHeader(HttpHeaderField.SET_COOKIE.getName(), httpCookie.toString());
-
-        sessionService.registerSession(session.getId(), user);
-        System.out.println(user);
+        log.info("User logged in: {}", user);
     }
 
     @Override
@@ -81,7 +85,7 @@ public class LoginController extends AbstractController {
     }
 
     private String determinePagePath(HttpCookie sessionCookie) {
-        if (sessionService.isSessionExist(sessionCookie.getValue())) {
+        if (sessionManager.isExistSession(sessionCookie.getValue())) {
             return "static/index.html";
         }
         return "static/login.html";

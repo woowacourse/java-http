@@ -29,6 +29,7 @@ public class AbstractController implements Controller {
                 .responseBody("");
     }
 
+
     protected void doGet(HttpRequest request, HttpResponse response) {
         handleMethodNotAllowed(response);
     }

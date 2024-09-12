@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.ErrorResponseHandler;
@@ -29,15 +31,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            handleRequest(outputStream, inputStream);
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void handleRequest(OutputStream outputStream, InputStream inputStream) throws IOException {
+        try {
             HttpResponse response = new HttpResponse(outputStream);
             ErrorResponseHandler.getInstance().setResponse(response);
-
             RequestReader reader = new RequestReader(inputStream);
             HttpRequest request = reader.getHttpRequest();
             HttpRequestHandler handler = new HttpRequestHandler();
             handler.handle(request, response);
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
         } catch (RequestException e) {
             e.handleErrorResponse();
         }

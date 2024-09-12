@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.request.requestLine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.apache.coyote.http11.request.domain.RequestMethod;
+import org.apache.coyote.request.requestLine.RequestMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

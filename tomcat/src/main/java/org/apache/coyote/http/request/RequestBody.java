@@ -12,7 +12,7 @@ public class RequestBody {
 
     private final Map<String, String> values;
 
-    private RequestBody(Map<String, String> values) {
+    public RequestBody(Map<String, String> values) {
         this.values = values;
     }
 

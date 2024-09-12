@@ -21,4 +21,8 @@ public class RequestMapping {
     public static Controller getController(HttpRequest request) throws Exception {
         return controllers.get(request.getPath());
     }
+
+    private RequestMapping() {
+        throw new UnsupportedOperationException("인스턴스를 생성할 수 없는 클래스입니다.");
+    }
 }

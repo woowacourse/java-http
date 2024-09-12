@@ -18,17 +18,15 @@ public class HttpResponse {
     private final HttpRequestHeaders headers;
     private int statusCode;
     private String statusMessage;
-    private Optional<String> responseBody;
+    private ResponseBody responseBody;
 
     public HttpResponse() {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
         this.headers = new HttpRequestHeaders();
-        this.responseBody = Optional.empty();
-
     }
 
-    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage, Optional<String> responseBody) {
+    public HttpResponse(HttpRequestHeaders headers, int statusCode, String statusMessage,ResponseBody responseBody) {
         this.viewResolver = new ViewResolver();
         this.serialzer = new ResponseSerializer();
         this.headers = headers;
@@ -73,9 +71,9 @@ public class HttpResponse {
 
     public HttpResponse viewUrl(String viewUrl) {
         String responseBody = viewResolver.findResponseFile(viewUrl);
+        this.responseBody = new ResponseBody(responseBody);
         contentType(viewUrl);
         headers.contentLength(responseBody.getBytes().length);
-        this.responseBody = Optional.of(responseBody);
         return this;
     }
 
@@ -91,7 +89,7 @@ public class HttpResponse {
         return statusMessage;
     }
 
-    public Optional<String> getResponseBody() {
+    public ResponseBody getResponseBody() {
         return responseBody;
     }
 }

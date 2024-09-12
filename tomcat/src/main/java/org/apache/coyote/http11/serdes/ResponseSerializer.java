@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseBody;
 
 public class ResponseSerializer implements Serializer<HttpResponse> {
     private static String PROTOCOL_AND_VERSION = "HTTP/" + HttpResponse.DEFAULT_VERSION.getVersion() + " ";
@@ -13,7 +14,7 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
 
     @Override
     public String serialize(HttpResponse response) {
-        Optional<String> responseBody = response.getResponseBody();
+        ResponseBody responseBody = response.getResponseBody();
         String firstLine = resolveFirstLine(response.getStatusCode(), response.getStatusMessage());
         String header = serializeHeader(response.getHeaders());
 
@@ -22,7 +23,7 @@ public class ResponseSerializer implements Serializer<HttpResponse> {
         joiner.add(firstLine);
         joiner.add(header);
         joiner.add(BLANK);
-        responseBody.ifPresent(joiner::add);
+        joiner.add(responseBody.getValue());
 
         return joiner.toString();
     }

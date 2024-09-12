@@ -3,11 +3,11 @@ package org.apache.coyote.coockie;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 public class HttpCookie {
 
     private static final String JSESSIONID_VALUE = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     public HttpCookie(String rawCookies) {
@@ -27,18 +27,11 @@ public class HttpCookie {
         return cookieGroup;
     }
 
-    public boolean hasJESSIONID() {
+    public boolean hasSessionId() {
         return cookies.containsKey(JSESSIONID_VALUE);
     }
 
-    public void generateJSESSIONID() {
-        if (!cookies.containsKey(JSESSIONID_VALUE)) {
-            UUID uuid = UUID.randomUUID();
-            cookies.put(JSESSIONID_VALUE, uuid.toString());
-        }
-    }
-
-    public String getJESSIONID() {
+    public String getSessionId() {
         return cookies.get(JSESSIONID_VALUE);
     }
 

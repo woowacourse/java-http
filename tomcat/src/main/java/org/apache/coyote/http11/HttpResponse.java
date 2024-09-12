@@ -11,7 +11,6 @@ public class HttpResponse {
     private final OutputStream outputStream;
     private HttpResponseHeader headers;
     private HttpStatusCode statusCode;
-    private String body; //TODO: Response에서 때어낼 수 있을 것 같은데?
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
@@ -25,16 +24,24 @@ public class HttpResponse {
 
     public void responseBody(String body) {
         setDefaultHaders(HttpContentType.TEXT, body);
-        this.body = body;
-        write();
+        write(body);
     }
 
-    private void write() {
+    private void write(String responseBody) {
         try (outputStream) {
-            outputStream.write(build().getBytes());
+            outputStream.write(build(responseBody).getBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String build(String responseBody) {
+        return String.join("\r\n",
+                statusCode.buildOutput(),
+                headers.buildOutput(),
+                "",
+                responseBody
+        );
     }
 
     private void setDefaultHaders(HttpContentType httpContentType, String body) {
@@ -53,24 +60,13 @@ public class HttpResponse {
 
         HttpContentType contentType = HttpContentType.matchContentType(path);
         setDefaultHaders(contentType, resource);
-        this.body = resource;
-        write();
-    }
-
-    public String build() {
-        return String.join("\r\n",
-                statusCode.buildOutput(),
-                headers.buildOutput(),
-                "",
-                body
-        );
+        write(resource);
     }
 
     public void redirect(String uri) {
-        this.body = "";
         headers.addHeader("Location", uri);
         setDefaultHaders(HttpContentType.TEXT, "");
-        write();
+        write("");
     }
 
     public HttpResponse createSession(String name, Object object) {

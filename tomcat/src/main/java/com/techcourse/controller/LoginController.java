@@ -12,7 +12,6 @@ import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.HttpStatusLine;
-import org.apache.coyote.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +39,12 @@ public class LoginController implements Controller {
     }
 
     private HttpResponseBuilder get(final HttpRequest request) {
+        User user = getUser(request.getSession());
+        if (user == null) {
+            return HttpResponse.builder().redirect("/login.html");
+        }
         HttpStatusLine statusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatusCode.OK);
-        String resource = StaticResourceHandler.handle("/login.html");
+        String resource = StaticResourceHandler.handle("/index.html");
         HttpBody responseBody = new HttpBody(resource);
         return HttpResponse.builder()
                 .statusLine(statusLine)
@@ -64,10 +67,11 @@ public class LoginController implements Controller {
                     .setCookie(HttpCookie.ofJSessionId(session.getId()))
                     .redirect("/index.html");
         }
-        HttpStatusLine statusLine = new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.UNAUTHORIZED);
         return HttpResponse.builder()
-                .statusLine(statusLine)
-                .contentType(TEXT_HTML.defaultCharset())
-                .location("/login.html");
+                .redirect("/401.html");
+    }
+
+    private User getUser(final Session session) {
+        return (User) session.getAttribute("user");
     }
 }

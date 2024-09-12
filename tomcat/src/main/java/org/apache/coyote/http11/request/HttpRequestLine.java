@@ -10,8 +10,7 @@ public record HttpRequestLine(
         HttpMethod httpMethod,
         String path,
         Map<String, String> queryString,
-        String version
-) {
+        String version) {
 
     HttpRequestLine(String requestLine) {
         this(

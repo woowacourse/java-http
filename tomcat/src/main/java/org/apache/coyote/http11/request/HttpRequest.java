@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpVersion;
+import org.apache.coyote.Session;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
@@ -86,6 +88,15 @@ public class HttpRequest {
 
     public boolean isBodyEmpty() {
         return body.isEmpty();
+    }
+
+    public Session getSession() {
+        HttpCookie cookies = header.getCookies();
+        return new Session(cookies.getJsessionid());
+    }
+
+    public boolean existsSession() {
+        return header.existsSession();
     }
 
     public Map<String, String> getBody() {

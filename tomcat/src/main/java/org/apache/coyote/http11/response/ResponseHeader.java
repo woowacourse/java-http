@@ -24,7 +24,7 @@ public class ResponseHeader {
         addHeader(LOCATION, location);
     }
 
-    public void addHeader(String key, String value) {
+    private void addHeader(String key, String value) {
         header.put(key, value);
     }
 

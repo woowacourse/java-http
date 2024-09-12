@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.StringJoiner;
 import org.apache.coyote.HttpStatusCode;
+import org.apache.coyote.MimeType;
 
 public class HttpResponse {
 
@@ -20,16 +21,20 @@ public class HttpResponse {
         header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
-    public void addStatusLine(StatusLine statusLine) {
+    public void setStatusLine(StatusLine statusLine) {
         this.statusLine = statusLine;
     }
 
-    public void addMimeType() {
-
+    public void setMimeType(MimeType mimeType) {
+        header.setContentType(mimeType);
     }
 
-    public void addCharSet() {
+    public void setLocation(String location) {
+        header.setLocation(location);
+    }
 
+    public void setCookie(String cookie) {
+        header.setCookie(cookie);
     }
 
     public void setHeader(ResponseHeader header) {

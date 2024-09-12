@@ -8,9 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.coyote.CharsetType;
 import org.apache.coyote.HttpStatusCode;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.MimeType;
-import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,19 +34,23 @@ class LoginControllerTest {
         // given
         String body = buildRequestBody(Map.of("account", "gugu", "password", "password"));
         HttpRequest request = buildHttpRequest("POST", "/login", body);
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse httpResponse = loginController.service(request, new SessionManager());
+        loginController.service(request, response);
 
         // then
-        String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.OK.toStatus();
+        String expectedRequestLine = HttpVersion.HTTP_1_1.getVersionString() + " " + HttpStatusCode.FOUND.toStatus();
         String expectedLocationHeader = "Location: " + "/index.html";
-        String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
+        String expectedContentType =
+                "Content-Type: " + MimeType.HTML.getMimeType() + "; charset=" + CharsetType.UTF_8.getCharset();
 
+        System.out.println(response);
+        System.out.println(expectedContentType);
         assertAll(
-                () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedLocationHeader.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
+                () -> assertThat(response.toByte()).contains(expectedRequestLine.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedLocationHeader.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedContentType.getBytes())
         );
     }
 
@@ -77,9 +82,10 @@ class LoginControllerTest {
         // given
         String body = buildRequestBody(Map.of("account", "gugu", "password", "invalidPassword"));
         HttpRequest request = buildHttpRequest("POST", "/login", body);
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse httpResponse = loginController.service(request, new SessionManager());
+        loginController.service(request, response);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -87,9 +93,9 @@ class LoginControllerTest {
         String expectedContentType = "Content-Type: " + MimeType.HTML.getMimeType();
 
         assertAll(
-                () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedLocationHeader.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
+                () -> assertThat(response.toByte()).contains(expectedRequestLine.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedLocationHeader.getBytes()),
+                () -> assertThat(response.toByte()).contains(expectedContentType.getBytes())
         );
     }
 }

@@ -31,7 +31,7 @@ class HttpResponseTest {
         // then
         assertAll(
                 () -> assertThat(responseString).startsWith("HTTP/1.1 200 OK"),
-                () -> assertThat(responseString).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(responseString).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(responseString).contains("Content-Length: " + body.length),
                 () -> assertThat(responseString).endsWith(bodyContent)
         );

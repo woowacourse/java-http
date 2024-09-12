@@ -18,7 +18,7 @@ public class Session implements HttpSession {
     private int maxInactiveInterval;
     private boolean isNew;
 
-    private Session(String id) {
+    public Session(String id) {
         this.id = id;
         this.creationTime = System.currentTimeMillis();
         this.lastAccessedTime = creationTime;

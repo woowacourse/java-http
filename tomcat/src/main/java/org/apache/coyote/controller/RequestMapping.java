@@ -12,12 +12,9 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestKey;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.util.FileExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RequestMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
     private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
     public RequestMapping() {
@@ -28,7 +25,6 @@ public class RequestMapping {
     }
 
     public HttpResponse dispatch(HttpRequest request) {
-        log(request);
         HttpResponse response = new HttpResponse();
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
@@ -38,19 +34,6 @@ public class RequestMapping {
         Controller controller = getController(request.getMethod(), path);
         controller.service(request, response);
         return response;
-    }
-
-    private void log(HttpRequest request) {
-        log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
-        for (String key : request.getQueryParams().keySet()) {
-            log.info("key = {}, value = {}", key, request.getQueryParams().get(key));
-        }
-        for (String key : request.getHeaders().getCookies().getCookies().keySet()) {
-            log.info("COOKIE: key = {}, value = {}", key, request.getHeaders().getCookies().getCookies().get(key));
-        }
-        if (!request.isBodyEmpty()) {
-            log.info("body = {}", request.getBody());
-        }
     }
 
     private Controller getController(HttpMethod method, String path) {

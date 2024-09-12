@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestCookie;

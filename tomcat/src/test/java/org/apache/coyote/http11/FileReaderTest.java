@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.coyote.http11.helper.FileReader;
 import org.junit.jupiter.api.Test;
 
 class FileReaderTest {

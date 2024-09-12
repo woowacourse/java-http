@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.coyote.http11.QueryParser;
+import org.apache.coyote.http11.helper.QueryParser;
 
 public class RequestBody {
 

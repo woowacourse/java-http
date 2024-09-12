@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;

@@ -1,6 +1,10 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.WelcomeController;
 
 public enum ControllerMapper {
 

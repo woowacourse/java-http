@@ -117,11 +117,13 @@ class Http11ProcessorTest {
     void loginTest() {
         // given
         String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class HttpRequestBody {
@@ -29,5 +30,29 @@ public class HttpRequestBody {
             formData.put(dataComponent[0], dataComponent[1]);
         }
         return formData;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpRequestBody that = (HttpRequestBody) o;
+        return Objects.equals(body, that.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestBody{" +
+                "body='" + body + '\'' +
+                '}';
     }
 }

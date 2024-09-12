@@ -37,6 +37,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String CHARSET = ";charset=utf-8";
     private static final String PARAMETER_SEPARATOR = "&";
     private static final String ASSIGN_OPERATOR = "=";
     private static final String HEADER_DELIMITER = ": ";
@@ -179,7 +183,7 @@ public class Http11Processor implements Runnable, Processor {
         createSession(user, cookie.getSessionId());
         result[0] = String.join("\r\n",
                 result[0],
-                "Set-Cookie: " + JSESSIONID + "=" + cookie.getSessionId());
+                SET_COOKIE + HEADER_DELIMITER + JSESSIONID + "=" + cookie.getSessionId());
         return result;
     }
 
@@ -214,7 +218,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String[] readRequestBody(Map<String, String> requestHeaders, BufferedReader reader) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+        int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer).split(PARAMETER_SEPARATOR);
@@ -242,8 +246,8 @@ public class Http11Processor implements Runnable, Processor {
     private static String createHttpResponseHeader(String responseHeader, String contentType, String responseBody) {
         return String.join("\r\n",
                 responseHeader,
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ");
+                CONTENT_TYPE + HEADER_DELIMITER + contentType + CHARSET + " ",
+                CONTENT_LENGTH + HEADER_DELIMITER + responseBody.getBytes().length + " ");
     }
 
     private void createHttpResponse(String responseBody, String responseHeader, OutputStream outputStream)

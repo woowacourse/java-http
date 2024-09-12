@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +10,7 @@ import java.util.Map;
 public class HttpHeaders {
 
     private static final String DELIMITER = ": ";
+    private static final String NEWLINE = "\r\n";
 
     private final Map<String, String> headers = new HashMap<>();
 
@@ -30,6 +34,12 @@ public class HttpHeaders {
 
     public String getCookies() {
         return headers.getOrDefault("Cookie", "");
+    }
+
+    public String convertMessage() {
+        return headers.keySet().stream()
+                .map(key -> key + DELIMITER + headers.get(key))
+                .collect(collectingAndThen(toList(), lines -> String.join(NEWLINE, lines)));
     }
 
     @Override

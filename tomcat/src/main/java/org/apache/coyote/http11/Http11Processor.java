@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
 import org.apache.catalina.Session;
@@ -38,16 +39,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = new HttpRequest(inputStream);
-            log.info("request - {}", request);
-            String response = getResponse(request);
-            outputStream.write(response.getBytes());
+            log.info("[요청] - {}", request);
+            HttpResponse response = getResponse(request);
+            log.info("[응답] - {}", response);
+            outputStream.write(response.convertMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getResponse(HttpRequest request) throws IOException {
+    private HttpResponse getResponse(HttpRequest request) throws IOException {
         if (request.isGetMethod()) {
             return doGet(request);
         }
@@ -57,63 +59,62 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String doGet(HttpRequest request) throws IOException {
+    private HttpResponse doGet(HttpRequest request) throws IOException {
         String path = request.getPath();
 
         if (path.endsWith(".css")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.OK,
+                    List.of("Content-Type: text/css;charset=utf-8"),
+                    responseBody
+            );
         }
 
         if (path.endsWith(".js")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/javascript;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.OK,
+                    List.of("Content-Type: text/javascript;charset=utf-8"),
+                    responseBody
+            );
         }
 
         if (path.endsWith(".svg")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: image/svg+xml ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.OK,
+                    List.of("Content-Type: image/svg+xml"),
+                    responseBody
+            );
         }
 
         if (path.equals("/login")) {
             String cookies = request.getCookies();
             HttpCookie httpCookie = new HttpCookie(cookies);
             if (httpCookie.hasKey("JSESSIONID")) {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: http://localhost:8080/index.html ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: 0 ",
-                        "");
+                return new HttpResponse(
+                        request.getProtocolVersion(),
+                        HttpStatusCode.FOUND,
+                        List.of("Location: http://localhost:8080/index.html", "Content-Type: text/html;charset=utf-8")
+                );
             }
         }
 
         if (path.equals("/")) {
             String responseBody = "Hello world!";
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.OK,
+                    List.of("Content-Type: text/html;charset=utf-8"),
+                    responseBody
+            );
         }
 
         if (!path.endsWith(".html")) {
@@ -122,17 +123,17 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource != null) {
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.OK,
+                    List.of("Content-Type: text/html;charset=utf-8"),
+                    responseBody
+            );
         }
         return null;
     }
 
-    private String doPost(HttpRequest request) {
+    private HttpResponse doPost(HttpRequest request) {
         String path = request.getPath();
         String requestBody = request.getBody();
 
@@ -155,12 +156,11 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IllegalArgumentException("올바르지 않은 request body 형식입니다.");
             }
             InMemoryUserRepository.save(new User(account, password, email));
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/index.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.FOUND,
+                    List.of("Location: http://localhost:8080/index.html", "Content-Type: text/html;charset=utf-8")
+            );
         }
 
         if (path.equals("/login")) {
@@ -185,33 +185,38 @@ public class Http11Processor implements Runnable, Processor {
                     String cookies = request.getCookies();
                     HttpCookie httpCookie = new HttpCookie(cookies);
                     if (httpCookie.hasKey("JSESSIONID")) {
-                        return String.join("\r\n",
-                                "HTTP/1.1 302 Found ",
-                                "Location: http://localhost:8080/index.html ",
-                                "Content-Type: text/html;charset=utf-8 ",
-                                "Content-Length: 0 ",
-                                "");
+                        return new HttpResponse(
+                                request.getProtocolVersion(),
+                                HttpStatusCode.FOUND,
+                                List.of(
+                                        "Location: http://localhost:8080/index.html",
+                                        "Content-Type: text/html;charset=utf-8"
+                                )
+                        );
                     }
                     Cookie cookie = CookieManager.setCookie();
                     Session session = new Session(cookie.getValue());
                     session.setAttribute("user", user);
                     SessionManager.getInstance().add(session);
-
-                    return String.join("\r\n",
-                            "HTTP/1.1 302 Found ",
-                            "Location: http://localhost:8080/index.html ",
-                            "Set-Cookie: " + cookie.getKeyValue(),
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: 0 ",
-                            "");
+                    return new HttpResponse(
+                            request.getProtocolVersion(),
+                            HttpStatusCode.FOUND,
+                            List.of(
+                                    "Location: http://localhost:8080/index.html",
+                                    "Set-Cookie: " + cookie.getKeyValue(),
+                                    "Content-Type: text/html;charset=utf-88"
+                            )
+                    );
                 }
             }
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/401.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
+            return new HttpResponse(
+                    request.getProtocolVersion(),
+                    HttpStatusCode.FOUND,
+                    List.of(
+                            "Location: http://localhost:8080/401.html",
+                            "Content-Type: text/html;charset=utf-88"
+                    )
+            );
         }
         return null;
     }

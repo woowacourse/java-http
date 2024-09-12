@@ -65,6 +65,10 @@ public class HttpRequest {
         return body;
     }
 
+    public String getProtocolVersion() {
+        return httpLine.getProtocolVersion();
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" +

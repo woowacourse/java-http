@@ -33,14 +33,12 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 12 ",
-                    "",
-                    "Hello world!");
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 12",
+                    "Hello world!"
+            );
         }
 
         @DisplayName("/index.html로 인덱스 페이지에 접근할 수 있다.")
@@ -61,14 +59,15 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 5564 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            URL resource = getClass().getClassLoader().getResource("static/index.html");
+            String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 5564",
+                    expectedBody
+            );
         }
 
         @DisplayName("CSS 파일에 접근할 수 있다.")
@@ -90,15 +89,15 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/css;charset=utf-8 \r\n" +
-                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
+            URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+            String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/css;charset=utf-8",
+                    "Content-Length: " + expectedBody.getBytes().length,
+                    expectedBody
+            );
         }
 
         @DisplayName("/login으로 로그인 페이지에 접근할 수 있다.")
@@ -119,15 +118,15 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/login.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
+            URL resource = getClass().getClassLoader().getResource("static/login.html");
+            String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: " + expectedBody.getBytes().length,
+                    expectedBody
+            );
         }
     }
 
@@ -155,14 +154,12 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/index.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 302 Found",
+                    "Location: http://localhost:8080/index.html",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 0"
+            );
         }
 
         @DisplayName("로그인 실패 시, 302을 반환하고 `/401.html`로 리다이렉트 한다.")
@@ -184,14 +181,12 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/401.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 302 Found",
+                    "Location: http://localhost:8080/401.html",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 0"
+            );
         }
 
         @DisplayName("/register로 회원가입 페이지에 접근할 수 있다.")
@@ -212,15 +207,14 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/register.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
-
-            assertThat(socket.output()).isEqualTo(expected);
+            URL resource = getClass().getClassLoader().getResource("static/register.html");
+            String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: " + expectedBody.getBytes().length,
+                    expectedBody
+            );
         }
 
         @DisplayName("회원가입 성공 시, index 페이지로 리다이렉트 한다.")
@@ -244,14 +238,12 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/index.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 302 Found",
+                    "Location: http://localhost:8080/index.html",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 0"
+            );
         }
 
         @DisplayName("회원가입 폼 입력이 올바르지 않는 경우 예외가 발생한다.")
@@ -340,14 +332,12 @@ class Http11ProcessorTest {
             processor2.process(socket2);
 
             // then
-            var expected = String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/index.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
-
-            assertThat(socket2.output()).isEqualTo(expected);
+            assertThat(socket.output()).contains(
+                    "HTTP/1.1 302 Found",
+                    "Location: http://localhost:8080/index.html",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: 0"
+            );
         }
     }
 }

@@ -30,6 +30,10 @@ public class HttpLine {
         return path;
     }
 
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
     @Override
     public String toString() {
         return "HttpLine{" +

@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
 
             HttpResponse httpResponse = new HttpResponse();
-            getHttpResponse(httpRequest, httpResponse);
+            handle(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -54,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void getHttpResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             if (isStaticResource(httpRequest)) {
                 httpResponse.ok(httpRequest);

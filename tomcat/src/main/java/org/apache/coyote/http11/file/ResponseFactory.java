@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.file;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -10,12 +12,14 @@ public class ResponseFactory {
     private static final String STATUS_LINE_DELIMITER = " ";
     private static final String HEADER_LINE_DELIMITER = ": ";
 
-    public static String writeResponse(HttpResponse response) {
-        return String.join(HTTP_LINE_SEPARATOR,
+    public static void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        final String rawResponse = String.join(HTTP_LINE_SEPARATOR,
                 writeStatusLine(response),
                 writeHeaders(response),
                 "",
                 writeBody(response));
+
+        outputStream.write(rawResponse.getBytes());
     }
 
     private static String writeStatusLine(HttpResponse response) {

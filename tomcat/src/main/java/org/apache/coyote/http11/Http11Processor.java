@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
@@ -41,13 +42,13 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final RequestMapping requestMapping = new RequestMapping();
 
-            final HttpRequest request = createRequest(bufferedReader);
+            final HttpRequest request = readHttpRequest(bufferedReader);
             final Controller controller = requestMapping.getController(request);
             final HttpResponse response = new HttpResponse();
 
             controller.service(request, response);
+            writeHttpResponse(outputStream, response);
 
-            outputStream.write(createRawResponse(response).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -56,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest createRequest(BufferedReader bufferedReader) throws IOException {
+    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
         final String requestLine = RequestFactory.readRequestLine(bufferedReader);
         final String requestHeaders = RequestFactory.readHeaders(bufferedReader);
         final HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders);
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private String createRawResponse(HttpResponse response) {
-        return ResponseFactory.writeResponse(response);
+    private void writeHttpResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        ResponseFactory.writeResponse(outputStream, response);
     }
 }

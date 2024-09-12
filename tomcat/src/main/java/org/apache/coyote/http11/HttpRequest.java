@@ -55,10 +55,16 @@ public class HttpRequest {
         }
 
         return Arrays.stream(rawBody.split(URLENCODED_DELIMITER))
-                .collect(Collectors.toMap(
-                        s -> s.split(URLENCODED_VALUE_DELIMITER)[URLENCODED_NAME_INDEX],
-                        s -> s.split(URLENCODED_VALUE_DELIMITER)[URLENCODED_VALUE_INDEX])
-                );
+                .map(HttpRequest::parseBodyPair)
+                .collect(Collectors.toMap(body -> body[URLENCODED_NAME_INDEX], body -> body[URLENCODED_VALUE_INDEX]));
+    }
+
+    private static String[] parseBodyPair(String bodyPair) {
+        String[] body = bodyPair.split(URLENCODED_VALUE_DELIMITER);
+        if (body.length != 2) {
+            throw new IllegalArgumentException("요청 본문은 key=value 형식이어야 합니다.");
+        }
+        return body;
     }
 
     public boolean isGetRequest() {

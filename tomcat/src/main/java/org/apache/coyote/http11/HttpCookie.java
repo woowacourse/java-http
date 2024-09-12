@@ -28,12 +28,18 @@ public class HttpCookie {
         }
 
         Map<String, String> cookies = Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
-                .collect(Collectors.toMap(
-                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_NAME_INDEX],
-                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_VALUE_INDEX])
-                );
+                .map(HttpCookie::parseCookiePair)
+                .collect(Collectors.toMap(cookie -> cookie[COOKIE_NAME_INDEX], cookie -> cookie[COOKIE_VALUE_INDEX]));
 
         return new HttpCookie(cookies);
+    }
+
+    private static String[] parseCookiePair(String cookiePair) {
+        String[] cookie = cookiePair.split(COOKIE_VALUE_DELIMITER);
+        if (cookie.length != 2) {
+            throw new IllegalArgumentException("요청 쿠키는 key=value 형식이어야 합니다.");
+        }
+        return cookie;
     }
 
     public boolean isContains(String cookieName) {

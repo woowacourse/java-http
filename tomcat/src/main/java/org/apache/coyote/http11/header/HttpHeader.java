@@ -26,13 +26,23 @@ public class HttpHeader {
 
     public static HttpHeader from(List<String> request) {
         Map<String, String> headers = request.stream()
-                        .skip(REQUEST_LINE_INDEX)
+                .skip(REQUEST_LINE_INDEX)
+                .map(HttpHeader::parseHeaderPair)
                 .collect(Collectors.toMap(
-                        r -> r.split(HEADER_DELIMITER)[HEADER_NAME_INDEX],
-                        r -> r.split(HEADER_DELIMITER)[HEADER_VALUE_INDEX].trim())
+                                header -> header[HEADER_NAME_INDEX],
+                                header -> header[HEADER_VALUE_INDEX].trim()
+                        )
                 );
 
         return new HttpHeader(headers);
+    }
+
+    private static String[] parseHeaderPair(String headerPair) {
+        String[] header = headerPair.split(HEADER_DELIMITER);
+        if (header.length != 2) {
+            throw new IllegalArgumentException("요청 헤더는 key=value 형식이어야 합니다.");
+        }
+        return header;
     }
 
     public void addHeader(HttpHeaderName headerName, String value) {

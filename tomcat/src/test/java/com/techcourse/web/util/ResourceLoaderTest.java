@@ -20,7 +20,7 @@ class ResourceLoaderTest {
 
 		HttpResponseBody responseBody = resourceLoader.loadResource(filePath);
 
-		byte[] expected = Files.readAllBytes(Path.of(getClass().getResource(filePath).getPath()));
+		byte[] expected = Files.readAllBytes(Path.of(getClass().getResource("/static" + filePath).getPath()));
 		assertThat(responseBody).satisfies(body -> {
 			assertThat(body.getContentType()).isEqualTo("text/html");
 			assertThat(body.getContent()).isEqualTo(expected);

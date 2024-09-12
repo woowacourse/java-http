@@ -2,9 +2,14 @@ package org.apache.coyote.http.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class ResponseHeadersTest {
+
+    private final Manager manager = SessionManager.getInstance();
 
     @Test
     void ResponseHeaders를_조립한다() {
@@ -32,7 +37,7 @@ class ResponseHeadersTest {
         ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.setContentType("text/html");
         responseHeaders.setContentLength(1024);
-        responseHeaders.setJsessionid("656cef62-e3c4-40bc-a8df-94732920ed46");
+        responseHeaders.addSessionCookie(new Session("656cef62-e3c4-40bc-a8df-94732920ed46", manager));
 
         // when
         StringBuilder builder = new StringBuilder();

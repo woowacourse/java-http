@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http.HttpHeader;
 
 public class ResponseHeaders implements Assemblable {
@@ -33,8 +34,8 @@ public class ResponseHeaders implements Assemblable {
         headers.put(HttpHeader.LOCATION.value(), location);
     }
 
-    protected void setJsessionid(String jsessionid) {
-        responseCookie.setJsessionid(jsessionid);
+    protected void addSessionCookie(Session session) {
+        responseCookie.addSessionCookie(session);
     }
 
     @Override

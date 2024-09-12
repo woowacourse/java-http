@@ -47,4 +47,8 @@ public interface Manager {
      * @param session Session to be removed
      */
     void remove(Session session);
+
+    Session createSession(String sessionId);
+
+    void clear();
 }

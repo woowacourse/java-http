@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http.HttpHeader;
 
 public class ResponseCookie implements Assemblable {
@@ -19,8 +20,8 @@ public class ResponseCookie implements Assemblable {
         this.cookies = new HashMap<>();
     }
 
-    protected void setJsessionid(String jsessionid) {
-        cookies.put(JSESSIONID, jsessionid);
+    protected void addSessionCookie(Session session) {
+        cookies.put(JSESSIONID, session.getId());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.apache.coyote.http.response;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http.MimeType;
 import org.apache.coyote.http.StatusCode;
 
@@ -36,8 +37,8 @@ public class Response {
         responseHeaders.setContentType(mimeType.getType());
     }
 
-    public void setJsessionid(String jsessionid) {
-        responseHeaders.setJsessionid(jsessionid);
+    public void addSessionCookie(Session session) {
+        responseHeaders.addSessionCookie(session);
     }
 
     public void setBody(String body) {

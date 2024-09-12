@@ -34,4 +34,14 @@ public class SessionManager implements Manager {
     public void remove(Session session) {
         sessions.remove(session.getId());
     }
+
+    @Override
+    public Session createSession(String sessionId) {
+        return new Session(sessionId, this);
+    }
+
+    @Override
+    public void clear() {
+        sessions.clear();
+    }
 }

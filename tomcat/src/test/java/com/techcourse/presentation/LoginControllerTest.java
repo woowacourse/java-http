@@ -12,13 +12,19 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
     private final LoginController loginController = LoginController.getInstance();
 
-    private final Manager sessionManager = SessionManager.getInstance();
+    private final Manager manager = SessionManager.getInstance();
+
+    @AfterEach
+    void tearDown() {
+        manager.clear();
+    }
 
     @Test
     void GET_요청_시_login_경로를_반환한다() {
@@ -43,9 +49,8 @@ class LoginControllerTest {
     @Test
     void GET_요청_시_이미_로그인되어_있을_경우_index_경로로_리다이렉트한다() {
         // given
-        Session session = new Session("1234");
+        Session session = new Session("1234", manager);
         session.setAttribute("user", new User("gugu", "password", "email"));
-        sessionManager.add(session);
 
         RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
         Map<String, String> headers = Map.of(

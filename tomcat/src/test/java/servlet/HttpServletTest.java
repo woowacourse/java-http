@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.request.Request;
@@ -16,11 +17,19 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class HttpServletTest {
 
     private final HttpServlet httpServlet = HttpServlet.getInstance();
+
+    private final Manager manager = SessionManager.getInstance();
+
+    @AfterEach
+    void tearDown() {
+        manager.clear();
+    }
 
     @Test
     void GET_login을_호출한다() throws IOException {
@@ -79,9 +88,8 @@ class HttpServletTest {
     void 이미_로그인한_후_GET_login을_호출한다() throws IOException {
         // given
         // todo
-        Session session = new Session("1234");
+        Session session = new Session("1234", manager);
         session.setAttribute("user", new User("gugu", "password", "email"));
-        SessionManager.getInstance().add(session);
 
         RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
         Map<String, String> headers = Map.of(

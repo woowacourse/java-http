@@ -32,7 +32,7 @@ public class RegisterController extends AbstractController {
         String id = request.getCookie().getAuthSessionId();
         Optional<Session> session = SessionManager.getInstance().findSession(id);
         if (session.isPresent()) {
-            return getLoginSuccessResponse(request);
+            return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
         }
         return HttpResponse.createFileOkResponse(request, REGISTER_PAGE);
     }
@@ -52,10 +52,6 @@ public class RegisterController extends AbstractController {
         String email = bodyParams.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return getLoginSuccessResponse(request);
-    }
-
-    private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
         return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
     }
 }

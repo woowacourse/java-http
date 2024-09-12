@@ -1,8 +1,9 @@
 package org.apache.catalina.handler;
 
 import com.techcourse.exception.TechcourseException;
+import com.techcourse.model.User;
 import com.techcourse.model.UserService;
-import java.util.UUID;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatusCode;
@@ -16,11 +17,11 @@ public class ServletRequestHandler {
 
     private final ViewResolver viewResolver;
 
-    public ServletRequestHandler(ViewResolver viewResolver) {
+    public ServletRequestHandler(final ViewResolver viewResolver) {
         this.viewResolver = viewResolver;
     }
 
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(final HttpRequest request) {
         final HttpMethod httpMethod = request.getHttpMethod();
         if (HttpMethod.GET.equals(httpMethod)) {
             return handleGet(request);
@@ -34,7 +35,7 @@ public class ServletRequestHandler {
     private HttpResponse handleGet(final HttpRequest request) {
         final String requestURI = request.getRequestURI();
         if (requestURI.equals("/login")) {
-            return handleGetLoginPage();
+            return handleGetLoginPage(request);
         }
         if (requestURI.equals("/register")) {
             return handleGetRegisterPage();
@@ -48,7 +49,27 @@ public class ServletRequestHandler {
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
-    private HttpResponse handleGetLoginPage() {
+    private HttpResponse handleGetLoginPage(final HttpRequest request) {
+        if (checkLogin(request)) {
+            return handleGetLoginPageWithLogin();
+        }
+        return handleGetLoginPageWithoutLogin();
+    }
+
+    private boolean checkLogin(final HttpRequest request) {
+        Session session = request.getSession();
+        return session != null;
+    }
+
+    private HttpResponse handleGetLoginPageWithLogin() {
+        final String path = "/index.html";
+        final String body = viewResolver.resolve(path);
+        final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
+        response.setContent(path, body);
+        return response;
+    }
+
+    private HttpResponse handleGetLoginPageWithoutLogin() {
         final String path = "/login.html";
         final String body = viewResolver.resolve(path);
         final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
@@ -94,17 +115,18 @@ public class ServletRequestHandler {
         final HttpRequestBody body = request.getBody();
         final UserService userService = UserService.getInstance();
         try {
-            userService.login(body.get("account"), body.get("password"));
-            return handlePostLoginSuccess();
+            final User user = userService.login(body.get("account"), body.get("password"));
+            final Session session = request.createSession();
+            session.setAttribute("user", user);
+            return handlePostLoginSuccess(session);
         } catch (TechcourseException e) {
             return handlePostLoginFailed();
         }
     }
 
-    private HttpResponse handlePostLoginSuccess() {
+    private HttpResponse handlePostLoginSuccess(final Session session) {
         final String location = "/index.html";
-        final String session = UUID.randomUUID().toString();
-        final HttpCookie cookie = new HttpCookie("JSESSIONID", session);
+        final HttpCookie cookie = HttpCookie.ofJSessionId(session.getId());
         final HttpResponse response = new HttpResponse(HttpStatusCode.FOUND);
         response.setLocation(location);
         response.setCookie(cookie);

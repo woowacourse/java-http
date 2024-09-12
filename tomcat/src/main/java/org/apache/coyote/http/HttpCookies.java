@@ -2,7 +2,6 @@ package org.apache.coyote.http;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class HttpCookies {
 
@@ -25,11 +24,11 @@ public class HttpCookies {
         }
     }
 
-    public Map<String, HttpCookie> getCookies() {
-        return cookies;
+    public void add(HttpCookie cookie) {
+        cookies.put(cookie.getName(), cookie);
     }
 
-    public Optional<HttpCookie> get(String name) {
-        return Optional.of(cookies.get(name));
+    public HttpCookie get(String name) {
+        return cookies.get(name);
     }
 }

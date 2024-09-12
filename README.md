@@ -39,15 +39,14 @@
 
 - [x] 쿠키 활용해서 로그인 상태 유지하기 (쿠키에 JSESSIONID 값 저장)
     - [x] Cookie 클래스 추가
-    - [x] 요청 헤더의 Cookie에 JSESSIONID가 없으면, 응답 헤더에 Set-Cookie 추가해 JSESSIONID 반환
 
 4. Session 구현
 
-- [ ] 세션 활용해서 로그인 상태 유지하기 (세션을 사용해서 서버에 로그인 여부를 저장)
-    - [ ] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부 체크
-    - [ ] SessionManager, Session 클래스 추가
-    - [ ] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장
-    - [ ] 로그인된 상태에서 로그인 페이지 접근 시 index.html 페이지로 리다이렉트 (`GET /login`)
+- [x] 세션 활용해서 로그인 상태 유지하기 (세션을 사용해서 서버에 로그인 여부를 저장)
+    - [x] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부 체크
+    - [x] SessionManager, Session 클래스 추가
+    - [x] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장
+    - [x] 로그인된 상태에서 로그인 페이지 접근 시 index.html 페이지로 리다이렉트 (`GET /login`)
 
 ### 3단계 - 리팩터링
 

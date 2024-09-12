@@ -10,6 +10,10 @@ public class HttpCookie {
         this.value = value;
     }
 
+    public static HttpCookie ofJSessionId(String sessionId) {
+        return new HttpCookie("JSESSIONID", sessionId);
+    }
+
     public String getName() {
         return name;
     }

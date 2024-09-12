@@ -3,6 +3,7 @@ package org.apache.coyote.http.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpCookies;
 
 public class HttpRequestHeader {
@@ -22,6 +23,14 @@ public class HttpRequestHeader {
         }
         String cookieLine = headers.get("Cookie");
         cookies = new HttpCookies(cookieLine);
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        cookies.add(cookie);
+    }
+
+    public HttpCookie getCookie(String name) {
+        return cookies.get(name);
     }
 
     public int getContentLength() {

@@ -18,13 +18,14 @@ public class UserService {
         return INSTANCE;
     }
 
-    public void login(String account, String password) {
+    public User login(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new TechcourseException("계정 정보가 틀렸습니다."));
         if (!user.checkPassword(password)) {
             throw new TechcourseException("계정 정보가 틀렸습니다.");
         }
         log.info("user: {}", user);
+        return user;
     }
 
     public void register(String account, String password, String email) {

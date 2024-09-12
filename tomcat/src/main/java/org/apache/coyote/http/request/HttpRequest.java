@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
@@ -13,6 +16,7 @@ public class HttpRequest {
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
+    private final SessionManager sessionManager = new SessionManager(); // TODO: catalina 계층의 request 분리하기(coyoteAdaptor)
 
     public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         this.startLine = readStartLine(bufferedReader);
@@ -44,6 +48,21 @@ public class HttpRequest {
         bufferedReader.read(buffer, 0, contentLength);
         final String bodyLine = new String(buffer);
         return new HttpRequestBody(bodyLine);
+    }
+
+    public Session createSession() {
+        Session session = new Session();
+        sessionManager.add(session);
+        return session;
+    }
+
+    public Session getSession() {
+        HttpCookie cookie = header.getCookie("JSESSIONID");
+        if (cookie != null) {
+            String sessionId = cookie.getValue();
+            return sessionManager.findSession(sessionId);
+        }
+        return null;
     }
 
     public HttpMethod getHttpMethod() {

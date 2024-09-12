@@ -3,6 +3,8 @@ package org.apache.coyote.http11.response;
 import java.util.StringJoiner;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.Session;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpResponse {
 
@@ -40,6 +42,15 @@ public class HttpResponse {
 
     public void setStatus(HttpStatusCode httpStatusCode) {
         statusLine.setStatusCode(httpStatusCode);
+    }
+
+    public boolean existsSession() {
+        return header.existsSession();
+    }
+
+    public Session getSession() {
+        HttpCookie cookies = header.getCookies();
+        return new Session(cookies.getJsessionid());
     }
 
     public byte[] toByte() {

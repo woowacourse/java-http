@@ -36,15 +36,21 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpRequest request = new HttpRequest(inputStream);
             RequestMapping requestMapping = new RequestMapping();
-            HttpResponse httpResponse = requestMapping.dispatch(httpRequest);
-
-            outputStream.write(httpResponse.toByte());
+            HttpResponse response = requestMapping.dispatch(request);
+            handleSession(response);
+            outputStream.write(response.toByte());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void handleSession(HttpResponse response) {
+        if (response.existsSession()) {
+            manager.add(response.getSession());
         }
     }
 }

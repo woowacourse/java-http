@@ -19,10 +19,6 @@ public class RequestHeader {
         header.put(key, value);
     }
 
-    public boolean hasContentLength() {
-        return header.containsKey(CONTENT_LENGTH);
-    }
-
     public int getContentLength() {
         return Integer.parseInt(header.get(CONTENT_LENGTH));
     }

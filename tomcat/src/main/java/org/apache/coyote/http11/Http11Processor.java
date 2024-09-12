@@ -40,9 +40,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = httpRequestReceiver.receiveRequest(inputStream);
-            String response = getResponse(request);
+            HttpResponse response = getResponse(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e, this);
@@ -58,14 +58,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequest request) throws IOException, ApplicationException {
+    private HttpResponse getResponse(HttpRequest request) throws IOException, ApplicationException {
         AbstractController controller = handlerMapping.getController(request);
         if (controller != null) {
             HttpResponse response = new HttpResponse();
             controller.service(request, response);
-            return response.toString();
+            return response;
         }
 
-        return viewResolver.resolve(request);
+        return viewResolver.resolve(request, new HttpResponse());
     }
 }

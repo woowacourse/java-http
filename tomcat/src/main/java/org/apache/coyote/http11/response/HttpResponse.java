@@ -28,6 +28,10 @@ public class HttpResponse {
         this.headers.put("Location", location);
     }
 
+    public void setContentType(String contentType) {
+        this.headers.put("Content-Type", contentType);
+    }
+
     public void setBody(String body) {
         this.body = body;
     }

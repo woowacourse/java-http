@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.util.Map;
 
@@ -55,6 +56,10 @@ public class HttpResponse {
 			sb.append(String.format("%s: %s\r\n", key, value));
 		});
 		sb.append("\r\n");
+		if (body != null) {
+			sb.append(body.value());
+			sb.append("\r\n");
+		}
 		return sb.toString();
 	}
 
@@ -83,11 +88,11 @@ public class HttpResponse {
 			ContentType contentType = ContentType.fromPath(url.getPath());
 			this.headers.add("Content-Type", contentType.getValue() + ";charset=utf-8");
 			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
-		} catch (NullPointerException e) {
+		} catch (AccessDeniedException | NullPointerException exception) {
 			this.body = new Body("Hello, World!");
 
 			this.headers.add("Content-Type", "text/plain; charset=utf-8");
-			this.headers.add("Content-Length", "0");
+			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
 		}
 	}
 }

@@ -12,10 +12,15 @@ public record Body(String value) {
 	}
 
 	private static String parseBody(Headers headers, BufferedReader reader) throws IOException {
-		int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH));
-		if (contentLength > 0) {
-			char[] body = new char[contentLength];
-			reader.read(body, 0, contentLength);
+		String contentLength = headers.getValue(CONTENT_LENGTH);
+		if (contentLength == null) {
+			return null;
+		}
+
+		int length = Integer.parseInt(contentLength);
+		if (length > 0) {
+			char[] body = new char[length];
+			reader.read(body, 0, length);
 			return new String(body);
 		}
 		return null;

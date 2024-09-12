@@ -4,18 +4,16 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.coyote.http11.request.HttpRequest;
-
 public class Session {
 	public static final String SESSION_HEADER_KEY = "JSESSIONID";
 	private final String id;
 
 	public Session() {
-		this.id =  UUID.randomUUID().toString();
+		this.id = UUID.randomUUID().toString();
 	}
 
-	public Session(HttpRequest httpRequest) {
-		this.id = Arrays.asList(httpRequest.getCookie().split("; "))
+	public Session(String cookies) {
+		this.id = Arrays.asList(cookies.split("; "))
 			.stream()
 			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
 			.findAny()

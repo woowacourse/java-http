@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.common.Body;
 import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
 	private final Method method;
@@ -34,5 +35,13 @@ public class HttpRequest {
 
 	public Body getBody() {
 		return body;
+	}
+
+	public Session getSession() {
+		String cookie = headers.getValue("Cookie");
+		if (cookie == null) {
+			return null;
+		}
+		return new Session(cookie);
 	}
 }

@@ -39,21 +39,21 @@ public class LoginController extends AbstractController {
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-		Session session = new Session(request);
-		Optional<User> userBySession = SessionManager.findUserBySession(session);
+		Session session = request.getSession();
 
-		response.setVersionOfProtocol("HTTP/1.1");
-		if (userBySession.isPresent()) {
+		if (session == null || SessionManager.findUserBySession(session).isEmpty()) {
+			response.setVersionOfProtocol("HTTP/1.1");
+			response.setStatusCode(200);
+			response.setStatusMessage("OK");
+			response.setBody("static" + request.getPath().value() + ".html");
+
+		} else {
+			response.setVersionOfProtocol("HTTP/1.1");
 			response.setStatusCode(302);
 			response.setStatusMessage("Found");
 			response.setHeaders(Map.of(
 				"Location", "http://localhost:8080" + "index.html"
 			));
-		} else {
-			response.setVersionOfProtocol("HTTP/1.1");
-			response.setStatusCode(200);
-			response.setStatusMessage("OK");
-			response.setBody("static" + request.getPath().value() + ".html");
 		}
 	}
 }

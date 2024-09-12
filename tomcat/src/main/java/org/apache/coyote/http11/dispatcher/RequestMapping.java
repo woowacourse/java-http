@@ -16,12 +16,10 @@ public class RequestMapping {
     public RequestMapping() {
         controllerMapper.put("/login", new LoginController());
         controllerMapper.put("/register", new RegisterController());
-        controllerMapper.put("/index", new AbstractController());
-        controllerMapper.put("/css/styles", new AbstractController());
     }
 
     public Controller getController(HttpRequest request) {
         return Optional.ofNullable(controllerMapper.get(request.getRequestUrl()))
-                .orElseThrow(() -> new IllegalArgumentException("해당 uri에 대한 요청을 처리할 수 없습니다."));
+                .orElse(new AbstractController());
     }
 }

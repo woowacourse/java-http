@@ -3,6 +3,7 @@ package support;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceController;
+import org.apache.catalina.connector.CatalinaConnectionListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.adapter.CoyoteAdapter;
@@ -21,8 +22,8 @@ public class TestServer {
             return;
         }
         final Tomcat tomcat = new Tomcat(
-                new Connector(11240, 50)
-                , new CoyoteAdapter(CONTROLLER_EXECUTOR, new ResourceController(), sessionManager)
+                new Connector(11240, 50,
+                        new CatalinaConnectionListener(new CoyoteAdapter(CONTROLLER_EXECUTOR, new ResourceController(), sessionManager)))
         );
         start(tomcat);
     }

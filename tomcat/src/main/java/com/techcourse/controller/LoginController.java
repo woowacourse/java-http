@@ -14,7 +14,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (isLoggedIn(request, response)) return;
+        if (isLoggedIn(request, response)) {
+            response.sendRedirect("/index.html");
+            return;
+        }
 
         response.sendStaticResourceResponse("/login.html");
     }
@@ -22,11 +25,7 @@ public class LoginController extends AbstractController {
     private boolean isLoggedIn(HttpRequest request, HttpResponse response) throws IOException {
         Session session = request.getSession(false);
 
-        if (session == null || session.getAttribute(SESSION_USER_ATTRIBUTE) == null) {
-            return false;
-        }
-        response.sendRedirect("/index.html");
-        return true;
+        return session != null && session.getAttribute(SESSION_USER_ATTRIBUTE) != null;
     }
 
     @Override

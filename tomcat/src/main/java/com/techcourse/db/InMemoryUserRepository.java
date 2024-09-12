@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-    private static final AtomicLong id = new AtomicLong(2);
+    private static final AtomicLong id = new AtomicLong(1);
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        UserRegistration userRegistration = new UserRegistration("gugu", "password", "hkkang@woowahan.com");
+        save(userRegistration);
     }
 
     public static User save(UserRegistration userRegistration) {

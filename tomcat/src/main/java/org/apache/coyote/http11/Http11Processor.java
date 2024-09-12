@@ -67,9 +67,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = readAndParserRequest(reader);
 
-            String response = handleRequest(httpRequest);
+            HttpResponse response = handleRequest(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException e) {
             log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
@@ -85,18 +85,18 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    private String handleRequest(HttpRequest httpRequest) {
+    private HttpResponse handleRequest(HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return generateResponseForUrl(httpRequest).toString();
+            return generateResponseForUrl(httpRequest);
         }
         if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
-            return generateResponseForPostUrl(httpRequest).toString();
+            return generateResponseForPostUrl(httpRequest);
         }
         log.warn("지원되지 않는 HTTP 메서드입니다.");
         return new HttpResponse(
                 new StatusLine(httpRequest.getVersionOfProtocol(), HttpStatus.BAD_REQUEST),
                 "text/html",
-                FileReader.loadFileContent(BAD_REQUEST_PAGE)).toString();
+                FileReader.loadFileContent(BAD_REQUEST_PAGE));
     }
 
     private HttpResponse generateResponseForUrl(HttpRequest httpRequest) {
@@ -109,7 +109,8 @@ public class Http11Processor implements Runnable, Processor {
             return generateResponseForQueryParam(httpRequest);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(httpRequest.getPathWithoutQuery(), httpRequest.getCookie());
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(
+                httpRequest.getPathWithoutQuery(), httpRequest.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             HttpResponse httpResponse = new HttpResponse(

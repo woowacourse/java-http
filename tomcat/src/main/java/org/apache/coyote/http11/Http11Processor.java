@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.servlet.HttpServlet;
-import org.apache.catalina.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.servlet.HttpServlet;
+import org.apache.catalina.servlet.ServletContext;
 import org.apache.catalina.servlet.ServletContextFactory;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

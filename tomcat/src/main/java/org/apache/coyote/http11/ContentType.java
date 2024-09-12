@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * Enumerates content types. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-3.7>RFC 2616, section 3.7</a>
+ * Enumerates content types. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-3.7>RFC 2616, section
+ * 3.7</a>
  */
 public enum ContentType {
 

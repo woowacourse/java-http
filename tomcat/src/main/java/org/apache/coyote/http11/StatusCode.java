@@ -1,7 +1,8 @@
 package org.apache.coyote.http11;
 
 /**
- * Enumerates HTTP status codes. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-6.1.1>RFC 2616, section 6.1.1</a>
+ * Enumerates HTTP status codes.
+ * see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-6.1.1>RFC 2616, section 6.1.1</a>
  */
 public enum StatusCode {
 

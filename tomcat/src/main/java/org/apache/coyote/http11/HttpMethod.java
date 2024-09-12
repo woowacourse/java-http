@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 /**
- * Enumerates HTTP methods. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.1>RFC 2616, section 5.1.1</a>
+ * Enumerates HTTP methods.
+ * see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.1>RFC 2616, section 5.1.1</a>
  */
 public enum HttpMethod {
     OPTIONS,

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.session.Session;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.List;
 import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 
 /**
  * HTTP Request object. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-5>RFC 2616, section 5</a>

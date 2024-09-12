@@ -1,7 +1,6 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,5 +25,6 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

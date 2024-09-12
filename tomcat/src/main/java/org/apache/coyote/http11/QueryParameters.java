@@ -24,6 +24,7 @@ public class QueryParameters {
 
     /**
      * Get the parameter value by name
+     *
      * @param name: Parameter name
      * @return Parameter value if exists, or null
      */

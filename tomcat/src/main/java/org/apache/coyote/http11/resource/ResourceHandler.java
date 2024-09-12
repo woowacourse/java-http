@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.resource;
 
 import java.io.IOException;
-import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.MediaType;
 
-public class ResourceHandler implements Handler {
+public class ResourceHandler implements Controller {
     private static final ResourceHandler INSTANCE = new ResourceHandler();
 
     private final ResourceReader resourceReader = ResourceReader.getInstance();
@@ -21,21 +21,17 @@ public class ResourceHandler implements Handler {
     }
 
     @Override
-    public HttpResponse doHandle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String path = httpRequest.getPath();
         if (path.equals("/")) {
-            return getRoot(httpResponse);
+            getRoot(httpResponse);
+        } else if (path.endsWith("html")) {
+            getHtml(path, httpResponse);
+        } else if (path.endsWith("css")) {
+            getCss(path, httpResponse);
+        } else if (path.endsWith("js")) {
+            getJs(path, httpResponse);
         }
-        if (path.endsWith("html")) {
-            return getHtml(path, httpResponse);
-        }
-        if (path.endsWith("css")) {
-            return getCss(path, httpResponse);
-        }
-        if (path.endsWith("js")) {
-            return getJs(path, httpResponse);
-        }
-        return httpResponse;
     }
 
     public HttpResponse getRoot(HttpResponse httpResponse) {

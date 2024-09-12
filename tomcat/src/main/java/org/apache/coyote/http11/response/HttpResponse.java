@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11Header;
@@ -90,5 +91,15 @@ public final class HttpResponse {
         } catch (IOException e) {
             return new byte[0];
         }
+    }
+
+    public Http11StatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public Optional<Http11Header> findHeader(String key) {
+        return headers.stream()
+                .filter(header -> header.key().equals(key))
+                .findFirst();
     }
 }

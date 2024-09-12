@@ -45,9 +45,8 @@ public class LoginController extends AbstractController {
         User user = authenticateUser(request, response, account, password);
         if (request.hasSession()) {
             createHasSessionUser(request, response, user);
-        } else {
-            createNoSessionUser(request, response, user);
         }
+        createNoSessionUser(request, response, user);
         log.info("{} - 회원 로그인 성공", user);
         response.sendRedirect("/index.html");
     }

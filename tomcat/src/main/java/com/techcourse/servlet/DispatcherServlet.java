@@ -17,8 +17,9 @@ public class DispatcherServlet implements Dispatcher {
             Controller controller = getHandler(request);
             if (controller != null) {
                 controller.service(request, response);
-            } else {
-                ViewResolver viewResolver = getViewResolver(request);
+            }
+            ViewResolver viewResolver = getViewResolver(request);
+            if (viewResolver != null) {
                 viewResolver.resolve(request.getTargetPath()).render(response);
             }
         } catch (Exception exception) {

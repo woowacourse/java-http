@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +14,7 @@ class HttpCookieTest {
     @DisplayName("HttpCookie 객체를 생성한다.")
     void createTest() {
         // given
-        List<String> cookieField = List.of("JSESSIONID=1234", "path=/", "HttpOnly");
+        List<String> cookieField = new ArrayList<>(List.of("JSESSIONID=1234", "path=/", "HttpOnly"));
 
         // when
         HttpCookie cookie = HttpCookie.from(cookieField);

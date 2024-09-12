@@ -30,8 +30,4 @@ public enum HttpStatusCode {
     public String getName() {
         return name();
     }
-
-    public String concatCodeAndStatus() {
-        return code + " " + name();
-    }
 }

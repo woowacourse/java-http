@@ -33,6 +33,15 @@ public class HttpResponse {
         httpHeader.putHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
+    public void setLoginFail(String protocol) throws IOException {
+        URL path = getClass().getClassLoader().getResource("static" + "/500.html");
+        body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
+        statusLine = new StatusLine(protocol, "500", "Internal Server Error");
+
+        httpHeader.putHeader("Content-Type", "text/html;charset=utf-8");
+        httpHeader.putHeader("Content-Length", String.valueOf(body.getBytes().length));
+    }
+
     public void setLoginPage(String protocol, String url) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + url + ".html");
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));

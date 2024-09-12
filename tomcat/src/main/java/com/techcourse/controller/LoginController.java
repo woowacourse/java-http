@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.handler.AbstractController;
@@ -16,9 +17,12 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> body = request.getRequestBody().getBody();
-        User user = InMemoryUserRepository.findByAccount(body.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("없는 사용자 입니다."));
-        processLogin(request, response, user);
+        Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));
+        if (user.isPresent()) {
+            processLogin(request, response, user.get());
+            return;
+        }
+        response.setLoginFail(request.getRequestLine().getProtocol());
     }
 
     @Override

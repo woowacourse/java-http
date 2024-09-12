@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.ContentType;
 
 public class HttpHeader {
 
-    private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
+    private static final String RESPONSE_HEADER_FORMAT = "%s: %s\r\n";
     private final Map<String, String> headers;
 
     public HttpHeader() {

@@ -16,6 +16,9 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalArgumentException("account is already exist");
+        }
         database.put(user.getAccount(), user);
     }
 

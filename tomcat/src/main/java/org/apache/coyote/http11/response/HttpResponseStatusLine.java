@@ -15,11 +15,11 @@ public class HttpResponseStatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public String toResponseForm() {
-        return httpVersion.getValueToHttpForm()+" "+httpStatus.getHeaderForm();
-    }
-
     public void setStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
+    }
+
+    public String toHttpForm() {
+        return httpVersion.toHttpForm() + " " + httpStatus.toHeaderForm();
     }
 }

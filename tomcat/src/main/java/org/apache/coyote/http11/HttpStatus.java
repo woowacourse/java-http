@@ -13,7 +13,7 @@ public enum HttpStatus {
         this.statusCode = statusCode;
     }
 
-    public String getHeaderForm() {
+    public String toHeaderForm() {
         return statusCode + " " + name();
     }
 }

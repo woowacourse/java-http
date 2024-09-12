@@ -26,7 +26,7 @@ public class HttpRequestLine {
     }
 
     private static void validateRequestLineForm(String[] splitLines) {
-        if(splitLines.length!=3){
+        if (splitLines.length != 3) {
             throw new IllegalArgumentException("잘못된 RequestLine 형식입니다.");
         }
     }
@@ -37,9 +37,5 @@ public class HttpRequestLine {
 
     public MethodType getMethodType() {
         return methodType;
-    }
-
-    public void setPath(String path) {
-        this.path = new Path(path);
     }
 }

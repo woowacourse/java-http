@@ -18,9 +18,20 @@ public class HttpRequest {
         this.httpRequestBody = httpRequestBody;
     }
 
-    //todo: 메서드 위치 수정
     public static HttpRequest createEmptyHttpRequest() {
         return new HttpRequest(null, null, null);
+    }
+
+    public void setHttpRequestLine(HttpRequestLine httpRequestLine) {
+        this.httpRequestLine = httpRequestLine;
+    }
+
+    public void setHttpRequestHeader(HttpRequestHeader httpRequestHeader) {
+        this.httpRequestHeader = httpRequestHeader;
+    }
+
+    public void setHttpRequestBody(HttpRequestBody httpRequestBody) {
+        this.httpRequestBody = httpRequestBody;
     }
 
     public RequestPathType getRequestPathType() {
@@ -39,19 +50,4 @@ public class HttpRequest {
         return httpRequestBody.getMap();
     }
 
-    public void setRequestPath(String path) {
-        httpRequestLine.setPath(path);
-    }
-
-    public void setHttpRequestLine(HttpRequestLine httpRequestLine) {
-        this.httpRequestLine = httpRequestLine;
-    }
-
-    public void setHttpRequestHeader(HttpRequestHeader httpRequestHeader) {
-        this.httpRequestHeader = httpRequestHeader;
-    }
-
-    public void setHttpRequestBody(HttpRequestBody httpRequestBody) {
-        this.httpRequestBody = httpRequestBody;
-    }
 }

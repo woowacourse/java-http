@@ -13,11 +13,14 @@ import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
 
 public class RequestProcessor {
 
+    private static final String HEADER_END = "";
+
     public void process(InputStream inputStream, HttpRequest request) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequestLine httpRequestLine = HttpRequestLine.toHttpRequestLine(br.readLine());
         HttpRequestHeader httpRequestHeader = getHttpRequestHeader(br);
+
         HttpRequestBody httpRequestBody = null;
         if (httpRequestLine.getMethodType().isPost()) {
             httpRequestBody = getHttpRequestBody(httpRequestHeader, br);
@@ -31,7 +34,7 @@ public class RequestProcessor {
     private HttpRequestHeader getHttpRequestHeader(BufferedReader br) throws IOException {
         List<String> requestHeaderLines = new ArrayList<>();
         String line;
-        while ((line = br.readLine()) != null && !line.equals("")) {
+        while ((line = br.readLine()) != null && !line.equals(HEADER_END)) {
             requestHeaderLines.add(line);
         }
         return HttpRequestHeader.toHttpRequestHeader(requestHeaderLines);

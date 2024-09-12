@@ -9,7 +9,6 @@ public enum MethodType {
         return valueOf(methodType);
     }
 
-
     public boolean isPost() {
         return this == POST;
     }

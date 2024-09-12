@@ -15,10 +15,7 @@ public class HttpRequestBody {
         this.httpRequestBody = httpRequestBody;
     }
 
-    public static HttpRequestBody toHttpRequestBody(
-            String httpRequestBody,
-            ContentType contentType
-    ) {
+    public static HttpRequestBody toHttpRequestBody(String httpRequestBody, ContentType contentType) {
         if (contentType.isFormUrlEncoded()) {
             Map<String, String> requestBody = toRequestBodyMapFromFormUrlEncoded(httpRequestBody);
             return new HttpRequestBody(requestBody);
@@ -29,6 +26,7 @@ public class HttpRequestBody {
     private static Map<String, String> toRequestBodyMapFromFormUrlEncoded(String httpRequestBody) {
         Map<String, String> requestBody = new HashMap<>();
         String[] splitFormDatas = httpRequestBody.split(FORM_DATA_ENTRY_SEPARATOR);
+
         for (String splitFormData : splitFormDatas) {
             validateFormDataForm(splitFormData);
             String[] formDataEntry = splitFormData.split(FORM_DATA_PARAM_SEPARATOR);

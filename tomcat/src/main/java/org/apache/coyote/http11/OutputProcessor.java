@@ -8,7 +8,7 @@ public class OutputProcessor {
 
 
     public void process(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
-        String response = httpResponse.getHttpResponseHttpOutputForm();
+        String response = httpResponse.toHttpForm();
 
         outputStream.write(response.getBytes());
         outputStream.flush();

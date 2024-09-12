@@ -31,7 +31,7 @@ public enum ContentType {
         return this == APPLICATION_X_WWW_FORM_URLENCODED;
     }
 
-    public String getValueToHttpHeaderForm() {
+    public String toHttpForm() {
         return name().replaceFirst("_", "/").toLowerCase();
     }
 }

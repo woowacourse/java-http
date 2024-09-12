@@ -1,7 +1,10 @@
 package com.techcourse.controller;
 
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.catalina.auth.Session;
+import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.http.VersionOfProtocol;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.reader.FileReader;
@@ -28,35 +31,45 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        return new HttpResponse(
+        String id = request.getCookie().getId();
+        Optional<Session> session = SessionManager.getInstance().findSession(id);
+        if (session.isPresent()) {
+            return getLoginSuccessResponse(request);
+        }
+        HttpResponse response = new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
                 request.getFileType(),
                 FileReader.loadFileContent(request.getPath() + ".html"));
+        response.addLocation(request.getPath() + ".html");
+        return response;
     }
 
     @Override
     public HttpResponse doPost(HttpRequest request) {
-        return handleRegistration(request.getVersionOfProtocol(), request.getBody(), request.getFileType());
+        return handleRegistration(request);
     }
 
-    private HttpResponse handleRegistration(
-            VersionOfProtocol versionOfProtocol,
-            Map<String, String> bodyParams,
-            String accept
-    ) {
+    private HttpResponse handleRegistration(HttpRequest request) {
+        VersionOfProtocol versionOfProtocol = request.getVersionOfProtocol();
+        Map<String, String> bodyParams = request.getBody();
         String account = bodyParams.get(ACCOUNT);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return new HttpResponse(
                     new StatusLine(versionOfProtocol, HttpStatus.BAD_REQUEST),
-                    accept,
+                    request.getFileType(),
                     FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
+
+        return getLoginSuccessResponse(request);
+    }
+
+    private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
         HttpResponse response = new HttpResponse(
-                new StatusLine(versionOfProtocol, HttpStatus.FOUND),
-                accept,
+                new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
+                request.getFileType(),
                 FileReader.loadFileContent(INDEX_PAGE));
         response.addLocation(INDEX_PAGE);
         return response;

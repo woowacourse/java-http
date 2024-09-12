@@ -225,8 +225,8 @@ class Http11ProcessorTest {
             var expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: " + bytes.length + " \r\n" +
-                    "Set-Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb" + " \r\n" +
                     "Location: http://localhost:8080/index.html" + " \r\n" +
+                    "Set-Cookie: JSESSIONID=a4b007ec-39a6-4130-9cf7-58a7014be9bb" + " \r\n" +
                     "\r\n" +
                     new String(bytes);
 

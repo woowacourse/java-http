@@ -32,11 +32,18 @@ public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        if(LOGIN_PATH.equals(request.getPath())) {
-            return new HttpResponse(
+        if (LOGIN_PATH.equals(request.getPath())) {
+            String id = request.getCookie().getId();
+            Optional<Session> session = SessionManager.getInstance().findSession(id);
+            if (session.isPresent()) {
+                return getLoginSuccessResponse(request);
+            }
+            HttpResponse response = new HttpResponse(
                     new StatusLine(request.getVersionOfProtocol(), HttpStatus.OK),
                     request.getFileType(),
                     FileReader.loadFileContent(request.getPath() + ".html"));
+            response.addLocation(request.getPath() + ".html");
+            return response;
         }
 
         Map<String, String> queryParams = request.getQueryParam();
@@ -75,11 +82,16 @@ public class LoginController extends AbstractController {
         HttpCookie httpCookie = request.getCookie();
         String cookie = httpCookie.getCookies(session.getId());
 
+        HttpResponse response = getLoginSuccessResponse(request);
+        response.setCookie(cookie);
+        return response;
+    }
+
+    private static HttpResponse getLoginSuccessResponse(HttpRequest request) {
         HttpResponse response = new HttpResponse(
                 new StatusLine(request.getVersionOfProtocol(), HttpStatus.FOUND),
                 request.getFileType(),
                 FileReader.loadFileContent(INDEX_PAGE));
-        response.setCookie(cookie);
         response.addLocation(INDEX_PAGE);
         return response;
     }

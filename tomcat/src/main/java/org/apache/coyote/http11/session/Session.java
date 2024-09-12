@@ -13,11 +13,16 @@ public class Session {
 	}
 
 	public Session(String cookies) {
-		this.id = Arrays.asList(cookies.split("; "))
+		String session = Arrays.asList(cookies.split("; "))
 			.stream()
 			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
 			.findAny()
 			.orElseGet(null);
+		if (session != null) {
+			this.id = session.substring(SESSION_HEADER_KEY.length() + 1);
+		} else {
+			this.id = null;
+		}
 	}
 
 	public String getId() {

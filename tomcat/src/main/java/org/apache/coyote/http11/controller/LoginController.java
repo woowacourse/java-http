@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
 			response.setStatusMessage("Found");
 			response.setHeaders(Map.of(
 				"Set-Cookie", "JSESSIONID=" + session.getId(),
-				"Location", "http://localhost:8080/401.html"
+				"Location", "http://localhost:8080/index.html"
 			));
 		}
 	}

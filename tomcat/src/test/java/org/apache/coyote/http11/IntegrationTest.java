@@ -268,4 +268,26 @@ class IntegrationTest {
                     .contains("Set-Cookie: JSESSIONID=");
         }
     }
+
+    @DisplayName("승인된 주소가 아니라면 404 페이지 반환")
+    @Test
+    void postRegister() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /hogee HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1")
+                .contains("Not Found")
+                .contains(body);
+    }
 }

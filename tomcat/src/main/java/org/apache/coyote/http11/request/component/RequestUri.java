@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.component;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class RequestUri {
     private static final String ROOT = "/";
@@ -35,7 +36,12 @@ public class RequestUri {
     }
 
     public String getRequestUrl() {
-        return Arrays.asList(requestUri.split(DELIMITER)).getFirst();
+        List<String> parts = Arrays.asList(requestUri.split(DELIMITER));
+        if (parts.size() <= 1) {
+            return requestUri;
+        }
+
+        return String.join(DELIMITER, parts.subList(0, parts.size() - 1));
     }
 
     private boolean isRoot() {
@@ -46,6 +52,6 @@ public class RequestUri {
         if (isRoot()) {
             return DEFAULT_MIME_TYPE;
         }
-        return Arrays.asList(requestUri.split("\\.")).getLast();
+        return Arrays.asList(requestUri.split(DELIMITER)).getLast();
     }
 }

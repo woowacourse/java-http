@@ -4,6 +4,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.function.Function;
 
+import org.apache.tomcat.http.common.body.Body;
+import org.apache.tomcat.http.common.body.BodyMapper;
+import org.apache.tomcat.http.common.body.FormUrlEncodeBody;
+import org.apache.tomcat.http.common.body.TextTypeBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;

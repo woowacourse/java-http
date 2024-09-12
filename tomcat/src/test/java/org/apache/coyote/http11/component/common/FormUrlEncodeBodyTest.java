@@ -2,7 +2,7 @@ package org.apache.coyote.http11.component.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http11.component.common.body.FormUrlEncodeBody;
+import org.apache.tomcat.http.common.body.FormUrlEncodeBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -20,6 +20,6 @@ public class ViewHttpHandler implements HttpHandler {
         URL resource = getClass().getClassLoader()
                 .getResource(fileName);
 
-        return ResourceToHttpBodyConverter.covert(resource);
+        return ResourceToHttpBodyConverter.convert(resource);
     }
 }

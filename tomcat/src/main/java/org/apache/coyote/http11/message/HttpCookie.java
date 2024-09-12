@@ -80,8 +80,4 @@ public class HttpCookie {
 
         return String.join(DIRECTIVES_DELIMITER, directivesString, HTTP_ONLY_DIRECTIVE);
     }
-
-    public String assembleDirective(Map.Entry<String, String> directive) {
-        return String.join(DIRECTIVE_DELIMITER, directive.getKey(), directive.getValue());
-    }
 }

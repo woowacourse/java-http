@@ -14,7 +14,7 @@ public class ResourceToHttpBodyConverter {
     private ResourceToHttpBodyConverter() {
     }
 
-    public static HttpResponse covert(URL resource) throws IOException {
+    public static HttpResponse convert(URL resource) throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("해당 파일이 존재하지 않습니다.");
         }
@@ -28,7 +28,7 @@ public class ResourceToHttpBodyConverter {
         return response;
     }
 
-    public static String probeContentType(Path path) throws IOException {
+    private static String probeContentType(Path path) throws IOException {
         String mimeType = Files.probeContentType(path);
         if (mimeType.startsWith("text")) {
             return mimeType + ";charset=utf-8";

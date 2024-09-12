@@ -12,7 +12,7 @@ public class RequestParams {
     public RequestParams(String rawRequestParams) {
         String[] tokens = rawRequestParams.split(DELIMITER_OF_REQUEST_PARAM);
         for (String token : tokens) {
-            this.requestParams.add(new RequestParam(token)); // account=gugu
+            this.requestParams.add(new RequestParam(token));
         }
     }
 

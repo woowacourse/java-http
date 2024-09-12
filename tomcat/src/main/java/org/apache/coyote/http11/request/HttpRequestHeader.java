@@ -13,7 +13,7 @@ public class HttpRequestHeader {
         String readLine;
         while (!"".equals(readLine = reader.readLine())) {
             String[] split = readLine.split(": ");
-            header.put(split[0], split[1]);
+            header.put(split[0], split[1].trim());
         }
     }
 

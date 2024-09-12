@@ -2,14 +2,15 @@ package org.apache.catalina.manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
-        this.id = id;
+    public Session() {
+        this.id = UUID.randomUUID().toString();
     }
 
     public String getId() {

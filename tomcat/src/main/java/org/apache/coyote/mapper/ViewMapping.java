@@ -14,10 +14,10 @@ public class ViewMapping {
         viewResolvers.add(new StaticResourceResolver());
     }
 
-    public View resolveView(String viewPath) {
+    public ViewResolver resolveView(String viewPath) {
         for (ViewResolver viewResolver : viewResolvers) {
             if (viewResolver.support(viewPath)) {
-                return viewResolver.resolve(viewPath);
+                return viewResolver;
             }
         }
         return null;

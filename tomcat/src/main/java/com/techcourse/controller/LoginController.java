@@ -1,8 +1,9 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;

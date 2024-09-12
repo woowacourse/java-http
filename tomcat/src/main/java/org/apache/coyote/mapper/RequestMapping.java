@@ -4,9 +4,9 @@ package org.apache.coyote.mapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.HomeController;
-import org.apache.coyote.controller.LoginController;
-import org.apache.coyote.controller.UserController;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.UserController;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 

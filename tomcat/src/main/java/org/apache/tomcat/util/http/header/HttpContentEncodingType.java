@@ -2,8 +2,7 @@ package org.apache.tomcat.util.http.header;
 
 public enum HttpContentEncodingType {
 
-    UTF8(";charset=utf-8"),
-    NONE("");
+    UTF8(";charset=utf-8");
 
     private final String encoding;
 

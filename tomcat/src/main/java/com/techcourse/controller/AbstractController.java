@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.infra.SessionManagerWrapper;
+import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Controller;
@@ -49,21 +50,23 @@ public abstract class AbstractController implements Controller {
     }
 
     private boolean sessionNotFound(HttpRequest request) {
-        return request.findSessionCookie()
-                .flatMap(SESSION_MANAGER::findBySessionCookie)
+        return findSession(request)
                 .isEmpty();
     }
 
-    protected final boolean isLogin(HttpRequest request) {
+    private Optional<Session> findSession(HttpRequest request) {
         return request.findSessionCookie()
-                .flatMap(SESSION_MANAGER::findBySessionCookie)
+                .flatMap(SESSION_MANAGER::findBySessionCookie);
+    }
+
+    protected final boolean isLogin(HttpRequest request) {
+        return findSession(request)
                 .map(session -> session.hasAttribute(SESSION_USER_ATTRIBUTE_NAME))
                 .orElse(false);
     }
 
     protected final <T> void addSessionAttribute(HttpRequest request, String key, T value) {
-        request.findSessionCookie()
-                .flatMap(SESSION_MANAGER::findBySessionCookie)
+        findSession(request)
                 .ifPresent(session -> session.setAttribute(key, value));
     }
 

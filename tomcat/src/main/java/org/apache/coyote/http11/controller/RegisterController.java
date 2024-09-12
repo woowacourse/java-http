@@ -16,6 +16,12 @@ public class RegisterController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.statusCode(HttpStatusCode.OK)
+                .staticResource("/register.html");
+    }
+
+    @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         Parameter param = request.getParameter();
         User newAccount = new User(param.getValue("account"), param.getValue("password"), param.getValue("email"));

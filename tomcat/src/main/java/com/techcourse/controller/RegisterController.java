@@ -54,8 +54,8 @@ public class RegisterController implements Controller {
     private void register(final HttpRequest request) {
         HttpBody body = request.getBody();
         String content = body.getContent();
-        HttpQueryParams params = new HttpQueryParams(content);
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        HttpQueryParams queryParams = new HttpQueryParams(content);
+        User user = new User(queryParams.get("account"), queryParams.get("password"), queryParams.get("email"));
         InMemoryUserRepository.save(user);
     }
 }

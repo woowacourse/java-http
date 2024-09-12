@@ -14,6 +14,10 @@ public class HttpResponse {
         this.responseBody = new ResponseBody();
     }
 
+    public void setVersion(String version) {
+        statusLine.setVersion(version);
+    }
+
     public void setStatusLine(String statusCode, String statusMessage) {
         statusLine.setStatusCode(statusCode);
         statusLine.setStatusMessage(statusMessage);

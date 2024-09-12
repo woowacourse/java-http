@@ -42,6 +42,10 @@ public class HttpRequest {
         return requestLine.getRequestUrl();
     }
 
+    public String getVersion() {
+        return requestLine.getVersion();
+    }
+
     public String getMimeType() {
         String mimeType = headers.getMimeType();
         if (mimeType.isBlank() || mimeType.equals(ALL_MIME_TYPE)) {

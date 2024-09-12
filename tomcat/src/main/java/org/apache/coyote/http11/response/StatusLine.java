@@ -1,16 +1,18 @@
 package org.apache.coyote.http11.response;
 
 public class StatusLine {
-    private static final String VERSION = "HTTP/1.1";
-
-    private final String version;
+    private String version;
     private String statusCode;
     private String statusMessage;
 
     public StatusLine() {
-        this.version = VERSION;
+        this.version = "";
         this.statusCode = "";
         this.statusMessage = "";
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public void setStatusCode(String statusCode) {

@@ -10,6 +10,8 @@ public class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
+        response.setVersion(request.getVersion());
+
         String method = request.getMethod();
         if (method.equals(POST_METHOD)) {
             doPost(request, response);

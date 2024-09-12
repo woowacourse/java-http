@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpCookie {
+public class HttpCookies {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_DELIMITER = ";";
@@ -17,16 +17,16 @@ public class HttpCookie {
 
     //TODO: 쿠키 사용해서 JSESSIONID 쿠키 생성, JSESSIONID 검증
 
-    private HttpCookie(Map<String, String> values) {
+    private HttpCookies(Map<String, String> values) {
         this.values = values;
     }
 
-    public static HttpCookie from(String cookieHeader) {
+    public static HttpCookies from(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) {
             throw new IllegalArgumentException("쿠키 헤더가 비어있습니다.");
         }
 
-        return new HttpCookie(Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
+        return new HttpCookies(Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
                 .map(cookie -> cookie.trim().split(KEY_DELIMITER, KEY_VALUE_PAIR))
                 .collect(Collectors.toMap(
                         result -> result[KEY_INDEX],

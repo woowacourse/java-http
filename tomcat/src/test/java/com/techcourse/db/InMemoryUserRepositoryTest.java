@@ -1,7 +1,7 @@
 package com.techcourse.db;
 
 import com.techcourse.model.domain.User;
-import com.techcourse.model.dto.UserInfo;
+import com.techcourse.model.dto.UserRegistration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +14,9 @@ class InMemoryUserRepositoryTest {
     @Test
     @DisplayName("유저를 저장한다.")
     void save() {
-        UserInfo userInfo = new UserInfo("account", "password", "test@email.com");
+        UserRegistration userRegistration = new UserRegistration("account", "password", "test@email.com");
 
-        User user = InMemoryUserRepository.save(userInfo);
+        User user = InMemoryUserRepository.save(userRegistration);
 
         assertThat(user.getAccount()).isEqualTo("account");
     }

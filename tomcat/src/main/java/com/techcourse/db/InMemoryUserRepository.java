@@ -1,7 +1,7 @@
 package com.techcourse.db;
 
 import com.techcourse.model.domain.User;
-import com.techcourse.model.dto.UserInfo;
+import com.techcourse.model.dto.UserRegistration;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,8 +18,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static User save(UserInfo userInfo) {
-        User user = new User(id.getAndIncrement(), userInfo.account(), userInfo.password(), userInfo.email());
+    public static User save(UserRegistration userRegistration) {
+        User user = new User(id.getAndIncrement(), userRegistration.account(), userRegistration.password(), userRegistration.email());
         database.put(user.getAccount(), user);
 
         return user;

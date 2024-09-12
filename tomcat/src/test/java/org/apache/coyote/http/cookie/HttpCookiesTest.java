@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class HttpCookieTest {
+class HttpCookiesTest {
 
     @Test
     @DisplayName("유효한 쿠키 헤더를 받아와 HttpCookie를 생성한다.")
@@ -20,8 +20,8 @@ class HttpCookieTest {
 
         //when, then
         assertAll(
-                () -> assertDoesNotThrow(() -> HttpCookie.from(cookieHeader)),
-                () -> assertThat(HttpCookie.from(cookieHeader).getJsessionid()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
+                () -> assertDoesNotThrow(() -> HttpCookies.from(cookieHeader)),
+                () -> assertThat(HttpCookies.from(cookieHeader).getJsessionid()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
         );
     }
 
@@ -30,7 +30,7 @@ class HttpCookieTest {
     @DisplayName("빈 쿠키 헤더가 들어왔을 때 예외를 반환한다.")
     void from_fail_InvalidCookieHeader(String cookieHeader) {
         //when, then
-        assertThatThrownBy(() -> HttpCookie.from(cookieHeader))
+        assertThatThrownBy(() -> HttpCookies.from(cookieHeader))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("쿠키 헤더");
     }

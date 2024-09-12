@@ -7,11 +7,11 @@ import java.util.Map;
 
 public class HttpSessionManager implements Manager {
 
+    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+
     public static HttpSessionManager getInstance() {
         return new HttpSessionManager();
     }
-
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
     private HttpSessionManager() {
     }

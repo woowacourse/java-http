@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.domain.User;
-import com.techcourse.model.dto.UserInfo;
+import com.techcourse.model.dto.UserRegistration;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.session.HttpSession;
 import org.apache.coyote.http.session.HttpSessionManager;
@@ -49,15 +49,15 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            String firstHttpRequestHeaderLine = bufferedReader.readLine();
+            String requestLine = bufferedReader.readLine();
 
-            if (firstHttpRequestHeaderLine == null) {
+            if (requestLine == null) {
                 return;
             }
 
             Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
 
-            final String[] httpRequestLine = firstHttpRequestHeaderLine.split(" ");
+            final String[] httpRequestLine = requestLine.split(" ");
             final String method = httpRequestLine[0];
             final String requestURL = httpRequestLine[1];
 
@@ -151,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
                                 throw new IllegalArgumentException("이미 존재하는 계정명입니다.");
                             },
                             () -> {
-                                UserInfo userRegisterInfo = new UserInfo(account, password, email);
+                                UserRegistration userRegisterInfo = new UserRegistration(account, password, email);
                                 User newUser = InMemoryUserRepository.save(userRegisterInfo);
                                 log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
                             }
@@ -291,11 +291,7 @@ public class Http11Processor implements Runnable, Processor {
         return loginUser.filter(user -> user.checkPassword(password))
                 .map(
                         user -> {
-                            UUID uuid = UUID.randomUUID();
-                            HttpSession session = new HttpSession(uuid);
-                            session.setAttribute("user", user);
-                            httpSessionManager.add(session);
-
+                            UUID uuid = createNewSession(user);
                             log.info("로그인 성공. user : {}", user);
                             return uuid;
                         }
@@ -304,6 +300,17 @@ public class Http11Processor implements Runnable, Processor {
                     log.info(account + "의 비밀번호가 잘못 입력되었습니다.");
                     return null;
                 });
+    }
+
+    private UUID createNewSession(final User user) {
+        UUID uuid = UUID.randomUUID();
+
+        HttpSession session = new HttpSession(uuid);
+        session.setAttribute("user", user);
+
+        httpSessionManager.add(session);
+
+        return uuid;
     }
 
     private void createHttpResponse(final String path, final OutputStream outputStream, String httpStatus,

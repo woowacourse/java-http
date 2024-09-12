@@ -45,7 +45,7 @@ class RegisterControllerTest {
 
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n";
         assertAll(
                 () -> assertThat(outputStream.toString()).isEqualTo(expected),

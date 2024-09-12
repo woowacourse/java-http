@@ -128,7 +128,7 @@ class Http11ProcessorTest {
         // then
         assertAll(
                 () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
-                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+                () -> assertThat(socket.output()).contains("Location: /index.html")
         );
     }
 
@@ -194,7 +194,7 @@ class Http11ProcessorTest {
         assertAll(
                 () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
                 () -> assertThat(socket.output()).contains("Set-Cookie: JSESSIONID="),
-                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+                () -> assertThat(socket.output()).contains("Location: /index.html")
         );
     }
 
@@ -221,7 +221,7 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/401.html \r\n" +
+                "Location: /401.html \r\n" +
                 "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -249,7 +249,7 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n";
         assertAll(
                 () -> assertThat(socket.output()).isEqualTo(expected),

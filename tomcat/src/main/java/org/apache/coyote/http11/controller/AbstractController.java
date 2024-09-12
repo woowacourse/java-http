@@ -31,7 +31,7 @@ public abstract class AbstractController implements Controller {
 
     protected void redirectTo(HttpResponse response, String location) throws IOException {
         response.addStatusLine(HttpStatusCode.FOUND);
-        response.addHeader(HttpHeader.LOCATION, "http://localhost:8080" + location);
+        response.addHeader(HttpHeader.LOCATION, location);
         response.writeResponse();
     }
 

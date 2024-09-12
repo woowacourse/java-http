@@ -51,7 +51,7 @@ class LoginControllerTest {
         assertAll(
                 () -> assertThat(outputStream.toString()).contains("HTTP/1.1 302 Found"),
                 () -> assertThat(outputStream.toString()).contains("Set-Cookie: JSESSIONID="),
-                () -> assertThat(outputStream.toString()).contains("Location: http://localhost:8080/index.html")
+                () -> assertThat(outputStream.toString()).contains("Location: /index.html")
         );
         inputStream.close();
         outputStream.close();
@@ -85,7 +85,7 @@ class LoginControllerTest {
 
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/401.html \r\n" +
+                "Location: /401.html \r\n" +
                 "\r\n";
         assertThat(outputStream.toString()).isEqualTo(expected);
         inputStream.close();
@@ -151,7 +151,7 @@ class LoginControllerTest {
 
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n";
         assertThat(outputStream.toString()).isEqualTo(expected);
         inputStream.close();

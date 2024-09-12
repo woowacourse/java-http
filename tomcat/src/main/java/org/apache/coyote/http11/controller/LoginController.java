@@ -48,7 +48,7 @@ public class LoginController extends AbstractController {
     private void redirectToHomeSettingCookie(HttpResponse response, String jSessionId) throws IOException {
         response.addStatusLine(HttpStatusCode.FOUND);
         response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + jSessionId);
-        response.addHeader(HttpHeader.LOCATION, "http://localhost:8080/index.html");
+        response.addHeader(HttpHeader.LOCATION, "/index.html");
         response.writeResponse();
     }
 

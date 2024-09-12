@@ -30,8 +30,9 @@ class LoginControllerTest {
     private final User user1 = new User("account", "password", "email");
     private final User user2 = new User("account2", "password2", "email2");
     private final Session session = new Session("sessionId");
+    private final Session generatedSession = new Session("new session");
     private final SessionManager sessionManager = new SessionManager();
-    private final LoginController loginController = new LoginController(new SessionService(() -> session));
+    private final LoginController loginController = new LoginController(new SessionService(() -> generatedSession));
 
     @BeforeEach
     void saveUser() {
@@ -63,7 +64,7 @@ class LoginControllerTest {
                 HttpStatus.FOUND,
                 Map.of(
                         HttpHeader.LOCATION, "/index.html",
-                        HttpHeader.SET_COOKIE, HttpCookie.ofSession(session.getId()).toResponse()
+                        HttpHeader.SET_COOKIE, HttpCookie.ofSession(generatedSession.getId()).toResponse()
                 )
         );
         assertThat(response).isEqualTo(expectedResponse);
@@ -149,7 +150,7 @@ class LoginControllerTest {
         sessionManager.add(session);
         HttpRequest request = new HttpRequest(
                 RequestLine.of("GET /login HTTP/1.1 "),
-                new HttpHeaders(Map.of()),
+                new HttpHeaders(Map.of("Cookie", "JSESSIONID=" + session.getId())),
                 ""
         );
         HttpResponse response = new HttpResponse();

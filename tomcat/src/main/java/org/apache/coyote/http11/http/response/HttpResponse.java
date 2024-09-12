@@ -22,7 +22,28 @@ public class HttpResponse {
 		this.body = body;
 	}
 
+	public static HttpResponse redirect(HttpResponseHeader responseHeader) {
+		return new HttpResponse(new HttpResponseStartLine(HTTP_VERSION, HttpStatusCode.FOUND), responseHeader, null);
+	}
+
 	public String toResponseMessage() {
+		if (body == null) {
+			return createResponseMessageWithoutBody();
+		}
+
+		return createResponseMessage();
+	}
+
+	private String createResponseMessageWithoutBody() {
+		header.addHeader("Content-Length", "0");
+		return String.join("\r\n"
+			, startLine.toResponseMessage()
+			, header.toResponseMessage()
+			, ""
+		);
+	}
+
+	private String createResponseMessage() {
 		String contentCharset = ";charset=utf-8";
 		header.addHeader("Content-Type", body.getContentType() + contentCharset);
 		header.addHeader("Content-Length", String.valueOf(body.getContentLength()));

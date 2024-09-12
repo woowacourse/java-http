@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.IOException;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
@@ -76,10 +76,10 @@ public class HttpRequest {
                 .orElseGet(sessionManager::createSession);
     }
 
-    public Cookies getCookie() {
+    public Cookie getCookie() {
         return requestHeaders.get(HttpHeader.COOKIE.getName())
-                .map(Cookies::new)
-                .orElseGet(Cookies::empty);
+                .map(Cookie::new)
+                .orElseGet(Cookie::empty);
     }
 
     public RequestLine getRequestLine() {

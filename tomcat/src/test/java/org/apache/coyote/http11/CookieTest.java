@@ -6,13 +6,13 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class CookiesTest {
+class CookieTest {
 
     @DisplayName("쿠키 헤더로 쿠키 객체를 생성한다.")
     @Test
     void cookieCreateTest() {
         String cookieHeader = "tasty_cookie=choco; JSESSIONID=jazz";
-        Cookies cookie = new Cookies(cookieHeader);
+        Cookie cookie = new Cookie(cookieHeader);
 
         Map<String, String> cookies = Map.of(
                 "tasty_cookie", "choco",
@@ -26,9 +26,9 @@ class CookiesTest {
     @Test
     void toCookieHeaderTest() {
         String cookieHeader = "tasty_cookie=choco; JSESSIONID=jazz";
-        Cookies cookies = new Cookies(cookieHeader);
+        Cookie cookie = new Cookie(cookieHeader);
 
-        assertThat(cookies.toCookieHeader())
+        assertThat(cookie.toCookieHeader())
                 .contains("tasty_cookie=choco")
                 .contains("JSESSIONID=jazz");
     }

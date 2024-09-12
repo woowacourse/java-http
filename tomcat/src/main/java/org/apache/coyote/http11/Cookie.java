@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Cookies {
+public class Cookie {
 
     public static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_DELIMITER = "; ";
@@ -18,11 +18,11 @@ public class Cookies {
 
     private final Map<String, String> cookies;
 
-    public Cookies(Map<String, String> cookies) {
+    public Cookie(Map<String, String> cookies) {
         this.cookies = cookies;
     }
 
-    public Cookies(String cookieHeader) {
+    public Cookie(String cookieHeader) {
         this.cookies = Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
                 .map(cookies -> cookies.split(COOKIE_SEPARATOR))
                 .filter(cookie -> cookie.length == VALID_PARAMETER_PAIR_LENGTH)
@@ -32,12 +32,12 @@ public class Cookies {
                 );
     }
 
-    public static Cookies ofJSessionId(String id) {
-        return new Cookies(Map.of(JSESSIONID, id));
+    public static Cookie ofJSessionId(String id) {
+        return new Cookie(Map.of(JSESSIONID, id));
     }
 
-    public static Cookies empty() {
-        return new Cookies(Collections.emptyMap());
+    public static Cookie empty() {
+        return new Cookie(Collections.emptyMap());
     }
 
     public String toCookieHeader() {

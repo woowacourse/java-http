@@ -5,7 +5,7 @@ import com.techcourse.service.UserService;
 import java.io.IOException;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.AbstractController;
-import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
     private void handleSuccessfulLogin(HttpRequest request, HttpResponse response, User user) {
         Session session = request.getSession();
         session.setAttribute(USER_SESSION_NAME, user);
-        response.addCookie(Cookies.ofJSessionId(session.getId()));
+        response.addCookie(Cookie.ofJSessionId(session.getId()));
         response.redirect("/index.html");
     }
 

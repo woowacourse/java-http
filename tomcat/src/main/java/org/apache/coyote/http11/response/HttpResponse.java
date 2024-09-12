@@ -4,7 +4,7 @@ import static org.apache.coyote.http11.Constants.CRLF;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.response.body.ResponseBody;
 import org.apache.coyote.http11.response.header.ContentType;
@@ -51,8 +51,8 @@ public class HttpResponse {
         responseHeaders.addHeader(HttpHeader.CONTENT_TYPE, contentType.value());
     }
 
-    public void addCookie(Cookies cookies) {
-        responseHeaders.addHeader(HttpHeader.SET_COOKIE, cookies.toCookieHeader());
+    public void addCookie(Cookie cookie) {
+        responseHeaders.addHeader(HttpHeader.SET_COOKIE, cookie.toCookieHeader());
     }
 
     public String toMessage() {

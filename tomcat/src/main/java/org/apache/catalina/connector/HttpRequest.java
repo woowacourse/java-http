@@ -2,6 +2,7 @@ package org.apache.catalina.connector;
 
 import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
 
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.catalina.session.Session;
@@ -26,7 +27,9 @@ public record HttpRequest(HttpRequestLine requestLine, HttpHeaders httpHeaders, 
     }
 
     public HttpCookie getCookie() {
-        return new HttpCookie(HttpCookieParser.parseCookies(httpHeaders.get(HttpHeaderType.COOKIE)));
+        String cookies = httpHeaders.get(HttpHeaderType.COOKIE);
+        Map<String, String> parsedCookies = HttpCookieParser.parseCookies(cookies);
+        return new HttpCookie(parsedCookies);
     }
 
     public Session getSession(boolean create) {

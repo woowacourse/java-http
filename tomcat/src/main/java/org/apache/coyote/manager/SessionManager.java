@@ -1,5 +1,6 @@
 package org.apache.coyote.manager;
 
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.session.Session;
@@ -28,5 +29,11 @@ public class SessionManager implements Manager {
 
     public boolean isSessionExist(String id) {
         return SESSIONS.containsKey(id);
+    }
+
+    public String generateSession(User user) {
+        Session session = new Session(user);
+        add(session);
+        return session.getId();
     }
 }

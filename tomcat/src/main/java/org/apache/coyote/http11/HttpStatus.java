@@ -4,8 +4,6 @@ public enum HttpStatus {
 
     OK(200, "OK"),
     FOUND(302, "Found"),
-    BAD_REQUEST(40, "Bad Request"),
-    UNAUTHORIZED(401, "Unauthorized"),
     ;
 
     private final int value;
@@ -16,11 +14,11 @@ public enum HttpStatus {
         this.reason = reason;
     }
 
-    public String toHttpHeader() {
-        return value + " " + reason;
+    public int getValue() {
+        return value;
     }
 
-    public boolean isFound() {
-        return this.equals(FOUND);
+    public String getReason() {
+        return reason;
     }
 }

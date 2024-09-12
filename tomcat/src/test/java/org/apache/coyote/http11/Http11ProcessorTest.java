@@ -16,7 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-@DisplayName("Http11Processor")
+@DisplayName("HTTP11 프로세서")
 class Http11ProcessorTest {
 
     @DisplayName("Http11Processor의 실행을 확인한다.")
@@ -105,7 +105,7 @@ class Http11ProcessorTest {
     void getLoginPageWithAlreadyLogin()  {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=randomUUID ",
@@ -113,7 +113,7 @@ class Http11ProcessorTest {
                 ""
         );
 
-        HttpSessionManger httpSessionManger = new HttpSessionManger();
+        HttpSessionManger httpSessionManger = HttpSessionManger.getInstance();
         HttpSession httpSession = new HttpSession("randomUUID");
         httpSession.setAttribute("user", new User("tester", "password", "test@gmail.com"));
         httpSessionManger.add(httpSession);
@@ -198,7 +198,7 @@ class Http11ProcessorTest {
     void getRegisterPage() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
+                "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

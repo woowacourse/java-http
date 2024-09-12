@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain.protocolVersion;
+package org.apache.coyote.util;
 
 import java.util.Arrays;
 

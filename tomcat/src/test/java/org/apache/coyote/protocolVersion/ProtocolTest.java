@@ -1,14 +1,17 @@
-package org.apache.coyote.http11.domain.protocolVersion;
+package org.apache.coyote.protocolVersion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.coyote.util.Protocol;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ProtocolTest {
+
+    public static final String HTTP = "HTTP";
 
     @ParameterizedTest
     @ValueSource(strings = {"pp", "httttttp"})
@@ -20,8 +23,6 @@ class ProtocolTest {
     @Test
     @DisplayName("일치하는 Protocol을 찾아올 수 있다.")
     void findProtocolWhenCorrespondProtocol() {
-        String inputProtocol = "HTTP";
-
-        assertEquals(Protocol.HTTP, Protocol.findProtocol(inputProtocol));
+        assertEquals(Protocol.HTTP, Protocol.findProtocol(HTTP));
     }
 }

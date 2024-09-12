@@ -4,6 +4,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 public class HttpResponse {
+    private static final String CONTENT_TYPE_FORMAT = "%s;charset=utf-8";
 
     private HttpResponseHeader headers;
     private HttpStatusCode statusCode;
@@ -29,7 +30,7 @@ public class HttpResponse {
     }
 
     private void setDefaultHaders(HttpContentType httpContentType, String body) {
-        this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
+        this.headers.addHeader("Content-Type", CONTENT_TYPE_FORMAT.formatted(httpContentType.getContentType()));
         this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
@@ -59,8 +60,8 @@ public class HttpResponse {
 
     public HttpResponse redirect(String uri) {
         this.body = "";
-        setDefaultHaders(HttpContentType.TEXT, "");
         headers.addHeader("Location", uri);
+        setDefaultHaders(HttpContentType.TEXT, "");
         return this;
     }
 

@@ -4,19 +4,17 @@ import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.util.ContentType;
 import org.apache.coyote.util.HttpHeaders;
+import org.apache.coyote.util.MapMaker;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class RequestHeader {
 
     private static final String HEADER_SPLITTER = ":";
     private static final String HEADER_SEPARATOR = ",";
     private static final int FIRST_HEADER_INDEX = 0;
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
     private static final int EMPTY_BODY_LENGTH = 0;
 
     private final Map<HttpHeaders, String> headerValue;
@@ -28,10 +26,7 @@ public class RequestHeader {
     private Map<HttpHeaders, String> initHeader(List<String> inputHeader) {
         return inputHeader.stream()
                 .map(header -> header.split(HEADER_SPLITTER))
-                .collect(Collectors.toMap(
-                        keyValue -> HttpHeaders.findHeader(keyValue[KEY_INDEX].trim()),
-                        keyValue -> keyValue[VALUE_INDEX].trim()
-                ));
+                .collect(MapMaker.toMap(HttpHeaders::findHeader));
     }
 
     public int getBodyLength() {

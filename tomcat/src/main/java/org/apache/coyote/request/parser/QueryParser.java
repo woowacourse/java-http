@@ -1,15 +1,14 @@
 package org.apache.coyote.request.parser;
 
+import org.apache.coyote.util.MapMaker;
+
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class QueryParser {
 
     private static final String QUERY_SEPARATOR = "&";
     private static final String PARAM_SEPARATOR = "=";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
 
     private QueryParser() {
     }
@@ -19,10 +18,7 @@ public class QueryParser {
             List<String> keys = List.of(query.split(QUERY_SEPARATOR));
             return keys.stream()
                     .map(key -> key.split(PARAM_SEPARATOR))
-                    .collect(Collectors.toMap(
-                            keyValue -> keyValue[KEY_INDEX],
-                            keyValue -> keyValue[VALUE_INDEX]
-                    ));
+                    .collect(MapMaker.toMap(key -> key));
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new IllegalArgumentException("파싱할 수 없는 형태의 쿼리입니다.");
         }

@@ -1,11 +1,13 @@
 package org.apache.coyote.cookie;
 
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
+import org.apache.coyote.util.MapMaker;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
 
 public class HttpCookie {
 
@@ -13,8 +15,6 @@ public class HttpCookie {
     private static final String COOKIE_DELIMITER = ";";
     private static final String COOKIE_COMBINATOR = "=";
     private static final String END_SPACE = " ";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> httpCookies;
 
@@ -31,10 +31,7 @@ public class HttpCookie {
 
         return httpCookies.stream()
                 .map(cookie -> cookie.split(COOKIE_COMBINATOR))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[KEY_INDEX].trim(),
-                        keyValue -> keyValue[VALUE_INDEX].trim()
-                ));
+                .collect(MapMaker.toMap(key -> key));
     }
 
     public Session getSession() {

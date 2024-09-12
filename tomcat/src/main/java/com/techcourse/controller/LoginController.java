@@ -1,6 +1,5 @@
 package com.techcourse.controller;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.session.Session;
@@ -29,14 +28,23 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final String account = request.getFormBodyByKey("account");
-        final String password = request.getFormBodyByKey("password");
+        final String requestPasswrd = request.getFormBodyByKey("password");
+        final User savedUser = getvaliduser(account, requestPasswrd);
+        validateUserPassword(savedUser, requestPasswrd);
 
-        final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-        if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
+        response.setResponse(processSuccessLogin(savedUser));
+    }
+
+    private User getvaliduser(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저입니다."));
+    }
+
+    private void validateUserPassword(final User user, final String password) {
+        if (!user.checkPassword(password)) {
             throw new UnauthorizedException("로그인에 실패하였습니다.");
         }
-
-        response.setResponse(processSuccessLogin(userOptional.get()));
     }
 
     private HttpResponse processSuccessLogin(final User user) {

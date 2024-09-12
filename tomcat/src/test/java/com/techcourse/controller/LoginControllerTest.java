@@ -84,7 +84,7 @@ class LoginControllerTest {
 
         assertThatThrownBy(() -> LoginController.getInstance().service(request, response))
                 .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("로그인에 실패하였습니다.");
+                .hasMessageContaining("존재하지 않는 유저입니다.");
     }
 
     @Test
@@ -97,7 +97,7 @@ class LoginControllerTest {
 
         assertThatThrownBy(() -> LoginController.getInstance().service(request, response))
                 .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("로그인에 실패하였습니다.");
+                .hasMessageContaining("존재하지 않는 유저입니다.");
     }
 
     @Test

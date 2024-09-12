@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -39,6 +40,7 @@ public class LoginHttpServlet implements HttpServlet {
             Session session = request.getSession(true);
             session.setAttribute("user", user);
             response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+            response.setContentType(ContentType.TEXT_HTML);
             response.redirectTo("/index.html");
             return;
         }

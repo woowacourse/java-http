@@ -8,10 +8,10 @@ import java.util.Set;
  */
 public enum ContentType {
 
-    TEXT_HTML("text/html;", Set.of("html", "htm")),
-    TEXT_CSS("text/css", Set.of("css")),
-    TEXT_JAVASCRIPT("text/javascript", Set.of("js")),
-    APPLICATION_JSON("application/json", Set.of("json")),
+    TEXT_HTML("text/html;", Set.of(".html", ".htm")),
+    TEXT_CSS("text/css", Set.of(".css")),
+    TEXT_JAVASCRIPT("text/javascript", Set.of(".js")),
+    APPLICATION_JSON("application/json", Set.of(".json")),
     ;
 
     private final String mediaType;
@@ -26,7 +26,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.supportsExtension(extension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported extension: " + extension));
+                .orElse(TEXT_HTML);
     }
 
     private boolean supportsExtension(String extension) {

@@ -8,9 +8,10 @@ public class HttpHeaders {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final String HEADER_REGEX = ": ";
-    private static final String LINE_FEED = "\r\n";
     private static final String DEFAULT_CONTENT_LENGTH = "0";
+    private static final String CRLF = "\r\n";
+    private static final String LINE_FEED = "\n";
+    private static final String HEADER_REGEX = ": ";
 
     private final Map<String, String> headers;
 
@@ -25,7 +26,7 @@ public class HttpHeaders {
     private static Map<String, String> parseHeaders(String header) {
         Map<String, String> map = new LinkedHashMap<>();
 
-        String[] headers = header.split("\n");
+        String[] headers = header.split(LINE_FEED);
         for (String value : headers) {
             String[] keyValue = value.split(HEADER_REGEX);
             map.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
@@ -57,7 +58,7 @@ public class HttpHeaders {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(HEADER_REGEX).append(entry.getValue()).append(LINE_FEED);
+            sb.append(entry.getKey()).append(HEADER_REGEX).append(entry.getValue()).append(CRLF);
         }
         return sb.toString();
     }

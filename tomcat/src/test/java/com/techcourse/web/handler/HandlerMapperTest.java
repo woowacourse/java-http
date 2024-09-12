@@ -55,6 +55,6 @@ class HandlerMapperTest {
 
 		Handler handler = HandlerMapper.findHandler(request);
 
-		assertThat(handler).isInstanceOf(expectedHandler);
+		assertThat(handler).isExactlyInstanceOf(expectedHandler);
 	}
 }

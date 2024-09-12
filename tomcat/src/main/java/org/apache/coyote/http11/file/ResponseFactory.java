@@ -1,7 +1,9 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.file;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseFactory {
     private static final String HTTP_LINE_SEPARATOR = "\r\n";

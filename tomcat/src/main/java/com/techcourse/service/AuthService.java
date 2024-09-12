@@ -19,6 +19,11 @@ public class AuthService {
                 .isPresent();
     }
 
+    public boolean isLoggedIn(String sessionId) {
+        Optional<Session> session = SessionManager.getInstance().findSession(sessionId);
+        return session.isPresent();
+    }
+
     public Optional<User> authenticateUser(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {

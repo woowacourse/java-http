@@ -1,17 +1,14 @@
 package com.techcourse.controller;
 
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.catalina.auth.Session;
-import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.HttpStatus;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.AuthService;
+import com.techcourse.service.RegisterService;
 
 public class RegisterController extends AbstractController {
 
@@ -22,6 +19,14 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
 
+    private final AuthService authService;
+    private final RegisterService registerService;
+
+    public RegisterController() {
+        this.authService = new AuthService();
+        this.registerService = new RegisterService();
+    }
+
     @Override
     public boolean isMatchesRequest(HttpRequest request) {
         return REGISTER_PATH.equals(request.getPath());
@@ -29,9 +34,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest request) {
-        String id = request.getCookie().getAuthSessionId();
-        Optional<Session> session = SessionManager.getInstance().findSession(id);
-        if (session.isPresent()) {
+        String sessionId = request.getCookie().getAuthSessionId();
+        if (authService.isLoggedIn(sessionId)) {
             return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
         }
         return HttpResponse.createFileOkResponse(request, REGISTER_PAGE);
@@ -39,19 +43,23 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doPost(HttpRequest request) {
-        return handleRegistration(request);
-    }
-
-    private HttpResponse handleRegistration(HttpRequest request) {
         Map<String, String> bodyParams = request.getBody();
-        String account = bodyParams.get(ACCOUNT);
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        if (hasMissingRequiredParams(bodyParams)) {
+            throw new IllegalArgumentException("바디가 제대로 정의되지 않았습니다.");
         }
+
+        String account = bodyParams.get(ACCOUNT);
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
-        InMemoryUserRepository.save(new User(account, password, email));
+        registerService.registerUser(account, password, email);
 
         return HttpResponse.createRedirectResponse(request, HttpStatus.FOUND, INDEX_PAGE);
+    }
+
+    private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
+        return queryParams.size() < 3 ||
+                queryParams.get(ACCOUNT) == null ||
+                queryParams.get(PASSWORD) == null ||
+                queryParams.get(EMAIL) == null;
     }
 }

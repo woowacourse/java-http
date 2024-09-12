@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.auth.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
 import com.techcourse.http.HttpResponse;

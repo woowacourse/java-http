@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
-import com.techcourse.auth.Session;
-import com.techcourse.auth.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;

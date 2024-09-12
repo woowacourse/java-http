@@ -63,6 +63,6 @@ public class StartLine {
 
     @Override
     public String toString() {
-        return version.getValue() + " " + httpStatus.toString() + CRLF;
+        return version.getValue() + START_LINE_PART_DELIMITER + httpStatus.toString() + CRLF;
     }
 }

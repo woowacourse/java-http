@@ -22,10 +22,6 @@ public class HttpRequestHeader {
         this(payLoads, null);
     }
 
-    public HttpRequestHeader() {
-        this(new LinkedHashMap<>());
-    }
-
     public static HttpRequestHeader readRequestHeader(BufferedReader bufferedReader) throws IOException {
         Map<String, String> payLoads = bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
@@ -44,26 +40,6 @@ public class HttpRequestHeader {
             return Cookie.read(rawValue);
         }
         return null;
-    }
-
-    public void contentType(String contentType) {
-        payLoads.put("Content-Type", contentType);
-    }
-
-    public void contentLength(int contentLength) {
-        payLoads.put("Content-Length", String.valueOf(contentLength));
-    }
-
-    public void setCookie(Cookie cookie) {
-        payLoads.put("Set-Cookie", cookie.serialize());
-    }
-
-    public void location(String location) {
-        payLoads.put("Location", location);
-    }
-
-    public Map<String, String> getPayLoads() {
-        return payLoads;
     }
 
     public boolean hasCookie() {

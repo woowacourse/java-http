@@ -2,11 +2,14 @@ package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.apache.util.parser.BodyParserFactory;
+import org.apache.util.parser.Parser;
 
 public class HttpRequest {
 
@@ -49,6 +52,13 @@ public class HttpRequest {
 
     public String getBody() {
         return body.getBody();
+    }
+
+    public Map<String, String> getKeyValueBodies() {
+        ContentType contentType = this.getContentType();
+        Parser parser = BodyParserFactory.getParser(contentType);
+
+        return parser.parse(this.getBody());
     }
 
     public String getPath() {

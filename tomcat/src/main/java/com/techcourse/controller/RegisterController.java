@@ -6,8 +6,6 @@ import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
-import org.apache.util.parser.BodyParserFactory;
-import org.apache.util.parser.Parser;
 
 public class RegisterController extends AbstractController {
 
@@ -15,12 +13,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        Parser parser = BodyParserFactory.getParser(request.getContentType());
-        Map<String, String> params = parser.parse(request.getBody());
+        Map<String, String> keyValueBodies = request.getKeyValueBodies();
 
-        String account = params.get("account");
-        String password = params.get("password");
-        String email = params.get("email");
+        String account = keyValueBodies.get("account");
+        String password = keyValueBodies.get("password");
+        String email = keyValueBodies.get("email");
 
         userService.registerUser(account, password, email);
 

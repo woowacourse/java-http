@@ -8,15 +8,12 @@ import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
-import org.apache.util.parser.BodyParserFactory;
-import org.apache.util.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +26,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        String body = request.getBody();
-        ContentType contentType = request.getContentType();
-        Parser parser = BodyParserFactory.getParser(contentType);
-
-        Map<String, String> params = parser.parse(body);
+        Map<String, String> params = request.getKeyValueBodies();
         String account = params.get("account");
         String password = params.get("password");
 

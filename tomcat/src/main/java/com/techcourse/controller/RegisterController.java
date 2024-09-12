@@ -18,11 +18,6 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getParameter(ACCOUNT);
         String password = request.getParameter(PASSWORD);

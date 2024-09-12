@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public final void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;

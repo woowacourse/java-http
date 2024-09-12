@@ -8,11 +8,6 @@ import org.apache.coyote.http11.response.header.ContentType;
 public class RootController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         super.doPost(request, response);
     }

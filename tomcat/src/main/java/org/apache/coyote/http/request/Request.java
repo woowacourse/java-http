@@ -70,7 +70,7 @@ public class Request {
                 return session;
             }
         } catch (IOException e) {
-            log.info("세션을 찾는 데 실패했습니다 {}", sessionId, e);
+            log.info("세션을 찾는 데 실패했습니다 id: {}", sessionId, e);
         }
         return null;
     }

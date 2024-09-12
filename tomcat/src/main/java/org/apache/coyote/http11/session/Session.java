@@ -6,11 +6,16 @@ import java.util.UUID;
 
 public class Session {
     private String id;
-    private Map<String, Object> session;
+    private Map<String, Object> values;
 
     public Session() {
         this.id = UUID.randomUUID().toString();
-        this.session = new HashMap<>();
+        this.values = new HashMap<>();
+    }
+
+    public Session(String id) {
+        this.id = id;
+        this.values = new HashMap<>();
     }
 
     public String getId() {
@@ -18,18 +23,18 @@ public class Session {
     }
 
     public void addAttribute(String name, Object value) {
-        session.put(name, value);
+        values.put(name, value);
     }
 
     public Object getAttribute(String name) {
-        return session.get(name);
+        return values.get(name);
     }
 
     public Object removeAttribute(String name) {
-        return session.get(name);
+        return values.get(name);
     }
 
     public void invalidate() {
-        session = new HashMap<>();
+        values = new HashMap<>();
     }
 }

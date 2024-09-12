@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.session;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
@@ -26,8 +28,7 @@ public class SessionManager implements Manager {
         return SESSIONS.entrySet().stream()
                 .filter(session -> session.getKey().equals(id))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션ID 입니다. (SESSION_ID: %s)".formatted(id)))
-                .getValue();
+                .map(Entry::getValue).orElse(null);
     }
 
     @Override

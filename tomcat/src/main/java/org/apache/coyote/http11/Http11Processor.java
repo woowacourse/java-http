@@ -52,19 +52,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void processRequest(HttpRequest request, HttpResponse response) {
-        setSession(request, response);
-
         FrontController frontController = FrontController.getInstance();
         Controller controller = frontController.mapController(request.getPath());
         controller.service(request, response);
-    }
-
-    private void setSession(HttpRequest request, HttpResponse response) {
-        if(!request.hasCookie("JSESSIONID")) {
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session session = new Session();
-            sessionManager.add(session);
-            response.setCookie(new Cookie("JSESSIONID", session.getId()));
-        }
     }
 }

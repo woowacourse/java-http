@@ -44,7 +44,6 @@ public class HttpResponse {
         this.contentLength = body.getBytes().length;
     }
 
-
     public void setCookie(Cookie cookie) {
         cookies.setCookie(cookie);
     }

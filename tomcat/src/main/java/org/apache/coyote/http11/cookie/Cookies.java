@@ -11,6 +11,13 @@ public class Cookies {
                 .anyMatch(cookie -> cookie.getName().equals(name));
     }
 
+    public Cookie getCookie(String name) {
+        return cookies.stream()
+                .filter(cookie -> cookie.getName().equals(name))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("쿠키가 존재하지 않습니다"));
+    }
+
     public void setCookie(Cookie cookie) {
         cookies.add(cookie);
     }
@@ -22,7 +29,7 @@ public class Cookies {
     public String toMessage() {
         StringBuilder message = new StringBuilder();
         for (Cookie cookie : cookies) {
-            message.append("%s=%s; ".formatted(cookie.getName(), cookie.getValue()));
+            message.append(cookie.toMessage());
         }
 
         return message.toString();

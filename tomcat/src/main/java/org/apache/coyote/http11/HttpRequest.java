@@ -13,7 +13,6 @@ import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
-
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
 public class HttpRequest {
     private HttpMethod method;
@@ -48,7 +47,7 @@ public class HttpRequest {
 
     private static Cookies getHttpCookies(Map<String, String> headers) {
         Cookies cookies = new Cookies();
-        if(headers.containsKey("Cookie")) {
+        if (headers.containsKey("Cookie")) {
             String[] cookieLine = headers.get("Cookie").split("; ");
             for (String cookie : cookieLine) {
                 String[] cookieKeyValue = cookie.split("=");
@@ -96,10 +95,11 @@ public class HttpRequest {
         return httpHeader;
     }
 
-    private static Map<String, String> getHttpBody(BufferedReader request, Map<String, String> httpHeaders) throws IOException {
+    private static Map<String, String> getHttpBody(BufferedReader request, Map<String, String> httpHeaders)
+            throws IOException {
         Map<String, String> httpBody = new HashMap<>();
 
-        if(!httpHeaders.containsKey("Content-Length")) {
+        if (!httpHeaders.containsKey("Content-Length")) {
             return httpBody;
         }
 
@@ -111,7 +111,8 @@ public class HttpRequest {
 
         StringBuilder sb = new StringBuilder();
         while (totalBytesRead < contentLength
-                && (bytesRead = request.read(buffer, 0, Math.min(buffer.length, contentLength - totalBytesRead))) != -1) {
+                && (bytesRead = request.read(buffer, 0, Math.min(buffer.length, contentLength - totalBytesRead)))
+                != -1) {
             sb.append(buffer, 0, bytesRead);
             totalBytesRead += bytesRead;
         }
@@ -122,7 +123,8 @@ public class HttpRequest {
         return httpBody;
     }
 
-    public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path, Map<String, String> queries,
+    public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path,
+                       Map<String, String> queries,
                        Map<String, String> headers, Map<String, String> body, Cookies cookies) {
         this.method = method;
         this.protocol = protocol;
@@ -180,5 +182,37 @@ public class HttpRequest {
         } catch (Exception e) {
             throw new IllegalArgumentException("'%s' Header가 존재하지 않습니다.".formatted(header));
         }
+    }
+
+    public Session getSession(boolean create) {
+        boolean hasCookie = hasCookie("JSESSIONID");
+        if (hasCookie) {
+            Cookie sessionCookie = cookies.getCookie("JSESSIONID");
+            String jSessionId = sessionCookie.getValue();
+            Session session = SessionManager.getInstance().findSession(jSessionId);
+
+            if (session != null) {
+                return session;
+            } else {
+                if(!create) {
+                    return null;
+                }
+                Session newSession = new Session();
+                SessionManager.getInstance().add(newSession);
+                return newSession;
+            }
+        } else {
+            if(!create) {
+                return null;
+            }
+            Session newSession = new Session();
+            SessionManager.getInstance().add(newSession);
+            return newSession;
+        }
+    }
+
+
+    public Cookie getCookie(String name) {
+        return cookies.getCookie(name);
     }
 }

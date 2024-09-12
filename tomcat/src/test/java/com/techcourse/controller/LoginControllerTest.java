@@ -76,7 +76,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("POST 요청 처리: 비밀번호가 올바르지 않는 경우 로그인 실패")
-    void handle_PostRequest_With_InvalidCredentials() throws Exception {
+    void handle_PostRequest_With_InvalidCredentials() {
         final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
         final HttpHeaders headers = new HttpHeaders(new HttpHeader(HttpHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
         final HttpRequest request = new HttpRequest(requestLine, headers, "account=gugu&password=wrongpassword");
@@ -89,7 +89,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("POST 요청 처리: 존재하지 않는 계정 정보로 로그인 실패")
-    void handle_PostRequest_WithNonexistentUser() throws Exception {
+    void handle_PostRequest_WithNonexistentUser() {
         final RequestLine requestLine = new RequestLine("POST", "/login", "HTTP/1.1");
         final HttpHeaders httpHeaders = new HttpHeaders(new HttpHeader(HttpHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
         final HttpRequest request = new HttpRequest(requestLine, httpHeaders, "account=nonexistent&password=anypassword");
@@ -102,7 +102,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("지원하지 않는 메소드 처리: 예외 반환")
-    void handle_UnsupportedMethod() throws Exception {
+    void handle_UnsupportedMethod() {
         final RequestLine requestLine = new RequestLine("PUT", "/login", "HTTP/1.1");
         final HttpRequest request = new HttpRequest(requestLine, null, null);
         final HttpResponse response = HttpResponse.builder().okBuild();

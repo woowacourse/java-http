@@ -7,7 +7,7 @@ import com.techcourse.exception.ApplicationException;
 import org.apache.catalina.controller.HandlerMapping;
 import com.techcourse.view.ViewResolver;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.HttpConnectorException;
+import org.apache.coyote.exception.HttpConnectorException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

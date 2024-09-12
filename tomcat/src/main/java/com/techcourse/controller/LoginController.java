@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import org.apache.catalina.session.Session;
@@ -27,13 +28,8 @@ public class LoginController extends AbstractController {
 
         userService.login(account, password)
                 .ifPresentOrElse(
-                        user -> {
-                            Session session = request.getSession();
-                            session.setAttribute(USER_SESSION_NAME, user);
-                            response.addCookie(Cookies.ofJSessionId(session.getId()));
-                            response.redirect("/index.html");
-                        },
-                        () -> response.redirect("/401.html")
+                        user -> handleSuccessfulLogin(request, response, user),
+                        () -> handleFailedLogin(response)
                 );
     }
 
@@ -45,5 +41,16 @@ public class LoginController extends AbstractController {
             return;
         }
         response.redirect("/index.html");
+    }
+
+    private void handleSuccessfulLogin(HttpRequest request, HttpResponse response, User user) {
+        Session session = request.getSession();
+        session.setAttribute(USER_SESSION_NAME, user);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
+        response.redirect("/index.html");
+    }
+
+    private void handleFailedLogin(HttpResponse response) {
+        response.redirect("/401.html");
     }
 }

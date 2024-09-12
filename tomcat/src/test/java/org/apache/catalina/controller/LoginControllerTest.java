@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.StatusCode;
@@ -17,10 +19,9 @@ class LoginControllerTest {
 
     private final LoginController loginController = new LoginController();
 
-    @DisplayName("GET 요청 시 JSESSIONID 쿠키 존재 여부에 따라 적절한 페이지를 반환해야 한다.")
+    @DisplayName("GET 요청 시 JSESSIONID 쿠키 존재하면 index.html로 302 리다이렉트 된다.")
     @Test
-    void doGet_WithJSessionId_ReturnsIndexHtml() throws IOException {
-        // JSESSIONID 쿠키가 있는 경우
+    void doGet1() throws IOException {
         String sessionId = "test-session-id";
         String requestString = String.join("\r\n",
                 "GET / HTTP/1.1",
@@ -38,14 +39,17 @@ class LoginControllerTest {
         loginController.doGet(request, response);
         StatusLine statusLine = response.getStatusLine();
 
+        String path = "src/main/resources/static/index.html";
+        String htmlString = new String(Files.readAllBytes(Paths.get(path)));
+
         assertThat(statusLine.getStatusCode()).isEqualTo(StatusCode.valueOf(302));
+        assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
     }
 
 
     @DisplayName("GET 요청 시 JSESSIONID 쿠키가 없으면 login.html을 반환해야 한다.")
     @Test
-    void doGet_WithoutJSessionId_ReturnsLoginHtml() throws IOException {
-        // JSESSIONID 쿠키가 없는 경우
+    void doGet2() throws IOException {
         String requestString = String.join("\r\n",
                 "GET / HTTP/1.1",
                 "Host: localhost",
@@ -60,12 +64,18 @@ class LoginControllerTest {
 
         loginController.doGet(request, response);
         StatusLine statusLine = response.getStatusLine();
+
+        String path = "src/main/resources/static/login.html";
+        String htmlString = new String(Files.readAllBytes(Paths.get(path)));
+
         assertThat(statusLine.getStatusCode()).isEqualTo(StatusCode.valueOf(200));
+        assertThat(response.getResponseHeader().getHeader("Content-Type")).isEqualTo("text/html");
+        assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
     }
 
     @DisplayName("POST 요청 시 잘못된 계정으로 로그인 시도 시 401 에러를 반환해야 한다.")
     @Test
-    void doPost_InvalidAccount() throws IOException {
+    void doGet3() throws IOException {
         String body = "account=wrongUser&password=1234";
         String requestString = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -82,19 +92,24 @@ class LoginControllerTest {
 
         loginController.doPost(request, response);
 
+        String path = "src/main/resources/static/401.html";
+        String htmlString = new String(Files.readAllBytes(Paths.get(path)));
+
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(StatusCode.valueOf(401));
+        assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
     }
 
     @DisplayName("POST 요청 시 잘못된 비밀번호로 로그인 시도 시 401 에러를 반환해야 한다.")
     @Test
-    void doPost_InvalidPassword() throws IOException {
+    void doGet4() throws IOException {
+        String body = "account=test&password=wrongPassword";
         String requestString = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost",
-                "Content-Length: 27",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "account=test&password=wrongPassword"
+                body
         );
 
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8));
@@ -103,7 +118,10 @@ class LoginControllerTest {
 
         loginController.doPost(request, response);
 
-        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(StatusCode.valueOf(401));
-    }
+        String path = "src/main/resources/static/401.html";
+        String htmlString = new String(Files.readAllBytes(Paths.get(path)));
 
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(StatusCode.valueOf(401));
+        assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
+    }
 }

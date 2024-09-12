@@ -10,8 +10,8 @@ public class ServletContext {
     private final List<HttpServlet> servlets = new ArrayList<>();
     private final SessionManager sessionManager = new SessionManager();
 
-    public void addServlet(HttpServlet handler) {
-        servlets.add(handler);
+    public void addServlet(HttpServlet servlet) {
+        servlets.add(servlet);
     }
 
     public HttpServlet mapServlet(HttpRequest request) {

@@ -12,7 +12,7 @@ public class HttpHeaders {
     private final Map<HttpHeaderType, String> headers;
 
     public HttpHeaders() {
-        headers = new HashMap<>();
+        this(new HashMap<>());
     }
 
     public HttpHeaders(Map<HttpHeaderType, String> headers) {

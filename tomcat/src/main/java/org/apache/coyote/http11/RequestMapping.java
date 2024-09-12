@@ -36,6 +36,17 @@ public class RequestMapping {
             throw new IllegalStateException("잘못된 mappedRequestUri 입니다.");
         }
 
+        boolean startAndEndWith = startAndEndWith(requestUri, beforeWildCard, afterWildCard);
+        boolean isValidLength = isValidLength(requestUri, beforeWildCard, afterWildCard);
+
+        return startAndEndWith && isValidLength;
+    }
+
+    private boolean startAndEndWith(String requestUri, String beforeWildCard, String afterWildCard) {
         return requestUri.startsWith(beforeWildCard) && requestUri.endsWith(afterWildCard);
+    }
+
+    private boolean isValidLength(String requestUri, String beforeWildCard, String afterWildCard) {
+        return requestUri.length() >= beforeWildCard.length() + afterWildCard.length();
     }
 }

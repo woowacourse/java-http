@@ -14,4 +14,12 @@ class HttpCookiesTest {
         HttpCookies cookies = new HttpCookies(cookieLine);
         assertThat(cookies.getCookies()).hasSize(3);
     }
+
+    @Test
+    @DisplayName("올바르지 않은 쿠키 문자열은 무시된다.")
+    void ignoreInvalidCookieLine() {
+        String cookieLine = "a=1; b=2; c=3; d";
+        HttpCookies cookies = new HttpCookies(cookieLine);
+        assertThat(cookies.getCookies()).hasSize(3);
+    }
 }

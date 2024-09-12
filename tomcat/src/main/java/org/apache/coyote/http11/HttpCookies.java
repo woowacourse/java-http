@@ -21,6 +21,7 @@ public class HttpCookies {
         }
         Arrays.stream(cookieLine.split(COOKIE_DELIMITER))
                 .map(token -> token.split(EQUALS, SPLIT_LIMIT))
+                .filter(cookieToken -> cookieToken.length == SPLIT_LIMIT)
                 .map(cookieToken -> new HttpCookie(cookieToken[NAME_INDEX].trim(), cookieToken[VALUE_INDEX].trim()))
                 .forEach(cookie -> cookies.put(cookie.getName(), cookie));
     }

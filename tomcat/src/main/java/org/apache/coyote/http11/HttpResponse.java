@@ -44,7 +44,7 @@ public class HttpResponse {
     }
 
     public String getHeader(String name) {
-        return String.valueOf(headers.get(name));
+        return headers.get(name);
     }
 
     public void setStatusCode(StatusCode statusCode) {

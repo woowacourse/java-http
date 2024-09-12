@@ -41,7 +41,7 @@ public class HttpHeaders {
         fields.put(name, value);
     }
 
-    public Object get(String name) {
+    public String get(String name) {
         return fields.get(name);
     }
 

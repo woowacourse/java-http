@@ -3,13 +3,11 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.RequestMapping;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.converter.MessageConverter;
-import org.apache.coyote.http11.file.FileFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.parser.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -41,7 +39,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequestParser.parse(bufferedReader);
             HttpResponse response = new HttpResponse(request);
             delegateDataProcess(request, response);
-            processWhenHasNoRedirect(response, request);
             String httpResponseMessage = MessageConverter.convertHttpResponseToMessage(response);
             bufferedWriter.write(httpResponseMessage);
             bufferedWriter.flush();
@@ -54,12 +51,5 @@ public class Http11Processor implements Runnable, Processor {
         RequestMapping requestMapping = new RequestMapping();
         requestMapping.getController(request)
                 .ifPresent(controller -> controller.service(request, response));
-    }
-
-    private void processWhenHasNoRedirect(HttpResponse response, HttpRequest request) throws IOException {
-        if (response.notHasLocation()) {
-            FileFinder fileFinder = new FileFinder(request);
-            fileFinder.resolve(response);
-        }
     }
 }

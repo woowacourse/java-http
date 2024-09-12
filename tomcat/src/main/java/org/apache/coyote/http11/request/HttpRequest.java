@@ -1,10 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.net.URI;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.file.FileDetails;
 
 public class HttpRequest {
 
@@ -26,10 +24,6 @@ public class HttpRequest {
         return headers.getSession(needSession);
     }
 
-    public FileDetails getFileDetails() {
-        return httpRequestLine.getFileDetails();
-    }
-
     public HttpMethod getHttpMethod() {
         return httpRequestLine.getHttpMethod();
     }
@@ -38,8 +32,8 @@ public class HttpRequest {
         return httpRequestLine.getHttpVersion();
     }
 
-    public URI getUri() {
-        return httpRequestLine.getUri();
+    public String getPath() {
+        return httpRequestLine.getPath();
     }
 
     public Map<String, String> getQueryParams() {

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request.parser;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,11 +17,11 @@ public class HttpRequestUriParser {
     public static HttpRequestUri parse(String requestUri) {
         int queryDelimiterIndex = requestUri.indexOf(QUERY_DELIMITER);
         if (queryDelimiterIndex == -1) {
-            return new HttpRequestUri(URI.create(requestUri));
+            return new HttpRequestUri(requestUri);
         }
         String path = requestUri.substring(0, queryDelimiterIndex);
         String query = requestUri.substring(queryDelimiterIndex + 1);
-        return new HttpRequestUri(URI.create(path), getParams(query));
+        return new HttpRequestUri(path, getParams(query));
     }
 
     private static Map<String, String> getParams(String query) {

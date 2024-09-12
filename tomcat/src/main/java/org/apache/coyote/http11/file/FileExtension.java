@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.file;
 
 import java.util.Arrays;
 import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.component.MediaType;
 
 public enum FileExtension {
 

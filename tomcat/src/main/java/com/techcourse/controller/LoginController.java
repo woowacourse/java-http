@@ -11,6 +11,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
+    private static final String LOGIN_REQUEST_URI = "/login";
     private static final String DEFAULT_REQUEST_URI = "/index";
     private static final String UNAUTHORIZED_REQUEST_URI = "/401";
 
@@ -31,6 +32,7 @@ public class LoginController extends AbstractController {
             if (!queryParams.isEmpty()) {
                 userService.findUser(queryParams);
             }
+            response.addStaticResource(LOGIN_REQUEST_URI);
         } catch (IllegalArgumentException e) {
             response.sendRedirect(UNAUTHORIZED_REQUEST_URI);
         }

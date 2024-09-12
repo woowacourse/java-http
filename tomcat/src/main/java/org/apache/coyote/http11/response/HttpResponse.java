@@ -5,6 +5,8 @@ import java.util.Map;
 import org.apache.coyote.http11.component.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.file.FileDetails;
+import org.apache.coyote.http11.file.FileFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
@@ -35,9 +37,13 @@ public class HttpResponse {
         headers.put(header, value);
     }
 
-    public boolean notHasLocation() {
-        return headers.keySet().stream()
-                .noneMatch(key -> key.equals(HttpHeaders.LOCATION));
+    public void addStaticResource(String uriPath) {
+        FileDetails fileDetails = FileDetails.from(uriPath);
+        FileFinder fileFinder = new FileFinder(fileDetails);
+        String responseBody = fileFinder.resolve();
+        addHeader(HttpHeaders.CONTENT_TYPE, fileDetails.extension().getMediaType());
+        addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+        setBody(responseBody);
     }
 
     public StatusLine getStatusLine() {

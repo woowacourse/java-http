@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import java.net.URI;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.file.FileDetails;
 import org.apache.coyote.http11.request.parser.HttpRequestUriParser;
 
 public class HttpRequestLine {
@@ -49,16 +47,12 @@ public class HttpRequestLine {
         }
     }
 
-    public FileDetails getFileDetails() {
-        return requestUri.getFileDetails();
-    }
-
     public Map<String, String> getQueryParams() {
         return requestUri.queryParams();
     }
 
-    public URI getUri() {
-        return requestUri.uri();
+    public String getPath() {
+        return requestUri.path();
     }
 
     public HttpMethod getHttpMethod() {

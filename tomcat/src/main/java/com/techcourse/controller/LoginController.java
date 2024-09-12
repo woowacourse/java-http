@@ -1,15 +1,21 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
+import java.io.IOException;
 import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpRequestParameter;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
+import org.apache.coyote.http11.data.MediaType;
+import org.apache.coyote.http11.resource.ResourceReader;
 import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
     private static final LoginController INSTANCE = new LoginController();
+
+    private final ResourceReader resourceReader = ResourceReader.getInstance();
 
     private LoginController() {
     }
@@ -35,13 +41,16 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
-        String redirectUrl = "/login.html";
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (validateSession(request.getSessionId())) {
-            redirectUrl = "/index.html";
+            response.addHttpStatusCode(HttpStatusCode.FOUND)
+                    .addRedirectUrl("/index.html");
+            return;
         }
-        response.addHttpStatusCode(HttpStatusCode.FOUND)
-                .addRedirectUrl(redirectUrl);
+        String responseBody = resourceReader.loadResourceAsString("login.html");
+        response.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .addHttpStatusCode(HttpStatusCode.OK)
+                .addResponseBody(responseBody);
     }
 
     private boolean validateSession(String sessionId) {

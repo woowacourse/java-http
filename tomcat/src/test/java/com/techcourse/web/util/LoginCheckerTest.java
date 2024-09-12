@@ -1,13 +1,11 @@
 package com.techcourse.web.util;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.session.SessionManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

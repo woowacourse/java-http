@@ -17,7 +17,7 @@ public class RequestMapping {
 	private static final RequestMapping instance = new RequestMapping();
 	private static final List<Controller> controllers = new ArrayList<>();
 
-	static  {
+	static {
 		controllers.add(RootPageController.getInstance());
 		controllers.add(ResourceController.getInstance());
 		controllers.add(LoginController.getInstance());

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -9,7 +8,6 @@ import org.apache.coyote.http11.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.techcourse.web.Resource;
 import com.techcourse.web.controller.Controller;
 import com.techcourse.web.controller.LoginController;
 import com.techcourse.web.controller.NotFoundController;

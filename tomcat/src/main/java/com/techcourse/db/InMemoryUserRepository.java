@@ -11,7 +11,7 @@ import com.techcourse.model.User;
 
 public class InMemoryUserRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
+	private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
 	private static final Map<String, User> database = new ConcurrentHashMap<>();
 
 	static {
@@ -27,10 +27,10 @@ public class InMemoryUserRepository {
 	}
 
 	public static Optional<User> findByAccount(String account) {
-        if (account == null) {
-            log.info("account not exist");
-            return Optional.empty();
-        }
+		if (account == null) {
+			log.info("account not exist");
+			return Optional.empty();
+		}
 		return Optional.ofNullable(database.get(account));
 	}
 

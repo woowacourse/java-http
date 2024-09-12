@@ -11,44 +11,44 @@ import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
 
-    private final String request;
-    private final ByteArrayOutputStream outputStream;
+	private final String request;
+	private final ByteArrayOutputStream outputStream;
 
-    public StubSocket(final String request) {
-        this.request = request;
-        this.outputStream = new ByteArrayOutputStream();
-    }
+	public StubSocket(final String request) {
+		this.request = request;
+		this.outputStream = new ByteArrayOutputStream();
+	}
 
-    public StubSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
-    }
+	public StubSocket() {
+		this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	}
 
-    public InetAddress getInetAddress() {
-        try {
-            return InetAddress.getLocalHost();
-        } catch (UnknownHostException ignored) {
-            return null;
-        }
-    }
+	public InetAddress getInetAddress() {
+		try {
+			return InetAddress.getLocalHost();
+		} catch (UnknownHostException ignored) {
+			return null;
+		}
+	}
 
-    public int getPort() {
-        return 8080;
-    }
+	public int getPort() {
+		return 8080;
+	}
 
-    public InputStream getInputStream() {
-        return new ByteArrayInputStream(request.getBytes());
-    }
+	public InputStream getInputStream() {
+		return new ByteArrayInputStream(request.getBytes());
+	}
 
-    public OutputStream getOutputStream() {
-        return new OutputStream() {
-            @Override
-            public void write(int b) {
-                outputStream.write(b);
-            }
-        };
-    }
+	public OutputStream getOutputStream() {
+		return new OutputStream() {
+			@Override
+			public void write(int b) {
+				outputStream.write(b);
+			}
+		};
+	}
 
-    public String output() {
-        return outputStream.toString(StandardCharsets.UTF_8);
-    }
+	public String output() {
+		return outputStream.toString(StandardCharsets.UTF_8);
+	}
 }

@@ -1,13 +1,14 @@
 package org.apache.coyote.request.header;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.util.ContentType;
 import org.apache.coyote.util.HttpHeaders;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RequestHeader {
 
@@ -16,6 +17,7 @@ public class RequestHeader {
     private static final int FIRST_HEADER_INDEX = 0;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int EMPTY_BODY_LENGTH = 0;
 
     private final Map<HttpHeaders, String> headerValue;
 
@@ -36,7 +38,7 @@ public class RequestHeader {
         if (headerValue.containsKey(HttpHeaders.CONTENT_LENGTH)) {
             return Integer.parseInt(headerValue.get(HttpHeaders.CONTENT_LENGTH));
         }
-        return 0;
+        return EMPTY_BODY_LENGTH;
     }
 
     public ContentType findAcceptType() {

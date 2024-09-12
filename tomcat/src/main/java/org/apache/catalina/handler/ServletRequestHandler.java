@@ -2,12 +2,12 @@ package org.apache.catalina.handler;
 
 import com.techcourse.exception.TechcourseException;
 import com.techcourse.model.UserService;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.response.HttpResponse;
 
 public class ServletRequestHandler {
@@ -31,7 +31,7 @@ public class ServletRequestHandler {
         throw new IllegalArgumentException("해당 메서드는 지원하지 않습니다: " + httpMethod); // TODO: 405 처리
     }
 
-    private HttpResponse handleGet(HttpRequest request) {
+    private HttpResponse handleGet(final HttpRequest request) {
         final String requestURI = request.getRequestURI();
         if (requestURI.equals("/login")) {
             return handleGetLoginPage();
@@ -43,7 +43,7 @@ public class ServletRequestHandler {
             return handleGetRootPage();
         }
         if (requestURI.contains(".")) {
-            return handleGetStaticPage(requestURI);
+            return handleGetStaticPage(request);
         }
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
@@ -71,26 +71,27 @@ public class ServletRequestHandler {
         return response;
     }
 
-    private HttpResponse handleGetStaticPage(String requestURI) {
-        final String path = requestURI;
+    private HttpResponse handleGetStaticPage(final HttpRequest request) {
+        final String path = request.getRequestURI();
         final String body = viewResolver.resolve(path);
         final HttpResponse response = new HttpResponse(HttpStatusCode.SUCCESS);
         response.setContent(path, body);
         return response;
     }
 
-    private HttpResponse handlePost(HttpRequest request) {
+    private HttpResponse handlePost(final HttpRequest request) {
         final String requestURI = request.getRequestURI();
         if (requestURI.equals("/login")) {
-            return handlePostLogin(request.getBody());
+            return handlePostLogin(request);
         }
         if (requestURI.equals("/register")) {
-            return handlePostRegister(request.getBody());
+            return handlePostRegister(request);
         }
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
-    private HttpResponse handlePostLogin(Map<String, String> body) {
+    private HttpResponse handlePostLogin(final HttpRequest request) {
+        final HttpRequestBody body = request.getBody();
         final UserService userService = UserService.getInstance();
         try {
             userService.login(body.get("account"), body.get("password"));
@@ -117,7 +118,8 @@ public class ServletRequestHandler {
         return response;
     }
 
-    private HttpResponse handlePostRegister(Map<String, String> body) {
+    private HttpResponse handlePostRegister(final HttpRequest request) {
+        final HttpRequestBody body = request.getBody();
         final UserService userService = UserService.getInstance();
         try {
             userService.register(body.get("account"), body.get("password"), body.get("email"));

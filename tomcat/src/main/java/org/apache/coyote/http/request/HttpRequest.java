@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
@@ -55,7 +54,7 @@ public class HttpRequest {
         return startLine.getRequestURI();
     }
 
-    public Map<String, String> getBody() {
-        return body.getBody();
+    public HttpRequestBody getBody() {
+        return body;
     }
 }

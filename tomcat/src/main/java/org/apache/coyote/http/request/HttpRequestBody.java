@@ -19,6 +19,10 @@ public class HttpRequestBody {
         }
     }
 
+    public String get(String key) {
+        return body.get(key);
+    }
+
     public Map<String, String> getBody() {
         return body;
     }

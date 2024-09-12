@@ -38,6 +38,7 @@ public class LoginController extends AbstractController {
         Map<String, String> cookies = request.getCookies();
         if (cookies.containsKey("JSESSIONID")) {
             if (sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
+                System.out.println("here!!!!!!!!!1");
                 response.setPath("/index.html");
                 response.setFileType("html");
                 response.setHttpStatusCode(HttpStatusCode.FOUND);
@@ -70,7 +71,7 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
 
         if (!body.containsKey("password")) {
-            throw new IllegalArgumentException("Not found password");
+            throw new IllegalArgumentException("password not found");
         }
 
         if (user.checkPassword(body.get("password").getFirst())) {

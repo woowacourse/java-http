@@ -23,10 +23,10 @@ class HomeControllerTest {
         controller.service(request, response);
 
         // then
-        assertThat(response.getResponseBody()).isNotNull();
+        assertThat(response.getHttpStatusCode()).isNotNull();
     }
 
-    @DisplayName("GET 응답 반환 실패 : DELETE일 경우")
+    @DisplayName("응답 반환 실패 : DELETE일 경우")
     @Test
     void service_notSupportedMethod_delete() throws Exception {
         // given

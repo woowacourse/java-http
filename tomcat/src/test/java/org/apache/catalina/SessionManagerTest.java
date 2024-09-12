@@ -17,12 +17,13 @@ class SessionManagerTest {
     void add() {
         // given
         SessionManager sessionManager = new SessionManager();
+        int size = sessionManager.size();
 
         // when
         sessionManager.add(Session.createRandomSession());
 
         // then
-        assertThat(sessionManager.size()).isEqualTo(1);
+        assertThat(sessionManager.size()).isEqualTo(size + 1);
     }
 
     @DisplayName("세션 찾기 성공")
@@ -45,11 +46,12 @@ class SessionManagerTest {
         SessionManager sessionManager = new SessionManager();
         Session session = Session.createRandomSession();
         sessionManager.add(session);
+        int size = sessionManager.size();
 
         // when
         sessionManager.remove(session);
 
         // then
-        assertThat(sessionManager.size()).isEqualTo(0);
+        assertThat(sessionManager.size()).isEqualTo(size - 1);
     }
 }

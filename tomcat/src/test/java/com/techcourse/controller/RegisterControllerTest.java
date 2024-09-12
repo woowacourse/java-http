@@ -34,7 +34,7 @@ class RegisterControllerTest {
                 "email", "test@test.com"
         );
         HttpRequest request = HttpRequestFixture.getPostRequest("/register", requestBody);
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         registerController.doPost(request, response);
@@ -55,7 +55,7 @@ class RegisterControllerTest {
                 "email", "test@test.com"
         );
         HttpRequest request = HttpRequestFixture.getPostRequest("/register", requestBody);
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         registerController.doPost(request, response);

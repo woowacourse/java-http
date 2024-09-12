@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.component.HttpVersion;
 
 public class HttpRequest {
 
@@ -28,7 +29,7 @@ public class HttpRequest {
         return httpRequestLine.getHttpMethod();
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpRequestLine.getHttpVersion();
     }
 

@@ -5,9 +5,9 @@ import java.util.Map;
 import org.apache.coyote.http11.component.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.component.HttpVersion;
 import org.apache.coyote.http11.file.FileDetails;
 import org.apache.coyote.http11.file.FileFinder;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -15,8 +15,8 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
     private String body;
 
-    public HttpResponse(HttpRequest request) {
-        this(new StatusLine(request.getHttpVersion()), "");
+    public HttpResponse(HttpVersion httpVersion) {
+        this(new StatusLine(httpVersion), "");
     }
 
     private HttpResponse(StatusLine statusLine, String body) {

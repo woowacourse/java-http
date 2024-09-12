@@ -32,7 +32,7 @@ class LoginControllerTest {
     void doGet() {
         //given
         HttpRequest request = HttpRequestFixture.getGetRequest("/login");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         loginController.doGet(request, response);
@@ -48,7 +48,7 @@ class LoginControllerTest {
         UUID uuid = UUID.randomUUID();
         SessionManager.getInstance().add(new Session(uuid.toString()));
         HttpRequest request = HttpRequestFixture.getGetRequestWithSession("/login", uuid.toString());
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         loginController.doGet(request, response);
@@ -67,7 +67,7 @@ class LoginControllerTest {
         UUID uuid = UUID.randomUUID();
         SessionManager.getInstance().add(new Session(uuid.toString()));
         HttpRequest request = HttpRequestFixture.getGetRequest("/login?account=daon");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         loginController.doGet(request, response);
@@ -88,7 +88,7 @@ class LoginControllerTest {
                 "password", "password"
         );
         HttpRequest request = HttpRequestFixture.getPostRequest("/login", params);
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         loginController.doPost(request, response);
@@ -109,7 +109,7 @@ class LoginControllerTest {
                 "password", "password"
         );
         HttpRequest request = HttpRequestFixture.getPostRequest("/login", params);
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         // when
         loginController.doPost(request, response);

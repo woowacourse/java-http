@@ -30,7 +30,7 @@ class ResourceControllerTest {
     void doGet() throws IOException {
         //given
         HttpRequest request = HttpRequestFixture.getGetRequest("/");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         resourceController.doGet(request, response);
@@ -48,7 +48,7 @@ class ResourceControllerTest {
     void doGetThrowsException() {
         //given
         HttpRequest request = HttpRequestFixture.getGetRequest("/baeky");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(request.getHttpVersion());
 
         //when
         resourceController.doGet(request, response);

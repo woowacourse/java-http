@@ -3,6 +3,7 @@ package org.apache.coyote.http11.converter;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.component.HttpVersion;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusLine;
 
@@ -29,11 +30,11 @@ public class MessageConverter {
     }
 
     private static String convertHttpStatusLineToMessage(StatusLine statusLine) {
-        String httpVersion = statusLine.getHttpVersion();
+        HttpVersion httpVersion = statusLine.getHttpVersion();
         HttpStatus httpStatus = statusLine.getHttpStatus();
         return String.join(
                 ELEMENT_DELIMITER,
-                httpVersion,
+                httpVersion.getName(),
                 String.valueOf(httpStatus.getCode()),
                 httpStatus.getValue(),
                 ""

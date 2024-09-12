@@ -1,22 +1,23 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.component.HttpVersion;
 
 public class StatusLine {
 
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
     private HttpStatus httpStatus;
 
-    public StatusLine(String httpVersion) {
+    public StatusLine(HttpVersion httpVersion) {
         this(httpVersion, HttpStatus.OK);
     }
 
-    public StatusLine(String httpVersion, HttpStatus httpStatus) {
+    public StatusLine(HttpVersion httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 

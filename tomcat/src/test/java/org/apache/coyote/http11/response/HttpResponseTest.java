@@ -9,10 +9,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.component.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
+import org.apache.coyote.http11.component.HttpVersion;
 import org.apache.coyote.http11.component.MediaType;
 import org.apache.coyote.http11.file.FileDetails;
-import org.apache.coyote.http11.fixture.HttpRequestFixture;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +22,7 @@ class HttpResponseTest {
     void sendRedirect() {
         //given
         String expected = "/index";
-        HttpRequest request = HttpRequestFixture.getGetRequest("/login");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
 
         //when
         response.sendRedirect(expected);
@@ -38,8 +36,7 @@ class HttpResponseTest {
     void addCookie() {
         //given
         HttpCookie cookie = HttpCookie.ofJSessionId("sessionId");
-        HttpRequest request = HttpRequestFixture.getGetRequest("/login");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
 
         //when
         response.addCookie(cookie);
@@ -54,8 +51,7 @@ class HttpResponseTest {
         //given
         String cookieKey = "daon";
         String cookieValue = "back-end";
-        HttpRequest request = HttpRequestFixture.getGetRequest("/login");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
 
         //when
         response.addHeader(cookieKey, cookieValue);
@@ -69,8 +65,7 @@ class HttpResponseTest {
     void addStaticResource() throws IOException {
         //given
         FileDetails fileDetails = FileDetails.from("/register");
-        HttpRequest request = HttpRequestFixture.getGetRequest("/login");
-        HttpResponse response = new HttpResponse(request);
+        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
 
         //when
         response.addStaticResource(fileDetails.fileName());

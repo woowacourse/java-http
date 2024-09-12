@@ -4,6 +4,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.component.HttpVersion;
 import org.apache.coyote.http11.request.parser.HttpRequestUriParser;
 
 public class HttpRequestLine {
@@ -16,9 +17,9 @@ public class HttpRequestLine {
 
     private final HttpMethod httpMethod;
     private final HttpRequestUri requestUri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    private HttpRequestLine(HttpMethod httpMethod, HttpRequestUri requestUri, String httpVersion) {
+    private HttpRequestLine(HttpMethod httpMethod, HttpRequestUri requestUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -31,7 +32,7 @@ public class HttpRequestLine {
         return new HttpRequestLine(
                 HttpMethod.valueOf(splitLine[HTTP_METHOD_INDEX]),
                 HttpRequestUriParser.parse(splitLine[REQUEST_URI_INDEX]),
-                splitLine[HTTP_VERSION_INDEX]
+                HttpVersion.parse(splitLine[HTTP_VERSION_INDEX])
         );
     }
 
@@ -59,7 +60,7 @@ public class HttpRequestLine {
         return httpMethod;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 }

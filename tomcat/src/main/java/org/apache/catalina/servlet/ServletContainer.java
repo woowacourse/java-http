@@ -33,11 +33,13 @@ public class ServletContainer {
 
     private Controller getController(HttpRequest request) {
         return controllers.stream()
-                .filter(controller ->
-                        request.URIStartsWith(controller.getClass().getAnnotation(WebServlet.class).value())
-                )
+                .filter(controller -> servletUriStartsWith(request, controller))
                 .findAny()
                 .orElse(resourceController);
+    }
+
+    private boolean servletUriStartsWith(HttpRequest request, Controller controller) {
+        return request.URIStartsWith(controller.getClass().getAnnotation(WebServlet.class).value());
     }
 
     private void validateResponse(HttpResponse response) {

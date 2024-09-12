@@ -11,7 +11,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.service.LoginService;
 
 public class LoginController extends AbstractController {
-
+    private static final String SESSION_ID_KEY = "JSESSIONID";
     private static final LoginController INSTANCE = new LoginController();
 
     private final LoginService loginService = LoginService.getInstance();
@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        if(httpRequest.hasCookie() && httpRequest.getCookie().has("JSESSIONID")){
+        if(httpRequest.hasCookie() && httpRequest.getCookie().has(SESSION_ID_KEY)){
             checkSession(httpRequest, httpResponse);
             return;
         }
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
 
     private void checkSession(HttpRequest httpRequest, HttpResponse httpResponse) {
         Cookie cookie = httpRequest.getCookie();
-        String jsessionid = cookie.getByKey("JSESSIONID");
+        String jsessionid = cookie.getByKey(SESSION_ID_KEY);
 
         if (!InMemorySessionRepository.existsById(jsessionid)) {
             throw new SecurityException("잘못된 세션 정보입니다.");
@@ -79,6 +79,6 @@ public class LoginController extends AbstractController {
         Session session = new Session();
         session.setAttribute("user", user);
         InMemorySessionRepository.save(session);
-        return new Cookie(Map.of("JSESSIONID", session.getId()));
+        return new Cookie(Map.of(SESSION_ID_KEY, session.getId()));
     }
 }

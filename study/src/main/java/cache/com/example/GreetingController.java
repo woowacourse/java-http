@@ -1,5 +1,6 @@
 package cache.com.example;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,14 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class GreetingController {
 
     @GetMapping("/")
-    public String index(final HttpServletResponse response) {
-        final String cacheControl = CacheControl
-                .noCache()
-                .cachePrivate()
-                .getHeaderValue();
-
-        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+    public String index(final HttpServletResponse response) throws IOException {
+        return "index.html";
     }
 
     /**
@@ -33,18 +28,18 @@ public class GreetingController {
                 .cachePrivate()
                 .getHeaderValue();
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/etag")
     public String etag(final HttpServletResponse response) {
         response.addHeader(HttpHeaders.ETAG, UUID.randomUUID().toString());
 
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")
     public String resourceVersioning() {
-        return "resource-versioning";
+        return "resource-versioning.html";
     }
 }

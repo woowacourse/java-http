@@ -9,8 +9,4 @@ server:
     enabled: true
     mime-types: text/html
     min-response-size: 1B
-spring:
-  mvc:
-    view:
-      suffix: .html
 

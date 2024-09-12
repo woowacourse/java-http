@@ -8,9 +8,9 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws ApplicationException {
-        if (request.isMethodGET()) {
+        if (request.isGET()) {
             doGet(request, response);
-        } else if (request.isMethodPOST()) {
+        } else if (request.isPOST()) {
             doPost(request, response);
         }
     }

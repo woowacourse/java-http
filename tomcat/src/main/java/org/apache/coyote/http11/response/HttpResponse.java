@@ -12,14 +12,6 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpStatusCode getStatusCode() {
-        return statusCode;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public String getBody() {
         return body;
     }

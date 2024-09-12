@@ -11,6 +11,10 @@ import org.apache.coyote.http11.AbstractController;
 
 public class RegisterController extends AbstractController {
 
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
     private final InMemoryUserRepository inMemoryUserRepository = InMemoryUserRepository.getInstance();
 
     @Override
@@ -22,15 +26,15 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        if (!request.hasParameter("account") || !request.hasParameter("password") || !request.hasParameter("email")) {
+        if (!request.hasParameter(ACCOUNT) || !request.hasParameter(PASSWORD) || !request.hasParameter(EMAIL)) {
             response.badRequest();
             return;
         }
 
         inMemoryUserRepository.save(new User(
-                request.getParameter("account"),
-                request.getParameter("password"),
-                request.getParameter("email")
+                request.getParameter(ACCOUNT),
+                request.getParameter(PASSWORD),
+                request.getParameter(EMAIL)
         ));
 
         response.found("/index.html");

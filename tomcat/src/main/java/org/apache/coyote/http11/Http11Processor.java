@@ -60,7 +60,6 @@ public class Http11Processor implements Runnable, Processor {
             response.notFound()
                     .setBody(StaticResourceProvider.getStaticResource("/404.html"));
         } catch (Exception e) {
-//            log.error(e.getMessage(), e);
             log.error("URI {}, error {}", request.getUri(), e.getMessage(), e);
             response.clear();
             response.internalServerError()

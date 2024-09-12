@@ -32,4 +32,8 @@ public class InMemoryUserRepository {
 
     private InMemoryUserRepository() {
     }
+
+    public void clear() {
+        database.clear();
+    }
 }

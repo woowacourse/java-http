@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
-import java.net.URI;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -12,8 +11,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
-    private static final URI REDIRECT_URI = URI.create("/index.html");
-    private static final URI UNAUTHORIZED_URI = URI.create("/401.html");
+    private static final String DEFAULT_REQUEST_URI = "/index";
+    private static final String UNAUTHORIZED_REQUEST_URI = "/401";
 
     private final UserService userService;
 
@@ -25,7 +24,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
             if (request.getSession(false) != null) {
-                response.sendRedirect(REDIRECT_URI.getPath());
+                response.sendRedirect(DEFAULT_REQUEST_URI);
                 return;
             }
             Map<String, String> queryParams = request.getQueryParams();
@@ -33,7 +32,7 @@ public class LoginController extends AbstractController {
                 userService.findUser(queryParams);
             }
         } catch (IllegalArgumentException e) {
-            response.sendRedirect(UNAUTHORIZED_URI.getPath());
+            response.sendRedirect(UNAUTHORIZED_REQUEST_URI);
         }
     }
 
@@ -44,10 +43,10 @@ public class LoginController extends AbstractController {
             userService.findUser(body.getParameters());
             Session session = request.getSession(true);
             SessionManager.getInstance().add(session);
-            response.sendRedirect(REDIRECT_URI.getPath());
+            response.sendRedirect(DEFAULT_REQUEST_URI);
             response.addCookie(HttpCookie.ofJSessionId(session.getId()));
         } catch (IllegalArgumentException e) {
-            response.sendRedirect(UNAUTHORIZED_URI.getPath());
+            response.sendRedirect(UNAUTHORIZED_REQUEST_URI);
         }
     }
 }

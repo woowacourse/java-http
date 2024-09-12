@@ -56,7 +56,7 @@ class LoginControllerTest {
         //then
         assertAll(
                 () -> assertThat(response.getStatusLine().getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/index.html")
+                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/index")
         );
     }
 
@@ -75,7 +75,7 @@ class LoginControllerTest {
         //then
         assertAll(
                 () -> assertThat(response.getStatusLine().getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/401.html")
+                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/401")
         );
     }
 
@@ -96,7 +96,7 @@ class LoginControllerTest {
         //then
         assertAll(
                 () -> assertThat(response.getStatusLine().getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/index.html")
+                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/index")
         );
     }
 
@@ -117,7 +117,7 @@ class LoginControllerTest {
         //then
         assertAll(
                 () -> assertThat(response.getStatusLine().getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/401.html")
+                () -> assertThat(response.getHeaders()).containsEntry(HttpHeaders.LOCATION, "/401")
         );
     }
 }

@@ -1,15 +1,14 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
-import java.net.URI;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
-    private static final URI REDIRECT_URI = URI.create("/index.html");
-    private static final URI UNAUTHORIZED_URI = URI.create("/401.html");
+    private static final String DEFAULT_REQUEST_URI = "/index";
+    private static final String UNAUTHORIZED_REQUEST_URI = "/401";
 
     private final UserService userService;
 
@@ -22,9 +21,9 @@ public class RegisterController extends AbstractController {
         try {
             RequestBody body = request.getBody();
             userService.create(body.getParameters());
-            response.sendRedirect(REDIRECT_URI.getPath());
+            response.sendRedirect(DEFAULT_REQUEST_URI);
         } catch (IllegalArgumentException e) {
-            response.sendRedirect(UNAUTHORIZED_URI.getPath());
+            response.sendRedirect(UNAUTHORIZED_REQUEST_URI);
         }
     }
 }

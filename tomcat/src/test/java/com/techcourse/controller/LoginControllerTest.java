@@ -1,16 +1,17 @@
 package com.techcourse.controller;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.OutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LoginControllerTest {
 
@@ -70,7 +71,6 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse(OutputStream.nullOutputStream());
 
         loginController.doPost(httpRequest, httpResponse);
-        System.out.println(new String(httpResponse.combineResponseToBytes()));
 
         assertTrue(new String(httpResponse.combineResponseToBytes()).contains(SET_COOKIE_JSESSIONID_HEADER));
     }

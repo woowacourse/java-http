@@ -12,7 +12,7 @@ class FileReaderTest {
     @Test
     void should_readFileContentInResource_when_readResourceFile() throws URISyntaxException, IOException {
         // given
-        FileReader fileReader = new FileReader();
+        FileReader fileReader = FileReader.getInstance();
 
         // when
         String fileContent = fileReader.readResourceFile("/default.html");
@@ -25,7 +25,7 @@ class FileReaderTest {
     @Test
     void should_throwException_when_readInvalidResourceFile() {
         // given
-        FileReader fileReader = new FileReader();
+        FileReader fileReader = FileReader.getInstance();
 
         // when & then
         assertThatThrownBy(() -> fileReader.readResourceFile("/invalid.html"))

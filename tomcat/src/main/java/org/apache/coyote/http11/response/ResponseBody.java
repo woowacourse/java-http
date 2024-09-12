@@ -7,16 +7,16 @@ import org.apache.coyote.http11.helper.FileReader;
 
 public class ResponseBody {
 
-    private static final FileReader FILE_READER = new FileReader();
-
+    private final FileReader fileReader;
     private String value;
 
     public ResponseBody() {
+        fileReader = FileReader.getInstance();
     }
 
     public void addFile(String filePath) throws URISyntaxException, IOException {
         try {
-            this.value = FILE_READER.readResourceFile(filePath);
+            this.value = fileReader.readResourceFile(filePath);
         } catch (IllegalArgumentException e) {
             this.value = "";
         }

@@ -14,7 +14,7 @@ class QueryParserTest {
     void should_returnMap_when_parse() {
         // given
         String input = "key1=value1&key2=value2";
-        QueryParser queryParser = new QueryParser();
+        QueryParser queryParser = QueryParser.getInstance();
 
         // when
         Map<String, String> queries = queryParser.parse(input);
@@ -29,7 +29,7 @@ class QueryParserTest {
     void should_throwException_when_parseInvalidString() {
         // given
         String input = "key1: value1";
-        QueryParser queryParser = new QueryParser();
+        QueryParser queryParser = QueryParser.getInstance();
 
         // when & then
         assertThatThrownBy(() -> queryParser.parse(input))

@@ -10,6 +10,18 @@ public class FileReader {
 
     private static final String PREFIX_STATIC_RESOURCES = "/static";
 
+    private static FileReader INSTANCE;
+
+    public static FileReader getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new FileReader();
+        }
+        return INSTANCE;
+    }
+
+    private FileReader() {
+    }
+
     public String readResourceFile(String filePath) throws URISyntaxException, IOException {
         URL resource = FileReader.class.getResource(PREFIX_STATIC_RESOURCES + filePath);
         if (resource == null) {

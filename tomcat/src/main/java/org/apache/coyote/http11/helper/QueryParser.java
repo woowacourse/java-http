@@ -8,6 +8,18 @@ public class QueryParser {
     private static final String DELIMITER_OF_QUERY = "&";
     private static final String DELIMITER_OF_KEY_VALUE = "=";
 
+    private static QueryParser INSTANCE;
+
+    public static QueryParser getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new QueryParser();
+        }
+        return INSTANCE;
+    }
+
+    private QueryParser() {
+    }
+
     public Map<String, String> parse(String rawQuery) {
         Map<String, String> result = new HashMap<>();
         String[] tokens = rawQuery.split(DELIMITER_OF_QUERY);

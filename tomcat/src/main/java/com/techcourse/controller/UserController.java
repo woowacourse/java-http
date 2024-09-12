@@ -2,16 +2,16 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import java.io.IOException;
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.Handler;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestParameter;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.MediaType;
-import org.apache.coyote.http11.ResourceReader;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.data.HttpMethod;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpRequestParameter;
+import org.apache.coyote.http11.data.HttpResponse;
+import org.apache.coyote.http11.data.HttpStatusCode;
+import org.apache.coyote.http11.data.MediaType;
+import org.apache.coyote.http11.resource.ResourceReader;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class UserController implements Handler {
     private static final UserController INSTANCE = new UserController();

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.data;
 
 public class ContentType {
     private static final String DELIMITER = ";";

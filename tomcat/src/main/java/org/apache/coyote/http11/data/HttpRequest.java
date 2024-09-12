@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.data;
 
 public class HttpRequest {
     private static final String SESSION_ID_KEY = "JSESSIONID";

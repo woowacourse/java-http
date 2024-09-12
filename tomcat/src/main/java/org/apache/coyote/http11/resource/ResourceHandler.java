@@ -1,6 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.resource;
 
 import java.io.IOException;
+import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.data.ContentType;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
+import org.apache.coyote.http11.data.HttpStatusCode;
+import org.apache.coyote.http11.data.MediaType;
 
 public class ResourceHandler implements Handler {
     private static final ResourceHandler INSTANCE = new ResourceHandler();

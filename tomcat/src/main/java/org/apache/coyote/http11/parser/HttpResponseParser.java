@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.parser;
+
+import org.apache.coyote.http11.data.HttpResponse;
 
 public class HttpResponseParser {
 

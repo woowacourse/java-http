@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.parser;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.data.HttpCookie;
 
 public class HttpCookieParser {
 
@@ -10,7 +11,7 @@ public class HttpCookieParser {
         if (rawRequestCookies == null) {
             return new HttpCookie(Map.of());
         }
-        Map<String, String> parsedRawRequestCookies =  Arrays.stream(rawRequestCookies.split(";"))
+        Map<String, String> parsedRawRequestCookies = Arrays.stream(rawRequestCookies.split(";"))
                 .map(String::trim)
                 .map(pair -> pair.split("="))
                 .collect(Collectors.toMap(

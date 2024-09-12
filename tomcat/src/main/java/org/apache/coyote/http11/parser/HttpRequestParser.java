@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.data.ContentType;
+import org.apache.coyote.http11.data.HttpCookie;
+import org.apache.coyote.http11.data.HttpMethod;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpRequestParameter;
+import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.http11.data.MediaType;
 
 public class HttpRequestParser {
 

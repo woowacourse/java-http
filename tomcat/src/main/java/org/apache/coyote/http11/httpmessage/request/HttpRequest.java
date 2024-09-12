@@ -11,17 +11,17 @@ import org.apache.coyote.http11.httpmessage.HttpHeaders;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
-public class Request {
+public class HttpRequest {
 
-    private final RequestLine requestLine;
+    private final HttpRequestLine httpRequestLine;
     private final HttpHeaders headers;
     private final HttpCookie cookies;
     private final String body;
 
     private Session session;
 
-    private Request(RequestLine requestLine, HttpHeaders headers, String body) {
-        this.requestLine = requestLine;
+    private HttpRequest(HttpRequestLine httpRequestLine, HttpHeaders headers, String body) {
+        this.httpRequestLine = httpRequestLine;
         this.headers = headers;
         if (headers.contains(HttpHeaders.COOKIE)) {
             this.cookies = HttpCookie.parseFrom(headers.get(HttpHeaders.COOKIE));
@@ -36,11 +36,11 @@ public class Request {
         }
     }
 
-    public static Request readFrom(BufferedReader reader) throws IOException {
-        RequestLine requestLine = RequestLine.parseFrom(reader.readLine());
+    public static HttpRequest readFrom(BufferedReader reader) throws IOException {
+        HttpRequestLine httpRequestLine = HttpRequestLine.parseFrom(reader.readLine());
         HttpHeaders header = new HttpHeaders(readHeader(reader));
         String requestBody = readBody(reader, header.getContentLength());
-        return new Request(requestLine, header, requestBody);
+        return new HttpRequest(httpRequestLine, header, requestBody);
     }
 
     private static Map<String, String> readHeader(BufferedReader reader) throws IOException {
@@ -71,23 +71,23 @@ public class Request {
     }
 
     public boolean isPost() {
-        return requestLine.isPost();
+        return httpRequestLine.isPost();
     }
 
     public boolean isStaticResourceRequest() {
-        return requestLine.isStaticResourceRequest();
+        return httpRequestLine.isStaticResourceRequest();
     }
 
-    public Method getMethod() {
-        return requestLine.method();
+    public HttpMethod getMethod() {
+        return httpRequestLine.httpMethod();
     }
 
     public String getTarget() {
-        return requestLine.target();
+        return httpRequestLine.target();
     }
 
     public String getHttpVersion() {
-        return requestLine.httpVersion();
+        return httpRequestLine.httpVersion();
     }
 
     public String getBody() {
@@ -97,7 +97,7 @@ public class Request {
     @Override
     public String toString() {
         return "Request{" +
-                "requestLine=" + requestLine +
+                "requestLine=" + httpRequestLine +
                 ", headers=" + headers +
                 ", body='" + body + '\'' +
                 '}';

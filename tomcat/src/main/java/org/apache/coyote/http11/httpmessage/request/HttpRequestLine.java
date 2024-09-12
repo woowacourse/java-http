@@ -2,22 +2,22 @@ package org.apache.coyote.http11.httpmessage.request;
 
 import org.apache.coyote.http11.exception.IllegalHttpMessageException;
 
-public record RequestLine (
-        Method method,
+public record HttpRequestLine(
+        HttpMethod httpMethod,
         String target,
         String httpVersion
 ) {
 
-    public static RequestLine parseFrom(String requestLineText) {
-        String[] token = requestLineText.split(" ");
+    public static HttpRequestLine parseFrom(String httpRequestLineText) {
+        String[] token = httpRequestLineText.split(" ");
         if (token.length != 3) {
             throw new IllegalHttpMessageException("잘못된 헤더 형식입니다.");
         }
-        return new RequestLine(Method.findByName(token[0]), token[1], token[2]);
+        return new HttpRequestLine(HttpMethod.findByName(token[0]), token[1], token[2]);
     }
 
     public boolean isPost() {
-        return method == Method.POST;
+        return httpMethod == HttpMethod.POST;
     }
 
     public boolean isStaticResourceRequest() {
@@ -29,7 +29,7 @@ public record RequestLine (
     @Override
     public String toString() {
         return "RequestLine{" +
-                "method=" + method +
+                "httpMethod=" + httpMethod +
                 ", target='" + target + '\'' +
                 ", httpVersion='" + httpVersion + '\'' +
                 '}';

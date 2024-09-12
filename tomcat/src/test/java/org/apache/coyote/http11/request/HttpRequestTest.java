@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.coyote.http11.httpmessage.request.Method;
-import org.apache.coyote.http11.httpmessage.request.Request;
+import org.apache.coyote.http11.httpmessage.request.HttpMethod;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class RequestTest {
+class HttpRequestTest {
 
     @Nested
     @DisplayName("생성 테스트")
@@ -37,12 +37,12 @@ class RequestTest {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
 
 
-            Request request = Request.readFrom(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.readFrom(bufferedReader);
 
             //then
             assertAll(
-                    () -> assertThat(request.getMethod()).isEqualTo(Method.GET),
-                    () -> assertThat(request.getTarget()).isEqualTo("/index.html")
+                    () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
+                    () -> assertThat(httpRequest.getTarget()).isEqualTo("/index.html")
             );
         }
     }

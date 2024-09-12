@@ -7,7 +7,7 @@ import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.DefaultResourceHandler;
-import org.apache.coyote.http11.httpmessage.request.Request;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
              var outputStream = connection.getOutputStream()) {
 
-            Request request = Request.readFrom(requestBufferedReader);
-            log.info("request : {}", request);
-            String response = getResponse(request);
+            HttpRequest httpRequest = HttpRequest.readFrom(requestBufferedReader);
+            log.info("request : {}", httpRequest);
+            String response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(Request request) throws IOException {
-        return requestHandler.handle(request);
+    private String getResponse(HttpRequest httpRequest) throws IOException {
+        return requestHandler.handle(httpRequest);
     }
 }

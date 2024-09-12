@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.httpmessage.response;
 
-public class StatusLine {
+public class HttpStatusLine {
 
     private final String protocolVersion;
     private final int statusCode;
     private final String statusText;
 
-    public StatusLine(String protocolVersion, int statusCode, String statusText) {
+    public HttpStatusLine(String protocolVersion, int statusCode, String statusText) {
         this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
         this.statusText = statusText;

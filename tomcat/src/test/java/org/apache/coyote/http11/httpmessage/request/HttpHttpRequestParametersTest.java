@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class RequestParametersTest {
+class HttpHttpRequestParametersTest {
 
     @Nested
     @DisplayName("파싱 테스트")
@@ -26,17 +26,17 @@ class RequestParametersTest {
             String parameter = "key=value";
 
             //when
-            RequestParameters requestParameters = RequestParameters.parseFrom(parameter);
+            HttpRequestParameters httpRequestParameters = HttpRequestParameters.parseFrom(parameter);
 
             //then
-            assertThat(requestParameters.getParam("key")).isEqualTo("value");
+            assertThat(httpRequestParameters.getParam("key")).isEqualTo("value");
         }
 
         @ParameterizedTest
         @DisplayName("key=value 형식의 문자열 여러개를 & 로 이어 붙이면 정상적으로 파싱할 수 있다.")
         @ValueSource(strings = {"key1=value1&key2=value2", "key1=value1&key2=value2&key3=value3"})
         void multipleKeyValueFromParseTest(String parameterText) {
-            assertThatCode(() -> RequestParameters.parseFrom(parameterText))
+            assertThatCode(() -> HttpRequestParameters.parseFrom(parameterText))
                     .doesNotThrowAnyException();
         }
 
@@ -48,13 +48,13 @@ class RequestParametersTest {
                     "key2=value2");
 
             //when
-            RequestParameters requestParameters = RequestParameters.parseFrom(parameterText);
+            HttpRequestParameters httpRequestParameters = HttpRequestParameters.parseFrom(parameterText);
 
             //then
             assertAll(
-                    () -> assertThat(requestParameters.getParam("key1"))
+                    () -> assertThat(httpRequestParameters.getParam("key1"))
                             .isNotEqualTo("value1"),
-                    () -> assertThatThrownBy(() -> requestParameters.getParam("key2"))
+                    () -> assertThatThrownBy(() -> httpRequestParameters.getParam("key2"))
                             .isInstanceOf(NoSuchElementException.class)
                             .hasMessage("key2 에 해당하는 값이 존재하지 않습니다.")
             );

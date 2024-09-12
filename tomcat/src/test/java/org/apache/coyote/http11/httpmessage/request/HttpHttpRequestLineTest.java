@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class RequestLineTest {
+class HttpHttpRequestLineTest {
 
     @Nested
     @DisplayName("파싱 테스트")
@@ -23,13 +23,13 @@ class RequestLineTest {
             String requestLineText = "GET /index.html HTTP/1.1 ";
 
             // when
-            RequestLine requestLine = RequestLine.parseFrom(requestLineText);
+            HttpRequestLine httpRequestLine = HttpRequestLine.parseFrom(requestLineText);
 
             //then
             assertAll(
-                    () -> assertThat(requestLine.httpVersion()).isEqualTo("HTTP/1.1"),
-                    () -> assertThat(requestLine.method()).isEqualTo(Method.GET),
-                    () -> assertThat(requestLine.target()).isEqualTo("/index.html")
+                    () -> assertThat(httpRequestLine.httpVersion()).isEqualTo("HTTP/1.1"),
+                    () -> assertThat(httpRequestLine.httpMethod()).isEqualTo(HttpMethod.GET),
+                    () -> assertThat(httpRequestLine.target()).isEqualTo("/index.html")
             );
         }
 
@@ -40,7 +40,7 @@ class RequestLineTest {
             String wrongRequestLine = "GET /index.html";
 
             // when & then
-            assertThatThrownBy(() -> RequestLine.parseFrom(wrongRequestLine))
+            assertThatThrownBy(() -> HttpRequestLine.parseFrom(wrongRequestLine))
                     .isInstanceOf(IllegalHttpMessageException.class)
                     .hasMessageContaining("잘못된 헤더 형식입니다.");
         }
@@ -48,7 +48,7 @@ class RequestLineTest {
 
     @Nested
     @DisplayName("정적 리소스 확인 테스트")
-    class IsStaticResourceRequestTest {
+    class IsStaticResourceHttpRequestTest {
 
         @ParameterizedTest(name = "{0} 확장자 파일을 요청하면 정적 리소스로 판단한다.")
         @ValueSource(strings = {".css", ".html", ".js"})
@@ -58,10 +58,10 @@ class RequestLineTest {
             String requestLineText = "GET " + target + " HTTP/1.1";
 
             //when
-            RequestLine requestLine = RequestLine.parseFrom(requestLineText);
+            HttpRequestLine httpRequestLine = HttpRequestLine.parseFrom(requestLineText);
 
             //then
-            assertThat(requestLine.isStaticResourceRequest()).isTrue();
+            assertThat(httpRequestLine.isStaticResourceRequest()).isTrue();
         }
 
         @Test
@@ -72,10 +72,10 @@ class RequestLineTest {
             String requestLineText = "GET " + target + " HTTP/1.1";
 
             //when
-            RequestLine requestLine = RequestLine.parseFrom(requestLineText);
+            HttpRequestLine httpRequestLine = HttpRequestLine.parseFrom(requestLineText);
 
             //then
-            assertThat(requestLine.isStaticResourceRequest()).isFalse();
+            assertThat(httpRequestLine.isStaticResourceRequest()).isFalse();
         }
 
         @Test
@@ -86,10 +86,10 @@ class RequestLineTest {
             String requestLineText = "GET " + target + " HTTP/1.1";
 
             //when
-            RequestLine requestLine = RequestLine.parseFrom(requestLineText);
+            HttpRequestLine httpRequestLine = HttpRequestLine.parseFrom(requestLineText);
 
             //then
-            assertThat(requestLine.isStaticResourceRequest()).isFalse();
+            assertThat(httpRequestLine.isStaticResourceRequest()).isFalse();
         }
     }
 }

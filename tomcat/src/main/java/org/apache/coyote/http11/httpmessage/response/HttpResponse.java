@@ -6,9 +6,9 @@ import org.apache.coyote.http11.exception.NotCompleteResponseException;
 import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
-public class Response {
+public class HttpResponse {
 
-    private final StatusLine statusLine;
+    private final HttpStatusLine httpStatusLine;
     private final HttpHeaders headers;
     private final String content;
 
@@ -16,8 +16,8 @@ public class Response {
         return new ResponseBuilder();
     }
 
-    public Response(StatusLine statusLine, HttpHeaders headers, String content) {
-        this.statusLine = statusLine;
+    public HttpResponse(HttpStatusLine httpStatusLine, HttpHeaders headers, String content) {
+        this.httpStatusLine = httpStatusLine;
         this.headers = headers;
         this.content = content;
     }
@@ -43,30 +43,30 @@ public class Response {
             return this;
         }
 
-        public Response found(String target) {
+        public HttpResponse found(String target) {
             this.headers.addHeader(HttpHeaders.LOCATION, target);
 
             return build(
-                    new StatusLine(this.ProtocolVersion, 301, "FOUND"),
+                    new HttpStatusLine(this.ProtocolVersion, 301, "FOUND"),
                     this.headers,
                     ""
             );
         }
 
-        public Response ofStaticResource(StaticResource resource) throws IOException {
+        public HttpResponse ofStaticResource(StaticResource resource) throws IOException {
             headers.addHeader(HttpHeaders.CONTENT_TYPE, resource.getContentType() + ";charset=utf-8");
             headers.addHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(resource.getContentLength()));
 
             return build(
-                    new StatusLine(this.ProtocolVersion, 200, "OK"),
+                    new HttpStatusLine(this.ProtocolVersion, 200, "OK"),
                     this.headers,
                     resource.getContent()
             );
         }
 
-        public Response build(StatusLine statusLine, HttpHeaders headers, String content) {
+        public HttpResponse build(HttpStatusLine httpStatusLine, HttpHeaders headers, String content) {
             setCookie(headers);
-            return new Response(statusLine, headers, content);
+            return new HttpResponse(httpStatusLine, headers, content);
         }
 
         private void setCookie(HttpHeaders headers) {
@@ -77,11 +77,11 @@ public class Response {
     }
 
     public String toHttpMessage() {
-        if (statusLine == null) {
+        if (httpStatusLine == null) {
             throw new NotCompleteResponseException("응답이 완성되지 않았습니다.");
         }
         return String.join("\r\n",
-                statusLine.toHttpMessage(),
+                httpStatusLine.toHttpMessage(),
                 headers.toHttpMessage(),
                 "",
                 content);

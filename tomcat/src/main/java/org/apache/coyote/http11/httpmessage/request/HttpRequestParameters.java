@@ -5,21 +5,21 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class RequestParameters {
+public class HttpRequestParameters {
     private final Map<String, String> requestParams;
 
-    private RequestParameters(Map<String, String> requestParams) {
+    private HttpRequestParameters(Map<String, String> requestParams) {
         this.requestParams = Map.copyOf(requestParams);
     }
 
-    public static RequestParameters parseFrom(String paramString) {
+    public static HttpRequestParameters parseFrom(String paramString) {
         Map<String, String> requestParams = new HashMap<>();
         String[] requestParamTokens = paramString.split("&");
         for (String requestParam : requestParamTokens) {
             String[] split = requestParam.split("=");
             requestParams.put(split[0], split[1]);
         }
-        return new RequestParameters(requestParams);
+        return new HttpRequestParameters(requestParams);
     }
 
     public String getParam(String key) {

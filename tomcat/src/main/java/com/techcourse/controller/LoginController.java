@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -21,9 +21,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String requestBody = request.getBody();
-        String account = requestBody.split("&")[0].split("=")[1];
-        String password = requestBody.split("&")[1].split("=")[1];
+        String account = request.findRequestBodyValue("account");
+        String password = request.findRequestBodyValue("password");
 
         User user = InMemoryUserRepository.findByAccount(account).get();
 

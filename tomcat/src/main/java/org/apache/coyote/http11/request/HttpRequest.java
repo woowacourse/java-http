@@ -24,12 +24,12 @@ public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final Map<String, String> headers;
-    private final String body;
+    private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, String body) {
+    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, HttpRequestBody httpRequestBody) {
         this.httpRequestLine = httpRequestLine;
         this.headers = headers;
-        this.body = body;
+        this.httpRequestBody = httpRequestBody;
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
@@ -49,7 +49,7 @@ public class HttpRequest {
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String body = new String(buffer);
-            return new HttpRequest(requestLine, headers, body);
+            return new HttpRequest(requestLine, headers, HttpRequestBody.from(body));
         }
 
         return new HttpRequest(requestLine, headers, null);
@@ -93,6 +93,10 @@ public class HttpRequest {
         return ContentType.HTML;
     }
 
+    public String findRequestBodyValue(String name) {
+        return httpRequestBody.getValue(name);
+    }
+
     public HttpMethod getHttpMethod() {
         return httpRequestLine.getMethod();
     }
@@ -109,7 +113,11 @@ public class HttpRequest {
         return headers;
     }
 
-    public String getBody() {
-        return body;
+    public HttpRequestLine getHttpRequestLine() {
+        return httpRequestLine;
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
     }
 }

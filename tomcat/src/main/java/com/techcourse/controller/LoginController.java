@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.Session;

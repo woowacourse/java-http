@@ -1,13 +1,12 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.HttpHeader.*;
+import static org.apache.coyote.http11.HttpHeader.COOKIE;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.RequestPathType;
 import org.apache.coyote.http11.request.requestLine.HttpRequestLine;
 import org.apache.coyote.http11.request.requestLine.MethodType;

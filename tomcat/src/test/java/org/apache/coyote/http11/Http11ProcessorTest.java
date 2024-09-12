@@ -54,12 +54,13 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK \r\n",
                 "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 5564 \r\n",
+                String.format("Content-Length: %d \r\n", responseBody.getBytes().length),
                 "\r\n",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+                responseBody
         );
     }
 
@@ -87,12 +88,13 @@ class Http11ProcessorTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             assertThat(socket.output()).contains(
                     "HTTP/1.1 200 OK \r\n",
                     "Content-Type: text/html;charset=utf-8 \r\n",
-                    "Content-Length: 5564 \r\n",
+                    String.format("Content-Length: %d \r\n", responseBody.getBytes().length),
                     "\r\n",
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+                    responseBody
             );
         }
 

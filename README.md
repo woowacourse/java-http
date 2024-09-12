@@ -89,6 +89,6 @@
     - [x] 로그인 컨트롤러
       - get /login
       - get /login?account=gugu&password=password
-    - [ ] 회원가입 컨트롤러
+    - [x] 회원가입 컨트롤러
       - get /register
       - post /register

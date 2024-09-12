@@ -5,19 +5,22 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private final Map<String, String> cookiePairs = new HashMap<>();
+    private static final String COOKIE_SEPARATOR = ";";
+    private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
 
-    public HttpCookie(String rawCookie) {
-        if (rawCookie == null) {
+    private final Map<String, String> cookies = new HashMap<>();
+
+    public HttpCookie(String requestCookieLine) {
+        if (requestCookieLine == null) {
             return;
         }
-        for (String rawCookiePair : rawCookie.split(";")) {
-            String[] cookiePair = rawCookiePair.split("=");
-            cookiePairs.put(cookiePair[0].trim(), cookiePair[1].trim());
+        for (String cookie : requestCookieLine.split(COOKIE_SEPARATOR)) {
+            String[] cookieKeyValue = cookie.split(COOKIE_KEY_VALUE_SEPARATOR);
+            cookies.put(cookieKeyValue[0].trim(), cookieKeyValue[1].trim());
         }
     }
 
     public String get(String key) {
-        return cookiePairs.get(key);
+        return cookies.get(key);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.config.DefaultTomcatConfig;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.handler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = Http11Processor.of(socket, new DefaultTomcatConfig());
+            Http11Processor processor = new Http11Processor(socket, new RequestHandler(RequestMapping.of()));
 
             processor.process(socket);
 
@@ -57,7 +58,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = Http11Processor.of(socket, new DefaultTomcatConfig());
+            Http11Processor processor = new Http11Processor(socket, new RequestHandler(RequestMapping.of()));
 
             processor.process(socket);
 

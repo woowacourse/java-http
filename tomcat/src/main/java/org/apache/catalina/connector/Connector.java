@@ -1,7 +1,9 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.config.TomcatConfig;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.handler.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.handler.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,17 +20,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final TomcatConfig tomcatConfig;
+    private final HttpRequestHandler requestHandler;
     private boolean stopped;
 
-    public Connector(TomcatConfig tomcatConfig) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, tomcatConfig);
+    public Connector(RequestMapping requestMapping) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, new RequestHandler(requestMapping));
     }
 
-    public Connector(int port, int acceptCount, TomcatConfig tomcatConfig) {
+    public Connector(int port, int acceptCount, HttpRequestHandler requestHandler) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.tomcatConfig = tomcatConfig;
+        this.requestHandler = requestHandler;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -70,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
 
-        var processor = Http11Processor.of(connection, tomcatConfig);
+        var processor = new Http11Processor(connection, requestHandler);
         new Thread(processor).start();
     }
 

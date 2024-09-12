@@ -1,8 +1,8 @@
 package org.apache.catalina.startup;
 
-import org.apache.catalina.config.DefaultTomcatConfig;
-import org.apache.catalina.config.TomcatConfig;
+import com.sun.net.httpserver.Request;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,18 +12,8 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final TomcatConfig tomcatConfig;
-
-    public Tomcat() {
-        this.tomcatConfig = new DefaultTomcatConfig();
-    }
-
-    public Tomcat(TomcatConfig tomcatConfig) {
-        this.tomcatConfig = tomcatConfig;
-    }
-
-    public void start() {
-        var connector = new Connector(tomcatConfig);
+    public void start(RequestMapping requestMapping) {
+        var connector = new Connector(requestMapping);
         connector.start();
 
         try {

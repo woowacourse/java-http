@@ -1,14 +1,18 @@
 package com.techcourse;
 
-import com.techcourse.config.ApplicationConfig;
-import org.apache.catalina.config.TomcatConfig;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(String[] args) {
-        TomcatConfig tomcatConfig = new ApplicationConfig();
-        Tomcat tomcat = new Tomcat(tomcatConfig);
-        tomcat.start();
+        RequestMapping requestMapping = RequestMapping.of(
+                new LoginController(),
+                new RegisterController()
+        );
+        Tomcat tomcat = new Tomcat();
+        tomcat.start(requestMapping);
     }
 }

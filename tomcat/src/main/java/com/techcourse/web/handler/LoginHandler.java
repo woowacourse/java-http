@@ -1,6 +1,7 @@
 package com.techcourse.web.handler;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.coyote.http11.http.HttpCookie;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.web.util.FormUrlEncodedParser;
 import com.techcourse.web.util.JsessionIdGenerator;
 import com.techcourse.web.util.LoginChecker;
 import com.techcourse.web.util.ResourceLoader;
@@ -50,7 +52,7 @@ public class LoginHandler implements Handler {
 		if (method == HttpMethod.GET && LOGIN_PATH.equals(requestUrl.getRequestUrl())) {
 			return loadLoginPage(request);
 		}
-		if (method == HttpMethod.GET && requestUrl.isQueryExist()) {
+		if (method == HttpMethod.POST) {
 			return login(request);
 		}
 
@@ -66,9 +68,9 @@ public class LoginHandler implements Handler {
 	}
 
 	private HttpResponse login(HttpRequest request) {
-		HttpRequestQuery query = request.getRequestLine().getQuery();
-		String account = query.getValue("account");
-		String password = query.getValue("password");
+		Map<String, String> body = FormUrlEncodedParser.parse(request.getRequestBody());
+		String account = body.get("account");
+		String password = body.get("password");
 
 		if (isUserNotExist(account, password)) {
 			return redirect(new HttpResponseHeader(), "/401.html");

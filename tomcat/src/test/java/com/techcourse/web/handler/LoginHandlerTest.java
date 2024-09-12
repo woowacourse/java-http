@@ -57,7 +57,7 @@ class LoginHandlerTest {
 	@Test
 	void succeedLogin() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
-		HttpRequest request = new HttpRequest("GET /login?account=gugu&password=password HTTP/1.1", headers, null);
+		HttpRequest request = new HttpRequest("POST /login HTTP/1.1", headers, "account=gugu&password=password");
 
 		LoginHandler loginHandler = LoginHandler.getInstance();
 
@@ -73,7 +73,7 @@ class LoginHandlerTest {
 	@Test
 	void createCookie() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
-		HttpRequest request = new HttpRequest("GET /login?account=gugu&password=password HTTP/1.1", headers, null);
+		HttpRequest request = new HttpRequest("POST /login HTTP/1.1", headers, "account=gugu&password=password");
 
 		LoginHandler loginHandler = LoginHandler.getInstance();
 
@@ -89,7 +89,7 @@ class LoginHandlerTest {
 	@Test
 	void notCreateCookie() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html", "Cookie: JSESSIONID=1234");
-		HttpRequest request = new HttpRequest("GET /login?account=gugu&password=password HTTP/1.1", headers, null);
+		HttpRequest request = new HttpRequest("POST /login HTTP/1.1", headers, "account=gugu&password=password");
 
 		LoginHandler loginHandler = LoginHandler.getInstance();
 
@@ -103,7 +103,7 @@ class LoginHandlerTest {
 	@Test
 	void handle_whenLoginFailed() throws IOException {
 		List<String> headers = List.of("Host: example.com", "Accept: text/html");
-		HttpRequest request = new HttpRequest("GET /login?account=hi&password=hellofail HTTP/1.1", headers, null);
+		HttpRequest request = new HttpRequest("POST /login HTTP/1.1", headers, "account=hi&password=hello");
 
 		LoginHandler loginHandler = LoginHandler.getInstance();
 
@@ -113,20 +113,5 @@ class LoginHandlerTest {
 			.extracting("headers")
 			.extracting("Location")
 			.isEqualTo(List.of("/401.html"));
-	}
-
-	@DisplayName("POST 요청은 처리하지 않는다.")
-	@Test
-	void isNotSupport() throws IOException {
-		List<String> headers = List.of("Host: example.com", "Accept: text/html");
-		HttpRequest request = new HttpRequest("POST /login?account=hi&password=hello HTTP/1.1", headers, null);
-
-		LoginHandler loginHandler = LoginHandler.getInstance();
-
-		assertThat(loginHandler.isSupport(request.getRequestLine())).isTrue();
-		assertThat(loginHandler.handle(request))
-			.extracting("startLine")
-			.extracting("statusCode")
-			.isEqualTo(HttpStatusCode.NOT_FOUND);
 	}
 }

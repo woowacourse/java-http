@@ -11,7 +11,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterController extends AbstractController {
+public class RegisterServlet extends AbstractServlet {
 	@Override
 	protected void doPost(HttpRequest request, HttpResponse response) {
 		Body body = request.getBody();

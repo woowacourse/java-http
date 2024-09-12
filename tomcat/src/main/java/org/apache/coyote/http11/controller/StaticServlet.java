@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticController extends AbstractController {
+public class StaticServlet extends AbstractServlet {
 	@Override
 	protected void doPost(HttpRequest request, HttpResponse response) {
 	}

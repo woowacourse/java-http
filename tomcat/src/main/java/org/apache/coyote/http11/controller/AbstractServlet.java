@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class AbstractController implements Controller {
+public abstract class AbstractServlet implements Servlet {
 
 	@Override
 	public void service(HttpRequest request, HttpResponse response) throws IOException {

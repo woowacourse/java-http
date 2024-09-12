@@ -14,7 +14,7 @@ import org.apache.coyote.http11.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginController extends AbstractController {
+public class LoginServlet extends AbstractServlet {
 
 	@Override
 	protected void doPost(HttpRequest request, HttpResponse response) {

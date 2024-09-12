@@ -34,6 +34,12 @@ public class HttpResponse {
         return new HttpResponse(status, headers, EMPTY_BODY);
     }
 
+    public static HttpResponse found(String location) {
+        HttpResponse response = from(HttpStatus.FOUND);
+        response.setHeader(HttpHeaderName.LOCATION, location);
+        return response;
+    }
+
     public HttpStatus getStatus() {
         return status;
     }

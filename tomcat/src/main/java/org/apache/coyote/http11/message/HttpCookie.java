@@ -30,7 +30,7 @@ public class HttpCookie {
         HashMap<String, String> directives = new HashMap<>(Map.of(
                 JSESSIONID_DIRECTIVE, session.getId()
         ));
-        return new HttpCookie(directives, false);
+        return new HttpCookie(directives, true);
     }
 
     public static HttpCookie from(List<String> cookieField) {
@@ -50,10 +50,6 @@ public class HttpCookie {
         String directiveName = directiveElements[DIRECTIVE_NAME_INDEX];
         String directiveValue = directiveElements[DIRECTIVE_VALUE_INDEX];
         return Map.entry(directiveName, directiveValue);
-    }
-
-    public void setJsessionid(String jsessionid) {
-        directives.put(JSESSIONID_DIRECTIVE, jsessionid);
     }
 
     public void setHttpOnly(boolean isHttpOnly) {

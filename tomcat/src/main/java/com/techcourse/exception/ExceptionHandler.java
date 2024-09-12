@@ -7,11 +7,12 @@ import org.slf4j.LoggerFactory;
 
 public class ExceptionHandler {
 
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
     public void handle(Exception e, HttpResponse response) {
         if (e instanceof UnauthorizedException) {
-            response.redirectTo("/401.html");
+            response.redirectTo(UNAUTHORIZED_PAGE);
             return;
         }
         if (e instanceof IllegalArgumentException) {

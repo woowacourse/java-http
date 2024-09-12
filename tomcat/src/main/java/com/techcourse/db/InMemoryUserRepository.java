@@ -23,5 +23,6 @@ public class InMemoryUserRepository {
         return database.get(account);
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

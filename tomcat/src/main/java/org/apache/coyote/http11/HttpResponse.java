@@ -52,6 +52,14 @@ public class HttpResponse {
         this.resourceName = resourceName;
     }
 
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
     public void setHttpCookie(HttpCookie httpCookie) {
         this.httpCookie = httpCookie;
     }

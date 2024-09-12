@@ -117,10 +117,8 @@ public class HttpRequestParser {
     private Session parseSession(HttpCookie httpCookie) {
         String sessionId = httpCookie.getValue("JSESSIONID");
         Session found = sessionManager.findSession(sessionId);
-        if (found == null && sessionId != null) {
-            Session session = new Session(sessionId);
-            sessionManager.add(new Session(sessionId));
-            return session;
+        if (found == null || sessionId == null) {
+            return sessionManager.create();
         }
         return found;
     }

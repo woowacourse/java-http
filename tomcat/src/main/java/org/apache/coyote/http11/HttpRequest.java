@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -14,6 +15,8 @@ public class HttpRequest {
     private String body;
 
     public HttpRequest() {
+        this.method = HttpMethod.GET;
+        this.protocolVersion = "HTTP/1.1";
     }
 
     public boolean hasMethod(HttpMethod method) {
@@ -49,6 +52,9 @@ public class HttpRequest {
     }
 
     public Session getSession() {
+        if (session == null) {
+            session = new Session(UUID.randomUUID().toString());
+        }
         return session;
     }
 

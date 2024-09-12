@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.http11.Session;
 
 public class SessionManager implements Manager {
@@ -17,6 +18,13 @@ public class SessionManager implements Manager {
             sessionManager = new SessionManager();
         }
         return sessionManager;
+    }
+
+    public Session create() {
+        String id = UUID.randomUUID().toString();
+        Session session = new Session(id);
+        add(session);
+        return session;
     }
 
     @Override

@@ -25,10 +25,6 @@ public class HttpRequestHeader {
         cookies = new HttpCookies(cookieLine);
     }
 
-    public void addCookie(HttpCookie cookie) {
-        cookies.add(cookie);
-    }
-
     public HttpCookie getCookie(String name) {
         return cookies.get(name);
     }

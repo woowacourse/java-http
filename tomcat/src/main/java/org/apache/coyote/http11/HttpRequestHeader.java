@@ -11,6 +11,10 @@ public record HttpRequestHeader(
         Map<String, String> queryString,
         Map<String, String> headers) {
 
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String COOKIE = "Cookie";
+
     public HttpRequestHeader(String request) {
         this(
                 extractHttpMethod(request),
@@ -61,16 +65,20 @@ public record HttpRequestHeader(
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
     }
 
+    public boolean hasContentLength(){
+        return headers.containsKey(CONTENT_LENGTH);
+    }
+
     public int getContentLength() {
-        return Integer.parseInt(headers.get("Content-Length"));
+        return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 
     public String getContentType() {
-        return headers.get("Content-Type");
+        return headers.get(CONTENT_TYPE);
     }
 
     public Map<String, String> getCookies() {
-        String cookie = headers.get("Cookie");
+        String cookie = headers.get(COOKIE);
         if (cookie == null) {
             return null;
         }

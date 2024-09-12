@@ -13,20 +13,13 @@ public class HttpRequestReceiver {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        HttpRequestHeader header = new HttpRequestHeader(receiveRequestHeader(bufferedReader));
-
-        HttpRequestBody body = null;
-        if ("POST".equals(header.getHttpMethod()) || "PUT".equals(header.getHttpMethod())) {
-            int contentLength = header.getContentLength();
-            String payload = receiveRequestBody(bufferedReader, contentLength);
-            String decodedPayload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
-            body = new HttpRequestBody(decodedPayload, header.getContentType());
-        }
+        HttpRequestHeader header = receiveRequestHeader(bufferedReader);
+        HttpRequestBody body = receiveRequestBody(header, bufferedReader);
 
         return new HttpRequest(header, body);
     }
 
-    private String receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
+    private HttpRequestHeader receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
         StringBuilder sb = new StringBuilder();
         while (true) {
             String input = bufferedReader.readLine();
@@ -35,12 +28,21 @@ public class HttpRequestReceiver {
             }
             sb.append(input).append(System.lineSeparator());
         }
-        return sb.toString();
+
+        return new HttpRequestHeader(sb.toString());
     }
 
-    private String receiveRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+    private HttpRequestBody receiveRequestBody(HttpRequestHeader header,
+                                               BufferedReader bufferedReader) throws IOException {
+        if (!header.hasContentLength()) {
+            return null;
+        }
+
+        int contentLength = header.getContentLength();
         char[] bodyChars = new char[contentLength];
         bufferedReader.read(bodyChars, 0, contentLength);
-        return new String(bodyChars);
+        String payload = new String(bodyChars);
+        String decodedPayload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+        return new HttpRequestBody(decodedPayload, header.getContentType());
     }
 }

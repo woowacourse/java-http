@@ -34,6 +34,35 @@ class Http11ProcessorTest {
                 "Hello world!");
     }
 
+    @Test
+    @DisplayName("루트 요청에 대해 index.html 페이지 응답")
+    void index() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: 5564 \r\n",
+                "\r\n",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+    }
+
     @Nested
     @DisplayName("정적 리소스 조회")
     class GetStaticResourceTest {

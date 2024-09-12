@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.techcourse.model.User;
-
 public class Session {
     private static final int DEFAULT_EXPIRATION_TIME_IN_SECONDS = 1800;
     private final String sessionId;
@@ -15,11 +13,14 @@ public class Session {
     private LocalDateTime lastAccessTime;
     private long expirationTimeInSeconds = DEFAULT_EXPIRATION_TIME_IN_SECONDS;
 
-    public Session(User user) {
+    public Session() {
         this.sessionId = UUID.randomUUID().toString();
-        attributes.put("userAccount", user);
         this.creationTime = LocalDateTime.now();
         this.lastAccessTime = LocalDateTime.now();
+    }
+
+    public void setAttributes(String key, Object value) {
+        attributes.put(key, value);
     }
 
     public boolean isExpired() {
@@ -33,5 +34,9 @@ public class Session {
 
     public String getSessionId() {
         return sessionId;
+    }
+
+    public boolean isNew(){
+        return attributes.isEmpty();
     }
 }

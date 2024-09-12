@@ -40,14 +40,14 @@ class HandlerMapperTest {
 		runTest(requestPath, expectedHandler);
 	}
 
-	@DisplayName("찾는 핸들러가 없는 경우 예외을 던진다.")
+	@DisplayName("찾는 핸들러가 없는 경우 404 핸들러를 반환한다.")
 	@Test
 	void findHandler_WhenHandlerNotFound() {
 		HttpRequest request = new HttpRequest("GET /not-found HTTP/1.1", List.of(), null);
 
-		assertThatThrownBy(() -> HandlerMapper.findHandler(request))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("handler not found. path: /not-found, method: GET");
+		Class<? extends Handler> expectedHandler = NotFoundHandler.class;
+
+		runTest("/not-found", expectedHandler);
 	}
 
 	private void runTest(String requestPath, Class<? extends Handler> expectedHandler) {

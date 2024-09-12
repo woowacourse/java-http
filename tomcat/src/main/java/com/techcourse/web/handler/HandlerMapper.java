@@ -2,9 +2,12 @@ package com.techcourse.web.handler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.request.HttpRequestLine;
+import org.apache.coyote.http11.http.response.HttpResponse;
+import org.apache.coyote.http11.http.response.HttpResponseHeader;
 
 public class HandlerMapper {
 
@@ -20,10 +23,8 @@ public class HandlerMapper {
 	public static Handler findHandler(HttpRequest httpRequest) {
 		HttpRequestLine requestLine = httpRequest.getRequestLine();
 		return handlers.stream()
-			.filter(handler -> handler.isSupport(requestLine))
+			.filter(h -> h.isSupport(requestLine))
 			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("handler not found. " +
-				"path: " + requestLine.getRequestPath() + ", method: " + requestLine.getMethod())
-			);
+			.orElse(NotFoundHandler.getInstance());
 	}
 }

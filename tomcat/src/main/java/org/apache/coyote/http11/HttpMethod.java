@@ -4,6 +4,7 @@ import com.techcourse.exception.client.BadRequestException;
 import java.util.Arrays;
 
 public enum HttpMethod {
+
     GET, POST;
 
     public static HttpMethod findByName(String name) {

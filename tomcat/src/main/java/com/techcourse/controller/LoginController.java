@@ -1,9 +1,9 @@
 package com.techcourse.controller;
 
 import com.techcourse.model.User;
-import com.techcourse.service.SessionService;
 import com.techcourse.service.LoginService;
-import java.util.Optional;
+import org.apache.catalina.session.Cookies;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -23,7 +23,7 @@ public class LoginController extends AbstractController{
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        if (alreadyLogin(request) || request.hasNoQuery()) {
+        if (alreadyLogin(request) || request.hasNoBody()) {
             redirectMain(request, response);
             return;
         }
@@ -31,8 +31,11 @@ public class LoginController extends AbstractController{
     }
 
     private static boolean alreadyLogin(HttpRequest request) {
-        Optional<String> optionalCookie = request.findFromHeader("Cookie");
-        return optionalCookie.filter(SessionService::hasSession).isPresent();
+        Session session = request.getSession(false);
+        if (session == null || !session.hasValue("user")) {
+            return false;
+        }
+        return true;
     }
 
     private static void redirectMain(HttpRequest request, HttpResponse response) {
@@ -52,11 +55,12 @@ public class LoginController extends AbstractController{
     }
 
     private static void requestLogin(HttpRequest request, HttpResponse response) {
-        User user = LoginService.login(request.findFromQueryParam("account"),
-                request.findFromQueryParam("password"));
+        User user = LoginService.login(request.findFromBody("account"),
+                request.findFromBody("password"));
+        Session session = request.getSession(true);
+        session.setAttribute("user", user);
         response.setHeaders(HttpHeaders.create(request, response));
-        response.addHeader("Set-Cookie", SessionService.createCookie(user));
-        log.info("[Login Success] = {}", user);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
         setRedirectHeaderToMain(response);
     }
 }

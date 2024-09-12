@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.ControllerAdviser;
 import com.techcourse.controller.FrontController;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int BUFFER_SIZE = 1024;
 
     private final Socket connection;
 
@@ -49,17 +47,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createRequest(InputStream inputStream) {
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)){
-            StringBuilder sb = new StringBuilder();
-            byte[] bytes = new byte[BUFFER_SIZE];
-            int readByteCount;
-
-            while ((readByteCount = bufferedInputStream.read(bytes)) != -1) {
-                String requestString = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
-                sb.append(requestString);
-            }
-
-            return HttpRequest.create(sb.toString());
+        try {
+            byte[] bytes = new byte[18000]; // TODO refactor
+            int readByteCount = inputStream.read(bytes);
+            String requestString = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
+            return HttpRequest.create(requestString);
         } catch (IOException e) {
             log.error("IO Exception occur during make request object");
         }

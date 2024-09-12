@@ -22,6 +22,10 @@ public class HttpResponse {
         headers.add(key, value);
     }
 
+    public void addCookie(String value) {
+        addHeader("Set-Cookie", value);
+    }
+
     public byte[] getBytes() {
         return getResponse().getBytes();
     }

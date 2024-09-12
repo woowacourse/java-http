@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.catalina.session.Cookies;
 import org.apache.coyote.view.View;
 
 public class HttpHeaders {
@@ -19,15 +20,19 @@ public class HttpHeaders {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String UTF_8 = ";charset=utf-8";
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, String> store;
+    private final Cookies cookies;
 
     public HttpHeaders() {
         store = new LinkedHashMap<>();
+        cookies = new Cookies();
     }
 
     public HttpHeaders(Map<String, String> store) {
         this.store = store;
+        cookies = new Cookies();
     }
 
     public static HttpHeaders create(HttpRequest request, HttpResponse response) {
@@ -50,16 +55,31 @@ public class HttpHeaders {
             throw new BadRequestException("잘못된 형식의 헤더입니다. = " + raw);
         }
         String[] split = raw.split(DELIMITER);
+        if (split[KEY_INDEX].equals(COOKIE)) {
+            handleCookie(split[VALUE_INDEX]);
+        }
         store.put(split[KEY_INDEX], split[VALUE_INDEX]);
+    }
+
+    private void handleCookie(String cookie) {
+        cookies.add(cookie);
     }
 
     public void add(String key, String value) {
         store.put(key, value);
     }
 
+//    public Optional<String> findCookie() {
+//        return cookies.findCookie();
+//    }
+
     public Optional<String> findByKey(String key) {
         String value = store.get(key);
         return Optional.ofNullable(value);
+    }
+
+    public Optional<String> findSessionId() {
+        return cookies.findSessionId();
     }
 
     public List<String> getHeaders() {

@@ -22,12 +22,12 @@ public class RegisterController extends AbstractController {
     private static final ResourceURI REDIRECT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.writeStaticResource(REGISTER_RESOURCE_URI);
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> parsed = QueryStringParser.parse(request.httpBody().body());
         String account = parsed.get("account");
         String password = parsed.get("password");

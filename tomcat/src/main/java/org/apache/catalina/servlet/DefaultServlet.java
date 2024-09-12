@@ -10,7 +10,7 @@ import org.apache.catalina.webresources.WebResource;
 public class DefaultServlet extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         WebResource webResource = StandardRoot.getResource(request.getURI());
         if (webResource.exists()) {
             response.writeStaticResource(request.getURI());

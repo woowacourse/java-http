@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     private static final ResourceURI REDIRECT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         Session session = request.getSession(false);
         if (Objects.nonNull(session)) {
             response.sendRedirect(REDIRECT_RESOURCE_URI);
@@ -38,7 +38,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Session session = request.getSession(true);
         Map<String, String> parsed = QueryStringParser.parse(request.httpBody().body());
         String account = parsed.get("account");

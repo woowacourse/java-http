@@ -10,7 +10,7 @@ public class RootController extends AbstractController {
     private static final ResourceURI ROOT_RESOURCE_URI = new ResourceURI("/index.html");
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.writeStaticResource(ROOT_RESOURCE_URI);
     }
 }

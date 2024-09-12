@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import java.util.NoSuchElementException;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Adapter;
@@ -20,7 +21,10 @@ public class CatalinaAdapter implements Adapter {
             String uri = request.getUri();
             Controller controller = RequestMapping.getController(uri);
             controller.service(request, response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            response.sendRedirect(request.getUri());
+        }
+        catch (Exception e) {
             log.error(e.getMessage(), e);
             response.sendRedirect(SERVER_ERROR_PAGE);
         }

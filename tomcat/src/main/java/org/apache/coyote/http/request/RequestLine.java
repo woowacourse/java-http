@@ -11,8 +11,12 @@ public class RequestLine {
     private final String protocol;
 
     public RequestLine(String method, String path, String protocol) {
-        this.method = HttpMethod.of(method);
-        this.uri = parseUri(path);
+        this(HttpMethod.of(method), path, protocol);
+    }
+
+    public RequestLine(HttpMethod method, String uri, String protocol) {
+        this.method = method;
+        this.uri = uri;
         this.protocol = protocol;
     }
 

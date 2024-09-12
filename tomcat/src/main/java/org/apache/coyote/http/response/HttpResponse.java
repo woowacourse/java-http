@@ -41,24 +41,7 @@ public class HttpResponse {
         return this.getBytes();
     }
 
-    public void sendRedirect(String path) {
-        setStatus(StatusCode.FOUND);
-        setHeader(Header.LOCATION.value(), path);
-    }
-
-    public void setStatus(StatusCode status) {
-        this.status = status;
-    }
-
-    public void setHeader(String key, String value) {
-        this.headers.put(key, value);
-    }
-
-    public void setBody(byte[] responseBody) {
-        this.body = new String(responseBody);
-    }
-
-    public byte[] getBytes() {
+    private byte[] getBytes() {
         String statusLine = getStatusLine();
         List<String> headerLines = getHeaderLines();
         String bodyLines = getBodyLines();
@@ -86,6 +69,27 @@ public class HttpResponse {
 
     private String getBodyLines() {
         return LINE_SEPARATOR + body;
+    }
+
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
+    public void sendRedirect(String path) {
+        setStatus(StatusCode.FOUND);
+        setHeader(Header.LOCATION.value(), path);
+    }
+
+    public void setStatus(StatusCode status) {
+        this.status = status;
+    }
+
+    public void setHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void setBody(byte[] responseBody) {
+        this.body = new String(responseBody);
     }
 
     public void setCookie(Cookie cookie) {

@@ -1,5 +1,6 @@
 package org.apache.catalina.controller;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -50,20 +51,20 @@ public abstract class AbstractController implements Controller {
 
     protected final String getRequiredParameter(HttpRequest request, String parameterName) {
         String value = request.getParameter(parameterName);
-        validateNotNull(parameterName, value);
+        validateNotNull(value);
         return value;
     }
 
     protected final String getRequiredBodyField(HttpRequest request, String fieldName) {
         RequestBody requestBody = request.getBody();
         String value = requestBody.getValue(fieldName);
-        validateNotNull(fieldName, value);
+        validateNotNull(value);
         return value;
     }
 
-    private void validateNotNull(String parameterName, String value) {
+    private void validateNotNull(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(parameterName + " is required.");
+            throw new NoSuchElementException("필수 파라미터가 누락되었습니다.");
         }
     }
 }

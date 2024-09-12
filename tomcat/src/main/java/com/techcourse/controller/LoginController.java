@@ -30,8 +30,8 @@ public class LoginController extends Controller {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.parseBodyParameter("account");
-        String password = request.parseBodyParameter("password");
+        String account = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
 
         if (account == null || password == null) {
             response.setStatusCode("401 Unauthorized");

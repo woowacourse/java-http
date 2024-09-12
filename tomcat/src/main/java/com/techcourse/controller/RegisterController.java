@@ -30,9 +30,9 @@ public class RegisterController extends Controller {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String bodyInputAccount = request.parseBodyParameter("account");
-        String bodyInputPassword = request.parseBodyParameter("password");
-        String bodyInputEmail = request.parseBodyParameter("email");
+        String bodyInputAccount = request.getBodyParameter("account");
+        String bodyInputPassword = request.getBodyParameter("password");
+        String bodyInputEmail = request.getBodyParameter("email");
 
         if (bodyInputAccount == null || bodyInputPassword == null || bodyInputEmail == null) {
             response.setStatusCode("400 Bad Request");

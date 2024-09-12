@@ -2,14 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.Container;
 import com.techcourse.controller.Controller;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, User> sessionStorage = new HashMap<>();
 
     private final Socket connection;
 
@@ -35,9 +32,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = HttpRequest.create(new BufferedReader(new InputStreamReader(inputStream)));
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            HttpRequest request = HttpRequest.create(bufferedReader);
             HttpResponse response = new HttpResponse();
 
             Controller controller = new Container().mapController(request.getUri());
@@ -45,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }

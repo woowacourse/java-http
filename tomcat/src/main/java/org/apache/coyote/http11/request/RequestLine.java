@@ -8,7 +8,7 @@ public class RequestLine {
 
     private String method;
     private String path;
-    private Map<String, String> queryParameters = new HashMap<>();
+    private Map<String, String> queryParameters;
 
     public static RequestLine create(String requestLine) {
         String[] splitRequestLine = requestLine.split(" ");

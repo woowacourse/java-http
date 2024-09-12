@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.LoginController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -48,13 +49,16 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
 
             String requestedFilePath = httpRequest.getHttpRequestPath();
-            if (httpRequest.getHttpRequestPath().contains("/login")) {
-                requestedFilePath = login(httpRequest);
-            }
+            HttpStatusCode httpStatusCode = HttpStatusCode.OK;
 
             HttpResponseBody httpResponseBody = new HttpResponseBody(
                     fileReader.readFile(requestedFilePath));
             HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
+
+            if (httpRequest.getHttpRequestPath().contains("/login")) { // response를 통으로 만들어주기
+                httpResponse = LoginController.login(httpRequest);
+            }
+
             String response = httpResponseParser.parseResponse(httpResponse);
 
             outputStream.write(response.getBytes());
@@ -65,28 +69,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse mapToHttpResponse(HttpStatusCode code, HttpRequest request, HttpResponseBody responseBody) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", request.getContentType() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(headers);
+        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(new HashMap<>());
+        httpResponseHeaders.setContentType(request);
+        httpResponseHeaders.setContentLength(responseBody);
         return new HttpResponse(code, httpResponseHeaders, responseBody);
-    }
-
-    private String login(HttpRequest httpRequest) {
-        if (httpRequest.isParameterEmpty()) {
-            return "/login";
-        }
-        String account = httpRequest.getQueryParameter("account");
-        String password = httpRequest.getQueryParameter("password");
-        try {
-            User foundUser = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException(account + "는 존재하지 않는 계정입니다."));
-            if (foundUser.checkPassword(password)) {
-                log.info("user : " + foundUser);
-            }
-        } catch (IllegalArgumentException e) {
-            return "/401.html";
-        }
-        return "/index.html";
     }
 }

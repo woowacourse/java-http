@@ -10,4 +10,8 @@ public class Constants {
     public static final String STATUS_LINE_DELIMITER = " ";
     public static final String HTTP_HEADER_SEPARATOR = ": ";
     public static final String EMPTY = "";
+    public static final String CRLF = "\r\n";
+
+    private Constants() {
+    }
 }

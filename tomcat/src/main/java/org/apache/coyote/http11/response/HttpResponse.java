@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.Constants.CRLF;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.Cookies;
@@ -54,7 +56,7 @@ public class HttpResponse {
     }
 
     public String toMessage() {
-        return String.join("\r\n",
+        return String.join(CRLF,
                 statusLine.toMessage(),
                 responseHeaders.toMessage(),
                 responseBody.toMessage());

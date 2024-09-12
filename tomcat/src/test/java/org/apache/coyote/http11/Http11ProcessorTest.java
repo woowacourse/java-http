@@ -16,7 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-@DisplayName("Http11Processor")
+@DisplayName("HTTP11 프로세서")
 class Http11ProcessorTest {
 
     @DisplayName("Http11Processor의 실행을 확인한다.")

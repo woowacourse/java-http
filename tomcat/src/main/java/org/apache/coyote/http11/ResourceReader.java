@@ -20,6 +20,15 @@ public class ResourceReader {
         }
     }
 
+    public static String probeContentType(String resourcePath) {
+        Path path = resolvePath(resourcePath);
+        try {
+            return Files.probeContentType(path);
+        } catch (IOException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+    }
+
     private static Path resolvePath(String resourcePath) {
         URL resource = ResourceReader.class.getResource("/static" + resourcePath);
         try {

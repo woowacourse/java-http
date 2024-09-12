@@ -10,7 +10,8 @@ public enum HttpHeader {
     SET_COOKIE("Set-Cookie"),
     HOST("Host"),
     CONNECTION("Connection"),
-    ACCEPT("Accept")
+    ACCEPT("Accept"),
+    NOT_YET_USED("Other"),
     ;
 
     private final String name;
@@ -23,7 +24,7 @@ public enum HttpHeader {
         return Arrays.stream(HttpHeader.values())
                 .filter(header -> header.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("입력 값과 일치하는 HttpHeader가 없습니다. 입력 = " + name));
+                .orElse(NOT_YET_USED);
     }
 
     public String getName() {

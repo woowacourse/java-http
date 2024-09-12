@@ -29,7 +29,7 @@ public class RequestMapping {
         HttpResponse response = new HttpResponse();
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
-            new StaticResourceHandler().service(request, response);
+            new StaticResourceHandler().handle(request, response);
             return response;
         }
         Controller controller = getController(request.getMethod(), path);

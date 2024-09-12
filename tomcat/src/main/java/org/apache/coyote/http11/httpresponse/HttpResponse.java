@@ -55,7 +55,8 @@ public class HttpResponse {
         httpResponseHeader.addHeader(headerName, value);
     }
 
-    public void location(String path) {
+    public void location(HttpRequest httpRequest, String path) {
+        found(httpRequest);
         addHeader(HttpHeaderName.LOCATION, path);
     }
 

@@ -37,8 +37,7 @@ class HttpResponseTest {
         HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
         HttpResponse httpResponse = new HttpResponse();
 
-        httpResponse.found(httpRequest);
-        httpResponse.location("/index");
+        httpResponse.location(httpRequest, "/index");
         httpResponse.setCookie("JSESSIONID=abcde");
         httpResponse.contentLength("89");
         httpResponse.contentType("test");

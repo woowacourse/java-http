@@ -37,21 +37,31 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()
-        ) {
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream()) {
             var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
 
-            HttpResponse httpResponse = new HttpResponse();
-            handle(httpRequest, httpResponse);
+            HttpResponse httpResponse = createResponse(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse createResponse(HttpRequest httpRequest) {
+        HttpResponse httpResponse = new HttpResponse();
+        try {
+            handle(httpRequest, httpResponse);
+            return httpResponse;
+        } catch (NotFoundException e) {
+            httpResponse.location(httpRequest, NOT_FOUND_PATH);
+        } catch (UnauthorizedException e) {
+            httpResponse.location(httpRequest, UNAUTHORIZED_PATH);
+        }
+        return httpResponse;
     }
 
     private void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -65,12 +75,6 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = requestMapping.getController(httpRequest);
 
             controller.service(httpRequest, httpResponse);
-        } catch (NotFoundException e) {
-            httpResponse.found(httpRequest);
-            httpResponse.location(NOT_FOUND_PATH);
-        } catch (UnauthorizedException e) {
-            httpResponse.found(httpRequest);
-            httpResponse.location(UNAUTHORIZED_PATH);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }

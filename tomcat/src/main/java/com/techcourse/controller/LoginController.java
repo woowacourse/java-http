@@ -28,8 +28,7 @@ public class LoginController extends AbstractController {
     }
 
     private void redirectLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.found(httpRequest);
-        httpResponse.location(LOGIN_PATH);
+        httpResponse.location(httpRequest, LOGIN_PATH);
     }
 
     private boolean validateUserInput(HttpRequest httpRequest) {
@@ -54,9 +53,8 @@ public class LoginController extends AbstractController {
         Session session = httpRequest.getSession();
         session.setUser(user);
         log.info(user.toString());
-        httpResponse.found(httpRequest);
+        httpResponse.location(httpRequest, INDEX_PATH);
         httpResponse.setSession(session);
-        httpResponse.location(INDEX_PATH);
     }
 
     @Override
@@ -69,8 +67,7 @@ public class LoginController extends AbstractController {
         }
         User user = (User) session.getUser();
         log.info(user.toString());
-        httpResponse.found(httpRequest);
+        httpResponse.location(httpRequest, INDEX_PATH);
         httpResponse.setSession(session);
-        httpResponse.location(INDEX_PATH);
     }
 }

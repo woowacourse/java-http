@@ -55,7 +55,6 @@ public class RegisterController extends AbstractController {
     }
 
     private void redirectPage(HttpRequest httpRequest, HttpResponse httpResponse, String path) {
-        httpResponse.found(httpRequest);
-        httpResponse.location(path);
+        httpResponse.location(httpRequest, path);
     }
 }

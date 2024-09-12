@@ -114,8 +114,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURL.equals("/register")) {
-            String path = register(requestBody);
-            doGet(httpRequestHeaders, path, outputStream);
+            boolean isregistered = register(requestBody);
+            if (isregistered) {
+                redirect("", "/", outputStream);
+                return;
+            }
+            sendHttpResponse("/static/register.html", outputStream, "400 BAD REQUEST", "text/html;charset=utf-8", "");
         }
     }
 
@@ -129,11 +133,12 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = determineContentType(result[1]);
         String cookie = "";
 
-        if (httpSession.isPresent() && !isLogined(cookies)) {
-            cookie = setCookie(httpSession.get().getId());
+        if (httpStatus.equals("302 FOUND")) {
+            redirect(cookieHeader, "/", outputStream);
+            return;
         }
 
-        sendHttpResponse(path, outputStream, httpStatus, contentType, cookie);
+        redirect(cookieHeader, "/401", outputStream);
     }
 
     private String setCookie(UUID uuid) {
@@ -188,8 +193,15 @@ public class Http11Processor implements Runnable, Processor {
         String cookies = httpRequestHeaders.get("Cookie");
         String[] searchResourcePath = determineResourcePath(requestURL);
 
-        if (isLogined(cookies) && requestURL.equals("/login")) {
-            searchResourcePath = determineResourcePath("/");
+        String sessionId = "";
+        HttpCookies httpCookies = HttpCookies.from(cookies);
+
+        if (httpCookies.hasJsessionId()) {
+            sessionId = httpCookies.getJsessionId();
+        }
+
+        if (sessionManager.findSession(sessionId) != null && requestURL.equals("/login")) {
+            redirect("", "/", outputStream);
         }
 
         String httpStatus = searchResourcePath[0];
@@ -327,6 +339,32 @@ public class Http11Processor implements Runnable, Processor {
         return uuid;
     }
 
+    private void redirect(String cookieHeader, String path, OutputStream outputStream) throws IOException {
+        String locationHeader = "Location: " + path;
+
+        String[] resourcePath = determineResourcePath(path);
+
+        URL resource = getClass().getResource(resourcePath[1]);
+
+        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        String header = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Content-Type: text/html;charset=utf-8  ",
+                "Content-Length: " + responseBody.length + " ",
+                locationHeader,
+                cookieHeader,
+                "");
+
+        byte[] headerBytes = header.getBytes();
+        byte[] response = new byte[headerBytes.length + responseBody.length];
+
+        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
+        System.arraycopy(responseBody, 0, response, headerBytes.length, responseBody.length);
+
+        writeHttpResponse(response, outputStream);
+    }
+
     private void sendHttpResponse(final String path, final OutputStream outputStream, String httpStatus,
                                   final String contentType, final String cookie) throws IOException {
 
@@ -334,7 +372,7 @@ public class Http11Processor implements Runnable, Processor {
         writeHttpResponse(response, outputStream);
     }
 
-    private byte[] createHttpResponse(String httpStatus, String contentType, String cookie, final String path) throws IOException {
+    private byte[] createHttpResponse(String httpStatus, String contentType, String cookieHeader, final String path) throws IOException {
         URL resource = getClass().getResource(path);
 
         if (resource == null) {
@@ -348,7 +386,7 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 " + httpStatus + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.length + " ",
-                cookie,
+                cookieHeader,
                 "");
 
         byte[] headerBytes = header.getBytes();

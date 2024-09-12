@@ -45,6 +45,7 @@ public class RegisterController extends AbstractController {
             sessionManager.add(sessionId, session);
             response.setRedirect(INDEX_PATH);
             response.setCookie(HttpCookie.ofSessionId(sessionId));
+            return;
         }
 
         throw new UncheckedServletException("이미 존재하는 ID입니다.");

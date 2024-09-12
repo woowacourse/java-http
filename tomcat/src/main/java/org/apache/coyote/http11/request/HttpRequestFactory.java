@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequestFactory {
 
@@ -15,30 +16,30 @@ public class HttpRequestFactory {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader reader = new BufferedReader(inputStreamReader);
 
-        String requestLine = reader.readLine();
-        if (requestLine == null) {
-            return null;
+        String line = reader.readLine();
+        if (line == null) {
+            throw new IOException("Empty request");
         }
 
-        List<String> headers = reader.lines()
-                .takeWhile(s -> !s.isBlank())
-                .toList();
+        RequestLine requestLine = RequestLine.from(line);
+        HttpHeaders headers = HttpHeaders.from(readHeaders(reader));
+        RequestBody requestBody = RequestBody.from(readRequestBody(reader, headers));
 
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers);
-        setRequestBodyIfPresent(reader, httpRequest);
-        return httpRequest;
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    private static void setRequestBodyIfPresent(BufferedReader reader, HttpRequest httpRequest) throws IOException {
-        int contentLength = httpRequest.getContentLength();
-        if (contentLength == 0) {
-            return;
-        }
+    private static List<String> readHeaders(BufferedReader reader) {
+        return reader.lines()
+                .takeWhile(s -> !s.isBlank())
+                .toList();
+    }
+
+    private static String readRequestBody(BufferedReader reader, HttpHeaders httpHeaders) throws IOException {
+        int contentLength = httpHeaders.getContentLength();
 
         char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
+        int read = reader.read(buffer, 0, contentLength);
 
-        httpRequest.setRequestBody(requestBody);
+        return new String(buffer, 0, read);
     }
 }

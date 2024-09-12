@@ -1,40 +1,23 @@
 package org.apache.coyote.http11.request;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private RequestBody requestBody;
+    private final RequestBody requestBody;
 
-    public HttpRequest(String requestLine, List<String> headers) {
-        this.requestLine = RequestLine.from(requestLine);
-        this.headers = parseHeaders(headers);
-        this.requestBody = RequestBody.empty();
-    }
-
-    private HttpHeaders parseHeaders(List<String> headers) {
-        Map<String, String> headersMap = headers.stream()
-                .map(header -> header.split(": "))
-                .collect(Collectors.toMap(header -> header[0], header -> header[1]));
-
-        return new HttpHeaders(headersMap);
-    }
-
-    public int getContentLength() {
-        if (!headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
-            return 0;
-        }
-        return Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, RequestBody requestBody) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.requestBody = requestBody;
     }
 
     public boolean sessionNotExists() {
@@ -65,7 +48,7 @@ public class HttpRequest {
             return null;
         }
 
-        HttpCookies cookie = HttpCookies.from(headers.get(HttpHeaders.COOKIE));
+        HttpCookies cookie = HttpCookies.from(headers.getCookie());
         String sessionId = cookie.get(Cookie.JSESSIONID);
         return SessionManager.findSession(sessionId);
     }
@@ -86,15 +69,15 @@ public class HttpRequest {
         return requestLine.getExtension();
     }
 
+    public String getPathWithExtension() {
+        return requestLine.getPathWithExtension();
+    }
+
     public Map<String, String> getQueryString() {
         return requestLine.getQueryString();
     }
 
     public Map<String, String> getParams() {
         return requestBody.getParams();
-    }
-
-    public void setRequestBody(String requestBody) {
-        this.requestBody = RequestBody.from(requestBody);
     }
 }

@@ -1,23 +1,28 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class RequestLine {
 
     private final HttpMethod method;
-    private final RequestURI requestUri;
-    private final String httpVersion;
+    private final RequestURI requestURI;
+    private final HttpVersion httpVersion;
 
-    public RequestLine(HttpMethod method, RequestURI requestUri, String httpVersion) {
+    public RequestLine(HttpMethod method, RequestURI requestURI, HttpVersion httpVersion) {
         this.method = method;
-        this.requestUri = requestUri;
+        this.requestURI = requestURI;
         this.httpVersion = httpVersion;
     }
 
     public static RequestLine from(String requestLine) {
         String[] tokens = requestLine.split(" ");
-        return new RequestLine(HttpMethod.valueOf(tokens[0]), new RequestURI(tokens[1]), tokens[2]);
+
+        HttpMethod method = HttpMethod.from(tokens[0]);
+        RequestURI requestURI = RequestURIFactory.create(tokens[1]);
+        HttpVersion httpVersion = HttpVersion.from(tokens[2]);
+
+        return new RequestLine(method, requestURI, httpVersion);
     }
 
     public HttpMethod getMethod() {
@@ -25,19 +30,23 @@ public class RequestLine {
     }
 
     public Map<String, String> getQueryString() {
-        return requestUri.getQueryString();
-    }
-
-    public String getExtension() {
-        return requestUri.getExtension();
+        return requestURI.getQueryString();
     }
 
     public String getPath() {
-        return requestUri.getPath();
+        return requestURI.getPath();
+    }
+
+    public String getExtension() {
+        return requestURI.getExtension();
+    }
+
+    public String getPathWithExtension() {
+        return requestURI.getPathWithExtension();
     }
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", method, requestUri.getURI(), httpVersion);
+        return String.format("%s %s %s", method, requestURI.getUri(), httpVersion.getVersion());
     }
 }

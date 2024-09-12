@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,11 @@ import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class RegisterHandlerTest {
+
+    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of(
+            "/register", new RegisterHandler()
+    ));
+    private final FrontController controller = new FrontController(handlerMapping);
 
     @Test
     @DisplayName("GET '/register' 요청에 대한 응답이 정상적으로 처리된다.")
@@ -26,7 +32,7 @@ class RegisterHandlerTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -57,7 +63,7 @@ class RegisterHandlerTest {
                 "account=gooreum&password=password"
         );
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -89,7 +95,7 @@ class RegisterHandlerTest {
                 "account=gugu&password=password"
         );
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);

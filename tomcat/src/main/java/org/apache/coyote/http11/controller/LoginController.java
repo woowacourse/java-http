@@ -12,7 +12,7 @@ import org.apache.coyote.http11.service.LoginService;
 
 public class LoginController implements Controller {
 
-    public static LoginController INSTANCE = new LoginController();
+    private static final LoginController INSTANCE = new LoginController();
 
     private final LoginService loginService = LoginService.getInstance();
 
@@ -32,10 +32,12 @@ public class LoginController implements Controller {
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if(httpRequest.isQueryStringRequest()){
             checkLogin(httpRequest, httpResponse);
+            return;
         }
 
         if(httpRequest.hasCookie() && httpRequest.getCookie().has("JSESSIONID")){
             checkSession(httpRequest, httpResponse);
+            return;
         }
 
         loginView(httpResponse);

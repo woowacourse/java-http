@@ -1,10 +1,11 @@
-package org.apache.coyote;
+package org.apache.coyote.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
 

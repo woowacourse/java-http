@@ -4,11 +4,11 @@ import com.techcourse.exception.TechcourseException;
 import com.techcourse.model.UserService;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.coyote.HttpCookie;
-import org.apache.coyote.HttpMethod;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.HttpStatusCode;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpStatusCode;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 public class ServletRequestHandler {
 

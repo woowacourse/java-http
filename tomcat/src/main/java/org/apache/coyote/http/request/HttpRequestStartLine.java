@@ -1,4 +1,6 @@
-package org.apache.coyote;
+package org.apache.coyote.http.request;
+
+import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequestStartLine {
 

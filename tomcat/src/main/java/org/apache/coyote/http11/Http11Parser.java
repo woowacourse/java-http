@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map.Entry;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http.response.HttpResponse;
 
 public class Http11Parser {
 

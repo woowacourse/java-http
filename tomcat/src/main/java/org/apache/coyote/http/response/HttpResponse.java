@@ -1,6 +1,9 @@
-package org.apache.coyote;
+package org.apache.coyote.http.response;
 
 import java.util.Map;
+import org.apache.coyote.http.HttpContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpStatusCode;
 
 public class HttpResponse {
 

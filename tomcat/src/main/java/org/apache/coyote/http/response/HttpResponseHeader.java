@@ -1,7 +1,9 @@
-package org.apache.coyote;
+package org.apache.coyote.http.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http.HttpContentType;
+import org.apache.coyote.http.HttpCookie;
 
 public class HttpResponseHeader {
 

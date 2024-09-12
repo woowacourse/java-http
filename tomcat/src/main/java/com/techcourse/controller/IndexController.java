@@ -11,6 +11,6 @@ public class IndexController extends AbstractController {
         String responseBody = "Hello world!";
 
         response.setBody(new ResponseBody("text/html", responseBody));
-        response.send200Response();
+        response.set200Response();
     }
 }

@@ -7,6 +7,6 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.sendStaticResourceResponse(request.getPath());
+        response.setStaticResourceResponse(request.getPath());
     }
 }

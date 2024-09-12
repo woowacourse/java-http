@@ -15,11 +15,11 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request, response)) {
-            response.sendRedirect("/index.html");
+            response.setRedirectResponse("/index.html");
             return;
         }
 
-        response.sendStaticResourceResponse("/login.html");
+        response.setStaticResourceResponse("/login.html");
     }
 
     private boolean isLoggedIn(HttpRequest request, HttpResponse response) throws IOException {
@@ -38,13 +38,13 @@ public class LoginController extends AbstractController {
                 .orElse(null);
 
         if (user == null) {
-            response.sendRedirect("/401.html");
+            response.setRedirectResponse("/401.html");
             return;
         }
 
         initializeSessionIfNotExists(request, response, user);
 
-        response.sendRedirect("/index.html");
+        response.setRedirectResponse("/index.html");
     }
 
     private void initializeSessionIfNotExists(HttpRequest request, HttpResponse response, User user) {

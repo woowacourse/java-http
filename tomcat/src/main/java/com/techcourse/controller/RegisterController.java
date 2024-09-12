@@ -9,19 +9,26 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class RegisterController extends AbstractController {
 
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+    private static final String DEFAULT_PATH = "static";
+    private static final String INDEX_HTML = "/index.html";
+    private static final String REGISTER_HTML = "/register.html";
+
     private final UserService userService = UserService.getInstance();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> keyValueBodies = request.getKeyValueBodies();
 
-        String account = keyValueBodies.get("account");
-        String password = keyValueBodies.get("password");
-        String email = keyValueBodies.get("email");
+        String account = keyValueBodies.get(ACCOUNT);
+        String password = keyValueBodies.get(PASSWORD);
+        String email = keyValueBodies.get(EMAIL);
 
         userService.registerUser(account, password, email);
 
-        String path = "static/index.html";
+        String path = DEFAULT_PATH + INDEX_HTML;
 
         response.setStatusLine(HttpStatus.OK);
         response.setStaticBody(path);
@@ -29,7 +36,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String path = "static/register.html";
+        String path = DEFAULT_PATH + REGISTER_HTML;
 
         response.setStatusLine(HttpStatus.OK);
         response.setStaticBody(path);

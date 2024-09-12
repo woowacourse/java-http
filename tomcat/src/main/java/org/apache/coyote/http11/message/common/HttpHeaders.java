@@ -10,6 +10,7 @@ public class HttpHeaders {
     private static final int VALUE_INDEX = 1;
     private static final String HEADER_REGEX = ": ";
     private static final String LINE_FEED = "\r\n";
+    private static final String DEFAULT_CONTENT_LENGTH = "0";
 
     private final Map<String, String> headers;
 
@@ -37,7 +38,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.getOrDefault(HttpHeaderField.CONTENT_LENGTH.getName(), "0"));
+        return Integer.parseInt(headers.getOrDefault(HttpHeaderField.CONTENT_LENGTH.getName(), DEFAULT_CONTENT_LENGTH));
     }
 
     public void setHeaders(String key, String value) {

@@ -15,6 +15,8 @@ import org.apache.util.ResourceReader;
 public class HttpResponse {
 
     private static final String CHARSET = ";charset=utf-8";
+    private static final String CRLF = "\r\n";
+
     private final HttpStatusLine statusLine;
     private final HttpHeaders headers;
     private final HttpBody body;
@@ -62,6 +64,6 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());
+        return String.join(CRLF, statusLine.toString(), headers.toString(), body.toString());
     }
 }

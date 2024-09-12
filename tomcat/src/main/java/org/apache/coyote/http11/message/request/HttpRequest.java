@@ -13,6 +13,8 @@ import org.apache.util.parser.Parser;
 
 public class HttpRequest {
 
+    private static final int OFFSET = 0;
+
     private final HttpRequestLine startLine;
     private final HttpHeaders headers;
     private final HttpBody body;
@@ -46,7 +48,7 @@ public class HttpRequest {
 
     private static String parseBody(BufferedReader reader, int countLength) throws IOException {
         char[] buffer = new char[countLength];
-        reader.read(buffer, 0, countLength);
+        reader.read(buffer, OFFSET, countLength);
         return new String(buffer);
     }
 

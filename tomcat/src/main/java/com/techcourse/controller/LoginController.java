@@ -20,6 +20,12 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String USER = "user";
+    private static final String DEFAULT_PATH = "static";
+    private static final String INDEX_HTML = "/index.html";
+    private static final String LOGIN_HTML = "/login.html";
 
     private final UserService userService = UserService.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -27,8 +33,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         Map<String, String> params = request.getKeyValueBodies();
-        String account = params.get("account");
-        String password = params.get("password");
+        String account = params.get(ACCOUNT);
+        String password = params.get(PASSWORD);
 
         if (!userService.isAccountExist(account)) {
             handleFailedLogin(response);
@@ -53,7 +59,7 @@ public class LoginController extends AbstractController {
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {
         Session session = new Session();
-        session.setAttribute("user", user);
+        session.setAttribute(USER, user);
         sessionManager.add(session);
 
         HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
@@ -61,7 +67,7 @@ public class LoginController extends AbstractController {
         httpCookie.setHttpOnly(true);
 
         response.setStatusLine(HttpStatus.FOUND);
-        response.setHeader(HttpHeaderField.LOCATION.getName(), "/index.html");
+        response.setHeader(HttpHeaderField.LOCATION.getName(), INDEX_HTML);
         response.setHeader(HttpHeaderField.SET_COOKIE.getName(), httpCookie.toString());
         log.info("User logged in: {}", user);
     }
@@ -79,8 +85,8 @@ public class LoginController extends AbstractController {
 
     private String determinePagePath(HttpCookie sessionCookie) {
         if (sessionManager.isExistSession(sessionCookie.getValue())) {
-            return "static/index.html";
+            return DEFAULT_PATH + INDEX_HTML;
         }
-        return "static/login.html";
+        return DEFAULT_PATH + LOGIN_HTML;
     }
 }

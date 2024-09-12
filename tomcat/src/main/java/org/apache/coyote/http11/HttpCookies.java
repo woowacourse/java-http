@@ -9,6 +9,7 @@ public class HttpCookies {
     private static final int VALUE_INDEX = 1;
     private static final String COOKIE_REGEX = "; ";
     private static final String KEY_VALUE_REGEX = "=";
+    private static final int KEY_VALUE_LENGTH = 2;
 
     private List<HttpCookie> cookies;
 
@@ -26,7 +27,7 @@ public class HttpCookies {
         String[] parts = cookies.split(COOKIE_REGEX);
         for (String part : parts) {
             String[] keyValue = part.trim().split(KEY_VALUE_REGEX);
-            if (keyValue.length == 2) {
+            if (keyValue.length == KEY_VALUE_LENGTH) {
                 result.add(new HttpCookie(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]));
             }
         }
@@ -37,7 +38,7 @@ public class HttpCookies {
         return cookies.stream()
                 .filter(cookie -> cookie.getName().equals(name))
                 .findFirst()
-                .orElse(new HttpCookie("", ""));
+                .orElse(new HttpCookie(name, ""));
     }
 
     @Override

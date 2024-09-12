@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.request.HttpMethod.POST;
 import static org.apache.coyote.http11.domain.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.domain.HttpStatusCode.OK;
 
@@ -12,14 +14,18 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.Cookie;
 import org.apache.coyote.http11.domain.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +39,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    private static final String GET = "GET";
-    private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
     private static final String CONTENT_TYPE = "Content-Type";
@@ -60,52 +64,63 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String[] requestLine = reader.readLine().split(" ");
-            String method = requestLine[0];
-            String url = requestLine[1];
-            String version = requestLine[2];
+            HttpRequest httpRequest = readHttpRequest(reader);
 
-            Map<String, String> requestHeaders = readRequestHeaders(reader);
-
-            if (method.equals(GET)) {
-                doGet(url, version, requestHeaders, outputStream);
+            if (httpRequest.getMethod().equals(GET)) {
+                doGet(httpRequest, outputStream);
             }
-            if (method.equals(POST)) {
-                doPost(url, version, requestHeaders, reader, outputStream);
+            if (httpRequest.getMethod().equals(POST)) {
+                doPost(httpRequest, reader, outputStream);
             }
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> readRequestHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
+    private HttpRequest readHttpRequest(BufferedReader reader) throws IOException {
+        HttpRequestLine httpRequestLine = new HttpRequestLine(reader.readLine());
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(readRequestHeaders(reader));
+        HttpRequestBody httpRequestBody = new HttpRequestBody(readRequestBody(httpRequestHeader, reader));
+        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+    }
+
+    private List<String> readRequestHeaders(BufferedReader reader) throws IOException {
+        List<String> requestHeaders = new ArrayList<>();
         String line;
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
-            String[] header = line.split(HEADER_DELIMITER);
-            requestHeaders.put(header[0], header[1]);
+        while (!(line = reader.readLine()).isEmpty()) {
+            requestHeaders.add(line);
         }
-        return Collections.unmodifiableMap(requestHeaders);
+        return requestHeaders;
+    }
+
+    private String readRequestBody(HttpRequestHeader requestHeader, BufferedReader reader) throws IOException {
+        String contentLengthHeader = requestHeader.getContentLength();
+        if (contentLengthHeader == null) {
+            return "";
+        }
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private void doGet(
-            String url,
-            String version,
-            Map<String, String> requestHeaders,
+            HttpRequest httpRequest,
             OutputStream outputStream
     ) throws IOException {
-        if (url.equals("/")) {
+        String path = httpRequest.getPath();
+        String version = httpRequest.getVersion();
+        if (path.equals("/")) {
             writeHttpResponse(
                     "Hello world!",
                     createHttpResponseHeader(version + " 200 OK ", "text/html", "Hello world!"),
                     outputStream);
             return;
         }
-        String[] result = determineGetResponse(url, version, requestHeaders);
-        Path path = getPath(result);
-        var responseBody = Files.readString(path);
-        String contentType = Files.probeContentType(path);
+        String[] result = determineGetResponse(path, version, httpRequest.getRequestHeader());
+        Path filePath = getPath(result);
+        var responseBody = Files.readString(filePath);
+        String contentType = Files.probeContentType(filePath);
 
         String responseHeader = createHttpResponseHeader(result[0], contentType, responseBody);
         writeHttpResponse(responseBody, responseHeader, outputStream);
@@ -133,14 +148,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doPost(
-            String url,
-            String version,
-            Map<String, String> requestHeaders,
+            HttpRequest httpRequest,
             BufferedReader reader,
             OutputStream outputStream
     ) throws IOException {
-        Map<String, String> requestBody = readRequestBody(requestHeaders, reader);
-        String[] responseHeaderAndPath = determinePostResponse(url, version, requestBody);
+        String url = httpRequest.getPath();
+        String version = httpRequest.getVersion();
+        String[] responseHeaderAndPath = determinePostResponse(url, version, httpRequest.getRequestBody());
 
         final Path path = getPath(responseHeaderAndPath);
         var responseBody = Files.readString(path);
@@ -214,20 +228,6 @@ public class Http11Processor implements Runnable, Processor {
         Session session = new Session(cookies.get(JSESSIONID));
         sessionManager.add(session);
         session.setAttribute("user", user);
-    }
-
-    private Map<String, String> readRequestBody(Map<String, String> requestHeaders, BufferedReader reader) throws IOException {
-        Map<String, String> result = new HashMap<>();
-        int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String[] params = new String(buffer).split(PARAMETER_SEPARATOR);
-        for(String param: params) {
-            String[] body = param.split(ASSIGN_OPERATOR);
-            result.put(body[0], body[1]);
-        }
-
-        return Collections.unmodifiableMap(result);
     }
 
     private String[] doRegister(String version, Map<String, String> requestBody) {

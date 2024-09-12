@@ -9,7 +9,7 @@ public class RequestControllerMapper {
 
     static {
         controllerMap.put("/login", new LoginController());
-
+        controllerMap.put("/register", new RegisterController());
     }
 
     public static Controller getController(String url) {

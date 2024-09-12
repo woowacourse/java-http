@@ -12,7 +12,7 @@ class UserServiceTest {
     @DisplayName("로그인에 성공하면 User 객체를 반환한다.")
     @Test
     void successLoginTest() {
-        UserService userService = UserService.getInstance();
+        UserService userService = new UserService();
 
         Optional<User> user = userService.login("gugu", "password");
 
@@ -22,7 +22,7 @@ class UserServiceTest {
     @DisplayName("로그인에 실패하면 Empty를 반환한다.")
     @Test
     void failureLoginTest() {
-        UserService userService = UserService.getInstance();
+        UserService userService = new UserService();
 
         Optional<User> user = userService.login("jazz", "password");
 

@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 
 class ResourceReaderTest {
 
-    @DisplayName("Content-Type을 반환한다.")
+    @DisplayName("인코딩을 포함한 Content-Type을 반환한다.")
     @Test
     void probeContentType() {
         // given
         String path = "/css/styles.css";
 
         // when&then
-        assertThat(ResourceReader.probeContentType(path)).isEqualTo("text/css");
+        assertThat(ResourceReader.probeContentType(path)).isEqualTo("text/css;charset=utf-8");
     }
 
     @DisplayName("요청 경로의 파일을 읽어온다.")

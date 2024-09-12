@@ -5,26 +5,27 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.coyote.http11.http.BaseHttpHeaders;
-import org.apache.coyote.http11.http.HttpHeader;
 
 public class HttpResponseHeader extends BaseHttpHeaders {
-
-	private static final String JSESSIONID = "JSESSIONID=";
 
 	public HttpResponseHeader() {
 		super(new LinkedHashMap<>());
 	}
 
 	public void addHeader(String key, String value) {
+		if (headers.containsKey(key)) {
+			headers.get(key).add(value);
+			return;
+		}
 		addHeader(key, List.of(value));
 	}
 
 	public void addHeader(String key, List<String> values) {
-		headers.put(key, values);
-	}
-
-	public void addJSessionId(String sessionId) {
-		addHeader(HttpHeader.SET_COOKIE.getName(), JSESSIONID + sessionId);
+		if (headers.containsKey(key)) {
+			headers.get(key).addAll(values);
+			return;
+		}
+		headers.put(key, new ArrayList<>(values));
 	}
 
 	public String toResponseMessage() {

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 public enum Http11StatusCode {
-    OK(200), FOUND(302);
+    OK(200), FOUND(302), NOT_FOUND(404);
 
     private final int intValue;
 

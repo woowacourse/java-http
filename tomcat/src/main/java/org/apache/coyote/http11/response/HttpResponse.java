@@ -75,10 +75,6 @@ public final class HttpResponse {
         headers.add(header);
     }
 
-    private void setStatusCode(Http11StatusCode statusCode) {
-        this.statusCode = statusCode;
-    }
-
     public void setBodyAndContentType(Path path) {
         this.body = readStaticData(path);
         addHeader(new Http11Header("Content-Length", body.length + ""));
@@ -91,6 +87,10 @@ public final class HttpResponse {
         } catch (IOException e) {
             return new byte[0];
         }
+    }
+
+    public void setStatusCode(Http11StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public Http11StatusCode getStatusCode() {

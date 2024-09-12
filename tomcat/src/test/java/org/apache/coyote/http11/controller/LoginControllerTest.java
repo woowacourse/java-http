@@ -49,8 +49,7 @@ class LoginControllerTest extends BaseHttpTest {
         String expected = resolve200Response("html", url);
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET /login HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html;charset=utf-8")),
-                Optional.empty()
+                new HttpRequestHeaders(Map.of("Content-Type", "text/html;charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 
@@ -67,8 +66,7 @@ class LoginControllerTest extends BaseHttpTest {
 
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET " + "/login?account=testAccount&password=testPassword" + " HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8")),
-                Optional.empty()
+                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 
@@ -86,8 +84,7 @@ class LoginControllerTest extends BaseHttpTest {
 
         HttpRequest validLoginRequest = new HttpRequest(
                 new RequestLine("GET " + "/login?account=wrongAccount&password=wrongPassword" + " HTTP/1.1 "),
-                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8")),
-                Optional.empty()
+                new HttpRequestHeaders(Map.of("Content-Type", "text/html; charset=utf-8"))
         );
         HttpResponse response = new HttpResponse();
 

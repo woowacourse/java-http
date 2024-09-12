@@ -5,32 +5,35 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequestHeaders;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpRequestHeaders httpRequestHeaders;
-    private final Optional<RequestBody> requestBody;
+    private final RequestBody requestBody;
 
 
-    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, Optional<RequestBody> requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.httpRequestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;
+    }
+
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders) {
+        this(requestLine, httpRequestHeaders, null);
     }
 
     public static HttpRequest from(BufferedReader bufferedReader) {
         try {
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
             HttpRequestHeaders httpHeader = HttpRequestHeaders.readRequestHeader(bufferedReader);
-            Optional<RequestBody> body = initializeBody(bufferedReader, requestLine, httpHeader);
+            RequestBody body = initializeBody(bufferedReader, requestLine, httpHeader).orElseGet(() -> null);
             return new HttpRequest(requestLine, httpHeader, body);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private static Optional<RequestBody> initializeBody(
@@ -52,22 +55,23 @@ public class HttpRequest {
         return requestLine.isQueryStringRequest();
     }
 
-    public Map<String, String> getQueryParameters(){
-        return requestLine.getParameters();
-    }
-
-    public boolean hasCookie(){
+    public boolean hasCookie() {
         return httpRequestHeaders.hasCookie();
     }
 
-    public Cookie getCookie(){
-        if(!hasCookie()){
-            throw  new IllegalStateException("쿠키가 존재하지 않습니다.");
+    public boolean hasRequestBody() {
+        return requestBody != null;
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestLine.getParameters();
+    }
+
+    public Cookie getCookie() {
+        if (!hasCookie()) {
+            throw new IllegalStateException("쿠키가 존재하지 않습니다.");
         }
         return httpRequestHeaders.getCookie();
-    }
-    public RequestLine getRequestLine() {
-        return requestLine;
     }
 
     public String getRequestUri() {
@@ -75,6 +79,9 @@ public class HttpRequest {
     }
 
     public RequestBody getRequestBody() {
-        return requestBody.orElseThrow(() -> new IllegalStateException("requestBody is null"));
+        if (!hasRequestBody()) {
+            throw new IllegalStateException("requestBody is null");
+        }
+        return requestBody;
     }
 }

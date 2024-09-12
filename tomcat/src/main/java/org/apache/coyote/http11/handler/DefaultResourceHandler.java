@@ -30,7 +30,7 @@ public class DefaultResourceHandler implements RequestHandler {
                     .ofStaticResource(new StaticResource("/index.html"))
                     .toHttpMessage();
         }
-        if (request.getTarget().contains("login")) {
+        if (request.getTarget().equals("/login")) {
             return loginResponse(request);
         }
         if (request.getTarget().contains("register")) {

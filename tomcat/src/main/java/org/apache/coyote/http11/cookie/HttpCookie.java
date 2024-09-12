@@ -24,4 +24,8 @@ public class HttpCookie {
         return Optional.ofNullable(cookie.get(JSESSIONID_KEY))
                 .orElse("");
     }
+
+    public Map<String, String> getCookie() {
+        return cookie;
+    }
 }

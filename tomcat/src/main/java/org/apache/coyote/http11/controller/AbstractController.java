@@ -17,7 +17,7 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        HttpMethod method = request.getRequestLine().getMethod();
+        HttpMethod method = request.parseRequestLine().getMethod();
         if (method.isPost()) {
             doPost(request, response);
             return;

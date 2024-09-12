@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
@@ -9,10 +10,26 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpRequestTest {
+
+    @DisplayName("http request의 첫 줄이 빈 문자열이면, request line이 존재하지 않다고 판단하여 예외를 발생시킨다.")
+    @Test
+    void cannotFindRequestLine() {
+        // given
+        String httpRequestMessage = String.join("\r\n",
+                "",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+
+        // when & then
+        assertThatThrownBy(() -> new HttpRequest(inputStream)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("request line이 존재하지 않습니다.");
+    }
 
     @DisplayName("http request로부터 request path를 파싱할 수 있다.")
     @Test

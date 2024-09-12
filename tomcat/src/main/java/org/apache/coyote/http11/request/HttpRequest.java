@@ -19,9 +19,17 @@ public class HttpRequest {
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        this.requestLine = new RequestLine(bufferedReader.readLine());
+        this.requestLine = parseRequestLine(bufferedReader);
         this.headers = parseHeaders(bufferedReader);
         this.body = parseBody(bufferedReader);
+    }
+
+    private RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        if (requestLine.isBlank()) {
+            throw new IllegalArgumentException("request line이 존재하지 않습니다.");
+        }
+        return new RequestLine(requestLine);
     }
 
     private Map<HttpHeader, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
@@ -69,7 +77,7 @@ public class HttpRequest {
         return queryStrings;
     }
 
-    public RequestLine getRequestLine() {
+    public RequestLine parseRequestLine() {
         return requestLine;
     }
 }

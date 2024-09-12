@@ -1,14 +1,15 @@
 package org.apache.coyote.response;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.OutputStream;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.util.HttpStatus;
 import org.apache.coyote.util.ResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.io.OutputStream;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpResponseTest {
 
@@ -43,13 +44,5 @@ class HttpResponseTest {
         String resource = ResourceFinder.findBy("/index.html");
 
         assertTrue(new String(httpResponse.combineResponseToBytes()).contains(resource));
-    }
-
-    @Test
-    @DisplayName("Default 페이지를 반환한다.")
-    void sendDefaultResponse() {
-        httpResponse.sendDefaultResponse();
-
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains("Hello world!"));
     }
 }

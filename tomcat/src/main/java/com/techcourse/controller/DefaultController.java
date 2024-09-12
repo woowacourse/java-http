@@ -3,9 +3,12 @@ package com.techcourse.controller;
 import com.techcourse.controller.model.AbstractController;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.ContentType;
 import org.apache.coyote.util.HttpStatus;
 
 public class DefaultController extends AbstractController {
+
+    private static final String DEFAULT_BODY = "Hello world!";
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
@@ -19,6 +22,6 @@ public class DefaultController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.sendDefaultResponse();
+        httpResponse.sendBodyResponse(DEFAULT_BODY, HttpStatus.OK, ContentType.PLAIN);
     }
 }

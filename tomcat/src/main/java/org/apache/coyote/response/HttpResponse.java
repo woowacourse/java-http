@@ -60,7 +60,7 @@ public class HttpResponse {
     public void sendStaticResourceResponse(HttpRequest httpRequest, HttpStatus httpStatus) {
         String resource = findResource(httpRequest);
 
-        setBody(resource, httpStatus, httpRequest.findContentType(), resource.getBytes().length);
+        setBody(resource, httpStatus, httpRequest.findContentType());
         flushBuffer();
     }
 
@@ -74,9 +74,15 @@ public class HttpResponse {
         return resource;
     }
 
-    public void sendDefaultResponse() {
-        setBody(DEFAULT_BODY, HttpStatus.OK, ContentType.PLAIN, DEFAULT_BODY.getBytes().length);
+    public void sendBodyResponse(String body, HttpStatus httpStatus, ContentType contentType) {
+        setBody(body, httpStatus, contentType);
         flushBuffer();
+    }
+
+    private void setBody(String body, HttpStatus httpStatus, ContentType contentType) {
+        responseBody.setBody(body);
+        responseLine.setHttpStatus(httpStatus);
+        header.addContentLengthAndType(contentType, body.getBytes().length);
     }
 
     private void flushBuffer() {
@@ -86,11 +92,5 @@ public class HttpResponse {
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private void setBody(String body, HttpStatus httpStatus, ContentType contentType, int length) {
-        responseBody.setBody(body);
-        responseLine.setHttpStatus(httpStatus);
-        header.addContentLengthAndType(contentType, length);
     }
 }

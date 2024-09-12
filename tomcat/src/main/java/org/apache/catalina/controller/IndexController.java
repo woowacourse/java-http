@@ -11,7 +11,7 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        throw new IllegalArgumentException("POST는 지원하지 않습니다.");
+        throw new UnsupportedOperationException("POST는 지원하지 않습니다.");
     }
 
     @Override

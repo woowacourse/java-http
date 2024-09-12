@@ -63,7 +63,7 @@ class IndexControllerTest {
 
         // when & then
         assertThatThrownBy(() -> indexController.doPost(request, response))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("POST는 지원하지 않습니다.");
     }
 }

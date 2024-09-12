@@ -42,7 +42,7 @@ class WelcomeControllerTest {
                 .isEqualTo(expected);
     }
 
-    @DisplayName("웰컴 컨트롤러는 루트로 POSt 요청 시 예외를 발생 시킨다.")
+    @DisplayName("웰컴 컨트롤러는 루트로 POST 요청 시 예외를 발생 시킨다.")
     @Test
     void doPost() {
         // given
@@ -59,7 +59,7 @@ class WelcomeControllerTest {
 
         // when & then
         assertThatThrownBy(() -> welcomeController.doPost(request, response))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("POST는 지원하지 않습니다.");
     }
 }

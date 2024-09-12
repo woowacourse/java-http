@@ -9,15 +9,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.coyote.http11.ProtocolVersion;
+import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.ProtocolVersion;
 
 public record HttpRequest(
         Method method,
         String path,
         ProtocolVersion protocolVersion,
-        Map<String, String> parameters,
-        Map<String, String> headers,
-        Map<String, String> cookies,
+        HttpParameters parameters,
+        HttpHeaders headers,
+        HttpCookies cookies,
         String body
 ) {
 
@@ -33,17 +35,17 @@ public record HttpRequest(
         Method method = Method.from(startLineParts[0]);
 
         String path = "";
-        Map<String, String> parameters = Map.of();
+        HttpParameters parameters = new HttpParameters();
         Pattern pattern = Pattern.compile("([^?]+)(\\?(.*))?");
         Matcher matcher = pattern.matcher(startLineParts[1]);
         if (matcher.find()) {
             path = matcher.group(1);
-            parameters = extractParameters(matcher.group(3));
+            extractParameters(matcher.group(3)).forEach(parameters::put);
         }
 
         ProtocolVersion protocolVersion = ProtocolVersion.from(startLineParts[2]);
-        Map<String, String> headers = extractHeaders(lines);
-        Map<String, String> cookies = extractCookies(headers.get(HEADER_NAME_COOKIE));
+        HttpHeaders headers = extractHeaders(lines);
+        HttpCookies cookies = extractCookies(headers.get(HEADER_NAME_COOKIE));
 
         String body = extractBody(lines);
 
@@ -63,32 +65,38 @@ public record HttpRequest(
                 ));
     }
 
-    private static Map<String, String> extractHeaders(List<String> lines) {
+    private static HttpHeaders extractHeaders(List<String> lines) {
         int endHeaderIndex = IntStream.range(0, lines.size())
                 .filter(i -> lines.get(i).isEmpty())
                 .findFirst()
                 .orElse(lines.size());
 
-        return lines.stream()
+        HttpHeaders httpHeaders = new HttpHeaders();
+        lines.stream()
                 .limit(endHeaderIndex)
                 .map(line -> line.split(DELIMITER_HEADER))
                 .filter(HttpRequest::isLengthTwo)
-                .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
+                .forEach(entry -> httpHeaders.put(entry[0], entry[1]));
+
+        return httpHeaders;
     }
 
     private static boolean isLengthTwo(String[] entry) {
         return entry.length == 2;
     }
 
-    private static Map<String, String> extractCookies(String cookieMessage) {
+    private static HttpCookies extractCookies(String cookieMessage) {
         if (cookieMessage == null) {
-            return Map.of();
+            return new HttpCookies();
         }
 
-        return Arrays.stream(cookieMessage.split(DELIMITER_COOKIE))
+        HttpCookies httpCookies = new HttpCookies();
+        Arrays.stream(cookieMessage.split(DELIMITER_COOKIE))
                 .map(cookie -> cookie.split(DELIMITER_VALUE))
-                .filter(entry -> isLengthTwo(entry))
-                .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
+                .filter(HttpRequest::isLengthTwo)
+                .forEach(entry -> httpCookies.put(entry[0], entry[1]));
+
+        return httpCookies;
     }
 
     private static String extractBody(List<String> lines) {

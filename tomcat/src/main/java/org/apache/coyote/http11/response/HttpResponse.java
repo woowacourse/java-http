@@ -1,17 +1,15 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import org.apache.coyote.http11.ProtocolVersion;
+import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.ProtocolVersion;
 
 public record HttpResponse(
         ProtocolVersion protocolVersion,
         Status status,
-        Map<String, String> headers,
-        Map<String, String> cookies,
+        HttpHeaders headers,
+        HttpCookies cookies,
         byte[] body
 ) {
 
@@ -67,9 +65,7 @@ public record HttpResponse(
 
     private void buildCookies(StringBuilder builder) {
         if (!cookies.isEmpty()) {
-            String cookiesMessage = cookies.entrySet().stream()
-                    .map(Entry::toString)
-                    .collect(Collectors.joining(DELIMITER_SEMICOLON));
+            String cookiesMessage = cookies.toMessage();
             builder.append(CRLF)
                     .append(HEADER_NAME_SET_COOKIE).append(cookiesMessage).append(DELIMITER_SPACE);
         }
@@ -82,15 +78,15 @@ public record HttpResponse(
     }
 
     public static class Builder {
-        private final Map<String, String> headers;
-        private final Map<String, String> cookies;
+        private final HttpHeaders headers;
+        private final HttpCookies cookies;
         private ProtocolVersion protocolVersion;
         private Status status;
         private byte[] body;
 
         private Builder() {
-            headers = new HashMap<>();
-            cookies = new HashMap<>();
+            headers = new HttpHeaders();
+            cookies = new HttpCookies();
         }
 
         public Builder protocolVersion(ProtocolVersion protocolVersion) {

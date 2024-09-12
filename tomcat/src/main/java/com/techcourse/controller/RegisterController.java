@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.response.ContentType;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.Status;
 
@@ -14,7 +15,7 @@ public class RegisterController extends MappingController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         String body = resourceResolver.resolve(request.getUrl());
         response.setStatus(Status.OK);
-        response.setContentType("text/html;charset=utf-8");
+        response.setContentType(ContentType.of(request.getUrl()));
         response.setBody(body);
     }
 
@@ -24,10 +25,11 @@ public class RegisterController extends MappingController {
         User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        String body = resourceResolver.resolve("/index.html");
+        String path = "/index.html";
+        String body = resourceResolver.resolve(path);
         response.setStatus(Status.FOUND);
-        response.setLocation("/index.html");
-        response.setContentType("text/html;charset=utf-8");
+        response.setLocation(path);
+        response.setContentType(ContentType.of(path));
         response.setBody(body);
     }
 }

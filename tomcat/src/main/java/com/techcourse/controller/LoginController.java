@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.response.ContentType;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.response.Status;
 
@@ -16,16 +17,18 @@ public class LoginController extends MappingController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (userService.existsUser(request)) {
-            String body = resourceResolver.resolve("/index.html");
+            String path = "/index.html";
+            String body = resourceResolver.resolve(path);
             response.setStatus(Status.UNAUTHORIZED);
-            response.setLocation("/index.html");
-            response.setContentType("text/html;charset=utf-8");
+            response.setLocation(path);
+            response.setContentType(ContentType.of(path));
             response.setBody(body);
             return;
         }
-        String body = resourceResolver.resolve("/login.html");
+        String path = "/login.html";
+        String body = resourceResolver.resolve(path);
         response.setStatus(Status.OK);
-        response.setContentType("text/html;charset=utf-8");
+        response.setContentType(ContentType.of(path));
         response.setBody(body);
     }
 
@@ -33,17 +36,19 @@ public class LoginController extends MappingController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         boolean successLogin = userService.login(request, response);
         if (successLogin) {
-            String body = resourceResolver.resolve("/index.html");
+            String path = "/index.html";
+            String body = resourceResolver.resolve(path);
             response.setStatus(Status.FOUND);
-            response.setLocation("/index.html");
-            response.setContentType("text/html;charset=utf-8");
+            response.setLocation(path);
+            response.setContentType(ContentType.of(path));
             response.setBody(body);
             return;
         }
-        String body = resourceResolver.resolve("/401.html");
+        String path = "/401.html";
+        String body = resourceResolver.resolve(path);
         response.setStatus(Status.UNAUTHORIZED);
-        response.setLocation("/401.html");
-        response.setContentType("text/html;charset=utf-8");
+        response.setLocation(path);
+        response.setContentType(ContentType.of(path));
         response.setBody(body);
     }
 }

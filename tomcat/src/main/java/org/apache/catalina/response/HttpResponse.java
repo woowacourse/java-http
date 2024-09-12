@@ -26,7 +26,7 @@ public class HttpResponse {
         headers.put(Header.SET_COOKIE, cookie);
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(ContentType contentType) {
         headers.put(Header.CONTENT_TYPE, contentType);
     }
 

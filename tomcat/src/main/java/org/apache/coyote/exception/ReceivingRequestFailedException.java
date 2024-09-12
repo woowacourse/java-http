@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.exception;
+package org.apache.coyote.exception;
 
 public class ReceivingRequestFailedException extends HttpConnectorException {
 
     public ReceivingRequestFailedException() {
-        super("HttpRequest format not matched");
+        super("Receiving request failed");
     }
 }

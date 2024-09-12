@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.HttpHeader;
 
 public class HttpRequestHeader {
 
@@ -10,11 +11,7 @@ public class HttpRequestHeader {
 
     public HttpRequestHeader(Map<String, String> httpRequestHeaders) {
         this.httpRequestHeaders = httpRequestHeaders;
-        this.httpCookies = new HttpCookies(httpRequestHeaders.get("Cookie"));
-    }
-
-    public boolean containsKey(String key) {
-        return this.httpRequestHeaders.containsKey(key);
+        this.httpCookies = new HttpCookies(httpRequestHeaders.get(HttpHeader.COOKIE));
     }
 
     public String findBy(String key) {

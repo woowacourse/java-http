@@ -5,32 +5,29 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String FILE_EXTENSION_DELIMITER = ".";
     private static final String CRLF = "\r\n";
-    
-    private String httpVersion;
-    private int httpStatusCode;
-    private String httpStatusMessage;
+
+    private HttpStatusLine httpStatusLine;
     private HttpResponseHeader httpResponseHeader;
     private String httpResponseBody;
 
     public HttpResponse() {
-        this.httpVersion = "HTTP/1.1";
-        this.httpStatusCode = 200;
-        this.httpStatusMessage = "OK";
+        this.httpStatusLine = new HttpStatusLine(HTTP_VERSION, HttpStatus.OK);
         this.httpResponseHeader = new HttpResponseHeader();
         this.httpResponseBody = "";
     }
 
-    public void setHttpStatusCode(int httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
-    }
-
-    public void setHttpStatusMessage(String httpStatusMessage) {
-        this.httpStatusMessage = httpStatusMessage;
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatusLine.setHttpStatus(httpStatus);
     }
 
     public void addHttpResponseHeader(String key, String value) {
@@ -41,16 +38,13 @@ public class HttpResponse {
         this.httpResponseHeader.setJSessionId(jSessionId);
     }
 
-    public void setContentType(HttpRequest httpRequest) {
-        if (httpRequest.matchesFileExtension(".css")) {
-            this.httpResponseHeader.add("Content-Type", "text/css");
-            return;
-        }
-        if (httpRequest.matchesFileExtension(".js")) {
-            this.httpResponseHeader.add("Content-Type", "application/javascript");
-            return;
-        }
-        this.httpResponseHeader.add("Content-Type", "text/html;charset=utf-8");
+    public void setContentType(ContentType contentType) {
+        this.httpResponseHeader.add(HttpHeader.CONTENT_TYPE, contentType.getContentType());
+    }
+
+    public void setContentType(String fileExtension) {
+        ContentType contentType = ContentType.findByFileExtension(fileExtension);
+        this.httpResponseHeader.add(HttpHeader.CONTENT_TYPE, contentType.getContentType());
     }
 
     public void setHttpResponseBody(String resourceName) throws IOException {
@@ -62,26 +56,39 @@ public class HttpResponse {
     }
 
     private String getResponseBody(String resourceName) throws IOException {
-        if (!resourceName.endsWith(".html") && resourceName.lastIndexOf(".") == -1) {
-            resourceName += ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + resourceName);
+        String adjustedResourceName = adjustResourceExtension(resourceName);
+        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + adjustedResourceName);
         Path path = new File(resource.getPath()).toPath();
         byte[] bytes = Files.readAllBytes(path);
         return new String(bytes);
     }
 
+    private String adjustResourceExtension(String resourceName) {
+        if (!hasFileExtension(resourceName)) {
+            resourceName = resourceName + FILE_EXTENSION_DELIMITER + ContentType.TEXT_HTML.getFileExtension();
+        }
+        return resourceName;
+    }
+
+    private boolean hasFileExtension(String resourceName) {
+        return resourceName.contains(FILE_EXTENSION_DELIMITER);
+    }
+
     public String toHttpResponse() {
         StringBuilder httpResponse = new StringBuilder();
 
-        String responseStatusLine = String.format("%s %d %s ", this.httpVersion, this.httpStatusCode, this.httpStatusMessage);
+        String responseStatusLine = String.format(
+                "%s %d %s ",
+                this.httpStatusLine.getHttpVersion(),
+                this.httpStatusLine.getHttpStatusCode(),
+                this.httpStatusLine.getHttpStatusMessage()
+        );
         httpResponse.append(responseStatusLine).append(CRLF);
 
-        appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.getSetCookieValue());
-        appendHeader(httpResponse, "Content-Type", this.httpResponseHeader.get("Content-Type"));
-        appendHeader(httpResponse, "Content-Length", String.valueOf(this.httpResponseBody.getBytes().length));
-        appendHeader(httpResponse, "Location", this.httpResponseHeader.get("Location"));
+        appendHeader(httpResponse, HttpHeader.SET_COOKIE, this.httpResponseHeader.getSetCookieValue());
+        appendHeader(httpResponse, HttpHeader.CONTENT_TYPE, this.httpResponseHeader.get(HttpHeader.CONTENT_TYPE));
+        appendHeader(httpResponse, HttpHeader.CONTENT_LENGTH, String.valueOf(this.httpResponseBody.getBytes().length));
+        appendHeader(httpResponse, HttpHeader.LOCATION, this.httpResponseHeader.get(HttpHeader.LOCATION));
 
         httpResponse.append(CRLF);
         httpResponse.append(this.httpResponseBody);

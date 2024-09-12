@@ -23,33 +23,36 @@
 
 1. HTTP Status Code 302 반환
 
-- [ ] 로그인 여부에 따라 다른 페이지로 이동시키기
-    - [ ] 로그인 성공 시 http status code를 302로 반환하고 `index.html`로 리다이렉트
-    - [ ] 로그인 실패 시 `401.html`로 리다이렉트
+- [x] 로그인 여부에 따라 다른 페이지로 이동시키기
+    - [x] 로그인 성공 시 http status code를 302로 반환하고 `index.html`로 리다이렉트
+    - [x] 로그인 실패 시 http status code를 302로 반환하고 `401.html`로 리다이렉트
 
 2. POST 방식으로 회원가입
 
-- [ ] 회원가입 페이지(`register.html`) 보여주도록 만들기 (`GET /register`)
-- [ ] 회원가입 버튼을 누르면 회원가입 시키기 (`POST /register`)
-    - [ ] 회원가입 성공 시 `index.html`로 리다이렉트
-- [ ] 로그인 페이지 보여줄 때와 로그인 버튼 누를 때 API 분리하기 (`GET /login`, `POST /login`)
-    - [ ] `login.html` form 태그 수정
+- [x] 회원가입 페이지(`register.html`) 보여주도록 만들기 (`GET /register`)
+- [x] 회원가입 버튼을 누르면 회원가입 시키기 (`POST /register`)
+    - [x] 회원가입 성공 시 `index.html`로 리다이렉트
+- [x] 로그인 페이지 보여줄 때와 로그인 버튼 누를 때 API 분리하기 (`GET /login`, `POST /login`)
+    - [x] `login.html` form 태그 수정
 
 3. Cookie에 JSESSIONID 값 저장
 
-- [ ] 쿠키 활용해서 로그인 상태 유지하기 (쿠키에 JSESSIONID 값 저장)
-    - [ ] Cookie 클래스 추가
-    - [ ] 요청 헤더의 Cookie에 JSESSIONID가 없으면, 응답 헤더에 Set-Cookie 추가해 JSESSIONID 반환
+- [x] 쿠키 활용해서 로그인 상태 유지하기 (쿠키에 JSESSIONID 값 저장)
+    - [x] Cookie 클래스 추가
 
 4. Session 구현
 
-- [ ] 세션 활용해서 로그인 상태 유지하기 (세션을 사용해서 서버에 로그인 여부를 저장)
-    - [ ] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부 체크
-    - [ ] SessionManager, Session 클래스 추가
-    - [ ] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장
-    - [ ] 로그인된 상태에서 로그인 페이지 접근 시 index.html 페이지로 리다이렉트 (`GET /login`)
+- [x] 세션 활용해서 로그인 상태 유지하기 (세션을 사용해서 서버에 로그인 여부를 저장)
+    - [x] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부 체크
+    - [x] SessionManager, Session 클래스 추가
+    - [x] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장
+    - [x] 로그인된 상태에서 로그인 페이지 접근 시 index.html 페이지로 리다이렉트 (`GET /login`)
 
 ### 3단계 - 리팩터링
+
+- [ ] HttpRequest 클래스 구현하기
+- [ ] HttpResponse 클래스 구현하기
+- [ ] Controller 인터페이스 추가하기
 
 ### 4단계 - 동시성 확장하기
 

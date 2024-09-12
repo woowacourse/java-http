@@ -1,24 +1,47 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.coyote.http.response.HttpResponse;
 
 public class Http11Parser {
 
-    private static final String REQUEST_HEADER_SUFFIX = "";
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String STATUS_LINE_DELIMITER = " ";
+    private static final String HEADER_DELIMITER = ": ";
+    private static final String BLANK_CRLF = " \r\n";
+    private static final String CRLF = "\r\n";
+    private static final int NO_CONTENT_LENGTH = 0;
 
-    public static Http11Request readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        if (line.isEmpty()) {
-            throw new IllegalArgumentException("HttpRequest가 비어있습니다.");
+    public static String writeHttpResponse(final HttpResponse response) {
+        StringBuilder serializedResponse = new StringBuilder();
+        appendStatusLine(serializedResponse, response);
+        appendHeaders(serializedResponse, response);
+        appendBody(serializedResponse, response);
+        return serializedResponse.toString();
+    }
+
+    private static void appendStatusLine(StringBuilder serializedResponse, HttpResponse response) {
+        serializedResponse.append(HTTP_VERSION)
+                .append(STATUS_LINE_DELIMITER)
+                .append(response.getStatusCode())
+                .append(BLANK_CRLF);
+    }
+
+    private static void appendHeaders(StringBuilder serializedResponse, HttpResponse response) {
+        response.getHeader()
+                .forEach((key, value) -> appendHeader(serializedResponse, key, value));
+    }
+
+    private static void appendHeader(StringBuilder serializedResponse, String key, String value) {
+        serializedResponse.append(key)
+                .append(HEADER_DELIMITER)
+                .append(value)
+                .append(BLANK_CRLF);
+    }
+
+    private static void appendBody(StringBuilder serializedResponse, HttpResponse response) {
+        if (response.getContentLength() != NO_CONTENT_LENGTH) {
+            serializedResponse.append(CRLF);
+            serializedResponse.append(response.getBody());
         }
-        while (!REQUEST_HEADER_SUFFIX.equals(line)) {
-            lines.add(line);
-            line = bufferedReader.readLine();
-        }
-        return new Http11Request(lines);
     }
 }

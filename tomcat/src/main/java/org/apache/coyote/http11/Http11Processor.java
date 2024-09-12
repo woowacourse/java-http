@@ -8,6 +8,8 @@ import java.net.Socket;
 import org.apache.catalina.handler.ServletRequestHandler;
 import org.apache.catalina.handler.ViewResolver;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +35,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final Http11Request request = Http11Parser.readHttpRequest(bufferedReader);
-            final Http11Response response = requestHandler.handle(request);
-            final String serializedResponse = response.serializeResponse();
+            final HttpRequest request = new HttpRequest(bufferedReader);
+            final HttpResponse response = requestHandler.handle(request);
+            final String serializedResponse = Http11Parser.writeHttpResponse(response);
             outputStream.write(serializedResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

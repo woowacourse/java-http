@@ -79,7 +79,7 @@ public record HttpRequest(
         if (cookieMessage == null) {
             return Map.of();
         }
-        
+
         return Arrays.stream(cookieMessage.split(DELIMITER_COOKIE))
                 .map(cookie -> cookie.split(DELIMITER_VALUE))
                 .filter(entry -> entry.length == 2)
@@ -103,5 +103,9 @@ public record HttpRequest(
 
     public boolean hasParameters(List<String> keys) {
         return keys.stream().allMatch(parameters::containsKey);
+    }
+
+    public boolean isMethod(Method method) {
+        return method.equals(this.method);
     }
 }

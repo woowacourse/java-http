@@ -19,8 +19,4 @@ public enum Method {
                 .findAny()
                 .orElse(null);
     }
-
-    public String getValue() {
-        return value;
-    }
 }

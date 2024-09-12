@@ -9,11 +9,8 @@ public class HttpResponse {
     private ResponseHeader header;
     private ResponseBody body;
 
-    public HttpResponse(HttpStatusCode statusCode, ResponseHeader header) {
-        this(statusCode, header, null);
-    }
-
     public HttpResponse() {
+        this(null, new ResponseHeader(), null);
     }
 
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header, byte[] body) {
@@ -44,6 +41,10 @@ public class HttpResponse {
         this.header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
+    public void setStatus(HttpStatusCode httpStatusCode) {
+        statusLine.setStatusCode(httpStatusCode);
+    }
+
     public byte[] toByte() {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
 
@@ -70,9 +71,5 @@ public class HttpResponse {
                 ", header=" + header +
                 ", body=" + body +
                 '}';
-    }
-
-    public void setStatus(HttpStatusCode httpStatusCode) {
-
     }
 }

@@ -43,7 +43,7 @@ public class HttpRequest {
     private RequestBody parseBody(BufferedReader bufferedReader) throws IOException {
         StringBuilder stringBody = new StringBuilder();
 
-        if (!header.hasContentLength()) {
+        if (requestLine.getMethod().equals(HttpMethod.GET)) {
             return RequestBody.empty();
         }
 

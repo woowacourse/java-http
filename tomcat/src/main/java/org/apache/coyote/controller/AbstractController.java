@@ -2,9 +2,6 @@ package org.apache.coyote.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import org.apache.coyote.ForwardResult;
 import org.apache.coyote.HttpStatusCode;
@@ -22,7 +19,7 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) {
         ForwardResult result = execute(request, response);
 
-        ResponseHeader header = result.header();
+        ResponseHeader header = new ResponseHeader();
         MimeType mimeType = MimeType.from(FileExtension.HTML);
         header.setContentType(mimeType);
 

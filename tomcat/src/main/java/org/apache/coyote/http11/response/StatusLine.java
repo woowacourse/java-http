@@ -7,7 +7,7 @@ public class StatusLine {
 
     private static final String RESPONSE_SPACE = " ";
     private final HttpVersion version;
-    private final HttpStatusCode statusCode;
+    private HttpStatusCode statusCode;
 
     private StatusLine(HttpVersion version, HttpStatusCode statusCode) {
         this.version = version;
@@ -16,6 +16,10 @@ public class StatusLine {
 
     public static StatusLine ofHTTP11(HttpStatusCode statusCode) {
         return new StatusLine(HttpVersion.HTTP_1_1, statusCode);
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String getReponseString() {

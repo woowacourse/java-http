@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,17 +20,21 @@ public class RequestBody {
         this.body = parseBody(body);
     }
 
-    public static RequestBody empty() {
-        return new RequestBody(EMPTY_BODY);
-    }
-
     private Map<String, String> parseBody(String query) {
         List<String> pairs = List.of(query.split(PARAMETER_DELIMITER));
+        if (pairs.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return pairs.stream()
                 .map(pair -> pair.split(KEY_VALUE_DELIMITER, LIMIT_SPLIT))
+                .filter(pair -> pair.length == 2)
                 .collect(Collectors.toMap(splitStrings -> splitStrings[KEY_INDEX],
                         splitStrings -> splitStrings[VALUE_INDEX])
                 );
+    }
+
+    public static RequestBody empty() {
+        return new RequestBody(EMPTY_BODY);
     }
 
     public boolean isEmpty() {

@@ -1,6 +1,5 @@
 package org.apache.coyote.controller;
 
-import org.apache.catalina.Manager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

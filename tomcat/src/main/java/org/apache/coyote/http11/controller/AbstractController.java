@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.file.RequestFactory;
+import org.apache.coyote.http11.file.ResponseFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -30,7 +31,7 @@ public class AbstractController implements Controller {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatusLine("200", "OK");
 
-        String responseBody = RequestFactory.getResponseBody(request);
+        String responseBody = ResponseFactory.getResponseBody(request);
         response.setBody(responseBody);
         response.setFieldValue("Content-Length", String.valueOf(responseBody.length()));
         response.setFieldValue("Content-Type", request.getMimeType());

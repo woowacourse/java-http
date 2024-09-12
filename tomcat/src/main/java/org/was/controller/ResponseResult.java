@@ -1,4 +1,4 @@
-package org.was.Controller;
+package org.was.controller;
 
 import java.util.HashMap;
 import java.util.Map;

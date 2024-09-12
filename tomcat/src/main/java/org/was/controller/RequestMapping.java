@@ -1,11 +1,12 @@
-package org.was.Controller;
+package org.was.controller;
 
+import com.techcourse.controller.DashboardController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.was.Controller.exception.ControllerNotFoundException;
+import org.was.controller.exception.ControllerNotFoundException;
 
 public class RequestMapping {
 
@@ -14,6 +15,7 @@ public class RequestMapping {
     private final Map<String, Controller> controllerMapping = new HashMap<>();
 
     private RequestMapping() {
+        controllerMapping.put("/", new DashboardController());
         controllerMapping.put("/login", new LoginController());
         controllerMapping.put("/register", new RegisterController());
     }

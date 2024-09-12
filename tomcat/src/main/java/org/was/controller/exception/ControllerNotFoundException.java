@@ -1,4 +1,4 @@
-package org.was.Controller.exception;
+package org.was.controller.exception;
 
 public class ControllerNotFoundException extends RuntimeException{
 

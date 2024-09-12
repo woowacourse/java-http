@@ -18,7 +18,7 @@ import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.was.Controller.FrontController;
+import org.was.controller.FrontController;
 
 public class Http11Processor implements Runnable, Processor {
 

@@ -9,7 +9,7 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.ResponseHeader;
-import org.was.Controller.ResponseResult;
+import org.was.controller.ResponseResult;
 import org.was.view.View;
 import org.was.view.ViewResolver;
 

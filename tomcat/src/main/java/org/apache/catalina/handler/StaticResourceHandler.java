@@ -30,6 +30,10 @@ public class StaticResourceHandler {
     }
 
     public boolean canHandleRequest(HttpRequest request) {
+        String path = request.getPath();
+        if (path.equals("/")) {
+            return false;
+        }
         URL resource = findResource(request.getPath());
         return resource != null;
     }

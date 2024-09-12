@@ -1,11 +1,11 @@
-package org.was.Controller;
+package org.was.controller;
 
 import java.io.IOException;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.was.Controller.exception.ControllerNotFoundException;
-import org.was.Controller.exception.MethodNotAllowedException;
+import org.was.controller.exception.ControllerNotFoundException;
+import org.was.controller.exception.MethodNotAllowedException;
 import org.was.converter.HttpResponseConverter;
 import org.was.view.ViewResolver;
 

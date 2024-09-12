@@ -1,4 +1,4 @@
-package org.was.Controller;
+package org.was.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 

@@ -10,8 +10,8 @@ import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.was.Controller.AbstractController;
-import org.was.Controller.ResponseResult;
+import org.was.controller.AbstractController;
+import org.was.controller.ResponseResult;
 
 public class RegisterController extends AbstractController {
 

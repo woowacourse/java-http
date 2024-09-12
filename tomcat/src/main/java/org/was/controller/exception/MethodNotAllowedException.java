@@ -1,4 +1,4 @@
-package org.was.Controller.exception;
+package org.was.controller.exception;
 
 import org.apache.coyote.http11.HttpMethod;
 

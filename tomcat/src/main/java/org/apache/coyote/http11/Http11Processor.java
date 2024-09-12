@@ -8,13 +8,18 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.cookie.HttpCookie;
 import org.apache.coyote.http.cookie.HttpCookies;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,36 +52,27 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+             final var outputStream = connection.getOutputStream()) {
 
-            performProcess(bufferedReader, outputStream);
+            performProcess(inputStream, outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void performProcess(final BufferedReader bufferedReader, final OutputStream outputStream) throws IOException {
+    private void performProcess(final InputStream inputStream, final OutputStream outputStream) throws IOException {
         try {
-            String requestLine = bufferedReader.readLine();
+            HttpRequest httpRequest = new HttpRequest(inputStream);
 
-            if (requestLine == null) {
-                return;
+            final String method = httpRequest.getHttpMethod().name();
+            final String requestURL = httpRequest.getPath();
+
+            if (method.equals(HttpMethod.GET.name())) {
+                doGet(httpRequest, requestURL, outputStream);
             }
 
-            Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
-
-            final String[] httpRequestLine = requestLine.split(" ");
-            final String method = httpRequestLine[0];
-            final String requestURL = httpRequestLine[1];
-
-            if (method.equals("GET")) {
-                doGet(httpRequestHeaders, requestURL, outputStream);
-            }
-
-            if (method.equals("POST")) {
-                doPost(httpRequestHeaders, bufferedReader, requestURL, outputStream);
+            if (method.equals(HttpMethod.POST.name())) {
+                doPost(httpRequest, requestURL, outputStream);
             }
         } catch (IOException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -92,27 +88,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> httpRequestHeaders = new HashMap<>();
-        String line;
-
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] headerLine = line.split(": ");
-
-            String key = URLDecoder.decode(headerLine[0]);
-            String value = URLDecoder.decode(headerLine[1]);
-
-            httpRequestHeaders.put(key, value);
-        }
-        return httpRequestHeaders;
-    }
-
-    private void doPost(final Map<String, String> httpRequestHeaders, final BufferedReader bufferedReader,
+    private void doPost(final HttpRequest httpRequest,
                         final String requestURL, final OutputStream outputStream) throws IOException {
-        String requestBody = readRequestBody(httpRequestHeaders, bufferedReader);
 
+        Map<String, String> requestBody = httpRequest.getRequestBody().getValues();
         if (requestURL.equals("/login")) {
-            login(httpRequestHeaders, outputStream, requestBody);
+            login(httpRequest.getRequestHeader(), outputStream, requestBody);
         }
 
         if (requestURL.equals("/register")) {
@@ -125,8 +106,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(final Map<String, String> httpRequestHeaders, final OutputStream outputStream, final String requestBody) throws IOException {
-        String cookies = httpRequestHeaders.get("Cookie");
+    private void login(final RequestHeader httpRequestHeaders, final OutputStream outputStream, final Map<String, String> requestBody) throws IOException {
+        String cookies = httpRequestHeaders.getCookies();
 
         Optional<Session> httpSession = loginPost(requestBody);
         String[] result = loginGet(httpSession.isPresent());
@@ -153,20 +134,10 @@ public class Http11Processor implements Runnable, Processor {
                 + "";
     }
 
-    private String readRequestBody(final Map<String, String> httpRequestHeaders, final BufferedReader bufferedReader)
-            throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
-
-    private boolean register(String requestBody) {
-        Map<String, String> userInfo = parseUserInfo(requestBody);
-
-        String account = userInfo.get("account");
-        String password = userInfo.get("password");
-        String email = userInfo.get("email");
+    private boolean register(Map<String, String> requestBody) {
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        String email = requestBody.get("email");
 
         return validateRegistration(account, password, email);
     }
@@ -191,9 +162,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void doGet(final Map<String, String> httpRequestHeaders, final String requestURL,
+    private void doGet(final HttpRequest httpRequest, final String requestURL,
                        final OutputStream outputStream) throws IOException {
-        String cookies = httpRequestHeaders.get("Cookie");
+        String cookies = httpRequest.getRequestHeader().getHeaders().get("Cookie");
         String[] searchResourcePath = determineResourcePath(requestURL);
 
         String sessionId = "";
@@ -254,7 +225,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private Optional<Session> loginPost(String requestBody) {
+    private Optional<Session> loginPost(Map<String, String> requestBody) {
         Map<String, String> userInfo = parseUserInfo(requestBody);
         String uuid = null;
 
@@ -278,21 +249,15 @@ public class Http11Processor implements Runnable, Processor {
         return new String[]{"302 FOUND", "/index"};
     }
 
-    private Map<String, String> parseUserInfo(String requestBody) {
+    private Map<String, String> parseUserInfo(Map<String, String> requestBody) {
         Map<String, String> userInfo = new HashMap<>();
-
-        String[] info = requestBody.split("&");
-
-        for (String metadata : info) {
-            String[] temp = metadata.split("=");
-            if (temp.length < 2 || temp[1].isEmpty()) {
-                throw new IllegalArgumentException("필수 입력값이 비어 있습니다.");
-            }
-            String key = URLDecoder.decode(temp[0]);
-            String value = URLDecoder.decode(temp[1]);
-
-            userInfo.put(key, value);
+        if (requestBody.get("account").isEmpty() || requestBody.get("password").isEmpty()) {
+            throw new IllegalArgumentException("필수 입력값이 비어 있습니다.");
         }
+
+        userInfo.put("account", requestBody.get("account"));
+        userInfo.put("password", requestBody.get("password"));
+
         return userInfo;
     }
 

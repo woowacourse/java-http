@@ -18,12 +18,12 @@ public class RequestBody {
 
     public Map<String, String> getUserInformation() {
         return Arrays.stream(body.split("&"))
-                .map(line -> line.split("="))
-                .filter(keyValue -> keyValue.length == 2)
-                .filter(keyValue -> !keyValue[0].isBlank() && !keyValue[1].isBlank())
+                .map(line -> Arrays.asList(line.split("=")))
+                .filter(keyValue -> keyValue.size() == 2)
+                .filter(keyValue -> !keyValue.get(0).isBlank() && !keyValue.get(1).isBlank())
                 .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1]
+                        keyValue -> keyValue.get(0).trim(),
+                        keyValue -> keyValue.get(1).trim()
                 ));
     }
 }

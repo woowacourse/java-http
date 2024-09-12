@@ -99,4 +99,12 @@ public class HttpResponse {
             responseBuilder.append(responseBody);
         }
     }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
 }

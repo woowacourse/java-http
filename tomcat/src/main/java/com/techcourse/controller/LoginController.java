@@ -48,7 +48,6 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
         String account = request.getParameter(ACCOUNT_PARAM);
         String password = request.getParameter(PASSWORD_PARAM);
-
         if (findUserByInfo(account, password)) {
             handleSuccessfulLogin(response, account);
             return;

@@ -29,7 +29,7 @@ public class HttpRequest {
     private static Map<String, String> parseHeaders(BufferedReader request) throws IOException {
         String line;
         Map<String, String> headers = new HashMap<>();
-        while (!(line = request.readLine()).isEmpty()) {
+        while ((line = request.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(": ", 2);
             if (headerParts.length == 2) {
                 headers.put(headerParts[0], headerParts[1]);
@@ -72,9 +72,5 @@ public class HttpRequest {
 
     public String getHeader(String header) {
         return headers.get(header);
-    }
-
-    public String getRequestBody() {
-        return requestBody;
     }
 }

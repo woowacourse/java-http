@@ -13,16 +13,7 @@ public class HttpRequest {
     private Session session;
     private String body;
 
-    public HttpRequest(HttpMethod method, String path, Map<String, String> queryString, String protocolVersion,
-                       Map<String, String> headers, HttpCookie httpCookie, Session session, String body) {
-        this.method = method;
-        this.path = path;
-        this.queryString = queryString;
-        this.protocolVersion = protocolVersion;
-        this.headers = headers;
-        this.httpCookie = httpCookie;
-        this.session = session;
-        this.body = body;
+    public HttpRequest() {
     }
 
     public boolean hasMethod(HttpMethod method) {
@@ -53,11 +44,43 @@ public class HttpRequest {
         return this.path;
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public Session getSession() {
         return session;
     }
 
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
     public String getBody() {
         return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setMethod(HttpMethod method) {
+        this.method = method;
+    }
+
+    public void setQueryString(Map<String, String> queryString) {
+        this.queryString = queryString;
+    }
+
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setHttpCookie(HttpCookie cookie) {
+        this.httpCookie = cookie;
     }
 }

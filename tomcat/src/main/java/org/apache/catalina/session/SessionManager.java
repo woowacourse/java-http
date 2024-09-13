@@ -39,7 +39,12 @@ public class SessionManager implements Manager {
         return sessions.containsKey(id);
     }
 
-    public String generateId() {
-        return UUID.randomUUID().toString();
+    public String store(String attributeName, Object attributeValue) {
+        Session session = new Session();
+        session.setAttribute(attributeName, attributeValue);
+
+        String id = UUID.randomUUID().toString();
+        this.add(id, session);
+        return id;
     }
 }

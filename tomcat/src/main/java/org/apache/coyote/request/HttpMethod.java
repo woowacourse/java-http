@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
+import org.apache.coyote.exception.CoyoteException;
 
 public enum HttpMethod {
 
@@ -20,6 +20,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(method -> name.equals(method.name()))
                 .findFirst()
-                .orElseThrow(() -> new UncheckedServletException("올바르지 않은 HTTP Method입니다."));
+                .orElseThrow(() -> new CoyoteException("올바르지 않은 HTTP Method입니다."));
     }
 }

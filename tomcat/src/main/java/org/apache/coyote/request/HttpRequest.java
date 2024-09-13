@@ -1,8 +1,10 @@
 package org.apache.coyote.request;
 
+import java.util.Optional;
+import org.apache.coyote.exception.CoyoteException;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.response.HttpHeaderType;
+import org.apache.coyote.http11.HttpHeaderType;
 
 public class HttpRequest {
 
@@ -16,11 +18,6 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public boolean pointsTo(HttpMethod httpMethod, String path) {
-        return httpMethod == requestLine.getMethod()
-               && path.equals(requestLine.getPath());
-    }
-
     public RequestBody getRequestBody() {
         return requestBody;
     }
@@ -29,15 +26,28 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpCookie getCookie() {
-        return new HttpCookie(httpHeader.get(HttpHeaderType.COOKIE.getName()));
-    }
-
     public boolean hasSession() {
-        return getCookie().hasSession();
+        return findCookie()
+                .map(HttpCookie::hasSession)
+                .orElse(false);
     }
 
     public String getSession() {
-        return getCookie().getSession();
+        if (!hasSession()) {
+            throw new CoyoteException("세션이 존재하지 않습니다.");
+        }
+
+        return findCookie()
+                .map(HttpCookie::getSession)
+                .orElseThrow(() -> new CoyoteException("쿠키가 존재하지 않습니다."));
+    }
+
+    private Optional<HttpCookie> findCookie() {
+        return httpHeader.find(HttpHeaderType.COOKIE.getName())
+                .map(HttpCookie::new);
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return requestLine.hasMethod(httpMethod);
     }
 }

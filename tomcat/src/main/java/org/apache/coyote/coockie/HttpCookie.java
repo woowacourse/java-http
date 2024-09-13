@@ -23,9 +23,9 @@ public class HttpCookie {
 
         if (rawCookies != null && !rawCookies.isBlank()) {
             String[] cookiesElements = rawCookies.split("; ");
-            if (cookiesElements.length > 1) {
-                for (int i = 0; i < cookiesElements.length; i++) {
-                    String[] cookiePair = cookiesElements[i].split("=");
+            for (int i = 0; i < cookiesElements.length; i++) {
+                String[] cookiePair = cookiesElements[i].split("=");
+                if (cookiePair.length > 1) {
                     cookieGroup.put(cookiePair[0], cookiePair[1]);
                 }
             }

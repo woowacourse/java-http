@@ -65,7 +65,8 @@ public class HttpHeader {
     }
 
     public String buildMessage() {
-        return headers.keySet().stream().map(key -> key + DELIMITER + " " + headers.get(key))
+        return headers.entrySet().stream()
+                .map(entry -> entry.getKey() + DELIMITER + " " + entry.getValue())
                 .collect(Collectors.joining(CRLF));
     }
 }

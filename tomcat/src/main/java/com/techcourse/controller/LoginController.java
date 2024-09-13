@@ -26,6 +26,7 @@ public class LoginController extends AbstractController {
         if (request.getPath().equals("/login")) {
             if (isAlreadyLogin(request.getRequestHeader())) {
                 response.redirect(request.getVersion(), "/index.html");
+                return;
             }
             response.redirect(request.getVersion(), "/login.html");
         }

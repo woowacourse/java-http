@@ -28,37 +28,7 @@ public class DefaultResourceHandler implements RequestHandler {
             httpResponse.setResponseOfStaticResource(staticResource);
             return;
         }
-        if (httpRequest.getTarget().contains("register")) {
-            registerResponse(httpRequest, httpResponse);
-            return;
-        }
         throw new CanNotHandleRequest("처리할 수 없는 요청입니다. : " + httpRequest.getTarget());
     }
 
-    private void registerResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (httpRequest.isPost()) {
-            HttpRequestParameters methodRequest = HttpRequestParameters.parseFrom(httpRequest.getBody());
-            User user = register(methodRequest);
-            Session session = httpRequest.getSession(true);
-            session.setAttribute("user", user);
-            SessionManager.getInstance().add(session);
-
-            httpResponse.addCookie("JSESSIONID", session.getId());
-            httpResponse.setMethodFound("/index.html");
-            return;
-        }
-
-        httpResponse.setResponseOfStaticResource(new StaticResource("/register.html"));
-    }
-
-    private User register(HttpRequestParameters requestParams) {
-        String account = requestParams.getParam("account");
-        User user = new User(
-                account,
-                requestParams.getParam("password"),
-                requestParams.getParam("email")
-        );
-        InMemoryUserRepository.save(user);
-        return InMemoryUserRepository.fetchByAccount(account);
-    }
 }

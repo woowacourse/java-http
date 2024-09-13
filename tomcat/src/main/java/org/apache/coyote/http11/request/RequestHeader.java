@@ -14,11 +14,7 @@ public class RequestHeader {
         return headers.get(key);
     }
 
-    public String getContentType() {
-        return headers.get("Accept").split(",")[0];
-    }
-
-    public String getCookie() {
-        return headers.get("Cookie");
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

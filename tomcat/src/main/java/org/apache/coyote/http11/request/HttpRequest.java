@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
@@ -14,27 +17,42 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public String getHeader(String key) {
-        return header.getHeader(key);
+    public HttpMethod getMethod() {
+        String method = requestLine.getMethod();
+        return HttpMethod.valueOf(method);
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getContentType() {
-        return header.getContentType();
+        String contentType = header.getHeader(HttpHeaders.ACCEPT.getName());
+        if (contentType == null) {
+            return null;
+        }
+
+        return contentType.split(",")[0];
     }
 
-    public String getCookie() {
-        return header.getCookie();
+    public HttpCookie getCookie() {
+        String cookieValue = header.getHeader(HttpHeaders.COOKIE.getName());
+        return new HttpCookie(cookieValue);
     }
 
     public Map<String, String> getFormData() {
         return requestBody.getFormData();
     }
 
-    public boolean hasBodyData() {
-        return requestBody != null;
+    public Map<String, String> getHeader() {
+        return header.getHeaders();
     }
 
     public RequestLine getRequestLine() {
         return requestLine;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

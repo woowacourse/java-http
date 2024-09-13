@@ -1,10 +1,10 @@
-package com.techcourse.view;
+package org.apache.coyote.http11.response;
 
-public class View {
+public class ResponseBody {
 
     private final String content;
 
-    public View(String content) {
+    public ResponseBody(String content) {
         this.content = content;
     }
 

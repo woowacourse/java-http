@@ -1,58 +1,67 @@
 package com.techcourse.controller;
 
+import static com.techcourse.controller.PagePath.INDEX_PAGE;
+import static com.techcourse.controller.PagePath.REGISTER_PAGE;
+
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.MissingRequestBodyException;
 import com.techcourse.model.User;
-import java.io.IOException;
+import com.techcourse.model.exception.UserCreationException;
 import java.util.Map;
-import com.techcourse.view.View;
-import com.techcourse.view.ViewResolver;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.was.controller.AbstractController;
+import org.was.controller.ResponseResult;
 
 public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    @Override
+    protected ResponseResult doGet(HttpRequest request) {
+        return ResponseResult
+                .status(HttpStatusCode.OK)
+                .path(REGISTER_PAGE.getPath());
+    }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
-        try {
-            if (!request.hasBodyData()) {
-                throw new IllegalArgumentException("RequestBody is missing in the request");
-            }
-
-            Map<String, String> requestFormData = request.getFormData();
-            String account = requestFormData.get("account");
-            String password = requestFormData.get("password");
-            String email = requestFormData.get("email");
-
-            User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-            responseRegisterSuccess(response);
-
-        } catch (IllegalArgumentException e) {
-            response.setStatus400();
-            response.setResponseBody(e.getMessage());
-            log.info("Bad Request: {}", e.getMessage());
-
+    protected ResponseResult doPost(HttpRequest request) {
+        Map<String, String> requestFormData = request.getFormData();
+        if (requestFormData.isEmpty()) {
+            return responseMissingBody();
         }
+
+        try {
+            registerUserByFormData(requestFormData);
+        } catch (UserCreationException e) {
+            return responseUserDataError(e.getMessage());
+        }
+        return responseRedirectIndex();
     }
 
-    @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        responseRegisterPage(request, response);
+    private void registerUserByFormData(Map<String, String> requestFormData) {
+        String account = requestFormData.get("account");
+        String password = requestFormData.get("password");
+        String email = requestFormData.get("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 
-    private void responseRegisterSuccess(HttpResponse response) {
-        response.setStatus302();
-        response.setLocation("/index.html");
+    private ResponseResult responseMissingBody() {
+        return ResponseResult
+                .status(HttpStatusCode.BAD_REQUEST)
+                .body(new MissingRequestBodyException().getMessage());
     }
 
-    private void responseRegisterPage(HttpRequest request, HttpResponse response) throws IOException {
-        View view = ViewResolver.getView("/register.html");
-        response.setStatus200();
-        response.setResponseBody(view.getContent());
-        response.setContentType(request.getContentType());
+    private ResponseResult responseUserDataError(String errorMessage) {
+        return ResponseResult
+                .status(HttpStatusCode.BAD_REQUEST)
+                .body(errorMessage);
+    }
+
+    private static ResponseResult responseRedirectIndex() {
+        return ResponseResult
+                .status(HttpStatusCode.FOUND)
+                .header(HttpHeaders.LOCATION.getName(), INDEX_PAGE.getPath())
+                .build();
     }
 }

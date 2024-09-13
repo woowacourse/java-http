@@ -1,4 +1,4 @@
-package com.techcourse.session;
+package org.was.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +18,8 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(String name) {
-        return values.get(name);
+    public boolean hasAttribute(String name) {
+        return values.containsKey(name);
     }
 
     public void setAttribute(String name, Object value) {

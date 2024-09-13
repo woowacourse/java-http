@@ -14,20 +14,12 @@ public class RequestLine {
         this.version = version;
     }
 
-    public boolean hasQueryString() {
-        return queryString != null;
-    }
-
     public String getMethod() {
         return method;
     }
 
     public String getPath() {
         return path;
-    }
-
-    public String getQueryString() {
-        return queryString;
     }
 
     public String getVersion() {

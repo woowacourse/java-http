@@ -17,10 +17,16 @@ public class RequestBody {
 
     public Map<String, String> getFormData() {
         Map<String, String> formData = new HashMap<>();
+        if (content == null || content.isEmpty()) {
+            return formData;
+        }
+
         String[] contentParts = content.split("&");
         for (String keyValuePair : contentParts) {
             String[] keyAndValue = keyValuePair.split("=");
-            formData.put(keyAndValue[0], keyAndValue[1]);
+            if (keyAndValue.length == 2) {
+                formData.put(keyAndValue[0], keyAndValue[1]);
+            }
         }
 
         return formData;

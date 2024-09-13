@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import com.techcourse.model.exception.UserCreationException;
+
 public class User {
 
     private final Long id;
@@ -8,6 +10,7 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateUserCreateData(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
@@ -34,5 +37,11 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    private void validateUserCreateData(String account, String password, String email) {
+        if (account == null || password == null || email == null) {
+            throw new UserCreationException();
+        }
     }
 }

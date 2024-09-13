@@ -12,7 +12,7 @@ public class Http11ResponseBody {
         return new Http11ResponseBody(response);
     }
 
-    public static Http11ResponseBody of() {
+    public static Http11ResponseBody createEmpty() {
         return new Http11ResponseBody("");
     }
 

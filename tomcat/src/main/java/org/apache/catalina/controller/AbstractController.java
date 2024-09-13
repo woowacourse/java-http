@@ -16,9 +16,12 @@ public abstract class AbstractController implements Controller {
         HttpMethod method = requestLine.getHttpMethod();
         if (method.isGet()) {
             doGet(request, response);
+            return;
         } else if (method.isPost()) {
             doPost(request, response);
+            return;
         }
+        throw new IllegalArgumentException("Unsupported method: " + method);
     }
 
     protected void doGet(Http11Request request, Http11Response response) throws Exception {/* NOOP */}

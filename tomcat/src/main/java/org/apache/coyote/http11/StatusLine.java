@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 public class StatusLine {
+    private static final String SPACE = " ";
     private final HttpVersion httpVersion;
     private final StatusCode statusCode;
 
@@ -14,7 +15,7 @@ public class StatusLine {
     }
 
     public String getStatusLine() {
-        return httpVersion.getVersion() + " " + statusCode.getStatusCode();
+        return httpVersion.getVersion() + SPACE + statusCode.getStatusCode() + SPACE;
     }
 
     public HttpVersion getHttpVersion() {

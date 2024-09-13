@@ -45,7 +45,7 @@ public class Http11Response {
 
         return new Http11Response(StatusLine.of(httpVersion, 200),
                 Http11ResponseHeader.of(),
-                Http11ResponseBody.of());
+                Http11ResponseBody.createEmpty());
     }
 
     public void unAuthorized(Http11Request request) {
@@ -69,7 +69,8 @@ public class Http11Response {
         this.statusLine = StatusLine.of(this.statusLine.getHttpVersion(), statusCode);
         this.responseHeader = Http11ResponseHeader.builder()
                 .addHeader(CONTENT_TYPE.getName(), List.of(HTML.getContentType()))
-                .addHeader(CONTENT_LENGTH.getName(), List.of(String.valueOf(responseBody.length())))
+                .addHeader(CONTENT_LENGTH.getName(),
+                        List.of(String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length)))
                 .addHeader(LOCATION.getName(), List.of(resourcePath))
                 .addHeader(SET_COOKIE.getName(), cookies)
                 .build();
@@ -83,7 +84,8 @@ public class Http11Response {
         this.statusLine = StatusLine.of(this.statusLine.getHttpVersion(), statusCode);
         this.responseHeader = Http11ResponseHeader.builder()
                 .addHeader(CONTENT_TYPE.getName(), List.of(contentType.getContentType()))
-                .addHeader(CONTENT_LENGTH.getName(), List.of(String.valueOf(responseBody.length())))
+                .addHeader(CONTENT_LENGTH.getName(),
+                        List.of(String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length)))
                 .build();
         this.responseBody = Http11ResponseBody.of(responseBody);
     }

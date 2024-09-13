@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.net.http.HttpHeaders;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Http11ResponseHeader {
 
     private static final String KEY_VALUE_DELIMITER = ": ";
-    private static final String NEW_LINE = "\r\n";
+    private static final String NEW_LINE = " \r\n";
     private final HttpHeaders httpHeaders;
 
     private Http11ResponseHeader(HttpHeaders httpHeaders) {
@@ -16,7 +16,7 @@ public class Http11ResponseHeader {
     }
 
     public static Http11ResponseHeader of() {
-        return new Http11ResponseHeader(HttpHeaders.of(Map.of(), (s1, s2) -> true));
+        return new Http11ResponseHeader(HttpHeaders.of(new LinkedHashMap<>(), (s1, s2) -> true));
     }
 
     public static Builder builder() {
@@ -40,7 +40,8 @@ public class Http11ResponseHeader {
     }
 
     public static class Builder {
-        private final Map<String, List<String>> headers = new HashMap<>();
+
+        private final Map<String, List<String>> headers = new LinkedHashMap<>();
 
         public Builder addHeader(String name, List<String> values) {
             headers.put(name, values);

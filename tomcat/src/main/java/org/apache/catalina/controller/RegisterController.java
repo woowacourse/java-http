@@ -38,7 +38,7 @@ public class RegisterController extends AbstractController {
         Http11RequestBody requestBody = request.getHttp11RequestBody();
         String body = requestBody.getBody();
 
-        Map<String, String> params = parseBody(body);
+        Map<String, String> params = BodyParser.parse(body);
 
         String account = params.get(ACCOUNT);
         String password = params.get(PASSWORD);

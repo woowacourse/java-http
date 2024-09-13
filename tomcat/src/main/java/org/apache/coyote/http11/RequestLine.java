@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 public class RequestLine {
 
     private static final String START_LINE_DELIMITER = " ";
-    private static final int FIRST = 0;
-    private static final int SECOND = 1;
-    private static final int THIRD = 2;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
@@ -19,9 +19,9 @@ public class RequestLine {
 
     public static RequestLine from(String startLine) {
         String[] splitStartLine = startLine.split(START_LINE_DELIMITER);
-        HttpMethod httpMethod = HttpMethod.from(splitStartLine[FIRST]);
-        RequestUri requestUri = RequestUri.from(splitStartLine[SECOND]);
-        HttpVersion httpVersion = HttpVersion.from(splitStartLine[THIRD]);
+        HttpMethod httpMethod = HttpMethod.from(splitStartLine[HTTP_METHOD_INDEX]);
+        RequestUri requestUri = RequestUri.from(splitStartLine[REQUEST_URI_INDEX]);
+        HttpVersion httpVersion = HttpVersion.from(splitStartLine[HTTP_VERSION_INDEX]);
 
         return new RequestLine(httpMethod, requestUri, httpVersion);
     }

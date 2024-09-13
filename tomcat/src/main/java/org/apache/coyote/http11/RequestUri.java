@@ -12,6 +12,7 @@ public class RequestUri {
     private static final String EMPTY_STRING = "";
     private static final String QUERY_PARAMS_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int PARAM_VALUE_INDEX = 1;
 
     private final String path;
     private final String queryString;
@@ -39,8 +40,8 @@ public class RequestUri {
     }
 
     private static String getParamValue(List<String> param) {
-        if (param.size() > 1) {
-            return param.get(1);
+        if (param.size() > PARAM_VALUE_INDEX) {
+            return param.get(PARAM_VALUE_INDEX);
         }
         return EMPTY_STRING;
     }

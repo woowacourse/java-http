@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse response(HttpRequest request) throws IOException {
-        HttpResponse response = HttpResponse.notFound();
+        HttpResponse response = new HttpResponse();
         servletContainer.service(request, response);
         return response;
     }

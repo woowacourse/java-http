@@ -28,11 +28,6 @@ public class HttpResponse {
         headers.addContentLength(body.getBytes().length);
     }
 
-    public static HttpResponse notFound() {
-        return new HttpResponse(new HttpResponseHeaders(), HttpStatus.NOT_FOUND,
-                StaticFileResponseUtils.readStaticFile("/404.html"));
-    }
-
     public void sendTextFiles(String text) {
         status = HttpStatus.OK;
         body = text;

@@ -14,6 +14,7 @@ public class Cookie {
 
     public Cookie(String cookie) {
         this.cookies = Arrays.stream(cookie.split(";"))
+                .filter(param -> param.contains("="))
                 .map(param -> param.split("=", 2))  // 2로 제한해서 key=value 형태로 분리
                 .collect(Collectors.toMap(
                         pair -> pair[0].trim(),

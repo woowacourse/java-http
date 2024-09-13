@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Objects;
 
 public record Path(String value) {
-	public static Path request(String requestLine) {
+	public static Path parseRequestPath(String requestLine) {
 		return new Path(requestLine.split(" ")[1]);
 	}
 

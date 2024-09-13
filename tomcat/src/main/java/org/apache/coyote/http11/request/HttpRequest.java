@@ -6,11 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import org.apache.coyote.http11.common.Body;
-import org.apache.coyote.http11.common.HeaderKey;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.session.Session;
-
-import jakarta.servlet.http.Cookie;
 
 public class HttpRequest {
 	private final Method method;
@@ -20,10 +17,10 @@ public class HttpRequest {
 
 	public HttpRequest(BufferedReader reader) throws IOException {
 		String requestLine = reader.readLine();
-		this.method = Method.request(requestLine);
-		this.path = Path.request(requestLine);
+		this.method = Method.parseRequestMethod(requestLine);
+		this.path = Path.parseRequestPath(requestLine);
 		this.headers = Headers.parseRequestHeader(reader);
-		this.body = Body.request(headers, reader);
+		this.body = Body.parseRequestBody(headers, reader);
 	}
 
 	public Method getMethod() {

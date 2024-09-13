@@ -31,7 +31,8 @@ public class Connector implements Runnable {
 
     private Connector(RequestMappings requestMappings, final int port, final int acceptCount, final int maxThreads) {
         this.requestMappings = requestMappings;
-        threadPool = Executors.newScheduledThreadPool(maxThreads);
+        threadPool = Executors.newFixedThreadPool(maxThreads); // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
+        // 단, 처음 maxThreads개의 스레드가 생기기 전에는 새로 생성한다.
         serverSocket = createServerSocket(port, acceptCount);
     }
 

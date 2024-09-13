@@ -12,8 +12,7 @@ public class ResourceHandlerMapping implements HandlerMapping {
     private static final Method SUPPORTING_METHOD = Method.GET;
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
     private final StaticResourceServlet staticResourceServlet = new StaticResourceServlet();
-
-
+    
     @Override
     public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
         return isAvailableResourceRequest(httpServletRequest);

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.Servlet;
-import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
@@ -31,12 +30,9 @@ public class LoginServlet implements Servlet {
             return;
         }
 
-        UUID jsessionId = UUID.randomUUID();
-        Session session = new Session(jsessionId.toString());
-        session.setAttributes("user", found.get());
-        sessionManager.putSession(jsessionId.toString(), session);
+        UUID sessionId = sessionManager.putUserSession(found.get());
 
         response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
-        response.setJsessionCookie(jsessionId);
+        response.setJsessionCookie(sessionId);
     }
 }

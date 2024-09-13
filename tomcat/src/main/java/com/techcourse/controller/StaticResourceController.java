@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import static org.apache.coyote.http.MediaType.APPLICATION_JAVASCRIPT;
+import static org.apache.coyote.http.MediaType.IMAGE_SVG;
 import static org.apache.coyote.http.MediaType.TEXT_CSS;
 import static org.apache.coyote.http.MediaType.TEXT_HTML;
 
@@ -37,6 +38,9 @@ public class StaticResourceController implements Controller {
         if (path.endsWith(".js") || accept.contains(APPLICATION_JAVASCRIPT.value())) {
             return APPLICATION_JAVASCRIPT.defaultCharset();
         }
-        return null;
+        if (path.contains(".svg")) {
+            return IMAGE_SVG.value();
+        }
+        throw new IllegalArgumentException("MIME type not supported");
     }
 }

@@ -6,6 +6,7 @@ public enum MediaType {
     TEXT_CSS("text/css"),
     APPLICATION_JAVASCRIPT("application/javascript"),
     APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded"),
+    IMAGE_SVG("image/svg+xml"),
     ;
 
     private final String value;

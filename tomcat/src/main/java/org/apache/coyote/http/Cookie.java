@@ -3,6 +3,7 @@ package org.apache.coyote.http;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 public class Cookie {
@@ -32,6 +33,18 @@ public class Cookie {
 
     public Optional<String> get(String key) {
         return Optional.ofNullable(cookies.get(key));
+    }
+
+    public boolean isNotEmpty() {
+        return !cookies.isEmpty();
+    }
+
+    public String encode() {
+        String encoded = "";
+        for(Entry<String, String> entry: cookies.entrySet()) {
+            encoded += entry.getKey() + "=" + entry.getValue();
+        }
+        return encoded;
     }
 
     @Override

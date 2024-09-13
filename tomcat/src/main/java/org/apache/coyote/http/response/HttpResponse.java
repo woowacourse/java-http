@@ -15,8 +15,8 @@ public class HttpResponse {
     private static final String BLANK_SPACE = " ";
 
     private final String protocol;
-    private StatusCode status;
     private final Map<String, String> headers;
+    private StatusCode status;
     private Cookie cookies;
     private String body;
 
@@ -37,7 +37,10 @@ public class HttpResponse {
     }
 
     public byte[] serialize() {
-        this.setHeader(Header.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
+        setHeader(Header.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
+        if (cookies.isNotEmpty()) {
+            setHeader(Header.SET_COOKIE.value(), cookies.encode());
+        }
         return this.getBytes();
     }
 
@@ -78,6 +81,9 @@ public class HttpResponse {
     public void sendRedirect(String path) {
         setStatus(StatusCode.FOUND);
         setHeader(Header.LOCATION.value(), path);
+        if (cookies.isNotEmpty()) {
+            setHeader(Header.SET_COOKIE.value(), cookies.encode());
+        }
     }
 
     public void setStatus(StatusCode status) {

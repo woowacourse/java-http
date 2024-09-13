@@ -38,11 +38,11 @@ public class FrontController implements Controller {
         try {
             handler.service(request, response);
         } catch (InvalidResourceException e) {
-            log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
+            logError(uri, e);
 
             handleNotFound(request, response);
         } catch (Exception e) {
-            log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
+            logError(uri, e);
 
             handleInternalServerError(request, response);
         }
@@ -63,5 +63,9 @@ public class FrontController implements Controller {
     private void handleInternalServerError(HttpRequest request, HttpResponse response) throws Exception {
         Controller internalServerErrorController = InternalServerErrorController.getInstance();
         internalServerErrorController.service(request, response);
+    }
+
+    private void logError(String uri, Exception e) {
+        log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
     }
 }

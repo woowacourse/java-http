@@ -1,11 +1,10 @@
 package thread.stage2;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class AppTest {
 
@@ -23,8 +22,8 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
-        final var NUMBER_OF_THREAD = 10;
-        var threads = new Thread[NUMBER_OF_THREAD];
+        int NUMBER_OF_THREAD = 10;
+        Thread[] threads = new Thread[NUMBER_OF_THREAD];
 
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));

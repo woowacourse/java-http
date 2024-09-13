@@ -46,31 +46,31 @@ public class Request {
         return requestLine.existQueryParams();
     }
 
-    public Session getSession(boolean create) {
-        String sessionId = headers.findJSessionId().orElse(null);
-        Session session = getSession(sessionId);
+    public Session getSession() {
+        Session session = headers.findJSessionId()
+                .map(this::getSession)
+                .orElse(null);
         if (session != null) {
-            return session;
+            return accessSession(session);
         }
-        if (create) {
-            return MANAGER.createSession(sessionId);
-        }
-        return null;
+        return MANAGER.createSession();
     }
 
     private Session getSession(String sessionId) {
         try {
-            Session session = MANAGER.findSession(sessionId);
-            if (session != null && session.isValid()) {
-                session.access();
-                return session;
-            }
-            if (session != null && !session.isValid()) {
-                MANAGER.remove(session);
-            }
+            return MANAGER.findSession(sessionId);
         } catch (IOException e) {
             log.info("세션을 찾는 데 실패했습니다 id: {}", sessionId, e);
         }
+        return null;
+    }
+
+    private Session accessSession(Session session) {
+        if (session.isValid()) {
+            session.access();
+            return session;
+        }
+        MANAGER.remove(session);
         return null;
     }
 }

@@ -6,15 +6,17 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
+import support.FixedIdGenerator;
 
 class ResponseCookieTest {
-
-    private final Manager manager = SessionManager.getInstance();
 
     @Test
     void ResponseCookie를_조립한다() {
         // given
-        Session session = manager.createSession("656cef62-e3c4-40bc-a8df-94732920ed46");
+        Manager manager = SessionManager.getInstance();
+        manager.setIdGenerator(new FixedIdGenerator());
+        Session session = manager.createSession();
+
         ResponseCookie responseCookie = new ResponseCookie();
         responseCookie.addSessionCookie(session);
 
@@ -23,7 +25,7 @@ class ResponseCookieTest {
         responseCookie.assemble(builder);
 
         // then
-        String expected = "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 \r\n";
+        String expected = "Set-Cookie: JSESSIONID=fixed-id \r\n";
         assertThat(builder.toString()).isEqualTo(expected);
     }
 }

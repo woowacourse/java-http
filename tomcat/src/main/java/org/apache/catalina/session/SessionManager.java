@@ -46,10 +46,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session createSession(String sessionId) {
-        if (sessionId == null) {
-            sessionId = idGenerator.generate();
-        }
+    public Session createSession() {
+        String sessionId = idGenerator.generate();
         long createdTime = System.currentTimeMillis();
         Session session = new Session(sessionId, createdTime);
         add(session);

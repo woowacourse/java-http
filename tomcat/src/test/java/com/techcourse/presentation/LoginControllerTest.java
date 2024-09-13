@@ -46,14 +46,15 @@ class LoginControllerTest {
     void GET_요청_시_이미_로그인되어_있을_경우_index_경로로_리다이렉트한다() {
         // given
         Manager manager = SessionManager.getInstance();
-        Session session = manager.createSession("1234");
+        manager.setIdGenerator(new FixedIdGenerator());
+        Session session = manager.createSession();
         session.setAttribute("user", new User("gugu", "password", "email"));
 
         RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
         Map<String, String> headers = Map.of(
                 "Host", "localhost:8080",
                 "Connection", "keep-alive",
-                "Cookie", "JSESSIONID=1234"
+                "Cookie", "JSESSIONID=fixed-id"
         );
         RequestHeaders requestHeaders = new RequestHeaders(headers);
         RequestBody requestBody = RequestBody.from(null);

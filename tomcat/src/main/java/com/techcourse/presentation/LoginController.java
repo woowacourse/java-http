@@ -40,7 +40,7 @@ public class LoginController {
     }
 
     private boolean isAlreadyLoggedIn(Request request) {
-        Session session = request.getSession(false);
+        Session session = request.getSession();
         return session != null && session.getAttribute("user") != null;
     }
 
@@ -53,7 +53,7 @@ public class LoginController {
     private void login(String account, String password, Request request, Response response) {
         try {
             User user = getUser(account, password);
-            Session session = request.getSession(true);
+            Session session = request.getSession();
             session.setAttribute("user", user);
             response.addSessionCookie(session);
             response.configureViewAndStatus("/index", StatusCode.FOUND);

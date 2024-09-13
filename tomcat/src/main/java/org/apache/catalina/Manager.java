@@ -48,7 +48,7 @@ public interface Manager {
      */
     void remove(Session session);
 
-    Session createSession(String sessionId);
+    Session createSession();
 
     void setIdGenerator(IdGenerator idGenerator);
 }

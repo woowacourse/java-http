@@ -5,7 +5,7 @@ import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
     public static final StaticResourceController INSTANCE = new StaticResourceController();
 
@@ -14,7 +14,7 @@ public class StaticResourceController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        byte[] responseBody = StaticResourceReader.readResource(getClass().getClassLoader(), request.getUri());
+        byte[] responseBody = readStaticResource(request.getUri());
         makeResponse(request, response, responseBody);
     }
 

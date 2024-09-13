@@ -2,14 +2,13 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.DynamicSourceController;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http.Cookie;
-import org.apache.coyote.http.Header;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public class LoginController extends AbstractController {
+public class LoginController extends DynamicSourceController {
 
     private static final String LOGIN_PAGE = "/login.html";
     private static final String INDEX_PAGE = "/index.html";

@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.apache.catalina.http.VersionOfProtocol;
 
-public final class StatusLine {
+public class StatusLine {
     private final VersionOfProtocol versionOfProtocol;
     private HttpStatus httpStatus;
 

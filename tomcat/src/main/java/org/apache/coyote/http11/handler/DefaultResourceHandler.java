@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.exception.CanNotHandleRequest;
-import org.apache.coyote.http11.exception.NoSuchUserException;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.HttpRequestParameters;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -30,49 +28,11 @@ public class DefaultResourceHandler implements RequestHandler {
             httpResponse.setResponseOfStaticResource(staticResource);
             return;
         }
-        if (httpRequest.getTarget().equals("/login")) {
-            loginResponse(httpRequest, httpResponse);
-            return;
-        }
         if (httpRequest.getTarget().contains("register")) {
             registerResponse(httpRequest, httpResponse);
             return;
         }
         throw new CanNotHandleRequest("처리할 수 없는 요청입니다. : " + httpRequest.getTarget());
-    }
-
-    private void loginResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (httpRequest.isPost()) {
-            login(httpRequest, httpResponse);
-            return;
-        }
-        if (isLoggedIn(httpRequest)) {
-            httpResponse.setMethodFound("/index.html");
-            return;
-        }
-        httpResponse.setMethodFound("/index.html");
-    }
-
-    private boolean isLoggedIn(HttpRequest httpRequest) {
-        return Objects.nonNull(httpRequest.getSession(false));
-    }
-
-    private void login(HttpRequest httpRequest, HttpResponse httpResponse) throws NoSuchUserException {
-        HttpRequestParameters requestParams = HttpRequestParameters.parseFrom(httpRequest.getBody());
-        String account = requestParams.getParam("account");
-        String password = requestParams.getParam("password");
-        User user = InMemoryUserRepository.fetchByAccount(account);
-        if (user.checkPassword(password)) {
-            Session session = httpRequest.getSession(true);
-            session.setAttribute("user", user);
-            SessionManager.getInstance().add(session);
-
-            httpResponse.addCookie("JSESSIONID", session.getId());
-            httpResponse.setMethodFound("/index.html");
-            return;
-        }
-
-        httpResponse.setMethodFound("/401.html");
     }
 
     private void registerResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String sessionId = request.getCookie("JSESSIONID");
+        String sessionId = request.getCookie(HttpResponse.SESSION_ID_NAME);
         if (sessionManager.hasSession(sessionId)) {
             response.generate302Response("/index.html");
             return;

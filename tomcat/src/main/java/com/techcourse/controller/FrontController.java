@@ -5,9 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.HttpStatusLine;
-import org.apache.coyote.http.HttpVersion;
 
 public class FrontController implements Controller {
 
@@ -42,11 +39,5 @@ public class FrontController implements Controller {
         }
         controller = controllers.get("/404.html");
         return controller.handle(request);
-    }
-
-    private HttpResponse notFound() {
-        return HttpResponse.builder()
-                .statusLine(new HttpStatusLine(HttpVersion.HTTP11, HttpStatusCode.NOT_FOUND))
-                .build();
     }
 }

@@ -45,7 +45,6 @@ public class Http11Processor implements Runnable, Processor {
 
             Http11Request request = Http11Request.from(inputStream);
             Http11Response response = Http11Response.ok();
-            User user = checkUser(request);
 
             // 여기부터 response 만들기
             processNonStaticRequest(request, response);
@@ -56,21 +55,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private User checkUser(Http11Request request) {
-        User user = null;
-        List<Cookie> cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (Objects.equals(cookie.getName(), "jsessionid")) {
-                Session session = SessionManager.findSession(cookie.getValue());
-                if (session == null) {
-                    return null;
-                }
-                user = session.getUser();
-            }
-        }
-        return user;
     }
 
     private void processNonStaticRequest(Http11Request request, Http11Response response) {

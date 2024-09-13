@@ -5,6 +5,8 @@ import java.util.Map;
 public class HttpResponse {
 
     private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
+    private static final String CRLF = "\r\n";
+    private static final String SP = " ";
 
     private HttpVersion httpVersion;
     private HttpStatus httpStatus;
@@ -38,12 +40,12 @@ public class HttpResponse {
     }
 
     public byte[] serialize() {
-        String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
+        String message = String.join(CRLF, getStartLine(), getHeaders(), getBody());
         return message.getBytes();
     }
 
     private String getStartLine() {
-        return httpVersion.getVersionName() + " " + httpStatus.getDescription() + " ";
+        return httpVersion.getVersionName() + SP + httpStatus.getDescription() + SP;
     }
 
     private CharSequence getHeaders() {

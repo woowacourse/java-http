@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -33,7 +34,7 @@ class Http11ProcessorTest {
 
     @DisplayName("index.html을 요청하면 body에 담아 200으로 응답한다")
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -49,7 +50,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String file = new String(Files.readAllBytes(Paths.get(resource.toURI())));
 
         assertThat(socket.output())
                 .contains("HTTP/1.1 200 OK")

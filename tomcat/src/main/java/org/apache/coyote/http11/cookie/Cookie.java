@@ -1,15 +1,18 @@
 package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Cookie {
+
     private Map<String, String> cookies;
 
     public Cookie() {
-        cookies = new HashMap<>();
+        cookies = new LinkedHashMap<>();
     }
 
     public Cookie(String cookie) {
@@ -27,6 +30,6 @@ public class Cookie {
     }
 
     public Map<String, String> getCookies() {
-        return cookies;
+        return Collections.unmodifiableMap(cookies);
     }
 }

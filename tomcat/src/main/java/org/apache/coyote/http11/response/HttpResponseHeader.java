@@ -16,20 +16,20 @@ public class HttpResponseHeader {
         headers.put(key, value);
     }
 
-    public String toString() {
-        return headers.entrySet().stream()
-                .map(header -> header.getKey() + ": " + header.getValue())
-                .collect(Collectors.joining("\r\n"));
+    public void putCookie(String name, Map<String, String> cookies) {
+        String value = cookies.keySet().stream()
+                .map(cookie -> cookie + "=" + cookies.get(cookie))
+                .collect(Collectors.joining("; "));
+        headers.put(name, value);
     }
 
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
 
-    public void putCookie(String name, Map<String, String> cookies) {
-        String value = cookies.keySet().stream()
-                .map(cookie -> cookie + "=" + cookies.get(cookie))
-                .collect(Collectors.joining("; "));
-        headers.put(name, value);
+    public String toString() {
+        return headers.entrySet().stream()
+                .map(header -> header.getKey() + ": " + header.getValue())
+                .collect(Collectors.joining("\r\n"));
     }
 }

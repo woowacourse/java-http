@@ -11,13 +11,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 public class RequestMapping {
 
     public static Controller getController(HttpRequest request) {
-        if (Objects.equals(request.getUrl(), "/")) {
+        if (request.getUrl().equals("/")) {
             return new RootController();
         }
-        if (Objects.equals(request.getUrl(), "/login")) {
+        if (request.getUrl().equals("/login")) {
             return new LoginController();
         }
-        if (Objects.equals(request.getUrl(), "/register")) {
+        if (request.getUrl().equals("/register")) {
             return new RegisterController();
         }
         return new DefaultController();

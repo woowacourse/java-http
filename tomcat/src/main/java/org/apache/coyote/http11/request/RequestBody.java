@@ -1,22 +1,23 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.utils.Separator;
 
 public class RequestBody {
+
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
 
     private Map<String, String> parameters;
 
     public static RequestBody create(String body) {
-        Map<String, String> parameters = new HashMap<>();
-        Arrays.stream(body.split("&"))
-                .forEach(requestBodyField -> {
-                    String[] split = requestBodyField.split("=");
-                    if (split.length == 2 && !split[0].isBlank() && !split[1].isBlank()) {
-                        parameters.put(split[0], split[1].trim());
-                    }
-                });
+        if (body.isBlank()) {
+            return new RequestBody(Map.of());
+        }
+        
+        List<String> parameterEntries = List.of(body.split(PARAMETER_SEPARATOR));
+        Map<String, String> parameters = Separator.separateKeyValueBy(parameterEntries, KEY_VALUE_SEPARATOR);
 
         return new RequestBody(parameters);
     }

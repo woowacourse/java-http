@@ -2,8 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.utils.Separator;
 
 public class HttpRequest {
 
@@ -32,16 +34,14 @@ public class HttpRequest {
     }
 
     private static Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
+        List<String> headerLines = new ArrayList<>();
         String headerLine = bufferedReader.readLine();
         while (headerLine != null && !headerLine.isBlank()) {
-            String[] requestHeaderEntry = headerLine.split(":");
-            headers.put(requestHeaderEntry[0], requestHeaderEntry[1].trim());
+            headerLines.add(headerLine);
             headerLine = bufferedReader.readLine();
         }
 
-        return headers;
+        return Separator.separateKeyValueBy(headerLines, ":");
     }
 
     private static String readBody(BufferedReader bufferedReader, String rawContentLength) throws IOException {

@@ -13,11 +13,11 @@ public class Separator {
     public static Map<String, String> separateKeyValueBy(List<String> targets, String delimiter) {
         Map<String, String> result = new HashMap<>();
         targets.forEach(target -> {
-            String[] split = target.split(delimiter);
+            String[] split = target.split(delimiter, KEY_VALUE_PAIR_SIZE);
             if (split.length != KEY_VALUE_PAIR_SIZE || split[KEY_INDEX].isBlank() || split[VALUE_INDEX].isBlank()) {
                 throw new IllegalArgumentException("Only Key-Value pair can be separated.");
             }
-            result.put(split[KEY_INDEX], split[VALUE_INDEX]);
+            result.put(split[KEY_INDEX].trim(), split[VALUE_INDEX].trim());
         });
         return result;
     }

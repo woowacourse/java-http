@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.exception.HttpFormatException;
 
 public class HttpRequest {
 
@@ -18,50 +18,37 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest of(BufferedReader requestReader) throws IOException {
-        List<String> requestHead = readRequestHead(requestReader);
+    public static HttpRequest of(List<String> requestHead) {
         validateRequestHead(requestHead);
-        RequestLine requestLine = getRequestLine(requestHead);
-        HttpHeaders headers = getHeaders(requestHead);
+        RequestLine requestLine = createRequestLine(requestHead);
+        HttpHeaders headers = createHeaders(requestHead);
 
-        int contentLength = headers.getAsInt("Content-Length").orElse(0);
-        String body = readBody(contentLength, requestReader);
-
-        return new HttpRequest(requestLine, headers, body);
-    }
-
-    private static List<String> readRequestHead(BufferedReader requestReader) throws IOException {
-        List<String> requestHead = new ArrayList<>();
-        String line;
-        while ((line = requestReader.readLine()) != null && !line.isEmpty()) {
-            requestHead.add(line);
-        }
-        return requestHead;
+        return new HttpRequest(requestLine, headers, "");
     }
 
     private static void validateRequestHead(List<String> requestLines) {
         if (requestLines.isEmpty()) {
-            throw new IllegalArgumentException("올바르지 않은 HTTP 요청 형식입니다.");
+            throw new HttpFormatException("올바르지 않은 HTTP 요청 형식입니다.");
         }
     }
 
-    private static RequestLine getRequestLine(List<String> requestHead) {
+    private static RequestLine createRequestLine(List<String> requestHead) {
         String firstLine = requestHead.getFirst();
         return RequestLine.of(firstLine);
     }
 
-    private static HttpHeaders getHeaders(List<String> requestHead) {
+    private static HttpHeaders createHeaders(List<String> requestHead) {
         List<String> headers = new ArrayList<>(requestHead.subList(1, requestHead.size()));
         return HttpHeaders.of(headers);
     }
 
-    private static String readBody(int contentLength, BufferedReader requestReader) throws IOException {
-        if (contentLength <= 0) {
-            return "";
-        }
-        char[] body = new char[contentLength];
-        requestReader.read(body, 0, contentLength);
-        return new String(body);
+    public HttpRequest withBody(String body) {
+        return new HttpRequest(requestLine, headers, body);
+    }
+
+    public int getBodyLength() {
+        return headers.getAsInt(HttpHeader.CONTENT_LENGTH.getName())
+                .orElse(0);
     }
 
     public String getPath() {
@@ -84,12 +71,24 @@ public class HttpRequest {
         return body;
     }
 
-    public Optional<String> getSessionId() {
-        RequestCookies requestCookies = RequestCookies.of(headers.get("Cookie"));
-        String sessionId = requestCookies.get("JSESSIONID");
-        if (sessionId == null) {
-            return Optional.empty();
-        }
-        return Optional.of(sessionId);
+    public String getBodyParameter(String parameterName) {
+        Queries queries = Queries.of(body);
+        return queries.get(parameterName);
+    }
+
+    public String getQuery(String key) {
+        return requestLine.getQuery(key);
+    }
+
+    public Set<String> getQueryKeys() {
+        return requestLine.getQueryKeys();
+    }
+
+    public String getSessionId() {
+        return headers.getSessionId();
+    }
+
+    public void addSession(String sessionId) {
+        headers.addSession(sessionId);
     }
 }

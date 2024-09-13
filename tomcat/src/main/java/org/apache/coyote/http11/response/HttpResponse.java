@@ -4,86 +4,96 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpResponse {
 
+    private static final String TEXT_CONTENT_TYPE = "text/plain;charset=utf-8 ";
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String STATUS_LINE_FORMAT = "%s %d %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
+    private static final HttpStatus DEFAULT_REDIRECT_STATUS = HttpStatus.FOUND;
 
     private final Protocol protocol = Protocol.HTTP11;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
     private final Map<String, String> headers;
-    private final String responseBody;
+    private String body;
+
+    public HttpResponse() {
+        this(null, new HashMap<>(), "");
+    }
+
+    public HttpResponse(HttpStatus httpStatus) {
+        this(httpStatus, new HashMap<>(), "");
+    }
 
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers) {
         this(httpStatus, headers, "");
     }
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String responseBody) {
+    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String body) {
         this.httpStatus = httpStatus;
         this.headers = headers;
-        this.responseBody = responseBody;
+        this.body = body;
     }
 
-    public static HttpResponse createRedirectResponse(HttpStatus httpStatus, String location) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Location", location);
-        return new HttpResponse(
-                httpStatus,
-                headers
-        );
+    public void redirectTo(String location) {
+        redirectTo(location, DEFAULT_REDIRECT_STATUS);
     }
 
-    public static HttpResponse createTextResponse(HttpStatus httpStatus, String responseBody) {
-        Map<String, String> headers = new HashMap<>();
-        int contentLength = responseBody.getBytes().length;
-        headers.put("Content-Type", "text/plain;charset=utf-8 ");
-        headers.put("Content-Length", String.valueOf(contentLength));
-
-        return new HttpResponse(
-                httpStatus,
-                headers,
-                responseBody
-        );
+    public void redirectTo(String location, HttpStatus status) {
+        addRedirectHeader(location);
+        setHttpStatus(status);
     }
 
-    public static HttpResponse createFileResponse(ResponseFile responseFile) {
-        Map<String, String> headers = new HashMap<>();
-        String responseBody = responseFile.getContent();
-        int contentLength = responseBody.getBytes().length;
-        headers.put("Content-Type", responseFile.getContentType());
-        headers.put("Content-Length", String.valueOf(contentLength));
+    private void addRedirectHeader(String location) {
+        addHeader(HttpHeader.LOCATION.getName(), location);
+    }
 
-        return new HttpResponse(
-                HttpStatus.OK,
-                headers,
-                responseBody
-        );
+    public void addCookie(HttpCookie cookie) {
+        addHeader(HttpHeader.SET_COOKIE.getName(), cookie.toResponse());
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    public void setTextBody(String body) {
+        setBody(TEXT_CONTENT_TYPE, body);
+    }
+
+    public void setBody(String contentType, String body) {
+        this.body = body;
+        int contentLength = body.getBytes().length;
+        headers.put(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(contentLength));
+        headers.put(HttpHeader.CONTENT_TYPE.getName(), contentType);
     }
 
     public String toResponse() {
-        String statusLine = getStatusLine();
-        String headers = getHeaders();
+        String statusLine = createStatusLineResponse();
+        String headers = createHeadersResponse();
 
         return String.join(
                 LINE_SEPARATOR,
                 statusLine,
                 headers,
                 "",
-                responseBody
+                body
         );
     }
 
-    private String getStatusLine() {
-        return String.format(STATUS_LINE_FORMAT,
+    private String createStatusLineResponse() {
+        return String.format(
+                STATUS_LINE_FORMAT,
                 protocol.getName(),
                 httpStatus.getCode(),
                 httpStatus.getReasonPhrase()
         );
     }
 
-    private String getHeaders() {
+    private String createHeadersResponse() {
         List<String> formattedHeaders = new ArrayList<>();
         for (String headerKey : headers.keySet()) {
             String headerValue = headers.get(headerKey);
@@ -93,10 +103,35 @@ public class HttpResponse {
         return String.join(LINE_SEPARATOR, formattedHeaders);
     }
 
-//    public void addSession(Session session) {
-//        if (headers.containsKey("JSESSIONID")) {
-//            return;
-//        }
-//        headers.put("JSESSIONID", session.getId());
-//    }
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpResponse response = (HttpResponse) o;
+        return protocol == response.protocol && httpStatus == response.httpStatus && Objects.equals(headers,
+                response.headers) && Objects.equals(body, response.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protocol, httpStatus, headers, body);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "protocol=" + protocol +
+                ", httpStatus=" + httpStatus +
+                ", headers=" + headers +
+                ", body='" + body + '\'' +
+                '}';
+    }
 }

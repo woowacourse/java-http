@@ -1,11 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.UuidSessionGenerator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.handler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,15 +15,14 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class Http11ProcessorTest {
 
     @Nested
     class ResourceFileTest {
-        @DisplayName("특정 엔드포인트에 대한 올바른 HTML 파일을 반환한다.")
+        @DisplayName("HTML 파일을 반환한다.")
         @ParameterizedTest
-        @ValueSource(strings = {"/index", "/login", "/register"})
+        @ValueSource(strings = {"/login.html", "/register.html"})
         void getResourceHtml(String requestPath) throws IOException {
             String httpRequest = String.join("\r\n",
                     "GET " + requestPath + " HTTP/1.1 ",
@@ -37,11 +32,11 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
+            Http11Processor processor = new Http11Processor(socket, new RequestHandler(RequestMapping.of()));
 
             processor.process(socket);
 
-            String responseBody = getFile(requestPath + ".html");
+            String responseBody = getFile(requestPath);
             int contentLength = responseBody.getBytes().length;
 
             assertThat(socket.output()).contains(
@@ -63,7 +58,7 @@ class Http11ProcessorTest {
                     "");
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
+            Http11Processor processor = new Http11Processor(socket, new RequestHandler(RequestMapping.of()));
 
             processor.process(socket);
 
@@ -81,113 +76,6 @@ class Http11ProcessorTest {
         private String getFile(String fileName) throws IOException {
             URL resource = getClass().getClassLoader().getResource("static/" + fileName);
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        }
-    }
-
-    @Nested
-    class LoginTest {
-
-        private final String account = "account";
-        private final String password = "password";
-        private final User user = new User(account, password, "aaa@gmail.com");
-
-        @BeforeEach
-        void saveUser() {
-            InMemoryUserRepository.save(user);
-        }
-
-        @AfterEach
-        void deleteUser() {
-            InMemoryUserRepository.delete(user);
-        }
-
-        @DisplayName("로그인 성공 시 올바르게 응답을 보낸다.")
-        @Test
-        void loginSuccess() {
-            String sessionId = "sessionId";
-            Session session = new Session(sessionId);
-            String body = String.format("account=%s&password=%s", account, password);
-            int contentLength = body.getBytes().length;
-            String httpRequest = String.join("\r\n",
-                    "POST /login HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "Content-Length: " + contentLength,
-                    "",
-                    body);
-
-            StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
-
-            processor.process(socket);
-
-            assertThat(socket.output()).contains(
-                    "HTTP/1.1 302 Found \r\n",
-                    "Location: /index.html \r\n",
-                    "Set-Cookie: JSESSIONID=" + sessionId
-            );
-        }
-
-        @DisplayName("로그인 실패 시 올바르게 응답을 보낸다.")
-        @Test
-        void loginFail() {
-            String sessionId = "sessionId";
-            Session session = new Session(sessionId);
-            String body = String.format("account=%s&password=%s", "invalid account", "password");
-            int contentLength = body.getBytes().length;
-            String httpRequest = String.join("\r\n",
-                    "POST /login HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "Content-Length: " + contentLength,
-                    "",
-                    body);
-
-            StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
-
-            processor.process(socket);
-
-            assertThat(socket.output()).contains(
-                    "HTTP/1.1 302 Found \r\n",
-                    "Location: /401.html \r\n"
-            );
-        }
-    }
-
-    @Nested
-    class RegisterTest {
-
-        @DisplayName("회원 가입 시 올바르게 응답을 보낸다.")
-        @Test
-        void register() {
-            String sessionId = "sessionId";
-            String account = "account";
-            User user = new User(account, "password", "kkk@gmail.com");
-            Session session = new Session(sessionId);
-            String body = "account=account&password=password&email=kkk@gmail.com";
-            int contentLength = body.getBytes().length;
-            String httpRequest = String.join("\r\n",
-                    "POST /register HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "Content-Length: " + contentLength,
-                    "",
-                    body);
-
-            StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
-
-            processor.process(socket);
-
-            assertAll(
-                    () -> assertThat(socket.output()).contains(
-                            "HTTP/1.1 302 Found \r\n",
-                            "Location: /index.html \r\n"
-                    ),
-                    () -> assertThat(InMemoryUserRepository.findByAccount(account)).isNotEmpty()
-            );
-            InMemoryUserRepository.delete(user);
         }
     }
 }

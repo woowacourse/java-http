@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Queries {
 
@@ -16,12 +19,11 @@ public class Queries {
     }
 
     public static Queries of(String queries) {
-        String[] splitQueries = queries.split(QUERIES_SEPARATOR);
+        List<String> splitQueries = Arrays.stream(queries.split(QUERIES_SEPARATOR))
+                .filter(Queries::isValidQuery)
+                .toList();
         Map<String, String> map = new HashMap<>();
         for (String query : splitQueries) {
-            if (!isValidQuery(query)) {
-                continue;
-            }
             int index = query.indexOf(QUERY_SEPARATOR);
             String key = query.substring(0, index);
             String value = query.substring(index + 1);
@@ -42,5 +44,9 @@ public class Queries {
 
     public String get(String key) {
         return values.get(key);
+    }
+
+    public Set<String> getParameters() {
+        return values.keySet();
     }
 }

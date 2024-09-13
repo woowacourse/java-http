@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Set;
+
 public class RequestUri {
 
     private static final String QUERY_START = "?";
@@ -34,5 +36,13 @@ public class RequestUri {
 
     public Queries getQueries() {
         return queries;
+    }
+
+    public String getQuery(String key) {
+        return queries.get(key);
+    }
+
+    public Set<String> getQueryKeys() {
+        return queries.getParameters();
     }
 }

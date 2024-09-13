@@ -23,17 +23,19 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
+    private final Container container;
 
     private boolean stopped;
 
-    public Connector() {
-        this(new Container(), DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
+    public Connector(Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
     }
 
     public Connector(final Container container, final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThread);
+        this.container = container;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -74,7 +76,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, container);
         executorService.execute(processor);
     }
 

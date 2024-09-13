@@ -15,6 +15,5 @@ class HeadersTest {
         headers.put(line);
 
         assertThat(headers.get("Host")).isEqualTo("localhost:8080 ");
-
     }
 }

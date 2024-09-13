@@ -8,7 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final int MAX_INACTIVE_INTERVAL = 60 * 1000 * 15; // 15분
+
     private final int maxInactiveInterval;
+
+    public SessionManager() {
+        this(MAX_INACTIVE_INTERVAL);
+    }
 
     public SessionManager(final int maxInactiveInterval) {
         this.maxInactiveInterval = maxInactiveInterval;
@@ -27,9 +33,12 @@ public class SessionManager {
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
-    public void cleanUpSession(final LocalDateTime time){
-        SESSIONS.entrySet().stream()
-                .filter(entry -> entry.getValue().isExpired(time))
+
+    public void cleanUpSession(final LocalDateTime time) {
+        SESSIONS.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue()
+                        .isExpired(time))
                 .forEach(entry -> SESSIONS.remove(entry.getKey()));
     }
 }

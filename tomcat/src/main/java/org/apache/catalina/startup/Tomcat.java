@@ -9,11 +9,14 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private final Connector connector;
+
+    public Tomcat(final Connector connector) {
+        this.connector = connector;
+    }
 
     public void start() {
-        final var connector = new Connector();
         connector.start();
-
         try {
             // make the application wait until we press any key.
             System.in.read();

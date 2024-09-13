@@ -1,8 +1,5 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.executor.ExecutorService;
-import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,28 +14,19 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int MAX_INACTIVE_INTERVAL = 60 * 1000 * 15; // 15분
 
     private final ServerSocket serverSocket;
+    private final ConnectionListener connectionListener;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final ConnectionListener connectionListener) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT,connectionListener);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount,final ConnectionListener connectionListener) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-    }
-
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
-        try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        this.connectionListener = connectionListener;
     }
 
     public void start() {
@@ -69,8 +57,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, new ExecutorService(), new SessionManager(MAX_INACTIVE_INTERVAL));
-        new Thread(processor).start();
+        connectionListener.onConnection(connection);
     }
 
     public void stop() {
@@ -79,6 +66,16 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (final IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+        try {
+            final int checkedPort = checkPort(port);
+            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            return new ServerSocket(checkedPort, checkedAcceptCount);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

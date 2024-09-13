@@ -1,6 +1,8 @@
 package thread.stage2;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);
+    private static final Logger log = LoggerFactory.getLogger(AppTest.class);
 
     /**
      * 1. App 클래스의 애플리케이션을 실행시켜 서버를 띄운다.
@@ -39,7 +42,7 @@ class AppTest {
             thread.join();
         }
 
-        assertThat(count.intValue()).isEqualTo(2);
+        assertThat(count.intValue()).isEqualTo(10);
     }
 
     private static void incrementIfOk(final HttpResponse<String> response) {

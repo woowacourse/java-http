@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.executor.ExecutorService;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ResourceController;
+import org.apache.coyote.adapter.Adapter;
+import org.apache.coyote.adapter.CoyoteAdapter;
+import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -9,19 +14,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
-
-    ExecutorService executorService = new ExecutorService();
-    SessionManager sessionManager = new SessionManager(150000);
+    Adapter adapter = new CoyoteAdapter(
+            new RequestMapper(
+                    Map.of("/login", new LoginController(),
+                            "/register", new RegisterController())
+            ), new ResourceController(), new SessionManager());
 
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, executorService, sessionManager);
+        final var processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);
@@ -48,7 +56,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, executorService, sessionManager);
+        final var processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);

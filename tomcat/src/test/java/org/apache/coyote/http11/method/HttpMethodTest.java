@@ -1,7 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.method;
 
-import org.apache.coyote.http11.method.HttpMethod;
-import org.apache.coyote.http11.method.NotFoundHttpMethodException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

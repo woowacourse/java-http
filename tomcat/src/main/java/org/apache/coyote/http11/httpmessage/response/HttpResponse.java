@@ -52,6 +52,10 @@ public class HttpResponse {
         this.headers.addHeader(HttpHeaders.LOCATION, target);
     }
 
+    public void setMethodBadRequest() {
+        this.httpStatusLine.setMethodBadRequest();
+    }
+
     public void setResponseOfStaticResource(StaticResource resource) throws IOException {
         this.httpStatusLine.setMethodOK();
         headers.addHeader(HttpHeaders.CONTENT_TYPE, resource.getContentType() + ";charset=utf-8");

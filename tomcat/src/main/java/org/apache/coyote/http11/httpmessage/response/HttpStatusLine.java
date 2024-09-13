@@ -29,4 +29,9 @@ public class HttpStatusLine {
         this.statusCode = 200;
         this.statusText = "OK";
     }
+
+    public void setMethodBadRequest() {
+        this.statusCode = 400;
+        this.statusText = "BAD REQUEST";
+    }
 }

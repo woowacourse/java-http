@@ -1,22 +1,34 @@
-package org.apache.catalina.servlets;
+package org.apache.catalina.servlet;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.controller.RegisterController;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
-import org.apache.catalina.servlets.http.response.HttpStatus;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 
-public class RegisterServlet extends HttpServlet {
+public class RegisterServlet extends AbstractServlet {
+
+    private static RegisterServlet instance;
+    private final RegisterController registerController = new RegisterController();
+
+    private RegisterServlet() {
+    }
+
+    public static RegisterServlet getInstance() {
+        if (instance == null) {
+            instance = new RegisterServlet();
+        }
+        return instance;
+    }
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
+        String registerPage = registerController.getRegisterPage();
+        URL resource = getClass().getClassLoader().getResource("static" + registerPage + ".html");
         String fileContent = getFileContent(resource);
 
         response.setContentType("text/html");
@@ -38,14 +50,8 @@ public class RegisterServlet extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getParameter("account");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        InMemoryUserRepository.save(new User(account, password, email));
-
+    public void doPost(HttpRequest request, HttpResponse response) {
+        registerController.register(request, response);
         response.setContentType("text/html");
-        response.setStatus(HttpStatus.OK.getStatusCode());
-        response.sendRedirect("/index.html");
     }
 }

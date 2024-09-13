@@ -1,36 +1,39 @@
-package org.apache.catalina.servlets;
+package org.apache.catalina.servlet;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.request.HttpRequest;
-import org.apache.catalina.servlets.http.response.HttpResponse;
+import org.apache.catalina.servlet.http.ContentType;
+import org.apache.catalina.servlet.http.request.HttpRequest;
+import org.apache.catalina.servlet.http.response.HttpResponse;
 
 /**
  * 정적 리소스를 관리하는 서블릿입니다.
  */
 public class DefaultServlet implements Servlet {
 
-    private final Map<String, String> contentTypes = Map.of(
-            "html", "text/html;charset=utf-8",
-            "css", "text/css",
-            "js", "application/javascript"
-    );
+    private static DefaultServlet instance;
+
+    public static DefaultServlet getInstance() {
+        if (instance == null) {
+            instance = new DefaultServlet();
+        }
+        return instance;
+    }
+
+    private DefaultServlet() {}
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws IOException {
-
+    public void service(HttpRequest request, HttpResponse response) {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI());
-
         String fileContent = getFileContent(resource);
         String resourceType = getResourceType(resource);
-        String contentType = contentTypes.getOrDefault(resourceType, "text/html;charset=utf-8");
 
-        response.setContentType(contentType);
+        ContentType contentType = ContentType.of(resourceType);
+        response.setContentType(contentType.getValue());
         response.setContentLength(fileContent.getBytes().length);
         response.setResponseBody(fileContent);
     }

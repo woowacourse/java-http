@@ -1,33 +1,32 @@
 package org.apache.catalina.mapper;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
-import org.apache.catalina.servlets.DefaultServlet;
-import org.apache.catalina.servlets.LoginServlet;
-import org.apache.catalina.servlets.RegisterServlet;
-import org.apache.catalina.servlets.Servlet;
+import org.apache.catalina.servlet.DefaultServlet;
+import org.apache.catalina.servlet.LoginServlet;
+import org.apache.catalina.servlet.RegisterServlet;
+import org.apache.catalina.servlet.Servlet;
 
 /**
  * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)
  */
-public class Mapper {
+public class ControllerMapper {
 
     private static final Map<Pattern, Servlet> values = Map.of(
-            Pattern.compile(".*\\..*"), new DefaultServlet(),
-            Pattern.compile("/"), new DefaultServlet(),
-            Pattern.compile("^/login$"), new LoginServlet(),
-            Pattern.compile("^/register$"), new RegisterServlet()
+            Pattern.compile(".*\\..*"), DefaultServlet.getInstance(),
+            Pattern.compile("/"), DefaultServlet.getInstance(),
+            Pattern.compile("^/login$"), LoginServlet.getInstance(),
+            Pattern.compile("^/register$"), RegisterServlet.getInstance()
     );
 
-    private static Mapper instance;
+    private static ControllerMapper instance;
 
-    private Mapper() {}
+    private ControllerMapper() {}
 
-    public static Mapper getInstance() {
+    public static ControllerMapper getInstance() {
         if (instance == null) {
-            instance = new Mapper();
+            instance = new ControllerMapper();
         }
         return instance;
     }

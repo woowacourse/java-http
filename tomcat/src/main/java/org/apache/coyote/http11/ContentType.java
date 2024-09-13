@@ -12,6 +12,8 @@ public enum ContentType {
     APPLICATION_X_WWW_FORM_URL_ENCODED("application/x-www-form-urlencoded", ""),
     ;
 
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+
     private final String name;
     private final String extension;
 
@@ -28,17 +30,18 @@ public enum ContentType {
     }
 
     public static ContentType determineContentType(String resourcePath) {
-        for (ContentType contentType : ContentType.values()) {
-            if (resourcePath.endsWith(contentType.getExtension())) {
-                return contentType;
-            }
-        }
+        return Arrays.stream(ContentType.values())
+                .filter(contentType -> isPathEndWithType(resourcePath, contentType))
+                .findFirst()
+                .orElse(ContentType.PLAIN);
+    }
 
-        return ContentType.PLAIN;
+    private static boolean isPathEndWithType(String resourcePath, ContentType contentType) {
+        return resourcePath.endsWith(contentType.getExtension());
     }
 
     public String getName() {
-        return name + ";charset=utf-8";
+        return name + CHARSET_UTF_8;
     }
 
     public String getExtension() {

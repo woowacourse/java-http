@@ -7,6 +7,12 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String PARAMETER_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_VALUE_LENGTH = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final HttpRequestFirstLine firstLine;
     private final HttpRequestHeader header;
     private final HttpCookie cookie;
@@ -29,11 +35,11 @@ public class HttpRequest {
 
     public Map<String, String> parseQueryParameters() {
         Map<String, String> bodys = new HashMap<>();
-        String[] pairs = body.split("&");
+        String[] pairs = body.split(PARAMETER_DELIMITER);
         for (String pair : pairs) {
-            String[] keyAndValue = pair.split("=");
-            if (keyAndValue.length == 2) {
-                bodys.put(keyAndValue[0], keyAndValue[1]);
+            String[] keyAndValue = pair.split(KEY_VALUE_DELIMITER);
+            if (keyAndValue.length == KEY_VALUE_LENGTH) {
+                bodys.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
             }
         }
         return bodys;

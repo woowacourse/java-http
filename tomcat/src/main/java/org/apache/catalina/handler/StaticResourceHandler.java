@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.handler;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

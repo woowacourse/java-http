@@ -3,8 +3,8 @@ package org.apache.coyote.http11.response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.catalina.handler.StaticResourceHandler;
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
 
 public class HttpResponse {
 

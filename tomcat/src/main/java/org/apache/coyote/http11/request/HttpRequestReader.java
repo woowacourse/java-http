@@ -15,13 +15,11 @@ public class HttpRequestReader {
 
     public HttpRequest read() throws IOException {
         List<String> requestHead = readRequestHead();
-        HttpRequest.Builder requestBuilder = new HttpRequest.Builder(requestHead);
+        HttpRequest request = HttpRequest.of(requestHead);
+        int contentLength = request.getBodyLength();
 
-        int contentLength = requestBuilder.getBodyLength();
         String body = readBody(contentLength);
-
-        return requestBuilder.body(body)
-                .build();
+        return request.withBody(body);
     }
 
     private List<String> readRequestHead() throws IOException {

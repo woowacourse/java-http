@@ -18,6 +18,39 @@ public class HttpRequest {
         this.body = body;
     }
 
+    public static HttpRequest of(List<String> requestHead) {
+        validateRequestHead(requestHead);
+        RequestLine requestLine = createRequestLine(requestHead);
+        HttpHeaders headers = createHeaders(requestHead);
+
+        return new HttpRequest(requestLine, headers, "");
+    }
+
+    private static void validateRequestHead(List<String> requestLines) {
+        if (requestLines.isEmpty()) {
+            throw new HttpFormatException("올바르지 않은 HTTP 요청 형식입니다.");
+        }
+    }
+
+    private static RequestLine createRequestLine(List<String> requestHead) {
+        String firstLine = requestHead.getFirst();
+        return RequestLine.of(firstLine);
+    }
+
+    private static HttpHeaders createHeaders(List<String> requestHead) {
+        List<String> headers = new ArrayList<>(requestHead.subList(1, requestHead.size()));
+        return HttpHeaders.of(headers);
+    }
+
+    public HttpRequest withBody(String body) {
+        return new HttpRequest(requestLine, headers, body);
+    }
+
+    public int getBodyLength() {
+        return headers.getAsInt(HttpHeader.CONTENT_LENGTH.getName())
+                .orElse(0);
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }
@@ -57,53 +90,5 @@ public class HttpRequest {
 
     public void addSession(String sessionId) {
         headers.addSession(sessionId);
-    }
-
-    public static class Builder {
-
-        private RequestLine requestLine;
-        private HttpHeaders headers;
-        private String body = "";
-
-        public Builder(List<String> requestHead) {
-            validateRequestHead(requestHead);
-            this.requestLine = createRequestLine(requestHead);
-            this.headers = createHeaders(requestHead);
-        }
-
-        private void validateRequestHead(List<String> requestLines) {
-            if (requestLines.isEmpty()) {
-                throw new HttpFormatException("올바르지 않은 HTTP 요청 형식입니다.");
-            }
-        }
-
-        private RequestLine createRequestLine(List<String> requestHead) {
-            String firstLine = requestHead.getFirst();
-            return RequestLine.of(firstLine);
-        }
-
-        private HttpHeaders createHeaders(List<String> requestHead) {
-            List<String> headers = new ArrayList<>(requestHead.subList(1, requestHead.size()));
-            return HttpHeaders.of(headers);
-        }
-
-        public Builder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpRequest build() {
-            if (requestLine == null || headers == null) {
-                throw new IllegalArgumentException("HTTP 요청 객체를 생성할 수 없습니다.");
-            }
-            if (body.length() != getBodyLength()) {
-                throw new HttpFormatException("요청 본문 길이가 올바르지 않습니다.");
-            }
-            return new HttpRequest(requestLine, headers, body);
-        }
-
-        public int getBodyLength() {
-            return headers.getAsInt(HttpHeader.CONTENT_LENGTH.getName()).orElse(0);
-        }
     }
 }

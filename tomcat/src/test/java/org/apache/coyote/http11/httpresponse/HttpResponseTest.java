@@ -43,7 +43,7 @@ class HttpResponseTest {
         httpResponse.contentType("test");
         httpResponse.responseBody("testResponseBody");
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found".getBytes())
                 .contains("Location: /index".getBytes())
                 .contains("Set-Cookie: JSESSIONID=abcde".getBytes())

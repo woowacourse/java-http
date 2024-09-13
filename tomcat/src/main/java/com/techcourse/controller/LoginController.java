@@ -39,14 +39,15 @@ public class LoginController extends AbstractController {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 계정입니다"));
-        if (user.checkPassword(password)) {
-            redirectWithCookie(httpRequest, httpResponse, user);
-            return;
-        }
-        log.error("비밀번호 불일치");
-        throw new UnauthorizedException("존재하지 않는 계정입니다");
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> redirectWithCookie(httpRequest, httpResponse, user),
+                        () -> {
+                            log.error("존재하지 않는 계정이거나 비밀번호 불일치");
+                            throw new UnauthorizedException("존재하지 않는 계정입니다");
+                        }
+                );
     }
 
     private void redirectWithCookie(HttpRequest httpRequest, HttpResponse httpResponse, User user) {

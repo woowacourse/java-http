@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse httpResponse = createResponse(httpRequest);
 
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(httpResponse.toResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -71,13 +71,16 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse.staticResource(httpRequest.getPath());
                 return;
             }
-            RequestMapping requestMapping = new RequestMapping();
-            Controller controller = requestMapping.getController(httpRequest);
-
-            controller.service(httpRequest, httpResponse);
+            setHttpResponse(httpRequest, httpResponse);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private static void setHttpResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        RequestMapping requestMapping = new RequestMapping();
+        Controller controller = requestMapping.getController(httpRequest);
+        controller.service(httpRequest, httpResponse);
     }
 
     private boolean isStaticResource(HttpRequest httpRequest) {

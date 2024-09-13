@@ -82,9 +82,7 @@ public class HttpResponse {
 
     public void staticResource(String path) {
         try {
-            path = settingExtension(path);
-            String fileName = STATIC_PATH + path;
-            var resourceUrl = getClass().getClassLoader().getResource(fileName);
+            URL resourceUrl = getRssourceUrl(path);
             validateResourceUrl(resourceUrl);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
@@ -94,6 +92,12 @@ public class HttpResponse {
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e.getMessage() + e);
         }
+    }
+
+    private URL getRssourceUrl(String path) {
+        path = settingExtension(path);
+        String fileName = STATIC_PATH + settingExtension(path);
+        return getClass().getClassLoader().getResource(fileName);
     }
 
     private String settingExtension(String path) {
@@ -114,25 +118,16 @@ public class HttpResponse {
         contentLength(String.valueOf(responseBody.getBytes().length));
     }
 
-    public byte[] getBytes() {
-        String statusLine = httpStatusLine.getString();
-
-        String responseHeader = httpResponseHeader.getString();
-
+    public byte[] toResponse() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(httpStatusLine.createStatusLineResponse())
+                .append(RESPONSE_LINE_DELIMITER)
+                .append(httpResponseHeader.createHeadersResponse());
         if (httpResponseBody != null) {
-            String responseBody = httpResponseBody.getBody();
-            String join = String.join(RESPONSE_LINE_DELIMITER,
-                    statusLine,
-                    responseHeader,
-                    responseBody);
-            System.out.println(join);
-            return join.getBytes();
+            stringBuilder.append(RESPONSE_LINE_DELIMITER)
+                    .append(httpResponseBody.getBody());
         }
-        String join = String.join(RESPONSE_LINE_DELIMITER,
-                statusLine,
-                responseHeader);
-        System.out.println(join);
-        return join.getBytes();
+        return stringBuilder.toString().getBytes();
     }
 
     public HttpStatusLine getHttpStatusLine() {

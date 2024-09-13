@@ -20,7 +20,7 @@ public class HttpResponseHeader {
         headers.put(headerName, value);
     }
 
-    public String getString() {
+    public String createHeadersResponse() {
         return headers.keySet().stream()
                 .map(key -> key.getName() + HEADER_DELIMITER + headers.get(key))
                 .collect(Collectors.joining(RESPONSE_LINE_DELIMITER));

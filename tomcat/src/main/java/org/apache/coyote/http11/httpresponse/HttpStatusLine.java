@@ -14,7 +14,7 @@ public class HttpStatusLine {
         this.httpStatusCode = httpStatusCode;
     }
 
-    public String getString() {
+    public String createStatusLineResponse() {
         return STATUS_LINE_FORMAT.formatted(version, httpStatusCode.getCode(), httpStatusCode.getMessage());
     }
 

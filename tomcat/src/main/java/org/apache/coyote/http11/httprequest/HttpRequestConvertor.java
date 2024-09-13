@@ -33,7 +33,6 @@ public class HttpRequestConvertor {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody, session);
         }
-
         return new HttpRequest(httpRequestLine, httpRequestHeader, session);
     }
 

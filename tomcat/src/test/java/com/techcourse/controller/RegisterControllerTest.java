@@ -32,7 +32,7 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
         registerController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found ".getBytes())
                 .contains("Location: /index".getBytes());
     }
@@ -55,7 +55,7 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
         registerController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found ".getBytes())
                 .contains("Location: /register".getBytes());
     }
@@ -78,7 +78,7 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
         registerController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found ".getBytes())
                 .contains("Location: /register".getBytes());
     }
@@ -99,7 +99,7 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
         registerController.doGet(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 200 OK ".getBytes())
                 .contains("Content-Type: text/html;charset=utf-8 ".getBytes())
                 .contains(("Content-Length: " + body.getBytes().length + " ").getBytes())

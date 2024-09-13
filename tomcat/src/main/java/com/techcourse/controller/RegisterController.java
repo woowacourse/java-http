@@ -30,15 +30,12 @@ public class RegisterController extends AbstractController {
         String account = httpRequest.getBodyValue(ACCOUNT);
         String password = httpRequest.getBodyValue(PASSWORD);
         String email = httpRequest.getBodyValue(EMAIL);
-
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
             redirectPage(httpRequest, httpResponse, REGISTER_PATH);
             return;
         }
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
+        InMemoryUserRepository.save(new User(account, password, email));
         redirectPage(httpRequest, httpResponse, INDEX_PATH);
     }
 

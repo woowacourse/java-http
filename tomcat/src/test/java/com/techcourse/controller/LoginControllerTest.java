@@ -37,7 +37,7 @@ class LoginControllerTest {
         LoginController loginController = new LoginController();
         loginController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found ".getBytes())
                 .contains("Location: /index.html ".getBytes())
                 .contains(("Set-Cookie: JSESSIONID=" + id + " ").getBytes());
@@ -103,7 +103,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
         loginController.doPost(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 302 Found ".getBytes())
                 .contains("Location: /login".getBytes());
     }
@@ -124,7 +124,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
         loginController.doGet(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 200 OK ".getBytes())
                 .contains("Content-Type: text/html;charset=utf-8 ".getBytes())
                 .contains(("Content-Length: " + body.getBytes().length + " ").getBytes())
@@ -149,7 +149,7 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
         loginController.doGet(httpRequest, httpResponse);
 
-        assertThat(httpResponse.getBytes())
+        assertThat(httpResponse.toResponse())
                 .contains("HTTP/1.1 200 OK ".getBytes())
                 .contains("Location: /login".getBytes());
     }

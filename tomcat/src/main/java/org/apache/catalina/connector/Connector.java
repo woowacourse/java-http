@@ -33,10 +33,10 @@ public class Connector implements Runnable {
 
     private Connector(RequestMappings requestMappings, final int port, final int acceptCount, final int maxThreads) {
         this.requestMappings = requestMappings;
-//        threadPool = Executors.newFixedThreadPool(maxThreads); // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
+
         threadPool = new ThreadPoolExecutor(
-                maxThreads,
-                maxThreads,
+                maxThreads, // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
+                maxThreads, // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(acceptCount)
         );

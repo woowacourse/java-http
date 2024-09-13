@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.except.InternaServerException;
-import com.techcourse.except.UnauthorizedException;
+import com.techcourse.except.UserNotFoundException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOGGER.error(e.getMessage(), e);
-        } catch (UnauthorizedException e) {
+        } catch (UserNotFoundException e) {
 
         } catch (Exception e) {
             throw new InternaServerException("서버에러가 발생했습니다.");

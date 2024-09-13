@@ -1,5 +1,7 @@
 package com.techcourse.controller;
 
+import com.techcourse.except.UnauthorizedException;
+import com.techcourse.except.UserNotFoundException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
@@ -27,6 +29,7 @@ public class LoginController extends AbstractController {
     private static final String DEFAULT_PATH = "static";
     private static final String INDEX_HTML = "/index.html";
     private static final String LOGIN_HTML = "/login.html";
+    private static final String UNAUTHORIZED_HTML = "/401.html";
 
     private final UserService userService = UserService.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -41,40 +44,45 @@ public class LoginController extends AbstractController {
         String account = params.get(ACCOUNT);
         String password = params.get(PASSWORD);
 
-        if (!userService.isAccountExist(account)) {
+        try {
+            User user = userService.findBy(account);
+            userService.checkUser(user, password);
+            handleSuccessfulLogin(response, user);
+        } catch (UserNotFoundException | UnauthorizedException e) {
             handleFailedLogin(response);
-            return;
         }
-
-        User user = userService.findUserByAccount(account);
-        if (!userService.isPasswordCorrect(user, password)) {
-            handleFailedLogin(response);
-            return;
-        }
-
-        handleSuccessfulLogin(response, user);
-    }
-
-    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
-        String path = "static/401.html";
-
-        response.setStaticBody(path);
-        response.setStatusLine(HttpStatus.UNAUTHORIZED);
     }
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {
-        Session session = new Session();
-        session.setAttribute(USER, user);
-        sessionManager.add(session);
-
-        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
-        httpCookie.setValue(session.getId());
-        httpCookie.setHttpOnly(true);
+        HttpCookie httpCookie = makeUserCookie(user);
 
         response.setStatusLine(HttpStatus.FOUND);
         response.setHeader(HttpHeaderField.LOCATION.getName(), INDEX_HTML);
         response.setHeader(HttpHeaderField.SET_COOKIE.getName(), httpCookie.toString());
         LOGGER.info("로그인한 회원: {}", user);
+    }
+
+    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
+        String path = DEFAULT_PATH + UNAUTHORIZED_HTML;
+
+        response.setStaticBody(path);
+        response.setStatusLine(HttpStatus.UNAUTHORIZED);
+    }
+
+    private HttpCookie makeUserCookie(User user) {
+        Session session = makeUserSession(user);
+
+        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
+        httpCookie.setValue(session.getId());
+        httpCookie.setHttpOnly(true);
+        return httpCookie;
+    }
+
+    private Session makeUserSession(User user) {
+        Session session = new Session();
+        session.setAttribute(USER, user);
+        sessionManager.add(session);
+        return session;
     }
 
     @Override

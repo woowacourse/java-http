@@ -6,7 +6,7 @@ import org.apache.catalina.response.HttpResponse;
 
 public class RootController extends AbstractController {
 
-    public static final String ROOT_PATH = "/";
+    private static final String ROOT_PATH = "/";
     private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
 
     @Override

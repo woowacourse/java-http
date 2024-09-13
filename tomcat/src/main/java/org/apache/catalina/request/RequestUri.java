@@ -9,8 +9,8 @@ import org.apache.catalina.parser.HttpRequestParser;
 public class RequestUri {
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
-    public static final int PATH_QUERY_PARAMETER_INDEX = 1;
-    public static final int PATH_WITHOUT_QUERY_INDEX = 0;
+    private static final int PATH_QUERY_PARAMETER_INDEX = 1;
+    private static final int PATH_WITHOUT_QUERY_INDEX = 0;
     private static final int PATH_LIMIT = 2;
     private final String path;
     private final Map<String, String> queryParam;

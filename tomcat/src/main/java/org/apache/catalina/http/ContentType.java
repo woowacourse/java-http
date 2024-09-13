@@ -14,8 +14,8 @@ public enum ContentType {
 
     private static final String DEFAULT_CHARSET = "charset=utf-8";
     private static final String MEDIA_TYPE_CHARSET_DELIMITER = ";";
-    public static final String CONTENT_TYPE_SEPARATOR = ",";
-    public static final int CONTENT_TYPE_INDEX = 0;
+    private static final String CONTENT_TYPE_SEPARATOR = ",";
+    private static final int CONTENT_TYPE_INDEX = 0;
     private final String accept;
     private final String type;
     private final String fileExtension;
@@ -33,7 +33,8 @@ public enum ContentType {
         List<String> types = List.of(acceptHeader.split(CONTENT_TYPE_SEPARATOR));
         String contentType = types.get(CONTENT_TYPE_INDEX).trim();
 
-        return Arrays.stream(values()).filter(value -> value.accept.equals(contentType))
+        return Arrays.stream(values())
+                .filter(value -> value.accept.equals(contentType))
                 .findAny()
                 .orElse(ContentType.HTML);
     }

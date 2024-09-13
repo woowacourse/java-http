@@ -10,7 +10,7 @@ import org.apache.catalina.parser.HttpRequestParser;
 
 public class RequestHeader {
 
-    public static final String ACCEPT = "Accept";
+    private static final String ACCEPT = "Accept";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
     private static final String COOKIE_SEPARATOR = ";";

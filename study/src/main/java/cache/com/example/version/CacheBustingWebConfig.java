@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CacheBustingWebConfig implements WebMvcConfigurer {
 
-    public static final String PREFIX_STATIC_RESOURCES = "/resources";
+    private static final String PREFIX_STATIC_RESOURCES = "/resources";
 
     private final ResourceVersion version;
 

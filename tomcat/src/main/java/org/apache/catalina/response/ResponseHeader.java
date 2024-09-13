@@ -5,12 +5,12 @@ import java.util.Map;
 
 public class ResponseHeader {
 
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String HEADER_END_SEPARATOR = " \r\n";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_END_SEPARATOR = " \r\n";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
-    public static final String HEADER_KEY_VALUE_SEPARATOR = ": ";
+    private static final String HEADER_KEY_VALUE_SEPARATOR = ": ";
 
     private final Map<String, String> headers;
 

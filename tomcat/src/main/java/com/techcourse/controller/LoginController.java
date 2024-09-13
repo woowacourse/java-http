@@ -17,7 +17,7 @@ import com.techcourse.service.LoginService;
 
 public class LoginController extends AbstractController {
 
-    public static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String ACCOUNT = "account";

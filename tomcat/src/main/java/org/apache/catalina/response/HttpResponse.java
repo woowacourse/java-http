@@ -5,7 +5,8 @@ import org.apache.catalina.request.HttpRequest;
 
 public class HttpResponse {
 
-    public static final String BASE_URL = "http://localhost:8080";
+    private static final String BASE_URL = "http://localhost:8080";
+
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private String body;

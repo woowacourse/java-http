@@ -67,7 +67,7 @@ public class HttpResponseConverter {
         }
 
         if (bodyContent != null) {
-            headers.put(HttpHeaders.CONTENT_LENGTH.getName(), String.valueOf(bodyContent.length()));
+            headers.put(HttpHeaders.CONTENT_LENGTH.getName(), String.valueOf(bodyContent.getBytes().length));
         }
 
         return new ResponseHeader(headers);

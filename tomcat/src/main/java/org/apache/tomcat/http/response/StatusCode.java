@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class StatusCode {
 
+    public static final StatusCode NOT_FOUND = new StatusCode("NOT_FOUND", 404);
+
     private final String name;
     private final int value;
 

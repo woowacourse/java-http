@@ -16,8 +16,8 @@ public class HttpResponse {
     private ResponseHeader responseHeader;
     private Body body;
 
-    public HttpResponse() {
-        this.statusLine = new StatusLine(new Version(1, 1), new StatusCode("NOT FOUND", 404));
+    public HttpResponse(final StatusCode code) {
+        this.statusLine = new StatusLine(new Version(1, 1), code);
         this.responseHeader = new ResponseHeader();
         this.body = new TextTypeBody("");
     }

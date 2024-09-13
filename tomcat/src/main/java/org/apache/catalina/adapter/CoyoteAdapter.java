@@ -6,6 +6,7 @@ import org.apache.catalina.servlet.ExceptionHandlerMapping;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.Response;
+import org.apache.tomcat.http.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class CoyoteAdapter {
     public Response service(final Request request) {
         final var httpRequest = new HttpRequest(request.getRequestLine(), request.getRequestHeaders(),
                 request.getBody(), request.getCookie());
-        final var httpResponse = new HttpResponse();
+        final var httpResponse = new HttpResponse(StatusCode.NOT_FOUND);
         adapt(httpRequest, httpResponse);
         return new Response(httpResponse.getStatusLine(), httpResponse.getResponseHeader(), httpResponse.getBody());
     }

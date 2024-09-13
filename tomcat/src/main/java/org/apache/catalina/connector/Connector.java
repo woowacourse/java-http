@@ -1,15 +1,15 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.Dispatcher;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Connector implements Runnable {
+public class Connector {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
@@ -23,12 +23,12 @@ public class Connector implements Runnable {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(int port, int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(int port, int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -38,36 +38,37 @@ public class Connector implements Runnable {
         }
     }
 
-    public void start() {
-        var thread = new Thread(this);
+    public void start(Dispatcher dispatcher) {
+        Thread thread = new Thread(() -> run(dispatcher));
         thread.setDaemon(true);
         thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
-    @Override
-    public void run() {
+    public void run(Dispatcher dispatcher) {
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
-            connect();
+            connect(dispatcher);
         }
     }
 
-    private void connect() {
+    private void connect(Dispatcher dispatcher) {
         try {
-            process(serverSocket.accept());
+            process(serverSocket.accept(), dispatcher);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(Socket connection, Dispatcher dispatcher) {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        Http11Processor processor = new Http11Processor(connection, dispatcher);
+        Thread thread = new Thread(processor);
+        log.info("new thread created: {}", thread.threadId());
+        thread.start();
     }
 
     public void stop() {
@@ -79,7 +80,7 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
+    private int checkPort(int port) {
         final var MIN_PORT = 1;
         final var MAX_PORT = 65535;
 
@@ -89,7 +90,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
+    private int checkAcceptCount(int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

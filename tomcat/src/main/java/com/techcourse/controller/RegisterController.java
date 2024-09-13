@@ -1,35 +1,39 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import com.techcourse.util.StaticResourceManager;
-import java.util.Map;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.techcourse.controller.dto.RegisterRequest;
+import com.techcourse.service.UserService;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.util.StaticResourceReader;
+import org.apache.coyote.http11.common.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseFile;
 
-public class RegisterController {
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
-    private static final String STATIC_RESOURCE_PATH = "static/register.html";
+public class RegisterController extends AbstractController {
 
-    public HttpResponse doGet(HttpRequest request) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
-        return new HttpResponse(200, "OK")
-                .addHeader("Content-Type", mediaType.getValue())
-                .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+    private static final ResponseFile registerPage = StaticResourceReader.read("/register.html");
+
+    private final UserService userService;
+
+    public RegisterController() {
+        this.userService = UserService.getInstance();
     }
 
-    public HttpResponse doPost(HttpRequest httpRequest) {
-        Map<String, String> body = httpRequest.parseFormBody();
+    @Override
+    public String matchedPath() {
+        return "/register";
+    }
 
-        String account = body.get("account");
-        String password = body.get("password");
-        String email = body.get("email");
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatusCode.OK)
+                .setBody(registerPage);
+    }
 
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return HttpResponse.redirect("index.html");
+    @Override
+    public void doPost(HttpRequest httpRequest, HttpResponse response) {
+        RegisterRequest registerRequest = RegisterRequest.of(httpRequest.getBody());
+        userService.register(registerRequest);
+        response.sendRedirect("/index.html");
     }
 }

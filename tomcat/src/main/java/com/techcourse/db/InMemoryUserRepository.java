@@ -1,7 +1,6 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +16,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {}
+
     public static void save(User user) {
         Long id = sequence.getAndIncrement();
         database.put(user.getAccount(), user.withId(id));
@@ -26,5 +27,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static void deleteAll() {
+        database.clear();
+    }
 }

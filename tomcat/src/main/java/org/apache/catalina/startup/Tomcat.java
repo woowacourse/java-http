@@ -1,18 +1,23 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.route.DefaultDispatcher;
+import org.apache.coyote.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector();
-        connector.start();
+        start(new DefaultDispatcher());
+    }
+
+    public void start(Dispatcher dispatcher) {
+        Connector connector = new Connector();
+        connector.start(dispatcher);
 
         try {
             // make the application wait until we press any key.

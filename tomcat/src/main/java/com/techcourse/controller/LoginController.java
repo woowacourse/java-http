@@ -1,62 +1,59 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.controller.dto.LoginRequest;
 import com.techcourse.model.User;
-import com.techcourse.util.StaticResourceManager;
-import jakarta.servlet.http.HttpSession;
-import java.util.Optional;
-import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.techcourse.service.UserService;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.util.StaticResourceReader;
+import org.apache.coyote.http11.common.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseFile;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String STATIC_RESOURCE_PATH = "static/login.html";
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final ResponseFile loginPage = StaticResourceReader.read("/login.html");
+    private static final String SESSION_KEY_USER = "user";
 
-    public HttpResponse doGet(HttpRequest request) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
+    private final SessionManager sessionManager;
+    private final UserService userService;
 
-        // 로그인한 경우 index.html로 리다이렉트
-        Optional<HttpSession> session = request.getSession(sessionManager);
-        boolean isLogin = session.map(s -> s.getAttribute("user") != null)
-                .orElse(false);
-        if (isLogin) {
-            return HttpResponse.redirect("index.html");
-        }
-
-        return new HttpResponse(200, "OK")
-                .addHeader("Content-Type", mediaType.getValue())
-                .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+    public LoginController() {
+        this.sessionManager = SessionManager.getInstance();
+        this.userService = UserService.getInstance();
     }
 
-    public HttpResponse doPost(HttpRequest request) {
-        log.info("Query Parameters: {}", request.parseFormBody());
+    @Override
+    public String matchedPath() {
+        return "/login";
+    }
 
-        Optional<String> userAccount = request.getFormValue("account");
-        Optional<String> userPassword = request.getFormValue("password");
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) {
+        sessionManager.getSession(request.getSessionId())
+                .map(s -> s.getAttribute(SESSION_KEY_USER))
+                .ifPresentOrElse(
+                        user -> response.sendRedirect("/index.html"),
+                        () -> response.setStatus(HttpStatusCode.OK).setBody(loginPage)
+                );
+    }
 
-        User user = userAccount.map(InMemoryUserRepository::findByAccount)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .orElse(null);
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) {
+        LoginRequest loginRequest = LoginRequest.of(request.getBody());
+        userService.login(loginRequest).ifPresentOrElse(
+                user -> doLogin(request, response, user),
+                () -> response.sendRedirect("/401.html")
+        );
+    }
 
-        if (user == null || !user.checkPassword(userPassword.get())) {
-            return HttpResponse.redirect("401.html");
-        }
-
-        // 세션이 있으면 세션에 유저 정보를 넣어주고, 없다면 생성해서 넣어줌
-        HttpSession httpSession = request.getSession(sessionManager)
-                .orElse(new Session(UUID.randomUUID().toString()));
-        httpSession.setAttribute("user", user);
-        sessionManager.add(httpSession);
-
-        return HttpResponse.redirect("index.html").addCookie("JSESSIONID", httpSession.getId());
+    private void doLogin(HttpRequest request, HttpResponse response, User user) {
+        Session session = sessionManager.getSession(request.getSessionId())
+                .orElseGet(SessionManager::createNewSession);
+        session.setAttribute(SESSION_KEY_USER, user);
+        response.sendRedirect("/index.html")
+                .setCookie("JSESSIONID", session.getId());
     }
 }

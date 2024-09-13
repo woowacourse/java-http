@@ -19,7 +19,7 @@ public class StaticResourceServlet extends HttpServlet {
             response.setStatus(HttpStatus.OK);
             response.setBody(path);
         } catch (IllegalArgumentException exception) {
-            response.sendRedirect("404.html");
+            response.sendRedirect("/404.html");
         }
     }
 }

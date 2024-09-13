@@ -57,6 +57,10 @@ public class HttpResponse {
         headers.add(HeaderName.SET_COOKIE, value);
     }
 
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
     public String render() {
         return statusLine + "\r\n" + headers + "\r\n\r\n" + body;
     }
@@ -64,5 +68,9 @@ public class HttpResponse {
     @Override
     public String toString() {
         return render();
+    }
+
+    public String getBody() {
+        return body;
     }
 }

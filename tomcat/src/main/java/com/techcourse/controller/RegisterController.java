@@ -42,6 +42,7 @@ public class RegisterController extends AbstractController {
 
     private void register(Map<String, String> parsed) {
         validateRegisterKeys(parsed);
+        validateRegisteredUser(parsed);
         User newbie = new User(
                 parsed.get("account"),
                 parsed.get("password"),
@@ -56,6 +57,13 @@ public class RegisterController extends AbstractController {
                 .allMatch(parsed::containsKey);
         if (!allKeysPresent) {
             throw new NoSuchElementException("invalid query string");
+        }
+    }
+
+    private void validateRegisteredUser(Map<String, String> parsed) {
+        String inputAccount = parsed.get("account");
+        if (InMemoryUserRepository.existsByAccount(inputAccount)) {
+            throw new IllegalArgumentException("account already exists");
         }
     }
 }

@@ -85,7 +85,7 @@ class RegisterControllerTest {
                 "Connection: keep-alive ",
                 "Content-Length: 52 ",
                 "",
-                "account=pond&email=pond@mail.com&password=password");
+                "account=pond2&email=pond@mail.com&password=password");
         BufferedReader bufferedReader = new BufferedReader(new StringReader(httpRequest));
         HttpRequest request = new HttpRequest(bufferedReader);
         HttpResponse httpResponse = new HttpResponse();

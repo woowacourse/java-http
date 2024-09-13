@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
+import java.util.Optional;
 
 public class SessionManager {
 
@@ -14,16 +14,10 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String id) {
-        if (!SESSIONS.containsKey(id)) {
-            try {
-                throw new IOException("no such session id");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return SESSIONS.get(id);
+    public Optional<Session> findSession(String id) {
+        return  Optional.ofNullable(SESSIONS.get(id));
     }
+
     public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
     }

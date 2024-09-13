@@ -1,11 +1,11 @@
-package com.techcourse;
+package org.apache.coyote.http11.request;
 
-public enum HttpProtocol {
+public enum HttpMethod {
     GET,
     POST,
     DELETE;
 
-    public static HttpProtocol from(String data) {
+    public static HttpMethod from(String data) {
         if ("GET".equals(data.toUpperCase().strip())) {
             return GET;
         }

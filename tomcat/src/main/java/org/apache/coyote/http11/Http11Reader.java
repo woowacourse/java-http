@@ -13,11 +13,25 @@ public class Http11Reader extends BufferedReader {
     }
 
     public List<String> readLines() throws IOException {
-        List<String> result = new ArrayList<>();
-        String newLine;
-        while ((newLine = readLine()) != null && !newLine.isEmpty()) {
-            result.add(newLine);
-        }
+        List<String> result = new ArrayList<>(readLinesWhileBuffered());
+        result.add(readWhileBuffered());
         return result;
+    }
+
+    private String readWhileBuffered() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        while (ready()) {
+            sb.append((char) read());
+        }
+        return sb.toString();
+    }
+
+    private List<String> readLinesWhileBuffered() throws IOException {
+        String newLine;
+        List<String> lines = new ArrayList<>();
+        while ((newLine = readLine()) != null && !newLine.isBlank()) {
+            lines.add(newLine);
+        }
+        return lines;
     }
 }

@@ -1,25 +1,27 @@
-package com.techcourse;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MyHeaders {
+public class HttpHeaders {
     private final Map<String, String> value;
 
-    public MyHeaders(Map<String, String> value) {
+    public HttpHeaders(Map<String, String> value) {
         this.value = value;
     }
 
-    public static MyHeaders from(List<String> lines) {
+    public static HttpHeaders from(List<String> lines) {
         Map<String, String> value = new HashMap<>();
 
         for (String line : lines) {
             String[] split = line.split(": ");
-            value.put(split[0], split[1]);
+            if (split.length == 2) {
+                value.put(split[0], split[1]);
+            }
         }
 
-        return new MyHeaders(value);
+        return new HttpHeaders(value);
     }
 
     public boolean contains(String key) {

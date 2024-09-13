@@ -1,12 +1,12 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private static SessionManager instance;
 
@@ -27,6 +27,9 @@ public class SessionManager implements Manager {
 
     @Override
     public Optional<Session> findSession(String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(SESSIONS.get(id));
     }
 

@@ -40,7 +40,6 @@ public class Http11Request {
 
         Http11RequestHeaders headers = parseHeader(br);
         Http11RequestBody body = parseBody(headers, br);
-        br.close();
 
         return new Http11Request(
                 Http11RequestMethod.from(method),

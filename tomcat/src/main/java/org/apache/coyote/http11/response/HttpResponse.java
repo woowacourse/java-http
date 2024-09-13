@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import static org.apache.coyote.http11.Constants.CRLF;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.response.body.ResponseBody;
@@ -41,10 +40,9 @@ public class HttpResponse {
         this.responseBody = new ResponseBody();
     }
 
-    public void write(String content) {
-        String contentLength = Integer.toString(content.getBytes(StandardCharsets.UTF_8).length);
-        this.responseHeaders.addHeader(HttpHeader.CONTENT_LENGTH, contentLength);
+    public void setBody(String content) {
         this.responseBody = new ResponseBody(content);
+        this.responseHeaders.addHeader(HttpHeader.CONTENT_LENGTH, responseBody.getContentLength());
     }
 
     public void setContentType(ContentType contentType) {

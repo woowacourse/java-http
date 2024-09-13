@@ -7,6 +7,8 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found"),
     ;
 
+    private static final String SP = " ";
+
     private final int code;
     private final String name;
 
@@ -16,10 +18,6 @@ public enum HttpStatus {
     }
 
     public String getDescription() {
-        return code + " " + name;
-    }
-
-    public boolean isRedirection() {
-        return code >= 300 && code < 400;
+        return code + SP + name;
     }
 }

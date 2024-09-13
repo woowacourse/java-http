@@ -2,22 +2,50 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 
-public record HttpResponse(
-        HttpVersion httpVersion,
-        HttpStatus httpStatus,
-        Header header,
-        byte[] responseBody
-) {
+public class HttpResponse {
 
     private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
+    private static final String CRLF = "\r\n";
+    private static final String SP = " ";
+
+    private HttpVersion httpVersion;
+    private HttpStatus httpStatus;
+    private Header header;
+    private byte[] responseBody;
+
+    public HttpResponse(
+            HttpVersion httpVersion,
+            HttpStatus httpStatus,
+            Header header,
+            byte[] responseBody
+    ) {
+        this.httpVersion = httpVersion;
+        this.httpStatus = httpStatus;
+        this.header = header;
+        this.responseBody = responseBody;
+    }
+
+    public static HttpResponse createHttp11Response() {
+        return new HttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpStatus.OK,
+                Header.empty(),
+                new byte[]{}
+        );
+    }
+
+    public void sendRedirect(String redirectionPath) {
+        this.httpStatus = HttpStatus.FOUND;
+        this.header.append(HttpHeaderKey.LOCATION, redirectionPath);
+    }
 
     public byte[] serialize() {
-        String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
+        String message = String.join(CRLF, getStartLine(), getHeaders(), getBody());
         return message.getBytes();
     }
 
     private String getStartLine() {
-        return httpVersion.getVersionName() + " " + httpStatus.getDescription() + " ";
+        return httpVersion.getVersionName() + SP + httpStatus.getDescription() + SP;
     }
 
     private CharSequence getHeaders() {
@@ -30,7 +58,27 @@ public record HttpResponse(
         return stringBuilder;
     }
 
-    private String getBody() {
+    public String getBody() {
         return new String(responseBody);
+    }
+
+    public Header getHeader() {
+        return header;
+    }
+
+    public HttpStatus getStatus() {
+        return httpStatus;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setResponseBody(byte[] responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.header.append(HttpHeaderKey.CONTENT_TYPE, contentType.getName());
     }
 }

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 public enum ContentType {
 
@@ -13,6 +12,8 @@ public enum ContentType {
     APPLICATION_X_WWW_FORM_URL_ENCODED("application/x-www-form-urlencoded", ""),
     ;
 
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+
     private final String name;
     private final String extension;
 
@@ -23,27 +24,24 @@ public enum ContentType {
 
     public static ContentType from(String contentTypeName) {
         return Arrays.stream(values())
-                .filter(it -> it.name.equals(contentTypeName))
+                .filter(contentType -> contentType.name.equals(contentTypeName))
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+                .orElse(PLAIN);
     }
 
     public static ContentType determineContentType(String resourcePath) {
-        for (ContentType contentType : ContentType.values()) {
-            if (resourcePath.endsWith(contentType.getExtension())) {
-                return contentType;
-            }
-        }
-
-        return ContentType.PLAIN;
+        return Arrays.stream(ContentType.values())
+                .filter(contentType -> isPathEndWithType(resourcePath, contentType))
+                .findFirst()
+                .orElse(ContentType.PLAIN);
     }
 
-    public boolean isApplicationXW3FormUrlEncoded() {
-        return this.equals(APPLICATION_X_WWW_FORM_URL_ENCODED);
+    private static boolean isPathEndWithType(String resourcePath, ContentType contentType) {
+        return resourcePath.endsWith(contentType.getExtension());
     }
 
     public String getName() {
-        return name + ";charset=utf-8";
+        return name + CHARSET_UTF_8;
     }
 
     public String getExtension() {

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +42,7 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 

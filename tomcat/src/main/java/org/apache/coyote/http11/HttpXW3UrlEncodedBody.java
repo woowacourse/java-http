@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class QueryParameter {
+class HttpXW3UrlEncodedBody implements HttpBody {
 
     private static final String PAIR_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";
@@ -13,18 +13,19 @@ public class QueryParameter {
     private static final int KEY_POSITION = 0;
     private static final int VALUE_POSITION = 1;
 
-    private final Map<String, String> queryParameter = new HashMap<>();
+    private final Map<String, String> pairs = new HashMap<>();
 
-    public QueryParameter(String queryParameter) {
-        if (queryParameter == null) {
-            queryParameter = "";
+    public HttpXW3UrlEncodedBody(char[] body) {
+        String bodyToken = "";
+        if (body != null) {
+            bodyToken = new String(body);
         }
 
-        parseQueryParameter(queryParameter);
+        parseBody(bodyToken);
     }
 
-    private void parseQueryParameter(String queryParameter) {
-        String[] pairs = queryParameter.split(PARAMETER_DELIMITER);
+    private void parseBody(String bodyToken) {
+        String[] pairs = bodyToken.split(PARAMETER_DELIMITER);
 
         Arrays.stream(pairs).forEach(this::parsePair);
     }
@@ -43,18 +44,21 @@ public class QueryParameter {
         String key = keyValuePair[KEY_POSITION];
         String value = keyValuePair[VALUE_POSITION];
 
-        queryParameter.put(key, value);
+        pairs.put(key, value);
     }
 
+    @Override
     public Optional<String> get(String key) {
-        return Optional.ofNullable(queryParameter.get(key));
+        return Optional.ofNullable(pairs.get(key));
     }
 
+    @Override
     public boolean isEmpty() {
-        return queryParameter.isEmpty();
+        return pairs.isEmpty();
     }
 
+    @Override
     public int getSize() {
-        return queryParameter.size();
+        return pairs.size();
     }
 }

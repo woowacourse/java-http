@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestProcessor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
 import org.apache.coyote.response.HttpResponse;

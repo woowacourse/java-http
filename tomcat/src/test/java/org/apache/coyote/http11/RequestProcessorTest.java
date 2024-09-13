@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.OutputStream;
+import org.apache.coyote.RequestProcessor;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;

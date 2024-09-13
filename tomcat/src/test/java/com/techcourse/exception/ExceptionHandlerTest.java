@@ -2,6 +2,8 @@ package com.techcourse.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.exception.handler.ExceptionHandler;
+import com.techcourse.exception.handler.GlobalExceptionHandler;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -11,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class ExceptionHandlerTest {
 
-    private final ExceptionHandler exceptionHandler = new ExceptionHandler();
+    private final ExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
     @DisplayName("UnauthorizedException에 대해 응답에 401 리다이렉션을 추가한다.")
     @Test

@@ -21,12 +21,12 @@ class RegisterServiceTest {
         @Test
         @DisplayName("성공 : 회원 가입")
         void registerUserSuccess() {
-            User expected = new User("kyum", "password", "kyum@naver.com");
+            User expected = new User("pokpo", "password", "kyum@naver.com");
             RegisterService registerService = new RegisterService();
 
-            registerService.registerUser("kyum", "password", "kyum@naver.com");
+            registerService.registerUser("pokpo", "password", "kyum@naver.com");
 
-            Optional<User> actual = InMemoryUserRepository.findByAccount("kyum");
+            Optional<User> actual = InMemoryUserRepository.findByAccount("pokpo");
             assertThat(actual).hasValue(expected);
         }
 

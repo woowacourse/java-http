@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -59,6 +60,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("/login에 GET 요청을 보내면 /login.html을 응답한다.")
     @Test
     void loginGet() throws IOException {
         // given
@@ -85,6 +87,8 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedHeader, expectedBody);
     }
 
+
+    @DisplayName("/register에 GET 요청을 보내면 /register.html을 응답한다.")
     @Test
     void registerGet() throws IOException {
         // given
@@ -111,6 +115,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedHeader, expectedBody);
     }
 
+    @DisplayName("유효한 회원 정보로 /login에 POST 요청을 보내면 /index.html로 리다이렉트하고, 쿠키로 JSESSIONID를 응답한다.")
     @Test
     void loginPost() {
         // given
@@ -134,6 +139,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedHeader);
     }
 
+    @DisplayName("잘못된 비밀번호로 /login에 POST 요청을 보내면 401 코드와 함께 /401.html을 응답한다.")
     @Test
     void loginPostInvalidUserInfo() throws IOException {
         // given
@@ -158,6 +164,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedHeader, expectedBody);
     }
 
+    @DisplayName("유효한 회원 정보로 /register에 POST 요청을 보내면 /index.html로 리다이렉트하고, 쿠키로 JSESSIONID를 응답한다.")
     @Test
     void registerPost() {
         // given

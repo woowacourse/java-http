@@ -15,8 +15,7 @@ public class QueryParameters {
         if (queryString.isEmpty()) {
             return;
         }
-        String[] params = queryString.split(PARAMETER_SEPARATOR);
-        for (String param : params) {
+        for (String param : queryString.split(PARAMETER_SEPARATOR)) {
             int index = param.indexOf(ASSIGN_OPERATOR);
             this.params.put(param.substring(0, index), param.substring(index + 1));
         }

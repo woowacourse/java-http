@@ -2,7 +2,8 @@ package org.apache.coyote.http11.httpmessage.response;
 
 public class HttpStatusLine {
 
-    private String httpVersion;
+    private final String httpVersion;
+
     private int statusCode;
     private String statusText;
 

@@ -10,8 +10,8 @@ import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 public class HttpResponse {
 
     private final HttpCookie httpCookie;
-    private HttpStatusLine httpStatusLine;
-    private HttpHeaders headers;
+    private final HttpStatusLine httpStatusLine;
+    private final HttpHeaders headers;
     private String body;
 
 

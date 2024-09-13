@@ -37,11 +37,11 @@ public final class HttpRequest {
         return requestLine;
     }
 
-    public HttpHeader httpHeader() {
-        return httpHeader;
-    }
-
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public HttpHeader getHttpHeader() {
+        return httpHeader;
     }
 }

@@ -38,9 +38,9 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(request.getRequestBody().getBody().get("password"))) {
             response.successLogin(request.getRequestLine().getProtocol());
             setSession(user, response);
-        } else {
-            response.failLogin(request.getRequestLine().getProtocol());
+            return;
         }
+        response.failLogin(request.getRequestLine().getProtocol());
     }
 
     private void setSession(User user, HttpResponse response) {
@@ -52,7 +52,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean alreadyLogin(HttpRequest request) {
-        String cookie = request.httpHeader().getCookie();
+        String cookie = request.getHttpHeader().getCookie();
         if (cookie != null) {
             String jSessionId = new HttpCookie(cookie).getJSessionId();
             Session session = SessionManager.getInstance().findSession(jSessionId);

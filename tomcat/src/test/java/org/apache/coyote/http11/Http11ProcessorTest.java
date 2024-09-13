@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -59,7 +60,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginPage() throws IOException {
+    void loginGet() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -85,7 +86,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void registerPage() throws IOException {
+    void registerGet() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1 ",
@@ -108,5 +109,75 @@ class Http11ProcessorTest {
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).contains(expectedHeader, expectedBody);
+    }
+
+    @Test
+    void loginPost() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expectedHeader = List.of("HTTP/1.1 302 Found \r\n", "Location: /index.html \r\n", "JSESSIONID=");
+
+        assertThat(socket.output()).contains(expectedHeader);
+    }
+
+    @Test
+    void loginPostInvalidUserInfo() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 37 ",
+                "",
+                "account=gugu&password=invalidPassword");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String expectedHeader = "HTTP/1.1 401 Unauthorized \r\n";
+        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expectedHeader, expectedBody);
+    }
+
+    @Test
+    void registerPost() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 59 ",
+                "",
+                "account=newUser&password=password&email=newUser@email.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expectedHeader = List.of("HTTP/1.1 302 Found \r\n", "Location: /index.html \r\n", "JSESSIONID=");
+
+        assertThat(socket.output()).contains(expectedHeader);
     }
 }

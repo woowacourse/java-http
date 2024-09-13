@@ -21,4 +21,8 @@ public class SessionManager {
     public static void remove(String id) {
         SESSIONS.remove(id);
     }
+
+    public static int size() {
+        return SESSIONS.size();
+    }
 }

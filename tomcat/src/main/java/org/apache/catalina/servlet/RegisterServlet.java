@@ -18,7 +18,7 @@ public class RegisterServlet extends AbstractServlet {
     private RegisterServlet() {
     }
 
-    public static RegisterServlet getInstance() {
+    public static synchronized RegisterServlet getInstance() {
         if (instance == null) {
             instance = new RegisterServlet();
         }

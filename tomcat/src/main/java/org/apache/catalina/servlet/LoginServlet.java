@@ -18,7 +18,7 @@ public class LoginServlet extends AbstractServlet {
     private LoginServlet() {
     }
 
-    public static LoginServlet getInstance() {
+    public static synchronized LoginServlet getInstance() {
         if (instance == null) {
             instance = new LoginServlet();
         }

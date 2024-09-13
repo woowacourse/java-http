@@ -17,7 +17,7 @@ public class DefaultServlet implements Servlet {
 
     private static DefaultServlet instance;
 
-    public static DefaultServlet getInstance() {
+    public static synchronized DefaultServlet getInstance() {
         if (instance == null) {
             instance = new DefaultServlet();
         }

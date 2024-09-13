@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             servletContainer.service(httpRequest, httpResponse);
         } catch (Exception e) {
             log.error("request 처리 실패 : ", e);
-            httpResponse.setMethodBadRequest();
+            httpResponse.setStatusBadRequest();
         }
     }
 }

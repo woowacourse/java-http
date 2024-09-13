@@ -47,17 +47,17 @@ public class HttpResponse {
         }
     }
 
-    public void setMethodFound(String target) {
-        this.httpStatusLine.setMethodFound();
+    public void setStatusFound(String target) {
+        this.httpStatusLine.setStatus(HttpStatus.FOUND);
         this.headers.addHeader(HttpHeaders.LOCATION, target);
     }
 
-    public void setMethodBadRequest() {
-        this.httpStatusLine.setMethodBadRequest();
+    public void setStatusBadRequest() {
+        this.httpStatusLine.setStatus(HttpStatus.BAD_REQUEST);
     }
 
     public void setResponseOfStaticResource(StaticResource resource) throws IOException {
-        this.httpStatusLine.setMethodOK();
+        this.httpStatusLine.setStatus(HttpStatus.OK);
         headers.addHeader(HttpHeaders.CONTENT_TYPE, resource.getContentType() + ";charset=utf-8");
         headers.addHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(resource.getContentLength()));
         this.body = resource.getContent();

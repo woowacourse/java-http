@@ -16,18 +16,8 @@ public class HttpStatusLine {
         return String.format("%s %s %s ", httpVersion, statusCode, statusText);
     }
 
-    public void setMethodFound() {
-        this.statusCode = 301;
-        this.statusText = "FOUND";
-    }
-
-    public void setMethodOK() {
-        this.statusCode = 200;
-        this.statusText = "OK";
-    }
-
-    public void setMethodBadRequest() {
-        this.statusCode = 400;
-        this.statusText = "BAD REQUEST";
+    public void setStatus(HttpStatus status) {
+        this.statusCode = status.getStatusCode();
+        this.statusText = status.getStatusText();
     }
 }

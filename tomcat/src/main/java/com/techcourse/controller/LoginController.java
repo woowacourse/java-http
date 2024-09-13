@@ -28,17 +28,17 @@ public class LoginController extends AbstractController {
             SessionManager.getInstance().add(session);
 
             response.addCookie(JSESSIONID, session.getId());
-            response.setMethodFound("/index.html");
+            response.setStatusFound("/index.html");
             return;
         }
 
-        response.setMethodFound("/401.html");
+        response.setStatusFound("/401.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request)) {
-            response.setMethodFound("/index.html");
+            response.setStatusFound("/index.html");
             return;
         }
         response.setResponseOfStaticResource(new StaticResource("/login.html"));

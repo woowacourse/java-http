@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
         SessionManager.getInstance().add(session);
 
         response.addCookie("JSESSIONID", session.getId());
-        response.setMethodFound("/index.html");
+        response.setStatusFound("/index.html");
     }
 
     private User register(HttpRequestParameters requestParams) {

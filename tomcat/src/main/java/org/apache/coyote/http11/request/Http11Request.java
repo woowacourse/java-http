@@ -73,7 +73,9 @@ public class Http11Request {
 
     private boolean isFile() {
         for (String extension : extensions) {
-            if (uri.endsWith(extension)) return true;
+            if (uri.endsWith(extension)) {
+                return true;
+            }
         }
         return false;
     }
@@ -134,7 +136,9 @@ public class Http11Request {
         }
 
         static Map<String, String> parseQuery(String url) {
-            if (!url.contains("?")) return Collections.emptyMap();
+            if (!url.contains("?")) {
+                return Collections.emptyMap();
+            }
             Map<String, String> queryMap = new HashMap<>();
 
             String queries = url.split("\\?")[1];

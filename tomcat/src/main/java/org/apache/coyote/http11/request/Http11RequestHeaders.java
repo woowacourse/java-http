@@ -34,7 +34,9 @@ public class Http11RequestHeaders {
     }
 
     public int getContentLength() {
-        if (!headerMap.containsKey(CONTENT_LENGTH)) return 0;
+        if (!headerMap.containsKey(CONTENT_LENGTH)) {
+            return 0;
+        }
         return Integer.parseInt(headerMap.get(CONTENT_LENGTH));
     }
 }

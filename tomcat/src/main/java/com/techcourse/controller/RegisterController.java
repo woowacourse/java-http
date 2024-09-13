@@ -13,19 +13,29 @@ public class RegisterController extends AbstractController {
 
     private static final RegisterController instance = new RegisterController();
 
+    private static final String REGISTER_ACCOUNT_KEY = "account";
+
+    private static final String REGISTER_EMAIL_KEY = "email";
+
+    private static final String REGISTER_PASSWORD_KEY = "password";
+
+    private static final String INDEX_PAGE = "/index.html";
+
+    private static final String REGISTER_PAGE = "/register.html";
+
     private RegisterController() {
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        String account = request.getRequestBodyValue("account");
-        String email = request.getRequestBodyValue("email");
-        String password = request.getRequestBodyValue("password");
+        String account = request.getRequestBodyValue(REGISTER_ACCOUNT_KEY);
+        String email = request.getRequestBodyValue(REGISTER_EMAIL_KEY);
+        String password = request.getRequestBodyValue(REGISTER_PASSWORD_KEY);
         try {
             User user = new User(account, password, email);
             checkDuplicatedUser(user);
             InMemoryUserRepository.save(user);
-            redirect(response, "/index.html");
+            redirect(response, INDEX_PAGE);
         } catch (UserException e) {
             setFailResponse(request, response);
         }
@@ -47,7 +57,7 @@ public class RegisterController extends AbstractController {
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {
-        request.setHttpRequestPath("/register.html");
+        request.setHttpRequestPath(REGISTER_PAGE);
         response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
     }
 

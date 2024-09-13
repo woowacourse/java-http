@@ -20,13 +20,21 @@ public class LoginController extends AbstractController {
 
     private static final LoginController instance = new LoginController();
 
+    private static final String LOGIN_ACCOUNT_KEY = "account";
+
+    private static final String LOGIN_PASSWORD_KEY = "password";
+
+    private static final String INDEX_PAGE = "/index.html";
+
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+
     private LoginController() {
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        String account = request.getRequestBodyValue("account");
-        String password = request.getRequestBodyValue("password");
+        String account = request.getRequestBodyValue(LOGIN_ACCOUNT_KEY);
+        String password = request.getRequestBodyValue(LOGIN_PASSWORD_KEY);
         try {
             User foundUser = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
@@ -40,7 +48,7 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         if (checkLogin(request)) {
-            redirect(response, "/index.html");
+            redirect(response, INDEX_PAGE);
         }
         setResponseContent(request, response);
     }
@@ -49,7 +57,7 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             log.info("user : " + user);
             response.setHttpStatusCode(HttpStatusCode.FOUND);
-            redirect(response, "/index.html");
+            redirect(response, INDEX_PAGE);
             setSessionAtResponseHeader(user, response);
         }
     }
@@ -71,7 +79,7 @@ public class LoginController extends AbstractController {
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {
-        request.setHttpRequestPath("/401.html");
+        request.setHttpRequestPath(UNAUTHORIZED_PAGE);
         response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
     }
 

@@ -18,7 +18,7 @@ public class RequestCookies {
     public static RequestCookies of(String requestCookies) {
         Map<String, HttpCookie> httpCookies = HttpCookie.createCookies(requestCookies)
                 .stream()
-                .map(cookie -> new SimpleEntry<>(cookie.getName(), cookie))
+                .map(cookie -> new SimpleEntry<>(cookie.name(), cookie))
                 .collect(toMap(Entry::getKey, Entry::getValue));
 
         return new RequestCookies(httpCookies);
@@ -33,7 +33,7 @@ public class RequestCookies {
         if (cookie == null) {
             return null;
         }
-        return cookie.getValue();
+        return cookie.value();
     }
 
     public void addSession(String sessionId) {

@@ -21,7 +21,7 @@ class HttpCookieTest {
         List<HttpCookie> httpCookies = HttpCookie.createCookies(cookies);
 
         assertThat(httpCookies)
-                .extracting(HttpCookie::getName, HttpCookie::getValue)
+                .extracting(HttpCookie::name, HttpCookie::value)
                 .contains(Tuple.tuple("potato", "me"))
                 .contains(Tuple.tuple("onion", "you"));
     }

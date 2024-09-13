@@ -2,22 +2,13 @@ package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import org.apache.coyote.http11.exception.HttpFormatException;
 
-public class HttpCookie {
+public record HttpCookie(String name, String value) {
 
+    static final String SESSION_KEY = "JSESSIONID";
     private static final String COOKIES_SEPARATOR = ";";
     private static final String COOKIE_SEPARATOR = "=";
-    protected static final String SESSION_KEY = "JSESSIONID";
-
-    private final String name;
-    private final String value;
-
-    public HttpCookie(String name, String value) {
-        this.name = name;
-        this.value = value;
-    }
 
     public static List<HttpCookie> createCookies(String cookies) {
         if (cookies == null || cookies.isBlank()) {
@@ -50,30 +41,5 @@ public class HttpCookie {
 
     public String toResponse() {
         return name + COOKIE_SEPARATOR + value;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        HttpCookie that = (HttpCookie) o;
-        return Objects.equals(name, that.name) && Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, value);
     }
 }

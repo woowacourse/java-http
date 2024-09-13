@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestProcessor;
+import org.apache.coyote.container.ServletContainer;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
 import org.apache.coyote.response.HttpResponse;
@@ -18,11 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestProcessor requestProcessor;
+    private final ServletContainer servletContainer;
 
     public Http11Processor(final Socket connection, Container container) {
         this.connection = connection;
-        this.requestProcessor = (RequestProcessor) container;
+        this.servletContainer = (ServletContainer) container;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestConverter.convertFrom(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            requestProcessor.process(httpRequest, httpResponse);
+            servletContainer.invoke(httpRequest, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

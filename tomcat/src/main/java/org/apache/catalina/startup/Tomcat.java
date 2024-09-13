@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.RequestProcessor;
+import org.apache.coyote.RequestContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector(new RequestProcessor());
+        var connector = new Connector(new RequestContainer());
         connector.start();
 
         try {

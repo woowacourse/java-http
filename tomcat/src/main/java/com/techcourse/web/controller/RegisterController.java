@@ -49,15 +49,19 @@ public class RegisterController extends AbstractController {
 	@Override
 	public void doPost(HttpRequest request, HttpResponse response) {
 		try {
-			Map<String, String> data = FormUrlEncodedParser.parse(request.getRequestBody());
-			User user = new User(data.get("account"), data.get("password"), data.get("email"));
-			InMemoryUserRepository.save(user);
-
+			User user = register(request);
 			login(user, response);
 		} catch (IllegalArgumentException e) {
 			log.error("Failed to register user. {}", e.getMessage());
 			response.setStatusCode(HttpStatusCode.BAD_REQUEST);
 		}
+	}
+
+	private static User register(HttpRequest request) {
+		Map<String, String> data = FormUrlEncodedParser.parse(request.getRequestBody());
+		User user = new User(data.get("account"), data.get("password"), data.get("email"));
+		InMemoryUserRepository.save(user);
+		return user;
 	}
 
 	private void login(User user, HttpResponse response) {

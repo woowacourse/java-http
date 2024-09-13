@@ -17,7 +17,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> body = request.getBody();
-
+        validateBody(body);
         String account = body.get(ACCOUNT_KEY);
         String email = body.get(EMAIL_KEY);
         String password = body.get(PASSWORD_KEY);
@@ -26,6 +26,20 @@ public class RegisterController extends AbstractController {
 
         response.setLocation("index.html");
         response.setStatus(HttpStatusCode.FOUND);
+    }
+
+    private void validateBody(Map<String, String> body) {
+        if (!body.containsKey(ACCOUNT_KEY)) {
+            throw new IllegalArgumentException("account가 존재하지 않습니다.");
+        }
+
+        if (!body.containsKey(EMAIL_KEY)) {
+            throw new IllegalArgumentException("email가 존재하지 않습니다.");
+        }
+
+        if (!body.containsKey(PASSWORD_KEY)) {
+            throw new IllegalArgumentException("password가 존재하지 않습니다.");
+        }
     }
 
     @Override

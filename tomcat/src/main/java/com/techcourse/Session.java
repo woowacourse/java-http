@@ -1,12 +1,12 @@
 package com.techcourse;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String sessionId;
-    private final Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     public Session(String sessionId) {
         this.sessionId = sessionId;

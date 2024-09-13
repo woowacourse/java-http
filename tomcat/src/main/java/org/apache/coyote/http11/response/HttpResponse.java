@@ -28,6 +28,12 @@ public class HttpResponse {
         responseHeader.putCookie(name, cookies);
     }
 
+    public void redirect(String version, String path) {
+        statusLine.setVersion(version);
+        statusLine.setStatusCode(FOUND);
+        responseHeader.put(LOCATION.getHeaderName(), path);
+    }
+
     public StatusLine getStatusLine() {
         return statusLine;
     }
@@ -47,11 +53,5 @@ public class HttpResponse {
     public void setStatusLine(String version, HttpStatusCode httpStatusCode) {
         statusLine.setVersion(version);
         statusLine.setStatusCode(httpStatusCode);
-    }
-
-    public void redirect(String version, String path) {
-        statusLine.setVersion(version);
-        statusLine.setStatusCode(FOUND);
-        responseHeader.put(LOCATION.getHeaderName(), path);
     }
 }

@@ -41,10 +41,7 @@ public class HttpResponse {
     }
 
     public void sendStaticResource(String filePath) {
-        status = HttpStatus.OK;
-        body = StaticFileResponseUtils.readStaticFile(filePath);
-        headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
-        headers.addContentLength(body.getBytes().length);
+        sendStaticResource(HttpStatus.OK, filePath);
     }
 
     public void sendStaticResource(HttpStatus status, String filePath) {

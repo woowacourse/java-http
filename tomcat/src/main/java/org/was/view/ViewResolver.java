@@ -9,7 +9,7 @@ import java.nio.file.Files;
 
 public class ViewResolver {
 
-    private static final ViewResolver INSTANCE =new ViewResolver();
+    private static final ViewResolver INSTANCE = new ViewResolver();
 
     private ViewResolver() {
     }

@@ -48,10 +48,8 @@ public class HttpResponseConverter {
         if (path != null && body == null) {
             View view = viewResolver.getView(path);
             return new ResponseBody(view.getContent());
-        } else if (body != null) {
-            return new ResponseBody(body);
         }
-        return new ResponseBody(null);
+        return new ResponseBody(body);
     }
 
     private ResponseHeader createResponseHeader(Map<String, String> headers, ResponseBody responseBody) {

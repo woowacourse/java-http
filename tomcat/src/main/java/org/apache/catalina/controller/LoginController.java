@@ -17,6 +17,9 @@ import java.util.Optional;
 public class LoginController extends MappingController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String LOGIN_PATH = "/login.html";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -26,10 +29,10 @@ public class LoginController extends MappingController {
         Session session = sessionManager.findSession(sessionId);
         if (session.isPresent() && session.getAttribute("user") != null) {
             response.setStatusLine(Status.FOUND);
-            response.sendRedirect("/index.html");
+            response.sendRedirect(INDEX_PATH);
             return;
         }
-        response.forward("/login.html");
+        response.forward(LOGIN_PATH);
     }
 
     @Override
@@ -38,7 +41,7 @@ public class LoginController extends MappingController {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
         if (optionalUser.isEmpty()) {
             response.setStatusLine(Status.UNAUTHORIZED);
-            response.sendRedirect("/401.html");
+            response.sendRedirect(UNAUTHORIZED_PATH);
             return;
         }
         User user = optionalUser.get();
@@ -46,12 +49,12 @@ public class LoginController extends MappingController {
             Session session = saveSession(user);
             log.info("{}", user);
             response.setStatusLine(Status.FOUND);
-            response.sendRedirect("/index.html");
-            response.setCookie(new Cookie(Map.of("JSESSIONID", session.getId())));
+            response.sendRedirect(INDEX_PATH);
+            response.setCookie(Cookie.ofSessionId(session.getId()));
             return;
         }
         response.setStatusLine(Status.UNAUTHORIZED);
-        response.sendRedirect("/401.html");
+        response.sendRedirect(UNAUTHORIZED_PATH);
     }
 
     private Session saveSession(User user) {

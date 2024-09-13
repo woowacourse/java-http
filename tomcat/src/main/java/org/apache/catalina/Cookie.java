@@ -15,6 +15,10 @@ public class Cookie {
         this.values = values;
     }
 
+    public static Cookie ofSessionId(String sessionId) {
+        return new Cookie(Map.of("JSESSIONID", sessionId));
+    }
+
     public static Cookie parse(String cookie) {
         if (cookie == null) {
             return new Cookie(Map.of());
@@ -33,11 +37,10 @@ public class Cookie {
         return values.getOrDefault(key, null);
     }
 
-    @Override
-    public String toString() {
-        StringJoiner stringJoiner = new StringJoiner(",");
+    public String toStringFormat() {
+        StringJoiner stringJoiner = new StringJoiner(COOKIE_DELIMITER);
         for (String key : values.keySet()) {
-            stringJoiner.add(key + "=" + values.get(key));
+            stringJoiner.add(key + SPLIT_DELIMITER + values.get(key));
         }
         return stringJoiner.toString();
     }

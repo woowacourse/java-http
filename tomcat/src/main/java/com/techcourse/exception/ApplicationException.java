@@ -1,8 +1,11 @@
 package com.techcourse.exception;
 
-public abstract class ApplicationException extends RuntimeException {
+import org.apache.catalina.exception.TomcatException;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
-    ApplicationException(String message) {
-        super(message);
+public abstract class ApplicationException extends TomcatException {
+
+    ApplicationException(HttpStatusCode httpStatusCode, String message) {
+        super(httpStatusCode, message);
     }
 }

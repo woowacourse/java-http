@@ -27,27 +27,26 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         try {
             this.requestLine = new RequestLine(bufferedReader.readLine());
-
             List<String> headerLines = bufferedReader.lines()
                     .takeWhile(line -> !line.isEmpty())
                     .toList();
             this.headers = new HttpHeaders(headerLines);
-
-            // Parse Body, it should consider all character including escape characters
-            StringBuilder bodyBuilder = new StringBuilder();
-            char[] buffer = new char[BUFFER_SIZE];
-            int readBytes = 0;
-            while (readBytes < headers.getContentLength()) {
-                readBytes += bufferedReader.read(buffer);
-                bodyBuilder.append(buffer, 0, readBytes);
-            }
-            String content = bodyBuilder.toString();
-            this.body = new HttpBody(content);
+            this.body = parseRequestBody(bufferedReader);
         } catch (IOException e) {
-            // IOException on reading lines using inputstream, parsing uri
-            // IndexOutOfBoundsException on missing tokens in request-line and header
             throw new IllegalArgumentException("Invalid HTTP request", e);
         }
+    }
+
+    private HttpBody parseRequestBody(BufferedReader bufferedReader) throws IOException {
+        StringBuilder bodyBuilder = new StringBuilder();
+        char[] buffer = new char[BUFFER_SIZE];
+        int readBytes = 0;
+        while (readBytes < headers.getContentLength()) {
+            readBytes += bufferedReader.read(buffer);
+            bodyBuilder.append(buffer, 0, readBytes);
+        }
+        String content = bodyBuilder.toString();
+        return new HttpBody(content);
     }
 
     public boolean hasPath(String path) {

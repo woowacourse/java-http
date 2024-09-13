@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 public class Http11RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LOGIN_REQUEST_URI = "/login";
+    private static final String REGISTER_REQUEST_URI = "/register";
     private static final Set<String> STATIC_RESOURCES = Set.of(
             "/401.html",
             "/404.html",
@@ -22,8 +24,8 @@ public class Http11RequestHandler {
 
     private final RequestMapping requestMapping = RequestMapping.from(
             Map.of(
-                    RequestUri.from("/login"), new LoginController(),
-                    RequestUri.from("/register"), new RegisterController()
+                    RequestUri.from(LOGIN_REQUEST_URI), new LoginController(),
+                    RequestUri.from(REGISTER_REQUEST_URI), new RegisterController()
             )
     );
 

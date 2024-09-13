@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class Http11Cookie {
 
-    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_DELIMITER = ";";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_VALUE_SIZE = 2;
     private static final int KEY_INDEX = 0;
@@ -25,6 +25,7 @@ public class Http11Cookie {
         }
 
         Map<String, String> cookieMap = Arrays.stream(cookies.split(COOKIE_DELIMITER))
+                .map(String::trim)
                 .map(cookie -> cookie.split(KEY_VALUE_DELIMITER, KEY_VALUE_SIZE))
                 .collect(Collectors.toMap(cookie -> cookie[KEY_INDEX], cookie -> cookie[VALUE_INDEX]));
 

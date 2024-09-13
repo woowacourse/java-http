@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Response {
 
+    private static final Logger log = LoggerFactory.getLogger(Http11Response.class);
     private static final String ROOT_PATH = "/";
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final String RESPONSE_FORMAT = String.join("\r\n", "%s", "%s", "%s");
@@ -25,7 +26,6 @@ public class Http11Response {
     private static final String HTML_404 = "/404.html";
     private static final String HTML_500 = "/500.html";
     private static final String HTML_INDEX = "/index.html";
-    private static final Logger log = LoggerFactory.getLogger(Http11Response.class);
 
     private StatusLine statusLine;
     private Http11ResponseHeader responseHeader;

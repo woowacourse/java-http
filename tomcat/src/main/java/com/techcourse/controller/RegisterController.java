@@ -36,18 +36,20 @@ public class RegisterController extends Controller {
         }
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(bodyInputAccount);
-        if (optionalUser.isEmpty()) {
-            User user = new User(bodyInputAccount, bodyInputPassword, bodyInputEmail);
-            InMemoryUserRepository.save(user);
-            log.info(user.toString());
 
-            String sessionId = SessionManager.put(user);
-            response.setStatusCode("302 Found");
-            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-            response.addHeader("Location", "/index.html");
+        if (!optionalUser.isEmpty()) {
+            response.setStatusCode("400 Bad Request");
+            response.setBodyWithStaticResource("/register.html");
             return;
         }
-        response.setStatusCode("400 Bad Request");
-        response.setBodyWithStaticResource("/register.html");
+
+        User user = new User(bodyInputAccount, bodyInputPassword, bodyInputEmail);
+        InMemoryUserRepository.save(user);
+        log.info(user.toString());
+
+        String sessionId = SessionManager.put(user);
+        response.setStatusCode("302 Found");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+        response.addHeader("Location", "/index.html");
     }
 }

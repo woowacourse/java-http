@@ -36,23 +36,18 @@ public class LoginController extends Controller {
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
-        if (optionalUser.isEmpty()) {
+        if (optionalUser.isEmpty() || optionalUser.get().checkPassword(password)) {
             response.setStatusCode("401 Unauthorized");
             response.setBodyWithStaticResource("/401.html");
             return;
         }
 
         User user = optionalUser.get();
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
-            String sessionId = SessionManager.put(user);
+        log.info(user.toString());
+        String sessionId = SessionManager.put(user);
 
-            response.setStatusCode("302 Found");
-            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-            response.addHeader("Location", "/index.html");
-            return;
-        }
-        response.setStatusCode("401 Unauthorized");
-        response.setBodyWithStaticResource("/401.html");
+        response.setStatusCode("302 Found");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+        response.addHeader("Location", "/index.html");
     }
 }

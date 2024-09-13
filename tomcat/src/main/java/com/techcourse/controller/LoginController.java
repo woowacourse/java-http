@@ -6,6 +6,7 @@ import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.HttpRequestParameters;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
+import org.apache.coyote.http11.httpmessage.response.StaticResource;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
@@ -38,10 +39,8 @@ public class LoginController extends AbstractController {
             response.setMethodFound("/index.html");
             return;
         }
-        response.setMethodFound("/index.html");
+        response.setResponseOfStaticResource(new StaticResource("/login.html"));
     }
-
-
 
     private boolean isLoggedIn(HttpRequest httpRequest) {
         return Objects.nonNull(httpRequest.getSession(false));

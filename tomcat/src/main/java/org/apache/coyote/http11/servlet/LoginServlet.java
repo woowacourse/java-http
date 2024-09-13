@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.coyote.http11.common.Body;
-import org.apache.coyote.http11.common.Properties;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -31,7 +29,14 @@ public class LoginServlet extends AbstractServlet {
 				"Set-Cookie", "JSESSIONID=" + session.getId(),
 				"Location", "http://localhost:8080/index.html"
 			));
+			return;
 		}
+		response.setVersionOfProtocol("HTTP/1.1");
+		response.setStatusCode(302);
+		response.setStatusMessage("Found");
+		response.setHeaders(Map.of(
+			"Location", "http://localhost:8080/401.html"
+		));
 	}
 
 	@Override

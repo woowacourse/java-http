@@ -11,8 +11,6 @@ import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 
-import com.techcourse.model.User;
-
 public class SessionManager implements Manager {
     private static final SessionManager instance = new SessionManager();
     private static final Map<String, Session> SESSIONS = new HashMap<>();
@@ -45,7 +43,7 @@ public class SessionManager implements Manager {
 
     public Optional<Session> getByAttribute(String attribute, Object value) {
         for (Entry<String, Session> entry : SESSIONS.entrySet()) {
-            if(entry.getValue().hasAttribute(attribute, value)) {
+            if (entry.getValue().hasAttribute(attribute, value)) {
                 return Optional.ofNullable(entry.getValue());
             }
         }

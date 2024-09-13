@@ -136,7 +136,7 @@ class LoginControllerTest {
     void homePage() throws IOException {
         // given
         Session session = Session.createRandomSession();
-        User user = new User("user", "password","email");
+        User user = new User("user", "password", "email");
         session.setAttribute("user", user);
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);

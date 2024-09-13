@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 import com.techcourse.exception.UnsupportedMethodException;
 
-public abstract class AbstractController implements Controller{
+public abstract class AbstractController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) throws IOException {
         HttpMethod method = request.getHttpMethod();

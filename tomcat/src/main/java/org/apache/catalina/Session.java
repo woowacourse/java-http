@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.techcourse.model.User;
-
 public class Session {
     private final String id;
     private final Map<String, Object> values;

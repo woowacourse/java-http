@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HttpHandler;
-import org.apache.coyote.http11.handler.HttpHandlerMapper;
+import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.handler.HttpControllerMapper;
 import org.apache.coyote.http11.handler.HttpHandlerMapperFactory;
 import org.apache.coyote.http11.handler.StaticResourceHttpHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -35,18 +33,18 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpHandlerMapper httpHandlerMapper = HttpHandlerMapperFactory.create();
+            HttpControllerMapper httpControllerMapper = HttpHandlerMapperFactory.create();
             StaticResourceHttpHandler staticResourceHttpHandler = new StaticResourceHttpHandler();
 
             HttpRequestReader reader = new HttpRequestReader(inputStream);
             HttpResponseWriter writer = new HttpResponseWriter(outputStream);
             HttpRequest request = reader.read();
-            HttpHandler httpHandler = httpHandlerMapper.findHandler(request)
+            Controller controller = httpControllerMapper.findController(request)
                     .orElse(staticResourceHttpHandler);
-
-            HttpResponse response = httpHandler.handle(request);
+            HttpResponse response = new HttpResponse();
+            controller.service(request, response);
             writer.write(response);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -2,38 +2,40 @@ package com.techcourse.controller;
 
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
-import java.io.IOException;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.handler.HttpHandler;
+import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterPostController implements HttpHandler {
+public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterPostController.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String INDEX_HTML_URL = "http://localhost:8080/index.html";
 
-    private final UserService service;
+    private final UserService userService;
 
-    public RegisterPostController(UserService service) {
-        this.service = service;
+    public RegisterController(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setBodyFromStaticResource("/register.html");
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
         validateFormParameters(request);
 
         User user = saveUser(request);
         log.info("회원가입 성공! account: {}, email: {}", user.getAccount(), user.getEmail());
 
-        HttpResponse response = HttpResponse.found(INDEX_HTML_URL);
+        response.setFound(INDEX_HTML_URL);
         Session session = request.getSession();
         session.setAttribute("user", user);
         response.setSessionCookie(session);
-
-        return response;
     }
 
     private void validateFormParameters(HttpRequest request) {
@@ -47,6 +49,6 @@ public class RegisterPostController implements HttpHandler {
         String password = request.getFormParameter("password");
         String email = request.getFormParameter("email");
 
-        return service.saveUser(account, password, email);
+        return userService.saveUser(account, password, email);
     }
 }

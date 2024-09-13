@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.header.HttpHeaderName.CONTENT_LENGTH;
+import static org.apache.coyote.http11.header.HttpHeaderName.COOKIE;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ public class HttpRequest {
     public static final String QUERY_TOKEN_DELIMITER = "=";
     public static final int NAME_INDEX = 0;
     public static final int VALUE_INDEX = 1;
+    public static final String EMPTY_BODY_LENGTH = "0";
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -30,20 +33,21 @@ public class HttpRequest {
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = parseRequestLine(bufferedReader);
         final Map<String, String> headers = parseHeaders(bufferedReader);
-        final String body = parseBody(bufferedReader, Integer.parseInt(headers.getOrDefault("Content-Length", "0")));
+        final int contentLength = Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH.getName(), EMPTY_BODY_LENGTH));
+        final String body = parseBody(bufferedReader, contentLength);
         return new HttpRequest(requestLine, headers, body);
     }
 
     private static RequestLine parseRequestLine(final BufferedReader reader) throws IOException {
-        return RequestLine.of(reader.readLine());
+        return RequestLine.from(reader.readLine());
     }
 
     private static Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
-        var header = reader.readLine();
+        String header = reader.readLine();
 
         while (!"".equals(header)) {
-            final var tokens = header.split(HEADER_DELIMITER);
+            final String[] tokens = header.split(HEADER_DELIMITER);
             headers.put(tokens[NAME_INDEX], tokens[VALUE_INDEX]);
             header = reader.readLine();
         }
@@ -69,12 +73,8 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
-    }
-
     public HttpCookie getCookies() {
-        final String cookieString = headers.getOrDefault("Cookie", "");
+        final String cookieString = headers.getOrDefault(COOKIE.getName(), "");
         return HttpCookie.from(cookieString);
     }
 
@@ -82,7 +82,7 @@ public class HttpRequest {
         if ("".equals(requestBody)) {
             return new HashMap<>();
         }
-        final var params = requestBody.split(QUERY_STRING_DELIMITER);
+        final String[] params = requestBody.split(QUERY_STRING_DELIMITER);
 
         return Arrays.stream(params)
                 .map(param -> param.split(QUERY_TOKEN_DELIMITER))

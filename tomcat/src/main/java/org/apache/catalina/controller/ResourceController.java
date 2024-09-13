@@ -10,7 +10,7 @@ public class ResourceController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        final var url = request.getRequestPath();
+        final String url = request.getRequestPath();
 
         if ("/".equals(url)) {
             buildIndexUrlResponse(response);

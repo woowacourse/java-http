@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.response.StatusCode.FOUND;
 import static org.apache.coyote.http11.response.StatusCode.OK;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -62,18 +63,18 @@ public class HttpResponse {
     }
 
     public void setContentOfResources(final String filePath) throws IOException {
-        final var responseBody = buildResponseBodyFromStaticFile(filePath);
+        final String responseBody = buildResponseBodyFromStaticFile(filePath);
         body = responseBody;
         headers.add(HttpHeader.contentLengthOf(responseBody));
     }
 
     private String buildResponseBodyFromStaticFile(final String filePath) throws IOException {
-        final var resourceName = STATIC_PATH + filePath;
-        final var resourceURL = this.getClass().getClassLoader().getResource(resourceName);
+        final String resourceName = STATIC_PATH + filePath;
+        final URL resourceURL = this.getClass().getClassLoader().getResource(resourceName);
         if (resourceURL == null) {
             throw new IllegalArgumentException("존재하지 않는 정적 리소스입니다.");
         }
-        final var path = Path.of(resourceURL.getPath());
+        final Path path = Path.of(resourceURL.getPath());
 
         return String.join(LINE_BREAK, Files.readAllLines(path)) + LINE_BREAK;
     }

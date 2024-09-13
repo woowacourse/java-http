@@ -40,6 +40,11 @@ class AppTest {
         }
 
         assertThat(count.intValue()).isEqualTo(2);
+
+        // threads-max 개만큼 즉시 실행
+        // (max-connections - threads-max) 개만큼 커넥션 유지, 큐에서 기다림
+        // accept-count 개만큼 accept만 하고 OS가 관리하는 큐에서 대기, 지금은 여기까지 request timeout
+        // 나머지는 시간에 따라 timeout이 걸릴 수도 있음, 지금은 여기까지 connect timeout
     }
 
     private static void incrementIfOk(final HttpResponse<String> response) {

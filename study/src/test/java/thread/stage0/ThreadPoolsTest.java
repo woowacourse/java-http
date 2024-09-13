@@ -25,14 +25,14 @@ class ThreadPoolsTest {
 
     @Test
     void testNewFixedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2); // n개까지 동시에 가능, 나머지는 대기열
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
@@ -40,13 +40,13 @@ class ThreadPoolsTest {
 
     @Test
     void testNewCachedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool(); // max가 Integer.MAX_VALUE로 설정
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

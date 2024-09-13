@@ -11,8 +11,13 @@ public class UserServlet {
         join(user);
     }
 
-    private void join(final User user) {
+    private synchronized void join(final User user) {
         if (!users.contains(user)) {
+            try {
+                Thread.sleep(1); // 의도적으로 컨텍스트 스위칭을 해도 테스트는 성공
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             users.add(user);
         }
     }

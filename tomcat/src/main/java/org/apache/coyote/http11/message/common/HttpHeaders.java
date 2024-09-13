@@ -52,7 +52,8 @@ public class HttpHeaders {
     }
 
     public ContentType getContentType() {
-        return ContentType.from(headers.getOrDefault(HttpHeaderField.CONTENT_TYPE.getName(), DEFAULT_VALUE));
+        return ContentType.from(
+                headers.getOrDefault(HttpHeaderField.CONTENT_TYPE.getName(), ContentType.TEXT_HTML.getType()));
     }
 
     @Override

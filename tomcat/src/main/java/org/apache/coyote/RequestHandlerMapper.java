@@ -1,8 +1,8 @@
 package org.apache.coyote;
 
-import com.techcourse.controller.NotFoundController;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.NotFoundController;
 import org.apache.ResourceReader;
 
 public class RequestHandlerMapper {

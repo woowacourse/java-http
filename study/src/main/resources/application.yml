@@ -1,0 +1,13 @@
+handlebars:
+  suffix: .html
+
+server:
+  tomcat:
+    accept-count: 1
+    max-connections: 1
+    threads:
+      min-spare: 2
+      max: 2
+  compression:
+    enabled: true
+    min-response-size: 10

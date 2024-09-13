@@ -62,6 +62,10 @@ public class HttpRequest {
     }
 
     public String getCookie(String key) {
+        if (httpHeaders.findField("Cookie") == null) {
+            return null;
+        }
+
         String[] cookies = parseWithTrim(httpHeaders.findField("Cookie"), ";");
 
         for (String cookie : cookies) {

@@ -42,13 +42,32 @@ class LoginControllerTest {
 
     @DisplayName("사용자 인증정보가 존재하지 않으면 요청된 페이지를 반환한다.")
     @Test
-    void doGet_whenSessionNotExist() throws IOException {
+    void doGet_whenLoginSessionNotExist() throws IOException {
         // given
         LoginController loginController = new LoginController();
 
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
+        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+
+        // when
+        HttpResponse httpResponse = loginController.doGet(httpRequest);
+
+        // then
+        Assertions.assertThat(httpResponse.getStatusMessage()).isEqualTo(Status.OK.getStatusMessage());
+        Assertions.assertThat(httpResponse.getContentType()).startsWith("text/html");
+    }
+
+    @DisplayName("쿠키가 존재하지 않으면 요청된 페이지를 반환한다.")
+    @Test
+    void doGet_whenSessionNotExist() throws IOException {
+        // given
+        LoginController loginController = new LoginController();
+
+        RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
+        HashMap<String, String> requestHeaders = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 

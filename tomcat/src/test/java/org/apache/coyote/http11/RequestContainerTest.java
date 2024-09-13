@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.RequestContainer;
+import org.apache.coyote.ServletContainer;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
@@ -16,7 +16,7 @@ class RequestContainerTest {
     @Test
     @DisplayName("요청과 일치하는 Controller가 없는 경우 404 페이지로 리다이렉트 한다.")
     void process() {
-        RequestContainer requestContainer = new RequestContainer();
+        ServletContainer requestContainer = new ServletContainer();
         HttpRequest httpRequest = HttpRequestFixture.NO_EXIST_METHOD_REQUEST;
         HttpResponse httpResponse = new HttpResponse(OutputStream.nullOutputStream());
 

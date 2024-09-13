@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.RequestContainer;
+import org.apache.coyote.ServletContainer;
 import org.apache.coyote.util.ResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new RequestContainer());
+        final var processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);
@@ -44,7 +44,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, new RequestContainer());
+        Http11Processor processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);
@@ -73,7 +73,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, new RequestContainer());
+        Http11Processor processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);
@@ -103,7 +103,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, new RequestContainer());
+        Http11Processor processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);
@@ -131,7 +131,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, new RequestContainer());
+        Http11Processor processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);
@@ -161,7 +161,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password&email=hkkang@woowahan.com");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, new RequestContainer());
+        Http11Processor processor = new Http11Processor(socket, new ServletContainer());
 
         // when
         processor.process(socket);

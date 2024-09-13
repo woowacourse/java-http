@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Nested;
@@ -40,6 +43,25 @@ class SessionManagerTest {
 
             // then
             assertThat(actual).isNull();
+        }
+
+        @Test
+        void 동시_요청을_처리할_수_있다() throws InterruptedException{
+            // given
+            ExecutorService executorService = Executors.newFixedThreadPool(5);
+            SessionManager sessionManager = SessionManager.getInstance();
+
+            // when
+            for (int i = 0; i < 10000; i++) {
+                int finalI = i;
+                executorService.submit(() -> sessionManager.add(new Session(finalI + "")));
+            }
+            executorService.awaitTermination(500, TimeUnit.MICROSECONDS);
+
+            // then
+            for (int i = 0; i < 10000; i++) {
+                assertThat(sessionManager.findSession(i + "")).isNotNull();
+            }
         }
     }
 }

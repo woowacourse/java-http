@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.header.HeaderContent.COOKIE;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
@@ -22,6 +23,10 @@ public class HttpRequestHeader {
 
     public HttpRequestHeader(Map<String, String> payLoads) {
         this(payLoads, null);
+    }
+
+    public HttpRequestHeader() {
+        this(new HashMap<>());
     }
 
     public static HttpRequestHeader readRequestHeader(BufferedReader bufferedReader) throws IOException {

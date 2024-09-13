@@ -85,7 +85,8 @@ public class HttpResponse {
     }
 
     private String createStatusLineResponse() {
-        return String.format(STATUS_LINE_FORMAT,
+        return String.format(
+                STATUS_LINE_FORMAT,
                 protocol.getName(),
                 httpStatus.getCode(),
                 httpStatus.getReasonPhrase()

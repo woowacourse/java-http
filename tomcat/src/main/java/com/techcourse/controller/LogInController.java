@@ -29,7 +29,7 @@ public class LogInController extends AbstractController {
             String sessionId = SessionManager.add(new Session(user));
             response.setStatusCode(HttpStatusCode.REDIRECT);
             response.setLocation("/index.html");
-            response.setCookie("JSESSIONID", sessionId);
+            response.setJSessionIdCookie(sessionId);
             return;
         }
 

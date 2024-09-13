@@ -20,8 +20,8 @@ public class HttpResponse {
         this.statusCode = statusCode;
     }
 
-    public void setCookie(String cookieKey, String cookieValue) {
-        this.headers.put("Set-Cookie", cookieKey + "=" + cookieValue);
+    public void setJSessionIdCookie(String jSessionId) {
+        this.headers.put("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 
     public void setLocation(String location) {

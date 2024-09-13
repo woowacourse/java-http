@@ -28,6 +28,6 @@ public class RegisterController extends AbstractController {
 
         response.setStatusCode(HttpStatusCode.REDIRECT);
         response.setLocation("index.html");
-        response.setCookie("JSESSIONID", sessionId);
+        response.setJSessionIdCookie(sessionId);
     }
 }

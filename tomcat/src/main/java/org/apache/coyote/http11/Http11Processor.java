@@ -13,6 +13,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.exception.HttpConnectorException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,14 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse processApplicationResponse(HttpRequest request) throws IOException, TomcatException {
         HttpResponse response = new HttpResponse();
         HttpResponse staticResourceResponse = viewResolver.resolve(request, new HttpResponse());
+
+        if (request.header().getJSessionIdCookie().isPresent() && request.isGET()
+                && ("/login".equals(request.getPath()) || "/register".equals(request.getPath()))) {
+            response.setStatusCode(HttpStatusCode.REDIRECT);
+            response.setLocation("/index.html");
+            return response;
+        }
+
         if (request.isGET() && staticResourceResponse != null) {
             return staticResourceResponse;
         }

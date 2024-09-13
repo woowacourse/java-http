@@ -7,7 +7,6 @@ import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.ServletContainer;
-import org.apache.coyote.http11.handler.DefaultResourceHandler;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.slf4j.Logger;
@@ -19,13 +18,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final ServletContainer servletContainer;
-    private final RequestHandler requestHandler;
     private final Socket connection;
 
     public Http11Processor(ServletContainer servletContainer, Socket connection) {
         this.servletContainer = servletContainer;
         this.connection = connection;
-        this.requestHandler = new DefaultResourceHandler();
     }
 
     @Override
@@ -60,10 +57,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             //todo 예외 처리
         }
-    }
-
-    private void getResponse(HttpRequest httpRequest) throws IOException {
-        HttpResponse httpResponse = new HttpResponse(httpRequest);
-        requestHandler.handle(httpRequest, httpResponse);
     }
 }

@@ -22,6 +22,7 @@ public class RequestLine {
         final String[] requestLineTokens = requestLine.split(DELIMITER);
         final HttpMethod method = HttpMethod.valueOf(requestLineTokens[METHOD_INDEX]);
         final String path = requestLineTokens[PATH_INDEX];
+      
         return new RequestLine(method, path);
     }
 

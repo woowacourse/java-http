@@ -16,13 +16,13 @@ public class LoginServlet implements Servlet {
     private static final String LOGIN_FAIL_PAGE = "/401.html";
     private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final SessionManager sessionManager = SessionManager.getInstance();
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
+    private static final String ACCOUNT_FORM_DATA = "account";
+    private static final String PASSWORD_FORM_DATA = "password";
 
     @Override
     public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String account = request.getFormData(ACCOUNT);
-        String password = request.getFormData(PASSWORD);
+        String account = request.getFormData(ACCOUNT_FORM_DATA);
+        String password = request.getFormData(PASSWORD_FORM_DATA);
 
         Optional<User> found = InMemoryUserRepository.findByAccount(account);
         if (found.isEmpty() || !found.get().checkPassword(password)) {

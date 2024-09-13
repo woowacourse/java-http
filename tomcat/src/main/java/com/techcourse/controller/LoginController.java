@@ -32,10 +32,7 @@ public class LoginController extends AbstractController{
 
     private static boolean alreadyLogin(HttpRequest request) {
         Session session = request.getSession(false);
-        if (session == null || !session.hasValue("user")) {
-            return false;
-        }
-        return true;
+        return session != null && session.hasValue("user");
     }
 
     private static void redirectMain(HttpRequest request, HttpResponse response) {

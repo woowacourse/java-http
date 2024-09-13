@@ -56,4 +56,8 @@ public class HttpResponse {
             throw new RuntimeException(e);
         }
     }
+
+    public int getHttpStatus() {
+        return httpStatus.getCode();
+    }
 }

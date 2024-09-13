@@ -39,22 +39,23 @@ public class LoginController extends MappingController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> params = request.getBody();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
-        if (optionalUser.isEmpty()) {
-            response.setStatusLine(Status.UNAUTHORIZED);
-            response.sendRedirect(UNAUTHORIZED_PATH);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            login(response, user, params);
             return;
         }
-        User user = optionalUser.get();
+        response.setStatusLine(Status.UNAUTHORIZED);
+        response.sendRedirect(UNAUTHORIZED_PATH);
+    }
+
+    private void login(HttpResponse response, User user, Map<String, String> params) {
         if (user.checkPassword(params.get("password"))) {
             Session session = saveSession(user);
             log.info("{}", user);
             response.setStatusLine(Status.FOUND);
             response.sendRedirect(INDEX_PATH);
             response.setCookie(Cookie.ofSessionId(session.getId()));
-            return;
         }
-        response.setStatusLine(Status.UNAUTHORIZED);
-        response.sendRedirect(UNAUTHORIZED_PATH);
     }
 
     private Session saveSession(User user) {

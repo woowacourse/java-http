@@ -10,7 +10,6 @@ import org.was.controller.ResponseResult;
 
 public class DashboardController extends AbstractController {
 
-
     @Override
     protected ResponseResult doPost(HttpRequest request) {
         return ResponseResult

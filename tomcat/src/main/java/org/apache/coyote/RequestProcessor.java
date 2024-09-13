@@ -6,9 +6,10 @@ import org.apache.coyote.request.mapper.RequestMapping;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.HttpStatus;
 
+import java.awt.*;
 import java.util.Optional;
 
-public class RequestProcessor {
+public class RequestProcessor extends Container {
 
     private final RequestMapping requestMapping;
 

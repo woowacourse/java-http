@@ -10,20 +10,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceFinder {
 
-    String fileName;
-    String extension;
+    private final String fileName;
+    private final String extension;
 
-    public ResourceFinder(String location) {
-        String[] split = location.split("\\.");
-        if (location.equals("/")) {
-            location = "/index.html";
-        } else if (split.length == 1) {
-            location += ".html";
-        } else if (split.length == 2) {
-            location = location + "." + split[1];
-        }
-        this.fileName = location.split("\\.")[0];
-        this.extension = location.split("\\.")[1];
+    public ResourceFinder(String location, String extension) {
+        this.fileName = location.equals("/") ? "/index" : location;
+        this.extension = extension;
     }
 
     public String getStaticResource(HttpResponse response) {

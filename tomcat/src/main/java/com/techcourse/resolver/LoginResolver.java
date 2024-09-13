@@ -1,6 +1,5 @@
 package com.techcourse.resolver;
 
-import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import java.util.Map;
@@ -22,7 +21,7 @@ public class LoginResolver extends HttpRequestResolver {
             response.addHeader("Location", "/index.html");
             return;
         }
-        String body = new ResourceFinder(request.getLocation()).getStaticResource(response);
+        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
         response.setBody(body);
     }
 

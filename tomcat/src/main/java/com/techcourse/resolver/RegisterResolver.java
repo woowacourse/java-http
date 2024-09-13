@@ -18,7 +18,7 @@ public class RegisterResolver extends HttpRequestResolver {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String body = new ResourceFinder(request.getLocation()).getStaticResource(response);
+        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
         response.setBody(body);
     }
 

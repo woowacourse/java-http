@@ -8,14 +8,14 @@ import java.util.TreeMap;
 
 public class HttpRequestLine {
     private final HttpMethod method;
-    private final String location;
-    private final String version;
+    private final HttpLocation location;
+    private final HttpVersion version;
     private final Map<String, String> queries = new TreeMap<>();
 
-    public HttpRequestLine(String method, String location, String version) {
+    private HttpRequestLine(String method, String location, String version) {
         this.method = HttpMethod.from(method);
-        this.location = location.split("\\?")[0];
-        this.version = version;
+        this.location = HttpLocation.from(location);
+        this.version = HttpVersion.from(version);
         setQueriesIfExist(location);
     }
 
@@ -28,6 +28,7 @@ public class HttpRequestLine {
             }
         }
     }
+
     public static HttpRequestLine from(List<String> clientData) {
         try {
             String requestLine = clientData.getFirst();
@@ -49,15 +50,15 @@ public class HttpRequestLine {
         return method;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 
-    public Map<String,String> getQueries() {
+    public HttpLocation getLocation() {
+        return location;
+    }
+
+    public Map<String, String> getQueries() {
         return queries;
     }
 }

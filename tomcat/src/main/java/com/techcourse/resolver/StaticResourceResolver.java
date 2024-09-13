@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class StaticResourceResolver implements Resolver {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String body = new ResourceFinder(request.getLocation()).getStaticResource(response);
+        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
         response.setBody(body);
     }
 

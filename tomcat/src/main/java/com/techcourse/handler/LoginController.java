@@ -50,7 +50,7 @@ public class LoginController extends AbstractController {
 
     private boolean isLoggedIn(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
-                .map(it -> it.checkPassword(password))
+                .map(user -> user.checkPassword(password))
                 .orElse(false);
     }
 

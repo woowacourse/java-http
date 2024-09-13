@@ -24,7 +24,7 @@ public enum ContentType {
 
     public static ContentType from(String contentTypeName) {
         return Arrays.stream(values())
-                .filter(it -> it.name.equals(contentTypeName))
+                .filter(contentType -> contentType.name.equals(contentTypeName))
                 .findFirst()
                 .orElse(PLAIN);
     }

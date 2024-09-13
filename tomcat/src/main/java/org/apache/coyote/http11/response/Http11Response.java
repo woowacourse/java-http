@@ -5,6 +5,8 @@ import org.apache.coyote.http11.request.HttpMimeType;
 public class Http11Response {
 
     private static final String protocol = "HTTP/1.1";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private String responseBody;
     private Http11ResponseHeaders headers;
@@ -20,8 +22,8 @@ public class Http11Response {
     private Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
                 Http11ResponseHeaders.builder()
-                        .addHeader("Content-Type", HttpMimeType.from(fileExtensions).asString())
-                        .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                        .addHeader(CONTENT_TYPE, HttpMimeType.from(fileExtensions).asString())
+                        .addHeader(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length))
                         .build());
     }
 

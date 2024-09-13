@@ -92,3 +92,11 @@
     - [x] 회원가입 컨트롤러
       - get /register
       - post /register
+
+### 4단계
+
+- [ ] Executors로 Thread Pool 적용
+  - Executors 클래스를 사용해서 ExecutorService 객체 제작
+  - 스레드 갯수는 maxThreads 라는 변수로 지정
+- [ ] 동시성 컬렉션 사용하기
+  - 동시성 컬렉션(Concurrent Collections)을 적용해서 스레드 안정성과 원자성을 보장

@@ -6,8 +6,6 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class FrontController {
 
-    private static FrontController instance = new FrontController();
-
     private final RequestMapping requestMapping;
 
     private FrontController() {
@@ -15,7 +13,7 @@ public class FrontController {
     }
 
     public static FrontController getInstance() {
-        return instance;
+        return FrontControllerHolder.INSTANCE;
     }
 
     public void service(HttpRequest request, HttpResponse response) {
@@ -25,5 +23,10 @@ public class FrontController {
         } catch (UncheckedServletException e) {
             ControllerAdviser.service(e, request, response);
         }
+    }
+
+    private static class FrontControllerHolder {
+
+        private static final FrontController INSTANCE = new FrontController();
     }
 }

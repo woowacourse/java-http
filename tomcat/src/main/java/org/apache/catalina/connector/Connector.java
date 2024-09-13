@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -16,20 +20,46 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREADS = 200;
+    private static final int DEFAULT_MAX_CONNECTIONS = 8192;
 
     private final ServerSocket serverSocket;
     private final Manager sessionManager;
+    private final ExecutorService executorService;
+    private final CoyoteProcessorFactory processorFactory;
 
     private boolean stopped;
 
     public Connector(Manager sessionManager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, sessionManager);
+        this(
+                DEFAULT_PORT,
+                DEFAULT_ACCEPT_COUNT,
+                DEFAULT_MAX_CONNECTIONS,
+                DEFAULT_THREADS,
+                sessionManager,
+                new CoyoteProcessorFactory()
+        );
     }
 
-    public Connector(final int port, final int acceptCount, final Manager sessionManager) {
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxConnections,
+            final int maxThreads,
+            final Manager sessionManager,
+            final CoyoteProcessorFactory processorFactory
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingDeque<>(maxConnections)
+        );
         this.sessionManager = sessionManager;
+        this.processorFactory = processorFactory;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -70,8 +100,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager);
-        new Thread(processor).start();
+        Http11Processor processor = processorFactory.getHttp11Processor(connection, sessionManager);
+        executorService.execute(processor);
     }
 
     public void stop() {

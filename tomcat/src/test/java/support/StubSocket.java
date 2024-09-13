@@ -14,7 +14,7 @@ public class StubSocket extends Socket {
     private final String request;
     private final ByteArrayOutputStream outputStream;
 
-    public StubSocket(final String request) {
+    public StubSocket(String request) {
         this.request = request;
         this.outputStream = new ByteArrayOutputStream();
     }

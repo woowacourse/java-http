@@ -12,6 +12,9 @@ public enum HttpMethod {
         if ("POST".equals(data.toUpperCase().strip())) {
             return POST;
         }
-        return DELETE;
+        if ("DELETE".equals(data.toUpperCase().strip())) {
+            return DELETE;
+        }
+        throw new IllegalArgumentException("%s는 존재하지 않는 HTTP 메서드입니다.");
     }
 }

@@ -1,15 +1,11 @@
 package support;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.resolver.Dispatcher;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Http11Reader;
 import org.apache.coyote.http11.Http11Writer;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 
 public class StubProcessor extends Http11Processor {
     public StubProcessor(Socket connection) {

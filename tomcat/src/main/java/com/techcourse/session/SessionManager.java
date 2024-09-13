@@ -14,7 +14,7 @@ public class SessionManager {
     }
 
     public Optional<Session> findSession(String id) {
-        return  Optional.ofNullable(SESSIONS.get(id));
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     public void remove(HttpSession session) {

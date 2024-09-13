@@ -15,15 +15,15 @@ public class Session {
         return this.id;
     }
 
-    public String getAttribute(final String name) {
+    public String getAttribute(String name) {
         return values.get(name);
     }
 
-    public void setAttribute(final String name, final String value) {
+    public void setAttribute(String name, String value) {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
+    public void removeAttribute(String name) {
         values.remove(name);
     }
 

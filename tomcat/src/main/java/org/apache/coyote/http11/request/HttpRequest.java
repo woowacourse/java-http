@@ -6,7 +6,7 @@ import java.util.Map;
 public abstract class HttpRequest {
 
     private final List<String> clientData;
-    private final String VERSION;
+    private final String version;
     private final HttpHeaders headers;
     private final HttpPayload payload;
     private final HttpRequestLine httpRequestLine;
@@ -14,7 +14,7 @@ public abstract class HttpRequest {
 
     public HttpRequest(List<String> clientData, String version) {
         this.clientData = clientData;
-        this.VERSION = version;
+        this.version = version;
         this.httpRequestLine = HttpRequestLine.from(clientData);
         this.headers = HttpHeaders.from(clientData);
         this.payload = HttpPayload.from(clientData);

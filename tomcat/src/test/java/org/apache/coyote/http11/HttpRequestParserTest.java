@@ -50,6 +50,6 @@ class HttpRequestParserTest {
         HttpRequest actualRequest = parser.extractRequest(inputStream);
 
         // then
-        assertThat(actualRequest).isEqualTo(expected);
+        assertThat(actualRequest.toString()).isEqualTo(expected.toString());
     }
 }

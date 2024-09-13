@@ -14,7 +14,7 @@ public class HttpPayload {
     }
 
     public static HttpPayload from(List<String> clientData) {
-        if (!clientData.get(0).contains("POST")) {
+        if (!clientData.getFirst().contains("POST")) {
             return null;
         }
 

@@ -7,15 +7,25 @@ import java.util.Map;
 public class HttpHeaders {
     private final Map<String, String> value;
 
+    public static final String HEADER_DELIMITER = ": ";
+
     public HttpHeaders(Map<String, String> value) {
         this.value = value;
     }
 
     public static HttpHeaders from(List<String> lines) {
-        Map<String, String> value = new HashMap<>();
+        if (lines.size() < 2) {
+            throw new IllegalArgumentException("request must be more than two lines");
+        }
 
-        for (String line : lines) {
-            String[] split = line.split(": ");
+        Map<String, String> value = new HashMap<>();
+        int startIndex = 1;
+        for (int index = startIndex; index < lines.size(); index++) {
+            String line = lines.get(index);
+            if (line.isEmpty()) {
+                break;
+            }
+            String[] split = line.split(HEADER_DELIMITER);
             validate(split);
             value.put(split[0], split[1]);
         }
@@ -24,7 +34,7 @@ public class HttpHeaders {
     }
 
     private static void validate(String[] split) {
-        if (split.length != 2) {
+        if (split.length < 2) {
             throw new IllegalArgumentException("key value not matched");
         }
         if (split[0].isBlank() || split[1].isBlank()) {

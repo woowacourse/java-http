@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class HttpRequest {
+    private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpPayload payload;
-    private final HttpRequestLine requestLine;
 
 
     public HttpRequest(List<String> clientData) {
@@ -27,30 +27,14 @@ public abstract class HttpRequest {
         return requestLine.getLocation().getExtension();
     }
 
-    public HttpVersion getVersion() {
-        return requestLine.getVersion();
-    }
-
-    public String getHeader(String key) {
-        return headers.find(key);
-    }
-
+    //TODO: cookies
     public String getCookie() {
         return headers.find("Cookie").split("=")[1];
-    }
-
-    public Map<String, String> getQueries() {
-        return requestLine.getQueries();
     }
 
     public boolean containsHeader(String key) {
         return headers.contains(key);
     }
-
-    public void setHeader(String key, String value) {
-        headers.set(key, value);
-    }
-
 
     public Map<String, String> getPayload() {
         return payload.getValue();

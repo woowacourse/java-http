@@ -3,7 +3,6 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 public class HttpRequestLine {
@@ -30,28 +29,22 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine from(List<String> clientData) {
-        try {
-            String requestLine = clientData.getFirst();
-            List<String> split = Arrays.stream(requestLine.split(" "))
-                    .map(String::strip)
-                    .toList();
-            validate(split);
-            return new HttpRequestLine(split.get(0), split.get(1), split.get(2));
-        } catch (NoSuchElementException e) {
+        if (clientData.isEmpty()) {
             throw new IllegalArgumentException("data parse error at request line");
         }
-    }
 
-    private static void validate(List<String> requestLine) {
-        // TODO: validate
+        String requestLine = clientData.getFirst();
+        List<String> split = Arrays.stream(requestLine.split(" ")).toList();
+        if (split.size() != 3) {
+            throw new IllegalArgumentException("request line must have 3 arguments");
+        }
+
+        return new HttpRequestLine(split.get(0), split.get(1), split.get(2));
+
     }
 
     public HttpMethod getMethod() {
         return method;
-    }
-
-    public HttpVersion getVersion() {
-        return version;
     }
 
     public HttpLocation getLocation() {

@@ -9,7 +9,7 @@ public class FakeRequests {
             "Connection: keep-alive "
     );
     public static final List<String> invalidGetRequest = List.of(
-            "GETO /// HTTP/1.1 ",
+            "GETO/// HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive "
     );
@@ -17,6 +17,6 @@ public class FakeRequests {
     public static final List<String> invalidHeaderRequest = List.of(
             "GET / HTTP/1.1 ",
             "Host - localhost:8080 ",
-            "Connection:: keep-alive "
+            "Connection keep-alive "
     );
 }

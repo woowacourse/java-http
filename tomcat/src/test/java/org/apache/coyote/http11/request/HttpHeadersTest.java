@@ -12,7 +12,7 @@ class HttpHeadersTest {
     @Test
     @DisplayName("{키:값} 이외의 형식일 때 예외가 발생한다.")
     void from() {
-        Assertions.assertThatThrownBy(() -> HttpHeaders.from(FakeRequests.invalidHeaderRequest)).isInstanceOf(
-                IllegalArgumentException.class);
+        Assertions.assertThatThrownBy(() -> HttpHeaders.from(FakeRequests.invalidHeaderRequest))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

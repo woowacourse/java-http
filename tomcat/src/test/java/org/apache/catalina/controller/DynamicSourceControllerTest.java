@@ -13,9 +13,9 @@ import org.apache.coyote.http.request.RequestParameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class AbstractControllerTest {
+class DynamicSourceControllerTest {
 
-    private AbstractController controller = new AbstractController() {
+    private DynamicSourceController controller = new DynamicSourceController() {
     };
 
     @DisplayName("필요한 파라미터를 가져올 수 있다.")

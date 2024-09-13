@@ -29,47 +29,56 @@ public class LoginController extends AbstractController {
         final var cookie = request.getHeaders().get(HttpHeaderField.COOKIE.getValue());
         final var httpCookie = HttpCookie.parse(cookie);
         if (httpCookie.containsKey(SESSION_COOKIE_NAME)) {
-            final var jSessionId = httpCookie.get(SESSION_COOKIE_NAME);
-            final var session = sessionManager.findSession(jSessionId);
+            findUser(response, httpCookie);
             response.setHttpStatusCode(HttpStatusCode.FOUND);
-            if (session == null) {
-                log.warn("유효하지 않은 세션입니다.");
-                response.putHeader(HttpHeaderField.LOCATION.getValue(), "401.html");
-            } else {
-                final var sessionUser = (User) session.getAttribute(USER_SESSION_KEY);
-                log.info("이미 로그인 유저 = {}", sessionUser);
-                response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
-            }
         } else {
             response.setHttpStatusCode(HttpStatusCode.OK);
+        }
+    }
+
+    private void findUser(final HttpResponse response, final HttpCookie httpCookie) {
+        final var jSessionId = httpCookie.get(SESSION_COOKIE_NAME);
+        final var session = sessionManager.findSession(jSessionId);
+        if (session == null) {
+            log.warn("유효하지 않은 세션입니다.");
+            response.putHeader(HttpHeaderField.LOCATION.getValue(), "401.html");
+        } else {
+            final var sessionUser = (User) session.getAttribute(USER_SESSION_KEY);
+            log.info("이미 로그인 유저 = {}", sessionUser);
+            response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
         }
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final var account = request.getBodyValue("account");
-        log.info("account = {}", account);
         try {
             response.setHttpStatusCode(HttpStatusCode.FOUND);
-            final var user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-            final var password = request.getBodyValue("password");
-
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-            }
-
+            final var user = login(request, account);
             final var uuid = UUID.randomUUID();
             response.putHeader(HttpHeaderField.SET_COOKIE.getValue(), SESSION_COOKIE_NAME + "=" + uuid);
             response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
-
-            final var session = new Session(uuid.toString());
-            session.setAttribute(USER_SESSION_KEY, user);
-            sessionManager.add(session);
-
+            saveSession(uuid, user);
         } catch (final IllegalArgumentException e) {
             response.putHeader(HttpHeaderField.LOCATION.getValue(), "401.html");
             log.warn(e.getMessage());
         }
+    }
+
+    private void saveSession(final UUID uuid, final User user) {
+        final var session = new Session(uuid.toString());
+        session.setAttribute(USER_SESSION_KEY, user);
+        sessionManager.add(session);
+    }
+
+    private User login(final HttpRequest request, final String account) {
+        final var user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        final var password = request.getBodyValue("password");
+
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        return user;
     }
 }

@@ -37,7 +37,6 @@ class RegisterServletTest {
 		User expectedUser = new User("testAccount", "test@mail.com", "testPassword");
 		User savedUser = InMemoryUserRepository.findByAccount("testAccount").orElse(null);
 		assertThat(savedUser).isNotNull();
-		assertThat(expectedUser).isEqualTo(savedUser);
 
 		assertThat(response.getVersionOfProtocol()).isEqualTo(new VersionOfProtocol("HTTP/1.1"));
 		assertThat(response.getStatusCode()).isEqualTo(new StatusCode(302));

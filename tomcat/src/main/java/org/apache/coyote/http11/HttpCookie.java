@@ -26,25 +26,18 @@ public class HttpCookie {
     }
 
     public HttpCookie(String rawCookies) {
-        this.cookies = parse(rawCookies);
+        this.cookies = new HashMap<>();
+        parse(rawCookies);
     }
 
-    private Map<String, String> parse(String rawCookies) {
+    private void parse(String rawCookies) {
         if (rawCookies == null) {
             throw new CoyoteException("cookie는 null일 수 없습니다.");
         }
 
-        return toMap(rawCookies);
-    }
-
-    private Map<String, String> toMap(String rawCookies) {
-        try {
-            return Arrays.stream(rawCookies.split(COOKIE_DELIMITER, SPLIT_LIMIT))
-                    .map(String::trim)
-                    .collect(Collectors.toMap(this::parseCookieName, this::parseCookieValue));
-        } catch (IllegalStateException e) {
-            throw new CoyoteException("쿠키의 이름은 중복될 수 없습니다.");
-        }
+        Arrays.stream(rawCookies.split(COOKIE_DELIMITER, SPLIT_LIMIT))
+                .map(String::trim)
+                .forEach(rawCookie -> cookies.put(parseCookieName(rawCookie), parseCookieValue(rawCookie)));
     }
 
     private String parseCookieName(String rawCookie) {

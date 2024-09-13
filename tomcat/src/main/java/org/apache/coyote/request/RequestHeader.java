@@ -8,26 +8,33 @@ import org.apache.coyote.http.HeaderName;
 
 public class RequestHeader {
 
-    private final Map<HeaderName, String> header;
+    private final Map<String, String> header;
     private final HttpCookie httpCookie;
 
     public RequestHeader(List<String> headerLines) {
         this.header = mapHeader(headerLines);
-        this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE));
+        this.httpCookie = mapCookie();
     }
 
-    private Map<HeaderName, String> mapHeader(List<String> headerLines) {
-        Map<HeaderName, String> rawHeader = new HashMap<>();
+    private HttpCookie mapCookie() {
+        if (header.containsKey(HeaderName.COOKIE.getValue())) {
+            return new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
+        }
+        return new HttpCookie();
+    }
+
+    private Map<String, String> mapHeader(List<String> headerLines) {
+        Map<String, String> rawHeader = new HashMap<>();
 
         for (String line : headerLines) {
             String[] headerEntry = line.split(": ", 2);
-            rawHeader.put(HeaderName.findByName(headerEntry[0]), headerEntry[1]);
+            rawHeader.put(headerEntry[0], headerEntry[1]);
         }
         return rawHeader;
     }
 
     public boolean hasSession() {
-        return header.containsKey(HeaderName.COOKIE) && httpCookie.hasSessionId();
+        return header.containsKey(HeaderName.COOKIE.getValue()) && httpCookie.hasSessionId();
     }
 
     public String getSessionId() {

@@ -10,6 +10,10 @@ public class HttpCookie {
 
     private final Map<String, String> cookies;
 
+    public HttpCookie() {
+        this.cookies = new HashMap<>();
+    }
+
     public HttpCookie(String rawCookies) {
         this.cookies = mapCookies(rawCookies);
     }
@@ -19,9 +23,11 @@ public class HttpCookie {
 
         if (rawCookies != null && !rawCookies.isBlank()) {
             String[] cookiesElements = rawCookies.split("; ");
-            for (int i = 0; i < cookiesElements.length; i++) {
-                String[] cookiePair = cookiesElements[i].split("=");
-                cookieGroup.put(cookiePair[0], cookiePair[1]);
+            if (cookiesElements.length > 1) {
+                for (int i = 0; i < cookiesElements.length; i++) {
+                    String[] cookiePair = cookiesElements[i].split("=");
+                    cookieGroup.put(cookiePair[0], cookiePair[1]);
+                }
             }
         }
         return cookieGroup;

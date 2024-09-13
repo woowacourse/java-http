@@ -26,7 +26,7 @@ public class RequestMapping {
     }
 
     public Controller getController(HttpRequest request) {
-        if(controllers.containsKey(request.getPath())) {
+        if (controllers.containsKey(request.getPath())) {
             return controllers.get(request.getPath());
         }
         return staticController;

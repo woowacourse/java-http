@@ -7,11 +7,6 @@ public class RequestURI {
     private final String path;
     private final QueryParameters parameters;
 
-    public RequestURI(String path, QueryParameters parameters) {
-        this.path = path;
-        this.parameters = parameters;
-    }
-
     public RequestURI(String requestURI) {
         if(requestURI.contains(QUERY_DELIMITER)) {
             int index = requestURI.indexOf(QUERY_DELIMITER);

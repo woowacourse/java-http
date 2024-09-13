@@ -11,7 +11,6 @@ import static org.apache.coyote.http11.request.HttpMethod.PUT;
 import static org.apache.coyote.http11.request.HttpMethod.TRACE;
 import static org.apache.coyote.http11.response.HttpStatusCode.NOT_IMPLEMENTED;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -39,7 +38,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         BiConsumer<HttpRequest, HttpResponse> handler = methodHandlers.get(request.getMethod());
-        if(handler == null) {
+        if (handler == null) {
             response.setStatusLine(request.getVersion(), NOT_IMPLEMENTED);
             return;
         }

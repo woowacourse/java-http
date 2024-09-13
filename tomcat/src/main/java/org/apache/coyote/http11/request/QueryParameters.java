@@ -12,7 +12,7 @@ public class QueryParameters {
 
     public QueryParameters(String queryString) {
         params = new HashMap<>();
-        if(queryString.isEmpty()) {
+        if (queryString.isEmpty()) {
             return;
         }
         String[] params = queryString.split(PARAMETER_SEPARATOR);

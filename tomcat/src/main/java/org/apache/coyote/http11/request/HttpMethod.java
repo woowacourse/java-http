@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 public enum HttpMethod {
     GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE, CONNECT;
-    
+
     public static HttpMethod ofValue(String name) {
         try {
             return HttpMethod.valueOf(name);

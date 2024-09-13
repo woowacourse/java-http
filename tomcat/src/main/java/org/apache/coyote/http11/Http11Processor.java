@@ -1,41 +1,26 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.request.HttpMethod.GET;
-import static org.apache.coyote.http11.request.HttpMethod.POST;
-import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.apache.catalina.controller.Controller;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.io.HttpResponseWriter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.request.RequestMapping;
-import org.apache.coyote.http11.response.MimeTypes;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 

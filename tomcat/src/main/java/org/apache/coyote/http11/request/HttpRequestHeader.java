@@ -14,7 +14,7 @@ public class HttpRequestHeader {
 
     public HttpRequestHeader(List<String> lines) {
         headers = new HashMap<>();
-        for( String line : lines) {
+        for (String line : lines) {
             int index = line.indexOf(HEADER_DELIMITER);
             headers.put(line.substring(0, index).trim(), line.substring(index + 1).trim());
         }

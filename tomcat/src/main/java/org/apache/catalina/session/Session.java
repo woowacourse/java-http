@@ -1,7 +1,7 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.HttpCookie;
 
 public class Session {
@@ -9,7 +9,7 @@ public class Session {
     public static final String JSESSIONID = "JSESSIONID";
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     public Session(String id) {
         this.id = id;

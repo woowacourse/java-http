@@ -7,7 +7,6 @@ import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractServlet implements Servlet {
-
 	@Override
 	public void service(HttpRequest request, HttpResponse response) throws IOException {
 		Method method = request.getMethod();

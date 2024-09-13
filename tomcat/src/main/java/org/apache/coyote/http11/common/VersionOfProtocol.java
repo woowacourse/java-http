@@ -3,7 +3,6 @@ package org.apache.coyote.http11.common;
 import java.util.Objects;
 
 public record VersionOfProtocol(String value) {
-
 	public static VersionOfProtocol request(String requestLine) {
 		return new VersionOfProtocol(requestLine.split(" ")[0]);
 	}

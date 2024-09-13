@@ -8,7 +8,6 @@ import org.apache.coyote.http11.request.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ServletContainer {
-
 	private final Map<Path, Servlet> servlets;
 
 	public ServletContainer() {

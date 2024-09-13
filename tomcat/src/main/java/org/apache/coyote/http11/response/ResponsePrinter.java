@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class ResponsePrinter {
-
 	private final OutputStream outputStream;
 
 	public ResponsePrinter(OutputStream outputStream) {

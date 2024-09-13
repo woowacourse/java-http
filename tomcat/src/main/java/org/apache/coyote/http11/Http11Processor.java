@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.ApplicationException;
+import com.techcourse.exception.StaticResourceNotFoundException;
+import com.techcourse.view.ResponseBuilder;
+import com.techcourse.view.ViewResolver;
 import java.io.IOException;
 import java.net.Socket;
-import org.apache.catalina.controller.AbstractController;
-import com.techcourse.exception.ApplicationException;
+import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.HandlerMapping;
-import com.techcourse.view.ViewResolver;
-import org.apache.catalina.exception.ControllerException;
+import org.apache.catalina.exception.TomcatException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.HttpConnectorException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -22,6 +24,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final HttpRequestReceiver httpRequestReceiver = new HttpRequestReceiver();
     private final HandlerMapping handlerMapping = new HandlerMapping();
+    private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ViewResolver viewResolver = new ViewResolver();
 
     public Http11Processor(final Socket connection) {
@@ -40,32 +43,36 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = httpRequestReceiver.receiveRequest(inputStream);
-            HttpResponse response = getResponse(request);
+            String response = processResponse(request);
 
-            outputStream.write(response.toString().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e, this);
-        } catch (HttpConnectorException e) {
-            // todo: 500 error page
-            log.error(e.getMessage(), e, this);
-        } catch (ControllerException e) {
-            // todo: map to proper error page
-            log.error(e.getMessage(), e, this);
-        } catch (ApplicationException e) {
-            // todo: map to proper error page
+        } catch (IOException | HttpConnectorException e) {
             log.error(e.getMessage(), e, this);
         }
     }
 
-    private HttpResponse getResponse(HttpRequest request) throws IOException, ApplicationException {
-        AbstractController controller = handlerMapping.getController(request);
+    private String processResponse(HttpRequest request) throws IOException, ApplicationException {
+        try {
+            return processApplicationResponse(request).toString();
+        } catch (TomcatException e) {
+            return responseBuilder.buildExceptionResponse(e);
+        }
+    }
+
+    private HttpResponse processApplicationResponse(HttpRequest request) throws IOException {
+        HttpResponse response = new HttpResponse();
+        HttpResponse staticResourceResponse = viewResolver.resolve(request, new HttpResponse());
+        if (staticResourceResponse != null) {
+            return staticResourceResponse;
+        }
+
+        Controller controller = handlerMapping.getController(request);
         if (controller != null) {
-            HttpResponse response = new HttpResponse();
             controller.service(request, response);
             return response;
         }
 
-        return viewResolver.resolve(request, new HttpResponse());
+        throw new StaticResourceNotFoundException();
     }
 }

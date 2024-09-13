@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.catalina.controller.Controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -26,6 +27,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.request.RequestMapping;
 import org.apache.coyote.http11.response.MimeTypes;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
@@ -53,6 +56,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -66,16 +70,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
              final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
              final BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            HttpRequest httpRequest = readHttpRequest(reader);
-            HttpResponse httpResponse = HttpResponse.defaultResponse();
+            HttpRequest request = readHttpRequest(reader);
+            HttpResponse response = HttpResponse.defaultResponse();
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
             HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStreamWriter);
-
-            if (httpRequest.getMethod().equals(GET)) {
-                doGet(httpRequest, httpResponse, httpResponseWriter);
-            }
-            if (httpRequest.getMethod().equals(POST)) {
-                doPost(httpRequest, httpResponse, httpResponseWriter);
-            }
+            httpResponseWriter.writeResponse(response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -106,117 +106,5 @@ public class Http11Processor implements Runnable, Processor {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    private void doGet(
-            HttpRequest request,
-            HttpResponse response,
-            HttpResponseWriter writer
-    ) throws IOException {
-        if (request.getPath().equals("/")) {
-            response.addHeader("Content-Length", Integer.toString("Hello world!".length()));
-            response.addHeader("Content-Type", "text/html;charset=utf-8");
-            response.setResponseBody("Hello world!");
-            writeHttpResponse(response, writer);
-            return;
-        }
-        determineGetResponse(request, response, request.getRequestHeader());
-
-        writeHttpResponse(response, writer);
-    }
-
-    private void determineGetResponse(HttpRequest request, HttpResponse response, Map<String, String> requestHeaders)
-            throws IOException {
-        String path = "static" + request.getPath();
-
-        if (path.equals("/login") && isAlreadyLogin(requestHeaders)) {
-            redirect(request, response, "index.html");
-            return;
-        }
-        if (!path.contains(".")) {
-            path = path + ".html";
-        }
-        URL resource = getClass().getClassLoader().getResource(path);
-        File file = new File(resource.getPath());
-        var responseBody = Files.readString(file.toPath());
-        String contentType = Files.probeContentType(file.toPath());
-        response.addHeader("Content-Length", Long.toString(file.length()));
-        response.addHeader("Content-Type", MimeTypes.getMimeTypes(contentType));
-        response.setResponseBody(responseBody);
-    }
-
-    private void redirect(HttpRequest request, HttpResponse response, String path) {
-        response.setStatusLine(request.getVersion(), FOUND);
-        response.addHeader("Location", path);
-    }
-
-    private void doPost(HttpRequest request, HttpResponse response, HttpResponseWriter writer) throws IOException {
-        determinePostResponse(request, response);
-        writeHttpResponse(response, writer);
-    }
-
-    private void determinePostResponse(HttpRequest request, HttpResponse response) throws IOException {
-        if (request.getPath().equals("/login")) {
-            doLogin(request, response);
-        }
-        if (request.getPath().equals("/register")) {
-            doRegister(request, response);
-        }
-    }
-
-    private void doLogin(HttpRequest request, HttpResponse response) throws IOException {
-        Map<String, String> requestBody = request.getRequestBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        if (!user.checkPassword(password)) {
-            redirect(request, response, "/401.html");
-            return;
-        }
-        log.info(user.toString());
-        redirect(request, response, "/index.html");
-
-        String sessionId = UUID.randomUUID().toString();
-        createSession(user, createCookie(JSESSIONID, sessionId));
-        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-    }
-
-    private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
-        if (requestHeaders.containsKey(COOKIE)) {
-            String sessionId = requestHeaders.get(COOKIE).split(ASSIGN_OPERATOR)[1];
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session session = sessionManager.findSession(sessionId);
-            return session != null;
-        }
-        return false;
-    }
-
-    private Cookie createCookie(String name, String value) {
-        Cookie cookie = new Cookie();
-        cookie.setCookie(name, value);
-        return cookie;
-    }
-
-    private void createSession(User user, Cookie cookie) {
-        Map<String, String> cookies = cookie.getCookies();
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = new Session(cookies.get(JSESSIONID));
-        sessionManager.add(session);
-        session.setAttribute("user", user);
-    }
-
-    private void doRegister(HttpRequest request, HttpResponse response) throws IOException {
-        redirect(request, response, "/index.html");
-        User user = createUser(request.getRequestBody());
-        InMemoryUserRepository.save(user);
-    }
-
-    private User createUser(Map<String, String> requestBody) {
-        return new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
-    }
-
-    private void writeHttpResponse(HttpResponse response, HttpResponseWriter writer) throws IOException {
-        writer.writeResponse(response);
     }
 }

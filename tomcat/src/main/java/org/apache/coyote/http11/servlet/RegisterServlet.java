@@ -22,9 +22,11 @@ public class RegisterServlet extends AbstractServlet {
 		String mail = properties.get("mail");
 		String password = properties.get("password");
 
-		User user = new User(account, mail, password);
-		InMemoryUserRepository.save(user);
-
+		if(InMemoryUserRepository.findByAccount(account).isEmpty()) {
+			User user = new User(account, mail, password);
+			InMemoryUserRepository.save(user);
+		}
+		
 		response.setRequestLine("HTTP/1.1", HttpStatusCode.REDIRECT);
 		response.setHeaders(Map.of("Location", "http://localhost:8080/index.html"));
 	}

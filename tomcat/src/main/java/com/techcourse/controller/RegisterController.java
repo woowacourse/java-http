@@ -25,6 +25,15 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        register(request);
+
+        String path = DEFAULT_PATH + INDEX_HTML;
+
+        response.setStatusLine(HttpStatus.OK);
+        response.setStaticBody(path);
+    }
+
+    private void register(HttpRequest request) {
         Map<String, String> keyValueBodies = request.getKeyValueBodies();
 
         String account = keyValueBodies.get(ACCOUNT);
@@ -32,11 +41,6 @@ public class RegisterController extends AbstractController {
         String email = keyValueBodies.get(EMAIL);
 
         userService.registerUser(account, password, email);
-
-        String path = DEFAULT_PATH + INDEX_HTML;
-
-        response.setStatusLine(HttpStatus.OK);
-        response.setStaticBody(path);
     }
 
     @Override

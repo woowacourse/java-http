@@ -1,20 +1,21 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.invoke.StringConcatFactory;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class StaticResourceHandlerTest {
+
+    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of());
+    private final FrontController controller = new FrontController(handlerMapping);
 
     @Test
     @DisplayName("GET '/index,html' 요청에 대한 응답이 정상적으로 처리된다.")
@@ -28,7 +29,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -46,7 +47,7 @@ class StaticResourceHandlerTest {
 
     @Test
     @DisplayName("GET '/index' 요청에 대한 응답은 처리되지 않고, '/404.html'로 리다이렉트한다.")
-    void index_redirect() {
+    void index_redirect() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /index HTTP/1.1 ",
@@ -56,18 +57,20 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
 
         // then
+        URL resource = getClass().getClassLoader().getResource("static/404.html");
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /404.html ",
-                "Content-Length: 0 ",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 2426 ",
                 "",
-                "");
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())
+                ));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -84,7 +87,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -112,7 +115,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -140,7 +143,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -153,7 +156,7 @@ class StaticResourceHandlerTest {
                 "Content-Length: 976 ",
                 "",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())
-        ));
+                ));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -170,7 +173,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -198,7 +201,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -226,7 +229,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -254,7 +257,7 @@ class StaticResourceHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);

@@ -13,15 +13,15 @@ public class RequestBody {
     }
 
     public static RequestBody from(String requestBody) {
+        if (requestBody == null || requestBody.isBlank()) {
+            return new RequestBody(Map.of());
+        }
+
         Map<String, String> body = Arrays.stream(requestBody.split("&"))
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(param -> param[0], param -> param[1]));
 
         return new RequestBody(body);
-    }
-
-    public static RequestBody empty() {
-        return new RequestBody(Map.of());
     }
 
     public Map<String, String> getParams() {

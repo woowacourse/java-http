@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +11,6 @@ public class Session {
 
     public Session() {
         this.id = UUID.randomUUID().toString();
-    }
-
-    public Session(String id) {
-        this.id = id;
     }
 
     public String getId() {

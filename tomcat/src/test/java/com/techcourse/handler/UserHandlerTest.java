@@ -1,17 +1,23 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class UserHandlerTest {
+
+    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of(
+            "/user", new UserHandler()
+    ));
+    private final FrontController controller = new FrontController(handlerMapping);
 
     @Test
     @DisplayName("GET '/user' 요청 시 비 로그인 상태일 경우 로그인 요청 메세지를 응답한다.")
@@ -25,7 +31,7 @@ class UserHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);
@@ -60,7 +66,7 @@ class UserHandlerTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(controller, socket);
 
         // when
         processor.process(socket);

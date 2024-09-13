@@ -1,14 +1,14 @@
-package com.techcourse.handler;
+package org.apache.catalina;
 
 import java.io.IOException;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class AbstractRequestHandler implements RequestHandler {
+public abstract class AbstractController implements Controller {
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         if (request.isSameMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;

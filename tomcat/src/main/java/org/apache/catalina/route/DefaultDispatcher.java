@@ -25,6 +25,10 @@ public class DefaultDispatcher implements Dispatcher {
         this(requestMapping, null, null);
     }
 
+    public DefaultDispatcher() {
+        this(new RequestMapper());
+    }
+
     @Override
     public void dispatch(HttpRequest request, HttpResponse response) {
         try {

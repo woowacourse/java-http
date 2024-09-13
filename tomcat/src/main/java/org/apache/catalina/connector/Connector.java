@@ -9,7 +9,7 @@ import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Connector implements Runnable {
+public class Connector {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
@@ -17,15 +17,13 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final Dispatcher dispatcher;
     private boolean stopped;
 
-    public Connector(Dispatcher dispatcher) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, dispatcher);
+    public Connector() {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(int port, int acceptCount, Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public Connector(int port, int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -40,35 +38,34 @@ public class Connector implements Runnable {
         }
     }
 
-    public void start() {
-        var thread = new Thread(this);
+    public void start(Dispatcher dispatcher) {
+        Thread thread = new Thread(() -> run(dispatcher));
         thread.setDaemon(true);
         thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
-    @Override
-    public void run() {
+    public void run(Dispatcher dispatcher) {
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
-            connect();
+            connect(dispatcher);
         }
     }
 
-    private void connect() {
+    private void connect(Dispatcher dispatcher) {
         try {
-            process(serverSocket.accept());
+            process(serverSocket.accept(), dispatcher);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(Socket connection) {
+    private void process(Socket connection, Dispatcher dispatcher) {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, dispatcher);
+        Http11Processor processor = new Http11Processor(connection, dispatcher);
         Thread thread = new Thread(processor);
         log.info("new thread created: {}", thread.threadId());
         thread.start();

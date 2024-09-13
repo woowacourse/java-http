@@ -69,6 +69,9 @@ public class Request {
                 session.access();
                 return session;
             }
+            if (session != null && !session.isValid()) {
+                MANAGER.remove(session);
+            }
         } catch (IOException e) {
             log.info("세션을 찾는 데 실패했습니다 id: {}", sessionId, e);
         }

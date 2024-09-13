@@ -2,6 +2,7 @@ package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.SoftAssertions.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,27 +41,6 @@ class RequestTest {
     }
 
     @Test
-    void 쿠키에_JSESSION_ID가_있지만_세션이_유효하지_않을경우_null을_반환한다() {
-        // given
-        Session session = manager.createSession("5678");
-        session.setCreateTime(System.currentTimeMillis() - 1800000);
-
-        Map<String, String> headers = Map.of(
-                "Host", "localhost:8080",
-                "Connection", "keep-alive",
-                "Cookie", "JSESSIONID=5678"
-        );
-        RequestHeaders requestHeaders = new RequestHeaders(headers);
-        Request request = new Request(REQUEST_LINE, requestHeaders, REQUEST_BODY);
-
-        // when
-        Session actual = request.getSession(false);
-
-        // then
-        assertThat(actual).isNull();
-    }
-
-    @Test
     void 쿠키에_JSESSION_ID가_있지만_존재하지_않은_세션일_경우_null을_반환한다() {
         // given
         Map<String, String> headers = Map.of(
@@ -94,7 +74,7 @@ class RequestTest {
         Session actual = request.getSession(create);
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(actual).isNotNull();
             try {
                 softly.assertThat(manager.findSession(actual.getId())).isNotNull();

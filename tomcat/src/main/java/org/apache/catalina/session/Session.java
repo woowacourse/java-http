@@ -2,7 +2,6 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
 
 public class Session {
 
@@ -12,23 +11,24 @@ public class Session {
 
     private final Map<String, Object> attributes;
 
-    private final Manager manager;
-
     private final int maxInactiveInterval;
 
-    private long createTime;
+    private final long createdTime;
 
     private long lastAccessedTime;
 
-    protected Session(String id, Manager manager) {
+    private boolean expired;
+
+    protected Session(String id, long createdTime) {
         this.id = id;
         this.attributes = new HashMap<>();
-        this.manager = manager;
-        this.manager.add(this);
+        this.createdTime = createdTime;
+        this.lastAccessedTime = createdTime;
         this.maxInactiveInterval = DEFAULT_MAX_INACTIVE_INTERVAL_SECOND;
     }
 
     public void setAttribute(String name, Object value) {
+        validateNotExpired();
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Attribute의 이름은 필수입니다.");
         }
@@ -36,19 +36,23 @@ public class Session {
     }
 
     public Object getAttribute(String name) {
+        validateNotExpired();
         return attributes.get(name);
     }
 
     public void removeAttribute(String name) {
+        validateNotExpired();
         attributes.remove(name);
     }
 
     public boolean isValid() {
-        if (getIdleSecond() >= maxInactiveInterval) {
-            expire();
+        if (expired) {
             return false;
         }
-        return true;
+        if (getIdleSecond() >= maxInactiveInterval) {
+            expire();
+        }
+        return !expired;
     }
 
     private int getIdleSecond() {
@@ -57,20 +61,24 @@ public class Session {
         return (int) idleTime / 1000;
     }
 
-    private void expire() {
-        manager.remove(this);
+    public void expire() {
+        this.expired = true;
+        attributes.clear();
     }
 
     public void access() {
+        validateNotExpired();
         this.lastAccessedTime = System.currentTimeMillis();
     }
 
     public String getId() {
+        validateNotExpired();
         return id;
     }
 
-    public void setCreateTime(long time) {
-        this.createTime = time;
-        this.lastAccessedTime = time;
+    private void validateNotExpired() {
+        if (!isValid()) {
+            throw new IllegalStateException("만료된 세션입니다.");
+        }
     }
 }

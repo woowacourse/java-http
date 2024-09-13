@@ -9,25 +9,21 @@ import org.junit.jupiter.api.Test;
 class SessionTest {
 
     @Test
-    void Session_객체를_생성하면_manager에_저장한다() {
+    void Session_객체를_생성한다() {
         // given
         String id = "1";
-        SessionManager manager = SessionManager.getInstance();
 
         // when
-        Session session = new Session(id, manager);
+        Session session = new Session(id, System.currentTimeMillis());
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(session.getId()).isEqualTo(id);
-            softly.assertThat(manager.findSession(id)).isEqualTo(session);
-        });
+        assertThat(session.getId()).isEqualTo(id);
     }
 
     @Test
     void attribute를_추가한다() {
         // given
-        Session session = new Session("1", SessionManager.getInstance());
+        Session session = new Session("1", System.currentTimeMillis());
 
         // when
         session.setAttribute("name", "prin");
@@ -39,7 +35,7 @@ class SessionTest {
     @Test
     void attribute의_name이_비어있으면_추가할_때_예외가_발생한다() {
         // given
-        Session session = new Session("1", SessionManager.getInstance());
+        Session session = new Session("1", System.currentTimeMillis());
 
         // when & then
         assertThatThrownBy(() -> session.setAttribute(null, "prin"))
@@ -50,10 +46,8 @@ class SessionTest {
     @Test
     void 만료되지_않은_유효한_세션이면_true를_반환한다() {
         // given
-        Session session = new Session("1", SessionManager.getInstance());
-
-        long now = System.currentTimeMillis();
-        session.setCreateTime(now - 1799999);
+        long createdTime = System.currentTimeMillis() - 1799999;
+        Session session = new Session("1", createdTime);
 
         // when
         boolean isValid = session.isValid();
@@ -63,22 +57,15 @@ class SessionTest {
     }
 
     @Test
-    void 만료된_유효하지_않은_세션이면_manager에서_삭제하고_false를_반환한다() {
+    void 만료된_유효하지_않은_세션이면_false를_반환한다() {
         // given
-        String id = "1";
-        SessionManager manager = SessionManager.getInstance();
-        Session session = new Session(id, manager);
-
-        long now = System.currentTimeMillis();
-        session.setCreateTime(now - 1800000);
+        long createdTime = System.currentTimeMillis() - 1800000;
+        Session session = new Session("1", createdTime);
 
         // when
         boolean isValid = session.isValid();
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(isValid).isFalse();
-            softly.assertThat(manager.findSession(id)).isNull();
-        });
+        assertThat(isValid).isFalse();
     }
 }

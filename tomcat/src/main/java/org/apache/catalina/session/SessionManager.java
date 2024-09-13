@@ -38,6 +38,10 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(Session session) {
+        if (session == null) {
+            return;
+        }
+        session.expire();
         SESSIONS.remove(session.getId());
     }
 
@@ -46,8 +50,9 @@ public class SessionManager implements Manager {
         if (sessionId == null) {
             sessionId = idGenerator.generate();
         }
-        Session session = new Session(sessionId, this);
-        session.setCreateTime(System.currentTimeMillis());
+        long createdTime = System.currentTimeMillis();
+        Session session = new Session(sessionId, createdTime);
+        add(session);
         return session;
     }
 

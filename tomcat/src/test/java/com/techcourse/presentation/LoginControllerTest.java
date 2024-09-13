@@ -2,6 +2,7 @@ package com.techcourse.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.techcourse.model.User;
 import java.io.IOException;
@@ -14,7 +15,6 @@ import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import support.FixedIdGenerator;
 
@@ -129,7 +129,7 @@ class LoginControllerTest {
         loginController.postLogin(request, response);
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(response.getViewName()).isEqualTo("/index");
             try {
                 softly.assertThat(manager.findSession(FixedIdGenerator.FIXED_ID)).isNotNull();

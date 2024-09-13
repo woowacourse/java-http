@@ -1,14 +1,14 @@
 package com.techcourse.db;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.techcourse.model.User;
 
 public class InMemoryUserRepository {
 
-    private static final Map<String, User> database = new HashMap<>();
+    private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
         final var user = new User(1L, "gugu", "password", "hkkang@woowahan.com");

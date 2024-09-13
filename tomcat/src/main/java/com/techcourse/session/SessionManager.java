@@ -1,8 +1,8 @@
 package com.techcourse.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -14,7 +14,7 @@ public class SessionManager implements Manager {
     private static final SessionManager instance;
 
     static {
-        sessions = new HashMap<>();
+        sessions = new ConcurrentHashMap<>();
         instance = new SessionManager();
     }
 

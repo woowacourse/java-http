@@ -17,7 +17,7 @@ public class FormUrlEncodeBody implements Body {
         this.content = Stream.of(plaintext.split(PARAMETER_DELIMITER))
                 .map(param -> List.of(param.split(KEY_VALUE_DELIMITER)))
                 .filter(param -> param.size() == 2)
-                .collect(Collectors.toMap(List::getFirst, param -> param.get(1)));
+                .collect(Collectors.toConcurrentMap(List::getFirst, param -> param.get(1)));
     }
 
     @Override

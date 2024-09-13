@@ -3,10 +3,10 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 # 최대 대기 요청 수
+    max-connections: 10 # 최대 커넥션 수
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 1 # 최소 대기 스레드 수
+      max: 10 # 최대 스레드 수
   compression:
     enabled: true

@@ -54,7 +54,7 @@ public class Http11Request {
         StringBuilder headerSb = new StringBuilder();
         String headerLine;
         while (!Objects.equals(headerLine = br.readLine(), "")) {
-            headerSb.append(headerLine).append(System.lineSeparator());
+            headerSb.append(headerLine).append("\r\n");
         }
         return Http11RequestHeaders.from(headerSb.toString());
     }

@@ -13,13 +13,13 @@ public class Http11RequestHeadersTest {
     @Test
     @DisplayName("HttpRequest 헤더를 파싱해 생성할 수 있다.")
     void from() {
-        String requestHeaders = """
-                cache-control: no-cache, private
-                connection: keep-alive
-                content-type: text/html; charset=UTF-8
-                date: Thu, 12 Sep 2024 07:59:42 GMT
-                server: nginx
-                """;
+        String requestHeaders =
+                "cache-control: no-cache, private" + "\r\n" +
+                "connection: keep-alive" + "\r\n" +
+                "content-type: text/html; charset=UTF-8" + "\r\n" +
+                "date: Thu, 12 Sep 2024 07:59:42 GMT" + "\r\n" +
+                "server: nginx"
+                ;
 
         Http11RequestHeaders headers = Http11RequestHeaders.from(requestHeaders);
         assertAll(() -> {

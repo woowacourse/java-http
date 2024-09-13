@@ -8,6 +8,7 @@ public enum ProtocolVersion {
     HTTP2("HTTP/2.0"),
     ;
 
+    private static final ProtocolVersion DEFAULT_VERSION = HTTP11;
     private final String value;
 
     ProtocolVersion(String value) {
@@ -18,7 +19,7 @@ public enum ProtocolVersion {
         return Arrays.stream(values())
                 .filter(version -> version.value.equals(value))
                 .findAny()
-                .orElse(null);
+                .orElse(DEFAULT_VERSION);
     }
 
     public String getValue() {

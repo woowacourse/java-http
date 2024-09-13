@@ -29,8 +29,8 @@ public class RegisterResolver extends HttpRequestResolver {
             throw new IllegalArgumentException("duplicated user name");
         }
 
-        Session newSession = new Session(UUID.randomUUID().toString());
-        newSession.setAttribute("JESSIONID", UUID.randomUUID().toString());
+        Session newSession = new Session(payload.get("account"));
+        newSession.setAttribute("JSESSIONID", UUID.randomUUID().toString());
         sessionManager.add(newSession);
 
         InMemoryUserRepository.save(
@@ -39,6 +39,6 @@ public class RegisterResolver extends HttpRequestResolver {
 
         response.setStatus(HttpStatus.FOUND);
         response.addHeader("Location", "/index.html");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + newSession.getId());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + newSession.getAttribute("JSESSIONID"));
     }
 }

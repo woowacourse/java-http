@@ -28,7 +28,6 @@ public class HttpRequestLine {
             }
         }
     }
-
     public static HttpRequestLine from(List<String> clientData) {
         try {
             String requestLine = clientData.getFirst();

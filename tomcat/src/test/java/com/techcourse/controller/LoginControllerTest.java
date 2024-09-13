@@ -167,9 +167,9 @@ class LoginControllerTest {
             User user = new User("kyum", "password", "kyum@naver.com");
             InMemoryUserRepository.save(user);
             HttpRequest request = new HttpRequest(
-                    new RequestLine("POST /login?account=kyum&password=password HTTP/1.1"),
+                    new RequestLine("POST /login HTTP/1.1"),
                     new RequestHeader(),
-                    new RequestBody()
+                    new RequestBody(Map.of("account", "kyum", "password", "password"))
             );
             HttpResponse response = HttpResponse.of(request);
 
@@ -194,9 +194,9 @@ class LoginControllerTest {
         @DisplayName("실패 : login 시도 실패 시 예외 발생")
         void doPostFail() {
             HttpRequest request = new HttpRequest(
-                    new RequestLine("POST /login?account=kyummi&password=password HTTP/1.1"),
+                    new RequestLine("POST /login HTTP/1.1"),
                     new RequestHeader(),
-                    new RequestBody()
+                    new RequestBody(Map.of("account", "kyummi", "password", "password"))
             );
             HttpResponse response = HttpResponse.of(request);
             LoginController loginController = new LoginController();

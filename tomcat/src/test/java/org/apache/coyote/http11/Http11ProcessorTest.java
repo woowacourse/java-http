@@ -173,15 +173,17 @@ class Http11ProcessorTest {
     class login {
 
         @ParameterizedTest
-        @ValueSource(strings = {"/login?account=gugu&password=11", "/login?account=11&password=password"})
+        @ValueSource(strings = {"account=gugu&password=11", "account=11&password=password"})
         @DisplayName("실패 : 아이디 혹은 비밀번호 오류로 로그인 실패 시 401 페이지 로드")
-        void loginFailByPassword(String url) throws IOException {
+        void loginFailByPassword(String body) throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
-                    "POST " + url + " HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "");
+                    "Content-Length: " + body.getBytes().length,
+                    "",
+                    body);
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
@@ -205,11 +207,14 @@ class Http11ProcessorTest {
         @DisplayName("성공 : 로그인 성공으로 index.html로 리다이렉션")
         void loginSuccess() throws IOException {
             // given
+            String body = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
-                    "POST /login?account=gugu&password=password HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "");
+                    "Content-Length: " + body.getBytes().length,
+                    "",
+                    body);
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

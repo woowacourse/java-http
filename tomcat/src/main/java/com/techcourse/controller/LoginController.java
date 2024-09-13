@@ -50,11 +50,11 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> queryParams = request.getQueryParam();
-        if (hasMissingRequiredParams(queryParams)) {
-            throw new IllegalArgumentException("파라미터가 제대로 정의되지 않았습니다.");
+        Map<String, String> body = request.getBody();
+        if (hasMissingRequiredParams(body)) {
+            throw new IllegalArgumentException("바디가 제대로 정의되지 않았습니다.");
         }
-        User user = loginService.login(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
+        User user = loginService.login(body.get(ACCOUNT), body.get(PASSWORD));
         loginAndSetResponse(response, user);
     }
 

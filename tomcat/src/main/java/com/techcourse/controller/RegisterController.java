@@ -18,9 +18,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        response.redirect(request.getVersion(), "/index.html");
         User user = createUser(request.getRequestBody());
         InMemoryUserRepository.save(user);
+        response.redirect(request.getVersion(), "/index.html");
     }
 
     private User createUser(Map<String, String> requestBody) {

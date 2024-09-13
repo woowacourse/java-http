@@ -43,6 +43,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
+        User user = getUser(request, response);
+        if (user == null) {
+            return;
+        }
+        String sessionId = UUID.randomUUID().toString();
+        createSession(user, createCookie(JSESSIONID, sessionId));
+        response.addHeader(SET_COOKIE.getHeaderName(), String.format("%s=%s", JSESSIONID, sessionId));
+        response.redirect(request.getVersion(), "/index.html");
+    }
+
+    private static User getUser(HttpRequest request, HttpResponse response) {
         Map<String, String> requestBody = request.getRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
@@ -50,13 +61,9 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
             response.redirect(request.getVersion(), "/401.html");
-            return;
+            return null;
         }
-        response.redirect(request.getVersion(), "/index.html");
-
-        String sessionId = UUID.randomUUID().toString();
-        createSession(user, createCookie(JSESSIONID, sessionId));
-        response.addHeader(SET_COOKIE.getHeaderName(), String.format("%s=%s", JSESSIONID, sessionId));
+        return user;
     }
 
     private Cookie createCookie(String name, String value) {

@@ -47,6 +47,12 @@ public class HttpResponse {
         setResponseBody(FILE_READER.read(UNAUTHORIZED_FILENAME));
     }
 
+    public void setNotFound() {
+        httpStatusCode = HttpStatusCode.NOT_FOUND;
+        setContentType(ContentType.fromFileName(NOT_FOUND_FILENAME));
+        setResponseBody(FILE_READER.read(NOT_FOUND_FILENAME));
+    }
+
     public void setStaticResource(String fileName) {
         try {
             httpStatusCode = HttpStatusCode.OK;

@@ -10,19 +10,22 @@ public class DefaultController extends AbstractController {
     private static final String ROOT_PATH = "/";
     private static final String INDEX_PATH = "/index.html";
     private static final String PERIOD = ".";
-    private static final String HTML_SUFFIX = ".html";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
-
         if (path.equals(ROOT_PATH)) {
             response.setRedirect(INDEX_PATH);
             return;
         }
 
         String fileName = parseFileName(path);
-        response.setStaticResource(fileName);
+        if (fileName.contains(PERIOD)) {
+            response.setStaticResource(fileName);
+            return;
+        }
+
+        response.setNotFound();
     }
 
     private String parseFileName(String path) {
@@ -30,11 +33,6 @@ public class DefaultController extends AbstractController {
             throw new CatalinaException("요청 URI는 %s로 시작해야 합니다.".formatted(PATH_PREFIX));
         }
 
-        String fileName = path.substring(path.indexOf(PATH_PREFIX) + PATH_PREFIX.length());
-        if (!fileName.contains(PERIOD)) {
-            fileName += HTML_SUFFIX;
-        }
-
-        return fileName;
+        return path.substring(path.indexOf(PATH_PREFIX) + PATH_PREFIX.length());
     }
 }

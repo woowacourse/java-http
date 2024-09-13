@@ -17,14 +17,14 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws ApplicationException {
-        handleControllerNoMatched(response);
+        handleControllerNoMatched();
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws ApplicationException {
-        handleControllerNoMatched(response);
+        handleControllerNoMatched();
     }
 
-    final void handleControllerNoMatched(HttpResponse response) {
+    final void handleControllerNoMatched() {
         throw new ControllerNotMatchedException();
     }
 }

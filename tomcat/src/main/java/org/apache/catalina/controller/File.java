@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class File {
+
+    private static final String TEXT_PREFIX = "text/";
     private static final String RESOURCE_PREFIX = "static/";
     private static final String HTML_SUFFIX = ".html";
     private static final String CONTENT_TYPE_SUFFIX = ";charset=utf-8";
@@ -44,13 +46,21 @@ public class File {
         Path resourceFilePath = resourceFile.toPath();
 
         try {
-            String contentType = Files.probeContentType(resourceFilePath) + CONTENT_TYPE_SUFFIX;
+            String contentType = getContentType(resourceFilePath);
             String responseBody = new String(Files.readAllBytes(resourceFilePath));
             return new File(contentType, responseBody);
         } catch (IOException e) {
             log.error("파일 읽기 실패: {}", requestPath);
             throw new FileException("파일 정보를 읽지 못했습니다.");
         }
+    }
+
+    private static String getContentType(Path filePath) throws IOException {
+        String contentType = Files.probeContentType(filePath);
+        if (contentType.startsWith(TEXT_PREFIX)) {
+            return contentType + CONTENT_TYPE_SUFFIX;
+        }
+        return contentType;
     }
 
     public void addToResponse(HttpResponse response) {

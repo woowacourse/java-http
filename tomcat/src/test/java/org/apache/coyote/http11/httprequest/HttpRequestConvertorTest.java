@@ -73,6 +73,26 @@ class HttpRequestConvertorTest {
         );
     }
 
+    @DisplayName("들어온 요청에 RequestBody가 없을 경우 RequestBody를 생성하지 않는다")
+    @Test
+    void notExistRequestBody() {
+        final String request = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "");
+        HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
+
+        assertAll(
+                () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(httpRequest.getPath()).isEqualTo("/login"),
+                () -> assertThat(httpRequest.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpRequest.getHeaderValue("Host")).isEqualTo("localhost:8080"),
+                () -> assertThat(httpRequest.getHeaderValue("Connection")).isEqualTo("keep-alive"),
+                () -> assertThat(httpRequest.getHttpRequestBody()).isNull()
+        );
+    }
+
     @DisplayName("SessionManager에 저장된 세션이 쿠키로 들어오면 해당 세션을 불러온다")
     @Test
     void loadSession() {

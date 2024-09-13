@@ -28,7 +28,7 @@ class HttpMethodTest {
         String method = "WRONG";
 
         // when & then
-        assertThatThrownBy(() ->  HttpMethod.of(method))
+        assertThatThrownBy(() -> HttpMethod.of(method))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

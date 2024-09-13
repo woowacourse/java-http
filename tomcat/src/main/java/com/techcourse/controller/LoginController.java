@@ -58,18 +58,9 @@ public class LoginController extends AbstractController {
     }
 
     private Session getSession(HttpRequest request, User user) throws IOException {
-        Session session = sessionManager.findSession(request)
-                .orElse(sessionManager.getByAttribute(SESSION_ATTRIBUTE, user).orElse(null));
-        if (Objects.nonNull(session)) {
-            session = getOrInvalidateSession(user, session);
-        }
-        return session;
-    }
-
-    private static Session getOrInvalidateSession(User user, Session session) {
-        if (isInvalidSession(user, session)) {
+        Session session = sessionManager.findSession(request).orElse(null);
+        if (Objects.nonNull(session) & isInvalidSession(user, session)) {
             sessionManager.remove(session);
-            return null;
         }
         return session;
     }

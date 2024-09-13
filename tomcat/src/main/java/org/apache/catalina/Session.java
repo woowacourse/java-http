@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class Session {
@@ -28,9 +27,5 @@ public class Session {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
-    }
-
-    public boolean hasAttribute(String name, Object value) {
-        return Objects.nonNull(values.get(name)) && values.get(name).equals(value);
     }
 }

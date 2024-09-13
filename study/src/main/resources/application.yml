@@ -4,3 +4,9 @@ server:
   compression:
     enabled: true
     min-response-size: 10
+  tomcat:
+    accept-count: 10
+    max-connections: 10
+    threads:
+      max: 2
+      min-spare: 2

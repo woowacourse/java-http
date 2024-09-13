@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +14,7 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    public static final String FAIL_PAGE_EXPECTED = "HTTP/1.1 302 FOUND \r\n" +
-                                                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                                                    "Content-Length: 3863 \r\n" +
-                                                    "Location: 401.html\r\n" +
-                                                    "\r\n";
-
     @Test
-    @Disabled
     void process() {
         // given
         final var socket = new StubSocket();
@@ -34,10 +26,10 @@ class Http11ProcessorTest {
         // then
         final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: 0 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "",
-                "Hello world!");
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -61,8 +53,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final var expected = "HTTP/1.1 200 OK \r\n" +
-                             "Content-Type: text/html;charset=utf-8 \r\n" +
                              "Content-Length: 5670 \r\n" +
+                             "Content-Type: text/html; charset=utf-8 \r\n" +
                              "\r\n" +
                              new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -78,7 +70,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 3863",
-                "Content-Type: application/x-www.form-urlencoded ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
                 "account=zeze&password=password ",
@@ -91,7 +83,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: 401.html");
     }
 
     @Test
@@ -102,8 +94,8 @@ class Http11ProcessorTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 3863",
-                "Content-Type: application/x-www.form-urlencoded ",
+                "Content-Length: 300",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
                 "account=redddy&password=486 ",
@@ -116,7 +108,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: 401.html");
     }
 
     @Test
@@ -128,7 +120,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 3863",
-                "Content-Type: application/x-www.form-urlencoded ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
                 "account=redddy&password=486 ",

@@ -50,3 +50,7 @@
 - [x] HttpResponse 구현하기
 - [x] Controller 인터페이스 추가하기
   - [x] 컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들기
+
+### 4단계 동시성 확장하기
+- [ ] Executors로 Thread Pool 적용
+- [ ] 동시성 컬렉션 사용하기 - Session 컬렉션에 동시성 컬렉션 적용

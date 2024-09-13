@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Map;
@@ -33,25 +32,14 @@ class SeparatorTest {
         assertThat(result).containsEntry("key1", "value1=hello");
     }
 
-    @DisplayName("입력한 텍스트에 존재하지 않는 구분자를 입력하는 경우, 예외가 발생한다.")
+    @DisplayName("입력된 구분자를 기준으로 key-value 쌍으로 나눌 수 없는 경우, 결과에 포함되지 않는다.")
     @Test
-    void separateKeyValueInvalidDelimiter() {
-        List<String> targets = List.of("key1=value1");
-        String invalidDelimiter = ":";
+    void separateKeyValueCannotSeparated() {
+        List<String> targets = List.of("key1=value1", "invalidInput");
+        String delimiter = "=";
 
-        assertThatThrownBy(() -> Separator.separateKeyValueBy(targets, invalidDelimiter))
-                .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Only Key-Value pair can be separated.");
-    }
+        Map<String, String> result = Separator.separateKeyValueBy(targets, delimiter);
 
-    @DisplayName("입력한 텍스트에 존재하지 않는 구분자를 입력하는 경우, 예외가 발생한다.")
-    @Test
-    void separateKeyValueEmptyKey() {
-        List<String> targets = List.of("=value1");
-        String invalidDelimiter = "=";
-
-        assertThatThrownBy(() -> Separator.separateKeyValueBy(targets, invalidDelimiter))
-                .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Only Key-Value pair can be separated.");
+        assertThat(result).containsExactlyEntriesOf(Map.of("key1", "value1"));
     }
 }

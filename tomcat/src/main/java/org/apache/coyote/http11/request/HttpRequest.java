@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.utils.Separator;
 
 public class HttpRequest {
@@ -36,7 +37,7 @@ public class HttpRequest {
     private static Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {
         List<String> headerLines = new ArrayList<>();
         String headerLine = bufferedReader.readLine();
-        while (headerLine != null && !headerLine.isBlank()) {
+        while (!StringUtils.isBlank(headerLine)) {
             headerLines.add(headerLine);
             headerLine = bufferedReader.readLine();
         }

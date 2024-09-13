@@ -3,6 +3,7 @@ package org.apache.coyote.http11.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class Separator {
 
@@ -14,10 +15,11 @@ public class Separator {
         Map<String, String> result = new HashMap<>();
         targets.forEach(target -> {
             String[] split = target.split(delimiter, KEY_VALUE_PAIR_SIZE);
-            if (split.length != KEY_VALUE_PAIR_SIZE || split[KEY_INDEX].isBlank() || split[VALUE_INDEX].isBlank()) {
-                throw new IllegalArgumentException("Only Key-Value pair can be separated.");
+            if (split.length == KEY_VALUE_PAIR_SIZE
+                    && !StringUtils.isBlank(split[KEY_INDEX])
+                    && !StringUtils.isBlank(split[VALUE_INDEX])) {
+                result.put(split[KEY_INDEX].trim(), split[VALUE_INDEX].trim());
             }
-            result.put(split[KEY_INDEX].trim(), split[VALUE_INDEX].trim());
         });
         return result;
     }

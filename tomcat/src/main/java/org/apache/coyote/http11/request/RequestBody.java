@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.utils.Separator;
 
 public class RequestBody {
@@ -12,10 +13,10 @@ public class RequestBody {
     private Map<String, String> parameters;
 
     public static RequestBody create(String body) {
-        if (body.isBlank()) {
+        if (StringUtils.isBlank(body)) {
             return new RequestBody(Map.of());
         }
-        
+
         List<String> parameterEntries = List.of(body.split(PARAMETER_SEPARATOR));
         Map<String, String> parameters = Separator.separateKeyValueBy(parameterEntries, KEY_VALUE_SEPARATOR);
 

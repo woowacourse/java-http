@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.utils.Separator;
 
 public class RequestLine {
@@ -33,7 +34,7 @@ public class RequestLine {
     }
 
     private static Map<String, String> parseQueryParameters(String queryString) {
-        if (queryString.isBlank()) {
+        if (StringUtils.isBlank(queryString)) {
             return Map.of();
         }
 

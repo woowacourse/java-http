@@ -18,7 +18,7 @@ public class ResponseHeaders {
     public void addContentTypeByFileExtension(String filePath) {
         MimeType mimeType = MimeType.find(filePath);
         add("Content-Type", String.format(FORMAT_OF_DEFAULT_CONTENT_TYPE, mimeType.getType()));
-    }
+    } // TODO: headerKey Enum 클래스로 관리하기
 
     public void addContentLength(int value) {
         add("Content-Length", String.valueOf(value));
@@ -26,7 +26,7 @@ public class ResponseHeaders {
 
     public void addLocation(String value) {
         add("Location", value);
-    }
+    } // TODO: 테스트 방식 고민해보기
 
     private void add(String key, String value) {
         headers.add(new ResponseHeader(key, value));

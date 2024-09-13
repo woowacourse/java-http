@@ -19,10 +19,17 @@ public enum MimeType {
     }
 
     public static MimeType find(String filePath) {
+        validateNull(filePath);
         return Arrays.stream(values())
                 .filter(value -> filePath.endsWith(value.extension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP MIME 타입입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 파일 경로입니다."));
+    }
+
+    private static void validateNull(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new IllegalArgumentException("유효하지 않은 파일 경로입니다.");
+        }
     }
 
     public String getType() {

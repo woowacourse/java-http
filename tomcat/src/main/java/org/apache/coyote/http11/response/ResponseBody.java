@@ -22,7 +22,7 @@ public class ResponseBody {
         } catch (IllegalArgumentException e) {
             this.value = EMPTY_BODY;
         }
-    }
+    } // TODO: 테스트를 위해 getValue 메서드가 필요 -> 메시지 파싱 로직을 외부로 추출?
 
     public int getLength() {
         if (value == null) {

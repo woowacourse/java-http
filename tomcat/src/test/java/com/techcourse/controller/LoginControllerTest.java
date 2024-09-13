@@ -16,7 +16,7 @@ class LoginControllerTest {
     private final LoginController controller;
 
     public LoginControllerTest() {
-        this.controller = new LoginController();
+        this.controller = LoginController.getInstance();
     }
 
     @DisplayName("login으로 GET 요청을 보내면 login.html을 200으로 응답한다")

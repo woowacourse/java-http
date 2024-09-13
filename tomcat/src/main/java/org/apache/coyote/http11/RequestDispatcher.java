@@ -9,8 +9,8 @@ public class RequestDispatcher {
     private final RegisterController registerController;
 
     public RequestDispatcher() {
-        this.loginController = new LoginController();
-        this.registerController = new RegisterController();
+        this.loginController = LoginController.getInstance();
+        this.registerController = RegisterController.getInstance();
     }
 
     public void requestMapping(HttpRequest request, HttpResponse response) {

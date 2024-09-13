@@ -15,7 +15,16 @@ public class LoginController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginController() {
+    private static LoginController instance;
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        if (instance == null) {
+            instance = new LoginController();
+        }
+        return instance;
     }
 
     @Override

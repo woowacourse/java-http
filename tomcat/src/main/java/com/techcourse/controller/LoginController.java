@@ -1,8 +1,8 @@
 package com.techcourse.controller;
 
 import com.techcourse.controller.dto.LoginRequest;
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -11,19 +11,18 @@ import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final ResponseFile loginPage = StaticResourceReader.read("/login.html");
     private static final String SESSION_KEY_USER = "user";
 
     private final SessionManager sessionManager;
+    private final UserService userService;
 
     public LoginController() {
         this.sessionManager = SessionManager.getInstance();
+        this.userService = UserService.getInstance();
     }
 
     @Override
@@ -44,16 +43,10 @@ public class LoginController extends AbstractController {
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         LoginRequest loginRequest = LoginRequest.of(request.getBody());
-        String userAccount = loginRequest.account();
-        String userPassword = loginRequest.password();
-        log.info("로그인 요청 -  id: {}, password: {}", userAccount, userPassword);
-
-        InMemoryUserRepository.findByAccount(userAccount)
-                .filter(user -> user.checkPassword(userPassword))
-                .ifPresentOrElse(
-                        user -> doLogin(request, response, user),
-                        () -> response.sendRedirect("/401.html")
-                );
+        userService.login(loginRequest).ifPresentOrElse(
+                user -> doLogin(request, response, user),
+                () -> response.sendRedirect("/401.html")
+        );
     }
 
     private void doLogin(HttpRequest request, HttpResponse response, User user) {

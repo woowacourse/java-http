@@ -1,21 +1,23 @@
 package com.techcourse.controller;
 
 import com.techcourse.controller.dto.RegisterRequest;
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final ResponseFile registerPage = StaticResourceReader.read("/register.html");
+
+    private final UserService userService;
+
+    public RegisterController() {
+        this.userService = UserService.getInstance();
+    }
 
     @Override
     public String matchedPath() {
@@ -31,14 +33,7 @@ public class RegisterController extends AbstractController {
     @Override
     public void doPost(HttpRequest httpRequest, HttpResponse response) {
         RegisterRequest registerRequest = RegisterRequest.of(httpRequest.getBody());
-        String account = registerRequest.account();
-        String password = registerRequest.password();
-        String email = registerRequest.email();
-        log.info("회원가입 요청 -  id: {}, password: {}, email: {}", account, password, email);
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-
+        userService.register(registerRequest);
         response.sendRedirect("/index.html");
     }
 }

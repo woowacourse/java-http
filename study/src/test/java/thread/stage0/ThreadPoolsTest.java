@@ -25,41 +25,58 @@ class ThreadPoolsTest {
 
     @Test
     void testNewFixedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        // corePoolSize = 2
+        // maximumPoolSize = 2
+        // keepAliveTime = 0
+
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
+        // logWithoutSleep 진행 시 queue에 쌓이지 X => 3, 0
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1; // holding tasks 저장
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        assertThat(executor.getPoolSize()).isEqualTo(expectedPoolSize);
+        assertThat(executor.getQueue().size()).isEqualTo(expectedQueueSize);
     }
 
     @Test
     void testNewCachedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        // corePoolSize = 0
+        // maximumPoolSize = MAX_VALUE
+        // keepAliveTime = 60s
+
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
+        // 실험) maximumPoolSize 이상 횟수로 실행시키면? -> OutOfMemoryError
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final long expectedPoolSize = 3;
+        final long expectedQueueSize = 0;
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        assertThat(executor.getPoolSize()).isEqualTo(expectedPoolSize);
+        assertThat(executor.getQueue().size()).isEqualTo(expectedQueueSize);
     }
 
     private Runnable logWithSleep(final String message) {
+        // 1초 후 로깅
         return () -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            log.info(message);
+        };
+    }
+
+    private Runnable logWithoutSleep(final String message) {
+        return () -> {
             log.info(message);
         };
     }

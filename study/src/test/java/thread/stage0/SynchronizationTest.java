@@ -1,12 +1,15 @@
 package thread.stage0;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 다중 스레드 환경에서 두 개 이상의 스레드가 변경 가능한(mutable) 공유 데이터를 동시에 업데이트하면 경쟁 조건(race condition)이 발생한다.
@@ -18,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SynchronizationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(SynchronizationTest.class);
+
     /**
      * 테스트가 성공하도록 SynchronizedMethods 클래스에 동기화를 적용해보자.
      * synchronized 키워드에 대하여 찾아보고 적용하면 된다.
@@ -27,12 +32,12 @@ class SynchronizationTest {
      */
     @Test
     void testSynchronized() throws InterruptedException {
-        var executorService = Executors.newFixedThreadPool(3);
-        var synchronizedMethods = new SynchronizedMethods();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        SynchronizedMethods synchronizedMethods = new SynchronizedMethods();
 
         IntStream.range(0, 1000)
-                .forEach(count -> executorService.submit(synchronizedMethods::calculate));
-        executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
+                .forEach(i -> executorService.submit(synchronizedMethods::calculate)); // 실행 (비동기로 요청 시도)
+        executorService.awaitTermination(500, TimeUnit.MILLISECONDS); // 정상적인 종료, 혹은 타임아웃 발생 여부 확인 후 대기
 
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
@@ -41,15 +46,17 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
+            log.info("before calculate: {}", sum);
             setSum(getSum() + 1);
+            log.info("after calculate: {}", sum);
         }
 
-        public int getSum() {
+        public /*synchronized*/ int getSum() {
             return sum;
         }
 
-        public void setSum(int sum) {
+        public /*synchronized*/ void setSum(int sum) {
             this.sum = sum;
         }
     }

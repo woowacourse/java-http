@@ -2,13 +2,19 @@ package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.apache.util.parser.BodyParserFactory;
+import org.apache.util.parser.Parser;
 
 public class HttpRequest {
+
+    private static final int OFFSET = 0;
 
     private final HttpRequestLine startLine;
     private final HttpHeaders headers;
@@ -43,24 +49,35 @@ public class HttpRequest {
 
     private static String parseBody(BufferedReader reader, int countLength) throws IOException {
         char[] buffer = new char[countLength];
-        reader.read(buffer, 0, countLength);
+        reader.read(buffer, OFFSET, countLength);
         return new String(buffer);
+    }
+
+    public Map<String, String> getKeyValueBodies() {
+        ContentType contentType = this.getContentType();
+        Parser parser = BodyParserFactory.getParser(contentType);
+
+        return parser.parse(this.getBody());
+    }
+
+    public ContentType getContentType() {
+        return headers.getContentType();
     }
 
     public String getBody() {
         return body.getBody();
     }
 
-    public String getPath() {
+    public URI getUri() {
         return startLine.getUri();
     }
 
-    public HttpCookie getCookie() {
-        return headers.getCookie();
+    public boolean hasPath(String path) {
+        return startLine.hasPath(path);
     }
 
-    public ContentType getContentType() {
-        return headers.getContentType();
+    public HttpCookies getCookies() {
+        return headers.getCookies();
     }
 
     public HttpMethod getMethod() {

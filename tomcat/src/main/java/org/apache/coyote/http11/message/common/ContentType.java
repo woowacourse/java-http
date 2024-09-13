@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum ContentType {
 
-    TEXT_HTML("text/html;charset=utf-8 "),
+    TEXT_HTML("text/html;charset=utf-8"),
     TEXT_JS("text/javascript;charset=utf-8"),
     TEXT_CSS("text/css;charset=utf-8"),
     FORM_DATA("application/x-www-form-urlencoded");

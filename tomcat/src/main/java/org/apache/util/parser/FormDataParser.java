@@ -9,6 +9,8 @@ public class FormDataParser implements Parser {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int KEY_VALUE_LENGTH = 2;
+    private static final String DEFAULT_VALUE = "";
 
     @Override
     public Map<String, String> parse(String body) {
@@ -21,6 +23,10 @@ public class FormDataParser implements Parser {
 
         for (String value : bodies) {
             String[] keyValue = value.split(KEY_VALUE_DELIMITER);
+            if (keyValue.length != KEY_VALUE_LENGTH) {
+                params.put(keyValue[KEY_INDEX], DEFAULT_VALUE);
+                continue;
+            }
             params.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
         return params;

@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?

@@ -5,7 +5,13 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
-public abstract class FrontController implements Controller {
+public abstract class AbstractController implements Controller {
+
+    protected String path;
+
+    protected AbstractController(String path) {
+        this.path = path;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -26,5 +32,10 @@ public abstract class FrontController implements Controller {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    }
+
+    @Override
+    public boolean canControl(HttpRequest request) {
+        return request.hasPath(path);
     }
 }

@@ -1,34 +1,29 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.http11.message.common.FileExtension;
+import org.apache.coyote.http11.message.request.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
-import org.apache.util.ResourceReader;
 
-public class StaticResourceController extends FrontController {
+public class StaticResourceController extends AbstractController {
 
-    private static final String STATIC_PREFIX = "static";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String URI = ".";
+    private static final String DEFAULT_PATH = "static";
+
+    public StaticResourceController() {
+        super(URI);
+    }
+
+    @Override
+    public boolean canControl(HttpRequest request) {
+        return HttpMethod.GET == request.getMethod();
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String path = STATIC_PREFIX + request.getPath();
-        String resource = ResourceReader.readResource(path);
-
-        String extension = extractFileExtension(path);
+        String path = DEFAULT_PATH + request.getUri();
 
         response.setStatusLine(HttpStatus.OK);
-        response.setContentType(FileExtension.getFileExtension(extension).getContentType());
-        response.setHeader(CONTENT_LENGTH_HEADER, String.valueOf(resource.getBytes().length));
-        response.setBody(resource);
-    }
-
-    private String extractFileExtension(String path) {
-        int lastDotIndex = path.lastIndexOf('.');
-        if (lastDotIndex == -1) {
-            return "";
-        }
-        return path.substring(lastDotIndex + 1);
+        response.setStaticBody(path);
     }
 }

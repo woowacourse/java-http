@@ -13,7 +13,7 @@ public class StaticResourceProvider {
     private static final Map<String, String> CACHE = new HashMap<>();
     private static final ClassLoader CLASS_LOADER = StaticResourceProvider.class.getClassLoader();
     private static final String STATIC_PATH = "static";
-    private static final int MAX_LENGTH = 1024 * 1024;
+    private static final int CACHE_MAX_LENGTH = 1024 * 1024;
 
     static public String getStaticResource(String path) throws IOException {
         if (CACHE.containsKey(path)) {
@@ -21,7 +21,7 @@ public class StaticResourceProvider {
         }
 
         String resource = readResource(path);
-        if (resource.length() <= MAX_LENGTH) {
+        if (resource.length() <= CACHE_MAX_LENGTH) {
             CACHE.put(path, resource);
         }
         return resource;

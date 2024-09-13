@@ -21,7 +21,8 @@ public class HttpHeaders {
 
     public HttpHeaders(Map<String, String> values) {
         this.values = values;
-        this.cookies = RequestCookies.of(values.get(HttpHeader.COOKIE));
+        String rawCookies = values.get(HttpHeader.COOKIE.getName());
+        this.cookies = RequestCookies.of(rawCookies);
     }
 
     public static HttpHeaders of(List<String> headers) {

@@ -49,11 +49,11 @@ public class HttpResponse {
     }
 
     private void addRedirectHeader(String location) {
-        addHeader(HttpHeader.LOCATION, location);
+        addHeader(HttpHeader.LOCATION.getName(), location);
     }
 
     public void addCookie(HttpCookie cookie) {
-        addHeader(HttpHeader.SET_COOKIE, cookie.toResponse());
+        addHeader(HttpHeader.SET_COOKIE.getName(), cookie.toResponse());
     }
 
     public void addHeader(String key, String value) {
@@ -67,8 +67,8 @@ public class HttpResponse {
     public void setBody(String contentType, String body) {
         this.body = body;
         int contentLength = body.getBytes().length;
-        headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength));
-        headers.put(HttpHeader.CONTENT_TYPE, contentType);
+        headers.put(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(contentLength));
+        headers.put(HttpHeader.CONTENT_TYPE.getName(), contentType);
     }
 
     public String toResponse() {

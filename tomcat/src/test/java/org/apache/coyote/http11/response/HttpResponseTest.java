@@ -20,7 +20,7 @@ class HttpResponseTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of(HttpHeader.LOCATION, "/index.html")
+                Map.of(HttpHeader.LOCATION.getName(), "/index.html")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -35,7 +35,7 @@ class HttpResponseTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.OK,
-                Map.of(HttpHeader.SET_COOKIE, "name=value")
+                Map.of(HttpHeader.SET_COOKIE.getName(), "name=value")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -51,8 +51,8 @@ class HttpResponseTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.OK,
-                Map.of(HttpHeader.CONTENT_TYPE, "text/plain;charset=utf-8 ",
-                        HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength)),
+                Map.of(HttpHeader.CONTENT_TYPE.getName(), "text/plain;charset=utf-8 ",
+                        HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(contentLength)),
                 "body"
         );
         assertThat(response).isEqualTo(expectedResponse);

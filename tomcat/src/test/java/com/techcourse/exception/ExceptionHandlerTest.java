@@ -21,7 +21,7 @@ class ExceptionHandlerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of(HttpHeader.LOCATION, "/401.html")
+                Map.of(HttpHeader.LOCATION.getName(), "/401.html")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -36,8 +36,8 @@ class ExceptionHandlerTest {
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.BAD_REQUEST,
                 Map.of(
-                        HttpHeader.CONTENT_TYPE, "text/plain;charset=utf-8 ",
-                        HttpHeader.CONTENT_LENGTH, String.valueOf(message.getBytes().length)
+                        HttpHeader.CONTENT_TYPE.getName(), "text/plain;charset=utf-8 ",
+                        HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(message.getBytes().length)
                 ),
                 message
         );
@@ -54,8 +54,8 @@ class ExceptionHandlerTest {
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 Map.of(
-                        HttpHeader.CONTENT_TYPE, "text/plain;charset=utf-8 ",
-                        HttpHeader.CONTENT_LENGTH, String.valueOf(message.getBytes().length)
+                        HttpHeader.CONTENT_TYPE.getName(), "text/plain;charset=utf-8 ",
+                        HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(message.getBytes().length)
                 ),
                 message
         );

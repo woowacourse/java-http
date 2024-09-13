@@ -63,8 +63,8 @@ class LoginControllerTest {
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
                 Map.of(
-                        HttpHeader.LOCATION, "/index.html",
-                        HttpHeader.SET_COOKIE, HttpCookie.ofSession(generatedSession.getId()).toResponse()
+                        HttpHeader.LOCATION.getName(), "/index.html",
+                        HttpHeader.SET_COOKIE.getName(), HttpCookie.ofSession(generatedSession.getId()).toResponse()
                 )
         );
         assertThat(response).isEqualTo(expectedResponse);
@@ -85,7 +85,7 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of(HttpHeader.LOCATION, "/401.html")
+                Map.of(HttpHeader.LOCATION.getName(), "/401.html")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -97,7 +97,7 @@ class LoginControllerTest {
         sessionManager.add(session);
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /login HTTP/1.1 "),
-                new HttpHeaders(Map.of(HttpHeader.COOKIE, "JSESSIONID=" + session.getId())),
+                new HttpHeaders(Map.of(HttpHeader.COOKIE.getName(), "JSESSIONID=" + session.getId())),
                 "account=account2&password=password2"
         );
         HttpResponse response = new HttpResponse();
@@ -106,7 +106,7 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of(HttpHeader.LOCATION, "/index.html")
+                Map.of(HttpHeader.LOCATION.getName(), "/index.html")
         );
         assertAll(
                 () -> assertThat(response).isEqualTo(expectedResponse),
@@ -132,8 +132,8 @@ class LoginControllerTest {
 
         File file = File.of("/login.html");
         Map<String, String> headers = Map.of(
-                HttpHeader.CONTENT_TYPE, file.getContentType(),
-                HttpHeader.CONTENT_LENGTH, String.valueOf(file.getContentLength())
+                HttpHeader.CONTENT_TYPE.getName(), file.getContentType(),
+                HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(file.getContentLength())
         );
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.OK,
@@ -159,7 +159,7 @@ class LoginControllerTest {
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,
-                Map.of(HttpHeader.LOCATION, "/index.html")
+                Map.of(HttpHeader.LOCATION.getName(), "/index.html")
         );
         assertThat(response).isEqualTo(expectedResponse);
     }

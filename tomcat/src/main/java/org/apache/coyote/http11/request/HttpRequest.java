@@ -103,7 +103,7 @@ public class HttpRequest {
         }
 
         public int getBodyLength() {
-            return headers.getAsInt(HttpHeader.CONTENT_LENGTH).orElse(0);
+            return headers.getAsInt(HttpHeader.CONTENT_LENGTH.getName()).orElse(0);
         }
     }
 }

@@ -38,7 +38,7 @@ class RegisterControllerTest {
 
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /register HTTP/1.1 "),
-                new HttpHeaders(Map.of(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength))),
+                new HttpHeaders(Map.of(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(contentLength))),
                 body
         );
         HttpResponse response = new HttpResponse();
@@ -63,7 +63,7 @@ class RegisterControllerTest {
         int contentLength = body.getBytes().length;
         HttpRequest request = new HttpRequest(
                 RequestLine.of("POST /register HTTP/1.1 "),
-                new HttpHeaders(Map.of(HttpHeader.CONTENT_LENGTH, String.valueOf(contentLength))),
+                new HttpHeaders(Map.of(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(contentLength))),
                 body
         );
         HttpResponse response = new HttpResponse();

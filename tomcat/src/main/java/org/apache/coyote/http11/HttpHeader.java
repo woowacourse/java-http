@@ -1,9 +1,19 @@
 package org.apache.coyote.http11;
 
-public class HttpHeader {
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String CONTENT_LENGTH = "Content-Length";
-    public static final String COOKIE = "Cookie";
-    public static final String SET_COOKIE = "Set-Cookie";
-    public static final String LOCATION = "Location";
+public enum HttpHeader {
+    CONTENT_TYPE("Content-Type"),
+    CONTENT_LENGTH("Content-Length"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie"),
+    LOCATION("Location");
+
+    private final String headerName;
+
+    HttpHeader(String headerName) {
+        this.headerName = headerName;
+    }
+
+    public String getName() {
+        return headerName;
+    }
 }

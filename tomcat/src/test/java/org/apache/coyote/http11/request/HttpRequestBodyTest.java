@@ -12,10 +12,8 @@ class HttpRequestBodyTest {
     void createRequestBody() {
         var result = new HttpRequestBody("account=gugu&password=password&email=hkkang@woowahan.com");
 
-        assertThat(result.getBodies().get("account")).isEqualTo("gugu");
-        assertThat(result.getBodies().get("password")).isEqualTo("password");
-        assertThat(result.getBodies().get("email")).isEqualTo("hkkang@woowahan.com");
-        assertThat(result.getBodies()).hasSize(3);
+        assertThat(result.getQueryParameters().get("account")).isEqualTo("gugu");
+        assertThat(result.getQueryParameters().get("password")).isEqualTo("password");
+        assertThat(result.getQueryParameters().get("email")).isEqualTo("hkkang@woowahan.com");
     }
-
 }

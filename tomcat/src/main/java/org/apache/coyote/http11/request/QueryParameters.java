@@ -24,4 +24,8 @@ public class QueryParameters {
     public static QueryParameters empty() {
         return new QueryParameters("");
     }
+
+    public String get(String name) {
+        return params.get(name);
+    }
 }

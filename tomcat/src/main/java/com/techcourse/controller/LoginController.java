@@ -11,6 +11,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.QueryParameters;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -55,7 +56,7 @@ public class LoginController extends AbstractController {
     }
 
     private static User getUser(HttpRequest request, HttpResponse response) {
-        Map<String, String> requestBody = request.getRequestBody();
+        QueryParameters requestBody = request.getQueryParameters();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         User user = InMemoryUserRepository.findByAccount(account)

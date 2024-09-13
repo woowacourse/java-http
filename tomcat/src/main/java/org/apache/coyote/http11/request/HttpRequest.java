@@ -27,8 +27,12 @@ public class HttpRequest {
         return requestHeader.getHeaders();
     }
 
-    public Map<String, String> getRequestBody() {
-        return requestBody.getBodies();
+    public String getRequestBody() {
+        return requestBody.getRequestBody();
+    }
+
+    public QueryParameters getQueryParameters() {
+        return requestBody.getQueryParameters();
     }
 
     public HttpMethod getMethod() {

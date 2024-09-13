@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,5 +21,4 @@ class HttpResponseHeaderTest {
 
         assertThat(header.getHeaders().get("Cookie")).isEqualTo("JSESSIONID=sessionId; yummy_cookie=choco");
     }
-
 }

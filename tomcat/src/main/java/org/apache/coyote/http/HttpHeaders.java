@@ -37,17 +37,11 @@ public class HttpHeaders implements HttpComponent {
     }
 
     public String get(final String name) {
-        if (headers.containsKey(name)) {
-            return headers.get(name);
-        }
-        return null;
+        return headers.get(name);
     }
 
     public HttpCookies getCookies() {
-        if (headers.containsKey(COOKIE)) {
-            return new HttpCookies(headers.get(COOKIE));
-        }
-        return null;
+        return new HttpCookies(headers.get(COOKIE));
     }
 
     public HttpCookie getCookie(final String name) {

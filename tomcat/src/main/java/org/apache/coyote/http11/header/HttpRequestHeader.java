@@ -12,6 +12,8 @@ import org.apache.coyote.http11.Cookie;
 
 public class HttpRequestHeader {
     private static final String HEADER_PAYLOAD_DELIMITER = ":";
+    public static final int HEDAER_KEY_INDEX = 0;
+    public static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> payLoads;
     private final Cookie cookie;
@@ -34,8 +36,8 @@ public class HttpRequestHeader {
                 .takeWhile(line -> !line.isBlank())
                 .map(line -> line.split(HEADER_PAYLOAD_DELIMITER, 2))
                 .collect(Collectors.toMap(
-                        split -> split[0].strip(),
-                        split -> split[1].strip()
+                        split -> split[HEDAER_KEY_INDEX].strip(),
+                        split -> split[HEADER_VALUE_INDEX].strip()
                 ));
 
         return new HttpRequestHeader(payLoads, initializeCookie(payLoads));

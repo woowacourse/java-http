@@ -17,8 +17,8 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100; // 동시에 수용할 수 있는 최대 클라이언트의 연결 요청 수
-    private static final int MAX_THREAD_POOL_COUNT = 10; // 서버가 동시에 처리할 수 있는 최대 스레드 수
+    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREAD_POOL_COUNT = 10;
 
     private final ServerSocket serverSocket;
     private final Dispatcher dispatcher;

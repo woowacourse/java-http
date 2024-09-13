@@ -1,13 +1,13 @@
 package thread.stage1;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class UserServlet {
 
-    private final List<User> users = new CopyOnWriteArrayList<>();
+    private final List<User> users = new ArrayList<>();
 
-    public synchronized void service(final User user) {
+    public void service(final User user) {
         join(user);
     }
 

@@ -19,11 +19,11 @@ public class RegisterServlet extends AbstractServlet {
 		Properties properties = body.parseProperty();
 
 		String account = properties.get("account");
-		String mail = properties.get("mail");
+		String email = properties.get("email");
 		String password = properties.get("password");
 
 		if(InMemoryUserRepository.findByAccount(account).isEmpty()) {
-			User user = new User(account, mail, password);
+			User user = new User(account, password, email);
 			InMemoryUserRepository.save(user);
 		}
 		

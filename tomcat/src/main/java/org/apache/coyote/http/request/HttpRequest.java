@@ -1,7 +1,8 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class HttpRequest {
     private static Map<String, String> parseHeaders(BufferedReader request) throws IOException {
         String line;
         Map<String, String> headers = new HashMap<>();
-        while (!(line = request.readLine()).isEmpty()) {
+        while ((line = request.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(": ", 2);
             if (headerParts.length == 2) {
                 headers.put(headerParts[0], headerParts[1]);
@@ -49,6 +50,14 @@ public class HttpRequest {
         return "";
     }
 
+    public String getParameter(String key) {
+        return Arrays.stream(requestBody.split("&"))
+                .filter(param -> param.startsWith(key + "="))
+                .map(param -> param.split("=")[1])
+                .findFirst()
+                .orElse("");
+    }
+
     public boolean containsHeaders(String header) {
         return headers.containsKey(header);
     }
@@ -63,9 +72,5 @@ public class HttpRequest {
 
     public String getHeader(String header) {
         return headers.get(header);
-    }
-
-    public String getRequestBody() {
-        return requestBody;
     }
 }

@@ -8,7 +8,7 @@ public class Session {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
+    public Session(String id) {
         this.id = id;
     }
 
@@ -16,7 +16,7 @@ public class Session {
         return id;
     }
 
-    public void setAttribute(final String name, final Object value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 }

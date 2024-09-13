@@ -1,15 +1,18 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.StatusCode;
 
 public class StaticResourceController extends AbstractController {
 
     private static final String RESOURCE_BASE_PATH = "static";
+    private static final String ERROR_404_PATH = "/404.html";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
@@ -17,16 +20,16 @@ public class StaticResourceController extends AbstractController {
 
         try {
             String responseBody = loadResourceContent(resource);
-            String contentType = getContentType(resource);
+            String contentType = response.getContentType(resource);
             buildOkResponse(responseBody, contentType, response);
         } catch (Exception e) {
-            buildRedirectResponse("/404.html", response);
+            buildRedirectResponse(ERROR_404_PATH, response);
         }
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
-        throw new RuntimeException();
+        throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
     private String loadResourceContent(String resource) throws IOException {
@@ -40,28 +43,14 @@ public class StaticResourceController extends AbstractController {
     }
 
     private void buildOkResponse(String responseBody, String contentType, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("200 OK")
+        response.withStatusCode(StatusCode.OK)
                 .withResponseBody(responseBody)
-                .addHeader("Content-Type", contentType)
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), contentType)
+                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
     }
 
     private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode("302 Found")
-                .addHeader("Location", location);
-    }
-
-    private String getContentType(String resource) {
-        if (resource.endsWith(".css")) {
-            return "text/css";
-        } else if (resource.endsWith(".js")) {
-            return "application/javascript";
-        } else if (resource.endsWith(".ico")) {
-            return "image/x-icon";
-        } else if (resource.endsWith(".html")) {
-            return "text/html";
-        } else {
-            return "text/plain";
-        }
+        response.withStatusCode(StatusCode.FOUND)
+                .addHeader(HttpHeader.LOCATION.getValue(), location);
     }
 }

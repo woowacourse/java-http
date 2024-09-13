@@ -22,7 +22,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) {
+    public Session findSession(String id) {
         return SESSIONS.get(id);
     }
 

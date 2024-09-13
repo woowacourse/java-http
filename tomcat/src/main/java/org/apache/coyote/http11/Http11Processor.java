@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import org.apache.catalina.Cookie;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestControllerMapper;
@@ -19,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -64,13 +58,15 @@ public class Http11Processor implements Runnable, Processor {
 
         Controller controller = RequestControllerMapper.getController(request.getUri());
         if (controller == null) {
-            response.setStatusCode(HttpStatusCode.BAD_REQUEST);
-            return; // 404 Not Found
+            response.setStatusCode(HttpStatusCode.NOT_FOUND);
+            request.setUri("/404.html");
+            return;
         }
         try {
             controller.service(request, response);
         } catch (Exception e) {
             response.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
+            request.setUri("/500.html");
         }
     }
 

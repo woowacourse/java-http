@@ -7,6 +7,7 @@ public enum HttpMimeType {
     TEXT_HTML("text/html", "utf-8"),
     TEXT_CSS("text/css", "utf-8"),
     TEXT_JS("text/javascript", "utf-8"),
+    IMG_SVG("image/svg+xml", null),
     ;
 
     private final String type;

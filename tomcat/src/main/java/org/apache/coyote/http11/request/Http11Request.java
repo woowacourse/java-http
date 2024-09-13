@@ -15,7 +15,7 @@ import java.util.Objects;
 public class Http11Request {
 
     private static final String protocol = "HTTP/1.1";
-    private static final List<String> extensions = List.of(".html", ".css", ".js", ".ico");
+    private static final List<String> extensions = List.of(".html", ".css", ".js", ".ico", ".svg");
 
     private final Http11RequestMethod method;
     private final Http11RequestHeaders header;

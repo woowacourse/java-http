@@ -1,5 +1,6 @@
 package thread.stage2;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpResponse;
@@ -21,6 +22,7 @@ class AppTest {
      * - http call count
      * - 테스트 결과값
      */
+    @Disabled // 테스트를 실행시키기 위해서 thred.stage2.App을 실행하고 @Disabled를 제거하세요.
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;

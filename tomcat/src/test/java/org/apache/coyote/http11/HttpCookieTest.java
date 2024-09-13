@@ -50,14 +50,14 @@ class HttpCookieTest {
                 .hasMessage("형식이 올바르지 않은 쿠키가 포함되어 있습니다.");
     }
 
-    @DisplayName("쿠키 파싱 성공: 중복된 쿠키 이름인 경우 하나만 적용")
+    @DisplayName("쿠키 파싱 성공: 중복된 쿠키 이름인 경우 가장 나중에 작성된 쿠키만 적용")
     @Test
     void construct_Fail_DuplicatedCookieNames() {
         // given
         HttpCookie httpCookie = new HttpCookie("a=a; a=b");
 
         // when & then
-        assertThat(httpCookie.buildMessage()).containsOnlyOnce("=");
+        assertThat(httpCookie.buildMessage()).isEqualTo("a=b");
     }
 
     @DisplayName("쿠키에 세션 추가")

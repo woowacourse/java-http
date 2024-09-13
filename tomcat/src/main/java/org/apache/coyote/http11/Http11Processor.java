@@ -54,6 +54,10 @@ public class Http11Processor implements Runnable, Processor {
     private void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             servletContainer.service(httpRequest, httpResponse);
+            if(!httpResponse.containsHeader("Cache-Control")) {
+                httpResponse.addHeader("Cache-Control", "no-cache, private");
+            }
+
         } catch (Exception e) {
             log.error("request 처리 실패 : ", e);
             httpResponse.setStatusBadRequest();

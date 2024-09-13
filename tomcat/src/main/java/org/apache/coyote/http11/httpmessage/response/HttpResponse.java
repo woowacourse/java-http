@@ -29,6 +29,14 @@ public class HttpResponse {
                 "");
     }
 
+    public boolean containsHeader(String headerName) {
+        return headers.contains(headerName);
+    }
+
+    public void addHeader(String name, String value) {
+        headers.addHeader(name, value);
+    }
+
     public String toHttpMessage() {
         if (httpStatusLine == null) {
             throw new NotCompleteResponseException("응답이 완성되지 않았습니다.");
@@ -65,5 +73,15 @@ public class HttpResponse {
 
     public void addCookie(String key, String value) {
         httpCookie.addCookie(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "httpCookie=" + httpCookie +
+                ", httpStatusLine=" + httpStatusLine +
+                ", headers=" + headers +
+                ", body='" + body + '\'' +
+                '}';
     }
 }

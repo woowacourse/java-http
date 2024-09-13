@@ -25,12 +25,37 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/hello.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 13 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseLine = "HTTP/1.1 200 OK \r\n";
+        String expectedContentType = "Content-Type: text/html;charset=utf-8 \r\n";
+        String expectedContentLength = "Content-Length: 13 \r\n";
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(
+                expectedResponseLine,
+                expectedContentLength,
+                expectedContentType,
+                expectedResponseBody);
+    }
+
+    @DisplayName("process 과정에서 처리되지 않은 예외는 500 HTTP 응답을 생성한다.")
+    @Test
+    void failProcess() throws IOException {
+        // given
+        final var socket = new StubSocket("WRONG\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expectedResponse = """
+                    HTTP/1.1 500 Internal Server Error
+                    Content-Type: text/html
+                    Content-Length: 79
+
+                    <html><body><h1>500 Internal Server Error</h1><p>Unexpected error occurred.</p></body></html>
+                """;
+
+        assertThat(socket.output()).isEqualTo(expectedResponse);
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ResponseBody {
@@ -13,7 +14,7 @@ public class ResponseBody {
         if (Objects.isNull(body) || body.isEmpty()) {
             return 0;
         }
-        return body.getBytes().length;
+        return body.getBytes(StandardCharsets.UTF_8).length;
     }
 
     public String getBody() {

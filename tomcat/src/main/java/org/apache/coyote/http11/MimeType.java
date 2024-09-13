@@ -8,6 +8,9 @@ public enum MimeType {
     SVG("svg", "image/svg+xml"),
     NONE("", "application/octet-stream");
 
+    private static final char EXTENSION_DELIMITER = '.';
+    private static final String EMPTY = "";
+
     private final String extension;
     private final String type;
 
@@ -29,9 +32,9 @@ public enum MimeType {
     }
 
     private static String extractExtension(String fileName) {
-        int index = fileName.lastIndexOf('.');
+        int index = fileName.lastIndexOf(EXTENSION_DELIMITER);
         if (index == -1) {
-            return "";
+            return EMPTY;
         }
         return fileName.substring(index + 1);
     }

@@ -8,11 +8,11 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 
-import com.techcourse.exception.UnsupportedMethodException;
 import com.techcourse.util.Resource;
 
-public class NotFoundController extends Controller {
+public class NotFoundController implements Controller {
     private static final NotFoundController instance = new NotFoundController();
+    private static final String NOT_FOUND_PATH = "404.html";
 
     private NotFoundController() {
     }
@@ -22,23 +22,10 @@ public class NotFoundController extends Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpResponse response = new HttpResponse();
-        String fileName = "404.html";
-        ResponseBody responseBody = new ResponseBody(Resource.read(fileName));
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
+        ResponseBody responseBody = new ResponseBody(Resource.read(NOT_FOUND_PATH));
         response.setStatus(HttpStatus.NOT_FOUND);
         response.setContentType(MimeType.HTML);
         response.setBody(responseBody);
-        return response;
-    }
-
-    @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported: POST");
-    }
-
-    @Override
-    protected HttpResponse doGet(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported: GET");
     }
 }

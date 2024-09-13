@@ -8,22 +8,28 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
+    private static ExecutorService executorService;
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(int port, int acceptCount, int maxThreads) {
+        executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -36,6 +42,20 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private int checkPort(final int port) {
+        final var MIN_PORT = 1;
+        final var MAX_PORT = 65535;
+
+        if (port < MIN_PORT || MAX_PORT < port) {
+            return DEFAULT_PORT;
+        }
+        return port;
+    }
+
+    private int checkAcceptCount(final int acceptCount) {
+        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 
     public void start() {
@@ -67,11 +87,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
+        shutdownExecutorServiceGracefully();
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -79,17 +100,14 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
-        final var MIN_PORT = 1;
-        final var MAX_PORT = 65535;
-
-        if (port < MIN_PORT || MAX_PORT < port) {
-            return DEFAULT_PORT;
+    private void shutdownExecutorServiceGracefully() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
         }
-        return port;
-    }
-
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

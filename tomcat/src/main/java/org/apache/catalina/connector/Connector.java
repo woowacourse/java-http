@@ -60,7 +60,9 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        executor.execute(this);
+        var thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }

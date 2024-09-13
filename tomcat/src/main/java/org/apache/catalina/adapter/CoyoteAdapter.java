@@ -26,11 +26,11 @@ public class CoyoteAdapter {
         final var httpRequest = new HttpRequest(request.getRequestLine(), request.getRequestHeaders(),
                 request.getBody(), request.getCookie());
         final var httpResponse = new HttpResponse(StatusCode.NOT_FOUND);
-        adapt(httpRequest, httpResponse);
+        handle(httpRequest, httpResponse);
         return new Response(httpResponse.getStatusLine(), httpResponse.getResponseHeader(), httpResponse.getBody());
     }
 
-    private void adapt(final HttpRequest request, final HttpResponse response) {
+    private void handle(final HttpRequest request, final HttpResponse response) {
         try {
             final var controller = requestMapping.get(request.getUriPath());
             controller.service(request, response);

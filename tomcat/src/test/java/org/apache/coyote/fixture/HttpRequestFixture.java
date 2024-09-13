@@ -55,6 +55,12 @@ public class HttpRequestFixture {
             RequestBodyFixture.NOT_REGISTER_LOGIN_USER_BODY
     );
 
+    public static final HttpRequest POST_LOGIN_PATH_REQUEST2 = new HttpRequest(
+            RequestLineFixture.LOGIN_POST,
+            RequestHeaderFixture.LOGIN_POST_DEFAULT,
+            RequestBodyFixture.NOT_REGISTER_LOGIN_USER_BODY
+    );
+
     public static final HttpRequest POST_LOGGED_IN_USER_PATH_REQUEST = new HttpRequest(
             RequestLineFixture.LOGIN_POST,
             RequestHeaderFixture.LOGIN_POST_DEFAULT,

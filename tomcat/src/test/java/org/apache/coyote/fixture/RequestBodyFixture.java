@@ -16,5 +16,7 @@ public class RequestBodyFixture {
 
     public static final RequestBody NOT_REGISTER_LOGIN_USER_BODY = new RequestBody("account=polla&password=password");
 
+    public static final RequestBody NOT_REGISTER_LOGIN_USER_BODY2 = new RequestBody("account=ato&password=password");
+
 
 }

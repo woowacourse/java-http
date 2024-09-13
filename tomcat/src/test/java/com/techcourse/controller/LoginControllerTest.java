@@ -45,7 +45,7 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인에 실패하는 경우 401 페이지로 리다이렉트 한다.")
     void doPost_WhenNotUser() {
-        HttpRequest httpRequest = HttpRequestFixture.POST_LOGIN_PATH_REQUEST;
+        HttpRequest httpRequest = HttpRequestFixture.POST_LOGIN_PATH_REQUEST2;
         HttpResponse httpResponse = new HttpResponse(OutputStream.nullOutputStream());
 
         loginController.doPost(httpRequest, httpResponse);

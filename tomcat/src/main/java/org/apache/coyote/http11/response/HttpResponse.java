@@ -28,25 +28,29 @@ public class HttpResponse {
     }
 
     public void ok(String fileName) throws IOException {
-        String content = ResourceReader.read(fileName);
-        this.statusLine = new StatusLine(HttpStatus.OK);
-        this.responseHeaders.addContentHeaders(ContentType.findByExtension(fileName), content);
-        this.responseBody = new ResponseBody(content);
+        statusLine = new StatusLine(HttpStatus.OK);
+        responseBody = new ResponseBody(ResourceReader.read(fileName));
+        responseHeaders.addHeader(HttpHeader.CONTENT_TYPE, ContentType.findByExtension(fileName).value());
+        responseHeaders.addHeader(HttpHeader.CONTENT_LENGTH, responseBody.getContentLength());
     }
 
     public void redirect(String path) {
-        this.statusLine = new StatusLine(HttpStatus.FOUND);
-        this.responseHeaders.addHeader(HttpHeader.LOCATION, path);
-        this.responseBody = new ResponseBody();
+        statusLine = new StatusLine(HttpStatus.FOUND);
+        responseHeaders.addHeader(HttpHeader.LOCATION, path);
+        responseBody = new ResponseBody();
     }
 
     public void setBody(String content) {
-        this.responseBody = new ResponseBody(content);
-        this.responseHeaders.addHeader(HttpHeader.CONTENT_LENGTH, responseBody.getContentLength());
+        responseBody = new ResponseBody(content);
+        responseHeaders.addHeader(HttpHeader.CONTENT_LENGTH, responseBody.getContentLength());
     }
 
     public void setContentType(ContentType contentType) {
         responseHeaders.addHeader(HttpHeader.CONTENT_TYPE, contentType.value());
+    }
+
+    public void addHeader(HttpHeader httpHeader, String value) {
+        responseHeaders.addHeader(httpHeader, value);
     }
 
     public void addCookie(Cookie cookie) {

@@ -23,6 +23,8 @@ public record Body(String value) {
 			char[] body = new char[length];
 			reader.read(body, 0, length);
 			return new String(body);
+		} else if(length < 0) {
+			throw new IOException("Invalid Content-Length: " + length);
 		}
 		return null;
 	}

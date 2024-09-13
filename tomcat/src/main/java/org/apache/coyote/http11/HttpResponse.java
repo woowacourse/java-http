@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
+    private static final String CRLF = "\r\n";
+
     private HttpStatus httpStatus;
     private String contentType;
     private String resourceName;
@@ -14,21 +16,27 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        StringBuilder response = new StringBuilder()
-                .append("HTTP/1.1 ")
-                .append(httpStatus.getStatusCode()).append(" ").append(httpStatus.name()).append(" \r\n")
-                .append("Content-Type: text/").append(contentType).append(";charset=utf-8 \r\n")
-                .append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n");
+        StringBuilder response = new StringBuilder(
+                String.format("""
+                                HTTP/1.1 %d %s\r
+                                Content-Type: text/%s;charset=utf-8\r
+                                Content-Length: %d\r
+                                """,
+                        httpStatus.getStatusCode(),
+                        httpStatus.name(),
+                        contentType,
+                        responseBody.getBytes().length
+                ));
 
         if (httpCookie != null) {
-            response.append("Set-Cookie: ").append(httpCookie.getResponse()).append(" \r\n");
+            response.append("Set-Cookie: ").append(httpCookie.getResponse()).append(CRLF);
         }
 
         if (location != null) {
-            response.append("Location: ").append(location).append(" \r\n");
+            response.append("Location: ").append(location).append(CRLF);
         }
 
-        response.append("\r\n").append(responseBody);
+        response.append(CRLF).append(responseBody);
         return response.toString().getBytes();
     }
 

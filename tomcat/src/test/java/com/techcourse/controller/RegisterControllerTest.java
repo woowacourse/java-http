@@ -15,7 +15,7 @@ class RegisterControllerTest {
     private final RegisterController controller;
 
     public RegisterControllerTest() {
-        this.controller = new RegisterController();
+        this.controller = RegisterController.getInstance();
     }
 
     @DisplayName("register로 GET 요청을 보내면 register.html을 200으로 응답한다")

@@ -18,6 +18,7 @@ public class HttpRequest {
     public HttpRequest() {
         this.method = HttpMethod.GET;
         this.protocolVersion = "HTTP/1.1";
+        this.httpCookie = new HttpCookie(Map.of());
     }
 
     public boolean hasMethod(HttpMethod method) {

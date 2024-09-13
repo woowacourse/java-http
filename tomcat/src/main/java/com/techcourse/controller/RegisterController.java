@@ -8,6 +8,18 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static RegisterController instance;
+
+    private RegisterController() {
+    }
+
+    public static RegisterController getInstance() {
+        if (instance == null) {
+            instance = new RegisterController();
+        }
+        return instance;
+    }
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         response.setResourceName("/register.html");

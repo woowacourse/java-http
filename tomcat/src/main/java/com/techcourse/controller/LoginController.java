@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
         String password = body.get(PASSWORD_KEY);
 
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (!user.checkPassword(password)) {
             response.setLocation("401.html");

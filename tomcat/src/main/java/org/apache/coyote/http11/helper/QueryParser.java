@@ -23,6 +23,7 @@ public class QueryParser {
     }
 
     public Map<String, String> parse(String rawQuery) {
+        validateNull(rawQuery);
         Map<String, String> result = new HashMap<>();
         String[] tokens = rawQuery.split(DELIMITER_OF_QUERY);
         for (String token : tokens) {
@@ -31,7 +32,14 @@ public class QueryParser {
             String value = token.split(DELIMITER_OF_KEY_VALUE)[INDEX_OF_QUERY_VALUE];
             result.put(key, value);
         }
+        result.forEach(System.out::printf);
         return result;
+    }
+
+    private void validateNull(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new IllegalArgumentException("유효하지 않은 형태의 쿼리스트링입니다.");
+        }
     }
 
     private void validateQueryFormat(String raw) {

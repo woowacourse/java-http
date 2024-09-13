@@ -2,7 +2,7 @@ package org.apache.catalina.servlet;
 
 import java.util.Map;
 
-import org.apache.catalina.exception.NoMatchedHandlerException;
+import org.apache.catalina.exception.NoMatchedControllerException;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class RequestMapping {
@@ -16,6 +16,6 @@ public class RequestMapping {
         if (mappedController.containsKey(request.getTarget())) {
             return mappedController.get(request.getTarget());
         }
-        throw new NoMatchedHandlerException(request.getTarget() + " 요청을 처리할 컨트롤러가 존재하지 않습니다.");
+        throw new NoMatchedControllerException(request.getTarget() + " 요청을 처리할 컨트롤러가 존재하지 않습니다.");
     }
 }

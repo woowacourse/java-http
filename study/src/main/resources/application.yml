@@ -3,12 +3,12 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 500 # 작업큐의 사이즈
-    max-connections: 500 # 수립가능한 connection의 총 개수
+    accept-count: 1 # 작업큐의 사이즈
+    max-connections: 2 # 수립가능한 connection의 총 개수
     #    connection-timeout: 20000 # timeout 판단 기준 시간, 20초
     threads:
-      min-spare: 10 # 항상 활성화 되어있는(idle) thread의 개수
-      max: 500 # 생성할 수 있는 thread의 총 개수
+      min-spare: 1 # 항상 활성화 되어있는(idle) thread의 개수
+      max: 2 # 생성할 수 있는 thread의 총 개수
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain

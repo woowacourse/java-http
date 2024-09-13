@@ -62,7 +62,6 @@ class ThreadTest {
 
         @Override
         public void run() {
-            System.out.println("@@@@@@@@@@@@@@@@@@@@");
             log.info(message);
         }
     }
@@ -77,7 +76,6 @@ class ThreadTest {
 
         @Override
         public void run() {
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!");
             log.info(message);
         }
     }

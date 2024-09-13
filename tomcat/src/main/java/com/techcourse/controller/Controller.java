@@ -4,5 +4,6 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 
 public interface Controller {
-    HttpResponse handle(HttpRequest request);
+    boolean canHandle(HttpRequest request);
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

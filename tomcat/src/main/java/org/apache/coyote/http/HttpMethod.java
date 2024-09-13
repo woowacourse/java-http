@@ -9,6 +9,14 @@ public enum HttpMethod implements HttpComponent {
         return valueOf(value.toUpperCase());
     }
 
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
+
     @Override
     public String asString() {
         return name();

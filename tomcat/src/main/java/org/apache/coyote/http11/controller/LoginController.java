@@ -17,7 +17,6 @@ public class LoginController extends AbstractController {
     protected void doPost(Http11Request request, Http11Response response) {
         Http11RequestBody body = request.getRequestBody();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(body.get("account"));
-        response.setStatusCode(HttpStatusCode.FOUND);
         String redirectUri = "/401.html";
 
         User user;
@@ -28,7 +27,7 @@ public class LoginController extends AbstractController {
             redirectUri = "/index.html";
         }
 
-        response.addLocation(redirectUri);
+        redirect(response, redirectUri);
     }
 
     @Override
@@ -44,8 +43,11 @@ public class LoginController extends AbstractController {
             request.setUri(request.getUri() + ".html");
             return;
         }
+        redirect(response, "/index.html");
+    }
+
+    private void redirect(Http11Response response, String uri) {
         response.setStatusCode(HttpStatusCode.FOUND);
-        String redirectUri = "/index.html";
-        response.addLocation(redirectUri);
+        response.addLocation(uri);
     }
 }

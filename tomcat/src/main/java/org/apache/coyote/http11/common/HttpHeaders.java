@@ -19,4 +19,11 @@ public class HttpHeaders {
     public void forEach(BiConsumer<String, String> consumer) {
         values.forEach(consumer);
     }
+
+    @Override
+    public String toString() {
+        return "HttpHeaders{" +
+                "values=" + values +
+                '}';
+    }
 }

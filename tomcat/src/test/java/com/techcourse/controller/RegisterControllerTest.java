@@ -28,9 +28,9 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("<title>회원가입</title>".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("<title>회원가입</title>".getBytes());
     }
 
     @Test
@@ -53,8 +53,8 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /index.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /index.html".getBytes());
     }
 
     @Test
@@ -77,6 +77,6 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 400 Bad Request".getBytes());
+                .containsSequence("HTTP/1.1 400 Bad Request".getBytes());
     }
 }

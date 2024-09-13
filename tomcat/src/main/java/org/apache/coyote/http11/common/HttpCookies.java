@@ -28,4 +28,11 @@ public class HttpCookies {
                 .map(Entry::toString)
                 .collect(Collectors.joining(DELIMITER_SEMICOLON));
     }
+
+    @Override
+    public String toString() {
+        return "HttpCookies{" +
+                "values=" + values +
+                '}';
+    }
 }

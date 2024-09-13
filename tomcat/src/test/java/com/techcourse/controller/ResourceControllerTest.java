@@ -28,8 +28,8 @@ class ResourceControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("<title>대시보드</title>".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("<title>대시보드</title>".getBytes());
     }
 }

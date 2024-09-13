@@ -28,9 +28,9 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("<title>로그인</title>".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("<title>로그인</title>".getBytes());
     }
 
     @Test
@@ -50,9 +50,9 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /index.html".getBytes())
-                .contains("Set-Cookie: ".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /index.html".getBytes())
+                .containsSequence("Set-Cookie: ".getBytes());
     }
 
     @Test
@@ -71,9 +71,10 @@ class LoginControllerTest {
         HttpResponse response = responseBuilder.build();
 
         // then
+        System.out.println("response = " + response);
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /401.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /401.html".getBytes());
     }
 
     @Test
@@ -93,7 +94,7 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /401.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /401.html".getBytes());
     }
 }

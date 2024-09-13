@@ -18,4 +18,11 @@ public class HttpParameters {
     public boolean containsKey(String key) {
         return values.containsKey(key);
     }
+
+    @Override
+    public String toString() {
+        return "HttpParameters{" +
+                "values=" + values +
+                '}';
+    }
 }

@@ -28,9 +28,9 @@ class HomeControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("Content-Length: 12".getBytes())
-                .contains("Hello world!".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("Content-Length: 12".getBytes())
+                .containsSequence("Hello world!".getBytes());
     }
 }

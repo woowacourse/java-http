@@ -46,6 +46,10 @@ public class HttpRequestLine {
         return startLine.split(SPACE);
     }
 
+    public boolean hasPath(String path) {
+        return uri.getPath().equals(path);
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -54,7 +58,7 @@ public class HttpRequestLine {
         return uri;
     }
 
-    public boolean hasPath(String path) {
-        return uri.getPath().equals(path);
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

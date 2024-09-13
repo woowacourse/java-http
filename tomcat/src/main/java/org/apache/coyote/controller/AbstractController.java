@@ -3,6 +3,8 @@ package org.apache.coyote.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
@@ -13,29 +15,35 @@ import org.apache.coyote.util.FileExtension;
 
 public abstract class AbstractController implements Controller {
 
-    @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        HttpMethod method = request.getMethod();
+    private final Map<HttpMethod, RequestHandler> methodHandlers = new EnumMap<>(HttpMethod.class);
 
-        if (method.isGet()) {
-            doGet(request, response);
-        } else if (method.isPost()) {
-            doPost(request, response);
-        } else {
-            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
-        }
-
-        if (response.isRedirection()) {
-            handleRedirection(response);
-            return;
-        }
-        handleResponse(response);
+    public AbstractController() {
+        methodHandlers.put(HttpMethod.GET, this::doGet);
+        methodHandlers.put(HttpMethod.POST, this::doPost);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
+    }
+
+    @Override
+    public void service(HttpRequest request, HttpResponse response) {
+        HttpMethod method = request.getMethod();
+
+        if (!methodHandlers.containsKey(method)) {
+            return;
+        }
+
+        RequestHandler handler = methodHandlers.get(method);
+        handler.handle(request, response);
+
+        if (response.isRedirection()) {
+            handleRedirection(response);
+            return;
+        }
+        handleResponse(response);
     }
 
     private void handleRedirection(HttpResponse response) {

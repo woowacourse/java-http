@@ -48,7 +48,7 @@ public class HttpResponseHeaders {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Map.copyOf(headers);
     }
 
     @Override

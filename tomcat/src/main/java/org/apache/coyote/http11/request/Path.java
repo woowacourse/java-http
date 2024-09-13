@@ -1,10 +1,14 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+
 import java.util.Objects;
 
 public record Path(String value) {
+	private static final int INDEX_OF_PATH = 1;
+
 	public static Path parseRequestPath(String requestLine) {
-		return new Path(requestLine.split(" ")[1]);
+		return new Path(requestLine.split(REQUEST_LINE_DELIMITER.getValue())[INDEX_OF_PATH]);
 	}
 
 	@Override

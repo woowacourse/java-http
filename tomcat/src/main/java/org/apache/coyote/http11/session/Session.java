@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.session;
 
+import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +16,7 @@ public class Session {
 	}
 
 	public Session(String cookies) {
-		String session = Arrays.asList(cookies.split("; "))
+		String session = Arrays.asList(cookies.split(SESSION_DELIMITER.getValue()))
 			.stream()
 			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
 			.findAny()

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.common;
 
+import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,7 +16,7 @@ public record Headers(Map<String, String> headers) {
 		HashMap<String, String> headers = new HashMap<>();
 		String line;
 		while ((line = reader.readLine()) != null && !line.isEmpty()) {
-			String[] header = line.split(":");
+			String[] header = line.split(HEADER_KEY_VALUE_DELIMITER.getValue());
 			headers.put(header[0].trim(), header[1].trim());
 		}
 		return new Headers(headers);

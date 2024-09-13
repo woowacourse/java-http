@@ -3,7 +3,9 @@ package org.apache.coyote.http11.common;
 public enum HTTP_DELIMITER {
 	REQUEST_LINE_DELIMITER(" "),
 	BODY_PROPERTY_DELIMITER("&"),
-	BODY_KEY_VALUE_DELIMITER("=")
+	BODY_KEY_VALUE_DELIMITER("="),
+	SESSION_DELIMITER("; "),
+	HEADER_KEY_VALUE_DELIMITER(":")
 	;
 
 	private final String value;

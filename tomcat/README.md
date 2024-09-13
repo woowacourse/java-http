@@ -39,6 +39,14 @@
 - [x] Controller 인터페이스 추가하기
     - RequestMapping 클래스 구현
 
+## 4. 동시성 확장
+
+- [ ] Executors로 Thread Pool 적용
+    - Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체 만들기
+    - 스레드 갯수는 maxThreads 변수로 지정
+- [ ] 동시성 컬렉션 사용
+    - SessionManager 클래스 동시성 컬렉션(Concurrent Collections)을 적용해서 스레드 안정성과 원자성을 보장
+
 ---
 
 ### 생각해보기 🤔
@@ -46,3 +54,10 @@
 > index.html 페이지만 접근했는데 CSS 같은 정적 파일들은 어떻게 호출된걸까?
 
 index.html 문서에 `<link href="css/styles.css" rel="stylesheet" />` 통해 CSS 정적 파일이 호출되고 있다.
+
+> acceptCount와 maxThreads는 각각 어떤 설정일까?
+> 최대 ThradPool의 크기는 250, 모든 Thread가 사용 중인(Busy) 상태이면 100명까지 대기 상태로 만들려면 어떻게 할까?
+
++ acceptCount : 모든 스레드를 사용 중일 때 대기할 수 있는 요청의 수
++ maxThreads : 동시에 요청을 처리할 수 있는 스레드의 개수
++ maxThreads = 250, acceptCount = 100

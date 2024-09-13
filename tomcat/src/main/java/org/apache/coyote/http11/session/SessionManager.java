@@ -7,7 +7,7 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
-    private static SessionManager instance = new SessionManager();
+    private final static SessionManager instance = new SessionManager();
 
     private SessionManager() {
     }

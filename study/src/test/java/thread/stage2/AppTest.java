@@ -21,6 +21,13 @@ class AppTest {
      * - http call count
      * - 테스트 결과값
      */
+
+    // accept-count: Thread Queue에 대기할 수 있는 요청 수
+    // max-connections: 동시에 처리할 수 있는 최대 연결 개수. 이 값이 넘어가면 accept-count만큼
+    // min-spare: 최소 스레드 수
+    // max: 최대 스레드 수
+
+    // Accept Queue -> Connection Queue -> Worker Thread
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;

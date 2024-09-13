@@ -95,7 +95,7 @@
 
 ### 4단계
 
-- [ ] Executors로 Thread Pool 적용
+- [x] Executors로 Thread Pool 적용
   - Executors 클래스를 사용해서 ExecutorService 객체 제작
   - 스레드 갯수는 maxThreads 라는 변수로 지정
 - [ ] 동시성 컬렉션 사용하기

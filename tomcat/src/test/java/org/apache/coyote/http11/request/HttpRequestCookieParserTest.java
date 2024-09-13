@@ -7,7 +7,7 @@ import org.apache.coyote.http11.Http11Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class Http11RequestCookieParserTest {
+class HttpRequestCookieParserTest {
 
     private final Http11RequestCookieParser requestCookieParser = new Http11RequestCookieParser(
             new Http11StartLineParser());

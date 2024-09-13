@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,7 +28,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMappings requestMappings = makeRequestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMappings);
 
         MockedStatic<Http11Cookie> http11CookieMockedStatic = Mockito.mockStatic(Http11Cookie.class);
         http11CookieMockedStatic.when(Http11Cookie::sessionCookie).thenReturn(new Http11Cookie("JSESSIONID", "test"));
@@ -42,5 +46,14 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(Path.of(resource.toURI())));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private static RequestMappings makeRequestMapping() {
+        return new RequestMappings(
+                new RequestMapping(new LoginController(), "/login", "/login.html"),
+                new RequestMapping(new RegisterController(), "/register", "/register.html"),
+                new RequestMapping(new StaticResourceController(), "*.js", "*.css", "*.html", "/", "/index",
+                        "/index.html", "", "*")
+        );
     }
 }

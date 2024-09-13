@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 public class RequestLine {
 
     public static final String SEPARATOR = " ";
@@ -17,7 +20,8 @@ public class RequestLine {
         this.httpVersion = httpVersion;
     }
 
-    public static RequestLine from(final String requestLine) {
+    public static RequestLine from(final BufferedReader bufferedReader) throws IOException {
+        final String requestLine = bufferedReader.readLine();
         if (requestLine == null || requestLine.isBlank()) {
             return new RequestLine(null, null, null);
         }

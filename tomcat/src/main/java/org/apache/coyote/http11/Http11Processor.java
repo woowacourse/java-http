@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest == null) {
                 return;
             }
-            String method = httpRequest.getStartLine().getMethod();
+            String method = httpRequest.getRequestLine().getMethod();
             String response = null;
             if (method.equals("POST")) {
                 response = makePostMethodResponse(httpRequest);
@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
             queryStorage.put(keyValue[0], keyValue[1]);
         }
 
-        String requestTarget = httpRequest.getStartLine().getPath();
+        String requestTarget = httpRequest.getRequestLine().getPath();
         String redirectTarget = "/index.html";
         String uuid = "";
         boolean loginSuccess = false;
@@ -133,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final Map<String, String> headerInfo = httpRequest.getHeaders();
 
-        String requestTarget = httpRequest.getStartLine().getPath();
+        String requestTarget = httpRequest.getRequestLine().getPath();
 
         String redirectTarget = "";
         if (requestTarget.equals("/login") && headerInfo.containsKey("Cookie")) {

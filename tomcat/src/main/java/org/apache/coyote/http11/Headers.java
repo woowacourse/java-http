@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +11,8 @@ public class Headers {
 
     private static final String FIELD_VALUE_SEPARATOR = ": ";
     private static final String CRLF = "\r\n";
+    private static final int FIELD_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> values;
 
@@ -15,9 +20,31 @@ public class Headers {
         this.values = values;
     }
 
+    public static Headers form(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+
+        String headerLine;
+        while ((headerLine = bufferedReader.readLine()) != null) {
+            if (headerLine.isBlank()) {
+                break;
+            }
+            final String[] header = headerLine.split(FIELD_VALUE_SEPARATOR);
+            headers.put(header[FIELD_INDEX], header[VALUE_INDEX]);
+        }
+        return new Headers(headers);
+    }
+
+    public boolean containsField(final String field) {
+        return values.containsKey(field);
+    }
+
+    public String getByField(final String field) {
+        return values.getOrDefault(field, null);
+    }
+
     public String format() {
         final List<String> headerLines = new ArrayList<>();
-        for (Map.Entry<String,String> entry : values.entrySet()) {
+        for (Map.Entry<String, String> entry : values.entrySet()) {
             headerLines.add(String.join(FIELD_VALUE_SEPARATOR, entry.getKey(), entry.getValue()));
         }
         return String.join(CRLF, headerLines);

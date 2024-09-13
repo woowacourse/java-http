@@ -1,7 +1,7 @@
 package org.apache.coyote.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
@@ -12,7 +12,7 @@ public class Session {
 
     public Session(final String id) {
         this.id = id;
-        this.values = new HashMap<>();
+        this.values = new ConcurrentHashMap<>();
     }
 
     public String getId() {

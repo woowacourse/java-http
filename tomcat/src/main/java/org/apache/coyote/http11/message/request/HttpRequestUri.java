@@ -1,6 +1,13 @@
 package org.apache.coyote.http11.message.request;
 
+import java.util.Optional;
+
+import org.apache.coyote.http11.FileExtensionType;
+
 public class HttpRequestUri {
+
+    private static final String FILE_NAME_AND_EXTENSION_SEPARATOR = "\\.";
+    private static final int FILE_EXTENSION_INDEX = 1;
 
     private final String value;
 
@@ -24,5 +31,27 @@ public class HttpRequestUri {
 
     public String getValue() {
         return value;
+    }
+
+    public boolean matchRequestUri(final String uri) {
+        return value.equals(uri);
+    }
+
+    public boolean isStaticResourceUri() {
+        return parseStaticFileExtensionType().isPresent();
+    }
+
+    public Optional<FileExtensionType> parseStaticFileExtensionType() {
+        final String[] fileNameAndExtension = value.split(FILE_NAME_AND_EXTENSION_SEPARATOR);
+        if (fileNameAndExtension.length != 2) {
+            return Optional.empty();
+        }
+
+        final String extension = fileNameAndExtension[FILE_EXTENSION_INDEX];
+        return Optional.of(FileExtensionType.getByValue(extension));
+    }
+
+    public Optional<FileExtensionType> getFileExtensionType() {
+        return parseStaticFileExtensionType();
     }
 }

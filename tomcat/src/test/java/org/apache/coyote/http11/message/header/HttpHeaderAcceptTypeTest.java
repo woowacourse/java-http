@@ -30,7 +30,7 @@ class HttpHeaderAcceptTypeTest {
                 Arguments.of("text/plain", HttpHeaderAcceptType.PLAIN),
                 Arguments.of("text/html", HttpHeaderAcceptType.HTML),
                 Arguments.of("text/css", HttpHeaderAcceptType.CSS),
-                Arguments.of("application/javascript", HttpHeaderAcceptType.JAVASCRIPT),
+                Arguments.of("application/javascript", HttpHeaderAcceptType.JS),
                 Arguments.of("image/svg+xml", HttpHeaderAcceptType.SVG),
                 Arguments.of("image/x-icon", HttpHeaderAcceptType.ICO),
                 Arguments.of("*/*", HttpHeaderAcceptType.ALL_ACCEPT)

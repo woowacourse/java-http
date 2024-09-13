@@ -48,4 +48,8 @@ public class HttpBody {
 
         values.put(keyAndValue[FORM_DATA_KEY_INDEX], keyAndValue[FORM_DATA_VALUE_INDEX]);
     }
+
+    public String convertResponseMessage() {
+        return value;
+    }
 }

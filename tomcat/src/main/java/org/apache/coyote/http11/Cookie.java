@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ public class Cookie {
     }
 
     public static Cookie read(String rawValue) {
-        Map<String, String> tempCookies = new HashMap<>();
+        Map<String, String> tempCookies = new LinkedHashMap<>();
         String[] elements = rawValue.split(COOKIE_ELEMENT_DELIMITER);
         Stream.of(elements)
                 .forEach(element -> parseElement(tempCookies, element));

@@ -31,7 +31,7 @@ public class HttpRequest {
         String line = bufferedReader.readLine();
         validateNotNull(line);
         String[] tokens = splitByDelimiter(line, REQUEST_LINE_DELIMITER, REQUEST_LINE_TOKEN_COUNT);
-        return new HttpRequestLine(HttpMethod.findByName(tokens[0]), tokens[1], tokens[2]);
+        return new HttpRequestLine(HttpMethod.findByName(tokens[0]), tokens[1], tokens[2].trim());
     }
 
     private void validateNotNull(String line) {
@@ -96,5 +96,9 @@ public class HttpRequest {
 
     public String getFileExtension() {
         return this.httpRequestLine.getFileExtension();
+    }
+
+    public String getHttpVersion() {
+        return this.httpRequestLine.getHttpVersion();
     }
 }

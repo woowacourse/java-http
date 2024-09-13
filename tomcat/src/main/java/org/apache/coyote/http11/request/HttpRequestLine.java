@@ -36,4 +36,8 @@ public class HttpRequestLine {
     private boolean existsFileExtension() {
         return urlPath.lastIndexOf(FILE_EXTENSION_DELIMITER) >= 0;
     }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
 }

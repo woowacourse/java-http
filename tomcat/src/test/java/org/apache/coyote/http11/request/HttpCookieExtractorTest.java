@@ -14,10 +14,10 @@ public class HttpCookieExtractorTest {
     @Test
     @DisplayName("헤더에서 쿠키를 추출한다.")
     void should_separate_cookie_from_request_header() {
-        //when
+        //given
         HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(Map.of("Cookie", cookies));
 
-        //given
+        //when
         HttpCookie httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
 
         //then

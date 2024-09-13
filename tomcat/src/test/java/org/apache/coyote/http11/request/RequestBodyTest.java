@@ -22,9 +22,9 @@ class RequestBodyTest {
 
         // then
         assertAll(
-                () -> assertThat(actual.get("account")).isEqualTo(account),
-                () -> assertThat(actual.get("password")).isEqualTo(password),
-                () -> assertThat(actual.get("email")).isEqualTo(email)
+                () -> assertThat(actual).containsEntry("account", account),
+                () -> assertThat(actual).containsEntry("password", password),
+                () -> assertThat(actual).containsEntry("email", email)
         );
     }
 

@@ -40,9 +40,9 @@ class HttpRequestParserTest {
                 () -> assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
                 () -> assertThat(requestLine.getPath()).isEqualTo("/index.html"),
-                () -> assertThat(header).size().isEqualTo(2),
-                () -> assertThat(header.get("Accept")).isEqualTo("text/html"),
-                () -> assertThat(header.get("Content-Length")).isEqualTo("11"),
+                () -> assertThat(header).hasSize(2),
+                () -> assertThat(header).containsEntry("Accept", "text/html"),
+                () -> assertThat(header).containsEntry("Content-Length", "11"),
                 () -> assertThat(requestBody.getContent()).isEqualTo("hello world")
         );
     }
@@ -72,9 +72,9 @@ class HttpRequestParserTest {
                 () -> assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
                 () -> assertThat(requestLine.getPath()).isEqualTo("/index.html"),
-                () -> assertThat(header).size().isEqualTo(2),
-                () -> assertThat(header.get("Accept")).isEqualTo("text/html"),
-                () -> assertThat(header.get("Content-Length")).isEqualTo("0"),
+                () -> assertThat(header).hasSize(2),
+                () -> assertThat(header).containsEntry("Accept", "text/html"),
+                () -> assertThat(header).containsEntry("Content-Length", "0"),
                 () -> assertThat(requestBody.getContent()).isEmpty()
         );
     }

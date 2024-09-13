@@ -52,7 +52,7 @@ class HttpRequestTest {
         String actual = request.getContentType();
 
         // then
-        assertThat(actual).isEqualTo(null);
+        assertThat(actual).isNull();
     }
 
     @Test

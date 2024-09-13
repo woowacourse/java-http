@@ -13,15 +13,15 @@ public class HttpCookie {
     }
 
     public HttpCookie(String cookie) {
-        if (cookie != null) {
-            for (String cookieParts : cookie.split(" ")) {
+        if (cookie != null && !cookie.isEmpty()) {
+            for (String cookieParts : cookie.split("; ")) {
                 String[] keyAndValue = cookieParts.split("=");
                 cookies.put(keyAndValue[0], keyAndValue[1]);
             }
         }
     }
 
-    public HttpCookie ofJSessionId(String sessionId) {
+    public static HttpCookie ofJSessionId(String sessionId) {
         HttpCookie cookie = new HttpCookie();
         cookie.cookies.put(JSESSIONID, sessionId);
         return cookie;
@@ -33,5 +33,9 @@ public class HttpCookie {
 
     public String getJSessionId() {
         return cookies.get(JSESSIONID);
+    }
+
+    public Map<String, String> getCookies() {
+        return cookies;
     }
 }

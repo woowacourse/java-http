@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
 
 class ConnectorTest {
-
+    /*
+    반드시 단독으로 실행해야 합니다. 다른 테스트와 함깨 실행할 경우 실패합니다.
+     */
     @Test
     @DisplayName("350번째 연결 요청은 성공하고 351번째 요청은 실패한다.")
     void requestFailWhenTooMany() throws InterruptedException {

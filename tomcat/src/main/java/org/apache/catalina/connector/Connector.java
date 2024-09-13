@@ -52,12 +52,10 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getId() + "시작입니다.");
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
             connect();
         }
-        System.out.println(Thread.currentThread().getId() + "끝입니다.");
     }
 
     private void connect() {

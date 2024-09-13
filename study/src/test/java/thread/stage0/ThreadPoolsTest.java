@@ -33,10 +33,10 @@ class ThreadPoolsTest {
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
         final int expectedPoolSize = executor.getPoolSize();
-        final int expectedQueueSize = executor.getQueue().size();
+        final int expectedQueueSize = executor.getQueue().size(); // 대기하는 작업 수
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        assertThat(expectedPoolSize).isEqualTo(2);
+        assertThat(expectedQueueSize).isEqualTo(1);
     }
 
     /*
@@ -57,7 +57,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = executor.getPoolSize();
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

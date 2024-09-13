@@ -16,7 +16,6 @@ import org.apache.coyote.http11.data.HttpVersion;
 import org.apache.coyote.http11.data.MediaType;
 import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
-import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +59,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse requestResponse(HttpRequest request) throws IOException {
-        String sessionId = request.getSessionId();
-        if (sessionId != null && SessionManager.findSession(sessionId) == null) {
-            return new HttpResponse(HttpVersion.HTTP_1_1)
-                    .setHttpStatusCode(HttpStatusCode.FOUND)
-                    .setRedirectUrl("/login.html");
+        HttpResponse response = InvalidSessionRemover.remove(request);
+        if (response != null) {
+            return response;
         }
+
         Controller controller = RequestMapping.getController(request);
         if (controller == null) {
             return new HttpResponse(HttpVersion.HTTP_1_1)
                     .setHttpStatusCode(HttpStatusCode.NOT_FOUND);
         }
-        HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
+
+        response = new HttpResponse(HttpVersion.HTTP_1_1);
         controller.service(request, response);
         return response;
     }

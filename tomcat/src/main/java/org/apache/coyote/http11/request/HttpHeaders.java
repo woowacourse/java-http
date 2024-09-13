@@ -16,12 +16,20 @@ public class HttpHeaders {
 
         for (String line : lines) {
             String[] split = line.split(": ");
-            if (split.length == 2) {
-                value.put(split[0], split[1]);
-            }
+            validate(split);
+            value.put(split[0], split[1]);
         }
 
         return new HttpHeaders(value);
+    }
+
+    private static void validate(String[] split) {
+        if (split.length != 2) {
+            throw new IllegalArgumentException("key value not matched");
+        }
+        if (split[0].isBlank() || split[1].isBlank()) {
+            throw new IllegalArgumentException("key value cant not be blank");
+        }
     }
 
     public boolean contains(String key) {

@@ -17,11 +17,7 @@ class HttpLocationTest {
 
     @Test
     @DisplayName("파일 형식이 따로 지정되지 않으면 html을 반환한다.")
-    void getFileName() {
-        Assertions.assertThat(HttpLocation.from("/hello").getExtension()).isEqualTo("html");
-    }
-
-    @Test
     void getExtension() {
+        Assertions.assertThat(HttpLocation.from("/hello").getExtension()).isEqualTo("html");
     }
 }

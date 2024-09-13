@@ -10,12 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RequestMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
     private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestMapping() {
@@ -24,17 +21,17 @@ public class RequestMapping {
         controllers.put("/register", new RegisterController());
     }
 
-    public void matchController(HttpRequest request, HttpResponse response) throws Exception {
+    public void matchService(HttpRequest request, HttpResponse response) throws Exception {
         Controller controller = selectController(request);
 
         controller.service(request, response);
     }
 
-    private Controller selectController(HttpRequest request) throws Exception {
-        Controller controller = controllers.get(request.getUrl());
+    private Controller selectController(HttpRequest request) {
         if (request.isResource()) {
             return new StaticResourceController();
         }
+        Controller controller = controllers.get(request.getUrl());
         if (controller == null) {
             return new NotFoundController();
         }

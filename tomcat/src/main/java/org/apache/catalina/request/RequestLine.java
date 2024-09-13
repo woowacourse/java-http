@@ -27,7 +27,7 @@ public class RequestLine {
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(SPACE);
-        if (parts.length < REQUEST_LINE_PARTS_COUNT) {
+        if (parts.length != REQUEST_LINE_PARTS_COUNT) {
             throw new IllegalArgumentException(requestLine + ": 요청 헤더의 형식이 올바르지 않습니다.");
         }
         this.httpMethod = HttpMethod.of(parts[HTTP_METHOD_INDEX]);

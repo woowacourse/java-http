@@ -41,13 +41,4 @@ public class SessionManager implements Manager {
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
     }
-
-    public Optional<Session> getByAttribute(String attribute, Object value) {
-        for (Entry<String, Session> entry : SESSIONS.entrySet()) {
-            if (entry.getValue().hasAttribute(attribute, value)) {
-                return Optional.ofNullable(entry.getValue());
-            }
-        }
-        return Optional.empty();
-    }
 }

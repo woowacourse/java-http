@@ -29,8 +29,4 @@ public class Session {
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
-
-    public boolean hasAttribute(String name, Object value) {
-        return Objects.nonNull(values.get(name)) && values.get(name).equals(value);
-    }
 }

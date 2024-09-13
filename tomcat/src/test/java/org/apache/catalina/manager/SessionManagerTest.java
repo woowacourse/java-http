@@ -68,42 +68,6 @@ class SessionManagerTest {
         );
     }
 
-    @DisplayName("세션 속성으로 존재하는 세션을 조회해온다.")
-    @Test
-    void getByAttribute() throws IOException {
-        // given
-        session.setAttribute("user", "account");
-        HttpRequest request = mock(HttpRequest.class);
-        HttpCookie cookie = mock(HttpCookie.class);
-        when(cookie.hasJSessionId()).thenReturn(true);
-        when(cookie.getJsessionid()).thenReturn(session.getId());
-        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
-
-        // When
-        Optional<Session> result = sessionManager.getByAttribute("user", "account");
-
-        // Then
-        assertThat(result.get()).isEqualTo(session);
-    }
-
-    @DisplayName("주어진 속성을 가진 세션이 없다.")
-    @Test
-    void cannotGetByAttribute() throws IOException {
-        // given
-        session.setAttribute("user", "account");
-        HttpRequest request = mock(HttpRequest.class);
-        HttpCookie cookie = mock(HttpCookie.class);
-        when(cookie.hasJSessionId()).thenReturn(true);
-        when(cookie.getJsessionid()).thenReturn(session.getId());
-        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
-
-        // When
-        Optional<Session> result = sessionManager.getByAttribute("user", "wrongAccount");
-
-        // Then
-        assertThat(result).isEmpty();
-    }
-
     @DisplayName("세션을 조회했을 때 존재하지 않는다.")
     @Test
     void findSessionNotExists() throws IOException {

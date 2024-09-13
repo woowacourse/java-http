@@ -11,7 +11,7 @@ public enum FileExtension {
     PNG("png"),
     JPG("jpeg"),
     SVG("svg"),
-    ;
+    NONE("");
 
     private final String extension;
 
@@ -21,7 +21,7 @@ public enum FileExtension {
 
     public static boolean isFileExtension(String path) {
         for (FileExtension ext : values()) {
-            if (path.endsWith(ext.getExtension())) {
+            if (path.endsWith(ext.getExtension()) && !ext.equals(NONE)) {
                 return true;
             }
         }

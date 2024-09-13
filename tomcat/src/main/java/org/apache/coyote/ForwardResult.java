@@ -1,10 +1,12 @@
 package org.apache.coyote;
 
-import org.apache.coyote.http11.response.ResponseHeader;
+public record ForwardResult(HttpStatusCode statusCode, String path) {
 
-public record ForwardResult(HttpStatusCode statusCode, String path, ResponseHeader header) {
+    public static ForwardResult ofRedirect(String path) {
+        return new ForwardResult(HttpStatusCode.FOUND, path);
+    }
 
-    public ForwardResult(HttpStatusCode statusCode, String path) {
-        this(statusCode, path, new ResponseHeader());
+    public boolean isRedirection() {
+        return statusCode.isRedirection();
     }
 }

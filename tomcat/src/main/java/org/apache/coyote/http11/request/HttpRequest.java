@@ -7,13 +7,16 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpVersion;
+import org.apache.coyote.Session;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ":";
+    private static final String END_OF_INPUT = "";
 
     private final RequestLine requestLine;
     private final RequestHeader header;
@@ -31,7 +34,7 @@ public class HttpRequest {
     private RequestHeader parseHeader(BufferedReader bufferedReader) throws IOException {
         RequestHeader header = new RequestHeader();
         String readLine = bufferedReader.readLine();
-        while (readLine != null && !readLine.equals("")) {
+        while (readLine != null && !readLine.equals(END_OF_INPUT)) {
             String[] headerToken = readLine.split(HEADER_DELIMITER);
             String value = reconstructHeaderValue(Arrays.copyOfRange(headerToken, 1, headerToken.length));
             header.addHeader(headerToken[0], value);
@@ -43,7 +46,7 @@ public class HttpRequest {
     private RequestBody parseBody(BufferedReader bufferedReader) throws IOException {
         StringBuilder stringBody = new StringBuilder();
 
-        if (!header.hasContentLength()) {
+        if (requestLine.getMethod().equals(HttpMethod.GET)) {
             return RequestBody.empty();
         }
 
@@ -55,11 +58,9 @@ public class HttpRequest {
     }
 
     private String reconstructHeaderValue(String[] headerValues) {
-        StringJoiner stringJoiner = new StringJoiner(HEADER_DELIMITER);
-        for (String value : headerValues) {
-            stringJoiner.add(value.strip());
-        }
-        return stringJoiner.toString();
+        return Arrays.stream(headerValues)
+                .map(String::strip)
+                .collect(Collectors.joining(HEADER_DELIMITER));
     }
 
     public HttpMethod getMethod() {
@@ -70,10 +71,6 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getUrl() {
-        return requestLine.getUrl();
-    }
-
     public HttpVersion getVersion() {
         return requestLine.getVersion();
     }
@@ -82,16 +79,17 @@ public class HttpRequest {
         return header;
     }
 
-    public Map<String, String> getQueryParams() {
-        return requestLine.getQueryParams();
+    public Session getSession() {
+        HttpCookie cookies = header.getCookies();
+        return new Session(cookies.getJsessionid());
     }
 
-    public boolean isBodyEmpty() {
-        return body.isEmpty();
+    public boolean existsSession() {
+        return header.existsSession();
     }
 
-    public String getBody() {
-        return body.getBodyValue();
+    public Map<String, String> getBody() {
+        return body.getBody();
     }
 
     @Override

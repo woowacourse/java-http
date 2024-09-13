@@ -5,16 +5,29 @@ import org.apache.coyote.HttpVersion;
 
 public class StatusLine {
 
+    private static final String RESPONSE_SPACE = " ";
     private final HttpVersion version;
-    private final HttpStatusCode statusCode;
+    private HttpStatusCode statusCode;
 
-    public StatusLine(HttpVersion version, HttpStatusCode statusCode) {
+    private StatusLine(HttpVersion version, HttpStatusCode statusCode) {
         this.version = version;
         this.statusCode = statusCode;
     }
 
+    public static StatusLine ofHTTP11(HttpStatusCode statusCode) {
+        return new StatusLine(HttpVersion.HTTP_1_1, statusCode);
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public boolean isRedirection() {
+        return statusCode.isRedirection();
+    }
+
     public String getReponseString() {
-        return version.getVersionString() + " " + statusCode.toStatus() + " ";
+        return version.getVersionString() + RESPONSE_SPACE + statusCode.toStatus() + RESPONSE_SPACE;
     }
 
     @Override

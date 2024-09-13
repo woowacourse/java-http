@@ -10,6 +10,16 @@ public class RequestLine {
     private static final String QUERY_DELIMITER = "&";
     private static final String PARAM_DELIMITER = "=";
     private static final String QUERY_START = "\\?";
+    private static final String SPACE_DELIMITER = " ";
+    private static final String URL_NO_QUERY = "?";
+
+    private static final int QUERY_LINE_INDEX = 1;
+    private static final int METHOD_INDEX = 0;
+    private static final int URL_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
+
+    private static final int EXPECTED_REQUEST_LINE_TOKENS = 3;
+    private static final int QUERY_PARAM_PARTS = 2;
 
     private final HttpMethod method;
     private final String path;
@@ -18,7 +28,12 @@ public class RequestLine {
     private final Map<String, String> queryParams;
 
     public RequestLine(
-            HttpMethod method, String path, String url, HttpVersion version, Map<String, String> queryParams) {
+            HttpMethod method,
+            String path,
+            String url,
+            HttpVersion version,
+            Map<String, String> queryParams
+    ) {
         this.method = method;
         this.path = path;
         this.url = url;
@@ -27,11 +42,14 @@ public class RequestLine {
     }
 
     public static RequestLine from(String requestLine) {
-        String[] requestLineToken = requestLine.split(" ");
+        String[] requestLineToken = requestLine.split(SPACE_DELIMITER);
+        if (requestLineToken.length != EXPECTED_REQUEST_LINE_TOKENS) {
+            throw new IllegalArgumentException("적절하지 않은 요청 라인입니다.");
+        }
 
-        HttpMethod method = HttpMethod.from(requestLineToken[0]);
-        String url = requestLineToken[1];
-        HttpVersion version = HttpVersion.from(requestLineToken[2]);
+        HttpMethod method = HttpMethod.from(requestLineToken[METHOD_INDEX]);
+        String url = requestLineToken[URL_INDEX];
+        HttpVersion version = HttpVersion.from(requestLineToken[VERSION_INDEX]);
         String path = parsePath(url);
         Map<String, String> queryParams = parseQueryParameter(url);
 
@@ -39,24 +57,26 @@ public class RequestLine {
     }
 
     private static String parsePath(String url) {
-        if (!url.contains("?")) {
+        if (!url.contains(URL_NO_QUERY)) {
             return url;
         }
-        String[] urlParts = url.split("\\?");
+        String[] urlParts = url.split(QUERY_START);
         return urlParts[0];
     }
 
     private static Map<String, String> parseQueryParameter(String url) {
         Map<String, String> queryParams = new HashMap<>();
-        if (!url.contains("?")) {
+        if (!url.contains(QUERY_START.substring(1))) {
             return queryParams;
         }
         String[] urlParts = url.split(QUERY_START);
-        String queryLine = urlParts[1];
+        String queryLine = urlParts[QUERY_LINE_INDEX];
         String[] queryList = queryLine.split(QUERY_DELIMITER);
         for (String query : queryList) {
             String[] queryParam = query.split(PARAM_DELIMITER);
-            queryParams.put(queryParam[0], queryParam[1]);
+            if (queryParam.length == QUERY_PARAM_PARTS) {
+                queryParams.put(queryParam[0], queryParam[1]);
+            }
         }
 
         return queryParams;

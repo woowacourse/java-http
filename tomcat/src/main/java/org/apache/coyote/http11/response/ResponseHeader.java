@@ -3,10 +3,13 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.coyote.CharsetType;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.http11.HttpCookie;
 
 public class ResponseHeader {
 
+    private static final String CHARSET = "; charset=";
     private final String LOCATION = "Location";
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_LENGTH = "Content-Length";
@@ -18,16 +21,37 @@ public class ResponseHeader {
         this.header = new HashMap<>();
     }
 
+    public void setContentType(MimeType mimeType) {
+        String contentType = mimeType.getMimeType();
+        if (mimeType.isTextBased()) {
+            contentType += CHARSET + CharsetType.UTF_8.getCharset();
+        }
+        addHeader(CONTENT_TYPE, contentType);
+    }
+
+    public boolean existsSession() {
+        if (!header.containsKey(SET_COOKIE)) {
+            return false;
+        }
+
+        HttpCookie cookies = getCookies();
+        return cookies.containsJSessionId();
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(header.get(SET_COOKIE));
+    }
+
+    public String getLocation() {
+        return header.get(LOCATION);
+    }
+
     public void setLocation(String location) {
         addHeader(LOCATION, location);
     }
 
-    public void addHeader(String key, String value) {
+    private void addHeader(String key, String value) {
         header.put(key, value);
-    }
-
-    public void setContentType(MimeType mimeType) {
-        addHeader(CONTENT_TYPE, mimeType.getContentType());
     }
 
     public String toHeaderString() {

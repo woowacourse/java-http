@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.CharsetType;
 import org.apache.coyote.MimeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class ResponseHeaderTest {
         MimeType mimeType = MimeType.HTML;
         String expected = String.join("\r\n",
                 "Content-Length: 12 ",
-                "Content-Type: " + mimeType.getContentType() + " "
+                "Content-Type: " + mimeType.getMimeType() + "; charset=" + CharsetType.UTF_8.getCharset() + " "
         );
         ResponseHeader header = new ResponseHeader();
 

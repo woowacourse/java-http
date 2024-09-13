@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.FrontController;
+import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -33,17 +33,24 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (InputStream inputStream = connection.getInputStream(); OutputStream outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = new HttpRequest(inputStream);
-            FrontController frontController = new FrontController();
-            HttpResponse httpResponse = frontController.dispatch(httpRequest, manager);
-
-            outputStream.write(httpResponse.toByte());
+            HttpRequest request = new HttpRequest(inputStream);
+            RequestMapping requestMapping = new RequestMapping();
+            HttpResponse response = requestMapping.dispatch(request);
+            handleSession(response);
+            outputStream.write(response.toByte());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void handleSession(HttpResponse response) {
+        if (response.existsSession()) {
+            manager.add(response.getSession());
         }
     }
 }

@@ -1,15 +1,13 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.Manager;
-import org.apache.coyote.ForwardResult;
-import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class NotFoundController extends AbstractController {
 
     @Override
-    public ForwardResult execute(HttpRequest request, Manager manager) {
-        return new ForwardResult(HttpStatusCode.FOUND, "404.html");
+    public void doGet(HttpRequest request, HttpResponse response) {
+        response.setLocation("404.html");
     }
 }

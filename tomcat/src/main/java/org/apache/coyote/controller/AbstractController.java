@@ -2,41 +2,60 @@ package org.apache.coyote.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.apache.catalina.Manager;
-import org.apache.coyote.ForwardResult;
+import java.util.Arrays;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.file.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.util.FileExtension;
 
 public abstract class AbstractController implements Controller {
 
-    public HttpResponse service(HttpRequest request, Manager manager) {
-        ForwardResult result = execute(request, manager);
+    @Override
+    public void service(HttpRequest request, HttpResponse response) {
+        HttpMethod method = request.getMethod();
 
-        ResponseHeader header = result.header();
-        MimeType mimeType = MimeType.from(FileExtension.HTML);
-        header.setContentType(mimeType);
-
-        if (result.statusCode().isRedirection()) {
-            header.setLocation(result.path());
-            return new HttpResponse(result.statusCode(), header, new byte[]{});
+        if (HttpMethod.GET.equals(method)) {
+            doGet(request, response);
+        } else if (HttpMethod.POST.equals(method)) {
+            doPost(request, response);
+        } else {
+            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
         }
 
-        try {
-            Path filePath = Paths.get(getClass().getClassLoader().getResource("static/" + result.path()).toURI());
-            byte[] body = Files.readAllBytes(filePath);
-            return new HttpResponse(HttpStatusCode.OK, header, body);
-        } catch (URISyntaxException | IOException e) {
-            header.setContentType(MimeType.OTHER);
-            return new HttpResponse(HttpStatusCode.NOT_FOUND, header, "No File Found".getBytes());
+        if (response.isRedirection()) {
+            handleRedirection(response);
+            return;
         }
+        handleResponse(response);
     }
 
-    protected abstract ForwardResult execute(HttpRequest request, Manager manager);
+    protected void doGet(HttpRequest request, HttpResponse response) {
+    }
+
+    protected void doPost(HttpRequest request, HttpResponse response) {
+    }
+
+    private void handleRedirection(HttpResponse response) {
+        String location = response.getLocation();
+        response.setLocation(location);
+        response.setMimeType(MimeType.from(FileExtension.from(location)));
+        response.setBody("".getBytes());
+    }
+
+    private void handleResponse(HttpResponse response) {
+        try {
+            String location = response.getLocation();
+            byte[] body = ResourceReader.read(location);
+            response.setStatus(HttpStatusCode.OK);
+            response.setMimeType(MimeType.from(FileExtension.from(location)));
+            response.setBody(Arrays.toString(body).getBytes());
+        } catch (URISyntaxException | IOException e) {
+            response.setMimeType(MimeType.OTHER);
+            response.setStatus(HttpStatusCode.NOT_FOUND);
+            response.setBody("No File Found".getBytes());
+        }
+    }
 }

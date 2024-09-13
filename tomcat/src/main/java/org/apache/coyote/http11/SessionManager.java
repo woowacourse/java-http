@@ -4,10 +4,11 @@ import org.apache.catalina.Manager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public SessionManager() {
     }

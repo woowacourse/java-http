@@ -19,9 +19,9 @@ public class HttpRequest {
 	public HttpRequest(BufferedReader reader) throws IOException {
 		String requestLine = reader.readLine();
 		this.requestLine = new RequestLine(
-			Method.parseRequestMethod(requestLine),
-			Path.parseRequestPath(requestLine),
-			VersionOfProtocol.parseReqeustVersionOfProtocol(requestLine)
+			Method.parseRequestToMethod(requestLine),
+			Path.parseRequestToPath(requestLine),
+			VersionOfProtocol.parseReqeustToVersionOfProtocol(requestLine)
 		);
 		this.headers = Headers.parseRequestHeader(reader);
 		this.body = Body.parseRequestBody(headers, reader);

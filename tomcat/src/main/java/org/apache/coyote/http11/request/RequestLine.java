@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class RequestLine {
 
@@ -20,14 +20,6 @@ public class RequestLine {
         return method.equals("POST");
     }
 
-    public boolean isRoot() {
-        return requestUrl.equals("/");
-    }
-
-    public boolean isIndex() {
-        return requestUrl.equals("/index.html");
-    }
-
     public boolean hasCss() {
         return requestUrl.contains(".css");
     }
@@ -36,20 +28,8 @@ public class RequestLine {
         return requestUrl.contains(".js");
     }
 
-    public boolean has401() {
-        return requestUrl.contains("401");
-    }
-
-    public boolean hasRegister() {
-        return requestUrl.contains("register");
-    }
-
-    public boolean isLogin() {
-        return requestUrl.equals("/login");
-    }
-
-    public boolean hasQuestion() {
-        return requestUrl.contains("?");
+    public boolean hasHtml() {
+        return requestUrl.contains(".html");
     }
 
     public String getMethod() {

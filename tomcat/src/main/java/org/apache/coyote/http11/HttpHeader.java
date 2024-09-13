@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.response.ContentType;
 
 public class HttpHeader {
 
-    private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
+    private static final String RESPONSE_HEADER_FORMAT = "%s: %s\r\n";
     private final Map<String, String> headers;
 
     public HttpHeader() {
@@ -20,6 +21,10 @@ public class HttpHeader {
         StringBuilder stringBuilder = new StringBuilder();
         headers.forEach((key, value) -> stringBuilder.append(String.format(RESPONSE_HEADER_FORMAT, key, value)));
         return stringBuilder.toString();
+    }
+
+    public void putContentType(String type) {
+        headers.put("Content-Type", ContentType.getContentType(type));
     }
 
     public int getContentLength() {

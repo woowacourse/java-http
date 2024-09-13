@@ -1,18 +1,21 @@
 package cache.com.example;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
-        return "index";
+    public ResponseEntity<String> index() {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache().cachePrivate())
+                .header(HttpHeaders.CONTENT_ENCODING, "gzip")
+                .body("index");
     }
 
     /**
@@ -29,8 +32,9 @@ public class GreetingController {
     }
 
     @GetMapping("/etag")
-    public String etag() {
-        return "index";
+    public ResponseEntity<String> etag() {
+        return ResponseEntity.ok()
+                .body("index");
     }
 
     @GetMapping("/resource-versioning")

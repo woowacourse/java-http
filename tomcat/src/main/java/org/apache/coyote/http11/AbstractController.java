@@ -11,8 +11,15 @@ public abstract class AbstractController implements Controller {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
         if (httpMethod == HttpMethod.POST) {
             doPost(httpRequest, httpResponse);
-        } else if (httpMethod == HttpMethod.GET) {
+        }
+        if (httpMethod == HttpMethod.GET) {
             doGet(httpRequest, httpResponse);
+        }
+        if (httpMethod == HttpMethod.PATCH) {
+            doPatch(httpRequest, httpResponse);
+        }
+        if (httpMethod == HttpMethod.DELETE) {
+            doDelete(httpRequest, httpResponse);
         }
     }
 
@@ -20,5 +27,11 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    }
+
+    protected void doPatch(HttpRequest request, HttpResponse response) throws IOException {
+    }
+
+    protected void doDelete(HttpRequest request, HttpResponse response) throws IOException {
     }
 }

@@ -59,7 +59,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
-        return queryParams.size() < 2 ||
+        return queryParams.size() != 2 ||
                 queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null;
     }
 

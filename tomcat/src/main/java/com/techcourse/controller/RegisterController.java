@@ -55,7 +55,7 @@ public class RegisterController extends AbstractController {
     }
 
     private boolean hasMissingRequiredParams(Map<String, String> queryParams) {
-        return queryParams.size() < 3 ||
+        return queryParams.size() != 3 ||
                 queryParams.get(ACCOUNT) == null ||
                 queryParams.get(PASSWORD) == null ||
                 queryParams.get(EMAIL) == null;

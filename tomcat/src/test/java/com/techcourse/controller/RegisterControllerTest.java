@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.dispatcher.DispatcherServlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
 import org.apache.coyote.http11.HttpResponse;
@@ -24,7 +25,7 @@ class RegisterControllerTest {
                     "GET /register HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -44,7 +45,7 @@ class RegisterControllerTest {
             Query query = Query.create("account=tacan&email=tacam@gmail.com&password=1234");
             HttpRequest request = new HttpRequest(startLine, null, query);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);

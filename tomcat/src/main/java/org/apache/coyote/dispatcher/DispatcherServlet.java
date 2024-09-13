@@ -1,19 +1,22 @@
-package com.techcourse.controller;
+package org.apache.coyote.dispatcher;
 
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.ControllerAdviser;
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class FrontController {
+public class DispatcherServlet {
 
     private final RequestMapping requestMapping;
 
-    private FrontController() {
+    private DispatcherServlet() {
         requestMapping = new RequestMapping();
     }
 
-    public static FrontController getInstance() {
-        return FrontControllerHolder.INSTANCE;
+    public static DispatcherServlet getInstance() {
+        return DispatcherServletHolder.INSTANCE;
     }
 
     public void service(HttpRequest request, HttpResponse response) {
@@ -25,8 +28,8 @@ public class FrontController {
         }
     }
 
-    private static class FrontControllerHolder {
+    private static class DispatcherServletHolder {
 
-        private static final FrontController INSTANCE = new FrontController();
+        private static final DispatcherServlet INSTANCE = new DispatcherServlet();
     }
 }

@@ -39,6 +39,22 @@ public class LoginController extends AbstractController {
                 );
     }
 
+    private void loginSuccess(HttpResponse httpResponse, User user) {
+        Session session = new Session(user.getId().toString());
+        session.setAttribute("user", user);
+        SessionManager.getInstance().add(session);
+
+        httpResponse.sendRedirect(ROOT_LOCATION);
+
+        HttpCookie httpCookie = new HttpCookie(JAVA_SESSION_ID, user.getId().toString());
+        httpResponse.setCookie(httpCookie);
+    }
+
+    private void loginFail(HttpResponse httpResponse) {
+        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/401.html"));
+    }
+
     private void processLoginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (isAlreadyLogin(httpRequest)) {
             httpResponse.sendRedirect(ROOT_LOCATION);
@@ -79,21 +95,5 @@ public class LoginController extends AbstractController {
                 .map(HttpCookie::getValue)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Cookie에 JSessionId가 존재하지 않습니다."));
-    }
-
-    private void loginSuccess(HttpResponse httpResponse, User user) {
-        Session session = new Session(user.getId().toString());
-        session.setAttribute("user", user);
-        SessionManager.getInstance().add(session);
-
-        httpResponse.sendRedirect(ROOT_LOCATION);
-
-        HttpCookie httpCookie = new HttpCookie(JAVA_SESSION_ID, user.getId().toString());
-        httpResponse.setCookie(httpCookie);
-    }
-
-    private void loginFail(HttpResponse httpResponse) {
-        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
-        httpResponse.setResponseBody(ResourceFileLoader.loadStaticFileToString("/401.html"));
     }
 }

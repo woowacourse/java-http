@@ -10,6 +10,7 @@ import org.apache.coyote.http11.request.line.Uri;
 
 public class HttpServletRequest {
 
+    public static final String JSESSION_COOKIE_NAME = "JSESSIONID";
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
@@ -46,7 +47,7 @@ public class HttpServletRequest {
 
     public String getSessionId() {
         HttpCookies cookies = HttpCookies.from(httpHeaders);
-        return cookies.getCookieValue("JSESSIONID");
+        return cookies.getCookieValue(JSESSION_COOKIE_NAME);
     }
 
     public Method getMethod() {

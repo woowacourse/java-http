@@ -9,6 +9,7 @@ import org.apache.coyote.http11.response.line.ResponseLine;
 
 public class HttpServletResponse {
 
+    public static final String JSESSION_COOKIE_PREFIX = "JSESSIONID=";
     private ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
@@ -57,6 +58,6 @@ public class HttpServletResponse {
     }
 
     public void setJsessionCookie(UUID uuid) {
-        httpHeaders.putHeader(HttpHeaderName.SET_COOKIE, "JSESSIONID=" + uuid);
+        httpHeaders.putHeader(HttpHeaderName.SET_COOKIE, JSESSION_COOKIE_PREFIX + uuid);
     }
 }

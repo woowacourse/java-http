@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.catalina.Controller;
 import org.apache.coyote.http11.Http11Processor;
@@ -23,7 +23,7 @@ public class Connector implements Runnable {
     private final Controller controller;
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executor;
 
     public Connector(final Controller controller) {
         // maxThreads: 스레드 풀에서 동시에 실행할 수 있는 최대 스레드 수입니다. 초과하면 대기 큐에 추가된다.
@@ -35,7 +35,18 @@ public class Connector implements Runnable {
         this.controller = controller;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executor = createThreadPool(maxThreads, acceptCount);
+    }
+
+    // 참고: https://dev-ws.tistory.com/96
+    private static ThreadPoolExecutor createThreadPool(int maxThreads, int acceptCount) {
+        return new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(acceptCount)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -77,7 +88,7 @@ public class Connector implements Runnable {
             return;
         }
         Http11Processor processor = new Http11Processor(controller, connection);
-        executorService.execute(processor);
+        executor.execute(processor);
     }
 
     public void stop() {
@@ -92,14 +103,14 @@ public class Connector implements Runnable {
 
     private void shutdown() {
         try {
-            executorService.shutdown(); // 실행 중인 모든 Task가 수행되면 종료
+            executor.shutdown(); // 실행 중인 모든 Task가 수행되면 종료
             // 800ms 이내에 종료되지 않으면 실행 중인 모든 Task를 즉시 종료
-            if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
-                executorService.shutdownNow();
+            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
             }
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
-            executorService.shutdownNow(); // 인터럽트 발생 경우에도 종료
+            executor.shutdownNow(); // 인터럽트 발생 경우에도 종료
             Thread.currentThread().interrupt(); // 인터럽트 상태를 다시 설정
         }
     }
@@ -116,5 +127,15 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    // 스레드 풀에서 대기가 아닌 실행 중인 스레드 수를 반환
+    public int getPoolSize() {
+        return executor.getPoolSize();
+    }
+
+    // 대기 큐에서 대기 중인 요청 수를 반환
+    public int getQueueSize() {
+        return executor.getQueue().size();
     }
 }

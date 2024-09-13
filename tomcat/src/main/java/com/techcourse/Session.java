@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package com.techcourse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,14 +10,6 @@ public class Session {
 
     public Session(String sessionId) {
         this.sessionId = sessionId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public Object getAttribute(String name) {
-        return attributes.get(name);
     }
 
     public void setAttributes(String name, Object value) {

@@ -1,32 +1,33 @@
-package com.techcourse.controller;
+package com.techcourse.servlet.mapping;
 
-import java.io.IOException;
-import org.apache.coyote.http11.HttpProtocol;
-import org.apache.coyote.http11.HttpRequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
+import com.techcourse.servlet.StaticResourceServlet;
+import org.apache.coyote.http11.Servlet;
+import org.apache.coyote.http11.common.HttpProtocol;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.util.FileUtils;
 
-public class StaticResourceController implements HttpRequestHandler {
+public class ResourceHandlerMapping implements HandlerMapping {
 
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final Method SUPPORTING_METHOD = Method.GET;
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
+    private final StaticResourceServlet staticResourceServlet = new StaticResourceServlet();
+    
+    @Override
+    public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
+        return isAvailableResourceRequest(httpServletRequest);
+    }
 
     @Override
-    public boolean supports(HttpRequest request) {
+    public Servlet getHandler(HttpServletRequest request) {
+        return staticResourceServlet;
+    }
+
+    private boolean isAvailableResourceRequest(HttpServletRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 !request.isUriHome() &&
                 resourceAvailable(request.getUriPath());
-    }
-
-    @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
-        String fileName = request.getUriPath();
-        String fileContent = FileUtils.readFile(fileName);
-        return HttpResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
     }
 
     private boolean resourceAvailable(String fileName) {

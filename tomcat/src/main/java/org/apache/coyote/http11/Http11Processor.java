@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.servlet.DispatcherServlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,9 +9,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.common.HttpHeaderName;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpMessageBody;
+import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +22,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Dispatcher dispatcher;
+    private final DispatcherServlet dispatcherServlet;
     private final Socket connection;
 
     public Http11Processor(Socket connection) {
-        dispatcher = Dispatcher.getInstance();
+        dispatcherServlet = DispatcherServlet.getInstance();
         this.connection = connection;
     }
 
@@ -39,22 +43,23 @@ public class Http11Processor implements Runnable, Processor {
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest httpRequest = parseHttpRequest(bufferedReader);
-            HttpRequestHandler httpRequestHandler = dispatcher.mappedHandler(httpRequest);
-            HttpResponse httpResponse = httpRequestHandler.handle(httpRequest);
+            HttpServletRequest httpServletRequest = parseHttpRequest(bufferedReader);
+            HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
 
-            httpResponse.flush(outputStream);
+            dispatcherServlet.doDispatch(httpServletRequest, httpServletResponse);
+
+            flushResponse(httpServletResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
+    private HttpServletRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = readHeaders(bufferedReader);
         HttpMessageBody httpMessageBody = readMessageBody(bufferedReader, httpHeaders);
 
-        return new HttpRequest(requestLine, httpHeaders, httpMessageBody);
+        return new HttpServletRequest(requestLine, httpHeaders, httpMessageBody);
     }
 
     private HttpHeaders readHeaders(BufferedReader bufferedReader) throws IOException {
@@ -67,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpMessageBody readMessageBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
-        String lengthValue = httpHeaders.getHeaderValue("Content-Length");
+        String lengthValue = httpHeaders.getHeaderValue(HttpHeaderName.CONTENT_LENGTH);
         if (lengthValue == null) {
             return HttpMessageBody.createEmptyBody();
         }
@@ -77,5 +82,12 @@ public class Http11Processor implements Runnable, Processor {
         bufferedReader.read(buffer, 0, bodyLength);
         String requestBody = new String(buffer);
         return new HttpMessageBody(requestBody);
+    }
+
+    private void flushResponse(HttpServletResponse httpServletResponse, OutputStream outputStream)
+            throws IOException {
+        byte[] httpMessage = httpServletResponse.resolveHttpMessage().getBytes();
+        outputStream.write(httpMessage);
+        outputStream.flush();
     }
 }

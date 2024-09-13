@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.common;
 
 import com.techcourse.exception.UncheckedServletException;
 
 public class HttpMessageBody {
 
-    private final String body;
+    private String body;
 
     public HttpMessageBody(String body) {
         this.body = body;
@@ -14,8 +14,8 @@ public class HttpMessageBody {
         return new HttpMessageBody("");
     }
 
-    public byte[] getBytes() {
-        return body.getBytes();
+    public void write(String message) {
+        body = message;
     }
 
     public String resolveBodyMessage() {

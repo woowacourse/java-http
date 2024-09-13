@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request.line;
 
-import org.apache.coyote.http11.HttpProtocol;
+import org.apache.coyote.http11.common.HttpProtocol;
 
 public class RequestLine {
 
@@ -19,18 +19,6 @@ public class RequestLine {
         return new RequestLine(Method.from(lineParts[0]), new Uri(lineParts[1]), HttpProtocol.from(lineParts[2]));
     }
 
-    public Method getMethod() {
-        return method;
-    }
-
-    public String getUriPath() {
-        return uri.getPath();
-    }
-
-    public String getQueryParameter(String name) {
-        return uri.getQueryParameter(name);
-    }
-
     public boolean isMethod(Method target) {
         return method.equals(target);
     }
@@ -47,7 +35,15 @@ public class RequestLine {
         return uri.isHome();
     }
 
-    public boolean isUriStartsWith(final Uri target) {
-        return uri.isStartsWith(target);
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUriPath() {
+        return uri.getPath();
+    }
+
+    public HttpProtocol getProtocol() {
+        return protocol;
     }
 }

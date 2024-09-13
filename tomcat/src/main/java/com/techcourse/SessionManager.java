@@ -1,7 +1,9 @@
-package org.apache.coyote.http11;
+package com.techcourse;
 
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
 
@@ -24,4 +26,12 @@ public class SessionManager {
         sessions.put(sessionId, session);
     }
 
+    public UUID putUserSession(User user) {
+        UUID sessionId = UUID.randomUUID();
+        Session session = new Session(sessionId.toString());
+        session.setAttributes("user", user);
+
+        sessions.put(sessionId.toString(), session);
+        return sessionId;
+    }
 }

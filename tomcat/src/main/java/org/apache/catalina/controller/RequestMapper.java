@@ -1,7 +1,7 @@
 package org.apache.catalina.controller;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapper {
@@ -15,7 +15,7 @@ public class RequestMapper {
     }
 
     private RequestMapper() {
-        controllers = new HashMap<>();
+        controllers = new ConcurrentHashMap<>();
     }
 
     public void addMapping(String endpoint, Controller controller) {

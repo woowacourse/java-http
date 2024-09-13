@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.CoyoteException;
 
@@ -15,7 +15,7 @@ public class HttpHeader {
     private final Map<String, String> headers;
 
     public HttpHeader() {
-        this.headers = new HashMap<>();
+        this.headers = new ConcurrentHashMap<>();
     }
 
     public HttpHeader(List<String> rawHeaders) {

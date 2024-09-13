@@ -35,6 +35,10 @@ class ConcurrencyTest {
 
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
+
+        // 내 생각 : synchronized를 걸지 않으면, 디버거로 똑같은 위치(if절)에 도달하게 만들 수 있기 때문이다.
+        // 해결법 : synchronized를 걸면 디버거로 똑같은 위치에 도달하게 만드려고 시도했을 때, 이미 firstThread가 들어가 있으면
+        // secondThread는 if절에 도달할 수 없다.
         assertThat(userServlet.getUsers()).hasSize(1);
     }
 }

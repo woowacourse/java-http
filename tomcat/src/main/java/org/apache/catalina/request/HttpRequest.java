@@ -47,6 +47,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getBody() {
-        return requestBody.body();
+        return requestBody.getBody();
     }
 }

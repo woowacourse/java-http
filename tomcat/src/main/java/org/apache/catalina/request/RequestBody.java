@@ -15,7 +15,7 @@ public final class RequestBody {
         this.body = new HashMap<>();
     }
 
-    public Map<String, String> body() {
+    public Map<String, String> getBody() {
         return new HashMap<>(body);
     }
 

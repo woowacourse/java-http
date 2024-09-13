@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.handler.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
@@ -18,17 +20,20 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 100;
 
     private final ServerSocket serverSocket;
     private final HttpRequestHandler requestHandler;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, new RequestHandler(requestMapping));
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, new RequestHandler(requestMapping));
     }
 
-    public Connector(int port, int acceptCount, HttpRequestHandler requestHandler) {
+    public Connector(int port, int acceptCount, int maxThreads, HttpRequestHandler requestHandler) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
         this.requestHandler = requestHandler;
     }
@@ -73,7 +78,7 @@ public class Connector implements Runnable {
         }
 
         var processor = new Http11Processor(connection, requestHandler);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {

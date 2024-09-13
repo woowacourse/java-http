@@ -28,7 +28,7 @@ public class RegisterController extends AbstractController {
         Session session = register(requestBody);
 
         httpResponse.setStatusLine(FOUND);
-        httpResponse.setCookie(session.getId());
+        httpResponse.setCookie("JSESSIONID", session.getId());
         httpResponse.setLocation("/index.html");
 
         return httpResponse;

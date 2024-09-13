@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
             httpResponse.setLocation("/401.html");
         } else {
             httpResponse.setStatusLine(FOUND);
-            httpResponse.setCookie(session.getId());
+            httpResponse.setCookie("JSESSIONID", session.getId());
             httpResponse.setLocation("/index.html");
         }
 
@@ -47,7 +47,7 @@ public class LoginController extends AbstractController {
             Session session = getSession(httpRequest.getCookie("JSESSIONID"));
 
             httpResponse.setStatusLine(FOUND);
-            httpResponse.setCookie(session.getId());
+            httpResponse.setCookie("JSESSIONID", session.getId());
             httpResponse.setLocation("/index.html");
 
             return httpResponse;

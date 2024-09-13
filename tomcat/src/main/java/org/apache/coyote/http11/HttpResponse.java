@@ -31,8 +31,8 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public void setCookie(String sessionId) {
-        httpHeaders.setField("Set-Cookie", "JSESSIONID=" + sessionId);
+    public void setCookie(String key, String value) {
+        httpHeaders.setField("Set-Cookie", key + "=" + value);
     }
 
     public String getStatusMessage() {

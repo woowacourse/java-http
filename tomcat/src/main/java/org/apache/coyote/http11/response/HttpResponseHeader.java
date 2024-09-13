@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class HttpResponseHeader {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Collections.unmodifiableMap(headers);
     }
 
     public void putCookie(String name, Map<String, String> cookies) {

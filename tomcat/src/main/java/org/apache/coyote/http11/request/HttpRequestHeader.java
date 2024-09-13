@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import static org.apache.coyote.http11.response.HttpResponseHeaderNames.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpResponseHeaderNames.COOKIE;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class HttpRequestHeader {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Collections.unmodifiableMap(headers);
     }
 
     public String getCookies() {

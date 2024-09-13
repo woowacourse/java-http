@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public record Body(String value) {
-	public static Body request(Headers headers, BufferedReader reader) throws IOException {
+	public static Body parseRequestBody(Headers headers, BufferedReader reader) throws IOException {
 		return new Body(parseBody(headers, reader));
 	}
 

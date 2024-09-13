@@ -15,6 +15,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {}
+
     public static void save(User user) {
         database.put(user.getAccount(), user);
     }
@@ -22,6 +24,4 @@ public class InMemoryUserRepository {
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
-
-    private InMemoryUserRepository() {}
 }

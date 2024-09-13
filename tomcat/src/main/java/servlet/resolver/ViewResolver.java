@@ -5,6 +5,18 @@ import java.net.URL;
 
 public class ViewResolver {
 
+    private static ViewResolver INSTANCE;
+
+    private ViewResolver() {
+    }
+
+    public static ViewResolver getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ViewResolver();
+        }
+        return INSTANCE;
+    }
+
     private static final String CLASS_PATH = "static";
 
     public File resolveViewName(String viewName) {

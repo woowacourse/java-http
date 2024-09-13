@@ -4,22 +4,22 @@ import org.apache.coyote.http.StatusCode;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.Response;
 
-public class ResourceHandler implements Handler {
+public class NotFoundHandler implements Handler {
 
-    private static ResourceHandler INSTANCE;
+    private static NotFoundHandler INSTANCE;
 
-    private ResourceHandler() {
+    private NotFoundHandler() {
     }
 
-    public static ResourceHandler getInstance() {
+    public static NotFoundHandler getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ResourceHandler();
+            INSTANCE = new NotFoundHandler();
         }
         return INSTANCE;
     }
 
     @Override
     public void handleRequest(Request request, Response response) {
-        response.configureViewAndStatus(request.getPath(), StatusCode.OK);
+        response.configureViewAndStatus("/404", StatusCode.NOT_FOUND);
     }
 }

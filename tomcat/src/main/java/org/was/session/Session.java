@@ -22,10 +22,6 @@ public class Session {
         return values.containsKey(name);
     }
 
-    public Object getAttribute(String name) {
-        return values.get(name);
-    }
-
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }

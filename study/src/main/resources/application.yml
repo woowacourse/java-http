@@ -3,7 +3,7 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 0 # 작업큐의 사이즈
+    accept-count: 2 # 작업큐의 사이즈
     max-connections: 2 # 수립가능한 connection의 총 개수
     threads:
       min-spare: 0 # 항상 활성화 되어있는(idle) thread의 개수

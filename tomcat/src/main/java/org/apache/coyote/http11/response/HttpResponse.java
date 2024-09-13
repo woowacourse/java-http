@@ -3,10 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 
 public class HttpResponse {
 
@@ -46,9 +43,9 @@ public class HttpResponse {
 
     public void getStaticResource(String url) {
         try {
-            final Path path = findPath(url);
-            byte[] fileBytes = Files.readAllBytes(path);
-            String contentType = URLConnection.guessContentTypeFromName(path.toString());
+            StaticResourceHandler handler = new StaticResourceHandler(url);
+            byte[] fileBytes = handler.getResource();
+            String contentType = handler.getContentType();
 
             setStatusCode(StatusCode.OK);
             addHeader("Content-Type", contentType + ";charset=utf-8");
@@ -76,18 +73,5 @@ public class HttpResponse {
         }
 
         return response.toString().getBytes();
-    }
-
-    private Path findPath(String requestURL) throws FileNotFoundException, URISyntaxException {
-        if (!requestURL.contains(".")) {
-            requestURL += ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + requestURL);
-        if (resource == null) {
-            throw new FileNotFoundException();
-        }
-
-        return Path.of(resource.toURI());
     }
 }

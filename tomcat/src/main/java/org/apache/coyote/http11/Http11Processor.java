@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +34,19 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            RequestParser requestParser = new RequestParser(bufferedReader);
-            RequestHandler requestHandler = new RequestHandler(requestParser);
-            final var response = requestHandler.getResponse();
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse();
+            RequestMapping requestMapping = new RequestMapping();
+            Controller controller = requestMapping.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
+            final var response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

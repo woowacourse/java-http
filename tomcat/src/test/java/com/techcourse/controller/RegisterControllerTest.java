@@ -63,4 +63,23 @@ class RegisterControllerTest {
 
         assertThat(actual).isEqualTo(expected);
     }
+
+    @DisplayName("정보 없이 POST /register 요청을 하면 회원가입 페이지로 리다이렉트한다.")
+    @Test
+    void doPost_whenNotBody() throws IOException {
+        String request = "POST /register HTTP/1.1 \r\n" +
+                "Host: localhost:8080 \r\n" +
+                "Content-Length: 24 \r\n\r\n" +
+                "account=&password=&email=";
+        BufferedReader bufferedReader = new BufferedReader(new StringReader(request));
+        HttpRequest httpRequest = new HttpRequest(bufferedReader);
+
+        registerController.doPost(httpRequest, httpResponse);
+        String actual = new String(httpResponse.buildResponse());
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /register.html \r\n" +
+                "\r\n";
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }

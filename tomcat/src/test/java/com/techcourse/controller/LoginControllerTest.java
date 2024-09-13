@@ -112,4 +112,23 @@ class LoginControllerTest {
 
         assertThat(actual).isEqualTo(expected);
     }
+
+    @DisplayName("정보 없이 POST /login 요청을 하면 로그인 페이지로 리다이렉트한다.")
+    @Test
+    void doPost_whenNotBody() throws IOException {
+        String request = "POST /login HTTP/1.1 \r\n" +
+                "Host: localhost:8080 \r\n" +
+                "Content-Length: 18 \r\n\r\n" +
+                "account=&password=";
+        BufferedReader bufferedReader = new BufferedReader(new StringReader(request));
+        HttpRequest httpRequest = new HttpRequest(bufferedReader);
+
+        loginController.doPost(httpRequest, httpResponse);
+        String actual = new String(httpResponse.buildResponse());
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /login.html \r\n" +
+                "\r\n";
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }

@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -20,6 +19,11 @@ public class RegisterController extends AbstractController {
         String account = bodys.get("account");
         String password = bodys.get("password");
         String email = bodys.get("email");
+
+        if (account == null || password == null || email == null) {
+            response.redirect("/register.html");
+            return;
+        }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

@@ -34,6 +34,11 @@ public class LoginController extends AbstractController {
             String account = bodys.get("account");
             String password = bodys.get("password");
 
+            if (account == null || password == null) {
+                response.redirect("/login.html");
+                return;
+            }
+
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow();
             if (!user.checkPassword(password)) {

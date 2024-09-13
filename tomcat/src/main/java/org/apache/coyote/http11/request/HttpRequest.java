@@ -32,7 +32,9 @@ public class HttpRequest {
         String[] pairs = body.split("&");
         for (String pair : pairs) {
             String[] keyAndValue = pair.split("=");
-            bodys.put(keyAndValue[0], keyAndValue[1]);
+            if (keyAndValue.length == 2) {
+                bodys.put(keyAndValue[0], keyAndValue[1]);
+            }
         }
         return bodys;
     }

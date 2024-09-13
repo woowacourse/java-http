@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpHeader;
 import org.apache.coyote.http11.common.HttpStatusCode;
+import org.apache.coyote.http11.common.StandardHttpHeaderName;
 
 public class HttpResponse {
 
@@ -62,7 +63,7 @@ public class HttpResponse {
 
     public HttpResponse sendRedirect(String location) {
         setStatus(HttpStatusCode.FOUND);
-        addHeader("Location", location);
+        addHeader(StandardHttpHeaderName.LOCATION.getName(), location);
         return this;
     }
 

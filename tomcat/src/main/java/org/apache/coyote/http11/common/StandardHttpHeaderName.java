@@ -5,7 +5,8 @@ public enum StandardHttpHeaderName {
     CONTENT_LENGTH("Content-Length"),
     CONTENT_TYPE("Content-Type"),
     SET_COOKIE("Set-Cookie"),
-    COOKIE("Cookie");
+    COOKIE("Cookie"),
+    LOCATION("Location"),;
 
     private final String headerName;
 

@@ -1,6 +1,7 @@
 package org.apache.tomcat.util.http;
 
 public enum HttpStatus {
+
     OK(200),
     FOUND(302);
 
@@ -9,6 +10,7 @@ public enum HttpStatus {
     HttpStatus(int code) {
         this.code = code;
     }
+
     public int getCode() {
         return code;
     }

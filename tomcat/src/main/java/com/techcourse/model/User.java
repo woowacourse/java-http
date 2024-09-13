@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import java.util.Objects;
+
 public class User {
 
     private final Long id;
@@ -8,6 +10,7 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateNonNull(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
@@ -26,6 +29,7 @@ public class User {
         return account;
     }
 
+
     @Override
     public String toString() {
         return "User{" +
@@ -34,5 +38,15 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    private void validateNonNull(String account, String password, String email) {
+        if (isNullOrEmpty(account) || isNullOrEmpty(password) || isNullOrEmpty(email)) {
+            throw new IllegalArgumentException("사용자 필수 정보가 누락되었습니다.");
+        }
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return Objects.isNull(value) || value.trim().isEmpty();
     }
 }

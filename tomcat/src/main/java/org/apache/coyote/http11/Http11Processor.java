@@ -4,14 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 
+import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.core.StandardContext;
 import org.apache.coyote.Processor;
-import org.apache.tomcat.util.http.RequestLine;
+import org.apache.tomcat.util.http.HttpVersion;
+import org.apache.tomcat.util.http.parser.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +34,12 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            Map<RequestLine, String> requestLineElements = extractRequestLine(bufferedReader);
-            Map<String, String> headers = parseHeaders(bufferedReader);
-            String body = parseBody(bufferedReader, headers);
-            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             final var outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP11);
 
-            StandardContext.processRequest(requestLineElements, headers, body, httpResponse);
+            StandardContext.processRequest(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.buildResponse().getBytes());
             outputStream.flush();
@@ -51,36 +47,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private static Map<RequestLine, String> extractRequestLine(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        String[] requestLineElements = line.split(" ");
-        return Map.of(RequestLine.HTTP_METHOD, requestLineElements[0],
-                RequestLine.REQUEST_URI, requestLineElements[1],
-                RequestLine.HTTP_VERSION, requestLineElements[2]);
-    }
-
-    private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headerMap = new HashMap<>();
-        String line;
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
-            StringTokenizer tokenizer = new StringTokenizer(line, ":");
-            String key = tokenizer.nextToken().trim();
-            String value = tokenizer.nextToken(":").trim();
-            headerMap.put(key, value);
-        }
-        return headerMap;
-    }
-
-    private static String parseBody(BufferedReader bufferedReader, Map<String, String> headerMap) throws IOException {
-        StringBuilder body = new StringBuilder();
-        if (headerMap.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(headerMap.get("Content-Length"));
-            char[] bodyChars = new char[contentLength];
-            int bytesRead = bufferedReader.read(bodyChars, 0, contentLength);
-            body.append(bodyChars, 0, bytesRead);
-        }
-        return body.toString();
     }
 }

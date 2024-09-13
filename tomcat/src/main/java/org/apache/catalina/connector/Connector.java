@@ -48,7 +48,7 @@ public class Connector implements Runnable {
 
     public void start() {
         stopped = false;
-        threadPool.submit(this);
+        new Thread(this).start();
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -73,7 +73,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMappings);
-        new Thread(processor).start();
+        threadPool.execute(processor);
     }
 
     public void stop() {

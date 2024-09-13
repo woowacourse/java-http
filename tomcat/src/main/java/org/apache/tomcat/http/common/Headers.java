@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Headers {
+
+    public static final String CONTENT_LENGTH = "Content-Length";
+
     protected static final String PARAMETER_DELIMITER = "\r\n";
     protected static final String KEY_VALUE_DELIMITER = ":";
 

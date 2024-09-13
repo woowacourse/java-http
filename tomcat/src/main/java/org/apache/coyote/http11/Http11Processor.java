@@ -10,12 +10,12 @@ import java.util.Objects;
 
 import org.apache.catalina.adapter.CoyoteAdapter;
 import org.apache.coyote.Processor;
+import org.apache.tomcat.http.common.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String BODY_LENGTH_FIND_NAME = "Content-Length";
     private static final String CRLF = "\r\n";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private int findContentLength(final String line, final int origin) {
-        if (line.startsWith(BODY_LENGTH_FIND_NAME) && origin == 0) {
+        if (line.startsWith(Headers.CONTENT_LENGTH) && origin == 0) {
             final var content = List.of(line.replaceAll(" ", "").split(":"));
             return Integer.parseInt(content.getLast());
         }

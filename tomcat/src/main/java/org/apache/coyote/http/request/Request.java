@@ -34,6 +34,14 @@ public class Request {
         return requestLine.getPath();
     }
 
+    public boolean isSameMethod(HttpMethod method) {
+        return getHttpMethod().equals(method);
+    }
+
+    public boolean isSamePath(String path) {
+        return getPath().equals(path);
+    }
+
     public String getQueryParamValue(String key) {
         return requestLine.getQueryParamValue(key);
     }

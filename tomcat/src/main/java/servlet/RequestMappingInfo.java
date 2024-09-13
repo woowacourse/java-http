@@ -26,6 +26,6 @@ public class RequestMappingInfo {
     }
 
     private boolean matches(Request request) {
-        return path.equals(request.getPath()) && httpMethod.equals(request.getHttpMethod());
+        return request.isSamePath(path) && request.isSameMethod(httpMethod);
     }
 }

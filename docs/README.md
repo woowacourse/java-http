@@ -41,3 +41,16 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 * 카탈리나, 코요테 이녀석들은 뭐지
 
 * yml에 tomcat 지우니까 됨 알아보자.
+
+
+<br>
+
+**스레드**
+
+* join 메서드에 synchronized 붙였을 때 안붙였을 때 디버거에 보이는게 다름
+
+
+![synchronized 안붙였을 때](img_4.png)
+
+![synchronized 붙였을 때](img_5.png)
+

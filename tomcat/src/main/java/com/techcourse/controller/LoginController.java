@@ -74,14 +74,4 @@ public class LoginController extends AbstractController {
         sessionManager.add(session);
         session.setAttribute("user", user);
     }
-
-//    private boolean getSession(boolean create) {
-//        SessionManager sessionManager = SessionManager.getInstance();
-//        Session session = sessionManager.findSession(JSESSIONID);
-//        if (session == null) {
-//            if (create) {
-//
-//            }
-//        }
-//    }
 }

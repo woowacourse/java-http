@@ -26,12 +26,14 @@ class HttpRequestTest {
 
             HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            assertAll(() -> assertThat(httpRequest.getQueryParam()).isEqualTo(
-                            Map.of("account", "gugu", "password", "password")),
+            assertAll(
+                    () -> assertThat(httpRequest.getQueryParam())
+                            .isEqualTo(Map.of("account", "gugu", "password", "password")),
                     () -> assertThat(httpRequest.getPathWithoutQuery()).isEqualTo("/index"),
                     () -> assertThat(httpRequest.getContentType()).isEqualTo(ContentType.HTML),
                     () -> assertThat(httpRequest.getCookie()).isEqualTo(new HttpCookie(Map.of("id", "gugu"))),
-                    () -> assertThat(httpRequest.getBody()).isEqualTo(body));
+                    () -> assertThat(httpRequest.getBody()).isEqualTo(body)
+            );
         }
     }
 }

@@ -6,13 +6,16 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
+    private static final RequestMapping requestMapping = new RequestMapping();
 
     private final Socket connection;
 
@@ -31,11 +34,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
-            HttpRequest request = HttpRequest.parse(requestLines);
-//            log.debug(request.toString());
 
+            HttpRequest request;
             HttpResponse.Builder responseBuilder = HttpResponse.builder();
-            REQUEST_MAPPING.getController(request)
+            try {
+                request = HttpRequest.parse(requestLines);
+//            log.debug(request.toString());
+            } catch (IllegalArgumentException e) {
+                HttpResponse response = responseBuilder.status(Status.BAD_REQUEST)
+                        .build();
+                outputStream.write(response.toMessage());
+                outputStream.flush();
+                return;
+            }
+
+            requestMapping.getController(request)
                     .service(request, responseBuilder);
             HttpResponse response = responseBuilder.build();
 //            log.debug(response.toString());

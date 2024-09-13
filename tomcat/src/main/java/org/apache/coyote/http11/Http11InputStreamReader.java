@@ -46,9 +46,6 @@ public class Http11InputStreamReader {
                 break;
             }
         }
-        if (line == null) {
-            log.warn("Incomplete headers received");
-        }
 
         return lines;
     }

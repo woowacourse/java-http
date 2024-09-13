@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import java.util.Map;
 import java.util.function.Predicate;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

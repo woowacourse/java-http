@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import java.util.Map;
+
 public class User {
 
     private final Long id;
@@ -16,6 +18,10 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public User(Map<String, String> body) {
+        this(body.get("account"), body.get("password"), body.get("email"));
     }
 
     public boolean checkPassword(String password) {

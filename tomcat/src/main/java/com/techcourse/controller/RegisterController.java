@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.Status;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.Status;
 
 public class RegisterController extends AbstractController {
 
@@ -22,22 +22,30 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        Map<String, String> body = HttpRequest.extractParameters(request.body());
-
-        if (!body.containsKey("account") ||
-                !body.containsKey("password") ||
-                !body.containsKey("email")) {
+        Map<String, String> body = request.extractUrlEncodedBody();
+        if (isInvalidBody(body)) {
             responseBuilder.status(Status.BAD_REQUEST);
             return;
         }
-
-        String account = body.get("account");
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+        if (existsAccount(body.get("account"))) {
             responseBuilder.status(Status.CONFLICT);
             return;
         }
+        saveUserAndRedirectHome(responseBuilder, body);
+    }
 
-        InMemoryUserRepository.save(new User(account, body.get("password"), body.get("email")));
+    private boolean isInvalidBody(Map<String, String> body) {
+        return !body.containsKey("account") ||
+                !body.containsKey("password") ||
+                !body.containsKey("email");
+    }
+
+    private boolean existsAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account).isPresent();
+    }
+
+    private void saveUserAndRedirectHome(HttpResponse.Builder responseBuilder, Map<String, String> body) {
+        InMemoryUserRepository.save(new User(body));
         responseBuilder.status(Status.FOUND)
                 .location("/index.html");
     }

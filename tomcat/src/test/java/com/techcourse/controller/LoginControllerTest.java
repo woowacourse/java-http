@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponse.Builder;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +28,9 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("<title>로그인</title>".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("<title>로그인</title>".getBytes());
     }
 
     @Test
@@ -40,7 +40,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=gugu&password=password HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=gugu&password=password"
         ));
 
         // when
@@ -50,9 +52,9 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /index.html".getBytes())
-                .contains("Set-Cookie: ".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /index.html".getBytes())
+                .containsSequence("Set-Cookie: ".getBytes());
     }
 
     @Test
@@ -62,7 +64,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=seyang&password=password HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=seyang&password=password"
         ));
 
         // when
@@ -71,9 +75,10 @@ class LoginControllerTest {
         HttpResponse response = responseBuilder.build();
 
         // then
+        System.out.println("response = " + response);
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /401.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /401.html".getBytes());
     }
 
     @Test
@@ -83,7 +88,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=gugu&password=pw HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=gugu&password=pw"
         ));
 
         // when
@@ -93,7 +100,7 @@ class LoginControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /401.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /401.html".getBytes());
     }
 }

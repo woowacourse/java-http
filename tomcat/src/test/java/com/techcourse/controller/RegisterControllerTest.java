@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponse.Builder;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +28,9 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 200 OK".getBytes())
-                .contains("Content-Type: text/html".getBytes())
-                .contains("<title>회원가입</title>".getBytes());
+                .containsSequence("HTTP/1.1 200 OK".getBytes())
+                .containsSequence("Content-Type: text/html".getBytes())
+                .containsSequence("<title>회원가입</title>".getBytes());
     }
 
     @Test
@@ -53,8 +53,8 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 302 Found".getBytes())
-                .contains("Location: /index.html".getBytes());
+                .containsSequence("HTTP/1.1 302 Found".getBytes())
+                .containsSequence("Location: /index.html".getBytes());
     }
 
     @Test
@@ -77,6 +77,6 @@ class RegisterControllerTest {
 
         // then
         assertThat(response.toMessage())
-                .contains("HTTP/1.1 400 Bad Request".getBytes());
+                .containsSequence("HTTP/1.1 400 Bad Request".getBytes());
     }
 }

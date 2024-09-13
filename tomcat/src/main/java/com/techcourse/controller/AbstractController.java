@@ -1,16 +1,17 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        if (request.method().equals("GET")) {
+        if (request.isMethod(Method.GET)) {
             doGet(request, responseBuilder);
         }
-        if (request.method().equals("POST")) {
+        if (request.isMethod(Method.POST)) {
             doPost(request, responseBuilder);
         }
     }

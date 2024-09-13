@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.response.HttpResponseHeaderNames.LOCATION;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
 import java.util.Map;
@@ -47,6 +48,6 @@ public class HttpResponse {
     public void redirect(String version, String path) {
         statusLine.setVersion(version);
         statusLine.setStatusCode(FOUND);
-        responseHeader.put("Location", path);
+        responseHeader.put(LOCATION.getHeaderName(), path);
     }
 }

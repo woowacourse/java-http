@@ -5,7 +5,8 @@ public enum HttpResponseHeaderNames {
     COOKIE("Cookie"),
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    SET_COOKIE("Set-Cookie");
+    SET_COOKIE("Set-Cookie"),
+    LOCATION("Location");
 
     private final String headerName;
 

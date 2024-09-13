@@ -5,20 +5,19 @@ import java.util.Map;
 
 public class QueryParameters {
 
-    private final Map<String, String> params;
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String ASSIGN_OPERATOR = "=";
 
-    public QueryParameters(Map<String, String> params) {
-        this.params = params;
-    }
+    private final Map<String, String> params;
 
     public QueryParameters(String queryString) {
         params = new HashMap<>();
         if(queryString.isEmpty()) {
             return;
         }
-        String[] params = queryString.split("&");
+        String[] params = queryString.split(PARAMETER_SEPARATOR);
         for (String param : params) {
-            int index = param.indexOf("=");
+            int index = param.indexOf(ASSIGN_OPERATOR);
             this.params.put(param.substring(0, index), param.substring(index + 1));
         }
     }

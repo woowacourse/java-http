@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 public class RequestURI {
 
+    private static final String QUERY_DELIMITER = "?";
+
     private final String path;
     private final QueryParameters parameters;
 
@@ -11,8 +13,8 @@ public class RequestURI {
     }
 
     public RequestURI(String requestURI) {
-        if(requestURI.contains("?")) {
-            int index = requestURI.indexOf("?");
+        if(requestURI.contains(QUERY_DELIMITER)) {
+            int index = requestURI.indexOf(QUERY_DELIMITER);
             path = requestURI.substring(0, index);
             parameters = new QueryParameters(requestURI.substring(index + 1));
             return;

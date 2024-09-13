@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequestBody {
+
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String ASSIGN_OPERATOR = "=";
+
     private final Map<String, String> bodies;
 
     public HttpRequestBody(String line) {
@@ -11,9 +15,9 @@ public class HttpRequestBody {
         if(line.isBlank()) {
             return;
         }
-        String[] params = line.split("&");
+        String[] params = line.split(PARAMETER_SEPARATOR);
         for(String param: params) {
-            int index = param.indexOf("=");
+            int index = param.indexOf(ASSIGN_OPERATOR);
             bodies.put(param.substring(0, index), param.substring(index + 1));
         }
     }

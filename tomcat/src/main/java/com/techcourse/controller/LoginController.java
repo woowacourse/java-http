@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http11.response.HttpResponseHeaderNames.COOKIE;
 import static org.apache.coyote.http11.response.HttpResponseHeaderNames.SET_COOKIE;
 
 import java.util.Map;
@@ -31,8 +32,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
-        if (requestHeaders.containsKey("Cookie")) {
-            String sessionId = requestHeaders.get("Cookie").split("=")[1];
+        if (requestHeaders.containsKey(COOKIE.getHeaderName())) {
+            String sessionId = requestHeaders.get(COOKIE.getHeaderName()).split(ASSIGN_OPERATOR)[1];
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = sessionManager.findSession(sessionId);
             return session != null;

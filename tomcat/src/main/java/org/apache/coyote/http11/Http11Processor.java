@@ -44,16 +44,6 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestMapping requestMapping;
 
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String COOKIE = "Cookie";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String CHARSET = ";charset=utf-8";
-    private static final String PARAMETER_SEPARATOR = "&";
-    private static final String ASSIGN_OPERATOR = "=";
-    private static final String HEADER_DELIMITER = ": ";
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestMapping = new RequestMapping();

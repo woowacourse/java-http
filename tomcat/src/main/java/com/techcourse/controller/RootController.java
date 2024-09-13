@@ -14,7 +14,7 @@ public class RootController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (request.getPath().equals("/")) {
             response.addHeader(CONTENT_LENGTH.getHeaderName(), Integer.toString("Hello world!".length()));
-            response.addHeader(CONTENT_TYPE.getHeaderName(), MimeTypes.getMimeTypes("html"));
+            response.addHeader(CONTENT_TYPE.getHeaderName(), MimeTypes.getMimeTypes("text/html"));
             response.setResponseBody("Hello world!");
         }
     }

@@ -15,7 +15,7 @@ public class StatusLine {
 
     public String getResponse() {
         StringBuilder response = new StringBuilder();
-        response.append(versionOfProtocol)
+        response.append(versionOfProtocol.getValue())
                 .append(" ")
                 .append(statusCode.getCode())
                 .append(" ")

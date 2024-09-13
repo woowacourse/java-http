@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
-    private static final String PATH = "/login";
+    private static final String URI = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String USER = "user";
@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     public LoginController() {
-        super(PATH);
+        super(URI);
     }
 
     @Override

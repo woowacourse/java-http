@@ -7,12 +7,11 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class StaticResourceController extends AbstractController {
 
-    private static final String PATH = ".";
-
+    private static final String URI = ".";
     private static final String DEFAULT_PATH = "static";
 
     public StaticResourceController() {
-        super(PATH);
+        super(URI);
     }
 
     @Override

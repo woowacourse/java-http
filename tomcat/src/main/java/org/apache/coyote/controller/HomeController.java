@@ -7,11 +7,11 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class HomeController extends AbstractController {
 
-    private static final String PATH = "/";
+    private static final String URI = "/";
     private static final String HOME_MESSAGE = "Hello world!";
 
     public HomeController() {
-        super(PATH);
+        super(URI);
     }
 
     @Override

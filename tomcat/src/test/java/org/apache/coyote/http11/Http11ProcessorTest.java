@@ -95,7 +95,7 @@ class Http11ProcessorTest {
     class Login {
         @Test
         @DisplayName("로그인 주소로 접속시 로그인 정적 페이지로 리다이렉트된다.")
-        void loginPageRedirect() throws IOException {
+        void loginPageRedirect() {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /login HTTP/1.1 ",
@@ -111,7 +111,6 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/login.html");
             var expected = "HTTP/1.1 302 FOUND \r\n" +
                     "Location: /login.html \r\n" +
                     "\r\n";
@@ -149,7 +148,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("로그인 성공")
-        void loginSuccess() throws IOException {
+        void loginSuccess() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -167,8 +166,6 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
                     "Location: /index.html \r\n");
@@ -176,7 +173,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("로그인 실패")
-        void loginFail() throws IOException {
+        void loginFail() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -194,8 +191,6 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/401.html");
-
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
                     "Location: /401.html \r\n");
@@ -207,7 +202,7 @@ class Http11ProcessorTest {
     class Register {
         @Test
         @DisplayName("회원가입 주소로 접속시 회원가입 정적 페이지로 리다이렉트된다.")
-        void registerPageRedirect() throws IOException {
+        void registerPageRedirect() {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /register HTTP/1.1 ",
@@ -223,8 +218,7 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/register.html");
-            var expected =   "HTTP/1.1 302 FOUND \r\n" +
+            var expected = "HTTP/1.1 302 FOUND \r\n" +
                     "Location: /register.html \r\n" +
                     "\r\n";
 
@@ -261,7 +255,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("회원가입 성공")
-        void registerSuccess() throws IOException {
+        void registerSuccess() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
@@ -279,8 +273,6 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 FOUND \r\n",
                     "Location: /index.html \r\n");

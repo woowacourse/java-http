@@ -50,10 +50,9 @@ public class HttpResponse {
     public String getResponse() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("\r\n");
         getStatusLineToString(stringBuilder);
         getHeadersToString(stringBuilder);
-        stringBuilder.append("").append("\r\n");
+        stringBuilder.append("\r\n");
         getResponseBodyToString(stringBuilder);
 
         return stringBuilder.toString();

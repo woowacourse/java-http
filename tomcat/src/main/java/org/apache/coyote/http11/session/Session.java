@@ -16,16 +16,21 @@ public class Session {
 	}
 
 	public Session(String cookies) {
-		String session = Arrays.asList(cookies.split(SESSION_DELIMITER.getValue()))
-			.stream()
-			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
-			.findAny()
-			.orElseGet(null);
+		String session = getSession(cookies);
 		if (session != null) {
 			this.id = session.substring(SESSION_HEADER_KEY.length() + 1);
 		} else {
 			this.id = null;
 		}
+	}
+
+	private static String getSession(String cookies) {
+		String session = Arrays.asList(cookies.split(SESSION_DELIMITER.getValue()))
+			.stream()
+			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
+			.findAny()
+			.orElseGet(null);
+		return session;
 	}
 
 	public String getId() {

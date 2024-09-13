@@ -19,7 +19,7 @@ public class Http11Request {
 
     private final Http11RequestMethod method;
     private final Http11RequestHeaders header;
-    private final String uri;
+    private String uri;
     private final Map<String, String> queryParameters;
     private final Http11RequestBody requestBody;
 
@@ -106,6 +106,10 @@ public class Http11Request {
 
     public Http11RequestHeaders getHeader() {
         return header;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     @Override

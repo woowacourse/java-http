@@ -13,7 +13,7 @@ import java.util.Optional;
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doPost(Http11Request request, Http11Response response) throws Exception {
+    protected void doPost(Http11Request request, Http11Response response) {
         Http11RequestBody body = request.getRequestBody();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(body.get("account"));
         response.setStatusCode(HttpStatusCode.FOUND);
@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        super.doGet(request, response);
+    protected void doGet(Http11Request request, Http11Response response) {
+        request.setUri(request.getUri() + ".html");
     }
 }

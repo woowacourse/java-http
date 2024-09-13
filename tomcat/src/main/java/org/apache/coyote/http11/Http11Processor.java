@@ -46,10 +46,6 @@ public class Http11Processor implements Runnable, Processor {
             User user = checkUser(request);
 
             // 여기부터 response 만들기
-            if (request.isStaticRequest()) {
-                response = getStaticResponse(request);
-            }
-
             if (!request.isStaticRequest()) {
                 Controller controller = RequestControllerMapper.getController(request.getUri());
                 if (controller == null) {
@@ -61,6 +57,10 @@ public class Http11Processor implements Runnable, Processor {
                     return; // error while service
                 }
             }
+            if (request.isStaticRequest()) {
+                response = getStaticResponse(request);
+            }
+
 
             outputStream.write(response.getBytes());
             outputStream.flush();

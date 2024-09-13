@@ -21,6 +21,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        super.doGet(request, response);
+        request.setUri(request.getUri() + ".html");
     }
 }

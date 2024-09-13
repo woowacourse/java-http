@@ -34,6 +34,9 @@ public record HttpRequest(HttpRequestLine requestLine, HttpHeaders httpHeaders, 
 
     public Session getSession(boolean create) {
         String sessionId = getCookie().get(SESSION_ID_IDENTIFICATION);
+        if (Objects.isNull(sessionId)) {
+            return null;
+        }
         SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(sessionId);
         if (Objects.nonNull(session)) {

@@ -2,54 +2,44 @@ package org.apache.coyote.http11.request;
 
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.utils.Cookies;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-public class RequestHeaders {
+public class RequestHeaders extends Headers {
 
-    private static final String HEADER_DELIMITER = ": ";
-
-    private final Map<String, String> headers;
+    private static final int DEFAULT_CONTENT_LENGTH = 0;
 
     public RequestHeaders(List<String> headers) {
-        this.headers = toMap(headers);
-    }
-
-    private Map<String, String> toMap(List<String> headerLines) {
-        Map<String, String> headers = new LinkedHashMap<>();
-
-        for (String headerLine : headerLines) {
-            String[] headerInfo = headerLine.split(HEADER_DELIMITER);
-            headers.put(headerInfo[0].trim(), headerInfo[1].trim());
-        }
-
-        return headers;
+        super(headers);
     }
 
     public boolean hasJSessionCookie() {
-        if (headers.containsKey("Cookie")) {
-            return headers.get("Cookie").contains("JSESSIONID");
+        HttpHeader cookieHeader = HttpHeader.COOKIE;
+
+        if (has(cookieHeader)) {
+            return get(cookieHeader).contains(Cookies.JSESSIONID);
         }
         return false;
     }
 
-    public String getJSessionId() {
-        HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-        return httpCookie.get("JSESSIONID");
+    public Session getSession() {
+        String jSessionId = getJSessionId();
+        return new Session(jSessionId);
     }
 
-    public Session getSession() {
-        HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-        String jsessionid = httpCookie.get("JSESSIONID");
-        return new Session(jsessionid);
+    public String getJSessionId() {
+        HttpCookie httpCookie = new HttpCookie(get(HttpHeader.COOKIE));
+        return httpCookie.get(Cookies.JSESSIONID);
     }
 
     public int getContentLength() {
-        String contentLength = headers.get("Content-Length");
+        String contentLength = get(HttpHeader.CONTENT_LENGTH);
+
         if (contentLength == null) {
-            return 0;
+            return DEFAULT_CONTENT_LENGTH;
         }
         return Integer.parseInt(contentLength);
     }

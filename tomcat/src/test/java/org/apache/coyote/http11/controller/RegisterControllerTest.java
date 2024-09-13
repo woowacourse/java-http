@@ -17,7 +17,7 @@ class RegisterControllerTest {
 
     @Test
     @DisplayName("회원가입 성공 시 기본 페이지로 리다이렉트된다.")
-    void process() throws IOException {
+    void process() throws Exception {
         RegisterController controller = new RegisterController();
         String body = "account=1234&password=1234&email=1234%40email.com";
         String request = String.join("\r\n",
@@ -28,8 +28,9 @@ class RegisterControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(InMemoryUserRepository.findByAccount("1234")).isPresent();
         assertThat(httpResponse.getLocation()).isEqualTo("/index.html");

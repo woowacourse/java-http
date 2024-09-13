@@ -32,7 +32,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("로그인한 사용자가 요청을 보내면 기본 페이지로 리다이렉트된다.")
-    void process1() throws IOException {
+    void process1() throws Exception {
         Session session = addSession();
         String request = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -42,8 +42,9 @@ class LoginControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(httpResponse.getLocation()).isEqualTo("/index.html");
     }
@@ -59,7 +60,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과를 출력한다.")
-    void process2() throws IOException {
+    void process2() throws Exception {
         String request = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -67,20 +68,21 @@ class LoginControllerTest {
                 "",
                 "");
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
         Logger logger = (Logger) LoggerFactory.getLogger(LoginController.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
 
-        controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(listAppender.list.get(0).getFormattedMessage()).isEqualTo("user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}");
     }
 
     @Test
     @DisplayName("로그인 성공 시 기본 페이지로 리다이렉트된다.")
-    void process3() throws IOException {
+    void process3() throws Exception {
         String body = "account=gugu&password=password";
         String request = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -90,15 +92,16 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(httpResponse.getLocation()).isEqualTo("/index.html");
     }
 
     @Test
     @DisplayName("로그인 성공 시 JSESSIONID를 응답 헤더로 반환한다.")
-    void process4() throws IOException {
+    void process4() throws Exception {
         String body = "account=gugu&password=password";
         String request = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -108,15 +111,16 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(httpResponse.getResponse()).contains("JSESSIONID");
     }
 
     @Test
     @DisplayName("로그인 실패 시 /401.html 페이지로 리다이렉트된다.")
-    void process5() throws IOException {
+    void process5() throws Exception {
         String body = "account=gugu&password=1234";
         String request = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -126,8 +130,9 @@ class LoginControllerTest {
                 "",
                 body);
         HttpRequest httpRequest = getHttpRequest(request);
+        HttpResponse httpResponse = new HttpResponse();
 
-        HttpResponse httpResponse = controller.process(httpRequest);
+        controller.service(httpRequest, httpResponse);
 
         assertThat(httpResponse.getLocation()).isEqualTo("/401.html");
     }

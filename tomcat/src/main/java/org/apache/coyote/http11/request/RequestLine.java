@@ -5,18 +5,19 @@ import org.apache.coyote.http11.common.HttpVersion;
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String QUERY_PARAMETER_DELIMITER = "?";
-    private static final String QUERY_PARAMETER_REGEX = "\\?";
+    private static final int INDEX_OF_HTTP_METHOD = 0;
+    private static final int INDEX_OF_URI = 1;
+    private static final int INDEX_OF_HTTP_VERSION = 2;
 
     private final HttpMethod httpMethod;
-    private final String uri;
+    private final RequestUri uri;
     private final HttpVersion httpVersion;
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(REQUEST_LINE_DELIMITER);
-        this.httpMethod = HttpMethod.from(parts[0]);
-        this.uri = parts[1];
-        this.httpVersion = HttpVersion.from(parts[2]);
+        this.httpMethod = HttpMethod.from(parts[INDEX_OF_HTTP_METHOD]);
+        this.uri = new RequestUri(parts[INDEX_OF_URI]);
+        this.httpVersion = HttpVersion.from(parts[INDEX_OF_HTTP_VERSION]);
     }
 
     public boolean isGetMethod() {
@@ -28,19 +29,18 @@ public class RequestLine {
     }
 
     public boolean hasQueryParameter() {
-        return uri.contains(QUERY_PARAMETER_DELIMITER);
-    }
-
-    public QueryParameter getQueryParameter() {
-        String queryParameter = uri.split(QUERY_PARAMETER_REGEX)[1];
-        return new QueryParameter(queryParameter);
+        return uri.hasQueryParameter();
     }
 
     public String getPath() {
-        return uri.split(QUERY_PARAMETER_REGEX)[0];
+        return uri.getPath();
+    }
+
+    public String getQueryParameterAttribute(String name) {
+        return uri.getQueryParameterAttribute(name);
     }
 
     public String getUri() {
-        return uri;
+        return uri.getUri();
     }
 }

@@ -1,43 +1,22 @@
 package org.apache.coyote.http11.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.HttpHeader;
+
 import java.util.stream.Collectors;
 
-public class ResponseHeaders {
+public class ResponseHeaders extends Headers {
 
-    private final Map<String, String> headers = new LinkedHashMap<>();
-
-    public boolean hasLocation() {
-        return headers.containsKey("Location");
+    public ResponseHeaders() {
+        super();
     }
 
-    public String getLocation() {
-        return headers.get("Location");
-    }
-
-    public void setCookie(String cookie) {
-        headers.put("Set-Cookie", cookie);
-    }
-
-    public void setContentType(String contentType) {
-        if ("text/html".equals(contentType)) {
-            headers.put("Content-Type", contentType + ";charset=utf-8");
-            return;
-        }
-        headers.put("Content-Type", contentType);
-    }
-
-    public void setLocation(String location) {
-        headers.put("Location", location);
-    }
-
-    public void setContentLength(int length) {
-        headers.put("Content-Length", String.valueOf(length));
+    public void put(HttpHeader httpHeader, String header) {
+        getHeaders().put(httpHeader.getName(), header);
     }
 
     public String getMessage() {
-        return headers.entrySet().stream()
+        return getHeaders().entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));
     }

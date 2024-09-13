@@ -6,8 +6,8 @@ public class Http11Response {
 
     private static final String protocol = "HTTP/1.1";
 
-    private final String responseBody;
-    private final Http11ResponseHeaders headers;
+    private String responseBody;
+    private Http11ResponseHeaders headers;
     private HttpStatusCode statusCode;
     private String firstLine = "";
 
@@ -17,12 +17,16 @@ public class Http11Response {
         this.headers = headers;
     }
 
-    public Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
+    private Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
                 Http11ResponseHeaders.builder()
                         .addHeader("Content-Type", HttpMimeType.from(fileExtensions).asString())
                         .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
                         .build());
+    }
+
+    public static Http11Response ok() {
+        return new Http11Response(HttpStatusCode.OK, "", "");
     }
 
     public byte[] getBytes() {
@@ -50,5 +54,13 @@ public class Http11Response {
 
     public void setStatusCode(HttpStatusCode statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setHeaders(Http11ResponseHeaders headers) {
+        this.headers = headers;
     }
 }

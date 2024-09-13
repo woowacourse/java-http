@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
             redirectUri = "/index.html";
         }
 
-        response.addHeader("Location", " " + redirectUri);
+        response.addHeader("Location", redirectUri);
     }
 
     @Override

@@ -9,7 +9,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestControllerMapper;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpMimeType;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.Http11ResponseHeaders;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,25 +44,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             Http11Request request = Http11Request.from(inputStream);
-            Http11Response response = new Http11Response(HttpStatusCode.OK, "", "");
+            Http11Response response = Http11Response.ok();
             User user = checkUser(request);
 
             // 여기부터 response 만들기
-            if (!request.isStaticRequest()) {
-                Controller controller = RequestControllerMapper.getController(request.getUri());
-                if (controller == null) {
-                    return; // 404 Not Found
-                }
-                try {
-                    controller.service(request, response);
-                } catch (Exception e) {
-                    return; // error while service
-                }
-            }
-            if (request.isStaticRequest()) {
-                response = getStaticResponse(request);
-            }
-
+            processNonStaticRequest(request, response);
+            processStaticRequest(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -82,14 +71,40 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
-    private Http11Response getStaticResponse(Http11Request request) throws IOException {
+    private void processNonStaticRequest(Http11Request request, Http11Response response) {
+        if (request.isStaticRequest()) {
+            return;
+        }
+
+        Controller controller = RequestControllerMapper.getController(request.getUri());
+        if (controller == null) {
+            response.setStatusCode(HttpStatusCode.BAD_REQUEST);
+            return; // 404 Not Found
+        }
+        try {
+            controller.service(request, response);
+        } catch (Exception e) {
+            response.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void processStaticRequest(Http11Request request, Http11Response response) throws IOException {
+        if (!request.isStaticRequest()) {
+           return;
+        }
+
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try (InputStream stream = loader.getResourceAsStream("static/" + request.getUri())) {
             if (stream == null) {
-                return new Http11Response(HttpStatusCode.OK, "", "");
+                response.setStatusCode(HttpStatusCode.NOT_FOUND);
+                return;
             }
             String responseBody = new String(stream.readAllBytes());
-            return new Http11Response(HttpStatusCode.OK, responseBody, getExtension(request));
+            response.setResponseBody(responseBody);
+            response.setHeaders(Http11ResponseHeaders.builder()
+                    .addHeader("Content-Type", HttpMimeType.from(getExtension(request)).asString())
+                    .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                    .build());
         }
     }
 

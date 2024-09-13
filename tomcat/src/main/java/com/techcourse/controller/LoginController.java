@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import com.techcourse.controller.model.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import com.techcourse.model.User;
 import com.techcourse.param.LoginParam;
 import com.techcourse.service.UserService;

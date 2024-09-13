@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import com.techcourse.controller.model.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import com.techcourse.param.RegisterParam;
 import com.techcourse.service.RegisterService;
 import org.apache.coyote.request.HttpRequest;

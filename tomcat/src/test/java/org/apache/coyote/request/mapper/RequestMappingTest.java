@@ -3,7 +3,7 @@ package org.apache.coyote.request.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.techcourse.controller.LoginController;
-import com.techcourse.controller.model.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.model.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.mapper.RequestMapping;
 import org.apache.coyote.response.HttpResponse;

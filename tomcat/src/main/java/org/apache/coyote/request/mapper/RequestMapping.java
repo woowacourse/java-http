@@ -4,9 +4,10 @@ import com.techcourse.controller.DefaultController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
-import com.techcourse.controller.model.Controller;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapping {

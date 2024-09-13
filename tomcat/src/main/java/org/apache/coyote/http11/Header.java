@@ -10,6 +10,9 @@ public class Header {
 
     private static final String PAIR_DELIMITER = ":";
     private static final String JSESSION_ID_KEY = "JSESSIONID";
+    private static final int KEY_PAIR_LENGTH = 2;
+    private static final int KEY_POSITION = 0;
+    private static final int VALUE_POSITION = 1;
 
     private final Map<String, String> header = new HashMap<>();
     private final Cookie cookie;
@@ -26,20 +29,22 @@ public class Header {
     }
 
     private void parseHeader(List<String> header) {
-        for (String pair : header) {
-            if (pair.contains(PAIR_DELIMITER)) {
-                String[] split = pair.split(PAIR_DELIMITER);
-                putIfValidPair(split);
-            }
+        header.forEach(this::parsePair);
+    }
+
+    private void parsePair(String pair) {
+        if (pair.contains(PAIR_DELIMITER)) {
+            String[] split = pair.split(PAIR_DELIMITER);
+            putIfValidPair(split);
         }
     }
 
     private void putIfValidPair(String[] keyValuePair) {
-        if (keyValuePair.length != 2) {
+        if (keyValuePair.length != KEY_PAIR_LENGTH) {
             return;
         }
-        String key = keyValuePair[0].trim();
-        String value = keyValuePair[1].trim();
+        String key = keyValuePair[KEY_POSITION].trim();
+        String value = keyValuePair[VALUE_POSITION].trim();
 
         append(key, value);
     }

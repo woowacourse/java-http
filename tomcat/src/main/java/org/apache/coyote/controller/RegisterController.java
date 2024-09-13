@@ -24,7 +24,6 @@ public class RegisterController extends AbstractController {
 
         String requestBody = httpRequest.getRequestBody();
 
-
         Session session = register(requestBody);
 
         httpResponse.setStatusLine(FOUND);
@@ -38,7 +37,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
 
-        String responseBody = getResource(httpRequest.getPath());
+        String responseBody = getResource(httpRequest.getPath() + ".html");
 
         httpResponse.setStatusLine(OK);
         httpResponse.setContentType(httpRequest.getContentType());

@@ -28,16 +28,6 @@ public class RequestLine {
     }
 
     public String getPath() {
-        if (method.equals(Method.GET)) {
-            if (path.equals("/login") || path.equals("/register")) {
-                path = path + ".html";
-            }
-
-            if (path.equals("/")) {
-                path = "home.html";
-            }
-        }
-
         return path;
     }
 

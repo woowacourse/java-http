@@ -43,6 +43,10 @@ public class HttpResponse {
         return this.httpHeaders.findField("Content-Type");
     }
 
+    public int getContentLength() {
+        return Integer.parseInt(this.httpHeaders.findField("Content-Length"));
+    }
+
     public String getResponse() {
         StringBuilder stringBuilder = new StringBuilder();
 

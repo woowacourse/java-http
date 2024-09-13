@@ -9,6 +9,7 @@ import static org.apache.coyote.http11.Method.POST;
 
 public class HttpRequest {
 
+    private static final int FILE_EXTENSION_INDEX = 1;
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private String requestBody = ""; // 추후 GET, POST 리팩토링
@@ -78,8 +79,13 @@ public class HttpRequest {
     }
 
     public String getContentType() {
-        String fileExtension = getPath().split("\\.")[1];
-        return "text/" + fileExtension;
+        String[] splitedPath = getPath().split("\\.");
+
+        if (splitedPath.length == 2) {
+            return "text/" + splitedPath[FILE_EXTENSION_INDEX];
+        }
+
+        return "text/html";
     }
 
     public String getRequestBody() {

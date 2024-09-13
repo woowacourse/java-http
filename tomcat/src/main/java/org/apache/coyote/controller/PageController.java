@@ -15,7 +15,12 @@ public class PageController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
 
-        String responseBody = getResource(httpRequest.getPath());
+        String path = httpRequest.getPath();
+        if (path.equals("/")) {
+            path = "/home.html";
+        }
+
+        String responseBody = getResource(path);
 
         httpResponse.setStatusLine(OK);
         httpResponse.setContentType(httpRequest.getContentType());

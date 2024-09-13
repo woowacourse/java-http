@@ -6,6 +6,7 @@ import static com.techcourse.controller.PagePath.REGISTER_PAGE;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.MissingRequestBodyException;
 import com.techcourse.model.User;
+import com.techcourse.model.exception.UserCreationException;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -29,7 +30,11 @@ public class RegisterController extends AbstractController {
             return responseMissingBody();
         }
 
-        registerUserByFormData(requestFormData);
+        try {
+            registerUserByFormData(requestFormData);
+        } catch (UserCreationException e) {
+            return responseUserDataError(e.getMessage());
+        }
         return responseRedirectIndex();
     }
 
@@ -37,6 +42,7 @@ public class RegisterController extends AbstractController {
         String account = requestFormData.get("account");
         String password = requestFormData.get("password");
         String email = requestFormData.get("email");
+
         InMemoryUserRepository.save(new User(account, password, email));
     }
 
@@ -44,6 +50,12 @@ public class RegisterController extends AbstractController {
         return ResponseResult
                 .status(HttpStatusCode.BAD_REQUEST)
                 .body(new MissingRequestBodyException().getMessage());
+    }
+
+    private ResponseResult responseUserDataError(String errorMessage) {
+        return ResponseResult
+                .status(HttpStatusCode.BAD_REQUEST)
+                .body(errorMessage);
     }
 
     private static ResponseResult responseRedirectIndex() {

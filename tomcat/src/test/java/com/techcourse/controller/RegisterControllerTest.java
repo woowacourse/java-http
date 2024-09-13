@@ -76,4 +76,22 @@ class RegisterControllerTest {
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST);
     }
+
+    @Test
+    void POST_요청시_폼데이터에_누락된_데이터가_있을경우_400_응답결과_반환() {
+        // given
+        RequestLine requestLine = new RequestLine("GET", "/register", null, "HTTP/1.1");
+        String formData = "account=ted&password=password&email=";
+        RequestBody requestBody = new RequestBody(formData);
+
+        HttpRequest request = new HttpRequest(requestLine, new RequestHeader(new HashMap<>()), requestBody);
+
+        RegisterController controller = new RegisterController();
+
+        // when
+        ResponseResult result = controller.doPost(request);
+
+        // then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST);
+    }
 }

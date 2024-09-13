@@ -1,31 +1,29 @@
 package org.apache.coyote.response;
 
 import org.apache.coyote.http.StatusCode;
+import org.apache.coyote.http11.ProtocolVersion;
 
 public class StatusLine {
 
-    private final String versionOfProtocol;
-    private int statusCode;
-    private String statusMessage;
+    private final ProtocolVersion versionOfProtocol;
+    private StatusCode statusCode;
 
     public StatusLine() {
-        this.versionOfProtocol = "HTTP/1.1";
-        this.statusCode = StatusCode._200.getCode();
-        this.statusMessage = StatusCode._200.getMessage();
+        this.versionOfProtocol = ProtocolVersion.HTTP1_1;
+        this.statusCode = StatusCode.OK;
     }
 
-    public String getStatusLineResponse() {
+    public String getResponse() {
         StringBuilder response = new StringBuilder();
-        response.append(versionOfProtocol)
+        response.append(versionOfProtocol.getValue())
                 .append(" ")
-                .append(statusCode)
+                .append(statusCode.getCode())
                 .append(" ")
-                .append(statusMessage);
+                .append(statusCode.getMessage());
         return String.valueOf(response);
     }
 
     public void setStatusCode(StatusCode statusCode) {
-        this.statusCode = statusCode.getCode();
-        this.statusMessage = statusCode.getMessage();
+        this.statusCode = statusCode;
     }
 }

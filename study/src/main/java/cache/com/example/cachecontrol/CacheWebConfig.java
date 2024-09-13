@@ -13,7 +13,8 @@ public class CacheWebConfig implements WebMvcConfigurer {
     public void addInterceptors(final InterceptorRegistry registry) {
         CacheControl cacheControl = CacheControl.noCache().cachePrivate();
         WebContentInterceptor webContentInterceptor = new WebContentInterceptor();
-        webContentInterceptor.addCacheMapping(cacheControl, "/**");
+        webContentInterceptor.addCacheMapping(cacheControl, "/");
+
         registry.addInterceptor(webContentInterceptor);
     }
 }

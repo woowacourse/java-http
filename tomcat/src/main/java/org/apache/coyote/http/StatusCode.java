@@ -1,10 +1,10 @@
 package org.apache.coyote.http;
 
 public enum StatusCode {
-    _200(200, "OK"),
-    _302(302, "FOUND"),
-    _401(401, "UNAUTHORIZED"),
-    _404(404, "NOT FOUND"),
+    OK(200, "OK"),
+    FOUND(302, "FOUND"),
+    UNAUTHORIZED(401, "UNAUTHORIZED"),
+    NOT_FOUND(404, "NOT FOUND"),
     ;
 
     private final int code;

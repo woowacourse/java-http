@@ -1,7 +1,5 @@
 package org.apache.coyote.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,17 +7,16 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
-    public RequestBody(BufferedReader bufferedReader, String bodyLength) throws IOException {
-        this.body = mapBody(bufferedReader, bodyLength);
+    public RequestBody() {
+        this.body = new HashMap<>();
     }
 
-    private Map<String, String> mapBody(BufferedReader bufferedReader, String bodyLength) throws IOException {
-        Map<String, String> rawBody = new HashMap<>();
+    public RequestBody(String bodyLine) {
+        this.body = mapBody(bodyLine);
+    }
 
-        int contentLength = Integer.parseInt(bodyLength);
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String bodyLine = new String(buffer);
+    private Map<String, String> mapBody(String bodyLine) {
+        Map<String, String> rawBody = new HashMap<>();
 
         String[] bodyElements = bodyLine.split("&");
         for (int i = 0; i < bodyElements.length; i++) {
@@ -27,10 +24,6 @@ public class RequestBody {
             rawBody.put(info[0], info[1]);
         }
         return rawBody;
-    }
-
-    public RequestBody() {
-        this.body = new HashMap<>();
     }
 
     public String get(String key) {

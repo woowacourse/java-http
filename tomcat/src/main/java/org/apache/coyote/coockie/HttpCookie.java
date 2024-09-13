@@ -3,12 +3,16 @@ package org.apache.coyote.coockie;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 public class HttpCookie {
 
     private static final String JSESSIONID_VALUE = "JSESSIONID";
+
     private final Map<String, String> cookies;
+
+    public HttpCookie() {
+        this.cookies = new HashMap<>();
+    }
 
     public HttpCookie(String rawCookies) {
         this.cookies = mapCookies(rawCookies);
@@ -21,24 +25,19 @@ public class HttpCookie {
             String[] cookiesElements = rawCookies.split("; ");
             for (int i = 0; i < cookiesElements.length; i++) {
                 String[] cookiePair = cookiesElements[i].split("=");
-                cookieGroup.put(cookiePair[0], cookiePair[1]);
+                if (cookiePair.length > 1) {
+                    cookieGroup.put(cookiePair[0], cookiePair[1]);
+                }
             }
         }
         return cookieGroup;
     }
 
-    public boolean hasJESSIONID() {
+    public boolean hasSessionId() {
         return cookies.containsKey(JSESSIONID_VALUE);
     }
 
-    public void generateJSESSIONID() {
-        if (!cookies.containsKey(JSESSIONID_VALUE)) {
-            UUID uuid = UUID.randomUUID();
-            cookies.put(JSESSIONID_VALUE, uuid.toString());
-        }
-    }
-
-    public String getJESSIONID() {
+    public String getSessionId() {
         return cookies.get(JSESSIONID_VALUE);
     }
 

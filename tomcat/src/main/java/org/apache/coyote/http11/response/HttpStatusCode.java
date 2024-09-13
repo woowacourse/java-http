@@ -8,6 +8,7 @@ public enum HttpStatusCode {
     REDIRECT(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
     NOT_FOUND(404, "Not Found"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error")
     ;
 
     private final int statusCode;
@@ -16,6 +17,14 @@ public enum HttpStatusCode {
     HttpStatusCode(int statusCode, String reasonPhrase) {
         this.statusCode = statusCode;
         this.statusMessage = reasonPhrase;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
     @Override

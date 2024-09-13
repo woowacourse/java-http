@@ -2,9 +2,8 @@ package org.apache.coyote.request;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.FileNameMap;
-import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.coyote.http.HttpMethod;
 
 public class RequestLine {
@@ -45,8 +44,11 @@ public class RequestLine {
     }
 
     public boolean isStaticRequest() {
-        FileNameMap fileNameMap = URLConnection.getFileNameMap();
-        return fileNameMap.getContentTypeFor(path) != null;
+        try {
+            return Files.probeContentType(Paths.get(path)) != null;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public boolean hasQueryParam() {

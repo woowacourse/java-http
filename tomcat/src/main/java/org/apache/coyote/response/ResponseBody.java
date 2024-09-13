@@ -15,6 +15,11 @@ public class ResponseBody {
     }
 
     public void setBody(String resource) {
+        if ("/favicon.ico".equals(resource)) {
+            content = "";
+            return;
+        }
+
         StringBuilder rawBody = new StringBuilder();
         try {
             Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());

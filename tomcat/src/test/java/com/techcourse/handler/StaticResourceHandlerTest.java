@@ -47,7 +47,7 @@ class StaticResourceHandlerTest {
 
     @Test
     @DisplayName("GET '/index' 요청에 대한 응답은 처리되지 않고, '/404.html'로 리다이렉트한다.")
-    void index_redirect() {
+    void index_redirect() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /index HTTP/1.1 ",
@@ -63,12 +63,14 @@ class StaticResourceHandlerTest {
         processor.process(socket);
 
         // then
+        URL resource = getClass().getClassLoader().getResource("static/404.html");
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /404.html ",
-                "Content-Length: 0 ",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 2426 ",
                 "",
-                "");
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())
+                ));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

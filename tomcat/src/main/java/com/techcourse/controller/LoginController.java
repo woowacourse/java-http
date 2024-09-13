@@ -36,7 +36,7 @@ public class LoginController extends Controller {
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
-        if (optionalUser.isEmpty() || optionalUser.get().checkPassword(password)) {
+        if (optionalUser.isEmpty() || !optionalUser.get().checkPassword(password)) {
             response.setStatusCode("401 Unauthorized");
             response.setBodyWithStaticResource("/401.html");
             return;

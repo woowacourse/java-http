@@ -16,11 +16,6 @@ public record HttpRequestHeader(Map<String, String> headers) {
         );
     }
 
-    private static HttpRequestLine extractRequestLine(String requestHeader) {
-        String firstLine = requestHeader.split(System.lineSeparator())[0];
-        return new HttpRequestLine(firstLine);
-    }
-
     private static Map<String, String> extractHeaders(String requestHeader) {
         String[] lines = requestHeader.split(System.lineSeparator());
         return Arrays.stream(lines)

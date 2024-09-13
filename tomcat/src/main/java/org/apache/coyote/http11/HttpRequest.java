@@ -67,6 +67,10 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
+    public String getPath() {
+        return getUri().getPath();
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
     }

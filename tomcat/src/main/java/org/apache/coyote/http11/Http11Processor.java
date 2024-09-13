@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.servlet.ServletContext;
-import org.apache.catalina.servlet.ServletContextFactory;
+import com.techcourse.config.ServletContextConfiguration;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ServletContext servletContext = ServletContextFactory.getContext();
+    private final ServletContext servletContext = ServletContextConfiguration.getContext();
 
     public Http11Processor(Socket connection) {
         this.connection = connection;

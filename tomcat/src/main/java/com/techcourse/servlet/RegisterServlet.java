@@ -2,21 +2,21 @@ package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.servlet.HttpServlet;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.catalina.servlet.AbstractHttpServlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryParameters;
+import org.apache.coyote.http11.StaticResourceServer;
 
-public class RegisterPostHttpServlet implements HttpServlet {
+public class RegisterServlet extends AbstractHttpServlet {
 
     @Override
-    public boolean canService(HttpRequest request) {
-        return request.hasMethod(HttpMethod.POST) && request.hasPath("/register");
+    public void doGet(HttpRequest request, HttpResponse response) {
+        StaticResourceServer.load(response, "/register.html");
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         String content = request.getContent();
         QueryParameters queryParameters = new QueryParameters(content);
         User user = new User(

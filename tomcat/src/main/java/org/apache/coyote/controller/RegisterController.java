@@ -13,7 +13,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         RequestBody requestBody = request.getBody();
-        String account = requestBody.get("account");    // TODO: DTO
+        String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");
         InMemoryUserRepository.save(new User(account, password, email));

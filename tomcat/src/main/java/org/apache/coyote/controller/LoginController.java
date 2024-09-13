@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     }
 
     private static void login(HttpRequest request, HttpResponse response, SessionManager sessionManager) {
-        String account = request.getQueryParam("account"); // TODO: dto 처리
+        String account = request.getQueryParam("account");
         String password = request.getQueryParam("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
@@ -47,7 +47,7 @@ public class LoginController extends AbstractController {
 
     private static void showLogin(HttpRequest request, HttpResponse response, SessionManager sessionManager) {
         if (request.hasSession() && sessionManager.isSessionExist(request.getSessionId())) {
-            response.setStatusCode(StatusCode.FOUND);
+            response.setStatusCode(StatusCode.FOUND); //
             response.addHeader(HeaderName.LOCATION, "/index.html");
         }
         if (!request.hasSession() || !sessionManager.isSessionExist(request.getSessionId())) {

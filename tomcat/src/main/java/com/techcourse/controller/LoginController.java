@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.CookieManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -12,20 +11,16 @@ public class LoginController extends Controller {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = CookieManager.getCookieValue(request.getHeaderValue("Cookie"), "JSESSIONID");
-        if (sessionId == null) {
-            response.setBodyWithStaticResource("/login.html");
-            return;
-        }
-        User user = SessionManager.get(sessionId);
-        if (user == null) {
-            response.setBodyWithStaticResource("/login.html");
-            return;
-        }
+        try {
+            String sessionId = request.getCookieValue("JSESSIONID");
+            User user = SessionManager.get(sessionId);
+            log.info(user.toString());
 
-        log.info(user.toString());
-        response.setStatusCode("302 Found");
-        response.addHeader("Location", "/index.html");
+            response.setStatusCode("302 Found");
+            response.addHeader("Location", "/index.html");
+        } catch (IllegalArgumentException e) {
+            response.setBodyWithStaticResource("/login.html");
+        }
     }
 
     @Override

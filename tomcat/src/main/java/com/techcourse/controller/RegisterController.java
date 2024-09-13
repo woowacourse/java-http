@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.CookieManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -12,7 +11,7 @@ public class RegisterController extends Controller {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = CookieManager.getCookieValue(request.getHeaderValue("Cookie"), "JSESSIONID");
+        String sessionId = request.getCookieValue("JSESSIONID");
         if (sessionId == null) {
             response.setBodyWithStaticResource("/register.html");
             return;

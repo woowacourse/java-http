@@ -68,8 +68,8 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getHeaderValue(String targetHeader) {
-        return requestHeaders.getHeaderValue(targetHeader);
+    public String getCookieValue(String cookieName) {
+        return requestHeaders.getCookieValue(cookieName);
     }
 
     public String getBodyParameter(String key) {

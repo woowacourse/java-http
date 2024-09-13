@@ -10,7 +10,11 @@ public class SessionManager {
     private static final Map<String, User> sessions = new HashMap<>();
 
     public static User get(String sessionId) {
-        return sessions.get(sessionId);
+        User user = sessions.get(sessionId);
+        if (user == null) {
+            throw new IllegalArgumentException("No such user exists.");
+        }
+        return user;
     }
 
     // TODO: sessionId 리턴을 명시적으로 드러내도록 메서드 네이밍 수정

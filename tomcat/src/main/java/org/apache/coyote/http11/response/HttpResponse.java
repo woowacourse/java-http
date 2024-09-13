@@ -59,7 +59,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        String statusLine = "HTTP/1.1 " + this.statusCode;
+        String statusLine = "HTTP/1.1 " + this.statusCode + " ";
         StringBuilder headerBuilder = new StringBuilder();
         headers.entrySet()
                 .stream()

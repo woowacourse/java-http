@@ -37,6 +37,10 @@ public class HttpRequest {
         return new HttpRequest(method, HttpUrlParser.parseUrl(url), headers, body);
     }
 
+    public boolean isMethod(HttpMethod method) {
+        return this.method.equals(method);
+    }
+
     public boolean hasFormParameters() {
         return body.hasFormParameters();
     }

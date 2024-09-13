@@ -20,7 +20,7 @@ class RegisterControllerTest {
 
     @DisplayName("register로 GET 요청을 보내면 register.html을 200으로 응답한다")
     @Test
-    void getLogin() {
+    void getRegister() {
         // given
         HttpRequest request = new HttpRequest();
         request.setMethod(HttpMethod.GET);
@@ -41,7 +41,7 @@ class RegisterControllerTest {
 
     @DisplayName("register로 POST 요청을 보내면 index.html로 리다이렉트한다")
     @Test
-    void successLogin() {
+    void postRegister() {
         // given
         HttpRequest request = new HttpRequest();
         request.setMethod(HttpMethod.POST);
@@ -63,7 +63,7 @@ class RegisterControllerTest {
 
     @DisplayName("회원가입에 성공하면 InMemoryRepository에 저장된다")
     @Test
-    void failLogin() {
+    void saveInRepository() {
         // given
         HttpRequest request = new HttpRequest();
         request.setMethod(HttpMethod.POST);

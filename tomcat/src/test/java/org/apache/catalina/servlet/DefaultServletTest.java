@@ -82,7 +82,7 @@ class DefaultServletTest {
 
     @DisplayName("요청에 JSESSIONID가 없으면 응답 쿠키에 JSESSIONID를 포함한다")
     @Test
-    void get() throws URISyntaxException {
+    void respondJSessionId() throws URISyntaxException {
         // given
         HttpRequest request = new HttpRequest();
         request.setMethod(HttpMethod.GET);

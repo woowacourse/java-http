@@ -33,7 +33,7 @@ public class HttpResponse {
 
     public void generate200Response(String path, String responseBody) {
         response = String.join("\r\n",
-                StatusLine.from(OK),
+                StatusLine.from(OK).getStatusLine(),
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -45,7 +45,7 @@ public class HttpResponse {
 
     public void generate302Response(String location) {
         response = String.join("\r\n",
-                StatusLine.from(FOUND),
+                StatusLine.from(FOUND).getStatusLine(),
                 "Location: " + location + " ",
                 "Content-Type: text/html;charset=utf-8 "
         );

@@ -5,11 +5,9 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.servlet.AbstractHttpServlet;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +17,8 @@ public class LoginServlet extends AbstractHttpServlet {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String content = request.getContent();
-        QueryParameters queryParameters = new QueryParameters(content);
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
         if (foundUser.isEmpty()) {
             response.redirectTo("/401.html");
@@ -34,7 +30,6 @@ public class LoginServlet extends AbstractHttpServlet {
             Session session = request.getSession(true);
             session.setAttribute("user", user);
             response.setCookie(HttpCookie.ofJSessionId(session.getId()));
-            response.setContentType(ContentType.TEXT_HTML);
             response.redirectTo("/index.html");
             return;
         }

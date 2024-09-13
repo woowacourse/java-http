@@ -28,4 +28,10 @@ public class InMemoryUserRepository {
     public static boolean existsByAccount(String account) {
         return database.containsKey(account);
     }
+
+    public static void clear() {
+        database.clear();
+        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        database.put(user.getAccount(), user);
+    }
 }

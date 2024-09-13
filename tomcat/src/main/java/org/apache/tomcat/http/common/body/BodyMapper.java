@@ -15,7 +15,7 @@ public enum BodyMapper {
     FORM_URL_ENCODED("application/x-www-form-urlencoded", FormUrlEncodeBody::new);
 
     private static final Map<String, BodyMapper> CONVERTER = Arrays.stream(BodyMapper.values())
-            .collect(Collectors.toConcurrentMap(BodyMapper::getMimeType, Function.identity()));
+            .collect(Collectors.toMap(BodyMapper::getMimeType, Function.identity()));
 
 
     private final String mimeType;

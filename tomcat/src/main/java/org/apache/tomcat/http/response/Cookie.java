@@ -19,7 +19,7 @@ public class Cookie {
         values = Stream.of(headerPair.getLast().split(PARAMETER_DELIMITER))
                 .map(param -> List.of(param.split(KEY_VALUE_DELIMITER)))
                 .filter(paramList -> paramList.size() == 2)
-                .collect(Collectors.toConcurrentMap(List::getFirst, List::getLast));
+                .collect(Collectors.toMap(List::getFirst, List::getLast));
     }
 
     public String get(final String cookieName) {

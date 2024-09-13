@@ -2,11 +2,11 @@ package com.techcourse.session;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import jakarta.servlet.ServletContext;
@@ -22,7 +22,7 @@ public class CustomSession implements HttpSession {
 
     public CustomSession() {
         this.id = String.valueOf(sessionIdIndex.incrementAndGet());
-        this.attributes = new ConcurrentHashMap<>();
+        this.attributes = new HashMap<>();
     }
 
     @Override

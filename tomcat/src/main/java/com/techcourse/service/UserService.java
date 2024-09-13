@@ -1,6 +1,7 @@
 package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.except.UnauthorizedException;
 import com.techcourse.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class UserService {
 
     public User findUserByAccount(String account) {
         return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 회원입니다."));
     }
 
     public void registerUser(String account, String password, String email) {

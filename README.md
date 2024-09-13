@@ -70,7 +70,7 @@
 
 2. 동시성 컬렉션 사용하기
 
-- [ ] 동시성 컬렉션(Concurrent Collections)을 적용해서 Session 컬렉션에 스레드 안정성과 원자성을 보장하기
+- [x] 동시성 컬렉션(Concurrent Collections)을 적용해서 Session 컬렉션에 스레드 안정성과 원자성을 보장하기
     - SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시에 접근할 수 있음
     - Session 컬렉션에 여러 스레드가 동시에 접근하여 읽고 쓰다보면 스레드 안정성을 보장하기 어려움
 

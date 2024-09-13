@@ -2,15 +2,15 @@ package org.apache.catalina.session;
 
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String ATTRIBUTE_USER_NAME = "user";
 

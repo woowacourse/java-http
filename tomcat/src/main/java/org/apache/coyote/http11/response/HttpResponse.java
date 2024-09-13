@@ -15,7 +15,7 @@ public record HttpResponse(
 
     private static final String CRLF = "\r\n";
     private static final ProtocolVersion DEFAULT_PROTOCOL = ProtocolVersion.HTTP11;
-    private static final String DELIMITER_SEMICOLON = "; ";
+    private static final String DELIMITER_SEMICOLON = ";";
     private static final String DELIMITER_COLON = ": ";
     private static final String DELIMITER_SPACE = " ";
     private static final String HEADER_NAME_SET_COOKIE = "Set-Cookie: ";

@@ -114,6 +114,14 @@ public class Http11Request {
         this.uri = uri;
     }
 
+    public boolean isGet() {
+        return method == Http11RequestMethod.GET;
+    }
+
+    public boolean isPost() {
+        return method == Http11RequestMethod.POST;
+    }
+
     @Override
     public String toString() {
         return "Http11Request{" +

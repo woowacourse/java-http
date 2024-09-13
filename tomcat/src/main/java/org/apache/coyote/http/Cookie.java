@@ -1,8 +1,9 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 public class Cookie {
@@ -10,7 +11,6 @@ public class Cookie {
     public static final String COOKIE_FIELD_DELIMITER = "=";
     private static final String COOKIE_DATA_DELIMITER = "; ";
     private static final int SPLIT_LIMIT = 2;
-
 
     private final Map<String, String> cookies;
 
@@ -33,6 +33,18 @@ public class Cookie {
 
     public Optional<String> get(String key) {
         return Optional.ofNullable(cookies.get(key));
+    }
+
+    public boolean isNotEmpty() {
+        return !cookies.isEmpty();
+    }
+
+    public String encode() {
+        String encoded = "";
+        for(Entry<String, String> entry: cookies.entrySet()) {
+            encoded += entry.getKey() + "=" + entry.getValue();
+        }
+        return encoded;
     }
 
     @Override

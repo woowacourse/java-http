@@ -1,8 +1,10 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.request;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.Cookie;
+import org.apache.coyote.http.Header;
 
 public class RequestHeaders {
 
@@ -18,8 +20,9 @@ public class RequestHeaders {
                 .collect(Collectors.toMap(token -> token[0].trim(), token -> token[1].trim()));
     }
 
-    public String getCookies() {
-        return values.getOrDefault(Header.COOKIE.value(), "");
+    public Cookie parseCookie() {
+        String cookieValue = values.getOrDefault(Header.COOKIE.value(), "");
+        return new Cookie(cookieValue);
     }
 
     public int getContentLength() {

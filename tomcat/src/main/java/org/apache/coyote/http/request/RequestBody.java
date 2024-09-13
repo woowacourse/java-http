@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.request;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ public class RequestBody {
 
     private final Map<String, String> values;
 
-    private RequestBody(Map<String, String> values) {
+    public RequestBody(Map<String, String> values) {
         this.values = values;
     }
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.request;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,10 +32,6 @@ public class RequestParameters {
                 .collect(HashMap::new,
                          (map, entry) -> map.put(entry[0], entry[1]),
                          HashMap::putAll);
-    }
-
-    public Map<String, String> getValues() {
-        return values;
     }
 
     public String getValue(String key) {

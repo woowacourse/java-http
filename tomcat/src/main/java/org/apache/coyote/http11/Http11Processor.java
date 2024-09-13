@@ -38,13 +38,12 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader request = new BufferedReader(new InputStreamReader(inputStream));
 
             HttpRequest httpRequest = HttpRequest.from(request);
-            HttpResponse.HttpResponseBuilder responseBuilder = HttpResponse.builder();
+            HttpResponse httpResponse = new HttpResponse();
 
             requestMapping.getController(httpRequest)
-                    .service(httpRequest, responseBuilder);
-            HttpResponse response = responseBuilder.build();
+                    .service(httpRequest, httpResponse);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

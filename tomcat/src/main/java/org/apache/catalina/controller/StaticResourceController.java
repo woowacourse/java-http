@@ -15,7 +15,7 @@ public class StaticResourceController extends AbstractController {
     private static final String ERROR_404_PATH = "/404.html";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String resource = request.getPath();
 
         try {
@@ -28,7 +28,7 @@ public class StaticResourceController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
@@ -42,15 +42,15 @@ public class StaticResourceController extends AbstractController {
         }
     }
 
-    private void buildOkResponse(String responseBody, String contentType, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.OK)
-                .withResponseBody(responseBody)
-                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), contentType)
-                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
+    private void buildOkResponse(String responseBody, String contentType, HttpResponse response) {
+        response.setStatusCode(StatusCode.OK);
+        response.setResponseBody(responseBody);
+        response.addHeader(HttpHeader.CONTENT_TYPE.getValue(), contentType);
+        response.addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
     }
 
-    private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.FOUND)
-                .addHeader(HttpHeader.LOCATION.getValue(), location);
+    private void buildRedirectResponse(String location, HttpResponse response) {
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader(HttpHeader.LOCATION.getValue(), location);
     }
 }

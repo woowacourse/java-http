@@ -14,9 +14,9 @@ public class HttpResponse {
     private static final String HEADER_SEPARATOR = ": ";
 
     private final HttpVersion httpVersion;
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
     private final Map<String, String> headers;
-    private final String responseBody;
+    private String responseBody;
 
     private HttpResponse(HttpVersion httpVersion, StatusCode statusCode, Map<String, String> headers, String responseBody) {
         this.httpVersion = httpVersion;
@@ -25,44 +25,8 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder().withHttpVersion(HttpVersion.HTTP_1_1);
-    }
-
-    public static class HttpResponseBuilder {
-
-        private HttpVersion httpVersion;
-        private StatusCode statusCode;
-        private Map<String, String> headers = new HashMap<>();
-        private String responseBody;
-
-        public HttpResponseBuilder withHttpVersion(HttpVersion httpVersion) {
-            this.httpVersion = httpVersion;
-            return this;
-        }
-
-        public HttpResponseBuilder withStatusCode(StatusCode statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public HttpResponseBuilder addHeader(String key, String value) {
-            this.headers.put(key, value);
-            return this;
-        }
-
-        public String getContentType(String resource) throws IOException {
-            return Files.probeContentType(Path.of(resource));
-        }
-
-        public HttpResponseBuilder withResponseBody(String responseBody) {
-            this.responseBody = responseBody;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(httpVersion, statusCode, headers, responseBody);
-        }
+    public HttpResponse() {
+        this(HttpVersion.HTTP_1_1, null, new HashMap<>(), "");
     }
 
     public byte[] getBytes() {
@@ -98,6 +62,22 @@ public class HttpResponse {
         if (responseBody != null && !responseBody.isEmpty()) {
             responseBuilder.append(responseBody);
         }
+    }
+
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void setResponseBody(String responseBody){
+        this.responseBody = responseBody;
+    }
+
+    public String getContentType(String resource) throws IOException {
+        return Files.probeContentType(Path.of(resource));
     }
 
     public Map<String, String> getHeaders() {

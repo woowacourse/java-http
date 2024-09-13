@@ -5,5 +5,5 @@ import org.apache.coyote.http.response.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception;
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

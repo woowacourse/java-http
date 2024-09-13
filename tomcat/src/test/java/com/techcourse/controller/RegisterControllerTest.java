@@ -17,10 +17,9 @@ class RegisterControllerTest {
     @DisplayName("/register 경로로 GET 요청하면 register 페이지를 반환한다.")
     void get() throws Exception {
         HttpRequest request = HttpRequestTestSupport.registerGet();
-        HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+        HttpResponse response = new HttpResponse();
 
-        registerController.service(request, builder);
-        HttpResponse response = builder.build();
+        registerController.service(request, response);
 
         String expectedResponseBody = HttpRequestTestSupport.loadResourceContent("/register.html");
         assertEquals(expectedResponseBody, response.getResponseBody());
@@ -30,10 +29,9 @@ class RegisterControllerTest {
     @DisplayName("/register 경로로 POST 요청하면 User 가 생성되고, 알맞은 헤더를 응답한다.")
     void post() throws Exception {
         HttpRequest request = HttpRequestTestSupport.registerPost();
-        HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+        HttpResponse response = new HttpResponse();
 
-        registerController.service(request, builder);
-        HttpResponse response = builder.build();
+        registerController.service(request, response);
 
         assertAll(
                 () -> assertNotNull(InMemoryUserRepository.findByAccount("lily")),

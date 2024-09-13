@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
     private static final String JSESSIONID_COOKIE = "JSESSIONID=";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String resource = ensureHtmlExtension(request.getPath());
         String responseBody = loadResourceContent(resource);
         boolean containsCookie = request.containsHeaders(HttpHeader.COOKIE.getValue());
@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getParameter(ACCOUNT_PARAM);
         String password = request.getParameter(PASSWORD_PARAM);
         if (findUserByInfo(account, password)) {
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
         handleFailedLogin(response);
     }
 
-    private void handleCookieRequest(HttpCookie httpCookie, String responseBody, HttpResponse.HttpResponseBuilder response) {
+    private void handleCookieRequest(HttpCookie httpCookie, String responseBody, HttpResponse response) {
         if (httpCookie.containsJSessionId()) {
             String sessionId = httpCookie.getJSessionId();
             Session session = SessionManager.getInstance().findSession(sessionId);
@@ -71,7 +71,7 @@ public class LoginController extends AbstractController {
         buildOkResponse(responseBody, response);
     }
 
-    private void handleSuccessfulLogin(HttpResponse.HttpResponseBuilder response, String account) {
+    private void handleSuccessfulLogin(HttpResponse response, String account) {
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         SessionManager.getInstance().add(session);
@@ -83,7 +83,7 @@ public class LoginController extends AbstractController {
                 });
     }
 
-    private void handleFailedLogin(HttpResponse.HttpResponseBuilder response) {
+    private void handleFailedLogin(HttpResponse response) {
         buildRedirectResponse(ERROR_401_PATH, response);
     }
 
@@ -107,22 +107,22 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.OK)
-                .withResponseBody(responseBody)
-                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML)
-                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
+    private void buildOkResponse(String responseBody, HttpResponse response) {
+        response.setStatusCode(StatusCode.OK);
+        response.setResponseBody(responseBody);
+        response.addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML);
+        response.addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
     }
 
-    private void buildRedirectResponse(String location, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.FOUND)
-                .addHeader(HttpHeader.LOCATION.getValue(), location);
+    private void buildRedirectResponse(String location, HttpResponse response) {
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader(HttpHeader.LOCATION.getValue(), location);
     }
 
-    private void buildRedirectWithCookieResponse(String location, String sessionId, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.FOUND)
-                .addHeader(HttpHeader.LOCATION.getValue(), location)
-                .addHeader(HttpHeader.SET_COOKIE.getValue(), JSESSIONID_COOKIE + sessionId);
+    private void buildRedirectWithCookieResponse(String location, String sessionId, HttpResponse response) {
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader(HttpHeader.LOCATION.getValue(), location);
+        response.addHeader(HttpHeader.SET_COOKIE.getValue(), JSESSIONID_COOKIE + sessionId);
     }
 
     private String ensureHtmlExtension(String path) {

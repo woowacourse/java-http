@@ -7,7 +7,7 @@ import org.apache.coyote.http.request.RequestMethod;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         RequestMethod method = request.getMethod();
         if (method.isGetMethod()) {
             doGet(request, response);
@@ -18,7 +18,6 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected abstract void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) throws Exception;
-
-    protected abstract void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response);
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
 }

@@ -12,19 +12,19 @@ public class HomeController extends AbstractController {
     public static final String TEXT_HTML = "text/html";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         buildOkResponse(HELLO_WORLD, response);
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse.HttpResponseBuilder response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
-    private void buildOkResponse(String responseBody, HttpResponse.HttpResponseBuilder response) {
-        response.withStatusCode(StatusCode.OK)
-                .withResponseBody(responseBody)
-                .addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length))
-                .addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML);
+    private void buildOkResponse(String responseBody, HttpResponse response) {
+        response.setStatusCode(StatusCode.OK);
+        response.setResponseBody(responseBody);
+        response.addHeader(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
+        response.addHeader(HttpHeader.CONTENT_TYPE.getValue(), TEXT_HTML);
     }
 }

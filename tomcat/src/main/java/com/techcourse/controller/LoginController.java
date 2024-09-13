@@ -1,24 +1,23 @@
 package com.techcourse.controller;
 
-import com.techcourse.controller.model.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import com.techcourse.model.User;
+import com.techcourse.param.LoginParam;
 import com.techcourse.service.UserService;
-import org.apache.coyote.http11.domain.ResourceFinder;
-import org.apache.coyote.http11.domain.body.ContentType;
-import org.apache.coyote.http11.request.domain.RequestLine;
-import org.apache.coyote.http11.request.domain.RequestPath;
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.request.paser.LoginQueryParser;
-import org.apache.coyote.http11.response.domain.HttpStatus;
-import org.apache.coyote.http11.response.maker.HttpResponseMaker;
-import org.apache.coyote.http11.response.model.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.HttpStatus;
+
+import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
-    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+    public static final String MAIN_PATH = "/index.html";
+    public static final String USER = "user";
 
     private final UserService userService;
 
@@ -30,24 +29,48 @@ public class LoginController extends AbstractController {
     public boolean canHandle(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return requestLine.isStartsWith(LOGIN_PATH);
+        return requestLine.isSamePath(LOGIN_PATH);
     }
 
     @Override
-    public HttpResponse doPost(HttpRequest httpRequest) {
-        throw new IllegalArgumentException("해당되는 메서드의 요청을 찾지 못했습니다.");
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        try {
+            LoginParam loginParam = new LoginParam(httpRequest);
+            User user = userService.findUser(loginParam.getAccount(), loginParam.getPassword());
+
+            setCookie(httpRequest, httpResponse, user);
+            httpResponse.sendRedirect(MAIN_PATH);
+        } catch (IllegalArgumentException e) {
+            httpResponse.sendError(HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
-        RequestPath requestPath = httpRequest.getRequestPath();
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (httpRequest.hasCookie()) {
+            isLoggedInUser(httpRequest, httpResponse);
+        }
+        httpResponse.sendStaticResourceResponse(httpRequest, HttpStatus.OK);
+    }
 
-        String resource = ResourceFinder.find(new RequestPath(LOGIN_PATH + "." + ContentType.HTML));
-        LoginQueryParser loginQuery = new LoginQueryParser(requestPath.getQueryString());
+    private void isLoggedInUser(HttpRequest httpRequest, HttpResponse httpResponse) {
+        Session session = httpRequest.getSession(false);
+        Optional<Object> user = session.findAttribute(USER);
 
-        User user = userService.findUser(loginQuery.findAccount(), loginQuery.findPassword());
-        logger.info(user.toString());
+        if (user.isPresent()) {
+            httpResponse.sendRedirect(MAIN_PATH);
+        }
+    }
 
-        return HttpResponseMaker.make(resource, ContentType.HTML, HttpStatus.OK);
+    private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
+        Session session = httpRequest.getSession(true);
+        session.setAttribute(USER, user);
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+
+        httpResponse.setCookies(session.getId());
     }
 }

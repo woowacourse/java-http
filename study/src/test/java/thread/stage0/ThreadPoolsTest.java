@@ -25,7 +25,7 @@ class ThreadPoolsTest {
 
     @Test
     void testNewFixedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
@@ -40,7 +40,7 @@ class ThreadPoolsTest {
 
     @Test
     void testNewCachedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));

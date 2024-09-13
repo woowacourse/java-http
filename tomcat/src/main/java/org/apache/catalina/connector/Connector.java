@@ -96,4 +96,12 @@ public class Connector implements Runnable {
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
+
+    public int getPoolSize() {
+        return threadPoolExecutor.getPoolSize();
+    }
+
+    public int getQueueSize() {
+        return threadPoolExecutor.getQueue().size();
+    }
 }

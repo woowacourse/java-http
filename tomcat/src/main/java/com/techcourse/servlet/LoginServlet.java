@@ -7,6 +7,7 @@ import org.apache.catalina.servlet.AbstractHttpServlet;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +17,9 @@ public class LoginServlet extends AbstractHttpServlet {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
+        QueryParameters queryParameters = new QueryParameters(request.getContent());
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
         if (foundUser.isEmpty()) {
             response.redirectTo("/401.html");

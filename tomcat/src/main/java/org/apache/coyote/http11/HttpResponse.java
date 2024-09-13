@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Status.FOUND;
+import static org.apache.coyote.http11.Status.OK;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -30,7 +33,7 @@ public class HttpResponse {
 
     public void generate200Response(String path, String responseBody) {
         response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                StatusLine.from(OK),
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -42,8 +45,8 @@ public class HttpResponse {
 
     public void generate302Response(String location) {
         response = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location+" ",
+                StatusLine.from(FOUND),
+                "Location: " + location + " ",
                 "Content-Type: text/html;charset=utf-8 "
         );
     }

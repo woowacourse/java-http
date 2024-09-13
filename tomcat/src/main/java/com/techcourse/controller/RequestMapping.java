@@ -1,11 +1,9 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.PageController;
-import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class RequestMapping {
 
@@ -14,14 +12,14 @@ public class RequestMapping {
     public RequestMapping() {
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
-        controllers.put("page", new PageController());
     }
 
-    public Controller getController(String path) {
+    public Controller getController(HttpRequest httpRequest) {
+        String path = httpRequest.getPath();
         if (controllers.containsKey(path)) {
             return controllers.get(path);
         }
 
-        return new PageController();
+        throw new NotFoundException("존재하지 않는 경로입니다.");
     }
 }

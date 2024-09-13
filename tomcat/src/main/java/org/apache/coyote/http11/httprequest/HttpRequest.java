@@ -1,37 +1,59 @@
 package org.apache.coyote.http11.httprequest;
 
+import java.util.Map;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
+    private final Session session;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+    public HttpRequest(
+            HttpRequestLine httpRequestLine,
+            HttpRequestHeader httpRequestHeader,
+            HttpRequestBody httpRequestBody,
+            Session session
+    ) {
         this.httpRequestLine = httpRequestLine;
         this.httpRequestHeader = httpRequestHeader;
         this.httpRequestBody = httpRequestBody;
+        this.session = session;
     }
 
-    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader) {
-        this(httpRequestLine, httpRequestHeader, null);
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader, Session session) {
+        this(httpRequestLine, httpRequestHeader, null, session);
     }
 
-    public boolean isMethod(String name) {
-        return httpRequestLine.isMethod(name);
+    public boolean isMethod(HttpMethod method) {
+        return httpRequestLine.isMethod(method);
     }
 
-    public boolean isPath(String path) {
-        return httpRequestLine.isPath(path);
+    public boolean containsHeader(String key) {
+        return httpRequestHeader.containsHeader(key);
     }
 
-    public boolean containsKey(String key) {
-        return httpRequestHeader.containsKey(key);
+    public boolean containsHeader(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.containsHeader(httpHeaderName);
     }
 
-    public String getValue(String key) {
-        return httpRequestHeader.getValue(key);
+    public String getHeaderValue(String key) {
+        return httpRequestHeader.getHeaderValue(key);
+    }
+
+    public String getHeaderValue(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.getHeaderValue(httpHeaderName);
+    }
+
+    public boolean containsBody(String key) {
+        return httpRequestBody.containsBody(key);
+    }
+
+    public String getBodyValue(String key) {
+        return httpRequestBody.getBodyValue(key);
     }
 
     public HttpMethod getMethod() {
@@ -46,7 +68,7 @@ public class HttpRequest {
         return httpRequestLine.getVersion();
     }
 
-    public String getBody() {
+    public Map<String, String> getBody() {
         return httpRequestBody.getBody();
     }
 
@@ -58,11 +80,7 @@ public class HttpRequest {
         return httpRequestBody;
     }
 
-    @Override
-    public String toString() {
-        return "HttpRequest{\n" +
-                "httpRequestHeader=" + httpRequestHeader +
-                ",\n httpRequestBody=" + httpRequestBody +
-                "\n}";
+    public Session getSession() {
+        return session;
     }
 }

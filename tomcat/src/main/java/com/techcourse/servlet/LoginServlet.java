@@ -1,12 +1,12 @@
 package com.techcourse.servlet;
 
+import com.techcourse.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.Servlet;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;

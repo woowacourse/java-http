@@ -1,8 +1,8 @@
 package com.techcourse.servlet;
 
+import com.techcourse.SessionManager;
 import java.io.IOException;
 import org.apache.coyote.http11.Servlet;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;

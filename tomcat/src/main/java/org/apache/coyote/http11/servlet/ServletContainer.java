@@ -12,6 +12,7 @@ public class ServletContainer {
 
 	public ServletContainer() {
 		this.servlets = Map.of(
+			new Path("/"), new IndexServlet(),
 			new Path("/login"), new LoginServlet(),
 			new Path("/register"), new RegisterServlet());
 	}

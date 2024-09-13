@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.common.ContentType.*;
 import static org.apache.coyote.http11.common.HeaderKey.*;
 
 import java.io.File;
@@ -61,10 +60,8 @@ public class HttpResponse {
 			this.headers.add(CONTENT_TYPE, contentType.getValue() + ";charset=utf-8");
 			this.headers.add(CONTENT_LENGTH, String.valueOf(body.getContentLength()));
 		} catch (AccessDeniedException | NullPointerException exception) {
-			this.body = new Body("Hello, World!");
-
-			this.headers.add(CONTENT_TYPE, TEXT_HTML.getValue() + ";charset=utf-8");
-			this.headers.add(CONTENT_LENGTH, String.valueOf(body.getContentLength()));
+			setStatusCode(404);
+			setStatusMessage("NOT FOUND");
 		}
 	}
 

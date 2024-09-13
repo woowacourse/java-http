@@ -5,8 +5,8 @@ server:
   compression:
     enabled: true
   tomcat:
-    accept-count: 1
-    max-connections: 1
     threads:
       min-spare: 2
       max: 2
+    max-connections: 10
+    accept-count: 5

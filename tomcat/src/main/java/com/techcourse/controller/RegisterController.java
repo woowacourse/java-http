@@ -17,10 +17,11 @@ public class RegisterController extends AbstractController {
     private static final String INDEX_HTML = "/index.html";
     private static final String REGISTER_HTML = "/register.html";
 
-    private final UserService userService = UserService.getInstance();
+    private final UserService userService;
 
-    public RegisterController() {
+    public RegisterController(UserService userService) {
         super(URI);
+        this.userService = userService;
     }
 
     @Override

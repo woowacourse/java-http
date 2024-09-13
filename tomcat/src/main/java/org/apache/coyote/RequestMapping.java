@@ -2,6 +2,7 @@ package org.apache.coyote;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.controller.AbstractController;
@@ -14,8 +15,9 @@ public class RequestMapping {
     private static final List<AbstractController> controllers = new ArrayList<>();
 
     static {
-        controllers.add(new LoginController());
-        controllers.add(new RegisterController());
+        UserService userService = new UserService();
+        controllers.add(new LoginController(userService));
+        controllers.add(new RegisterController(userService));
         controllers.add(new HomeController());
     }
 

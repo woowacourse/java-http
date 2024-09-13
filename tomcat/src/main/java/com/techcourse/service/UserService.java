@@ -10,14 +10,6 @@ import org.slf4j.LoggerFactory;
 public class UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-    private static final UserService INSTANCE = new UserService();
-
-    private UserService() {
-    }
-
-    public static UserService getInstance() {
-        return INSTANCE;
-    }
 
     public boolean isAccountExist(String account) {
         return InMemoryUserRepository.findByAccount(account).isPresent();

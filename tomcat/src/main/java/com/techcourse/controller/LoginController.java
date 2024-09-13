@@ -31,11 +31,12 @@ public class LoginController extends AbstractController {
     private static final String LOGIN_HTML = "/login.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
 
-    private final UserService userService = UserService.getInstance();
+    private final UserService userService;
     private final SessionManager sessionManager = SessionManager.getInstance();
 
-    public LoginController() {
+    public LoginController(UserService userService) {
         super(URI);
+        this.userService = userService;
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
@@ -22,18 +23,14 @@ public class LoginServlet extends AbstractServlet {
 		if (user.isPresent() && user.get().checkPassword(password)) {
 			Session session = SessionManager.createSession(user.get());
 
-			response.setVersionOfProtocol("HTTP/1.1");
-			response.setStatusCode(302);
-			response.setStatusMessage("Found");
+			response.setRequestLine("HTTP/1.1", HttpStatusCode.REDIRECT);
 			response.setHeaders(Map.of(
 				"Set-Cookie", "JSESSIONID=" + session.getId(),
 				"Location", "http://localhost:8080/index.html"
 			));
 			return;
 		}
-		response.setVersionOfProtocol("HTTP/1.1");
-		response.setStatusCode(302);
-		response.setStatusMessage("Found");
+		response.setRequestLine("HTTP/1.1", HttpStatusCode.REDIRECT);
 		response.setHeaders(Map.of(
 			"Location", "http://localhost:8080/401.html"
 		));
@@ -44,15 +41,11 @@ public class LoginServlet extends AbstractServlet {
 		Session session = request.getSession();
 
 		if (session == null || SessionManager.findUserBySession(session).isEmpty()) {
-			response.setVersionOfProtocol("HTTP/1.1");
-			response.setStatusCode(200);
-			response.setStatusMessage("OK");
+			response.setRequestLine("HTTP/1.1", HttpStatusCode.OK);
 			response.setBody("static" + request.getPath().value() + ".html");
 
 		} else {
-			response.setVersionOfProtocol("HTTP/1.1");
-			response.setStatusCode(302);
-			response.setStatusMessage("Found");
+			response.setRequestLine("HTTP/1.1", HttpStatusCode.REDIRECT);
 			response.setHeaders(Map.of(
 				"Location", "http://localhost:8080/index.html"
 			));

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class StaticServlet extends AbstractServlet {
 	@Override
@@ -12,9 +13,7 @@ public class StaticServlet extends AbstractServlet {
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-		response.setVersionOfProtocol("HTTP/1.1");
-		response.setStatusCode(200);
-		response.setStatusMessage("OK");
+		response.setRequestLine("HTTP/1.1", HttpStatusCode.OK);
 		response.setBody("static" + request.getPath().value());
 	}
 }

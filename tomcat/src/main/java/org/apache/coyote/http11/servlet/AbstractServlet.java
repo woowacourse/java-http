@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public abstract class AbstractServlet implements Servlet {
 	@Override
@@ -16,9 +17,7 @@ public abstract class AbstractServlet implements Servlet {
 		} else if (method.isPost()) {
 			doPost(request, response);
 		}
-		response.setVersionOfProtocol("HTTP/1.1");
-		response.setStatusCode(405);
-		response.setStatusMessage("Method Not Allowed");
+		response.setRequestLine("HTTP/1.1", HttpStatusCode.METHOD_NOT_ALLOWED);
 		response.setHeaders(Map.of("Allow", "GET, POST"));
 	}
 

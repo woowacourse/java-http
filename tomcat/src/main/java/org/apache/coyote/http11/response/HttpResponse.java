@@ -34,6 +34,12 @@ public class HttpResponse {
 		return sb.toString();
 	}
 
+	public void setRequestLine(String versionOfProtocol, HttpStatusCode httpStatusCode) {
+		this.responseLine.setVersionOfProtocol(new VersionOfProtocol(versionOfProtocol));
+		this.responseLine.setStatusCode(new StatusCode(httpStatusCode.getStatusCode()));
+		this.responseLine.setStatusMessage(new StatusMessage(httpStatusCode.getStatusMessage()));
+	}
+
 	public void setVersionOfProtocol(String value) {
 		this.responseLine.setVersionOfProtocol(new VersionOfProtocol(value));
 	}

@@ -1,6 +1,9 @@
 package cache.com.example;
 
+import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+
 import cache.com.example.version.ResourceVersion;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-import java.time.Duration;
-
-import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GreetingControllerTest {
@@ -68,10 +67,8 @@ class GreetingControllerTest {
     }
 
     /**
-     * http://localhost:8080/resource-versioning
-     * 위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다.
-     * 보통 정적 파일을 캐싱 무효화하기 위해 캐싱과 함께 버전을 적용시킨다.
-     * 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
+     * http://localhost:8080/resource-versioning 위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다. 보통 정적 파일을 캐싱 무효화하기
+     * 위해 캐싱과 함께 버전을 적용시킨다. 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
      */
     @Test
     void testCacheBustingOfStaticResources() {
@@ -99,4 +96,32 @@ class GreetingControllerTest {
                 .expectStatus()
                 .isNotModified();
     }
+
+    @Test
+    void testCacheBustingTriggersNewRequestAfterVersionUpdate() {
+        var uri = String.format("%s/%s/js/index.js", PREFIX_STATIC_RESOURCES, version.getVersion());
+
+        // "/resource-versioning/js/index.js" 경로의 정적 파일에 ETag를 사용한 캐싱이 적용되었는지 확인한다.
+        var response = webTestClient
+                .get()
+                .uri(uri)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().exists(HttpHeaders.ETAG)
+                .expectHeader().cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
+                .expectBody(String.class).returnResult();
+
+        log.info("response body\n{}", response.getResponseBody());
+
+        version.updateVersion();
+
+        // 캐싱된 파일이 아닌 새 버전의 파일이 정상적으로 호출되었는지 확인
+        webTestClient.get()
+                .uri(uri)
+                .exchange()
+                .expectStatus()
+                .isOk()  // 새로운 파일이므로 200 OK
+                .expectHeader().doesNotExist(HttpHeaders.IF_NONE_MATCH);  // 새로운 파일이므로 캐싱되지 않은 파일임
+    }
+
 }

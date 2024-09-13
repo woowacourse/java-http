@@ -10,6 +10,9 @@ public class SafeExecutionWrapper {
 
     private static final ExceptionHandler EXCEPTION_HANDLER = new GlobalExceptionHandler();
 
+    private SafeExecutionWrapper() {
+    }
+
     public static BiConsumer<HttpRequest, HttpResponse> withExceptionHandling(BiConsumer<HttpRequest, HttpResponse> execution) {
         return (request, response) -> {
             try {

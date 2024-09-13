@@ -37,7 +37,7 @@ public class HttpResponse {
     }
 
     public void setContentLength() {
-        this.headers.put("Content-Length", String.valueOf(body.length()));
+        this.headers.put("Content-Length", String.valueOf(body.getBytes().length));
     }
 
     public void setBody(String body) {

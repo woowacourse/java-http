@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import org.apache.coyote.http11.message.HttpHeaderName;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -15,8 +16,8 @@ public class StringHttpHandler implements HttpHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpResponse response = HttpResponse.of(HttpStatus.OK, body);
-        response.setHeader("Content-Type", "text/plain;charset=utf-8");
+        HttpResponse response = HttpResponse.of(HttpStatus.OK, body.getBytes());
+        response.setHeader(HttpHeaderName.CONTENT_TYPE, "text/plain;charset=utf-8");
         return response;
     }
 }

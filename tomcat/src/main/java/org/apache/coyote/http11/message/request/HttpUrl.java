@@ -10,11 +10,19 @@ public class HttpUrl {
         this.queryParameters = queryParameters;
     }
 
-    public String getPath() {
-        return path;
+    public HttpUrl(String path) {
+        this(path, new QueryParameters());
     }
 
-    public QueryParameters getQueryParameters() {
-        return queryParameters;
+    public boolean hasQueryString() {
+        return queryParameters.hasParameters();
+    }
+
+    public String getQueryParameter(String key) {
+        return queryParameters.getSingleValueByKey(key);
+    }
+
+    public String getPath() {
+        return path;
     }
 }

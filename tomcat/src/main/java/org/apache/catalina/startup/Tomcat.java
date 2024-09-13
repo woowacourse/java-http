@@ -1,10 +1,10 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
@@ -12,7 +12,9 @@ public class Tomcat {
 
     public void start() {
         var connector = new Connector();
+        SessionManager sessionManager = SessionManager.getInstance();
         connector.start();
+        sessionManager.start();
 
         try {
             // make the application wait until we press any key.
@@ -22,6 +24,7 @@ public class Tomcat {
         } finally {
             log.info("web server stop.");
             connector.stop();
+            sessionManager.stop();
         }
     }
 }

@@ -22,6 +22,14 @@ class ContentTypeTest {
         assertThat(contentType.toResponseText()).isEqualTo("text/html; charset=utf-8");
     }
 
+    @Test
+    @DisplayName("/를 기준으로 파싱 확인")
+    void parse() {
+        final ContentType contentType = ContentType.from("application/x-www-form-urlencoded");
+
+        assertThat(contentType).isEqualTo(ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
+    }
+
     @ParameterizedTest
     @DisplayName("콘텐츠 타입 변환 확인")
     @MethodSource("fromParameter")

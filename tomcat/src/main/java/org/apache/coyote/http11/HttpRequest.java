@@ -16,6 +16,7 @@ import org.apache.coyote.component.RequestLine;
 
 public class HttpRequest {
 
+    private static final String DEFAULT_PLAIN_TEXT = "";
     private static final String BODY_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final int KEY_INDEX = 0;
@@ -24,30 +25,57 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final Map<String, String> body;
+    private final String plainText;
 
     public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final Map<String, String> body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.plainText = DEFAULT_PLAIN_TEXT;
+    }
+
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String plainText) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = Map.of();
+        this.plainText = plainText;
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
         final var requestLine = RequestLine.from(reader.readLine());
         final var httpHeaders = HttpHeaders.parse(reader);
-        final var requestBody = parseRequestBody(httpHeaders, reader);
-        return new HttpRequest(requestLine, httpHeaders, requestBody);
+        final var contentType = ContentType.from(httpHeaders.get(HttpHeaderField.CONTENT_TYPE.getValue()));
+        if (contentType == ContentType.APPLICATION_X_WWW_FORM_URLENCODED) {
+            return new HttpRequest(requestLine, httpHeaders, parseRequestBodyKeyValue(httpHeaders, reader));
+        }
+        return new HttpRequest(requestLine, httpHeaders, parseRequestBody(httpHeaders, reader));
     }
 
-    private static Map<String, String> parseRequestBody(final HttpHeaders headers, final BufferedReader bufferedReader)
+    private static Map<String, String> parseRequestBodyKeyValue(final HttpHeaders headers,
+                                                                final BufferedReader bufferedReader)
             throws IOException {
         if (!headers.contains(HttpHeaderField.CONTENT_LENGTH.getValue())) {
             return Map.of();
         }
+        final var serialized = read(headers, bufferedReader);
+        final var requestBody = new String(serialized);
+        return generate(requestBody);
+    }
+
+    private static String parseRequestBody(final HttpHeaders headers, final BufferedReader bufferedReader)
+            throws IOException {
+        if (!headers.contains(HttpHeaderField.CONTENT_LENGTH.getValue())) {
+            return "";
+        }
+        final var buffer = read(headers, bufferedReader);
+        return new String(buffer);
+    }
+
+    private static char[] read(final HttpHeaders headers, final BufferedReader bufferedReader) throws IOException {
         final int contentLength = Integer.parseInt(headers.get(HttpHeaderField.CONTENT_LENGTH.getValue()));
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        final var requestBody = new String(buffer);
-        return generate(requestBody);
+        return buffer;
     }
 
     private static Map<String, String> generate(final String requestBody) {
@@ -114,5 +142,9 @@ public class HttpRequest {
 
     public Map<String, String> getBody() {
         return body;
+    }
+
+    public String getPlainText() {
+        return plainText;
     }
 }

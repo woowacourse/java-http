@@ -11,6 +11,7 @@ public enum ContentType {
     TEXT_CSS("text", "css"),
     TEXT_JS("text", "js"),
     APPLICATION_JSON("application", "json"),
+    APPLICATION_X_WWW_FORM_URLENCODED("application", "x-www-form-urlencoded"),
     IMAGE_ICON("image", "ico");
 
     private static final Map<String, ContentType> SUIT_CASE = Arrays.stream(ContentType.values())
@@ -34,6 +35,17 @@ public enum ContentType {
             return SUIT_CASE.get(extension);
         }
         throw new IllegalArgumentException(extension + " 는 지원하지 않는 형식입니다.");
+    }
+
+    public static ContentType from(final String target) {
+        if (target == null) {
+            return TEXT_HTML;
+        }
+        final var type = target.substring(target.lastIndexOf("/") + 1);
+        if (SUIT_CASE.containsKey(type)) {
+            return SUIT_CASE.get(type);
+        }
+        throw new IllegalArgumentException(type + " 는 지원하지 않는 형식입니다.");
     }
 
     public String toResponseText() {

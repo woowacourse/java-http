@@ -38,7 +38,7 @@ class HttpRequestTest {
                                                   "Host: localhost:8080 \r\n" +
                                                   "Connection: keep-alive \r\n" +
                                                   "Content-Length: 30\r\n" +
-                                                  "Content-Type: application/x-www.form-urlencoded \r\n" +
+                                                  "Content-Type: application/x-www-form-urlencoded \r\n" +
                                                   "Accept: */* \r\n" +
                                                   "\r\n" +
                                                   "account=redddy&password=486 \r\n" +

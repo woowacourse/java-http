@@ -19,7 +19,7 @@ public class Connector implements Runnable {
     private static final int MAX_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
-    private final ExecutorService threadPool;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
@@ -28,7 +28,7 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.threadPool = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -60,8 +60,7 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            Socket connection = serverSocket.accept();
-            threadPool.submit(() -> process(connection));
+            process(serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -72,12 +71,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
-        threadPool.shutdown();
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {

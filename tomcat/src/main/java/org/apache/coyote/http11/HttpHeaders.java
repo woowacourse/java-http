@@ -23,7 +23,7 @@ public class HttpHeaders {
     }
 
     public HttpHeaders(Map<String, String> headers) {
-        this.headers = headers;
+        this.headers = Map.copyOf(headers);
     }
 
     public static HttpHeaders from(List<String> headers) {

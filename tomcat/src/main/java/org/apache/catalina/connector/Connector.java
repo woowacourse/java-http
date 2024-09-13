@@ -102,8 +102,4 @@ public class Connector implements Runnable {
     public void shutdown() {
         executorService.shutdown();
     }
-
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
 }

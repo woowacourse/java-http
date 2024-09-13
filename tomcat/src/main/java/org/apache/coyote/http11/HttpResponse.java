@@ -11,7 +11,8 @@ public class HttpResponse {
     public static final String SESSION_ID_NAME = "JSESSIONID";
     public static final String KEY_VALUE_SEPARATOR = "=";
 
-    private String response="";
+    private String response = "";
+    private String body = "";
 
     public HttpResponse() {
     }
@@ -19,10 +20,12 @@ public class HttpResponse {
     public String generateResponseBody(String path) throws IOException {
         if (!path.contains(".")) {
             final URL resource = getClass().getClassLoader().getResource(path + ".html");
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return body;
         }
         final URL resource = getClass().getClassLoader().getResource(path);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return body;
     }
 
     public void generate200Response(String path, String responseBody) {
@@ -45,14 +48,17 @@ public class HttpResponse {
         );
     }
 
-    public String getResponse() {
-        return response;
-    }
-
     public void appendSetCookieHeader(String sessionId) {
-        response= String.join("\r\n",
+        if (!body.isEmpty()) {
+            return;
+        }
+        response = String.join("\r\n",
                 response + " ",
                 SET_COOKIE_PREFIX + SESSION_ID_NAME + KEY_VALUE_SEPARATOR + sessionId + " "
         );
+    }
+
+    public String getResponse() {
+        return response;
     }
 }

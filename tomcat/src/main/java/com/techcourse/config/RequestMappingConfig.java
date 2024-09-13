@@ -16,12 +16,7 @@ public class RequestMappingConfig {
                         "/login", new LoginController(),
                         "/register", new RegisterController(),
                         "/", staticResourceController,
-                        "/index.html", staticResourceController,
-                        "/login.html", staticResourceController,
-                        "/register.html", staticResourceController,
-                        "/css/styles.css", staticResourceController,
-                        "/401.html", staticResourceController,
-                        "/js/scripts.js", staticResourceController
+                        ".*\\.(js|html|css)$", staticResourceController
                 )
         );
     }

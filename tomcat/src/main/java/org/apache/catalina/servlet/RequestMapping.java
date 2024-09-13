@@ -13,9 +13,12 @@ public class RequestMapping {
     }
 
     public Controller getController(HttpRequest request) {
-        if (mappedController.containsKey(request.getTarget())) {
-            return mappedController.get(request.getTarget());
-        }
-        throw new NoMatchedControllerException(request.getTarget() + " 요청을 처리할 컨트롤러가 존재하지 않습니다.");
+        String controllerKey = mappedController.keySet().stream()
+                .filter(pathRegex -> request.getTarget().matches(pathRegex))
+                .findFirst()
+                .orElseThrow(() -> new NoMatchedControllerException(
+                        request.getTarget() + " 요청을 처리할 컨트롤러가 존재하지 않습니다.")
+                );
+        return mappedController.get(controllerKey);
     }
 }

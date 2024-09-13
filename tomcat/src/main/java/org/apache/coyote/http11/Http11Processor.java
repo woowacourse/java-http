@@ -1,11 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -43,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.buildResponse());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException(e);

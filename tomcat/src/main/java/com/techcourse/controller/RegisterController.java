@@ -4,10 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class RegisterController extends AbstractController{
+public class RegisterController extends AbstractController {
 
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.getStaticResource("/register.html");

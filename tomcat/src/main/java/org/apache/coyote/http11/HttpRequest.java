@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.exception.UnexpectedQueryParamException;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
@@ -43,15 +44,18 @@ public class HttpRequest {
 
     private void mapQueryParams(String[] pairs) {
         for (String pair : pairs) {
-            String[] keyValue = pair.split(Symbol.QUERY_PARAM_DELIMITER);
+            if (!pair.isEmpty()) {
 
-            String key = keyValue[0];
-            String value = Symbol.EMPTY;
+                String[] keyValue = pair.split(Symbol.QUERY_PARAM_DELIMITER);
 
-            if (keyValue.length > 1) {
-                value = keyValue[1];
+                String key = keyValue[0];
+                String value = Symbol.EMPTY;
+
+                if (keyValue.length > 1) {
+                    value = keyValue[1];
+                }
+                params.put(key, value);
             }
-            params.put(key, value);
         }
     }
 
@@ -101,6 +105,27 @@ public class HttpRequest {
             throw new UnexpectedQueryParamException();
         }
         return paramValue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HttpRequest request)) {
+            return false;
+        }
+        return method == request.method && Objects.equals(uri, request.uri) && Objects.equals(
+                path,
+                request.path
+        ) && Objects.equals(params, request.params) && Objects.equals(protocol, request.protocol)
+                && Objects.equals(headers, request.headers) && Objects.equals(body, request.body)
+                && Objects.equals(cookie, request.cookie);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(method, uri, path, params, protocol, headers, body, cookie);
     }
 
     public Cookies getCookies() {

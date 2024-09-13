@@ -2,6 +2,7 @@ package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.util.Symbol;
 
 public class Cookies {
@@ -33,5 +34,21 @@ public class Cookies {
 
     public String getJSESSIONID() {
         return cookies.get(JSESSIONID_KEY);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Cookies cookies1)) {
+            return false;
+        }
+        return Objects.equals(cookies, cookies1.cookies);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(cookies);
     }
 }

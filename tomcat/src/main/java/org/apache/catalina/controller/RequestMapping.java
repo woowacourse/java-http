@@ -58,10 +58,9 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest request) {
         HttpEndpoint httpEndpoint = HttpEndpoint.of(request);
-        Controller controller = endpointControllers.get(httpEndpoint);
-        if (controller == null) {
+        if (!endpointControllers.containsKey(httpEndpoint)) {
             return new ResourceController();
         }
-        return controller;
+        return endpointControllers.get(httpEndpoint);
     }
 }

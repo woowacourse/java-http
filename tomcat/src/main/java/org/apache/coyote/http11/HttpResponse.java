@@ -47,23 +47,23 @@ public class HttpResponse {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("\r\n");
-        serializeStatusLine(stringBuilder);
-        serializeResponseHeaders(stringBuilder);
+        getStatusLineToString(stringBuilder);
+        getHeadersToString(stringBuilder);
         stringBuilder.append("").append("\r\n");
-        serializeResponseBody(stringBuilder);
+        getResponseBodyToString(stringBuilder);
 
         return stringBuilder.toString();
     }
 
-    private void serializeStatusLine(StringBuilder stringBuilder) {
-        stringBuilder.append(statusLine.serialize()).append("\r\n");
+    private void getStatusLineToString(StringBuilder stringBuilder) {
+        stringBuilder.append(statusLine.getStatusLineToString()).append("\r\n");
     }
 
-    private void serializeResponseHeaders(StringBuilder stringBuilder) {
-        httpHeaders.serializeHeaders(stringBuilder);
+    private void getHeadersToString(StringBuilder stringBuilder) {
+        httpHeaders.getHeadersToString(stringBuilder);
     }
 
-    private void serializeResponseBody(StringBuilder stringBuilder) {
+    private void getResponseBodyToString(StringBuilder stringBuilder) {
         stringBuilder.append(responseBody);
     }
 }

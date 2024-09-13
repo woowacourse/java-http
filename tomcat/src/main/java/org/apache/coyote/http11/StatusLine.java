@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 public class StatusLine {
 
+    private static final String DELIMITER = " ";
     private final String version;
     private final int statusCode;
     private final String statusMessage;
@@ -16,7 +17,11 @@ public class StatusLine {
         return statusMessage;
     }
 
-    public String serialize() {
-        return version + " " + statusCode + " " + statusMessage + " ";
+    public String getStatusLineToString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(version).append(DELIMITER)
+                .append(statusCode).append(DELIMITER)
+                .append(statusMessage).append(DELIMITER);
+        return stringBuilder.toString();
     }
 }

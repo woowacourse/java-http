@@ -53,7 +53,7 @@ public class HttpHeaders {
         this.headers.put(key, value);
     }
 
-    public void serializeHeaders(StringBuilder stringBuilder) {
+    public void getHeadersToString(StringBuilder stringBuilder) {
         for (Entry<String, String> headers : this.headers.entrySet()) {
             stringBuilder.append(headers.getKey() + ": " + headers.getValue() + " ").append("\r\n");
         }

@@ -3,6 +3,7 @@ package org.apache.catalina.session;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
@@ -19,6 +20,12 @@ public class SessionManager implements Manager {
     }
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
+    public static Session createNewSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        SESSIONS.put(session.getId(), session);
+        return session;
+    }
 
     @Override
     public void add(HttpSession session) {

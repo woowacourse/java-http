@@ -3,10 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.controller.dto.LoginRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.UUID;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.util.StaticResourceReader;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -59,15 +58,9 @@ public class LoginController extends AbstractController {
 
     private void doLogin(HttpRequest request, HttpResponse response, User user) {
         Session session = sessionManager.getSession(request.getSessionId())
-                .orElseGet(this::registerNewSession);
+                .orElseGet(SessionManager::createNewSession);
         session.setAttribute(SESSION_KEY_USER, user);
         response.sendRedirect("/index.html")
                 .setCookie("JSESSIONID", session.getId());
-    }
-
-    private Session registerNewSession() {
-        Session newSession = new Session(UUID.randomUUID().toString());
-        sessionManager.add(newSession);
-        return newSession;
     }
 }

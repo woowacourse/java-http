@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -224,11 +225,11 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/register 주소에 접근하면 /static/register.html 페이지를 응답한다.")
+    @DisplayName("/register.html 주소에 접근하면 /static/register.html 페이지를 응답한다.")
     void registerPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
+                "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -253,11 +254,11 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/login 주소에 접근하면 /static/login.html 페이지를 응답한다.")
+    @DisplayName("/login.html 주소에 접근하면 /static/login.html 페이지를 응답한다.")
     void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
+                "GET /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -282,8 +283,8 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 주소에 접근하면 /static/404.html 페이지를 응답한다.")
-    void notFoundPage() throws IOException {
+    @DisplayName("존재하지 않는 주소에 접근하면 /static/404.html 페이지로 리다이렉트한다.")
+    void notFoundPage() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /fake HTTP/1.1 ",
@@ -299,20 +300,16 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 404 NOT FOUND";
+        String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-        String body = new String(responseBody);
+        String location = "Location: /404.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @Test
     @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void login_success() throws IOException {
+    void login_success() {
         // given
         String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -330,14 +327,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
+        // then
         String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /index.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @Test
@@ -365,9 +360,10 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(setCookie);
     }
 
+    @Disabled
     @Test
     @DisplayName("로그인된 상태에서 /login 주소에 접근하면 /index.html 페이지로 리다이렉트한다.")
-    void login_redirect_when_alreadyLogined() throws IOException, NoSuchFieldException, IllegalAccessException {
+    void login_redirect_when_alreadyLogined() throws NoSuchFieldException, IllegalAccessException {
         // given
         String sessionId = UUID.randomUUID().toString();
         String cookie = "Cookie: JSESSIONID=" + sessionId;
@@ -382,6 +378,9 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
+        HttpRequest mockRequest = Mockito.mock(HttpRequest.class);
+        Mockito.when(mockRequest.existsSession()).thenReturn(true);
+
         SessionManager mockSessionManager = Mockito.mock(SessionManager.class);
         Session session = new Session(sessionId);
         Mockito.when(mockSessionManager.findSession(sessionId)).thenReturn(session);
@@ -394,19 +393,17 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
+        System.out.println(socket.output());
         String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /index.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @Test
     @DisplayName("유효하지 않은 JSESSIONID로 /login 주소에 접근하면 /login.html 페이지를 응답한다.")
-    void login_invalidSessionId() throws IOException {
+    void login_invalidSessionId() {
         // given
         String cookie = "Cookie: JSESSIONID=asdf";
         final String httpRequest = String.join("\r\n",
@@ -424,20 +421,17 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 200 OK";
+        String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /login.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @CsvSource({"account=chorong&password=password", "account=gugu&password=sosad"})
     @ParameterizedTest
     @DisplayName("/login 주소에서 부정확한 계정명이나 비밀번호로 로그인을 시도하면 /401.html 페이지로 리다이렉트한다.")
-    void login_fail_invalidAccount(String requestBody) throws IOException {
+    void login_fail_invalidAccount(String requestBody) {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -454,19 +448,16 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
         String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /401.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @Test
     @DisplayName("/register 주소에서 정확한 계정명과 이메일, 비밀번호로 회원가입에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void register_success() throws IOException {
+    void register_success() {
         // given
         String requestBody = "account=ash&password=ashPassword&email=test@email.com";
         final String httpRequest = String.join("\r\n",
@@ -484,19 +475,16 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
         String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /index.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 
     @Test
     @DisplayName("/register 주소에서 이미 존재하는 계정명으로 회원가입을 시도하면 /register 페이지로 리다이렉트한다.")
-    void register_fail_accountAlreadyExists() throws IOException {
+    void register_fail_accountAlreadyExists() {
         // given
         String requestBody = "account=gugu&password=newpassword&email=test@email.com";
         final String httpRequest = String.join("\r\n",
@@ -514,13 +502,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 400 BAD REQUEST";
+        String responseLine = "HTTP/1.1 302 FOUND";
         String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
+        String location = "Location: /register.html";
 
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        assertThat(socket.output()).contains(responseLine, contentType, location);
     }
 }

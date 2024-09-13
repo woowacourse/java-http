@@ -1,11 +1,15 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.session.Session;
+import org.apache.coyote.http.cookie.HttpCookies;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -54,6 +58,10 @@ public class HttpRequest {
         return new RequestBody(stringBuilder.toString());
     }
 
+    public boolean existsSession() {
+        return header.existsSession();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -70,7 +78,12 @@ public class HttpRequest {
         return header;
     }
 
-    public RequestBody getRequestBody() {
-        return body;
+    public Session getSession() {
+        HttpCookies cookies = HttpCookies.from(header.getCookies());
+        return new Session(cookies.getJsessionId());
+    }
+
+    public Map<String, String> getRequestBody() {
+        return body.getValues();
     }
 }

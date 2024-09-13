@@ -10,6 +10,10 @@ public class HttpCookie {
         this.value = value;
     }
 
+    public static String setCookieHeader(String uuid) {
+        return "JSESSIONID=" + uuid + " ";
+    }
+
     public String getName() {
         return name;
     }

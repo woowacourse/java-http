@@ -12,7 +12,19 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeader requestHeader;
-    private final ResponseBody responseBody;
+    private ResponseBody responseBody;
+
+    public HttpResponse() {
+        this(null, new ResponseHeader(), null);
+    }
+
+    public HttpResponse(HttpStatus httpStatus, ResponseHeader responseHeader, byte[] values) {
+        this.statusLine = StatusLine.of11(httpStatus);
+        this.requestHeader = responseHeader;
+        this.responseBody = new ResponseBody(values);
+
+        setContentLength(responseBody.getLength());
+    }
 
     public HttpResponse(HttpStatus httpStatus, byte[] values) {
         this.statusLine = StatusLine.of11(httpStatus);
@@ -65,6 +77,11 @@ public class HttpResponse {
 
     public void setLocation(String location) {
         requestHeader.setLocation(location);
+    }
+
+    public void setResponseBody(byte[] values) {
+        this.responseBody = new ResponseBody(values);
+        setContentLength(responseBody.getLength());
     }
 
     public StatusLine getStatusLine() {

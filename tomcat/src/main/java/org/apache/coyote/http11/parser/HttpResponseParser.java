@@ -21,7 +21,7 @@ public class HttpResponseParser {
                 .map(cookie -> "Set-Cookie: " + cookie + "\r\n")
                 .collect(Collectors.joining());
         if (!cookies.isEmpty()) {
-            headerBuilder.append(cookies).append(" \r\n");
+            headerBuilder.append(cookies);
         }
         if (httpResponse.getRedirectUrl() != null) {
             headerBuilder.append("Location: ").append(httpResponse.getRedirectUrl()).append(" \r\n");

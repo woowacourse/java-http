@@ -18,7 +18,7 @@ class HttpRequestTest {
     @Test
     void parseHttpRequest() throws IOException {
         Session session = new Session("1234");
-        new SessionManager().add(session);
+        SessionManager.getInstance().add(session);
         String rawRequest = String.join("\r\n",
                 "POST /hello?me=potato&you=gamja HTTP/1.1 ",
                 "Host: localhost:8080 ",

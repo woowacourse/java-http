@@ -31,7 +31,7 @@ class LoginControllerTest {
     private final User user2 = new User("account2", "password2", "email2");
     private final Session session = new Session("sessionId");
     private final Session generatedSession = new Session("new session");
-    private final SessionManager sessionManager = new SessionManager();
+    private final SessionManager sessionManager = SessionManager.getInstance();
     private final LoginController loginController = new LoginController(new SessionService(() -> generatedSession));
 
     @BeforeEach

@@ -11,7 +11,7 @@ class SessionServiceTest {
 
     HttpSession session1 = new Session("1");
     HttpSession session2 = new Session("2");
-    private final Manager sessionManager = new SessionManager();
+    private final Manager sessionManager = SessionManager.getInstance();
     private final SessionService sessionService = new SessionService();
 
     @AfterEach

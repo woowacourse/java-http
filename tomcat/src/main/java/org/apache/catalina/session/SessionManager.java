@@ -7,6 +7,14 @@ import java.util.Map;
 public class SessionManager implements Manager {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final SessionManager INSTANCE = new SessionManager();
+
+    private SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void add(HttpSession session) {

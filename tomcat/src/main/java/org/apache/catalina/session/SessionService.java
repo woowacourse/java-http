@@ -6,7 +6,7 @@ import java.util.Optional;
 public class SessionService {
 
     private static final SessionGenerator DEFAULT_SESSION_GENERATOR = new UuidSessionGenerator();
-    private static final Manager MANAGER = new SessionManager();
+    private static final Manager MANAGER = SessionManager.getInstance();
     private final SessionGenerator sessionGenerator;
 
     public SessionService() {

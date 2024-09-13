@@ -39,13 +39,9 @@ class LoginControllerTest {
         loginController.doGet(request, response);
         StatusLine statusLine = response.getStatusLine();
 
-        String path = "src/main/resources/static/index.html";
-        String htmlString = new String(Files.readAllBytes(Paths.get(path)));
-
         assertThat(statusLine.getStatusCode()).isEqualTo(StatusCode.valueOf(302));
-        assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
+        assertThat(response.getResponseHeader().getHeader("Location")).isEqualTo("/index.html");
     }
-
 
     @DisplayName("GET 요청 시 JSESSIONID 쿠키가 없으면 login.html을 반환해야 한다.")
     @Test

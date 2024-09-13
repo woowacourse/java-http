@@ -55,6 +55,7 @@ public class RegisterController extends AbstractController {
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             response.setRedirectResponse(REDIRECT_URI, 302, List.of());
+            return;
         }
         response.setRedirectResponse(INDEX_HTML, 302, List.of());
     }

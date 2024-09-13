@@ -41,10 +41,6 @@ public class HttpResponse {
 		this.responseLine.setStatusMessage(new StatusMessage(httpStatusCode.getStatusMessage()));
 	}
 
-	public void setVersionOfProtocol(String value) {
-		this.responseLine.setVersionOfProtocol(new VersionOfProtocol(value));
-	}
-
 	public void setStatusCode(int value) {
 		this.responseLine.setStatusCode(new StatusCode(value));
 	}
@@ -57,7 +53,11 @@ public class HttpResponse {
 		this.headers = new Headers(headers);
 	}
 
-	public void setBody(String filename) throws IOException {
+	public void setBodyByPlainText(String body) {
+		this.body = new Body(body);
+	}
+
+	public void setBodyByFileName(String filename) throws IOException {
 		try {
 			URL url = HttpResponse.class.getClassLoader().getResource(filename);
 			File file = new File(url.getPath());

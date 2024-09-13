@@ -42,7 +42,7 @@ public class LoginServlet extends AbstractServlet {
 
 		if (session == null || SessionManager.findUserBySession(session).isEmpty()) {
 			response.setRequestLine("HTTP/1.1", HttpStatusCode.OK);
-			response.setBody("static" + request.getPath().value() + ".html");
+			response.setBodyByFileName("static" + request.getPath().value() + ".html");
 
 		} else {
 			response.setRequestLine("HTTP/1.1", HttpStatusCode.REDIRECT);

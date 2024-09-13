@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class IndexServlet extends AbstractServlet {
+public class HelloWorldServlet extends AbstractServlet {
 	@Override
 	protected void doPost(HttpRequest request, HttpResponse response) {
 
@@ -15,6 +15,6 @@ public class IndexServlet extends AbstractServlet {
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
 		response.setRequestLine("HTTP/1.1", HttpStatusCode.OK);
-		response.setBody("static/index.html");
+		response.setBodyByPlainText("Hello, World");
 	}
 }

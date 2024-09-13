@@ -57,6 +57,6 @@ public class SessionManager implements Manager {
             return null;
         }
 
-        return SESSIONS.get(sessionId);
+        return findSession(sessionId);
     }
 }

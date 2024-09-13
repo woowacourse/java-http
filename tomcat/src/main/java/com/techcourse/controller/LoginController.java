@@ -23,13 +23,11 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        if (request.getPath().equals("/login")) {
-            if (isAlreadyLogin(request.getRequestHeader())) {
-                response.redirect(request.getVersion(), "/index.html");
-                return;
-            }
-            response.redirect(request.getVersion(), "/login.html");
+        if (isAlreadyLogin(request.getRequestHeader())) {
+            response.redirect(request.getVersion(), "/index.html");
+            return;
         }
+        response.redirect(request.getVersion(), "/login.html");
     }
 
     private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
@@ -48,9 +46,11 @@ public class LoginController extends AbstractController {
         if (user == null) {
             return;
         }
+        Cookie cookie = request.getCookie();
         String sessionId = UUID.randomUUID().toString();
-        createSession(user, createCookie(JSESSIONID, sessionId));
-        response.addHeader(SET_COOKIE.getHeaderName(), String.format("%s=%s", JSESSIONID, sessionId));
+        cookie.addCookie(JSESSIONID, sessionId);
+        createSession(user, cookie);
+        response.addCookie(SET_COOKIE.getHeaderName(), cookie.getCookies());
         response.redirect(request.getVersion(), "/index.html");
     }
 
@@ -67,12 +67,6 @@ public class LoginController extends AbstractController {
         return user;
     }
 
-    private Cookie createCookie(String name, String value) {
-        Cookie cookie = new Cookie();
-        cookie.setCookie(name, value);
-        return cookie;
-    }
-
     private void createSession(User user, Cookie cookie) {
         Map<String, String> cookies = cookie.getCookies();
         SessionManager sessionManager = SessionManager.getInstance();
@@ -80,4 +74,14 @@ public class LoginController extends AbstractController {
         sessionManager.add(session);
         session.setAttribute("user", user);
     }
+
+//    private boolean getSession(boolean create) {
+//        SessionManager sessionManager = SessionManager.getInstance();
+//        Session session = sessionManager.findSession(JSESSIONID);
+//        if (session == null) {
+//            if (create) {
+//
+//            }
+//        }
+//    }
 }

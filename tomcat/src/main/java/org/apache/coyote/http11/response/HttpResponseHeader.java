@@ -24,4 +24,11 @@ public class HttpResponseHeader {
     public Map<String, String> getHeaders() {
         return headers;
     }
+
+    public void putCookie(String name, Map<String, String> cookies) {
+        String value = cookies.keySet().stream()
+                .map(cookie -> cookie + "=" + cookies.get(cookie))
+                .collect(Collectors.joining("; "));
+        headers.put(name, value);
+    }
 }

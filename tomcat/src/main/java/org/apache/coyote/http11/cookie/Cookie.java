@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.cookie;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Cookie {
     private Map<String, String> cookies;
@@ -10,7 +12,16 @@ public class Cookie {
         cookies = new HashMap<>();
     }
 
-    public void setCookie(String name, String value) {
+    public Cookie(String cookie) {
+        this.cookies = Arrays.stream(cookie.split(";"))
+                .map(param -> param.split("=", 2))  // 2로 제한해서 key=value 형태로 분리
+                .collect(Collectors.toMap(
+                        pair -> pair[0].trim(),
+                        pair -> pair[1].trim()
+                ));
+    }
+
+    public void addCookie(String name, String value) {
         cookies.put(name, value);
     }
 

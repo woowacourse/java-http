@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.cookie.Cookie;
+
 public class HttpRequest {
     private final HttpRequestLine requestLine;
     private final HttpRequestHeader requestHeader;
@@ -31,5 +33,13 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return requestLine.getMethod();
+    }
+
+    public Cookie getCookie() {
+        if (requestHeader.getCookies() == null) {
+            return new Cookie();
+        }
+
+        return new Cookie(requestHeader.getCookies());
     }
 }

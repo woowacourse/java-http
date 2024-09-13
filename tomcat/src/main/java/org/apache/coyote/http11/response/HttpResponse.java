@@ -20,8 +20,12 @@ public class HttpResponse {
         return new HttpResponse();
     }
 
-    public void addHeader(String key, String value) {
-        responseHeader.put(key, value);
+    public void addHeader(String name, String value) {
+        responseHeader.put(name, value);
+    }
+
+    public void addCookie(String name, Map<String, String> cookies) {
+        responseHeader.putCookie(name, cookies);
     }
 
     public StatusLine getStatusLine() {

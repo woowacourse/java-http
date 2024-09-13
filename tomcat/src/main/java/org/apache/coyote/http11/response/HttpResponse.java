@@ -29,7 +29,7 @@ public class HttpResponse {
     }
 
     public void setContentType(String contentType) {
-        if("text/html".equals(contentType)) {
+        if ("text/html".equals(contentType)) {
             this.headers.put("Content-Type", contentType + ";charset=utf-8");
             return;
         }
@@ -58,9 +58,11 @@ public class HttpResponse {
                 .append(value)
                 .append(System.lineSeparator()));
 
-        stringBuilder
-                .append(System.lineSeparator())
-                .append(body);
+        if (body != null) {
+            stringBuilder
+                    .append(System.lineSeparator())
+                    .append(body);
+        }
 
         return stringBuilder.toString();
     }

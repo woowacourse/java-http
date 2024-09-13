@@ -60,10 +60,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse processApplicationResponse(HttpRequest request) throws IOException {
+    private HttpResponse processApplicationResponse(HttpRequest request) throws IOException, TomcatException {
         HttpResponse response = new HttpResponse();
         HttpResponse staticResourceResponse = viewResolver.resolve(request, new HttpResponse());
-        if (staticResourceResponse != null) {
+        if (request.isGET() && staticResourceResponse != null) {
             return staticResourceResponse;
         }
 

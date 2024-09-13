@@ -9,8 +9,8 @@ public abstract class HttpConnectorException extends TomcatException {
 
     private static final Logger log = LoggerFactory.getLogger(HttpConnectorException.class);
 
-    HttpConnectorException(HttpStatusCode statusCode, String message) {
-        super(statusCode, message);
+    HttpConnectorException(String message) {
+        super(HttpStatusCode.INTERNAL_SERVER_ERROR, message);
         log.error(message);
     }
 }

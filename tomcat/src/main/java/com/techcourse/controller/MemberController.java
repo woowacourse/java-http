@@ -43,11 +43,11 @@ public final class MemberController extends AbstractController {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UnauthorizedException::new);
         if (user.checkPassword(password)) {
-            HttpResponseBuilder.setRedirection(httpResponse, "/");
+            HttpResponseBuilder.buildRedirection(httpResponse, "/");
             registerLoginSession(request, httpResponse, user);
             return;
         }
-        HttpResponseBuilder.setRedirection(httpResponse, "/401.html");
+        HttpResponseBuilder.buildRedirection(httpResponse, "/401.html");
     }
 
     private void registerService(HttpRequest request, HttpResponse httpResponse) {
@@ -57,7 +57,7 @@ public final class MemberController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        HttpResponseBuilder.setRedirection(httpResponse, "/");
+        HttpResponseBuilder.buildRedirection(httpResponse, "/");
     }
 
     private void registerLoginSession(HttpRequest request, HttpResponse httpResponse, User user) {

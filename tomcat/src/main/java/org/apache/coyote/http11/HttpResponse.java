@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -9,6 +10,8 @@ import org.apache.coyote.util.Symbol;
 public class HttpResponse {
 
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final List<String> headers = new ArrayList<>();
     private String protocol;
     private int statusCode;
@@ -40,8 +43,10 @@ public class HttpResponse {
         this.cookies = cookies;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setBody(String contents) {
+        int contentLength = contents.getBytes(StandardCharsets.UTF_8).length;
+        this.body = contents;
+        addHeaders(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public byte[] getBytes() {

@@ -33,7 +33,7 @@ public final class ViewController extends AbstractController {
         if (request.getUri().equals("/login")
                 && cookies.hasJSESSIONID()
                 && SessionManager.isRegisitered(cookies.getJSESSIONID())) {
-            HttpResponseBuilder.setRedirection(httpResponse, "/");
+            HttpResponseBuilder.buildRedirection(httpResponse, "/");
             return;
         }
 

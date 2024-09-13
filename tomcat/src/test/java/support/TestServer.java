@@ -11,11 +11,19 @@ import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TestServer {
     private static final String HOST = "http://localhost:11240";
     private static final AtomicBoolean isOpen = new AtomicBoolean(false);
+
+    public static void serverStart(final Tomcat tomcat) {
+        if (isOpen.get() == true) {
+            return;
+        }
+        start(tomcat);
+    }
 
     public static void serverStart() {
         if (isOpen.get() == true) {
@@ -23,7 +31,9 @@ public class TestServer {
         }
         final Tomcat tomcat = new Tomcat(
                 new Connector(11240, 50,
-                        new CatalinaConnectionListener(new CoyoteAdapter(CONTROLLER_EXECUTOR, new ResourceController(), sessionManager)))
+                        new CatalinaConnectionListener(new CoyoteAdapter(CONTROLLER_EXECUTOR, new ResourceController(), sessionManager),
+                        Executors.newCachedThreadPool())
+                        )
         );
         start(tomcat);
     }

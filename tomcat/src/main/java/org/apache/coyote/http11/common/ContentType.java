@@ -14,13 +14,13 @@ public enum ContentType {
 	}
 
 	public static ContentType fromPath(String path) {
-		if (path.endsWith("css")) {
+		if (path.endsWith(".css")) {
 			return ContentType.TEXT_CSS;
 		}
-		if (path.endsWith("js")) {
+		if (path.endsWith(".js")) {
 			return ContentType.APPLICATION_JSON;
 		}
-		if (path.endsWith("html")) {
+		if (path.endsWith(".html")) {
 			return ContentType.TEXT_HTML;
 		}
 		return ContentType.APPLICATION_JSON;

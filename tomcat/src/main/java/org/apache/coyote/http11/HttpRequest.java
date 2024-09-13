@@ -160,6 +160,10 @@ public class HttpRequest {
         return method;
     }
 
+    public boolean isMethod(HttpMethod method) {
+        return this.method == method;
+    }
+
     public HttpProtocol getProtocol() {
         return protocol;
     }

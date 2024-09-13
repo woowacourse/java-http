@@ -1,4 +1,4 @@
-package org.apache.coyote.resource;
+package org.apache.coyote.http11.resource;
 
 import java.io.File;
 import java.net.URL;

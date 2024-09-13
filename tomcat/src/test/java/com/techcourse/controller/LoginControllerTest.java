@@ -40,7 +40,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=gugu&password=password HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=gugu&password=password"
         ));
 
         // when
@@ -62,7 +64,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=seyang&password=password HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=seyang&password=password"
         ));
 
         // when
@@ -84,7 +88,9 @@ class LoginControllerTest {
         RequestMapping requestMapping = new RequestMapping();
         Builder responseBuilder = HttpResponse.builder();
         HttpRequest request = HttpRequest.parse(List.of(
-                "GET /login?account=gugu&password=pw HTTP/1.1"
+                "POST /login HTTP/1.1",
+                "",
+                "account=gugu&password=pw"
         ));
 
         // when

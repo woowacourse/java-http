@@ -94,8 +94,8 @@ class Http11ProcessorTest {
     @DisplayName("로그인 테스트")
     class Login {
         @Test
-        @DisplayName("로그인 페이지로 이동한다.")
-        void loginPage() throws IOException {
+        @DisplayName("로그인 주소로 접속시 로그인 정적 페이지로 리다이렉트된다.")
+        void loginPageRedirect() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /login HTTP/1.1 ",
@@ -115,6 +115,34 @@ class Http11ProcessorTest {
             var expected = "HTTP/1.1 302 FOUND \r\n" +
                     "Location: /login.html \r\n" +
                     "\r\n";
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("로그인 정적 페이지를 가져온다.")
+        void loginPage() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /login.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/login.html");
+            var expected = "HTTP/1.1 200 OK \r\n" +
+                    "Content-Length: " + new File(resource.getPath()).length() + " \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "\r\n"+
+                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -178,8 +206,8 @@ class Http11ProcessorTest {
     @DisplayName("회원가입 테스트")
     class Register {
         @Test
-        @DisplayName("회원가입 페이지로 이동한다.")
-        void registerPage() throws IOException {
+        @DisplayName("회원가입 주소로 접속시 회원가입 정적 페이지로 리다이렉트된다.")
+        void registerPageRedirect() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /register HTTP/1.1 ",
@@ -199,6 +227,34 @@ class Http11ProcessorTest {
             var expected =   "HTTP/1.1 302 FOUND \r\n" +
                     "Location: /register.html \r\n" +
                     "\r\n";
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("회원가입 정적 페이지를 가져온다.")
+        void registerPage() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /register.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            var expected = "HTTP/1.1 200 OK \r\n" +
+                    "Content-Length: " + new File(resource.getPath()).length() + " \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "\r\n"+
+                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             assertThat(socket.output()).isEqualTo(expected);
         }

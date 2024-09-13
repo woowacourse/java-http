@@ -1,25 +1,36 @@
 package org.apache.coyote.http11.session;
 
+import static org.apache.coyote.http11.common.HttpDelimiter.*;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.coyote.http11.request.HttpRequest;
-
 public class Session {
 	public static final String SESSION_HEADER_KEY = "JSESSIONID";
+
 	private final String id;
 
 	public Session() {
-		this.id =  UUID.randomUUID().toString();
+		this.id = UUID.randomUUID().toString();
 	}
 
-	public Session(HttpRequest httpRequest) {
-		this.id = Arrays.asList(httpRequest.getCookie().split("; "))
+	public Session(String cookies) {
+		String session = getSession(cookies);
+		if (session != null) {
+			this.id = session.substring(SESSION_HEADER_KEY.length() + 1);
+		} else {
+			this.id = null;
+		}
+	}
+
+	private static String getSession(String cookies) {
+		String session = Arrays.asList(cookies.split(SESSION_DELIMITER.getValue()))
 			.stream()
 			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
 			.findAny()
 			.orElseGet(null);
+		return session;
 	}
 
 	public String getId() {

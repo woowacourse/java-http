@@ -1,15 +1,17 @@
 package com.techcourse.controller;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.OutputStream;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.ResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.io.OutputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StaticResourceControllerTest {
 
@@ -46,7 +48,7 @@ class StaticResourceControllerTest {
 
         staticResourceController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_404_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_404_HEADER);
     }
 
     @Test
@@ -58,6 +60,6 @@ class StaticResourceControllerTest {
         staticResourceController.doGet(httpRequest, httpResponse);
 
         String resource = ResourceFinder.findBy(INDEX_HTML_PATH);
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(resource));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(resource);
     }
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpResponseTest {
 
@@ -24,7 +24,7 @@ class HttpResponseTest {
     void sendError() {
         httpResponse.sendError(HttpStatus.NOT_FOUND);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains("Location: 404.html"));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains("Location: 404.html");
     }
 
     @Test
@@ -32,7 +32,7 @@ class HttpResponseTest {
     void sendRedirect() {
         httpResponse.sendRedirect("/index.html");
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains("Location: /index.html"));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains("Location: /index.html");
     }
 
     @Test
@@ -43,6 +43,6 @@ class HttpResponseTest {
         httpResponse.sendStaticResourceResponse(httpRequest, HttpStatus.OK);
         String resource = ResourceFinder.findBy("/index.html");
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(resource));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(resource);
     }
 }

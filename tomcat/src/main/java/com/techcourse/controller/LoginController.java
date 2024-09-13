@@ -6,16 +6,15 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
-import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
@@ -24,7 +23,8 @@ public class LoginController {
     private LoginController() {
     }
 
-    public void login(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         String account = request.getRequestBodyValue("account");
         String password = request.getRequestBodyValue("password");
         try {
@@ -34,7 +34,15 @@ public class LoginController {
         } catch (UserException e) {
             setFailResponse(request, response);
         }
-        setResponseContent(request,response);
+        setResponseContent(request, response);
+    }
+
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+        if (checkLogin(request)) {
+            redirect(response, "/index.html");
+        }
+        setResponseContent(request, response);
     }
 
     private void loginProcess(String password, User user, HttpResponse response) {
@@ -46,6 +54,14 @@ public class LoginController {
         }
     }
 
+    private boolean checkLogin(HttpRequest request) {
+        String jsessionid = request.getJSESSIONID();
+        if (jsessionid.isEmpty()) {
+            return false;
+        }
+        return SessionManager.containsSession(jsessionid);
+    }
+
     private void setSessionAtResponseHeader(User user, HttpResponse response) {
         String jsessionid = UUID.randomUUID().toString();
         Session session = new Session(jsessionid);
@@ -54,21 +70,9 @@ public class LoginController {
         response.setHttpResponseHeader("Set-Cookie", "JSESSIONID=" + jsessionid);
     }
 
-    private void redirect(HttpResponse response, String path) {
-        response.setHttpStatusCode(HttpStatusCode.FOUND);
-        response.setHttpResponseHeader("Location", path);
-    }
-
     private void setFailResponse(HttpRequest request, HttpResponse response) {
         request.setHttpRequestPath("/401.html");
         response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
-    }
-
-    private void setResponseContent(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        FileReader fileReader = FileReader.getInstance();
-        response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
-        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
-        response.setHttpResponseHeader("Content-Length", String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 
     public static LoginController getInstance() {

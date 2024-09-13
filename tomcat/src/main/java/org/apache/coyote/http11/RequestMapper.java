@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticPageController;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -25,18 +23,14 @@ public class RequestMapper {
         this.staticPageController = StaticPageController.getInstance();
     }
 
-    public void mapRequest(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        if (request.getHttpMethod().equals(HttpMethod.POST)) {
-            if (request.getHttpRequestPath().contains("/login")) {
-                loginController.login(request, response);
-            }
-            if (request.getHttpRequestPath().contains("/register")) {
-                registerController.register(request, response);
-            }
+    public Controller mapRequest(HttpRequest request, HttpResponse response) {
+        if (request.getHttpRequestPath().contains("/login")) {
+            return loginController;
         }
-        if (request.getHttpMethod().equals(HttpMethod.GET)) {
-            staticPageController.getStaticPage(request, response);
+        if (request.getHttpRequestPath().contains("/register")) {
+            return registerController;
         }
+        return staticPageController;
     }
 
     public static RequestMapper getInstance() {

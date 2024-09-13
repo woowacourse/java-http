@@ -87,7 +87,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        loginController.login(parsedRequest, httpResponse);
+        loginController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.FOUND);
@@ -110,7 +110,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        loginController.login(parsedRequest, httpResponse);
+        loginController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(parsedRequest.getHttpRequestPath()).isEqualTo("/401.html");
@@ -133,7 +133,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        registerController.register(parsedRequest, httpResponse);
+        registerController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.FOUND);
@@ -156,7 +156,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        registerController.register(parsedRequest, httpResponse);
+        registerController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(parsedRequest.getHttpRequestPath()).isEqualTo("/register.html");

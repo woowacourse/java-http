@@ -36,10 +36,6 @@ public class HttpResponse {
         this.statusLine.setHttpStatus(httpStatus);
     }
 
-    public void setHeader(String key, String value) {
-        this.headers.setHeaders(key, value);
-    }
-
     public void setContentType(ContentType contentType) {
         this.headers.setHeaders(HttpHeaderField.CONTENT_TYPE.getName(), contentType.getType());
     }
@@ -62,6 +58,9 @@ public class HttpResponse {
         this.setHeader(HttpHeaderField.CONTENT_LENGTH.getName(), String.valueOf(body.getBytes().length));
     }
 
+    public void setHeader(String key, String value) {
+        this.headers.setHeaders(key, value);
+    }
 
     @Override
     public String toString() {

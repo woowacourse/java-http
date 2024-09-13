@@ -28,14 +28,14 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    @Override
-    public boolean canControl(HttpRequest request) {
-        return request.hasPath(path);
-    }
-
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    }
+
+    @Override
+    public boolean canControl(HttpRequest request) {
+        return request.hasPath(path);
     }
 }

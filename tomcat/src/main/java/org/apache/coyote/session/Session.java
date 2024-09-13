@@ -11,12 +11,12 @@ public class Session {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(String id) {
-        this.id = id;
-    }
-
     public Session() {
         this(UUID.randomUUID().toString());
+    }
+
+    public Session(String id) {
+        this.id = id;
     }
 
     public String getId() {

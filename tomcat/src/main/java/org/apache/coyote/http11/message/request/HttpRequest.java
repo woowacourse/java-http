@@ -53,15 +53,19 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getBody() {
-        return body.getBody();
-    }
-
     public Map<String, String> getKeyValueBodies() {
         ContentType contentType = this.getContentType();
         Parser parser = BodyParserFactory.getParser(contentType);
 
         return parser.parse(this.getBody());
+    }
+
+    public ContentType getContentType() {
+        return headers.getContentType();
+    }
+
+    public String getBody() {
+        return body.getBody();
     }
 
     public URI getUri() {
@@ -74,10 +78,6 @@ public class HttpRequest {
 
     public HttpCookies getCookies() {
         return headers.getCookies();
-    }
-
-    public ContentType getContentType() {
-        return headers.getContentType();
     }
 
     public HttpMethod getMethod() {

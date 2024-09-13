@@ -14,11 +14,17 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        StringBuilder response = new StringBuilder()
-                .append("HTTP/1.1 ")
-                .append(httpStatus.getStatusCode()).append(" ").append(httpStatus.name()).append(" \r\n")
-                .append("Content-Type: text/").append(contentType).append(";charset=utf-8 \r\n")
-                .append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n");
+        StringBuilder response = new StringBuilder(
+                String.format("""
+                                HTTP/1.1 %d %s\r\n
+                                Content-Type: text/%s;charset=utf-8\r\n
+                                Content-Length: %d\r\n
+                                """,
+                        httpStatus.getStatusCode(),
+                        httpStatus.name(),
+                        contentType,
+                        responseBody.getBytes().length
+                ));
 
         if (httpCookie != null) {
             response.append("Set-Cookie: ").append(httpCookie.getResponse()).append(" \r\n");

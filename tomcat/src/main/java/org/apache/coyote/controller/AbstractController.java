@@ -31,11 +31,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         HttpMethod method = request.getMethod();
-
-        if (!methodHandlers.containsKey(method)) {
-            return;
-        }
-
+        validateMethod(method);
         RequestHandler handler = methodHandlers.get(method);
         handler.handle(request, response);
 
@@ -44,6 +40,12 @@ public abstract class AbstractController implements Controller {
             return;
         }
         handleResponse(response);
+    }
+
+    private void validateMethod(HttpMethod method) {
+        if (!methodHandlers.containsKey(method)) {
+            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
+        }
     }
 
     private void handleRedirection(HttpResponse response) {

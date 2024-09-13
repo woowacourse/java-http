@@ -1,6 +1,5 @@
 package org.apache.coyote.request;
 
-import java.io.IOException;
 import java.util.List;
 import org.apache.coyote.http.HttpMethod;
 
@@ -12,7 +11,7 @@ public class HttpRequest {
 
     public HttpRequest(List<String> headerLines, String bodyLine) {
         this.requestLine = new RequestLine(headerLines.getFirst());
-        this.header = new RequestHeader(headerLines);
+        this.header = new RequestHeader(headerLines.subList(1, headerLines.size()));
         this.body = mapBody(bodyLine);
     }
 

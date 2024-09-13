@@ -20,7 +20,6 @@ class RequestLineTest {
         assertSoftly(softly -> {
             softly.assertThat(actual.getHttpMethod()).isEqualTo(HttpMethod.GET);
             softly.assertThat(actual.getPath()).isEqualTo("/index.html");
-            softly.assertThat(actual.getHttpVersion()).isEqualTo("HTTP/1.1");
         });
     }
 

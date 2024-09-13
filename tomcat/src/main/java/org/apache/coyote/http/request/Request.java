@@ -38,10 +38,6 @@ public class Request {
         return requestLine.getQueryParamValue(key);
     }
 
-    public String getHttpVersion() {
-        return requestLine.getHttpVersion();
-    }
-
     public String getBodyValue(String key) {
         return body.getValue(key);
     }

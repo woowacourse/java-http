@@ -51,10 +51,6 @@ public class RequestLine {
         return uri.getQueryParamValue(key);
     }
 
-    protected String getHttpVersion() {
-        return this.httpVersion;
-    }
-
     protected boolean existQueryParams() {
         return uri.existQueryParams();
     }

@@ -43,7 +43,6 @@ class RequestParserTest {
             assertSoftly(softly -> {
                 softly.assertThat(actual.getHttpMethod()).isEqualTo(HttpMethod.GET);
                 softly.assertThat(actual.getPath()).isEqualTo("/users");
-                softly.assertThat(actual.getHttpVersion()).isEqualTo("HTTP/1.1");
                 softly.assertThat(actual.getQueryParamValue("team")).isEqualTo("ddangkong");
                 softly.assertThat(actual.getBodyValue("account")).isEqualTo("prin");
                 softly.assertThat(actual.getBodyValue("password")).isEqualTo("1q2w3e4r!");

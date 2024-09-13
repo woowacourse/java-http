@@ -1,9 +1,10 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
+import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class FrontController extends AbstractController {
+public class FrontController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         final RequestMapping requestMapping = new RequestMapping();

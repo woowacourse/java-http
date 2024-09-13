@@ -18,7 +18,6 @@ public class HttpBodyFactory {
     }
 
     interface HttpBodyConstructor {
-
         HttpBody newInstance(char[] input);
     }
 }

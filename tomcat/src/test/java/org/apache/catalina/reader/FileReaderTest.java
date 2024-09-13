@@ -1,4 +1,4 @@
-package org.apache.catalina.io;
+package org.apache.catalina.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,7 +19,7 @@ class FileReaderTest {
     class loadFileContent {
 
         @Test
-        @DisplayName("성공 : 해당 경로의 파일을 읽을 수 있다.")
+        @DisplayName("성공 : 해당 경로의 파일 읽기 성공")
         void loadFileContentSuccess() throws IOException {
             String fileName = "/index.html";
 
@@ -32,7 +32,7 @@ class FileReaderTest {
         }
 
         @Test
-        @DisplayName("실패 : 해당 경로의 파일이 존재하지 않다.")
+        @DisplayName("실패 : 해당 경로의 파일이 존재하지 않을 경우 예외 발생")
         void loadFileContentFailByNotExistsFile() {
             String fileName = "/a.html";
 

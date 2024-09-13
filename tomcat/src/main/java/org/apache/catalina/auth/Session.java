@@ -13,19 +13,19 @@ public class Session {
         this.id = id;
     }
 
-    public Object getAttribute(final String name) {
-        if (values.containsKey(name)) {
-            return values.get(name);
+    public Object getAttribute(final String id) {
+        if (values.containsKey(id)) {
+            return values.get(id);
         }
-        throw new IllegalArgumentException("해당 세션 값은 존재하지 않습니다.");
+        throw new IllegalStateException("해당 세션 값은 존재하지 않습니다.");
     }
 
-    public void setAttribute(final String name, final Object value) {
-        values.put(name, value);
+    public void setAttribute(final String id, final Object value) {
+        values.put(id, value);
     }
 
-    public void removeAttribute(final String name) {
-        values.remove(name);
+    public void removeAttribute(final String id) {
+        values.remove(id);
     }
 
     public String getId() {

@@ -45,7 +45,7 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    @DisplayName("성공 : 파일의 내용을 읽는다")
+    @DisplayName("성공 : 파일의 내용을 조회 가능")
     void 파일의_내용을_읽는다() {
         final String fileName = "nextstep.txt";
 

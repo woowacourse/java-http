@@ -9,6 +9,7 @@ public record HttpCookie(String name, String value) {
     static final String SESSION_KEY = "JSESSIONID";
     private static final String COOKIES_SEPARATOR = ";";
     private static final String COOKIE_SEPARATOR = "=";
+    private static final int SPLIT_COOKIE_LENGTH = 2;
 
     public static List<HttpCookie> createCookies(String cookies) {
         if (cookies == null || cookies.isBlank()) {
@@ -30,9 +31,8 @@ public record HttpCookie(String name, String value) {
     }
 
     private static boolean isValidCookie(String cookie) {
-        int index = cookie.indexOf(COOKIE_SEPARATOR);
-        int cookieLastIndex = cookie.length() - 1;
-        return index != -1 && index != cookieLastIndex;
+        String[] splitCookie = cookie.split(COOKIE_SEPARATOR);
+        return splitCookie.length == SPLIT_COOKIE_LENGTH;
     }
 
     public static HttpCookie ofSession(String sessionId) {

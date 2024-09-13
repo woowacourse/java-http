@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.manager.Session;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -51,8 +52,8 @@ public class LoginController extends AbstractController {
             sessionManager.add(session);
 
             response.setStatusCode(StatusCode.FOUND);
-            response.addHeader("Location", "/index.html");
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            response.addHeader(HttpHeaders.LOCATION, "/index.html");
+            response.addHeader(HttpHeaders.SET_COOKIE, "JSESSIONID=" + session.getId());
         } catch (Exception e) {
             response.redirect("/401.html");
         }

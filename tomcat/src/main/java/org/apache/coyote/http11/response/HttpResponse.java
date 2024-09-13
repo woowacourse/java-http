@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 
 public class HttpResponse {
@@ -38,7 +39,7 @@ public class HttpResponse {
 
     public void redirect(String url) {
         setStatusCode(StatusCode.FOUND);
-        addHeader("Location", url);
+        addHeader(HttpHeaders.LOCATION, url);
     }
 
     public void getStaticResource(String url) {
@@ -48,8 +49,8 @@ public class HttpResponse {
             String contentType = handler.getContentType();
 
             setStatusCode(StatusCode.OK);
-            addHeader("Content-Type", contentType + ";charset=utf-8");
-            addHeader("Content-Length", String.valueOf(fileBytes.length));
+            addHeader(HttpHeaders.CONTENT_TYPE, contentType + HttpHeaders.CHARSET_UTF_8);
+            addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileBytes.length));
             setBody(fileBytes);
 
         } catch (FileNotFoundException | URISyntaxException e) {

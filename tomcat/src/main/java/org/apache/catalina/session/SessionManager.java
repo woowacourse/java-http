@@ -1,14 +1,14 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.IdGenerator;
 import org.apache.catalina.Manager;
 import org.apache.catalina.util.RandomIdGenerator;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final RandomIdGenerator DEFAULT_ID_GENERATOR = new RandomIdGenerator();
 
     private static SessionManager INSTANCE;

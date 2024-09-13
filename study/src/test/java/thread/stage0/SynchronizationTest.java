@@ -30,16 +30,46 @@ class SynchronizationTest {
         var executorService = Executors.newFixedThreadPool(3);
         var synchronizedMethods = new SynchronizedMethods();
 
+        // 방법 1
         IntStream.range(0, 1000)
-                .forEach(count -> executorService.submit(synchronizedMethods::calculate));
+                .forEach(count -> executorService.submit(synchronizedMethods::synchronizedCalculate));
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
 
-        assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
+        // 방법 2
+        IntStream.range(0, 1000)
+                .forEach(count -> executorService.submit(SynchronizedMethods::syncStaticCalculate));
+        executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
+
+        // 방법 3
+        IntStream.range(0, 1000)
+                .forEach(count -> executorService.submit(synchronizedMethods::performSynchronizedTask));
+        executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
+
+        assertThat(SynchronizedMethods.staticSum).isEqualTo(1000);
     }
 
     private static final class SynchronizedMethods {
 
+        private static int staticSum = 0;
+
         private int sum = 0;
+
+        // 방법 1: Synchronized Instance Methods: Only one thread per instance of the class can execute this method.
+        public synchronized void synchronizedCalculate() {
+            setSum(getSum() + 1);
+        }
+
+        // 방법 2: Synchronized Static Methods: Only one thread can execute inside a static synchronized method.
+        public static synchronized void syncStaticCalculate() {
+            staticSum = staticSum + 1;
+        }
+
+        // 방법 3: Synchronized Blocks Within Methods:
+        public void performSynchronizedTask() {
+            synchronized (this) {
+                calculate();
+            }
+        }
 
         public void calculate() {
             setSum(getSum() + 1);

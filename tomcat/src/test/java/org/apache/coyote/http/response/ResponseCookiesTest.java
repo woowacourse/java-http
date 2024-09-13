@@ -8,7 +8,7 @@ import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.FixedIdGenerator;
 
-class ResponseCookieTest {
+class ResponseCookiesTest {
 
     @Test
     void ResponseCookie를_조립한다() {
@@ -17,12 +17,12 @@ class ResponseCookieTest {
         manager.setIdGenerator(new FixedIdGenerator());
         Session session = manager.createSession();
 
-        ResponseCookie responseCookie = new ResponseCookie();
-        responseCookie.addSessionCookie(session);
+        ResponseCookies responseCookies = new ResponseCookies();
+        responseCookies.addSessionCookie(session);
 
         // when
         StringBuilder builder = new StringBuilder();
-        responseCookie.assemble(builder);
+        responseCookies.assemble(builder);
 
         // then
         String expected = "Set-Cookie: JSESSIONID=fixed-id \r\n";

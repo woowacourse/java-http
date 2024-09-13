@@ -15,11 +15,11 @@ public class ResponseHeaders implements Assemblable {
 
     private final Map<String, String> headers;
 
-    private final ResponseCookie responseCookie;
+    private final ResponseCookies cookies;
 
     protected ResponseHeaders() {
         this.headers = new LinkedHashMap<>();
-        this.responseCookie = new ResponseCookie();
+        this.cookies = new ResponseCookies();
     }
 
     protected void setContentType(String contentType) {
@@ -35,12 +35,12 @@ public class ResponseHeaders implements Assemblable {
     }
 
     protected void addSessionCookie(Session session) {
-        responseCookie.addSessionCookie(session);
+        cookies.addSessionCookie(session);
     }
 
     @Override
     public void assemble(StringBuilder builder) {
-        responseCookie.assemble(builder);
+        cookies.assemble(builder);
         builder.append(headers.entrySet()
                         .stream()
                         .map(this::convert)

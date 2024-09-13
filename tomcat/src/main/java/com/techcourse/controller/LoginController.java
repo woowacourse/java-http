@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.controller.dto.LoginRequestDto;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.SafeExecutionWrapper;
 import com.techcourse.exception.UnauthorizedException;
@@ -17,8 +18,7 @@ public class LoginController extends AbstractSessionController {
 
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_SUCCESS_PAGE = "/index.html";
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
+
     private static final String SESSION_KEY = "user";
 
     public LoginController() {
@@ -49,10 +49,8 @@ public class LoginController extends AbstractSessionController {
     }
 
     private LoginCredentials createLoginCredentials(HttpRequest request) {
-        String account = request.getBodyParameter(ACCOUNT);
-        String password = request.getBodyParameter(PASSWORD);
-
-        return new LoginCredentials(account, password);
+        LoginRequestDto loginRequestDto = LoginRequestDto.of(request);
+        return new LoginCredentials(loginRequestDto.account(), loginRequestDto.password());
     }
 
     private User getUser(LoginCredentials loginCredentials) {

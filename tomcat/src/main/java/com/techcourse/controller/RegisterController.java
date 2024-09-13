@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.controller.dto.RegisterDto;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.SafeExecutionWrapper;
 import com.techcourse.model.User;
@@ -16,9 +17,6 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REGISTER_PATH = "/register";
     private static final String REGISTER_SUCCESS_PAGE = "/index.html";
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-    private static final String EMAIL = "email";
 
     public RegisterController() {
         List<Handler> handlers = List.of(
@@ -33,12 +31,10 @@ public class RegisterController extends AbstractController {
     }
 
     private void doRegisterPost(HttpRequest request, HttpResponse response) {
-        String account = request.getBodyParameter(ACCOUNT);
-        String password = request.getBodyParameter(PASSWORD);
-        String email = request.getBodyParameter(EMAIL);
-        User user = new User(account, password, email);
+        RegisterDto registerDto = RegisterDto.of(request);
+        User user = new User(registerDto.account(), registerDto.password(), registerDto.email());
 
-        validateRegisterAccount(account);
+        validateRegisterAccount(registerDto.account());
         InMemoryUserRepository.save(user);
 
         response.redirectTo(REGISTER_SUCCESS_PAGE);

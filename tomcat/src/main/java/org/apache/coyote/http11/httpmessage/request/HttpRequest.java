@@ -78,10 +78,6 @@ public class HttpRequest {
         return httpRequestLine.isPost();
     }
 
-    public boolean isStaticResourceRequest() {
-        return httpRequestLine.isStaticResourceRequest();
-    }
-
     public HttpMethod getMethod() {
         return httpRequestLine.httpMethod();
     }

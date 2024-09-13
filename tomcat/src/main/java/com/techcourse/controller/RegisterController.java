@@ -1,0 +1,33 @@
+package com.techcourse.controller;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.controller.AbstractController;
+import com.techcourse.exception.ApplicationException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class RegisterController extends AbstractController {
+
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) throws ApplicationException {
+        String account = request.body().getAttribute("account");
+        String email = request.body().getAttribute("email");
+        String password = request.body().getAttribute("password");
+
+        User user = InMemoryUserRepository.save(new User(account, password, email));
+        String sessionId = SessionManager.add(new Session(user));
+        log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
+
+        response.setStatusCode(HttpStatusCode.REDIRECT);
+        response.setLocation("index.html");
+        response.setJSessionIdCookie(sessionId);
+    }
+}

@@ -1,22 +1,31 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.exception.ApplicationException;
+import com.techcourse.exception.StaticResourceNotFoundException;
+import com.techcourse.view.ResponseBuilder;
+import com.techcourse.view.ViewResolver;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.HandlerMapping;
+import org.apache.catalina.exception.TomcatException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.handler.HandlerMapping;
-import org.apache.coyote.view.ViewResolver;
+import org.apache.coyote.exception.HttpConnectorException;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    public static final String HTTP_VERSION = "HTTP/1.1";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
     private final HttpRequestReceiver httpRequestReceiver = new HttpRequestReceiver();
     private final HandlerMapping handlerMapping = new HandlerMapping();
+    private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ViewResolver viewResolver = new ViewResolver();
 
     public Http11Processor(final Socket connection) {
@@ -35,22 +44,44 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = httpRequestReceiver.receiveRequest(inputStream);
-            String response = getResponse(request);
+            String response = processResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | HttpConnectorException e) {
             log.error(e.getMessage(), e, this);
         }
     }
 
-    private String getResponse(HttpRequest request) throws IOException {
-        Controller controller = handlerMapping.getController(request.header());
-        if (controller != null) {
-            HttpResponse httpResponse = controller.process(request);
-            return httpResponse.toString();
+    private String processResponse(HttpRequest request) throws IOException, ApplicationException {
+        try {
+            return processApplicationResponse(request).toString();
+        } catch (TomcatException e) {
+            return responseBuilder.buildExceptionResponse(e);
+        }
+    }
+
+    private HttpResponse processApplicationResponse(HttpRequest request) throws IOException, TomcatException {
+        HttpResponse response = new HttpResponse();
+        HttpResponse staticResourceResponse = viewResolver.resolve(request, new HttpResponse());
+
+        if (request.header().getJSessionIdCookie().isPresent() && request.isGET()
+                && ("/login".equals(request.getPath()) || "/register".equals(request.getPath()))) {
+            response.setStatusCode(HttpStatusCode.REDIRECT);
+            response.setLocation("/index.html");
+            return response;
         }
 
-        return viewResolver.resolve(request.header());
+        if (request.isGET() && staticResourceResponse != null) {
+            return staticResourceResponse;
+        }
+
+        Controller controller = handlerMapping.getController(request);
+        if (controller != null) {
+            controller.service(request, response);
+            return response;
+        }
+
+        throw new StaticResourceNotFoundException();
     }
 }

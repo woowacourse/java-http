@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * Enumerates content types. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-3.7>RFC 2616, section 3.7</a>
+ * Enumerates content types.
+ * see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-3.7>RFC 2616, section 3.7</a>
  */
 public enum ContentType {
 
-    TEXT_HTML("text/html;", Set.of("html", "htm")),
-    TEXT_CSS("text/css", Set.of("css")),
-    TEXT_JAVASCRIPT("text/javascript", Set.of("js")),
-    APPLICATION_JSON("application/json", Set.of("json")),
+    TEXT_HTML("text/html;", Set.of(".html", ".htm")),
+    TEXT_CSS("text/css", Set.of(".css")),
+    TEXT_JAVASCRIPT("text/javascript", Set.of(".js")),
+    APPLICATION_JSON("application/json", Set.of(".json")),
     ;
 
     private final String mediaType;
@@ -26,7 +27,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.supportsExtension(extension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported extension: " + extension));
+                .orElse(TEXT_HTML);
     }
 
     private boolean supportsExtension(String extension) {

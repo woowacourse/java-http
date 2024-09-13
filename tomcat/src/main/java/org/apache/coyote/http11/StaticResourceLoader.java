@@ -19,12 +19,12 @@ public class StaticResourceLoader {
         try {
             URL resource = classLoader.getResource(STATIC_RESOURCE_PATH + uri);
             if (resource == null) {
-                throw new IllegalArgumentException("Resource not found: " + uri);
+                throw new ResourceNotFoundException(uri);
             }
             Path path = Paths.get(resource.getFile());
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to load resource: " + uri);
+            throw new IllegalStateException("Unable to load resource: " + uri, e);
         }
     }
 }

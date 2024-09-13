@@ -18,8 +18,7 @@ class HttpBodyTest {
     @Test
     @DisplayName("content가 null이 주어지는 경우, 빈 문자열로 치환해 저장한다.")
     void emptyContentFromNullInput() {
-        String content = null;
-        HttpBody httpBody = new HttpBody(content);
+        HttpBody httpBody = new HttpBody(null);
         assertEquals("", httpBody.getContent());
     }
 }

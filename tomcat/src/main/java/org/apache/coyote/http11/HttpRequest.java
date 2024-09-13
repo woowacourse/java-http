@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.List;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 
 /**
  * HTTP Request object. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-5>RFC 2616, section 5</a>
@@ -13,10 +15,13 @@ import java.util.List;
 public class HttpRequest {
 
     private static final int BUFFER_SIZE = 64;
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final HttpHeaders headers;
     private final RequestLine requestLine;
     private final HttpBody body;
+
+    private Manager manager;
 
     public HttpRequest(InputStream inputStream) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -37,12 +42,21 @@ public class HttpRequest {
                 readBytes += bufferedReader.read(buffer);
                 bodyBuilder.append(buffer, 0, readBytes);
             }
-            this.body = new HttpBody(bodyBuilder.toString());
+            String content = bodyBuilder.toString();
+            this.body = new HttpBody(content.getBytes());
         } catch (IOException e) {
             // IOException on reading lines using inputstream, parsing uri
             // IndexOutOfBoundsException on missing tokens in request-line and header
             throw new IllegalArgumentException("Invalid HTTP request", e);
         }
+    }
+
+    public boolean hasPath(String path) {
+        return requestLine.hasPath(path);
+    }
+
+    public boolean hasMethod(HttpMethod httpMethod) {
+        return requestLine.hasMethod(httpMethod);
     }
 
     public HttpMethod getMethod() {
@@ -63,6 +77,25 @@ public class HttpRequest {
 
     public String getContent() {
         return body.getContent();
+    }
+
+    public Session getSession(boolean create) {
+        if (manager == null) {
+            throw new IllegalStateException("Manager has not been set.");
+        }
+        HttpCookie cookie = headers.getCookie(JSESSIONID);
+        Session session = null;
+        if (cookie != null) {
+            session = manager.findSession(cookie.getValue());
+        }
+        if (create && session == null) {
+            session = manager.createSession();
+        }
+        return session;
+    }
+
+    public void setManager(Manager manager) {
+        this.manager = manager;
     }
 
     public String toString() {

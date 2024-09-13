@@ -27,6 +27,12 @@ public class HttpCookieParser {
         String attributes = httpCookie.getAttributes().entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
+        if (httpCookie.isHttpOnly()) {
+            attributes += "; HttpOnly";
+        }
+        if (httpCookie.isSecure()) {
+            attributes += "; Secure";
+        }
         return httpCookie.getName() + "=" + httpCookie.getValue() + "; " + attributes;
     }
 }

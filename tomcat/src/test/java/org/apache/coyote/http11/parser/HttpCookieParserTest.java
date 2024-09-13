@@ -30,12 +30,13 @@ class HttpCookieParserTest {
     @DisplayName("HTTP 응답을 위한 쿠키 문자열을 생성한다.")
     void formatCookieForResponse() {
         // given
-        HttpCookie cookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, "session-id", Map.of("Max-Age", "600"));
+        HttpCookie cookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, "session-id", Map.of("Max-Age", "600"))
+                .setHttpOnly();
 
         // when
         String rawCookie = HttpCookieParser.formatCookieForResponse(cookie);
 
         // then
-        assertThat(rawCookie).isEqualTo("JSESSIONID=session-id; Max-Age=600");
+        assertThat(rawCookie).isEqualTo("JSESSIONID=session-id; Max-Age=600; HttpOnly");
     }
 }

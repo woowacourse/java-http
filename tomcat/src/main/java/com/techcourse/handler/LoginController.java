@@ -13,6 +13,8 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class LoginController extends AbstractController {
 
+    private static final String USER_SESSION_KEY = "user";
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setContentType(ContentType.HTML);
@@ -33,7 +35,7 @@ public class LoginController extends AbstractController {
         }
 
         HttpSession session = request.getSession(true);
-        session.setAttribute("user", getUser(account));
+        session.setAttribute(USER_SESSION_KEY, getUser(account));
         header.appendJSessionId(session.getId());
         response.sendRedirect("index.html");
     }

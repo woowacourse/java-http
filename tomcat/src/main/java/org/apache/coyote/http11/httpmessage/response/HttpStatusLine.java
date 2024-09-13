@@ -7,10 +7,10 @@ public class HttpStatusLine {
     private int statusCode;
     private String statusText;
 
-    public HttpStatusLine(String httpVersion, int statusCode, String statusText) {
+    public HttpStatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
-        this.statusText = statusText;
+        this.statusCode = httpStatus.getStatusCode();
+        this.statusText = httpStatus.getStatusText();
     }
 
     public String toHttpMessage() {

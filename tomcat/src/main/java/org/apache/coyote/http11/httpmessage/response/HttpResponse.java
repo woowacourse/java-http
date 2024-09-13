@@ -24,7 +24,7 @@ public class HttpResponse {
 
     public HttpResponse(HttpRequest httpRequest) {
 
-        this(new HttpStatusLine(httpRequest.getHttpVersion(), 0, null), //todo 생성 방식 고민
+        this(new HttpStatusLine(httpRequest.getHttpVersion(), HttpStatus.NOT_FOUND),
                 new HttpHeaders(),
                 "");
     }

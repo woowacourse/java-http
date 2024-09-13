@@ -33,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (var inputStream = connection.getInputStream();
+             var outputStream = connection.getOutputStream(); connection) {
 
             HttpRequest request = HttpRequestMessageReader.read(inputStream);
             HttpResponse response = HttpResponse.ok();

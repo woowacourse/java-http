@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
             response.setBody("/index.html");
 
             String sessionId = sessionManager.generateSession(user.get());
-            response.addHeader(HeaderName.SET_COOKIE, sessionId);
+            response.addHeader(HeaderName.SET_COOKIE, "JSESSIONID=" + sessionId);
         }
     }
 

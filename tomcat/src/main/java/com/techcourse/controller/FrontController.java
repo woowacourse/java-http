@@ -21,6 +21,7 @@ public class FrontController implements Controller {
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
         controllers.put("static", new StaticResourceController());
+        controllers.put("/404.html", new NotFoundController());
     }
 
     public static FrontController getInstance() {
@@ -29,9 +30,6 @@ public class FrontController implements Controller {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        if (request == null) {
-            return notFound();
-        }
         String path = request.getPath();
         Controller controller;
         if (controllers.containsKey(path)) {
@@ -42,7 +40,8 @@ public class FrontController implements Controller {
             controller = controllers.get("static");
             return controller.handle(request);
         }
-        return notFound();
+        controller = controllers.get("/404.html");
+        return controller.handle(request);
     }
 
     private HttpResponse notFound() {

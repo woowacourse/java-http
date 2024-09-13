@@ -19,18 +19,18 @@ public class Connector implements Runnable {
 	private static final int DEFAULT_ACCEPT_COUNT = 100;
 	private static final int DEFAULT_THREAD_COUNT = 250;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private boolean stopped;
-	private final ExecutorService executorService;
-
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
-    }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-		this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
+    }
+
+    public Connector() {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

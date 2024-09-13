@@ -9,6 +9,11 @@ import java.net.URI;
 
 public class HttpRequest {
 
+    private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int METHOD_POSITION = 0;
+    private static final int PATH_POSITION = 1;
+    private static final String DEFAULT_JSSEION_ID = "";
+
     private final HttpMethod httpMethod;
     private final URI uri;
     private final HttpVersion httpVersion;
@@ -36,9 +41,9 @@ public class HttpRequest {
     }
 
     public static HttpRequest createHttp11Request(String requestLine, Header header, HttpBody body, Manager manager) {
-        String[] requestLines = requestLine.split(" ");
-        HttpMethod httpMethod = HttpMethod.from(requestLines[0]);
-        URI uri = URI.create(requestLines[1]);
+        String[] requestLines = requestLine.split(REQUEST_LINE_DELIMITER);
+        HttpMethod httpMethod = HttpMethod.from(requestLines[METHOD_POSITION]);
+        URI uri = URI.create(requestLines[PATH_POSITION]);
 
         return new HttpRequest(
                 httpMethod,
@@ -47,7 +52,7 @@ public class HttpRequest {
                 header,
                 body,
                 manager,
-                header.getJSessionId().orElse("")
+                header.getJSessionId().orElse(DEFAULT_JSSEION_ID)
         );
     }
 

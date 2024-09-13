@@ -15,9 +15,6 @@ import util.ResourceFileLoader;
 
 public class LoginController extends AbstractController {
 
-    private static final String ROOT_LOCATION = "http://localhost:8080/";
-    private final String JAVA_SESSION_ID = "JSESSIONID";
-
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         processLogin(response, request.getRequestBody());

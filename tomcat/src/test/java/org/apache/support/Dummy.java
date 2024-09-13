@@ -33,6 +33,14 @@ public class Dummy {
         return new HttpRequest(requestLine, requestHeaders, textTypeBody, cookie);
     }
 
+    public static HttpRequest getHttpRequestCookie(final String cookieValue) {
+        final var requestLine = new RequestLine(Method.GET, URI.create("/"), new Version(1, 1));
+        final var requestHeaders = new RequestHeaders("");
+        final var textTypeBody = new TextTypeBody("");
+        final var cookie = new Cookie(cookieValue);
+        return new HttpRequest(requestLine, requestHeaders, textTypeBody, cookie);
+    }
+
 
     public static HttpRequest getHttpRequestBody(final Body body) {
         final var requestLine = new RequestLine(Method.GET, URI.create("/"), new Version(1, 1));

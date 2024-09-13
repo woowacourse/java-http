@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.coyote.http11.http.response.HttpResponseBody;
+import com.techcourse.web.Resource;
 
 public class ResourceLoader {
 
@@ -19,10 +19,10 @@ public class ResourceLoader {
 		return instance;
 	}
 
-	public HttpResponseBody loadResource(String filePath) throws IOException {
+	public Resource loadResource(String filePath) throws IOException {
 		Path path = getPath(RESOURCE_PATH + filePath);
 
-		return new HttpResponseBody(Files.probeContentType(path), Files.readAllBytes(path));
+		return new Resource(Files.probeContentType(path), Files.readAllBytes(path));
 	}
 
 	private Path getPath(String fileName) {

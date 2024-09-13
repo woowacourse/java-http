@@ -13,10 +13,6 @@ public class SessionManager {
 		sessions.put(id, new Session(id, user));
 	}
 
-	public static void removeSession(String sessionId) {
-		sessions.remove(sessionId);
-	}
-
 	public static Session getSession(String sessionId) {
 		return sessions.get(sessionId);
 	}

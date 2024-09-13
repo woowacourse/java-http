@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class User {
 
-    private static final Logger log = LoggerFactory.getLogger(User.class);
+	private static final Logger log = LoggerFactory.getLogger(User.class);
 	private final Long id;
 	private final String account;
 	private final String password;
@@ -36,10 +36,10 @@ public class User {
 	}
 
 	public boolean checkPassword(String password) {
-        if (password == null) {
-            log.info("password not exist");
-            return false;
-        }
+		if (password == null) {
+			log.info("password not exist");
+			return false;
+		}
 		return this.password.equals(password);
 	}
 

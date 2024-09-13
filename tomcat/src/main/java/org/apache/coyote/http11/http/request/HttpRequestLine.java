@@ -34,14 +34,6 @@ public class HttpRequestLine {
 		return httpRequestUrl.getPath();
 	}
 
-	public HttpRequestQuery getQuery() {
-		return httpRequestUrl.getQuery();
-	}
-
-	public HttpRequestUrl getHttpRequestUrl() {
-		return httpRequestUrl;
-	}
-
 	public String getHttpVersion() {
 		return httpVersion;
 	}

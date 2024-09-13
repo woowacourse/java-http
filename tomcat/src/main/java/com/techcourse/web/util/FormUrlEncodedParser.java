@@ -16,10 +16,8 @@ public class FormUrlEncodedParser {
 		String[] pairs = body.split(PARAMETER_SEPARATOR);
 
 		return Arrays.stream(pairs)
-			.collect(Collectors.toMap(
-				pair -> pair.split(KEY_VALUE_SEPARATOR)[KEY_INDEX],
-				FormUrlEncodedParser::getValue
-			));
+			.map(pair -> pair.split(KEY_VALUE_SEPARATOR))
+			.collect(Collectors.toMap(FormUrlEncodedParser::getKey, FormUrlEncodedParser::getValue));
 	}
 
 	private static void validateBodyIsNotEmpty(String body) {
@@ -28,11 +26,14 @@ public class FormUrlEncodedParser {
 		}
 	}
 
-	private static String getValue(String pair) {
-		String[] keyValue = pair.split(KEY_VALUE_SEPARATOR);
-		if (keyValue.length == 1) {
+	private static String getKey(String[] pair) {
+		return pair[KEY_INDEX];
+	}
+
+	private static String getValue(String[] pair) {
+		if (pair.length == 1) {
 			return "";
 		}
-		return keyValue[VALUE_INDEX];
+		return pair[VALUE_INDEX];
 	}
 }

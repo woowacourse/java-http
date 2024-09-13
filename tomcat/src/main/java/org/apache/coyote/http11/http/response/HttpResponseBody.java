@@ -4,12 +4,14 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpResponseBody {
 
-	private final String contentType;
-	private final byte[] content;
+	private String contentType;
+	private byte[] content;
 
-	public HttpResponseBody(String contentType, byte[] content) {
-		this.contentType = contentType;
-		this.content = content;
+	public HttpResponseBody() {
+	}
+
+	public boolean isExist() {
+		return contentType != null && content != null;
 	}
 
 	public String getContentType() {
@@ -22,6 +24,14 @@ public class HttpResponseBody {
 
 	public int getContentLength() {
 		return content.length;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public void setContent(byte[] content) {
+		this.content = content;
 	}
 
 	public String toResponseMessage() {

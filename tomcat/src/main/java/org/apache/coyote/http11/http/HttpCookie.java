@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-	private static final String JSESSIONID = "JSESSIONID";
+	public static final String JSESSIONID = "JSESSIONID";
 	private static final String COOKIE_VALUE_DELIMITER = "; ";
 	private static final String KEY_VALUE_DELIMITER = "=";
 	private static final int KEY_INDEX = 0;
@@ -17,34 +17,37 @@ public class HttpCookie {
 	public static HttpCookie from(String cookieValues) {
 		String[] cookies = cookieValues.split(COOKIE_VALUE_DELIMITER);
 
-		return Arrays.stream(cookies).collect(Collectors.collectingAndThen(
-			Collectors.toMap(
-				c -> c.split(KEY_VALUE_DELIMITER)[KEY_INDEX],
-				c -> c.split(KEY_VALUE_DELIMITER)[VALUE_INDEX]
-			),
-			HttpCookie::new));
+		return Arrays.stream(cookies)
+			.map(cookie -> cookie.split(KEY_VALUE_DELIMITER))
+			.collect(Collectors.collectingAndThen(
+				Collectors.toMap(HttpCookie::parsekey, HttpCookie::parseValue),
+				HttpCookie::new)
+			);
+	}
+
+	private static String parsekey(String[] cookie) {
+		return cookie[KEY_INDEX];
+	}
+
+	private static String parseValue(String[] cookie) {
+		if (cookie.length == 1) {
+			return "";
+		}
+		return cookie[VALUE_INDEX];
 	}
 
 	private HttpCookie(Map<String, String> cookie) {
 		this.cookie = cookie;
 	}
 
-	public String getValue(String key) {
-		if (isNotExistKey(key)) {
-			throw new IllegalArgumentException("Key not found. key: " + key);
-		}
-		return cookie.get(key);
-	}
-
 	private boolean isNotExistKey(String key) {
 		return !cookie.containsKey(key);
 	}
 
-	public boolean hasJsessionId() {
-		return cookie.containsKey(JSESSIONID) && cookie.get(JSESSIONID) != null;
-	}
-
 	public String getJsessionid() {
-		return getValue(JSESSIONID);
+		if (isNotExistKey(JSESSIONID)) {
+			return null;
+		}
+		return cookie.get(JSESSIONID);
 	}
 }

@@ -43,32 +43,4 @@ public class HttpRequestQuery {
 		}
 		return parts[QUERY_VALUE_INDEX];
 	}
-
-	public String getValue(String key) {
-		if (isNotExistKey(key)) {
-			log.info("Key not found: {}", key);
-			return null;
-		}
-		return query.get(key);
-	}
-
-	private boolean isNotExistKey(String key) {
-		if (query == null) {
-			return false;
-		}
-		return !query.containsKey(key);
-	}
-
-	public boolean isExist() {
-		return query != null;
-	}
-
-	public String toUrl() {
-		if (query == null) {
-			return "";
-		}
-		return query.entrySet().stream()
-			.map(e -> e.getKey() + QUERY_KEY_VALUE_DELIMITER + e.getValue())
-			.collect(Collectors.joining(QUERY_PARAM_DELIMITER));
-	}
 }

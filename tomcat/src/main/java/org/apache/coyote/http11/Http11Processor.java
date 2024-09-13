@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
@@ -10,9 +9,7 @@ import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.web.handler.Handler;
-import com.techcourse.web.handler.HandlerMapper;
+import com.techcourse.web.controller.Controller;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,15 +36,18 @@ public class Http11Processor implements Runnable, Processor {
 
 			outputStream.write(httpResponseMessage.getBytes());
 			outputStream.flush();
-		} catch (IOException | UncheckedServletException e) {
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 	}
 
-	private String createHttpResponseMessage(InputStream inputStream) throws IOException {
+	private String createHttpResponseMessage(InputStream inputStream) throws Exception {
 		HttpRequest request = HttpRequestMessageReader.read(inputStream);
-		Handler handler = HandlerMapper.findHandler(request);
-		HttpResponse response = handler.handle(request);
+		HttpResponse response = new HttpResponse();
+
+		RequestMapping requestMapping = RequestMapping.getInstance();
+		Controller controller = requestMapping.getController(request);
+		controller.service(request, response);
 
 		return response.toResponseMessage();
 	}

@@ -20,6 +20,7 @@ public class HttpResponse {
 	private Body body;
 
 	public HttpResponse() {
+		this.responseLine = new ResponseLine();
 		this.headers = new Headers();
 	}
 

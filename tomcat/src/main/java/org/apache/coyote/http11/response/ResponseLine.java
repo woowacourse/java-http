@@ -7,10 +7,7 @@ public class ResponseLine {
 	private StatusCode statusCode;
 	private StatusMessage statusMessage;
 
-	public ResponseLine(VersionOfProtocol versionOfProtocol, StatusCode statusCode, StatusMessage statusMessage) {
-		this.versionOfProtocol = versionOfProtocol;
-		this.statusCode = statusCode;
-		this.statusMessage = statusMessage;
+	public ResponseLine() {
 	}
 
 	public VersionOfProtocol getVersionOfProtocol() {

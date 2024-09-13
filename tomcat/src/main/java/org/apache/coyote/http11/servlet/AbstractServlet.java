@@ -16,9 +16,10 @@ public abstract class AbstractServlet implements Servlet {
 			doGet(request, response);
 		} else if (method.isPost()) {
 			doPost(request, response);
+		} else {
+			response.setRequestLine("HTTP/1.1", HttpStatusCode.METHOD_NOT_ALLOWED);
+			response.setHeaders(Map.of("Allow", "GET, POST"));
 		}
-		response.setRequestLine("HTTP/1.1", HttpStatusCode.METHOD_NOT_ALLOWED);
-		response.setHeaders(Map.of("Allow", "GET, POST"));
 	}
 
 	protected abstract void doPost(HttpRequest request, HttpResponse response);

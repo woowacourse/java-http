@@ -1,7 +1,7 @@
 package org.apache.catalina.servlet;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.catalina.servlet.controller.HomeController;
 import org.apache.catalina.servlet.controller.LoginController;
@@ -13,7 +13,7 @@ public class RequestMapping {
     private final Map<String, Controller> registry;
 
     public RequestMapping() {
-        registry = new HashMap<>();
+        registry = new ConcurrentHashMap<>();
         registry.put("/", new HomeController());
         registry.put("/login", new LoginController());
         registry.put("/register", new UserRegistrationController());

@@ -29,7 +29,7 @@ public class StatusLine {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final StatusLine that = (StatusLine) o;
+        final var that = (StatusLine) o;
         return Objects.equals(version, that.version) && Objects.equals(statusCode, that.statusCode);
     }
 

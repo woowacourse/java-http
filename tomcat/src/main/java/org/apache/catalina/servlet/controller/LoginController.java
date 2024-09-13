@@ -19,7 +19,6 @@ public class LoginController extends AbstractController {
     private static final String ID_QUERY_NAME = "account";
     private static final String PASSWORD_QUERY_NAME = "password";
 
-
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
         if (isLogin(request)) {

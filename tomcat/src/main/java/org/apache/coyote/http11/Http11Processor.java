@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private int findContentLength(final String line, final int origin) {
         if (line.startsWith(BODY_LENGTH_FIND_NAME) && origin == 0) {
-            final List<String> content = List.of(line.replaceAll(" ", "").split(":"));
+            final var content = List.of(line.replaceAll(" ", "").split(":"));
             return Integer.parseInt(content.getLast());
         }
         return origin;

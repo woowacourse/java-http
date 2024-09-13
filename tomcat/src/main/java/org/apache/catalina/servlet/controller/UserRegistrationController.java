@@ -23,13 +23,13 @@ public class UserRegistrationController extends AbstractController {
             throw new IllegalStateException("이미 존재하는 회원 ID");
         }
         InMemoryUserRepository.save(new User(account, password, email));
-        final HttpResponse httpResponse = StaticResourceFinder.renderRedirect(REGISTER_SUCCESSFUL_REDIRECT_URI);
+        final var httpResponse = StaticResourceFinder.renderRedirect(REGISTER_SUCCESSFUL_REDIRECT_URI);
         response.copyProperties(httpResponse);
     }
 
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
-        final HttpResponse httpResponse = StaticResourceFinder.render("register.html");
+        final var httpResponse = StaticResourceFinder.render("register.html");
         response.copyProperties(httpResponse);
     }
 }

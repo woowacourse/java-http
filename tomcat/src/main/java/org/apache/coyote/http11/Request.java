@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.tomcat.http.common.Method;
 import org.apache.tomcat.http.common.body.Body;
 import org.apache.tomcat.http.common.body.BodyMapper;
 import org.apache.tomcat.http.request.RequestHeaders;
@@ -48,22 +47,6 @@ public class Request {
             bodyTexts.add(lines.get(i));
         }
         return String.join(LINE_DELIMITER, bodyTexts).replaceAll(" ", "");
-    }
-
-    public String getQueryValue(final String key) {
-        return requestLine.getQueryValue(key);
-    }
-
-    public boolean hasNotQuery() {
-        return Objects.isNull(requestLine.getQuery()) || requestLine.getQuery().isBlank();
-    }
-
-    public String getPath() {
-        return requestLine.getPath();
-    }
-
-    public boolean isSameMethod(final Method method) {
-        return requestLine.getMethod() == method;
     }
 
     public RequestLine getRequestLine() {

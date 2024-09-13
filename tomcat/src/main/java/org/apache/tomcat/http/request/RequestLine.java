@@ -45,10 +45,6 @@ public class RequestLine {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Query 키 값입니다."));
     }
 
-    public String getQuery() {
-        return uri.getQuery();
-    }
-
     public String getPath() {
         return uri.getPath();
     }

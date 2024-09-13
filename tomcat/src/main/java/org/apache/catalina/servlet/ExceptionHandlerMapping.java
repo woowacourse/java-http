@@ -1,7 +1,7 @@
 package org.apache.catalina.servlet;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.catalina.servlet.exceptionhandler.NotFoundExceptionHandler;
 import org.apache.catalina.servlet.exceptionhandler.UnAuthorizedExceptionHandler;
@@ -13,7 +13,7 @@ public class ExceptionHandlerMapping {
     private final Map<Class<? extends Exception>, ExceptionHandler> registry;
 
     public ExceptionHandlerMapping() {
-        registry = new HashMap<>();
+        registry = new ConcurrentHashMap<>();
         registry.put(AuthenticationException.class, new UnAuthorizedExceptionHandler());
         registry.put(NotFoundException.class, new NotFoundExceptionHandler());
     }

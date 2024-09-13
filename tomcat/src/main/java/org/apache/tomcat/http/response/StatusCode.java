@@ -26,7 +26,7 @@ public class StatusCode {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final StatusCode that = (StatusCode) o;
+        final var that = (StatusCode) o;
         return value == that.value && Objects.equals(name, that.name);
     }
 

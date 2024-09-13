@@ -28,7 +28,7 @@ public class TextTypeBody implements Body {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final TextTypeBody that = (TextTypeBody) o;
+        final var that = (TextTypeBody) o;
         return Objects.equals(content, that.content);
     }
 

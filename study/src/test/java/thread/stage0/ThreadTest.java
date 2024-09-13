@@ -33,6 +33,8 @@ class ThreadTest {
          thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
+        // join 에 값을 안넣으면 무한정 대기 + 값을 넣으면 그 시간만큼 대기
+        // join 내 값이 더 클시, 스레드 작업 끝나면 종료
          thread.join();
     }
 
@@ -62,6 +64,13 @@ class ThreadTest {
 
         @Override
         public void run() {
+            try {
+                // sleep 와 wait 의 차이점은?
+                // Exception in thread "Thread-0" java.lang.IllegalMonitorStateException: current thread is not owner
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             log.info(message);
         }
     }

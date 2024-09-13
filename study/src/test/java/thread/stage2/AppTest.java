@@ -26,6 +26,23 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
+
+        //accept-count : 한번에 받아들이는 개수 ( default 100 개 )
+        //max-connections : 수립가능한 Connection 총 개수 ( 이거 단위로 계속 끊기는 듯? )
+
+        // 스레드가 늘어나도 max-connections 가 안늘어나면 동일하다.
+        // 스레드 8 이여도 max-connections 가 2이면 2개씩 작동 그래서 max-connections 가 큰이유
+
+        // 4 1 2 2 이면? = 6개 ( 연결되어있는거 말고 대기를 받는거 )
+
+        // 1 2 2 2 이면? = 4개
+
+        // TestHTTP Utils 의 requestTimeOut 을 늘리면, 커넥션을 유지하고 있어서 더 못받는다.
+
+        // 2 2 2 3 = 4개 ( max-connections 가 더 작아서 max가 3이여도 2개씩 )
+
+        // 2 3 2 3 = 5개
+
         final var NUMBER_OF_THREAD = 10;
         var threads = new Thread[NUMBER_OF_THREAD];
 
@@ -35,6 +52,8 @@ class AppTest {
 
         for (final var thread : threads) {
             thread.start();
+
+            //TODO Thread.sleep 가 정확하게 뭔가
             Thread.sleep(50);
         }
 

@@ -41,11 +41,24 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public void calculate() {
-            synchronized (this) {
-                setSum(getSum() + 1);
-            }
+//        public void calculate() {
+//            synchronized (this) {
+//                setSum(getSum() + 1);
+//            }
+//        }
+
+        // static 메소드도 이와 동일하게 작동
+        // setSum 과 getSum 에 synchronized 를 걸어도 동시성 문제가 발생한다.
+        public synchronized void calculate() {
+            setSum(getSum() + 1);
         }
+
+        // 한 클래스 내에서 여러 라킹을 걸어야 하는게 아니라면 this 낫배드
+//        public void calculate(){
+//            synchronized (this){
+//                setSum(getSum() + 1);
+//            }
+//        }
 
         public int getSum() {
             return sum;

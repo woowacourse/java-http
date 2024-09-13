@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Cookie;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.Http11Request;
@@ -32,6 +33,19 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Http11Request request, Http11Response response) {
-        request.setUri(request.getUri() + ".html");
+        Session session = null;
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("JSESSIONID")) {
+                session = SessionManager.findSession(cookie.getValue());
+            }
+        }
+
+        if (session == null) {
+            request.setUri(request.getUri() + ".html");
+            return;
+        }
+        response.setStatusCode(HttpStatusCode.FOUND);
+        String redirectUri = "/index.html";
+        response.addLocation(redirectUri);
     }
 }

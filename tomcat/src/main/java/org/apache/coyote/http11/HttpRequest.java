@@ -109,8 +109,14 @@ public class HttpRequest {
 
     @Override
     public String toString() {
-        return "HttpRequest{" + "body='" + body + '\'' + ", method=" + method + ", uri='" + uri + '\'' + ", path='"
-                + path + '\'' + ", params=" + params + ", protocol='" + protocol + '\'' + ", headers='" + headers + '\''
-                + '}';
+        return method.name() + Symbol.SPACE + uri + params + Symbol.SPACE + protocol +
+                Symbol.CRLF +
+                headers +
+                Symbol.CRLF +
+                cookie +
+                Symbol.CRLF +
+                Symbol.CRLF +
+                body + Symbol.CRLF
+                ;
     }
 }

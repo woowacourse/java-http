@@ -1,11 +1,11 @@
-package com.techcourse.resolver;
+package org.apache.coyote.http11;
 
 public enum HttpStatus {
-    OK(200, "ok"),
-    FOUND(302, "Found"),
-    NOT_FOUND(404, "Not Found"),
-    METHOD_NOT_ALLOWED(405, "method not allowed"),
-    INTERNAL_SERVER_ERROR(500, "internal server error");
+    OK(200, "OK"),
+    FOUND(302, "FOUND"),
+    NOT_FOUND(404, "NOT FOUND"),
+    METHOD_NOT_ALLOWED(405, "METHOD NOT ALLOWED"),
+    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR");
 
     private final Integer code;
     private final String message;

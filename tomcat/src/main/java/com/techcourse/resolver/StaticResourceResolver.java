@@ -1,7 +1,6 @@
 package com.techcourse.resolver;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 
 

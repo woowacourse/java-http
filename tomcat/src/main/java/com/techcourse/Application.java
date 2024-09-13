@@ -1,11 +1,11 @@
 package com.techcourse;
 
-import com.techcourse.resolver.HomeResolver;
 import com.techcourse.resolver.LoginResolver;
 import com.techcourse.resolver.RegisterResolver;
 import com.techcourse.resolver.Resolver;
 import java.util.List;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.startup.WAS;
 
 public class Application {
 

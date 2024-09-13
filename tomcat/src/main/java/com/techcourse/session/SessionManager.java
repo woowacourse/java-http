@@ -1,7 +1,6 @@
-package com.techcourse;
+package com.techcourse.session;
 
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

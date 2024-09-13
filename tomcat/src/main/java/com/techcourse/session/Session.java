@@ -1,4 +1,4 @@
-package com.techcourse;
+package com.techcourse.session;
 
 import java.util.HashMap;
 import java.util.Map;

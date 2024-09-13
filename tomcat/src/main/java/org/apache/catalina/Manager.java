@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import com.techcourse.Session;
+import com.techcourse.session.Session;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;

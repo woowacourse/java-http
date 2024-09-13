@@ -1,12 +1,13 @@
 package com.techcourse.resolver;
 
 
-import com.techcourse.Session;
-import com.techcourse.SessionManager;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

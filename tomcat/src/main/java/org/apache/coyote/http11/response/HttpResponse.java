@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 
-import com.techcourse.resolver.HttpStatus;
+import org.apache.coyote.http11.HttpStatus;
 import java.util.Map;
 import java.util.TreeMap;
 

@@ -65,7 +65,7 @@ class LoginControllerTest {
         String htmlString = new String(Files.readAllBytes(Paths.get(path)));
 
         assertThat(statusLine.getStatusCode()).isEqualTo(StatusCode.valueOf(200));
-        assertThat(response.getResponseHeader().getHeader("Content-Type")).isEqualTo("text/html");
+        assertThat(response.getResponseHeader().getHeader("Content-Type")).isEqualTo("text/html;charset=utf-8");
         assertThat(response.getResponseBody().getBody()).isEqualTo(htmlString);
     }
 

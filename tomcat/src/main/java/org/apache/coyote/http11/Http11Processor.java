@@ -1,25 +1,16 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.apache.controller.Controller;
+import org.apache.controller.ControllerContainer;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
-import org.apache.coyote.session.Session;
-import org.apache.util.QueryStringParser;
+import org.apache.exception.HandlerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +18,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String SERVER_ERR_PAGE = "/500.html";
+
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -43,110 +37,42 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-
             Http11Request request = Http11Request.from(inputStream);
             log.info("http request : {}", request);
-            Http11Response response = Http11Response.create();
 
-            handle(request, response);
-
-            outputStream.write(response.toString().getBytes());
-            outputStream.flush();
+            Http11Response response = createResponse(request);
+            sendResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handle(Http11Request request, Http11Response response) throws IOException {
+    private Http11Response createResponse(Http11Request request) throws IOException {
+        Http11Response response = Http11Response.create();
+        handle(request, response);
+        return response;
+    }
+
+    private void handle(Http11Request request, Http11Response response) {
         try {
-            if (request.isStaticResourceRequest()) {
-                getView(request.getEndpoint(), response);
-                return;
-            }
-            String endpoint = request.getEndpoint();
-            Http11Method method = request.getMethod();
-            if (method == Http11Method.GET && "/".equals(endpoint)) {
-                response.addBody("Hello world!");
-                response.addContentType("text/html");
-                return;
-            }
-            if (method == Http11Method.GET && "/login".equals(endpoint)) {
-                if (hasUser(request)) {
-                    response.sendRedirect("/index.html");
-                    return;
-                }
-                getView("/login.html", response);
-                return;
-            }
-            if (method == Http11Method.GET && "/register".equals(endpoint)) {
-                getView("/register.html", response);
-                return;
-            }
-            if (method == Http11Method.POST && "/login".equals(endpoint)) {
-                login(request, response);
-                return;
-            }
-            if (method == Http11Method.POST && "/register".equals(endpoint)) {
-                register(request, response);
-                return;
-            }
-            response.sendRedirect("/404.html");
+            Controller handler = findHandler(request);
+            handler.service(request, response);
+        } catch (HandlerNotFoundException e) {
+            response.sendRedirect(NOT_FOUND_PAGE);
         } catch (Exception e) {
-            response.sendRedirect("/500.html");
+            response.sendRedirect(SERVER_ERR_PAGE);
         }
     }
 
-    private boolean hasUser(Http11Request request) {
-        try {
-            Session session = request.getSession();
-            session.getAttribute("user");
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+    private Controller findHandler(Http11Request request) {
+        return ControllerContainer.getHandlers().stream()
+                .filter(controller -> controller.isMatch(request.getStartLine()))
+                .findFirst()
+                .orElseThrow(() -> new HandlerNotFoundException("존재하지 않는 핸들러입니다."));
     }
 
-    private void getView(String view, Http11Response response) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + view);
-        if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 자원입니다.");
-        }
-        Path path = new File(resource.getFile()).toPath();
-        String contentType = Files.probeContentType(path);
-        response.addBody(new String(Files.readAllBytes(path)));
-        response.addContentType(contentType);
-    }
-
-    private void login(Http11Request request, Http11Response response) {
-        String body = request.getBody();
-        Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
-        String account = queryStrings.get("account").getFirst();
-        String password = queryStrings.get("password").getFirst();
-
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.checkPassword(password)) {
-                Session session = request.getSession();
-                session.setAttribute("user", user);
-                response.addCookie("JSESSIONID", session.getId());
-                response.sendRedirect("/index.html");
-                return;
-            }
-        }
-        response.sendRedirect("/401.html");
-    }
-
-    private void register(Http11Request request, Http11Response response) {
-        String body = request.getBody();
-        Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
-        String account = queryStrings.get("account").getFirst();
-        String email = queryStrings.get("email").getFirst();
-        String password = queryStrings.get("password").getFirst();
-
-        User user = new User(account, password, email);
-
-        InMemoryUserRepository.save(user);
-        response.sendRedirect("/index.html");
+    private void sendResponse(OutputStream outputStream, Http11Response response) throws IOException {
+        outputStream.write(response.toString().getBytes());
+        outputStream.flush();
     }
 }

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RequestCookies {
 
@@ -32,5 +33,15 @@ public class RequestCookies {
             return Optional.of(values.get(key));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        String keyValues = values.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(",", "(", ")"));
+        return "RequestCookies{" +
+               "values=" + keyValues +
+               '}';
     }
 }

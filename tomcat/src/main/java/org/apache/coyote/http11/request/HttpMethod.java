@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-public enum Http11Method {
+public enum HttpMethod {
     GET(false),
     POST(true),
     PUT(true),
@@ -12,7 +12,7 @@ public enum Http11Method {
 
     private final boolean hasBody;
 
-    Http11Method(boolean hasBody) {
+    HttpMethod(boolean hasBody) {
         this.hasBody = hasBody;
     }
 

@@ -7,10 +7,10 @@ public class Http11RequestStartLine {
     private static final int HTTP_VERSION_INDEX = 2;
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private final Http11Method method;
+    private final HttpMethod method;
     private final Http11RequestTarget requestTarget;
 
-    private Http11RequestStartLine(Http11Method method, Http11RequestTarget requestTarget) {
+    private Http11RequestStartLine(HttpMethod method, Http11RequestTarget requestTarget) {
         this.method = method;
         this.requestTarget = requestTarget;
     }
@@ -21,7 +21,7 @@ public class Http11RequestStartLine {
 
         validateVersion(values[HTTP_VERSION_INDEX]);
 
-        Http11Method method = Http11Method.valueOf(values[HTTP_METHOD_INDEX]);
+        HttpMethod method = HttpMethod.valueOf(values[HTTP_METHOD_INDEX]);
         Http11RequestTarget requestTarget = Http11RequestTarget.from(values[REQUEST_TARGET_INDEX]);
 
         return new Http11RequestStartLine(method, requestTarget);
@@ -43,7 +43,7 @@ public class Http11RequestStartLine {
         return requestTarget.getEndPoint();
     }
 
-    public Http11Method getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

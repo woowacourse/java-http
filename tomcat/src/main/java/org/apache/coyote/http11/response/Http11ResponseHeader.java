@@ -1,4 +1,6 @@
 package org.apache.coyote.http11.response;
 
-public record Http11ResponseHeader(String name, String value) {
+import org.apache.coyote.http11.HttpHeaderName;
+
+public record Http11ResponseHeader(HttpHeaderName name, String value) {
 }

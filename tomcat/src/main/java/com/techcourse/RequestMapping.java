@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package com.techcourse;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;

@@ -12,10 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * 스레드 풀은 무엇이고 어떻게 동작할까?
  * 테스트를 통과시키고 왜 해당 결과가 나왔는지 생각해보자.
- *
+ * <p>
  * Thread Pools
  * https://docs.oracle.com/javase/tutorial/essential/concurrency/pools.html
- *
+ * <p>
  * Introduction to Thread Pools in Java
  * https://www.baeldung.com/thread-pool-java-and-guava
  */
@@ -31,8 +31,8 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
@@ -46,7 +46,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

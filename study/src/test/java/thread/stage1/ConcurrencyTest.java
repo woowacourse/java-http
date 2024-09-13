@@ -1,8 +1,10 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -16,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ConcurrencyTest.class);
 
     @Test
     void test() throws InterruptedException {
@@ -35,6 +39,7 @@ class ConcurrencyTest {
 
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
+        log.info(userServlet.getUsers().toString());
         assertThat(userServlet.getUsers()).hasSize(1);
     }
 }

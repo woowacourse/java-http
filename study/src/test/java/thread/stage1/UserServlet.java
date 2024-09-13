@@ -24,4 +24,11 @@ public class UserServlet {
     public List<User> getUsers() {
         return users;
     }
+
+    @Override
+    public String toString() {
+        return "UserServlet{" +
+                "users=" + users +
+                '}';
+    }
 }

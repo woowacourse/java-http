@@ -16,7 +16,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
+    /**
+     * 1. getUsers() 메서드에 synchronized 붙이기
+     *
+     * synchronize메서드는 인스턴스 단위로 lock을 건다. 이때, synchronized가 적용된 모든 object에 대해서 lock을 공유한다.
+     * 따라서, 동기화가 필요하지 않은 작업도 lock이 걸려 수행할 수 없다. 그렇기 때문에 성능적으로는 좋지 않다.
+     * 추가로, transactional을 함께 사용할 경우, 병렬로 실행되면서 원하지 않는 결과가 생길 수 있다.
+     * 참고: https://tecoble.techcourse.co.kr/post/2023-08-16-concurrency-managing/
+     */
 
+    /**
+     * 2. 객체가 상태를 갖지 않도록 한다.
+     *
+     * 음.......
+     */
     @Test
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();

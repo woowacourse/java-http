@@ -3,11 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 8
+    max-connections: 2
     threads:
       min-spare: 2
-      max: 2
+      max: 5
   compression:
     enabled: true
     min-response-size: 10

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMappings;
 import org.slf4j.Logger;
@@ -21,14 +23,16 @@ public class Connector implements Runnable {
 
     private final RequestMappings requestMappings;
 
-    public Connector(RequestMappings requestMappings) {
-        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    private final ExecutorService threadPool;
+
+    public Connector(RequestMappings requestMappings, int maxThreads) {
+        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
     }
 
-    public Connector(final RequestMappings requestMappings, final int port, final int acceptCount) {
+    private Connector(RequestMappings requestMappings, final int port, final int acceptCount, final int maxThreads) {
         this.requestMappings = requestMappings;
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
+        threadPool = Executors.newScheduledThreadPool(maxThreads);
+        serverSocket = createServerSocket(port, acceptCount);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -42,10 +46,8 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
         stopped = false;
+        threadPool.submit(this);
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 

@@ -13,13 +13,18 @@ public class HttpRequestParser {
 
     private static final String DELIMITER_QUERY_STRING = "?";
 
-    private static final String DELIMITER_QUERY_STRING_VALUES = "&";
+    private static final String DELIMITER_PARAMETER_SET = "&";
 
-    private static final String DELIMITER_QUERY_STRING_VALUE = "=";
+    private static final String DELIMITER_PARAMETER_VALUE = "=";
 
     private static final String EMPTY_LINE = "";
 
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
+
+    private static final HttpRequestParser instance = new HttpRequestParser();
+
+    private HttpRequestParser() {
+    }
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
         String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
@@ -27,8 +32,16 @@ public class HttpRequestParser {
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
         HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
-
-        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpRequestHeaders);
+        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
+        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
+        if (httpMethod.equals(HttpMethod.POST)) {
+            httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
+        }
+        if (!httpRequestHeaders.getCookies().equals(EMPTY_LINE)) {
+            httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
+        }
+        return new HttpRequest(httpMethod, httpRequestPath, queryString,
+                httpRequestHeaders, httpRequestBody, httpCookie);
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {
@@ -52,13 +65,7 @@ public class HttpRequestParser {
             return new QueryString(queryStrings);
         }
         String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
-        String[] queryStringInfos = queryString.split(DELIMITER_QUERY_STRING_VALUES);
-        for (String queryStringInfo : queryStringInfos) {
-            String[] splittedQueryString = queryStringInfo.split(DELIMITER_QUERY_STRING_VALUE);
-            String key = splittedQueryString[0];
-            String value = splittedQueryString[1];
-            queryStrings.put(key, value);
-        }
+        splitMultipleStrings(queryStrings, queryString.split(DELIMITER_PARAMETER_SET), DELIMITER_PARAMETER_VALUE);
         return new QueryString(queryStrings);
     }
 
@@ -71,12 +78,40 @@ public class HttpRequestParser {
 
         String headerLine = bufferedReader.readLine();
         while (!EMPTY_LINE.equals(headerLine)) {
-            String[] headerInfo = headerLine.split(DELIMITER_HEADER);
-            String key = headerInfo[0];
-            String value = headerInfo[1];
-            headers.put(key, value);
+            splitSingleString(headers, headerLine, DELIMITER_HEADER);
             headerLine = bufferedReader.readLine();
         }
         return new HttpRequestHeaders(headers);
+    }
+
+    private HttpRequestBody parseHttpRequestBody(
+            HttpRequestHeaders headers, BufferedReader bufferedReader) throws IOException {
+        Map<String, String> requestBody = new HashMap<>();
+        int contentLength = headers.getContentLength();
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            splitMultipleStrings(requestBody,
+                    new String(buffer).split(DELIMITER_PARAMETER_SET), DELIMITER_PARAMETER_VALUE);
+        }
+        return new HttpRequestBody(requestBody);
+    }
+
+    private void splitMultipleStrings(Map<String, String> set, String[] rawStrings, String delimiter) {
+        for (String rawString : rawStrings) {
+            splitSingleString(set, rawString, delimiter);
+        }
+    }
+
+    private void splitSingleString(Map<String, String> set, String rawString, String delimiter) {
+        int delimiterIndex = rawString.indexOf(delimiter);
+        int delimiterLength = delimiter.length();
+        String key = rawString.substring(0, delimiterIndex);
+        String value = rawString.substring(delimiterIndex + delimiterLength);
+        set.put(key, value);
+    }
+
+    public static HttpRequestParser getInstance() {
+        return instance;
     }
 }

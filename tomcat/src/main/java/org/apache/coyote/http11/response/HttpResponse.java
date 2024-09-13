@@ -2,18 +2,28 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-    private final HttpStatusCode httpStatusCode;
-
     private final HttpResponseHeaders httpResponseHeaders;
 
-    private final HttpResponseBody httpResponseBody;
+    private HttpResponseBody httpResponseBody;
 
-    public HttpResponse(HttpStatusCode httpStatusCode,
-                        HttpResponseHeaders httpResponseHeaders,
-                        HttpResponseBody httpResponseBody) {
+    private HttpStatusCode httpStatusCode;
+
+    public HttpResponse() {
+        this.httpStatusCode = HttpStatusCode.OK;
+        this.httpResponseHeaders = new HttpResponseHeaders();
+        this.httpResponseBody = new HttpResponseBody("");
+    }
+
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
-        this.httpResponseHeaders = httpResponseHeaders;
-        this.httpResponseBody = httpResponseBody;
+    }
+
+    public void setHttpResponseHeader(String key, String value) {
+        this.httpResponseHeaders.setAttribute(key, value);
+    }
+
+    public void setHttpResponseBody(String body) {
+        this.httpResponseBody = new HttpResponseBody(body);
     }
 
     public HttpStatusCode getHttpStatusCode() {

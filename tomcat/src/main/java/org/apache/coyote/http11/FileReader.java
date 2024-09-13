@@ -15,8 +15,6 @@ public class FileReader {
 
     private static final String DEFAULT_RESPONSE = "Hello world!";
 
-    private static final String DELIMITER_LINE = "\r\n";
-
     private static final FileReader instance = new FileReader();
 
     private FileReader() {
@@ -29,15 +27,15 @@ public class FileReader {
             Path filePath = Path.of(resource.toURI());
             StringBuilder stringBuilder = new StringBuilder();
             List<String> fileLines = Files.readAllLines(filePath);
-            fileLines.forEach(line -> stringBuilder.append(line).append(DELIMITER_LINE));
+            fileLines.forEach(line -> stringBuilder.append(line).append(System.lineSeparator()));
             responseBody = stringBuilder.toString();
         }
         return responseBody;
     }
 
     private URL findFile(String path) {
-        if (path.equals("/login")) {
-            path = path.concat(".html");
+        if (path.equals("/login") || path.equals("/register")) {
+            path += ".html";
         }
         URL url = getClass().getClassLoader().getResource(BASE_DIRECTORY + path);
         if (url == null) {

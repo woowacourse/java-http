@@ -1,23 +1,17 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseBody;
-import org.apache.coyote.http11.response.HttpResponseHeaders;
 import org.apache.coyote.http11.response.HttpResponseParser;
-import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,20 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequestParser httpRequestParser = new HttpRequestParser();
-            HttpResponseParser httpResponseParser = new HttpResponseParser();
-            FileReader fileReader = FileReader.getInstance();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-            HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    fileReader.readFile(httpRequest.getHttpRequestPath()));
-            if (httpRequest.getHttpRequestPath().contains("/login?")) {
-                login(httpRequest);
-            }
-
-            HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
-            String response = httpResponseParser.parseResponse(httpResponse);
-
+            String response = getResponse(inputStream);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
@@ -62,21 +43,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse mapToHttpResponse(HttpStatusCode code, HttpRequest request, HttpResponseBody responseBody) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", request.getContentType() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(headers);
-        return new HttpResponse(code, httpResponseHeaders, responseBody);
-    }
+    private static String getResponse(InputStream inputStream) throws IOException, URISyntaxException {
+        RequestMapper requestMapper = RequestMapper.getInstance();
+        HttpRequestParser httpRequestParser = HttpRequestParser.getInstance();
+        HttpResponseParser httpResponseParser = HttpResponseParser.getInstance();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-    private void login(HttpRequest httpRequest) {
-        String account = httpRequest.getQueryParameter("account");
-        String password = httpRequest.getQueryParameter("password");
-        User foundUser = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException(account + "는 존재하지 않는 계정입니다."));
-        if (foundUser.checkPassword(password)) {
-            log.info("user : " + foundUser);
-        }
+        HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
+        HttpResponse httpResponse = new HttpResponse();
+        requestMapper.mapRequest(httpRequest, httpResponse);
+        return httpResponseParser.parseResponse(httpResponse);
     }
 }

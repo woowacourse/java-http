@@ -6,6 +6,10 @@ public class HttpRequestHeaders {
 
     private static final String contentTypeKey = "Accept";
 
+    private static final String contentLengthKey = "Content-Length";
+
+    private static final String cookieKey = "Cookie";
+
     private static final String DELIMITER = ",";
 
     private final Map<String, String> headers;
@@ -16,5 +20,13 @@ public class HttpRequestHeaders {
 
     public String getContentType() {
         return this.headers.get(contentTypeKey).split(DELIMITER)[0];
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(this.headers.get(contentLengthKey));
+    }
+
+    public String getCookies() {
+        return this.headers.getOrDefault(cookieKey, "");
     }
 }

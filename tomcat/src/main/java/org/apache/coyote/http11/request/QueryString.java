@@ -11,6 +11,10 @@ public class QueryString {
     }
 
     public String getValue(String key) {
-        return queryStrings.get(key);
+        return queryStrings.getOrDefault(key, "");
+    }
+
+    public boolean isEmpty() {
+        return queryStrings.isEmpty();
     }
 }

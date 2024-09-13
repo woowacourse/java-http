@@ -11,9 +11,9 @@ public class UserServlet {
         join(user);
     }
 
-    private void join(final User user) {
+    private synchronized void join(final User user) {
         if (!users.contains(user)) {
-            users.add(user);
+            users.add(user); // break point
         }
     }
 

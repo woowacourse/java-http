@@ -7,7 +7,6 @@ public class HttpResponse {
     private HttpVersion httpVersion;
     private HttpStatusCode httpStatusCode;
     private ContentType contentType;
-    private int contentLength;
     private List<HttpCookie> httpCookies;
     private String responseBody;
     private String redirectUrl;
@@ -17,18 +16,13 @@ public class HttpResponse {
         this.httpCookies = new ArrayList<>();
     }
 
-    public HttpResponse addHttpStatusCode(HttpStatusCode httpStatusCode) {
+    public HttpResponse setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
         return this;
     }
 
-    public HttpResponse addContentType(ContentType contentType) {
+    public HttpResponse setContentType(ContentType contentType) {
         this.contentType = contentType;
-        return this;
-    }
-
-    public HttpResponse addContentLength(int contentLength) {
-        this.contentLength = contentLength;
         return this;
     }
 
@@ -37,12 +31,12 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addResponseBody(String responseBody) {
+    public HttpResponse setResponseBody(String responseBody) {
         this.responseBody = responseBody;
         return this;
     }
 
-    public HttpResponse addRedirectUrl(String redirectUrl) {
+    public HttpResponse setRedirectUrl(String redirectUrl) {
         this.redirectUrl = redirectUrl;
         return this;
     }
@@ -57,10 +51,6 @@ public class HttpResponse {
 
     public ContentType getContentType() {
         return contentType;
-    }
-
-    public int getContentLength() {
-        return contentLength;
     }
 
     public List<HttpCookie> getHttpCookies() {

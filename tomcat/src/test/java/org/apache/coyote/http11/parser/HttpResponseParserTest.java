@@ -16,8 +16,8 @@ class HttpResponseParserTest {
     @DisplayName("문자열 HTTP 응답을 생성한다.")
     void parse() {
         // given
-        HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1).addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody("Hello Word!")
+        HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1).setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody("Hello Word!")
                 .addCookie(new HttpCookie("KEY", "VALUE", Map.of("Max-Age", "600")));
 
         // when

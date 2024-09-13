@@ -32,14 +32,15 @@ public class RegisterController extends AbstractController {
         } catch (IllegalArgumentException e) {
             redirectUrl = "/400.html";
         }
-        response.addHttpStatusCode(HttpStatusCode.FOUND).addRedirectUrl(redirectUrl);
+        response.setHttpStatusCode(HttpStatusCode.FOUND)
+                .setRedirectUrl(redirectUrl);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String responseBody = resourceReader.loadResourceAsString("register.html");
-        response.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody(responseBody);
+        response.setContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody(responseBody);
     }
 }

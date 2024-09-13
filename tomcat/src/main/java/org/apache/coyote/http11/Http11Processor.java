@@ -47,9 +47,9 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse = requestResponse(httpRequest);
             } catch (IllegalArgumentException e) {
                 httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
-                        .addHttpStatusCode(HttpStatusCode.BAD_REQUEST)
-                        .addResponseBody(e.getMessage())
-                        .addContentType(new ContentType(MediaType.HTML, null));
+                        .setHttpStatusCode(HttpStatusCode.BAD_REQUEST)
+                        .setResponseBody(e.getMessage())
+                        .setContentType(new ContentType(MediaType.HTML, null));
             }
             String response = HttpResponseParser.parse(httpResponse);
             outputStream.write(response.getBytes());
@@ -63,13 +63,13 @@ public class Http11Processor implements Runnable, Processor {
         String sessionId = request.getSessionId();
         if (sessionId != null && SessionManager.findSession(sessionId) == null) {
             return new HttpResponse(HttpVersion.HTTP_1_1)
-                    .addHttpStatusCode(HttpStatusCode.FOUND)
-                    .addRedirectUrl("/login.html");
+                    .setHttpStatusCode(HttpStatusCode.FOUND)
+                    .setRedirectUrl("/login.html");
         }
         Controller controller = RequestMapping.getController(request);
         if (controller == null) {
             return new HttpResponse(HttpVersion.HTTP_1_1)
-                    .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
+                    .setHttpStatusCode(HttpStatusCode.NOT_FOUND);
         }
         HttpResponse response = new HttpResponse(HttpVersion.HTTP_1_1);
         controller.service(request, response);

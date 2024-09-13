@@ -35,33 +35,33 @@ public class ResourceHandler implements Controller {
     }
 
     public HttpResponse getRoot(HttpResponse httpResponse) {
-        httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody("Hello world!");
+        httpResponse.setContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody("Hello world!");
         return httpResponse;
     }
 
     public HttpResponse getHtml(String path, HttpResponse httpResponse) throws IOException {
         String responseBody = resourceReader.loadResourceAsString(path);
-        httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody(responseBody);
+        httpResponse.setContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody(responseBody);
         return httpResponse;
     }
 
     public HttpResponse getCss(String path, HttpResponse httpResponse) throws IOException {
         String responseBody = resourceReader.loadResourceAsString(path);
-        httpResponse.addContentType(new ContentType(MediaType.CSS, null))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody(responseBody);
+        httpResponse.setContentType(new ContentType(MediaType.CSS, null))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody(responseBody);
         return httpResponse;
     }
 
     public HttpResponse getJs(String path, HttpResponse httpResponse) throws IOException {
         String responseBody = resourceReader.loadResourceAsString(path);
-        httpResponse.addContentType(new ContentType(MediaType.JAVASCRIPT, null))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody(responseBody);
+        httpResponse.setContentType(new ContentType(MediaType.JAVASCRIPT, null))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody(responseBody);
         return httpResponse;
     }
 }

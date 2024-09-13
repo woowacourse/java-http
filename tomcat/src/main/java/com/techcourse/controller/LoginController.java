@@ -32,26 +32,26 @@ public class LoginController extends AbstractController {
         try {
             String sessionId = UserService.login(requestParameter);
             HttpCookie httpCookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, sessionId, Map.of("Max-Age", "600"));
-            response.addHttpStatusCode(HttpStatusCode.FOUND)
+            response.setHttpStatusCode(HttpStatusCode.FOUND)
                     .addCookie(httpCookie)
-                    .addRedirectUrl("/index.html");
+                    .setRedirectUrl("/index.html");
         } catch (IllegalArgumentException e) {
-            response.addHttpStatusCode(HttpStatusCode.FOUND)
-                    .addRedirectUrl("/401.html");
+            response.setHttpStatusCode(HttpStatusCode.FOUND)
+                    .setRedirectUrl("/401.html");
         }
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (validateSession(request.getSessionId())) {
-            response.addHttpStatusCode(HttpStatusCode.FOUND)
-                    .addRedirectUrl("/index.html");
+            response.setHttpStatusCode(HttpStatusCode.FOUND)
+                    .setRedirectUrl("/index.html");
             return;
         }
         String responseBody = resourceReader.loadResourceAsString("login.html");
-        response.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                .addHttpStatusCode(HttpStatusCode.OK)
-                .addResponseBody(responseBody);
+        response.setContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .setHttpStatusCode(HttpStatusCode.OK)
+                .setResponseBody(responseBody);
     }
 
     private boolean validateSession(String sessionId) {

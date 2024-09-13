@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.controller;
 
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.IndexController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ResourceController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.SessionManager;

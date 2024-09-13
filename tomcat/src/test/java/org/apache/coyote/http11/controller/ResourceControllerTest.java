@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.ResourceController;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;

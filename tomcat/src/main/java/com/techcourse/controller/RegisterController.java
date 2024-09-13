@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
 
 public class RegisterController extends AbstractController {
 
@@ -19,7 +20,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String sessionId = request.getCookie(HttpResponse.SESSION_ID_NAME);
         if (sessionManager.hasSession(sessionId)) {
             response.generate302Response("/index.html");
@@ -30,7 +31,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Optional<Map<String, String>> parsed = request.parseQueryString();
         Map<String, String> queryPairs = parsed.orElseThrow(
                 () -> new NoSuchElementException("invalid query string")

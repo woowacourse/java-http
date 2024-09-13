@@ -62,7 +62,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequest httpRequest) throws IOException {
-        return requestHandler.handle(httpRequest);
+    private void getResponse(HttpRequest httpRequest) throws IOException {
+        HttpResponse httpResponse = new HttpResponse(httpRequest);
+        requestHandler.handle(httpRequest, httpResponse);
     }
 }

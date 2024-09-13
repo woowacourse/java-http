@@ -19,49 +19,45 @@ import com.techcourse.model.User;
 public class DefaultResourceHandler implements RequestHandler {
 
     @Override
-    public String handle(HttpRequest httpRequest) throws IOException {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.isStaticResourceRequest()) {
-            return HttpResponse.builder()
-                    .versionOf(httpRequest.getHttpVersion())
-                    .ofStaticResource(new StaticResource(httpRequest.getTarget()))
-                    .toHttpMessage();
+            StaticResource staticResource = new StaticResource(httpRequest.getTarget());
+            httpResponse.setResponseOfStaticResource(staticResource);
+            return;
         }
         if (httpRequest.getTarget().equals("/")) {
-            return HttpResponse.builder()
-                    .versionOf(httpRequest.getHttpVersion())
-                    .ofStaticResource(new StaticResource("/index.html"))
-                    .toHttpMessage();
+            StaticResource staticResource = new StaticResource("/index.html");
+            httpResponse.setResponseOfStaticResource(staticResource);
+            return;
         }
         if (httpRequest.getTarget().equals("/login")) {
-            return loginResponse(httpRequest);
+            loginResponse(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.getTarget().contains("register")) {
-            return registerResponse(httpRequest);
+            registerResponse(httpRequest, httpResponse);
+            return;
         }
         throw new CanNotHandleRequest("처리할 수 없는 요청입니다. : " + httpRequest.getTarget());
     }
 
-    private String loginResponse(HttpRequest httpRequest) throws IOException {
+    private void loginResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.isPost()) {
-            return login(httpRequest).toHttpMessage();
+            login(httpRequest, httpResponse);
+            return;
         }
         if (isLoggedIn(httpRequest)) {
-            return HttpResponse.builder()
-                    .versionOf(httpRequest.getHttpVersion())
-                    .found("/index.html")
-                    .toHttpMessage();
+            httpResponse.setMethodFound("/index.html");
+            return;
         }
-        return HttpResponse.builder()
-                .versionOf(httpRequest.getHttpVersion())
-                .ofStaticResource(new StaticResource("/login.html"))
-                .toHttpMessage();
+        httpResponse.setMethodFound("/index.html");
     }
 
     private boolean isLoggedIn(HttpRequest httpRequest) {
         return Objects.nonNull(httpRequest.getSession(false));
     }
 
-    private HttpResponse login(HttpRequest httpRequest) throws NoSuchUserException {
+    private void login(HttpRequest httpRequest, HttpResponse httpResponse) throws NoSuchUserException {
         HttpRequestParameters requestParams = HttpRequestParameters.parseFrom(httpRequest.getBody());
         String account = requestParams.getParam("account");
         String password = requestParams.getParam("password");
@@ -70,35 +66,29 @@ public class DefaultResourceHandler implements RequestHandler {
             Session session = httpRequest.getSession(true);
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
-            return HttpResponse.builder()
-                    .versionOf(httpRequest.getHttpVersion())
-                    .addCookie("JSESSIONID", session.getId())
-                    .found("/index.html");
+
+            httpResponse.addCookie("JSESSIONID", session.getId());
+            httpResponse.setMethodFound("/index.html");
+            return;
         }
 
-        return HttpResponse.builder()
-                .versionOf(httpRequest.getHttpVersion())
-                .found("/401.html");
+        httpResponse.setMethodFound("/401.html");
     }
 
-    private String registerResponse(HttpRequest httpRequest) throws IOException {
+    private void registerResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.isPost()) {
             HttpRequestParameters methodRequest = HttpRequestParameters.parseFrom(httpRequest.getBody());
             User user = register(methodRequest);
             Session session = httpRequest.getSession(true);
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
-            return HttpResponse.builder()
-                    .versionOf(httpRequest.getHttpVersion())
-                    .addCookie("JSESSIONID", session.getId())
-                    .found("/index.html")
-                    .toHttpMessage();
+
+            httpResponse.addCookie("JSESSIONID", session.getId());
+            httpResponse.setMethodFound("/index.html");
+            return;
         }
 
-        return HttpResponse.builder()
-                .versionOf(httpRequest.getHttpVersion())
-                .ofStaticResource(new StaticResource("/register.html"))
-                .toHttpMessage();
+        httpResponse.setResponseOfStaticResource(new StaticResource("/register.html"));
     }
 
     private User register(HttpRequestParameters requestParams) {

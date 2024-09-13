@@ -15,7 +15,11 @@ public class HttpBody {
     }
 
     public HttpBody(String content) {
-        this(content.getBytes(StandardCharsets.UTF_8));
+        if (content == null) {
+            this.content = new byte[0];
+            return;
+        }
+        this.content = content.getBytes(StandardCharsets.UTF_8);
     }
 
     public static HttpBody empty() {

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+import static org.apache.coyote.http11.common.HttpDelimiter.*;
 import static org.apache.coyote.http11.common.HeaderKey.*;
 
 import java.io.BufferedReader;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public record Body(String value) {
-	public static Body parseRequestBody(Headers headers, BufferedReader reader) throws IOException {
+	public static Body request(Headers headers, BufferedReader reader) throws IOException {
 		return new Body(parseBody(headers, reader));
 	}
 

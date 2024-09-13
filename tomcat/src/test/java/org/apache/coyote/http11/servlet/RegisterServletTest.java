@@ -2,13 +2,11 @@ package org.apache.coyote.http11.servlet;
 
 import static org.apache.coyote.http11.common.HeaderKey.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.apache.coyote.http11.common.HeaderKey;
 import org.apache.coyote.http11.common.VersionOfProtocol;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

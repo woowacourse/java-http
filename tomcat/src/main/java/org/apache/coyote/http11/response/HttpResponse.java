@@ -13,9 +13,7 @@ import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.VersionOfProtocol;
 
 public class HttpResponse {
-	private VersionOfProtocol versionOfProtocol;
-	private StatusCode statusCode;
-	private StatusMessage statusMessage;
+	private ResponseLine responseLine;
 	private Headers headers;
 	private Body body;
 
@@ -25,10 +23,8 @@ public class HttpResponse {
 
 	public String toPlainText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("%s %d %s \r\n", versionOfProtocol.value(), statusCode.value(), statusMessage.value()));
-		headers.headers().forEach((key, value) -> {
-			sb.append(String.format("%s: %s \r\n", key, value));
-		});
+		sb.append(responseLine.generatePlainText());
+		sb.append(headers.generatePlainText());
 		sb.append("\r\n");
 		if (body != null) {
 			sb.append(body.value());
@@ -36,16 +32,16 @@ public class HttpResponse {
 		return sb.toString();
 	}
 
-	public void setVersionOfProtocol(String versionOfProtocol) {
-		this.versionOfProtocol = new VersionOfProtocol(versionOfProtocol);
+	public void setVersionOfProtocol(String value) {
+		this.responseLine.setVersionOfProtocol(new VersionOfProtocol(value));
 	}
 
-	public void setStatusCode(int statusCode) {
-		this.statusCode = new StatusCode(statusCode);
+	public void setStatusCode(int value) {
+		this.responseLine.setStatusCode(new StatusCode(value));
 	}
 
-	public void setStatusMessage(String statusMessage) {
-		this.statusMessage = new StatusMessage(statusMessage);
+	public void setStatusMessage(String value) {
+		this.responseLine.setStatusMessage(new StatusMessage(value));
 	}
 
 	public void setHeaders(Map<String, String> headers) {
@@ -70,15 +66,15 @@ public class HttpResponse {
 	}
 
 	public VersionOfProtocol getVersionOfProtocol() {
-		return versionOfProtocol;
+		return responseLine.getVersionOfProtocol();
 	}
 
 	public StatusCode getStatusCode() {
-		return statusCode;
+		return responseLine.getStatusCode();
 	}
 
 	public StatusMessage getStatusMessage() {
-		return statusMessage;
+		return responseLine.getStatusMessage();
 	}
 
 	public Headers getHeaders() {

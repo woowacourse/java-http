@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+import static org.apache.coyote.http11.common.HttpDelimiter.*;
 
 import java.util.HashMap;
 import java.util.Map;

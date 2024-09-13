@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+import static org.apache.coyote.http11.common.HttpDelimiter.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,5 +28,13 @@ public record Headers(Map<String, String> headers) {
 
 	public String getValue(HeaderKey headerKey) {
 		return headers.get(headerKey.getValue());
+	}
+
+	public String generatePlainText() {
+		StringBuilder sb = new StringBuilder();
+		headers().forEach((key, value) -> {
+			sb.append(String.format("%s: %s \r\n", key, value));
+		});
+		return sb.toString();
 	}
 }

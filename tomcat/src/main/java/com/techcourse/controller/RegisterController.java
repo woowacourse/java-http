@@ -16,7 +16,12 @@ public class RegisterController extends AbstractController {
 
     protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> bodys = getBody(request.getBody());
-        User user = new User(bodys.get("account"), bodys.get("password"), bodys.get("email"));
+
+        String account = bodys.get("account");
+        String password = bodys.get("password");
+        String email = bodys.get("email");
+
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         response.redirect("/index.html");
     }

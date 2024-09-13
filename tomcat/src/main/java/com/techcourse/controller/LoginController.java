@@ -35,13 +35,17 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
             Map<String, String> bodys = getBody(request.getBody());
-            User user = InMemoryUserRepository.findByAccount(bodys.get("account"))
+
+            String account = bodys.get("account");
+            String password = bodys.get("password");
+
+            User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow();
-            if (!user.checkPassword(bodys.get("password"))) {
+            if (!user.checkPassword(password)) {
                 throw new RuntimeException();
             }
-            log.debug("user: {}", user);
 
+            log.debug("user: {}", user);
             Session session = new Session();
             session.setAttribute("user", user);
             sessionManager.add(session);

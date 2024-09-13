@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.common.Body;
 import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.Properties;
 import org.apache.coyote.http11.common.VersionOfProtocol;
 import org.apache.coyote.http11.session.Session;
 
@@ -44,5 +45,10 @@ public class HttpRequest {
 			return null;
 		}
 		return new Session(cookie);
+	}
+
+	public String getProperty(String key) {
+		Properties properties = body.parseProperty();
+		return properties.get(key);
 	}
 }

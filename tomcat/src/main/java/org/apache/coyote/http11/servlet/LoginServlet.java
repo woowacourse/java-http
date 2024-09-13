@@ -17,11 +17,9 @@ import com.techcourse.model.User;
 public class LoginServlet extends AbstractServlet {
 	@Override
 	protected void doPost(HttpRequest request, HttpResponse response) {
-		Body body = request.getBody();
-		Properties properties = body.parseProperty();
+		String account = request.getProperty("account");
+		String password = request.getProperty("password");
 
-		String account = properties.get("account");
-		String password = properties.get("password");
 		Optional<User> user = InMemoryUserRepository.findByAccount(account);
 		if (user.isPresent() && user.get().checkPassword(password)) {
 			Session session = SessionManager.createSession(user.get());

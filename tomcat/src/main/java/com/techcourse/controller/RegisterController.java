@@ -12,12 +12,12 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterAbstractController extends AbstractController {
+public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterAbstractController.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws ApplicationException {
+    public void doPost(HttpRequest request, HttpResponse response) throws ApplicationException {
         String account = request.body().getAttribute("account");
         String email = request.body().getAttribute("email");
         String password = request.body().getAttribute("password");
@@ -27,6 +27,7 @@ public class RegisterAbstractController extends AbstractController {
         log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
 
         response.setStatusCode(HttpStatusCode.REDIRECT);
+        response.setLocation("index.html");
         response.setCookie("JSESSIONID", sessionId);
     }
 }

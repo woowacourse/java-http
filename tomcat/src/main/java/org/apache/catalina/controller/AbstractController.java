@@ -1,6 +1,7 @@
 package org.apache.catalina.controller;
 
 import com.techcourse.exception.ApplicationException;
+import org.apache.catalina.exception.ControllerNotMatchedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -16,8 +17,14 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws ApplicationException {
+        handleControllerNoMatched(response);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws ApplicationException {
+        handleControllerNoMatched(response);
+    }
+
+    final void handleControllerNoMatched(HttpResponse response) {
+        throw new ControllerNotMatchedException();
     }
 }

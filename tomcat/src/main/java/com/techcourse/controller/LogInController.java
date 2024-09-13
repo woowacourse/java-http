@@ -18,7 +18,7 @@ public class LogInController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LogInController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws ApplicationException {
+    public void doPost(HttpRequest request, HttpResponse response) throws ApplicationException {
         String account = request.body().getAttribute("account");
         String password = request.body().getAttribute("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
@@ -27,10 +27,10 @@ public class LogInController extends AbstractController {
             User user = optionalUser.get();
             log.info("optionalUser : {}", user);
             String sessionId = SessionManager.add(new Session(user));
-
             response.setStatusCode(HttpStatusCode.REDIRECT);
-            response.setCookie("JSESSIONID", sessionId);
             response.setLocation("/index.html");
+            response.setCookie("JSESSIONID", sessionId);
+            return;
         }
 
         response.setStatusCode(HttpStatusCode.REDIRECT);

@@ -1,16 +1,16 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.utils.Separator;
 
 public class RequestLine {
 
     private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
-    private static final int QUERY_PARAMETER_ENTRY_SIZE = 2;
-    private static final int QUERY_PARAMETER_KEY_INDEX = 0;
-    private static final int QUERY_PARAMETER_VALUE_INDEX = 1;
+    private static final String QUERY_STRING_STARTING_SIGN = "?";
+    private static final String QUERY_PARAMETER_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
 
     private String method;
     private String path;
@@ -22,29 +22,25 @@ public class RequestLine {
         String path = splitRequestLine[PATH_INDEX];
 
         String queryString = "";
-        int queryStringIndex = requestLine.indexOf("?");
+        int queryStringIndex = requestLine.indexOf(QUERY_STRING_STARTING_SIGN);
         if (queryStringIndex >= 0) {
             path = requestLine.substring(0, queryStringIndex);
             queryString = requestLine.substring(queryStringIndex)
-                    .replace("?", "");
+                    .replace(QUERY_STRING_STARTING_SIGN, "");
         }
-        Map<String, String> queryParameters = parseQueryParameters(queryString);
 
-        return new RequestLine(method, path, queryParameters);
+        return new RequestLine(method, path, parseQueryParameters(queryString));
     }
 
     private static Map<String, String> parseQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
-        Arrays.stream(queryString.split("&"))
-                .forEach(queryParameterEntry -> {
-                    String[] split = queryParameterEntry.split("=");
-                    if (split.length == QUERY_PARAMETER_ENTRY_SIZE
-                            && !split[QUERY_PARAMETER_KEY_INDEX].isBlank()
-                            && !split[QUERY_PARAMETER_VALUE_INDEX].isBlank()) {
-                        queryParameters.put(split[QUERY_PARAMETER_KEY_INDEX], split[QUERY_PARAMETER_VALUE_INDEX]);
-                    }
-                });
-        return queryParameters;
+        if (queryString.isBlank()) {
+            return Map.of();
+        }
+
+        List<String> parameterEntries = List.of(queryString.split(QUERY_PARAMETER_SEPARATOR));
+        Map<String, String> parameters = Separator.separateKeyValueBy(parameterEntries, KEY_VALUE_SEPARATOR);
+
+        return parameters;
     }
 
     private RequestLine(String method, String path, Map<String, String> queryParameters) {

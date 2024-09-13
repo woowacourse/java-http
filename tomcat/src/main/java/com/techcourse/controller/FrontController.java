@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -49,10 +48,8 @@ public class FrontController implements Controller {
     }
 
     private Controller getHandler(String uri) {
-        if (Objects.nonNull(handlerMappings.get(uri))) {
-            return handlerMappings.get(uri);
-        }
-        return StaticResourceController.getInstance();
+        return handlerMappings.getOrDefault(uri, StaticResourceController.getInstance());
+
     }
 
     private void handleNotFound(HttpRequest request, HttpResponse response) throws Exception {

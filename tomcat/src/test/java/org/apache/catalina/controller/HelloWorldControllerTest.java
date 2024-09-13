@@ -23,8 +23,8 @@ class HelloWorldControllerTest {
         assertAll(
                 () -> assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200),
                 () -> assertThat(response.getStatusLine().getStatusMessage()).isEqualTo("OK"),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(12),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML.value()),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo("12"),
                 () -> assertThat(response.getBody()).isEqualTo("Hello world!")
         );
     }

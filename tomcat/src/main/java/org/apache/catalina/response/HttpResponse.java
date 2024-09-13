@@ -12,7 +12,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private final Map<Header, Object> headers = new LinkedHashMap<>();
+    private final Map<Header, String> headers = new LinkedHashMap<>();
     private String body;
 
     public void setStatusLine(Status status) {
@@ -20,11 +20,11 @@ public class HttpResponse {
     }
 
     public void setCookie(Cookie cookie) {
-        headers.put(Header.SET_COOKIE, cookie);
+        headers.put(Header.SET_COOKIE, cookie.toStringFormat());
     }
 
     public void setContentType(ContentType contentType) {
-        headers.put(Header.CONTENT_TYPE, contentType);
+        headers.put(Header.CONTENT_TYPE, contentType.value());
     }
 
     public void forward(String path) {
@@ -47,14 +47,14 @@ public class HttpResponse {
     }
 
     private void setContentLength(int contentLength) {
-        headers.put(Header.CONTENT_LENGTH, contentLength);
+        headers.put(Header.CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     private void setLocation(String location) {
         headers.put(Header.LOCATION, location);
     }
 
-    public Map<Header, Object> getHeaders() {
+    public Map<Header, String> getHeaders() {
         return headers;
     }
 

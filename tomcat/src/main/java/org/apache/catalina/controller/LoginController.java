@@ -55,7 +55,10 @@ public class LoginController extends MappingController {
             response.setStatusLine(Status.FOUND);
             response.sendRedirect(INDEX_PATH);
             response.setCookie(Cookie.ofSessionId(session.getId()));
+            return;
         }
+        response.setStatusLine(Status.UNAUTHORIZED);
+        response.sendRedirect(UNAUTHORIZED_PATH);
     }
 
     private Session saveSession(User user) {

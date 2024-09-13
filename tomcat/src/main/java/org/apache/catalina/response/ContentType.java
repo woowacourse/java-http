@@ -19,8 +19,7 @@ public enum ContentType {
         return HTML;
     }
 
-    @Override
-    public String toString() {
+    public String value() {
         return value;
     }
 }

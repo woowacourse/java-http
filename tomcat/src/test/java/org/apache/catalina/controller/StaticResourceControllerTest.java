@@ -29,8 +29,8 @@ class StaticResourceControllerTest {
         assertAll(
                 () -> assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200),
                 () -> assertThat(response.getStatusLine().getStatusMessage()).isEqualTo("OK"),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.CSS),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.CSS.value()),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(String.valueOf(body.getBytes().length)),
                 () -> assertThat(response.getBody()).isEqualTo(body)
         );
     }

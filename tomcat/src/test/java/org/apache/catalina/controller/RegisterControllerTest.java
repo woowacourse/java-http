@@ -30,8 +30,8 @@ class RegisterControllerTest {
         assertAll(
                 () -> assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200),
                 () -> assertThat(response.getStatusLine().getStatusMessage()).isEqualTo("OK"),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML.value()),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(String.valueOf(body.getBytes().length)),
                 () -> assertThat(response.getBody()).isEqualTo(body)
         );
     }
@@ -47,8 +47,8 @@ class RegisterControllerTest {
         assertAll(
                 () -> assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200),
                 () -> assertThat(response.getStatusLine().getStatusMessage()).isEqualTo("OK"),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
-                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML.value()),
+                () -> assertThat(response.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(String.valueOf(body.getBytes().length)),
                 () -> assertThat(response.getBody()).isEqualTo(body),
                 () -> assertThat(InMemoryUserRepository.findByAccount("gugu")).isPresent()
         );

@@ -17,7 +17,7 @@ public class ResponseParser {
                 statusLine.getStatusCode(),
                 statusLine.getStatusMessage()));
 
-        Map<Header, Object> headers = response.getHeaders();
+        Map<Header, String> headers = response.getHeaders();
         for (Header header : headers.keySet()) {
             responseJoiner.add(String.format(HEADER_FORMAT,
                     header.value(),

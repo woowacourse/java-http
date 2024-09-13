@@ -23,8 +23,8 @@ class HttpResponseTest {
         assertAll(
                 () -> assertThat(httpResponse.getBody()).isEqualTo(body),
                 () -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(200),
-                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
-                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length)
+                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML.value()),
+                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(String.valueOf(body.getBytes().length))
         );
     }
 
@@ -40,8 +40,8 @@ class HttpResponseTest {
         assertAll(
                 () -> assertThat(httpResponse.getBody()).isEqualTo(body),
                 () -> assertThat(httpResponse.getHeaders().get(Header.LOCATION)).isEqualTo("/index.html"),
-                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML),
-                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(body.getBytes().length)
+                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_TYPE)).isEqualTo(ContentType.HTML.value()),
+                () -> assertThat(httpResponse.getHeaders().get(Header.CONTENT_LENGTH)).isEqualTo(String.valueOf(body.getBytes().length))
         );
     }
 }

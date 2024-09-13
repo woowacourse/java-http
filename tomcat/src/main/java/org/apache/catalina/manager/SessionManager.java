@@ -3,12 +3,15 @@ package org.apache.catalina.manager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
+
+import com.techcourse.model.User;
 
 public class SessionManager implements Manager {
     private static final SessionManager instance = new SessionManager();
@@ -38,5 +41,14 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public Optional<Session> getByAttribute(String attribute, Object value) {
+        for (Entry<String, Session> entry : SESSIONS.entrySet()) {
+            if(entry.getValue().hasAttribute(attribute, value)) {
+                return Optional.ofNullable(entry.getValue());
+            }
+        }
+        return Optional.empty();
     }
 }

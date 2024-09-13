@@ -136,7 +136,8 @@ class LoginControllerTest {
     void homePage() throws IOException {
         // given
         Session session = Session.createRandomSession();
-        session.setAttribute("user", "validUser");
+        User user = new User("user", "password","email");
+        session.setAttribute("user", user);
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1 ");
@@ -160,5 +161,4 @@ class LoginControllerTest {
                 expectedLocationHeader
         );
     }
-
 }

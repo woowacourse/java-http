@@ -32,7 +32,7 @@ public class HttpRequestParser {
         throw new UnexpectedHeaderException(String.join(Symbol.SPACE, requestLine));
     }
 
-    public String extractStrings(InputStream inputStream) throws IOException {
+    private String extractStrings(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         StringBuilder str = new StringBuilder();

@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.readFrom(requestBufferedReader);
-            log.info("request : {}", httpRequest);
+            log.trace("request : {}", httpRequest);
             HttpResponse httpResponse = new HttpResponse(httpRequest);
 
             service(httpRequest, httpResponse);

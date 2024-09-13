@@ -20,7 +20,7 @@ public class HttpRequestParser {
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         String startLine = bufferedReader.readLine();
         if (startLine == null) {
-            return null;
+            throw new IllegalArgumentException("유효한 형식의 HTTP 요청이 아닙니다.");
         }
         String[] requestParts = startLine.split(" ");
         String httpMethodName = requestParts[0].trim();

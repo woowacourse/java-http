@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -57,5 +58,25 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 형식의 HTTP 요청시 예외 메세지를 반환한다.")
+    void invalidRequest() {
+        // given
+        String invalidHttpRequest = "";
+
+        var socket = new StubSocket(invalidHttpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 400 Bad Request \r\n"
+                + "Content-Type: text/html \r\n"
+                + "Content-Length: 48 \r\n"
+                + "\r\n"
+                + "유효한 형식의 HTTP 요청이 아닙니다.");
     }
 }

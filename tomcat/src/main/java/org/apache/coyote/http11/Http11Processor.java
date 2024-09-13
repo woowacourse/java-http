@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.http11.data.MediaType;
 import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
 import org.apache.coyote.http11.session.SessionManager;
@@ -39,10 +41,16 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              OutputStream outputStream = connection.getOutputStream()) {
-
-            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
-            HttpResponse httpResponse = requestResponse(httpRequest);
-
+            HttpResponse httpResponse = null;
+            try {
+                HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
+                httpResponse = requestResponse(httpRequest);
+            } catch (IllegalArgumentException e) {
+                httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
+                        .addHttpStatusCode(HttpStatusCode.BAD_REQUEST)
+                        .addResponseBody(e.getMessage())
+                        .addContentType(new ContentType(MediaType.HTML, null));
+            }
             String response = HttpResponseParser.parse(httpResponse);
             outputStream.write(response.getBytes());
             outputStream.flush();

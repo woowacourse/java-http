@@ -1,12 +1,11 @@
 package org.apache.coyote.manager;
 
 import com.techcourse.model.User;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.session.Session;
 
 public class SessionManager implements Manager {
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final ConcurrentHashMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static SessionManager instance;
 
     private SessionManager() {

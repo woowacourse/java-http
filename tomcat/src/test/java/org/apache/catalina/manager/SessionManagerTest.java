@@ -11,17 +11,25 @@ import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class SessionManagerTest {
+    private SessionManager sessionManager;
+    private Session session;
+
+    @BeforeEach
+    void init(){
+        sessionManager = SessionManager.getInstance();
+        session = Session.createRandomSession();
+        sessionManager.add(session);
+    }
+
     @DisplayName("새로운 세션을 생성하고 저장한다.")
     @Test
     void addSession() throws IOException {
         // given
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = Session.createRandomSession();
-
         HttpRequest request = mock(HttpRequest.class);
         when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
 
@@ -38,10 +46,6 @@ class SessionManagerTest {
     @Test
     void findSessionExists() throws IOException {
         // given
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = Session.createRandomSession();
-        sessionManager.add(session);
-
         HttpRequest request = mock(HttpRequest.class);
         HttpCookie cookie = mock(HttpCookie.class);
         when(cookie.hasJSessionId()).thenReturn(true);
@@ -62,7 +66,6 @@ class SessionManagerTest {
     @Test
     void findSessionNotExists() throws IOException {
         // given
-        SessionManager sessionManager = SessionManager.getInstance();
         HttpRequest request = mock(HttpRequest.class);
         HttpCookie cookie = mock(HttpCookie.class);
         when(cookie.hasJSessionId()).thenReturn(true);
@@ -80,10 +83,6 @@ class SessionManagerTest {
     @Test
     void removeSession() throws IOException {
         // given
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = Session.createRandomSession();
-        sessionManager.add(session);
-
         HttpRequest request = mock(HttpRequest.class);
         when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
 

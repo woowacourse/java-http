@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.manager.Session;
 import org.apache.coyote.http11.request.HttpCookie;
@@ -19,17 +19,12 @@ public class LoginController extends AbstractController {
 
     protected void doGet(HttpRequest request, HttpResponse response) {
         HttpCookie cookie = request.getCookie();
-        String sessionId = cookie.get("JSESSIONID");
 
-        if (sessionId != null) {
-            Session session = sessionManager.findSession(sessionId);
-            if (session != null && session.getAttribute("user") != null) {
-                response.redirect("/index.html");
-                return;
-            }
-        }
-
-        response.getStaticResource("/login.html");
+        Optional.ofNullable(cookie.get("JSESSIONID"))
+                .map(sessionManager::findSession)
+                .filter(session -> session.getAttribute("user") != null)
+                .ifPresentOrElse(user -> response.redirect("/index.html"),
+                        () -> response.getStaticResource("/login.html"));
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {

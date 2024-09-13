@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record Headers(Map<String, String> headers) {
-
 	public Headers() {
 		this(new HashMap<>());
 	}
@@ -25,7 +24,7 @@ public record Headers(Map<String, String> headers) {
 		headers.put(key, value);
 	}
 
-	public String getValue(String key) {
-		return headers.get(key);
+	public String getValue(HeaderKey headerKey) {
+		return headers.get(headerKey.getValue());
 	}
 }

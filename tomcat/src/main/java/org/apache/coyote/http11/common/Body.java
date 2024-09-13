@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.common;
 
+import static org.apache.coyote.http11.common.HTTP_DELIMITER.*;
+import static org.apache.coyote.http11.common.HeaderKey.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
 
 public record Body(String value) {
-	private static final String CONTENT_LENGTH = "Content-Length";
-
 	public static Body request(Headers headers, BufferedReader reader) throws IOException {
 		return new Body(parseBody(headers, reader));
 	}
@@ -32,7 +33,7 @@ public record Body(String value) {
 
 	public Properties parseProperty() {
 		Properties properties = new Properties();
-		Arrays.asList(value.split("&"))
+		Arrays.asList(value.split(BODY_PROPERTY_DELIMITER.getValue()))
 			.forEach(properties::add);
 		return properties;
 	}

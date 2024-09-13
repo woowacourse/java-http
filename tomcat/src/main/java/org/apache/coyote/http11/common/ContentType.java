@@ -4,7 +4,7 @@ public enum ContentType {
 	APPLICATION_JSON("application/json"),
 	TEXT_CSS("text/css"),
 	TEXT_HTML("text/html"),
-	APPLICATION_JAVASCRIPT("text/javascript"),
+	TEXT_JAVASCRIPT("text/javascript"),
 	;
 
 	private final String value;

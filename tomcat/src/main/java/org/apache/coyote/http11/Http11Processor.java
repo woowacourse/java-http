@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,20 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
-            HttpRequest request = HttpRequest.parse(requestLines);
-//            log.debug(request.toString());
 
+            HttpRequest request;
             HttpResponse.Builder responseBuilder = HttpResponse.builder();
+            try {
+                request = HttpRequest.parse(requestLines);
+//            log.debug(request.toString());
+            } catch (IllegalArgumentException e) {
+                HttpResponse response = responseBuilder.status(Status.BAD_REQUEST)
+                        .build();
+                outputStream.write(response.toMessage());
+                outputStream.flush();
+                return;
+            }
+
             requestMapping.getController(request)
                     .service(request, responseBuilder);
             HttpResponse response = responseBuilder.build();

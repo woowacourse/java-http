@@ -29,9 +29,10 @@ public record HttpRequest(
     private static final String DELIMITER_VALUE = "=";
     private static final String DELIMITER_PARAMETER_ENTRY = "&";
     private static final String HEADER_NAME_COOKIE = "Cookie";
+    private static final int REQUIRED_REQUEST_LINE_ITEMS_COUNT = 3;
 
     public static HttpRequest parse(List<String> lines) {
-        String[] startLineParts = lines.getFirst().split(DELIMITER_SPACE);
+        String[] startLineParts = splitRequestLine(lines.getFirst());
         Method method = Method.from(startLineParts[0]);
 
         String path = "";
@@ -50,6 +51,14 @@ public record HttpRequest(
         String body = extractBody(lines);
 
         return new HttpRequest(method, path, protocolVersion, parameters, headers, cookies, body);
+    }
+
+    private static String[] splitRequestLine(String first) {
+        String[] result = first.split(DELIMITER_SPACE);
+        if (result.length < REQUIRED_REQUEST_LINE_ITEMS_COUNT) {
+            throw new IllegalArgumentException("Request line items count is incorrect: " + first);
+        }
+        return result;
     }
 
     private static Map<String, String> extractParameters(String query) {

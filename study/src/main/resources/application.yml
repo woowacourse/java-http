@@ -3,17 +3,22 @@ handlebars:
 
 server:
   tomcat:
-    # Maximum queue length for incoming connection requests when all possible request processing threads are in use.
+    # Maximum queue length for incoming connection requests when all possible request processing
+    # threads are in use.
     # 스레드 풀이 꽉 찼을 때, 최대 큐 개수
-    accept-count: 1 # default 100
-    # Maximum number of connections that the server accepts and processes at any given time. Once the limit has been reached, the operating system may still accept connections based on the "acceptCount" property.
+    accept-count: 2 # default 100
+    # Maximum number of connections that the server accepts and processes at any given time.
+    # Once the limit has been reached,
+    # the operating system may still accept connections based on the "acceptCount" property.
     # 커넥션의 최대 개수
-    max-connections: 1 # default 8192
+    max-connections: 2 # default 8192
     threads:
       # Minimum amount of worker threads.
-      min-spare: 2 # default 10
+      # 항상 활성화 되어있는(idle) thread의 개수
+      min-spare: 10 # default 10
       # Maximum amount of worker threads.
-      max: 2 # default 200
+      # 생성할 수 있는 thread의 총 개수
+      max: 10 # default 200
   compression:
     enabled: true
     min-response-size: 10

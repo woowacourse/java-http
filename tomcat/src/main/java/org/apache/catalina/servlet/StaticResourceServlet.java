@@ -1,7 +1,6 @@
 package org.apache.catalina.servlet;
 
 import java.net.URI;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StaticResourceServer;
@@ -15,11 +14,6 @@ public class StaticResourceServlet implements HttpServlet {
 
     public static StaticResourceServlet getInstance() {
         return instance;
-    }
-
-    @Override
-    public boolean canService(HttpRequest request) {
-        return request.getMethod() == HttpMethod.GET;
     }
 
     @Override

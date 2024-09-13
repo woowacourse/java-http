@@ -25,6 +25,10 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
+    public static void clear() {
+        database.clear();
+    }
+
     private InMemoryUserRepository() {
     }
 }

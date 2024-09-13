@@ -11,15 +11,21 @@ public class HttpResponseWriter {
     private HttpResponseWriter() {
     }
 
-    public static String write(HttpResponse response) {
+    public static byte[] writeAsBytes(HttpResponse response) {
         StatusCode statusCode = response.getStatusCode();
         HttpHeaders headers = response.getHeaders();
         String content = response.getContent();
+        validateNonNull(statusCode, headers, content);
+        return writeAsString(statusCode, headers, content).getBytes();
+    }
 
+    private static void validateNonNull(StatusCode statusCode, HttpHeaders headers, String content) {
         Objects.requireNonNull(statusCode, "StatusCode must not be null.");
         Objects.requireNonNull(headers, "Headers must not be null.");
         Objects.requireNonNull(content, "Content must not be null");
+    }
 
+    private static String writeAsString(StatusCode statusCode, HttpHeaders headers, String content) {
         StringBuilder builder = new StringBuilder();
         builder.append("%s %s %s".formatted(HTTP_VERSION, statusCode.getCode(), statusCode.getMessage()));
         builder.append(CRLF);

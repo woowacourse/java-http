@@ -14,8 +14,16 @@ public class HttpBody {
         this.content = content;
     }
 
+    public HttpBody(String content) {
+        if (content == null) {
+            this.content = new byte[0];
+            return;
+        }
+        this.content = content.getBytes(StandardCharsets.UTF_8);
+    }
+
     public static HttpBody empty() {
-        return new HttpBody(new byte[0]);
+        return new HttpBody("");
     }
 
     public long getContentLength() {

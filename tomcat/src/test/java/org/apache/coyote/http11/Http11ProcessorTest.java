@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
 
 import org.apache.catalina.servlet.PathMatchServletContainer;
 import org.apache.catalina.servlet.RequestMapping;
@@ -18,7 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.techcourse.controller.LoginController;
+import com.techcourse.config.RequestMappingConfig;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
@@ -26,9 +25,7 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private final RequestMapping requestMapping = new RequestMapping(
-            Map.of()
-    );
+    private final RequestMapping requestMapping = RequestMappingConfig.getRequestMapping();
     private final ServletContainer servletContainer = new PathMatchServletContainer(requestMapping);
 
     @Test

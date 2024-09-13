@@ -1,13 +1,17 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import javax.annotation.Nullable;
 import org.apache.catalina.cookie.Cookie;
-import org.apache.catalina.cookie.CookieCreator;
+import org.apache.catalina.cookie.CookieUtils;
 
 public class HttpRequestHeaders {
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, String> headers;
 
@@ -15,14 +19,23 @@ public class HttpRequestHeaders {
         this.headers = Map.copyOf(headers);
     }
 
-    public Optional<String> getHeader(String key) {
-        return Optional.ofNullable(headers.get(key));
+    public HttpRequestHeaders() {
+        this.headers = Collections.emptyMap();
+    }
+
+    @Nullable
+    public String getContentType() {
+        return headers.get(CONTENT_TYPE);
     }
 
     public Cookie getCookie() {
-        return getHeader("Cookie")
-                .map(CookieCreator::create)
+        return getHeader(COOKIE)
+                .map(CookieUtils::createCookie)
                 .orElse(new Cookie());
+    }
+
+    public Optional<String> getHeader(String key) {
+        return Optional.ofNullable(headers.get(key));
     }
 
     @Override

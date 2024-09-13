@@ -117,11 +117,13 @@ class Http11ProcessorTest {
     void loginTest() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
@@ -131,8 +133,8 @@ class Http11ProcessorTest {
         // then
         List<String> expected = List.of(
                 "HTTP/1.1 302 Found",
-                "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 0",
+                "Set-Cookie: ",
                 "");
 
         assertThat(socket.output()).contains(expected);
@@ -161,6 +163,34 @@ class Http11ProcessorTest {
                 "Content-Length: " + response.getBytes().length,
                 "",
                 response);
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void registerTest() throws IOException{
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 80",
+                "",
+                "account=taka&password=password&email=takan1%40woowahan.com");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expected = List.of(
+                "HTTP/1.1 302 Found",
+                "Content-Length: 0",
+                "Set-Cookie: ",
+                "Location: /index.html",
+                "");
 
         assertThat(socket.output()).contains(expected);
     }

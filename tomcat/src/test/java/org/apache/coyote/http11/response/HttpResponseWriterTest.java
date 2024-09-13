@@ -16,16 +16,16 @@ class HttpResponseWriterTest {
         HttpStatus status = HttpStatus.OK;
         HttpResponseHeaders headers = new HttpResponseHeaders(Map.of(
                 "Content-Type", "text/html",
-                "Content-Length", "21"
+                "Content-Length", "13"
         ));
         String body = "Hello World!!";
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponse response = new HttpResponse(status, headers, body);
+        HttpResponse response = new HttpResponse(headers, status, body);
         List<String> expected = List.of(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html",
-                "Content-Length: 21",
+                "Content-Length: 13",
                 "",
                 "Hello World!!");
 

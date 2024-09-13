@@ -17,12 +17,12 @@ class HttpRequestCreatorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "");;
+                "");
         BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
         HttpRequestStartLine startLine = new HttpRequestStartLine("GET", "/", "HTTP/1.1");
         HttpRequestHeaders headers = new HttpRequestHeaders(Map.of(
                 "Host", "localhost:8080", "Connection", "keep-alive"));
-        String body = "";
+        HttpRequestBody body = new HttpRequestBody("");
         HttpRequest expected = new HttpRequest(startLine, headers, body);
 
         HttpRequest actual = HttpRequestCreator.createHttpRequest(reader);

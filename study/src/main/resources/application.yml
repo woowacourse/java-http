@@ -3,7 +3,7 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 0 # 요청의 개수가 Max-Connections를 초과했을 경우에, accept만 해둘 수 있는 요청의 개수
+    max-connections: 2 # 서버가 accept하고 process할 수 있는 요청의 개수
     threads:
-      max: 2
+      max: 2 # 동시에 처리할 수 있는 스레드의 개수

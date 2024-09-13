@@ -1,27 +1,60 @@
 package org.apache.coyote.http11.response;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.util.StaticFileResponseUtils;
 
 public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String EMPTY_BODY = "";
 
-    private final HttpStatus status;
     private final HttpResponseHeaders headers;
-    private final String body;
+    private HttpStatus status;
+    private String body;
 
-    public HttpResponse(HttpStatus status, HttpResponseHeaders headers, String body) {
-        this.status = status;
+    public HttpResponse(HttpResponseHeaders headers, HttpStatus status, String body) {
         this.headers = headers;
+        this.status = status;
         this.body = body;
+        headers.addContentLength(body.getBytes().length);
     }
 
-    public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder();
+    public HttpResponse() {
+        this.headers = new HttpResponseHeaders();
+        this.status = HttpStatus.OK;
+        this.body = EMPTY_BODY;
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendTextFiles(String text) {
+        status = HttpStatus.OK;
+        body = text;
+        headers.addContentType("text/html;charset=utf-8");
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendStaticResource(String filePath) {
+        sendStaticResource(HttpStatus.OK, filePath);
+    }
+
+    public void sendStaticResource(HttpStatus status, String filePath) {
+        this.status = status;
+        body = StaticFileResponseUtils.readStaticFile(filePath);
+        headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void sendRedirect(String location) {
+        status = HttpStatus.FOUND;
+        body = EMPTY_BODY;
+        headers.addLocation(location);
+        headers.addContentLength(body.getBytes().length);
+    }
+
+    public void setSession(Session session) {
+        headers.setSession(session);
     }
 
     public String getHttpVersion() {
@@ -34,10 +67,6 @@ public class HttpResponse {
 
     public String getStatusMessage() {
         return status.getStatusMessage();
-    }
-
-    public Optional<String> getHeader(String key) {
-        return headers.getHeader(key);
     }
 
     public Map<String, String> getHeaders() {
@@ -73,56 +102,5 @@ public class HttpResponse {
                 .add("headers=" + headers)
                 .add("body='" + body + "'")
                 .toString();
-    }
-
-    public static class HttpResponseBuilder {
-        private HttpStatus status;
-        private Map<String, String> headers;
-        private String body;
-
-        private HttpResponseBuilder() {
-            this.headers = new HashMap<>();
-            this.body = "";
-        }
-
-        public HttpResponseBuilder ok() {
-            status = HttpStatus.OK;
-            return this;
-        }
-
-        public HttpResponseBuilder found() {
-            status = HttpStatus.FOUND;
-            return this;
-        }
-
-        public HttpResponseBuilder status(HttpStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public HttpResponseBuilder addHeaders(Map<String, String> addedHeaders) {
-            headers.putAll(addedHeaders);
-            return this;
-        }
-
-        public HttpResponseBuilder contentType(String type) {
-            headers.put("Content-Type", type);
-            return this;
-        }
-
-        public HttpResponseBuilder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponse build() {
-            setContentLength();
-            return new HttpResponse(status, new HttpResponseHeaders(headers), body);
-        }
-
-        private void setContentLength() {
-            int contentLength = body.getBytes(StandardCharsets.UTF_8).length;
-            headers.put("Content-Length", String.valueOf(contentLength));
-        }
     }
 }

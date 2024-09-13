@@ -63,15 +63,15 @@ public class HttpRequestParser {
     }
 
     private Map<String, String> parseQueryString(String token) {
-        Map<String, String> queryString = new HashMap<>();
+        Map<String, String> queryStringData = new HashMap<>();
         int separatorIndex = token.indexOf('?');
         if (separatorIndex == -1) {
-            return queryString;
+            return queryStringData;
         }
-        Stream.of(token.substring(separatorIndex + 1)
-                        .split("&"))
-                .forEach(data -> parseData(data, queryString));
-        return queryString;
+        String queryString = token.substring(separatorIndex + 1);
+        Stream.of(queryString.split("&"))
+                .forEach(data -> parseData(data, queryStringData));
+        return queryStringData;
     }
 
     private void parseData(String s, Map<String, String> queryString) {
@@ -106,13 +106,17 @@ public class HttpRequestParser {
         String data = headers.get("Cookie");
         Stream.of(data.split(";"))
                 .map(String::trim)
-                .forEach(s -> {
-                    int separatorIndex = s.indexOf("=");
-                    if (separatorIndex != -1) {
-                        cookies.put(s.substring(0, separatorIndex), s.substring(separatorIndex + 1));
-                    }
-                });
+                .forEach(s -> parseCookieData(s, cookies));
         return new HttpCookie(cookies);
+    }
+
+    private void parseCookieData(String s, Map<String, String> cookies) {
+        int separatorIndex = s.indexOf("=");
+        if (separatorIndex != -1) {
+            String name = s.substring(0, separatorIndex);
+            String value = s.substring(separatorIndex + 1);
+            cookies.put(name, value);
+        }
     }
 
     private Session parseSession(HttpCookie httpCookie) {

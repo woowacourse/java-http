@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.common.ContentType.*;
+import static org.apache.coyote.http11.common.HeaderKey.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -55,13 +58,13 @@ public class HttpResponse {
 			this.body = new Body(new String(Files.readAllBytes(file.toPath())));
 
 			ContentType contentType = ContentType.fromPath(url.getPath());
-			this.headers.add("Content-Type", contentType.getValue() + ";charset=utf-8");
-			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
+			this.headers.add(CONTENT_TYPE, contentType.getValue() + ";charset=utf-8");
+			this.headers.add(CONTENT_LENGTH, String.valueOf(body.getContentLength()));
 		} catch (AccessDeniedException | NullPointerException exception) {
 			this.body = new Body("Hello, World!");
 
-			this.headers.add("Content-Type", "text/html;charset=utf-8");
-			this.headers.add("Content-Length", String.valueOf(body.getContentLength()));
+			this.headers.add(CONTENT_TYPE, TEXT_HTML.getValue() + ";charset=utf-8");
+			this.headers.add(CONTENT_LENGTH, String.valueOf(body.getContentLength()));
 		}
 	}
 

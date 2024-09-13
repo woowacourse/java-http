@@ -22,8 +22,8 @@ public record Headers(Map<String, String> headers) {
 		return new Headers(headers);
 	}
 
-	public void add(String key, String value) {
-		headers.put(key, value);
+	public void add(HeaderKey key, String value) {
+		headers.put(key.getValue(), value);
 	}
 
 	public String getValue(HeaderKey headerKey) {

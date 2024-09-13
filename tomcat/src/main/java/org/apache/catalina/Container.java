@@ -1,4 +1,4 @@
-package com.techcourse;
+package org.apache.catalina;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.HomeController;
@@ -19,7 +19,10 @@ public class Container {
         controllers.put("/static-resource", new StaticResourceController());
     }
 
-    public Controller mapController(String mappingUri) {
+    private Container() {
+    }
+
+    public static Controller mapController(String mappingUri) {
         Controller controller = controllers.get(mappingUri);
         if (controller == null) {
             return controllers.get("/static-resource");

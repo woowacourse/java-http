@@ -3,7 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.catalina.SessionStorage;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.CookieManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -17,7 +17,7 @@ public class LoginController extends Controller {
             response.setBodyWithStaticResource("/login.html");
             return;
         }
-        User user = SessionStorage.get(sessionId);
+        User user = SessionManager.get(sessionId);
         if (user == null) {
             response.setBodyWithStaticResource("/login.html");
             return;
@@ -50,7 +50,7 @@ public class LoginController extends Controller {
         User user = optionalUser.get();
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            String sessionId = SessionStorage.put(user);
+            String sessionId = SessionManager.put(user);
 
             response.setStatusCode("302 Found");
             response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);

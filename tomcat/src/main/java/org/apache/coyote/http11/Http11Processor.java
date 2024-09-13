@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.Container;
 import com.techcourse.controller.Controller;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.create(bufferedReader);
             HttpResponse response = new HttpResponse();
 
-            Controller controller = new Container().mapController(request.getUri());
+            Controller controller = Container.mapController(request.getUri());
             controller.service(request, response);
 
             outputStream.write(response.toString().getBytes());

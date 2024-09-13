@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SessionStorage {
+public class SessionManager {
 
     private static final Map<String, User> sessions = new HashMap<>();
 

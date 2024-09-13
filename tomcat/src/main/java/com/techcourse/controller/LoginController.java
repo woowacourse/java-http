@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
@@ -13,10 +12,10 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT_FIELD_NAME = "account";
     private static final String PASSWORD_FIELD_NAME = "password";
-    private static final String USER_ATTRIBUTE_NAME = "user";
 
     private static final String INDEX_PATH = "/index.html";
     private static final String INDEX_FILE_NAME = "login.html";
+    private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
     private final SessionManager sessionManager;
 
@@ -32,22 +31,12 @@ public class LoginController extends AbstractController {
 
         if (InMemoryUserRepository.exists(account, password)) {
             User user = InMemoryUserRepository.getByAccount(account);
-            String sessionId = saveSessionAndGetSessionId(user);
+            String sessionId = sessionManager.store(USER_SESSION_ATTRIBUTE_NAME, user);
             response.setRedirectWithSessionId(INDEX_PATH, sessionId);
             return;
         }
 
         response.setUnauthorized();
-    }
-
-    private String saveSessionAndGetSessionId(User user) {
-        Session session = new Session();
-        session.setAttribute(USER_ATTRIBUTE_NAME, user);
-
-        String sessionId = sessionManager.generateId();
-        sessionManager.add(sessionId, session);
-
-        return sessionId;
     }
 
     @Override

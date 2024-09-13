@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.UUID;
+import org.apache.catalina.servlet.DispatcherServlet;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,13 +20,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestDispatcher requestDispatcher;
+    private final DispatcherServlet dispatcherServlet;
     private final SessionManager sessionManager;
     private final HttpRequestParser requestParser;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestDispatcher = new RequestDispatcher();
+        this.dispatcherServlet = new DispatcherServlet();
         this.sessionManager = SessionManager.getInstance();
         this.requestParser = HttpRequestParser.getInstance();
     }
@@ -44,21 +44,21 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = requestParser.parseInput(inputStream);
             HttpResponse response = new HttpResponse();
 
-            requestDispatcher.requestMapping(request, response);
-            String resourceName = response.getResourceName();
-            if (resourceName == null) {
-                resourceName = request.getPath();
-                response.setResourceName(resourceName);
-            }
-            String responseBody = getResource(resourceName);
-            String resourceExtension = getExtension(resourceName);
-
-            if (!request.hasCookieFrom("JSESSIONID")) {
-                String sessionId = UUID.randomUUID().toString();
-                response.setHttpCookie(HttpCookie.ofJSessionId(sessionId));
-            }
-            response.setResponseBody(responseBody);
-            response.setContentType(resourceExtension);
+            dispatcherServlet.requestMapping(request, response);
+//            String resourceName = response.getResourceName();
+//            if (resourceName == null) {
+//                resourceName = request.getPath();
+//                response.setResourceName(resourceName);
+//            }
+//            String responseBody = getResource(resourceName);
+//            String resourceExtension = getExtension(resourceName);
+//
+//            if (!request.hasCookieFrom("JSESSIONID")) {
+//                String sessionId = UUID.randomUUID().toString();
+//                response.setHttpCookie(HttpCookie.ofJSessionId(sessionId));
+//            }
+//            response.setResponseBody(responseBody);
+//            response.setContentType(resourceExtension);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

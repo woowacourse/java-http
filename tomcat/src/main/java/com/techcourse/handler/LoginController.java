@@ -11,6 +11,8 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
+import java.util.NoSuchElementException;
+
 public class LoginController extends AbstractController {
 
     private static final String USER_SESSION_KEY = "user";
@@ -57,6 +59,7 @@ public class LoginController extends AbstractController {
     }
 
     private User getUser(String account) {
-        return InMemoryUserRepository.findByAccount(account).orElseThrow();
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 아이디입니다."));
     }
 }

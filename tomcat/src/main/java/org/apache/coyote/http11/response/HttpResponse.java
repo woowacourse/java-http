@@ -34,7 +34,7 @@ public class HttpResponse {
 
             byte[] fileContents = Files.readAllBytes(new File(resource.getFile()).toPath());
             String fileExtension = getFileExtension(filePath);
-            
+
             setBodyWithContentType(new String(fileContents), "text/" + fileExtension + ";charset=utf-8");
         } catch (IOException e) {
             this.statusCode = "500 Internal Server Error";
@@ -59,7 +59,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        String statusLine = "HTTP/1.1" + this.statusCode;
+        String statusLine = "HTTP/1.1 " + this.statusCode;
         StringBuilder headerBuilder = new StringBuilder();
         headers.entrySet()
                 .stream()

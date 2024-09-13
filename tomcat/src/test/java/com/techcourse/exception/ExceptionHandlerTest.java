@@ -17,7 +17,7 @@ class ExceptionHandlerTest {
     @Test
     void handleUnauthorizedException() {
         HttpResponse response = new HttpResponse();
-        exceptionHandler.handle(new UnauthorizedException(), response);
+        exceptionHandler.handle(new UnauthorizedException("test"), response);
 
         HttpResponse expectedResponse = new HttpResponse(
                 HttpStatus.FOUND,

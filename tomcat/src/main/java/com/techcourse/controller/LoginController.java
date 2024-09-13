@@ -61,7 +61,7 @@ public class LoginController extends AbstractSessionController {
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자입니다."));
 
         if (!user.checkPassword(loginCredentials)) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("사용자 인증에 실패하였습니다.");
         }
         return user;
     }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.processor;
 
+import com.techcourse.RequestMapping;
 import com.techcourse.controller.Controller;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +8,6 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestPathType;
 import org.apache.coyote.http11.response.HttpResponse;

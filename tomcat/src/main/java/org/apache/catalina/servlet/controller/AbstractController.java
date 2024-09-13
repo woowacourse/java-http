@@ -11,7 +11,6 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isSameMethod(Method.GET)) {
             doGet(request, response);
-            return;
         }
         if (request.isSameMethod(Method.POST)) {
             doPost(request, response);

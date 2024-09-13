@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.except.InternaServerException;
+import com.techcourse.except.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.controller.AbstractController;
@@ -51,10 +52,10 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOGGER.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        } catch (UnauthorizedException e) {
+
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new InternaServerException("서버에러가 발생했습니다.");
         }
     }
 }

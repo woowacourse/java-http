@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.component.HttpHeaderField;
 import org.apache.coyote.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void render(final OutputStream outputStream, final HttpRequest request, final HttpResponse response)
             throws IOException {
+        response.setSourceCode(request.getResources());
+        response.putHeader(HttpHeaderField.CONTENT_LENGTH.getValue(), request.getContentLength());
+        response.putHeader(HttpHeaderField.CONTENT_TYPE.getValue(), request.getContentTypeToResponseText());
+
         outputStream.write(response.toHttpResponse(request).getBytes());
         outputStream.flush();
     }

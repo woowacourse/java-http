@@ -7,5 +7,5 @@ import org.apache.coyote.http11.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response) throws IOException;
+    void service(HttpRequest request, HttpResponse response);
 }

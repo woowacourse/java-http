@@ -1,9 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.constants.HttpHeader;
+import org.apache.coyote.http11.constants.HttpMethod;
 
 public class HttpRequest {
 
@@ -11,10 +15,9 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final String body;
 
-
     private HttpRequest(final RequestLine requestLine,
                         final Map<String, String> headers,
-                        final  String body) {
+                        final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
@@ -43,8 +46,6 @@ public class HttpRequest {
         }
         return headers;
     }
-
-
 
     public Cookie getCookie() {
         final String cookie = headers.get("Cookie");

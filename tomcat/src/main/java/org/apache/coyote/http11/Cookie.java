@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+
 public class Cookie {
 
     private final String value;
@@ -21,5 +23,21 @@ public class Cookie {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof final Cookie cookie)) {
+            return false;
+        }
+        return Objects.equals(value, cookie.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
     }
 }

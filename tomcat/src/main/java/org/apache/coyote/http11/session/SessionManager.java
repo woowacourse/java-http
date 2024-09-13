@@ -1,9 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.apache.catalina.Manager;
 

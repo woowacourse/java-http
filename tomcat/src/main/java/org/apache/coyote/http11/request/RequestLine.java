@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.coyote.http11.constants.HttpMethod;
 
 public record RequestLine(HttpMethod method, String uri, String version) {
 

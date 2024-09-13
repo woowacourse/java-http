@@ -22,21 +22,21 @@ public class HttpCookie {
         }
     }
 
-    private boolean isNotEmpty(String[] keyValue) {
-        return Objects.nonNull(keyValue[COOKIE_KEY_POSITION]) && Objects.nonNull(keyValue[COOKIE_VALUE_POSITION])
-                && !keyValue[COOKIE_KEY_POSITION].isEmpty() && !keyValue[COOKIE_VALUE_POSITION].isEmpty();
-    }
-
     private void parseCookies(String cookieHeader) {
         String[] cookiePairs = cookieHeader.split(HEADER_DELIMITER);
         for (String cookiePair : cookiePairs) {
             String[] keyValue = cookiePair.split(COOKIE_DELIMITER, COOKIE_LIMIT);
             if (keyValue.length == COOKIE_LIMIT && isNotEmpty(keyValue)) {
-                String key = URLDecoder.decode(keyValue[0].trim(), StandardCharsets.UTF_8);
-                String value = URLDecoder.decode(keyValue[1].trim(), StandardCharsets.UTF_8);
+                String key = URLDecoder.decode(keyValue[COOKIE_KEY_POSITION].trim(), StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[COOKIE_VALUE_POSITION].trim(), StandardCharsets.UTF_8);
                 cookies.put(key, value);
             }
         }
+    }
+
+    private boolean isNotEmpty(String[] keyValue) {
+        return Objects.nonNull(keyValue[COOKIE_KEY_POSITION]) && Objects.nonNull(keyValue[COOKIE_VALUE_POSITION])
+                && !keyValue[COOKIE_KEY_POSITION].trim().isEmpty() && !keyValue[COOKIE_VALUE_POSITION].trim().isEmpty();
     }
 
     public static String ofJSessionId(String value) {

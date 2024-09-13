@@ -49,11 +49,7 @@ public class HttpHeaders {
     }
 
     public String getCookie() {
-        if (!headers.containsKey(COOKIE)) {
-            return "";
-        }
-
-        return headers.get(COOKIE);
+        return headers.getOrDefault(COOKIE, "");
     }
 
     public String buildHttpHeadersResponse() {

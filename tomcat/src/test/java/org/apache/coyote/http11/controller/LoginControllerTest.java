@@ -52,6 +52,7 @@ public class LoginControllerTest {
 
         assertThat(new String(response.getBytes()))
                 .contains("302 Found")
+                .contains("401.html")
                 .doesNotContain("Set-Cookie");
     }
 
@@ -69,6 +70,7 @@ public class LoginControllerTest {
         LoginController loginController = new LoginController();
         loginController.doGet(request, response);
 
+        System.out.println(new String(response.getBytes()));
         assertThat(new String(response.getBytes()))
                 .contains("200 OK");
     }

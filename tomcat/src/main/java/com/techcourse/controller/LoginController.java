@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.manager.Session;
-import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -17,8 +16,6 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-
-    private final SessionManager sessionManager = SessionManager.getInstance();
 
     protected void doGet(HttpRequest request, HttpResponse response) {
         HttpCookie cookie = request.getCookie();

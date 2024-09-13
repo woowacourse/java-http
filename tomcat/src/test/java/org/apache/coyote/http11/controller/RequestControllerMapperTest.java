@@ -22,4 +22,12 @@ public class RequestControllerMapperTest {
         Controller controller = RequestControllerMapper.getController(url);
         assertThat(controller.getClass()).isEqualTo(RegisterController.class);
     }
+
+    @Test
+    @DisplayName("url에 맞는 Controller가 없으면 null을 반환한다.")
+    void getController_invalid() {
+        String url = "/invalid";
+        Controller controller = RequestControllerMapper.getController(url);
+        assertThat(controller).isNull();
+    }
 }

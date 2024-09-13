@@ -34,6 +34,28 @@ public class LoginControllerTest {
     }
 
     @Test
+    @DisplayName("password가 잘못되면 로그인 할 수 없다.")
+    void doPost_invalidPassword_exception() throws IOException {
+        String loginRequest =
+                "POST /login HTTP/1.1" + "\r\n" +
+                        "Host: localhost:8080" + "\r\n" +
+                        "Connection: keep-alive" + "\r\n" +
+                        "Content-Length: 34" + "\r\n" +
+                        "\r\n" +
+                        "account=gugu&password=not_password";
+
+        Http11Request request = Http11Request.from(new ByteArrayInputStream(loginRequest.getBytes()));
+        Http11Response response = Http11Response.ok();
+
+        LoginController loginController = new LoginController();
+        loginController.doPost(request, response);
+
+        assertThat(new String(response.getBytes()))
+                .contains("302 Found")
+                .doesNotContain("Set-Cookie");
+    }
+
+    @Test
     @DisplayName("로그인 페이지 요청을 보낼 수 있다.")
     void doGet() throws IOException {
         String loginRequest =

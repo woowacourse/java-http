@@ -10,7 +10,7 @@ public record Headers(Map<String, String> headers) {
 		this(new HashMap<>());
 	}
 
-	public static Headers request(BufferedReader reader) throws IOException {
+	public static Headers parseRequestHeader(BufferedReader reader) throws IOException {
 		HashMap<String, String> headers = new HashMap<>();
 		String line;
 		while ((line = reader.readLine()) != null && !line.isEmpty()) {

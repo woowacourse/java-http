@@ -2,7 +2,10 @@ package org.apache.coyote.http11.common;
 
 public enum HeaderKey {
 	CONTENT_LENGTH("Content-Length"),
-	CONTENT_TYPE("Content-Type")
+	CONTENT_TYPE("Content-Type"),
+	COOKIE("Cookie"),
+	SET_COOKIE("Set-Cookie"),
+	LOCATION("Location")
 	;
 
 	private final String value;

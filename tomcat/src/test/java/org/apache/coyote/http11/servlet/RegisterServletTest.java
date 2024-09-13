@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.servlet;
 
+import static org.apache.coyote.http11.common.HeaderKey.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.coyote.http11.common.HeaderKey;
 import org.apache.coyote.http11.common.VersionOfProtocol;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -43,8 +45,8 @@ class RegisterServletTest {
 		assertThat(response.getStatusCode()).isEqualTo(new StatusCode(302));
 		assertThat(response.getStatusMessage()).isEqualTo(new StatusMessage("Found"));
 
-		assertThat(response.getHeaders().getValue("Location")).isNotNull();
-		assertThat(response.getHeaders().getValue("Location")).isEqualTo("http://localhost:8080/index.html");
+		assertThat(response.getHeaders().getValue(LOCATION)).isNotNull();
+		assertThat(response.getHeaders().getValue(LOCATION)).isEqualTo("http://localhost:8080/index.html");
 	}
 
 	@DisplayName("회원가입 페이지를 조회에 성공한다.")

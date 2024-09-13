@@ -8,11 +8,15 @@ public class UserServlet {
     private final List<User> users = new ArrayList<>();
 
     public void service(final User user) {
-        join(user);
+        try {
+            join(user);
+        } catch (IllegalArgumentException | InterruptedException e) {
+        }
     }
 
-    private void join(final User user) {
+    private void join(final User user) throws InterruptedException {
         if (!users.contains(user)) {
+            // Thread.sleep(1);
             users.add(user);
         }
     }

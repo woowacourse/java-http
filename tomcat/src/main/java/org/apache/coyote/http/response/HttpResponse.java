@@ -1,6 +1,7 @@
 package org.apache.coyote.http.response;
 
 import java.util.Map;
+import org.apache.catalina.handler.ViewResolver;
 import org.apache.coyote.http.HttpContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpStatusCode;
@@ -11,10 +12,14 @@ public class HttpResponse {
     private final HttpResponseHeader header;
     private final HttpResponseBody body;
 
-    public HttpResponse(HttpStatusCode statusCode) {
-        this.startLine = new HttpResponseStartLine(statusCode);
+    public HttpResponse() {
+        this.startLine = new HttpResponseStartLine();
         this.header = new HttpResponseHeader();
         this.body = new HttpResponseBody();
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        startLine.setStatusCode(statusCode);
     }
 
     public void setLocation(String location) {
@@ -26,8 +31,14 @@ public class HttpResponse {
         header.setCookie(cookie);
     }
 
-    public void setContent(String path, String content) {
-        header.setContentType(HttpContentType.findByExtension(path));
+    public void setContent(String path) {
+        final HttpContentType type = HttpContentType.findByExtension(path);
+        final String content = ViewResolver.resolve(path);
+        setContent(type, content);
+    }
+
+    public void setContent(HttpContentType type, String content) {
+        header.setContentType(type);
         header.setContentLength(content.getBytes().length);
         body.setContent(content);
     }

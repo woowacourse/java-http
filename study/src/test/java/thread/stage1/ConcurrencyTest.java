@@ -1,19 +1,15 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
+
 /**
- * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
- * - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우
- * - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할 경우
- *
- * 위 경우는 동기화(synchronization)를 적용시키거나 객체가 상태를 갖지 않도록 한다.
- * 객체를 불변 객체로 만드는 방법도 있다.
- *
- * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다.
- * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
+ * 스레드를 다룰 때 어떤 상황을 조심해야 할까? - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우 - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할 경우
+ * <p>
+ * 위 경우는 동기화(synchronization)를 적용시키거나 객체가 상태를 갖지 않도록 한다. 객체를 불변 객체로 만드는 방법도 있다.
+ * <p>
+ * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다. 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
 
@@ -35,6 +31,13 @@ class ConcurrencyTest {
 
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
+        /*
+        users.add(user); 라인에 디버그 중단점을 걸면 된다.
+        이유는, 하나의 스레드가 if문 내부의 add에 걸려있는 상태에서, 다른 스레드가 if문 조건절을 검사했기 때문이다.
+        디버거에서 특정 코드 라인에 중단점을 걸면, 해당 라인에 도달한 스레드는 즉시 멈추게 된다. 이 상태에서 다른 스레드는 계속 실행될 수 있다.
+
+        if문 내부의 users.add(user); 라인 바로 앞에 Thread.sleep()을 배치해도 종단점을 거는것과 같은 효과를 가질 수 있다.
+        */
         assertThat(userServlet.getUsers()).hasSize(1);
     }
 }

@@ -23,6 +23,7 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler(PREFIX_STATIC_RESOURCES + "/" + version.getVersion() + "/**")
                 .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic());
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic())
+                .setEtagGenerator((resource) -> version.getVersion());
     }
 }

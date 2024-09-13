@@ -12,7 +12,7 @@ public class Http11RequestTest {
 
     @Test
     @DisplayName("요청에 따라 정적 파일 요청인지 아닌지 알 수 있다.")
-    void isStaticRequest_static() {
+    void isStaticRequest_static() throws IOException {
         String staticRequest = """
                 GET /index.html HTTP/1.1
                 Host: localhost:8080
@@ -22,17 +22,14 @@ public class Http11RequestTest {
                 """;
         InputStream inputStream = new ByteArrayInputStream(staticRequest.getBytes());
         Http11Request request;
-        try {
-            request = Http11Request.from(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException();
-        }
+
+        request = Http11Request.from(inputStream);
         assertThat(request.isStaticRequest()).isTrue();
     }
 
     @Test
     @DisplayName("요청에 따라 정적 파일 요청인지 아닌지 알 수 있다.")
-    void isStaticRequest_nonStatic() {
+    void isStaticRequest_nonStatic() throws IOException {
         String staticRequest = """
                 POST /login HTTP/1.1
                 Host: localhost:8080
@@ -41,11 +38,7 @@ public class Http11RequestTest {
                 
                 """;
         InputStream inputStream = new ByteArrayInputStream(staticRequest.getBytes());
-        try {
-            Http11Request from = Http11Request.from(inputStream);
-            assertThat(from.isStaticRequest()).isFalse();
-        } catch (IOException e) {
-            throw new RuntimeException();
-        }
+        Http11Request from = Http11Request.from(inputStream);
+        assertThat(from.isStaticRequest()).isFalse();
     }
 }

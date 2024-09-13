@@ -12,6 +12,7 @@ public class HttpHeaders {
     private static final String CRLF = "\r\n";
     private static final String LINE_FEED = "\n";
     private static final String HEADER_REGEX = ": ";
+    private static final String DEFAULT_VALUE = "";
 
     private final Map<String, String> headers;
 
@@ -47,11 +48,11 @@ public class HttpHeaders {
     }
 
     public HttpCookies getCookies() {
-        return new HttpCookies(headers.getOrDefault(HttpHeaderField.COOKIE.getName(), ""));
+        return new HttpCookies(headers.getOrDefault(HttpHeaderField.COOKIE.getName(), DEFAULT_VALUE));
     }
 
     public ContentType getContentType() {
-        return ContentType.from(headers.getOrDefault(HttpHeaderField.CONTENT_TYPE.getName(), ""));
+        return ContentType.from(headers.getOrDefault(HttpHeaderField.CONTENT_TYPE.getName(), DEFAULT_VALUE));
     }
 
     @Override

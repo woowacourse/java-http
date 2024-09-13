@@ -16,13 +16,14 @@ public class HttpResponse {
 
     private static final String CHARSET = ";charset=utf-8";
     private static final String CRLF = "\r\n";
+    private static final String DEFAULT_BODY = "";
 
     private final HttpStatusLine statusLine;
     private final HttpHeaders headers;
     private final HttpBody body;
 
     public HttpResponse() {
-        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpBody(""));
+        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpBody(DEFAULT_BODY));
     }
 
     public HttpResponse(HttpStatusLine statusLine, HttpHeaders headers, HttpBody body) {

@@ -11,8 +11,8 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start(Mapper mapper) {
-        var connector = new Connector(mapper);
-        connector.start();
+        var connector = new Connector();
+        connector.start(mapper);
 
         try {
             // make the application wait until we press any key.

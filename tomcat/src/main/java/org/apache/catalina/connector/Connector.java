@@ -9,7 +9,7 @@ import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Connector implements Runnable {
+public class Connector {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
@@ -18,16 +18,14 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final Mapper mapper;
 
-    public Connector(Mapper mapper) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, mapper);
+    public Connector() {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, Mapper mapper) {
+    public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.mapper = mapper;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -40,31 +38,30 @@ public class Connector implements Runnable {
         }
     }
 
-    public void start() {
-        var thread = new Thread(this);
+    public void start(Mapper mapper) {
+        var thread = new Thread(() -> run(mapper));
         thread.setDaemon(true);
         thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
-    @Override
-    public void run() {
+    public void run(Mapper mapper) {
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
-            connect();
+            connect(mapper);
         }
     }
 
-    private void connect() {
+    private void connect(Mapper mapper) {
         try {
-            process(serverSocket.accept());
+            process(serverSocket.accept(), mapper);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection, Mapper mapper) {
         if (connection == null) {
             return;
         }

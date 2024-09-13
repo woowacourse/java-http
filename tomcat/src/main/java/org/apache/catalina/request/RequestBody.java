@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class RequestBody {
+public class RequestBody {
     private final Map<String, String> body;
 
     public RequestBody(Map<String, String> body) {

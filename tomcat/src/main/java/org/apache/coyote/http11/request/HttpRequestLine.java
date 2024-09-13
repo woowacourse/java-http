@@ -12,7 +12,7 @@ public class HttpRequestLine {
 
     public HttpRequestLine(String line) {
         String[] requestLine = line.split(" ");
-        method = HttpMethod.ofValue(requestLine[HTTP_METHOD_INDEX]);
+        method = HttpMethod.fromName(requestLine[HTTP_METHOD_INDEX]);
         requestURI = new RequestURI(requestLine[HTTP_URI_INDEX]);
         version = requestLine[HTTP_VERSION_INDEX];
     }

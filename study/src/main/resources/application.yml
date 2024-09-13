@@ -3,11 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 0 # max-connections 이상의 요청이 들어 왔을 때 사용하는 요청 대기열 큐의 사이즈
+    max-connections: 2 #  Tomcat 서버가 '동시에 처리할 수 있는 최대 클라이언트 연결 수'
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 2 # 톰캣 스레드 풀에 대기 상태로 있는 스레드 개수
+      max: 2 # 스레드 풀이 '동시에' 사용할 수 있는 최대 스레드 개수
   compression:
     enabled: true
     min-response-size: 10

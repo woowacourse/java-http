@@ -1,45 +1,47 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.HttpHeaderNames;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class HttpResponse {
 
-    private final String version;
-    private final int statusCode;
-    private final String statusMessage;
-    private final Map<String, Object> headers;
-    private final String body;
+    private String version;
+    private HttpStatus httpStatus;
+    private Map<String, Object> headers;
+    private String body;
 
-    public HttpResponse(String version, int statusCode, String statusMessage, Map<String, Object> headers,
-                        String body) {
-        this.version = version;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.headers = headers;
-        this.body = body;
+    public HttpResponse() {
+        headers = new HashMap<>();
     }
 
-    public static HttpResponse of(String version, int statusCode,
-                                    String contentType, String body) {
-        Map<String, Object> headers = new HashMap<>();
-        headers.put("Content-Type", contentType + ";charset=utf-8");
-        headers.put("Content-Length", body.getBytes().length);
-
-        return new HttpResponse(version, statusCode, "OK", headers, body);
+    public void setResponseFromRequest(HttpRequest request) throws URISyntaxException, IOException {
+        String responseBody = new String(request.toHttpResponseBody());
+        version = request.getVersion();
+        headers.put(HttpHeaderNames.CONTENT_TYPE, request.getContentType());
+        headers.put(HttpHeaderNames.CONTENT_LENGTH, responseBody.getBytes().length);
+        body = responseBody;
     }
 
-    public void addHeader(String key, String value) {
+    public void addHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void addHeader(String key, Object value) {
         headers.put(key, value);
     }
 
     public void send(OutputStream outputStream) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append(version).append(" ").append(statusCode).append(" ").append(statusMessage).append(" \r\n");
+            sb.append(version).append(" ").append(httpStatus.getCode())
+                    .append(" ").append(httpStatus.getMessage()).append(" \r\n");
             for (Entry<String, Object> entry : headers.entrySet()) {
                 sb.append(entry.getKey());
                 sb.append(": ");
@@ -53,5 +55,9 @@ public class HttpResponse {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int getHttpStatus() {
+        return httpStatus.getCode();
     }
 }

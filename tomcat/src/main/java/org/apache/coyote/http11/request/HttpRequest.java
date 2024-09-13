@@ -118,10 +118,6 @@ public record HttpRequest(
         return extractParameters(body);
     }
 
-    public boolean hasParameters(List<String> keys) {
-        return keys.stream().allMatch(parameters::containsKey);
-    }
-
     public boolean isMethod(Method method) {
         return method.equals(this.method);
     }

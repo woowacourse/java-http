@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.apache.coyote.http11.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

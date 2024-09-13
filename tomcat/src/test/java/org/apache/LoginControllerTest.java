@@ -3,7 +3,6 @@ package org.apache;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,14 +23,15 @@ class LoginControllerTest {
 
 	@DisplayName("세션이 존재하지 않을 땐 login.html 파일을 반환한다.")
 	@Test
-	void handle_GET_returnLoginHtml() throws IOException {
+	void handle_GET_returnLoginHtml() throws Exception {
 		// given
 		SessionManager sessionManager = SessionManager.getInstance();
 		LoginController handler = new LoginController(sessionManager);
 		HttpRequest request = HttpRequestFixture.createGetMethod("/login");
+		HttpResponse response = HttpResponse.empty();
 
 		// when
-		HttpResponse response = handler.handle(request);
+		handler.doGet(request, response);
 
 		// then
 		URL resource = Http11Processor.class.getClassLoader().getResource("static/login.html");
@@ -39,20 +39,22 @@ class LoginControllerTest {
 		final Path path = file.toPath();
 		var responseBody = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 		assertThat(response.getResponseBody()).isEqualTo(responseBody);
+		assertThat(response.getHeaders())
+			.anyMatch(header -> header.startsWith("Location:"));
 	}
 
 	@DisplayName("쿠키에 유효한 세션이 존재할 경우 index.html 파일을 반환한다.")
 	@Test
-	void handle_GET_returnRedirectUri() throws IOException {
+	void handle_GET_returnRedirectUri() throws Exception {
 		// given
 		SessionManager sessionManager = SessionManager.getInstance();
 		UUID uuid = UUID.randomUUID();
 		sessionManager.add(new Session(uuid.toString()));
-		LoginController handler = new LoginController(sessionManager);
+		LoginController controller = new LoginController(sessionManager);
 		HttpRequest request = HttpRequestFixture.createGetMethodWithSessionId("/login", uuid.toString());
-
+		HttpResponse response = HttpResponse.empty();
 		// when
-		HttpResponse response = handler.handle(request);
+		controller.doGet(request, response);
 
 		// then
 		assertThat(response.getHeaders()).contains("Location: /index.html");
@@ -60,13 +62,14 @@ class LoginControllerTest {
 
 	@DisplayName("로그인 POST 요청시 세션을 생성하여 Cookie header 에 전달한다.")
 	@Test
-	void handle_POST_returnSessionId() throws IOException {
+	void handle_POST_returnSessionId() throws Exception {
 		// given
-		LoginController handler = new LoginController(SessionManager.getInstance());
+		LoginController controller = new LoginController(SessionManager.getInstance());
 		HttpRequest request = HttpRequestFixture.createLoginPostMethod();
+		HttpResponse response = HttpResponse.empty();
 
 		// when
-		HttpResponse response = handler.handle(request);
+		controller.doPost(request, response);
 
 		// then
 		assertThat(response.getHeaders())
@@ -75,13 +78,14 @@ class LoginControllerTest {
 
 	@DisplayName("로그인 POST 요청시 세션을 생성하여 Cookie header 에 전달한다.")
 	@Test
-	void handle_POST_withInvalidPassword() throws IOException {
+	void handle_POST_withInvalidPassword() throws Exception {
 		// given
-		LoginController handler = new LoginController(SessionManager.getInstance());
+		LoginController controller = new LoginController(SessionManager.getInstance());
 		HttpRequest request = HttpRequestFixture.createLoginPostMethodWithInvalidPassword();
+		HttpResponse response = HttpResponse.empty();
 
 		// when
-		HttpResponse response = handler.handle(request);
+		controller.doPost(request, response);
 
 		// then
 		assertThat(response.getHeaders()).contains("Location: /401.html");

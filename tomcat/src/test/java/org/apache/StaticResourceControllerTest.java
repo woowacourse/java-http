@@ -40,7 +40,7 @@ class StaticResourceControllerTest {
 	}
 
 	@Test
-	void handle() throws IOException {
+	void handle() throws Exception {
 		// given
 		String requestString = String.join("\r\n",
 			"GET /css/styles.css HTTP/1.1 ",
@@ -49,9 +49,10 @@ class StaticResourceControllerTest {
 			"",
 			"");
 		final HttpRequest request = HttpRequest.from(new ByteArrayInputStream(requestString.getBytes()));
+		final HttpResponse response = HttpResponse.empty();
 
 		// when
-		HttpResponse actual = handler.handle(request);
+		handler.doGet(request, response);
 
 		// then
 		var expected = String.join("\r\n",
@@ -59,6 +60,6 @@ class StaticResourceControllerTest {
 			"Content-Type: text/css;charset=utf-8 ",
 			"Content-Length: 211991 ");
 
-		assertThat(actual.toString().startsWith(expected)).isTrue();
+		assertThat(response.toString().startsWith(expected)).isTrue();
 	}
 }

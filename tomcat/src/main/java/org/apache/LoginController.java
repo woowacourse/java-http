@@ -3,7 +3,6 @@ package org.apache;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -12,7 +11,6 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpResponse;
@@ -22,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
@@ -40,34 +38,42 @@ public class LoginController implements Controller {
 	}
 
 	@Override
-	public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-		if (httpRequest.hasMethod(HttpMethod.GET)) {
-			Optional<String> sessionId = httpRequest.getSessionIdFromCookie();
-			if (sessionId.isEmpty() || sessionManager.findSession(sessionId.get()) == null) {
-				URL resource = Http11Processor.class.getClassLoader().getResource("static/login.html");
-				File file = new File(resource.getPath());
-				final Path path = file.toPath();
-				var responseBody = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-				return HttpResponse.ok(httpRequest.getUri(), responseBody);
-			}
-			return HttpResponse.redirect(httpRequest.getUri(), "/index.html");
+	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+		Optional<String> sessionId = request.getSessionIdFromCookie();
+		if (sessionId.isEmpty() || sessionManager.findSession(sessionId.get()) == null) {
+			setRedirect(request,response, "login.html");
+			return;
 		}
-		var redirectUri = "/401.html";
+		setRedirect(request, response, "index.html");
+	}
+
+	private static void setRedirect(HttpRequest request, HttpResponse response, String location) throws IOException {
+		URL resource = Http11Processor.class.getClassLoader().getResource("static/" + location);
+		File file = new File(resource.getPath());
+		final Path path = file.toPath();
+		response.setContentType(request.getUri());
+		response.setResponseBody(Files.readAllBytes(path));
+		response.setContentLength();
+		response.setLocation("/" + location);
+	}
+
+	@Override
+	protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
 		try {
-			HttpRequestBody body = httpRequest.getRequestBody();
+			HttpRequestBody body = request.getRequestBody();
 			User user = login(body.get("account"), body.get("password"));
 			UUID uuid = UUID.randomUUID();
 			Session session = new Session(uuid.toString());
 			session.setAttribute("user", user);
 			sessionManager.add(session);
 
-			redirectUri = "/index.html";
-			HttpResponse response = HttpResponse.redirect(httpRequest.getUri(), redirectUri);
+			setRedirect(request, response ,"index.html");
 			response.setCookie("JSESSIONID", uuid.toString());
-			return response;
+			return;
 		} catch (RuntimeException exception) {
-			return HttpResponse.redirect(httpRequest.getUri(), redirectUri);
+			setRedirect(request, response, "401.html");
 		}
+		super.doPost(request, response);
 	}
 
 	private User login(String account, String password) {

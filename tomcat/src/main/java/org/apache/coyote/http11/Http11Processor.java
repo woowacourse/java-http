@@ -43,17 +43,20 @@ public class Http11Processor implements Runnable, Processor {
 			 final var outputStream = connection.getOutputStream()) {
 
 			HttpRequest request = HttpRequest.from(inputStream);
+			HttpResponse response = HttpResponse.empty();
 
 			if (!request.isHttp11VersionRequest()) {
 				throw new IOException("not http1.1 request");
 			}
 
-			var response = requestMapping.getController(request).handle(request);
+			requestMapping.getController(request).service(request, response);
 
 			outputStream.write(response.getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

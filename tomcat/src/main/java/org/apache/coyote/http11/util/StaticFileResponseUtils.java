@@ -51,9 +51,6 @@ public class StaticFileResponseUtils {
         }
         String extension = filePath.substring(delimiterIndex + 1);
 
-        if (EXTENSION_TO_CONTENT_TYPE.containsKey(extension)) {
-            return EXTENSION_TO_CONTENT_TYPE.get(extension);
-        }
-        return DEFAULT_CONTENT_TYPE;
+        return EXTENSION_TO_CONTENT_TYPE.getOrDefault(extension, DEFAULT_CONTENT_TYPE);
     }
 }

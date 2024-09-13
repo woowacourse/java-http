@@ -10,11 +10,12 @@ import java.util.NoSuchElementException;
 class ResourceFinder {
 
     private static final String RESOURCE_PATH_FORMAT = "static/%s";
+    private static final String INDEX_PATH = "/";
 
     public static boolean hasResource(String resourceName, ClassLoader classLoader) {
         URL resourcePath = classLoader.getResource(String.format(RESOURCE_PATH_FORMAT, resourceName));
 
-        return resourcePath != null && !"/".equals(resourceName);
+        return resourcePath != null && !INDEX_PATH.equals(resourceName);
     }
 
     public static byte[] readResource(String resourceName, ClassLoader classLoader) {

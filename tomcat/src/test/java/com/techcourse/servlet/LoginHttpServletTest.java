@@ -60,7 +60,7 @@ class LoginHttpServletTest {
                 """.trim().getBytes();
 
         HttpRequest request = new HttpRequest(new ByteArrayInputStream(bytes));
-        request.setManager(new SessionManager());
+        request.setManager(new SessionManager(() -> "hoony"));
         HttpResponse response = new HttpResponse();
         loginRequestHandler.service(request, response);
         assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo("/index.html");

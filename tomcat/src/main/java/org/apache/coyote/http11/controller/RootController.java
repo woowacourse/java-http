@@ -1,16 +1,15 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 
-public class HelloWorldController extends Controller {
+public class RootController extends AbstractController {
 
     @Override
-    public HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.OK)
+    public void doGet(HttpRequest request, HttpResponse response) {
+        response.statusCode(HttpStatusCode.OK)
                 .responseBody("Hello world!");
     }
 }

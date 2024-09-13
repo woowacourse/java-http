@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import org.apache.coyote.http11.controller.HelloWorldController;
-import org.apache.coyote.http11.controller.LoginPageController;
+import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.RootController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,28 +15,22 @@ public class HttpRequestHandler {
 
     public HttpRequestHandler() {
         this.controllerResolver = Map.of(
-                "/", new HelloWorldController(),
-                "/login", new LoginPageController(),
+                "/", new RootController(),
+                "/login", new LoginController(),
                 "/register", new RegisterController()
         );
     }
 
-    HttpRequestHandler(Map<String, Controller> controllerResolver) {
-        this.controllerResolver = controllerResolver;
-    }
-
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
         Controller controller = controllerResolver.get(path);
         if (controller != null) {
-            return controller.service(request);
+            controller.service(request, response);
         }
-        return staticPage(path);
-    }
 
-    private HttpResponse staticPage(String url) {
-        return HttpResponse.builder()
-                .statusCode(HttpStatusCode.OK)
-                .staticResource(url);
+        if (controller == null) {
+            response.statusCode(HttpStatusCode.OK)
+                    .staticResource(path);
+        }
     }
 }

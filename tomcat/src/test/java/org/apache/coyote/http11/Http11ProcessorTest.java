@@ -107,7 +107,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void register() throws IOException {
+    void register() {
         // given
         final String requestBody = "account=poke&email=poke@zzang.com&password=password";
         final String httpRequest = String.join("\r\n",
@@ -127,5 +127,21 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=", "HTTP/1.1 302 Found");
+    }
+
+    @Test
+    void handleInvalidHttpFormat() throws IOException {
+        // given
+        final String httpRequest = "NOT_SUPPORT_PROTOCOLsdf/index.html HTTP/1.1 ";
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 400 Bad Request";
+        assertThat(socket.output()).contains(expected);
     }
 }

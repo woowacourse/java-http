@@ -5,7 +5,8 @@ public enum HttpStatusCode {
     NOT_FOUND("404 Not Found"),
     FOUND("302 Found"),
     UNAUTHORIZED("401 Unauthorized"),
-    METHOD_NOT_ALLOWED("405 Method Not Allowed");
+    METHOD_NOT_ALLOWED("405 Method Not Allowed"),
+    BAD_REQUEST("400 Bad Request");
 
     private final String message;
 

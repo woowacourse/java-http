@@ -34,7 +34,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, responseBody);
 
         // when
-        QueryParam queryParam = request.getQueryParam();
+        Parameter queryParam = request.getParameter();
         String actual = queryParam.getValue("name");
 
         // then
@@ -51,7 +51,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, responseBody);
 
         // when
-        QueryParam queryParam = request.getQueryParam();
+        Parameter queryParam = request.getParameter();
         String actual = queryParam.getValue("name");
 
         // then

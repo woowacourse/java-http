@@ -53,7 +53,7 @@ class RequestReaderTest {
         // when
         RequestReader requestReader = new RequestReader(inputStream);
         HttpRequest request = requestReader.getHttpRequest();
-        QueryParam queryParam = request.getQueryParam();
+        Parameter queryParam = request.getParameter();
         String actual = queryParam.getValue("email");
         // then
         assertThat(actual).isEqualTo(expected);

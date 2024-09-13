@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import support.StubSocket;
@@ -57,5 +58,61 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("없는 아이디로 로그인 요청 시 예외를 발생시킨다.")
+    void throw_exception_when_login_with_does_not_exist_account() {
+        // given
+        final var request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: http://localhost:8080",
+                "Content-type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu1&password=password",
+                "");
+
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expect = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Length: 2426",
+                "Content-Type: text/html;charset=utf-8",
+                "");
+
+        assertThat(socket.output())
+                .startsWith(expect);
+    }
+
+    @Test
+    @DisplayName("틀린 비밀번호로 로그인 요청 시 예외를 발생시킨다.")
+    void throw_exception_when_login_with_incorrect_password() {
+        // given
+        final var request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: http://localhost:8080",
+                "Content-type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password2",
+                "");
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expect = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Length: 2426",
+                "Content-Type: text/html;charset=utf-8",
+                "");
+
+        assertThat(socket.output()).startsWith(expect);
     }
 }

@@ -23,6 +23,8 @@ import java.util.Map;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_CONTENT_LENGTH = "0";
+    private static final String DEFAULT_CONTENT_TYPE = "";
 
     private final Socket connection;
     private final Manager sessionManager;
@@ -83,8 +85,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpBody createRequestBody(BufferedReader bufferedReader, Header header) throws IOException {
-        String contentLength = header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse("0");
-        String contentType = header.get(HttpHeaderKey.CONTENT_TYPE).orElse("");
+        String contentLength = header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse(DEFAULT_CONTENT_LENGTH);
+        String contentType = header.get(HttpHeaderKey.CONTENT_TYPE).orElse(DEFAULT_CONTENT_TYPE);
         char[] requestBody = new char[Integer.parseInt(contentLength)];
         bufferedReader.read(requestBody);
 

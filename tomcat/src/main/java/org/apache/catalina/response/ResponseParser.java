@@ -26,8 +26,8 @@ public class ResponseParser {
             stringBuilder.append("Location: " + response.getResource() + "\r\n");
         }
 
-        stringBuilder.append("Content-Length: " + responseBody.getBytes().length + " ").append("\r\n")
-                .append("Content-Type: " + getContentType(response.getResource())).append("\r\n")
+        stringBuilder.append("Content-Type: " + getContentType(response.getResource())).append("\r\n")
+                .append("Content-Length: " + responseBody.getBytes().length + " ").append("\r\n")
                 .append("\r\n").append(responseBody);
 
         return stringBuilder.toString();

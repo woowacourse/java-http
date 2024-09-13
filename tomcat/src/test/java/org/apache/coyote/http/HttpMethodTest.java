@@ -1,7 +1,6 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,14 +31,15 @@ public class HttpMethodTest {
     }
 
     @Test
-    void 지원하지_않는_메서드를_찾으려_하면_예외가_발생한다() {
+    void 지원하지_않는_메서드를_찾으려_하면_NONE을_반환한다() {
         // given
         String unsupportedMethodName = "DELETE";
 
-        // when & then
-        assertThatThrownBy(() -> HttpMethod.findByName(unsupportedMethodName))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("지원하지 않는 HTTP 메소드입니다.");
+        // when
+        HttpMethod method = HttpMethod.findByName(unsupportedMethodName);
+
+        // then
+        assertThat(method).isEqualTo(HttpMethod.NONE);
     }
 
     @Test
@@ -47,9 +47,10 @@ public class HttpMethodTest {
         // given
         String lowerCaseMethod = "get";
 
-        // when & then
-        assertThatThrownBy(() -> HttpMethod.findByName(lowerCaseMethod))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("지원하지 않는 HTTP 메소드입니다.");
+        // when
+        HttpMethod method = HttpMethod.findByName(lowerCaseMethod);
+
+        // then
+        assertThat(method).isEqualTo(HttpMethod.NONE);
     }
 }

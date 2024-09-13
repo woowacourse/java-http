@@ -1,17 +1,20 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class Tomcat {
+
+    private static final int PORT = 8080;
+    private static final int ACCEPT_COUNT = 100;
+    private static final int MAX_THREADS = 250;
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(PORT, ACCEPT_COUNT, MAX_THREADS);
         connector.start();
 
         try {

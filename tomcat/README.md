@@ -41,7 +41,7 @@
 
 ## 4. 동시성 확장
 
-- [ ] Executors로 Thread Pool 적용
+- [x] Executors로 Thread Pool 적용
     - Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체 만들기
     - 스레드 갯수는 maxThreads 변수로 지정
 - [ ] 동시성 컬렉션 사용

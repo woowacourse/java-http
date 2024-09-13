@@ -4,19 +4,17 @@ import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.LoginService;
 
+public class LoginController extends AbstractController {
+    private static final String SESSION_ID_KEY = "JSESSIONID";
+    private static final LoginController INSTANCE = new LoginController();
 
-public class LoginController implements Controller {
-
-    public static LoginController INSTANCE = new LoginController();
-
-    private final LoginService loginService = new LoginService();
+    private final LoginService loginService = LoginService.getInstance();
 
     private LoginController() {
     }
@@ -31,48 +29,56 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        return LoginControllerAdapter.adapt(httpRequest);
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new UnsupportedOperationException(httpRequest.getRequestUri() + "지원하지 않는 요청입니다.");
     }
 
-    public HttpResponse loginView(HttpRequest httpRequest) {
-        return new ResponseBuilder()
-                .statusCode(HttpStatusCode.OK_200)
-                .viewUrl("/login.html")
-                .build();
+    @Override
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if(httpRequest.isQueryStringRequest()){
+            checkLogin(httpRequest, httpResponse);
+            return;
+        }
+
+        if(httpRequest.hasCookie() && httpRequest.getCookie().has(SESSION_ID_KEY)){
+            checkSession(httpRequest, httpResponse);
+            return;
+        }
+
+        loginView(httpResponse);
+
     }
 
-    public HttpResponse checkSession(HttpRequest httpRequest) {
+    private void loginView(HttpResponse httpResponse) {
+        httpResponse.statusCode(StatusCode.OK_200)
+                .viewUrl("/login.html");
+    }
+
+    private void checkSession(HttpRequest httpRequest, HttpResponse httpResponse) {
         Cookie cookie = httpRequest.getCookie();
-        String jsessionid = cookie.getByKey("JSESSIONID");
+        String jsessionid = cookie.getByKey(SESSION_ID_KEY);
 
         if (!InMemorySessionRepository.existsById(jsessionid)) {
             throw new SecurityException("잘못된 세션 정보입니다.");
         }
 
-        return new ResponseBuilder()
-                .statusCode(HttpStatusCode.FOUND_302)
-                .location("/index.html")
-                .build();
+        httpResponse.redirect("/index.html");
     }
 
-    public HttpResponse checkLogin(HttpRequest httpRequest) {
+    private void checkLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> parameters = httpRequest.getQueryParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
         User user = loginService.findByAccount(parameters.get("account"));
         Cookie userSessionCookie = makeUserSessionCookie(user);
 
-        return new ResponseBuilder()
-                .statusCode(HttpStatusCode.FOUND_302)
-                .location("/index.html")
-                .setCookie(userSessionCookie)
-                .build();
+        httpResponse.redirect("/index.html")
+                .setCookie(userSessionCookie);
     }
 
     private Cookie makeUserSessionCookie(User user) {
         Session session = new Session();
         session.setAttribute("user", user);
         InMemorySessionRepository.save(session);
-        return new Cookie(Map.of("JSESSIONID", session.getId()));
+        return new Cookie(Map.of(SESSION_ID_KEY, session.getId()));
     }
 }

@@ -45,10 +45,6 @@ public class Cookie {
         return cookies.get(key);
     }
 
-    public void put(String key, String value) {
-        cookies.put(key, value);
-    }
-
     public String serialize() {
         return serializer.serialize(this);
     }

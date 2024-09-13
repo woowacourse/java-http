@@ -7,5 +7,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 public interface Controller {
     boolean canHandle(String url);
 
-    HttpResponse handle(HttpRequest httpRequest);
+    void service(HttpRequest httpRequest, HttpResponse httpResponse);
 }

@@ -12,9 +12,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.error.ErrorHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,30 +45,35 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
         }
     }
 
     private HttpResponse makeResponse(HttpRequest httpRequest) throws IOException {
-        RequestLine requestLine = httpRequest.getRequestLine();
         try {
-            if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-                return resolveHandlerResponse2(httpRequest);
+            if (HandlerMapper.hasHandler(httpRequest.getRequestUri())) {
+                return resolveHandlerResponse(httpRequest);
             }
-            return new ResponseBuilder()
-                    .statusCode(HttpStatusCode.OK_200)
-                    .viewUrl(requestLine.getRequestURI())
-                    .build();
+            return resolveViewResponse(httpRequest);
         } catch (Exception e) {
-            if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
-                return ErrorHandlerMapper.handleError(e.getClass());
-            }
-            throw new UncheckedServletException(e);
+            return handleError(e);
         }
     }
 
-    private HttpResponse resolveHandlerResponse2(HttpRequest httpRequest) {
+    private HttpResponse handleError(Exception e) {
+        if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
+            return ErrorHandlerMapper.handleError(e.getClass());
+        }
+        throw new UncheckedServletException(e);
+    }
+
+    private HttpResponse resolveViewResponse(HttpRequest httpRequest) {
+        return HttpResponse.ok(httpRequest.getRequestUri());
+    }
+
+    private HttpResponse resolveHandlerResponse(HttpRequest httpRequest) {
+        HttpResponse httpResponse = new HttpResponse();
         Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
-        return controller.handle(httpRequest);
+        controller.service(httpRequest, httpResponse);
+        return httpResponse;
     }
 }

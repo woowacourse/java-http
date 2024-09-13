@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 
 public enum HandlerMapper {
     LOGIN_CONTROLLER(uri -> LoginController.getInstance().canHandle(uri), LoginController.getInstance()),
-    USER_CONTROLLER(uri -> new UserController().canHandle(uri), new UserController()),
+    USER_CONTROLLER(uri -> UserController.getInstance().canHandle(uri), UserController.getInstance()),
     ;
 
-    private Predicate<String> condition;
-    private Controller controller;
+    private final Predicate<String> condition;
+    private final Controller controller;
 
     HandlerMapper(Predicate<String> condition, Controller controller) {
         this.condition = condition;

@@ -3,11 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 0 # 작업 큐의 사이즈
+    max-connections: 2 #최대 클라이언트 연결 수
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 1 #항상 활성화 되어 있는 thread 개수
+      max: 2 #생성할 수 있는 thread 총 개수
   compression:
     enabled: true
     min-response-size: 10

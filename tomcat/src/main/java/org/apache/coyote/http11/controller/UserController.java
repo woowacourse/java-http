@@ -1,17 +1,25 @@
 package org.apache.coyote.http11.controller;
 
 import com.techcourse.model.User;
-import com.techcourse.model.UserInfo;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.resolver.RequestBodyResolver;
+import org.apache.coyote.http11.request.resolver.UserResolver;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.UserService;
 
-public class UserController implements Controller {
+public class UserController extends AbstractController {
 
-    private final UserService userService = new UserService();
+    private final RequestBodyResolver<User> userResolver = new UserResolver();
+    private final UserService userService = UserService.getInstance();
+
+    private static final UserController INSTANCE = new UserController();
+
+    public static UserController getInstance() {
+        return INSTANCE;
+    }
+
+    private UserController() {}
 
     @Override
     public boolean canHandle(String url) {
@@ -19,21 +27,23 @@ public class UserController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if (httpRequest.isMethod(HttpMethod.POST)) {
-            UserInfo userInfo = UserInfo.read(httpRequest.getRequestBody());
-            User user = new User(userInfo);
-            userService.save(user);
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        saveUser(httpRequest, httpResponse);
+    }
 
-            return new ResponseBuilder()
-                    .statusCode(HttpStatusCode.FOUND_302)
-                    .location("/index.html")
-                    .build();
-        }
+    @Override
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        registerView(httpResponse);
+    }
 
-        return new ResponseBuilder()
-                .statusCode(HttpStatusCode.OK_200)
-                .viewUrl("/register.html")
-                .build();
+    private void saveUser(HttpRequest httpRequest, HttpResponse httpResponse) {
+        User user = userResolver.resolve(httpRequest.getRequestBody());
+        userService.save(user);
+        httpResponse.redirect("/index.html");
+    }
+
+    private void registerView(HttpResponse httpResponse) {
+        httpResponse.statusCode(StatusCode.OK_200)
+                .viewUrl("/register.html");
     }
 }

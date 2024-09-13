@@ -1,27 +1,22 @@
-package com.techcourse.model;
+package org.apache.coyote.http11.request.resolver;
 
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.RequestBody;
 
-public class UserInfo {
+public class UserResolver implements RequestBodyResolver<User> {
+
     private static final String USER_REGISTRATION_INFO_DELIMITER = "&";
     private static final String INFO_ELEMENT_DELIMITER = "=";
     private static final int ELEMENT_KEY_INDEX = 0;
     private static final int ELEMENT_VALUE_INDEX = 1;
+    private static final String USER_ACCOUNT_KEY = "account";
+    private static final String USER_PASSWORD_KEY = "password";
+    private static final String USER_EMAIL_KEY = "email";
 
-
-    private final String account;
-    private final String password;
-    private final String email;
-
-    public UserInfo(String account, String password, String email) {
-        this.account = account;
-        this.password = password;
-        this.email = email;
-    }
-
-    public static UserInfo read(RequestBody requestBody) {
+    @Override
+    public User resolve(RequestBody requestBody) {
         Map<String, String> registerInfo = new HashMap<>();
         String body = requestBody.getContent();
         String[] elements = body.split(USER_REGISTRATION_INFO_DELIMITER);
@@ -31,22 +26,10 @@ public class UserInfo {
             registerInfo.put(parsedElement[ELEMENT_KEY_INDEX], parsedElement[ELEMENT_VALUE_INDEX]);
         }
 
-        return new UserInfo(
-                registerInfo.get("account"),
-                registerInfo.get("password"),
-                registerInfo.get("email")
+        return new User(
+                registerInfo.get(USER_ACCOUNT_KEY),
+                registerInfo.get(USER_PASSWORD_KEY),
+                registerInfo.get(USER_EMAIL_KEY)
         );
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 }

@@ -15,7 +15,6 @@ import org.apache.catalina.session.Session;
 public class HttpRequest {
 
     private static final int BUFFER_SIZE = 64;
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final HttpHeaders headers;
     private final RequestLine requestLine;
@@ -87,7 +86,7 @@ public class HttpRequest {
         if (manager == null) {
             throw new IllegalStateException("Manager has not been set.");
         }
-        HttpCookie cookie = headers.getCookie(JSESSIONID);
+        HttpCookie cookie = headers.getCookie(Session.JSESSIONID);
         Session session = null;
         if (cookie != null) {
             session = manager.findSession(cookie.getValue());

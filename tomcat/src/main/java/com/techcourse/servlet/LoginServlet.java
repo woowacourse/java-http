@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.servlet.AbstractHttpServlet;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class LoginServlet extends AbstractHttpServlet {
             log.info("Verified User : {}", user);
             Session session = request.getSession(true);
             session.setAttribute("user", user);
-            response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+            response.setCookie(session.getCookie());
             response.redirectTo("/index.html");
             return;
         }

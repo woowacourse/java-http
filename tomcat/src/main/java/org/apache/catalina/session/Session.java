@@ -2,8 +2,11 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class Session {
+
+    public static final String JSESSIONID = "JSESSIONID";
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
@@ -26,5 +29,9 @@ public class Session {
 
     public void removeAttribute(String name) {
         values.remove(name);
+    }
+
+    public HttpCookie getCookie() {
+        return new HttpCookie(JSESSIONID, id);
     }
 }

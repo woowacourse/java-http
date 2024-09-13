@@ -19,7 +19,6 @@ class HttpResponseTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "");
-        HttpRequest httpRequest = HttpRequestMaker.makeHttpRequest(request);
         HttpResponse httpResponse = new HttpResponse();
 
         assertThatThrownBy(() -> httpResponse.staticResource("/ln"))

@@ -12,8 +12,14 @@ public class UserServlet {
     }
 
     private void join(final User user) {
-        if (!users.contains(user)) {
-            users.add(user);
+        if (users.contains(user)) {
+            return;
+        }
+
+        synchronized (this) {
+            if (!users.contains(user)) {
+                users.add(user);
+            }
         }
     }
 

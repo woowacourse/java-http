@@ -1,5 +1,7 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http11.httpmessage.HttpHeaders.JSESSIONID;
+
 import java.util.Objects;
 
 import org.apache.catalina.servlet.AbstractController;
@@ -25,7 +27,7 @@ public class LoginController extends AbstractController {
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
 
-            response.addCookie("JSESSIONID", session.getId());
+            response.addCookie(JSESSIONID, session.getId());
             response.setMethodFound("/index.html");
             return;
         }

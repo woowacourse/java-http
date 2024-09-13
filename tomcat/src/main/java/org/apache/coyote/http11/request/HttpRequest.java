@@ -25,12 +25,16 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getUrl() {
-        return firstLine.getUrl();
+    public boolean isGet() {
+        return firstLine.getMethod() == HttpMethod.GET;
     }
 
-    public HttpMethod getMethod() {
-        return firstLine.getMethod();
+    public boolean isPost() {
+        return firstLine.getMethod() == HttpMethod.POST;
+    }
+
+    public String getUrl() {
+        return firstLine.getUrl();
     }
 
     public HttpCookie getCookie() {

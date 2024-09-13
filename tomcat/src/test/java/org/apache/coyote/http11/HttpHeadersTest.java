@@ -25,4 +25,17 @@ class HttpHeadersTest {
                 () -> assertThat(headers.getHeaders()).contains(Map.entry("Host", "localhost:8080"), Map.entry("Connection", "keep-alive"))
         );
     }
+
+    @DisplayName("헤더가 없을 경우(빈 리스트) 헤더 값에는 아무것도 저장되지 않는다.")
+    @Test
+    void emptyfrom() {
+        // given
+        List<String> headerLines = List.of();
+
+        // when
+        HttpHeaders headers = HttpHeaders.from(headerLines);
+
+        // then
+        assertThat(headers.getHeaders()).isEmpty();
+    }
 }

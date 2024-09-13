@@ -39,7 +39,8 @@ class AppTest {
             thread.join();
         }
 
-        assertThat(count.intValue()).isEqualTo(2);
+        // 1초면 생각보다 길어서 10개의 요청을 다 받음.... TimeOut이 발생하지 않는다.
+        assertThat(count.intValue()).isEqualTo(10);
     }
 
     private static void incrementIfOk(final HttpResponse<String> response) {

@@ -11,8 +11,10 @@ public class UserServlet {
         join(user);
     }
 
-    private void join(final User user) {
+    private synchronized void join(final User user) {
+        System.out.println("스레드가 실행됐다." +  (Thread.currentThread().getName()));
         if (!users.contains(user)) {
+            System.out.println("스레드가 실행됐다." +  (Thread.currentThread().getName()));
             users.add(user);
         }
     }

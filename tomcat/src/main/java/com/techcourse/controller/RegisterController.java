@@ -11,20 +11,16 @@ public class RegisterController extends Controller {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookieValue("JSESSIONID");
-        if (sessionId == null) {
-            response.setBodyWithStaticResource("/register.html");
-            return;
-        }
-        User user = SessionManager.get(sessionId);
-        if (user == null) {
-            response.setBodyWithStaticResource("/register.html");
-            return;
-        }
+        try {
+            String sessionId = request.getCookieValue("JSESSIONID");
+            User user = SessionManager.get(sessionId);
 
-        log.info(user.toString());
-        response.setStatusCode("302 Found");
-        response.addHeader("Location", "/index.html");
+            log.info(user.toString());
+            response.setStatusCode("302 Found");
+            response.addHeader("Location", "/index.html");
+        } catch (IllegalArgumentException e) {
+            response.setBodyWithStaticResource("/register.html");
+        }
     }
 
     @Override

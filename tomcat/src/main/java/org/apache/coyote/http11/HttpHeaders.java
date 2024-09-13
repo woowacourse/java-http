@@ -34,11 +34,16 @@ public class HttpHeaders {
         Map<String, String> headers = new HashMap<>();
         for (String line : lines) {
             String[] headerField = line.split(HEADER_DELIMITER, HEADER_LIMIT);
-            if (headerField.length == HEADER_LIMIT) {
+            if (headerField.length == HEADER_LIMIT && isNotEmpty(headerField)) {
                 headers.put(headerField[HEADER_KEY_POSITION].trim(), headerField[HEADER_VALUE_POSITION].trim());
             }
         }
         return headers;
+    }
+
+    private static boolean isNotEmpty(String[] keyValue) {
+        return Objects.nonNull(keyValue[HEADER_KEY_POSITION]) && Objects.nonNull(keyValue[HEADER_VALUE_POSITION])
+                && !keyValue[HEADER_KEY_POSITION].trim().isEmpty() && !keyValue[HEADER_VALUE_POSITION].trim().isEmpty();
     }
 
     public void setCookie(String cookie) {

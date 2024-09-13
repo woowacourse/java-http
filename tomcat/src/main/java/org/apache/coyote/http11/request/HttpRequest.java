@@ -65,7 +65,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public Map<String, String> getBodyQueryString() {
+    public Map<String, String> getBodyQueryStrings() {
         Map<String, String> queryStrings = new HashMap<>();
         for (String queryString : body.split(QUERY_STRING_SEPARATOR)) {
             String[] queryStringKeyValue = queryString.split(QUERY_STRING_KEY_VALUE_SEPARATOR);

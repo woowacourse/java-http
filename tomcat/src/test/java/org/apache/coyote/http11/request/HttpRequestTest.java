@@ -96,7 +96,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // when
-        Map<String, String> bodyQueryString = request.getBodyQueryString();
+        Map<String, String> bodyQueryString = request.getBodyQueryStrings();
 
         // then
         assertAll(

@@ -12,20 +12,21 @@ import com.techcourse.model.User;
 
 public class RegisterController extends AbstractController {
 
-    private static final RegisterController instance = new RegisterController();
+    private static final RegisterController INSTANCE = new RegisterController();
 
     private RegisterController() {}
 
     public static RegisterController getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        Map<String, String> pairs = request.getBodyQueryString();
+        Map<String, String> queryStrings = request.getBodyQueryStrings();
 
-        InMemoryUserRepository.save(new User(pairs.get("account"), pairs.get("password"), pairs.get("email")));
-        redirectTo(response, "/index.html");
+        User user = new User(queryStrings.get(ACCOUNT), queryStrings.get(PASSWORD), queryStrings.get(EMAIL));
+        InMemoryUserRepository.save(user);
+        redirectTo(response, INDEX_PAGE);
     }
 
     @Override

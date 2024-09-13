@@ -11,16 +11,18 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
-    private static final RequestMapping instance = new RequestMapping();
-    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
-    private static final Controller STATIC_RESOURCE_CONTROLLER = StaticResourceController.getInstance();
-    private static final Controller HOME_PAGE_CONTROLLER = HomePageController.getInstance();
     private static final String PATH_SEPARATOR = "/";
     private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String LOGIN_URL = "/login";
+    private static final String REGISTER_URL = "/register";
+    private static final Controller STATIC_RESOURCE_CONTROLLER = StaticResourceController.getInstance();
+    private static final Controller HOME_PAGE_CONTROLLER = HomePageController.getInstance();
+    private static final RequestMapping instance = new RequestMapping();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     static {
-        controllers.put("/login", LoginController.getInstance());
-        controllers.put("/register", RegisterController.getInstance());
+        controllers.put(LOGIN_URL, LoginController.getInstance());
+        controllers.put(REGISTER_URL, RegisterController.getInstance());
     }
 
     private RequestMapping() {

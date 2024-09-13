@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,7 +51,7 @@ class LoginControllerTest {
 
         loginController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_401_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_401_HEADER);
     }
 
     @Test
@@ -61,7 +62,7 @@ class LoginControllerTest {
 
         loginController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_MAIN_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_MAIN_HEADER);
     }
 
     @Test
@@ -72,7 +73,7 @@ class LoginControllerTest {
 
         loginController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(SET_COOKIE_JSESSIONID_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(SET_COOKIE_JSESSIONID_HEADER);
     }
 
     @Test
@@ -93,6 +94,6 @@ class LoginControllerTest {
         HttpResponse cookieUserResponse = new HttpResponse(OutputStream.nullOutputStream());
         loginController.doPost(cookieUserRequest, cookieUserResponse);
 
-        assertTrue(new String(cookieUserResponse.combineResponseToBytes()).contains(LOCATION_MAIN_HEADER));
+        assertThat(new String(cookieUserResponse.combineResponseToBytes())).contains(LOCATION_MAIN_HEADER);
     }
 }

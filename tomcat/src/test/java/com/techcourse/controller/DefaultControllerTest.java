@@ -1,14 +1,16 @@
 package com.techcourse.controller;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.OutputStream;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.io.OutputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DefaultControllerTest {
 
@@ -46,7 +48,7 @@ class DefaultControllerTest {
 
         defaultController.doGet(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(DEFAULT_TEXT));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(DEFAULT_TEXT);
     }
 
     @Test
@@ -57,6 +59,6 @@ class DefaultControllerTest {
 
         defaultController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_404_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_404_HEADER);
     }
 }

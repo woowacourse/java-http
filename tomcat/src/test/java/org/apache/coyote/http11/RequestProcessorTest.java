@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.OutputStream;
@@ -21,6 +22,6 @@ class RequestProcessorTest {
 
         requestProcessor.process(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains("Location: 404.html"));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains("Location: 404.html");
     }
 }

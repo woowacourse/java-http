@@ -1,15 +1,17 @@
 package com.techcourse.controller;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.OutputStream;
 import org.apache.coyote.fixture.HttpRequestFixture;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.ResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.io.OutputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RegisterControllerTest {
 
@@ -48,7 +50,7 @@ class RegisterControllerTest {
         registerController.doGet(httpRequest, httpResponse);
 
         String resource = ResourceFinder.findBy(REGISTER_RESOURCE_PATH);
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(resource));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(resource);
     }
 
     @Test
@@ -59,7 +61,7 @@ class RegisterControllerTest {
 
         registerController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_REGISTER_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_REGISTER_HEADER);
     }
 
     @Test
@@ -70,6 +72,6 @@ class RegisterControllerTest {
 
         registerController.doPost(httpRequest, httpResponse);
 
-        assertTrue(new String(httpResponse.combineResponseToBytes()).contains(LOCATION_MAIN_HEADER));
+        assertThat(new String(httpResponse.combineResponseToBytes())).contains(LOCATION_MAIN_HEADER);
     }
 }

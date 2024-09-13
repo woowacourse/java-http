@@ -7,7 +7,6 @@ import support.StubSocket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class Http11ProcessorTest {
 
@@ -113,9 +112,9 @@ class Http11ProcessorTest {
         String expectedLocation = "Location: /index.html \r\n";
 
         assertAll(
-                () -> assertTrue(socket.output().contains(expectedLine)),
-                () -> assertTrue(socket.output().contains(expectedLocation)),
-                () -> assertTrue(socket.output().contains("Set-Cookie:"))
+                () -> assertThat(socket.output()).contains(expectedLine),
+                () -> assertThat(socket.output()).contains(expectedLocation),
+                () -> assertThat(socket.output()).contains("Set-Cookie:")
         );
     }
 
@@ -171,8 +170,8 @@ class Http11ProcessorTest {
         String expectedLocation = "Location: /index.html \r\n";
 
         assertAll(
-                () -> assertTrue(socket.output().contains(expectedLine)),
-                () -> assertTrue(socket.output().contains(expectedLocation))
+                () -> assertThat(socket.output()).contains(expectedLine),
+                () -> assertThat(socket.output()).contains(expectedLocation)
         );
     }
 }

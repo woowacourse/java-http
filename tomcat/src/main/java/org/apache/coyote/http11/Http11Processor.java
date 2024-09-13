@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
         HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
         HttpResponse httpResponse = new HttpResponse();
-        Controller controller = requestMapper.mapRequest(httpRequest, httpResponse);
+        Controller controller = requestMapper.mapRequest(httpRequest);
         controller.service(httpRequest, httpResponse);
         return httpResponseParser.parseResponse(httpResponse);
     }

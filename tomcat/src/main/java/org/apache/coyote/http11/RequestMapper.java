@@ -23,7 +23,7 @@ public class RequestMapper {
         this.staticPageController = StaticPageController.getInstance();
     }
 
-    public Controller mapRequest(HttpRequest request, HttpResponse response) {
+    public Controller mapRequest(HttpRequest request) {
         if (request.getHttpRequestPath().contains("/login")) {
             return loginController;
         }

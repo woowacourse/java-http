@@ -13,28 +13,21 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
-
-    private static final String STATIC = "/static";
-    private static final String HTML = ".html";
-    private static final String CSS = ".css";
-    private static final String JS = ".js";
-    private static final String SVG = ".svg";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -76,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
             if (method.equals(HttpMethod.POST.name())) {
                 doPost(httpRequest, requestURL, outputStream);
             }
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException | URISyntaxException e) {
             log.error(e.getMessage(), e);
             handleException(outputStream);
         }
@@ -84,14 +77,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleException(OutputStream outputStream) {
         try {
-            sendHttpResponse("/static/500.html", outputStream, HttpStatus.INTERNAL_SERVER_ERROR, MimeType.HTML, "");
-        } catch (IOException e) {
+            sendHttpResponse("/500.html", outputStream, HttpStatus.INTERNAL_SERVER_ERROR, "");
+        } catch (IOException | URISyntaxException e) {
             log.error("Failed to send error response", e);
         }
     }
 
     private void doPost(final HttpRequest httpRequest,
-                        final String requestURL, final OutputStream outputStream) throws IOException {
+                        final String requestURL, final OutputStream outputStream) throws IOException, URISyntaxException {
 
         Map<String, String> requestBody = httpRequest.getRequestBody().getValues();
         if (requestURL.equals("/login")) {
@@ -104,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
                 redirect("", "/", outputStream);
                 return;
             }
-            sendHttpResponse("/static/register.html", outputStream, HttpStatus.BAD_REQUEST, MimeType.HTML, "");
+            sendHttpResponse("/register.html", outputStream, HttpStatus.BAD_REQUEST, "");
         }
     }
 
@@ -164,7 +157,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doGet(final HttpRequest httpRequest, final String requestURL,
-                       final OutputStream outputStream) throws IOException {
+                       final OutputStream outputStream) throws IOException, URISyntaxException {
         String cookies = httpRequest.getRequestHeader().getHeaders().get("Cookie");
         String sessionId = "";
         HttpCookies httpCookies = HttpCookies.from(cookies);
@@ -178,42 +171,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         HttpStatus httpStatus = HttpStatus.OK;
-        String resourcePath = determineResourcePath(requestURL);
 
-        MimeType contentType = determineContentType(resourcePath);
-
-        sendHttpResponse(resourcePath, outputStream, httpStatus, contentType, "");
-    }
-
-    private String determineResourcePath(String requestURL) {
-        if (requestURL.equals("/") || requestURL.equals("/index.html")) {
-            return "/static/index.html";
-        }
-
-        if (requestURL.endsWith(SVG)) {
-            return STATIC + "/assets/img/error-404-monochrome.svg";
-        }
-
-        if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
-            return STATIC + requestURL;
-        }
-
-        return STATIC + requestURL + HTML;
-    }
-
-    private MimeType determineContentType(String resourcePath) {
-        if (resourcePath.endsWith(CSS)) {
-            return MimeType.CSS;
-        }
-
-        if (resourcePath.endsWith(JS)) {
-            return MimeType.JS;
-        }
-
-        if (resourcePath.endsWith(SVG)) {
-            return MimeType.SVG;
-        }
-        return MimeType.HTML;
+        sendHttpResponse(requestURL, outputStream, httpStatus, "");
     }
 
     private Optional<Session> loginPost(Map<String, String> requestBody) {
@@ -291,42 +250,43 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void redirect(String cookieHeader, String path, OutputStream outputStream) throws IOException {
-        String resourcePath = determineResourcePath(path);
+        try {
+            byte[] values = FileReader.read(path);
 
-        URL resource = getClass().getResource(resourcePath);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, values);
 
-        byte[] values = Files.readAllBytes(new File(resource.getFile()).toPath());
+            httpResponse.setMimeType(MimeType.HTML);
+            httpResponse.setLocation(path);
+            httpResponse.setCookie(cookieHeader);
 
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, values);
-
-        httpResponse.setMimeType(MimeType.HTML);
-        httpResponse.setLocation(path);
-        httpResponse.setCookie(cookieHeader);
-
-        byte[] response = httpResponse.toByte();
-        writeHttpResponse(response, outputStream);
+            byte[] response = httpResponse.toByte();
+            writeHttpResponse(response, outputStream);
+        } catch (IOException | URISyntaxException exception) {
+            log.info("redirection 실패: " + path);
+        }
     }
 
     private void sendHttpResponse(final String path, final OutputStream outputStream, HttpStatus httpStatus,
-                                  final MimeType contentType, final String cookie) throws IOException {
+                                  final String cookie) throws IOException, URISyntaxException {
 
-        byte[] response = createHttpResponse(httpStatus, contentType, cookie, path);
+        byte[] response = createHttpResponse(httpStatus, cookie, path);
         writeHttpResponse(response, outputStream);
     }
 
-    private byte[] createHttpResponse(HttpStatus httpStatus, MimeType contentType, String cookieHeader, final String path) throws IOException {
-        URL resource = getClass().getResource(path);
+    private byte[] createHttpResponse(HttpStatus httpStatus, String cookieHeader, final String path) throws IOException, URISyntaxException {
+        byte[] values;
 
-        if (resource == null) {
-            resource = getClass().getResource("/static/404.html");
+        try {
+            values = FileReader.read(path);
+
+        } catch (IOException | URISyntaxException | NullPointerException exception) {
+            values = FileReader.read("/404.html");
             httpStatus = HttpStatus.NOT_FOUND;
         }
 
-        byte[] values = Files.readAllBytes(new File(resource.getFile()).toPath());
-
         HttpResponse httpResponse = new HttpResponse(httpStatus, values);
 
-        httpResponse.setMimeType(contentType);
+        httpResponse.setMimeType(MimeType.from(path));
         httpResponse.setCookie(cookieHeader);
 
         return httpResponse.toByte();

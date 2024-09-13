@@ -51,6 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+
+            sendInternalServerError(connection);
         }
     }
 
@@ -82,5 +84,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new RequestBody(body.toString());
+    }
+
+    private void sendInternalServerError(Socket connection) {
+        try (var outputStream = connection.getOutputStream()) {
+            String errorResponse = """
+                        HTTP/1.1 500 Internal Server Error
+                        Content-Type: text/html
+                        Content-Length: 79
+
+                        <html><body><h1>500 Internal Server Error</h1><p>Unexpected error occurred.</p></body></html>
+                    """;
+
+            outputStream.write(errorResponse.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException ioException) {
+            log.error("Failed to send error response: {}", ioException.getMessage(), ioException);
+        }
     }
 }

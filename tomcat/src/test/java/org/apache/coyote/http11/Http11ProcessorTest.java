@@ -9,6 +9,8 @@ import java.nio.file.Files;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import support.StubSocket;
 
@@ -35,5 +37,28 @@ class Http11ProcessorTest {
                 expectedContentLength,
                 expectedContentType,
                 expectedResponseBody);
+    }
+
+    @DisplayName("process 과정에서 처리되지 않은 예외는 500 HTTP 응답을 생성한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"GET HTTP/1.1", "WRONG / HTTP/1.1", "GET / HTTP/0.9"})
+    void failProcess(String requestLine) throws IOException {
+        // given
+        final var socket = new StubSocket(requestLine + "\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expectedResponse = """
+                    HTTP/1.1 500 Internal Server Error
+                    Content-Type: text/html
+                    Content-Length: 79
+
+                    <html><body><h1>500 Internal Server Error</h1><p>Unexpected error occurred.</p></body></html>
+                """;
+
+        assertThat(socket.output()).isEqualTo(expectedResponse);
     }
 }

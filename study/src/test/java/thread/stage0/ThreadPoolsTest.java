@@ -25,14 +25,14 @@ class ThreadPoolsTest {
 
     @Test
     void testNewFixedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 1; // 고정시킨 ThreadPool의 크기
+        final int expectedQueueSize = 2; // 작업을 대기중인 큐 사이즈
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
@@ -46,7 +46,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3; // 필요할 때마다 스레드 생성, 기존 생성된 스레드는 60초 간 재사용 대기하다 반납됨
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

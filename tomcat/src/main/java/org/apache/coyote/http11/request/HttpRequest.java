@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaderNames;
 import org.apache.coyote.http11.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,12 +23,12 @@ public class HttpRequest {
     private static final String HTML = ".html";
 
     private final HttpRequestLine httpRequestLine;
-    private final Map<String, String> headers;
+    private final HttpHeaders httpHeaders;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, HttpRequestBody httpRequestBody) {
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpHeaders httpHeaders, HttpRequestBody httpRequestBody) {
         this.httpRequestLine = httpRequestLine;
-        this.headers = headers;
+        this.httpHeaders = httpHeaders;
         this.httpRequestBody = httpRequestBody;
     }
 
@@ -44,15 +44,17 @@ public class HttpRequest {
             headers.put(headerParts[0], headerParts[1]);
         }
 
+        HttpHeaders httpHeaders = HttpHeaders.from(headers);
+
         if (requestLine.isPost()) {
-            int contentLength = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
+            int contentLength = Integer.parseInt(headers.get(HttpHeaderNames.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String body = new String(buffer);
-            return new HttpRequest(requestLine, headers, HttpRequestBody.from(body));
+            return new HttpRequest(requestLine, httpHeaders, HttpRequestBody.from(body));
         }
 
-        return new HttpRequest(requestLine, headers, null);
+        return new HttpRequest(requestLine, httpHeaders, null);
     }
 
     public boolean isGet() {
@@ -109,8 +111,8 @@ public class HttpRequest {
         return httpRequestLine.getVersion();
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
     }
 
     public HttpRequestLine getHttpRequestLine() {

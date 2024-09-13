@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.HttpHeaderNames;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,8 +24,8 @@ public class HttpResponse {
     public void setResponseFromRequest(HttpRequest request) throws URISyntaxException, IOException {
         String responseBody = new String(request.toHttpResponseBody());
         version = request.getVersion();
-        headers.put(HttpHeaders.CONTENT_TYPE, request.getContentType());
-        headers.put(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
+        headers.put(HttpHeaderNames.CONTENT_TYPE, request.getContentType());
+        headers.put(HttpHeaderNames.CONTENT_LENGTH, responseBody.getBytes().length);
         body = responseBody;
     }
 

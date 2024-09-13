@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaderNames;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
 
         response.setResponseFromRequest(request);
         response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader(HttpHeaders.LOCATION, "/index.html");
+        response.addHeader(HttpHeaderNames.LOCATION, "/index.html");
     }
 
     private User createUser(HttpRequest request) {

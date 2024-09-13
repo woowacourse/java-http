@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
@@ -35,18 +34,18 @@ class SynchronizationTest {
 
     private static final class SynchronizedMethods {
 
-        private final AtomicInteger sum = new AtomicInteger(1);
+        private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 
         public int getSum() {
-            return sum.get();
+            return sum;
         }
 
         public void setSum(int sum) {
-            this.sum.set(sum);
+            this.sum = sum;
         }
     }
 }

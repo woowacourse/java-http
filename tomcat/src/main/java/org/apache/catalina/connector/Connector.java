@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.apache.catalina.container.Container;
+import org.apache.catalina.server.Server;
+import org.apache.catalina.server.ServerProperties;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +21,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private final Container container;
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
+    private final ServerProperties serverProperties;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
-    }
-
-    public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(final Server server) {
+        this.serverProperties = server.getServerProperties();
+        this.container = server.getContainer();
+        this.serverSocket = createServerSocket(serverProperties.getPort(), serverProperties.getAcceptCount());
+        this.executorService = Executors.newFixedThreadPool(serverProperties.getMaxThreads());
         this.stopped = false;
     }
 
@@ -56,7 +63,8 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            Socket connection = serverSocket.accept();
+            executorService.submit(() -> process(connection));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -66,7 +74,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, container);
         new Thread(processor).start();
     }
 

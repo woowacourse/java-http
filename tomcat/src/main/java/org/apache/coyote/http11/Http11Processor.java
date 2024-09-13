@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.apache.coyote.HandlerMapping;
+import org.apache.catalina.container.Container;
+import org.apache.catalina.ExceptionHandler;
+import org.apache.catalina.HandlerMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.http.HttpVersion;
@@ -21,9 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Container container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -49,14 +53,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse process(final HttpRequest httpRequest) throws Exception {
-        final HandlerMapping handlerMapping = HandlerMapping.getInstance();
+        final HandlerMapping handlerMapping = container.getHandlerMapping();
         final Controller controller = handlerMapping.getHandler(httpRequest);
         final HttpResponse httpResponse = HttpResponse.builder().version(HttpVersion.HTTP_1_1).build();
 
         try {
             controller.service(httpRequest, httpResponse);
         } catch (Exception e) {
-            handlerMapping.getHandlerByException(e).service(httpRequest, httpResponse);
+            final ExceptionHandler exceptionHandler = container.getExceptionHandler();
+            exceptionHandler.getHandler(e).service(httpRequest, httpResponse);
         }
 
         return httpResponse;

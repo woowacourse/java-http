@@ -14,6 +14,8 @@ import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.techcourse.MyContainer;
+
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -22,8 +24,9 @@ class Http11ProcessorTest {
     @DisplayName("루트 Get 요청 처리")
     void process() {
         // given
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -47,8 +50,9 @@ class Http11ProcessorTest {
                 "",
                 "");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -73,8 +77,9 @@ class Http11ProcessorTest {
                 "",
                 "");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -96,8 +101,9 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=1");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -122,8 +128,9 @@ class Http11ProcessorTest {
                 "",
                 "account=gugu&password=password");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -141,8 +148,9 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Connection: keep-alive");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -164,8 +172,9 @@ class Http11ProcessorTest {
                 "",
                 "account=gugu&email=hi@naver.com&password=password");
 
+        final var container = MyContainer.getInstance();
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);

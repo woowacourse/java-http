@@ -82,7 +82,7 @@ public class HttpResponse {
 
     public void staticResource(String path) {
         try {
-            URL resourceUrl = getRssourceUrl(path);
+            URL resourceUrl = getResourceUrl(path);
             validateResourceUrl(resourceUrl);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
@@ -94,7 +94,7 @@ public class HttpResponse {
         }
     }
 
-    private URL getRssourceUrl(String path) {
+    private URL getResourceUrl(String path) {
         path = settingExtension(path);
         String fileName = STATIC_PATH + settingExtension(path);
         return getClass().getClassLoader().getResource(fileName);

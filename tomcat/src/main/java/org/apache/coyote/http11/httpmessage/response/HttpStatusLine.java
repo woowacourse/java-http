@@ -16,10 +16,6 @@ public class HttpStatusLine {
         return String.format("%s %s %s ", httpVersion, statusCode, statusText);
     }
 
-    public void setHttpVersion(String httpVersion) {
-        this.httpVersion = httpVersion;
-    }
-
     public void setMethodFound() {
         this.statusCode = 301;
         this.statusText = "FOUND";

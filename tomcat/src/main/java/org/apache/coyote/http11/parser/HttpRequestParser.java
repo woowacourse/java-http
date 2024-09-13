@@ -1,18 +1,26 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.data.ContentType;
+import org.apache.coyote.http11.data.HttpCookie;
+import org.apache.coyote.http11.data.HttpMethod;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpRequestParameter;
+import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.http11.data.MediaType;
 
 public class HttpRequestParser {
 
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         String startLine = bufferedReader.readLine();
         if (startLine == null) {
-            return null;
+            throw new IllegalArgumentException("유효한 형식의 HTTP 요청이 아닙니다.");
         }
         String[] requestParts = startLine.split(" ");
         String httpMethodName = requestParts[0].trim();
@@ -25,21 +33,21 @@ public class HttpRequestParser {
         Map<String, String> rawHttpRequestHeader = parseRawHttpRequestHeader(bufferedReader);
         ContentType contentType = null;
         Integer contentLength = null;
-        String rawRequestBody = null;
+        String requestBody = null;
         HttpRequestParameter httpRequestParameter = null;
         if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PATCH) {
             String rawContentType = rawHttpRequestHeader.get("Content-Type");
             contentType = new ContentType(rawContentType);
             String rawContentLength = rawHttpRequestHeader.get("Content-Length");
             contentLength = Integer.valueOf(rawContentLength);
-            rawRequestBody = parseHttpRequestBody(contentLength, bufferedReader);
+            requestBody = parseHttpRequestBody(contentLength, bufferedReader);
             if (contentType.getMediaType() == MediaType.URLENC) {
-                httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
+                httpRequestParameter = parseHttpRequestParameter(requestBody);
             }
         }
-        HttpCookie httpCookie = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
-        return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
-                httpRequestParameter, httpCookie);
+        List<HttpCookie> httpCookies = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
+        return new HttpRequest(httpMethod, path, httpVersion, requestBody, contentType, contentLength,
+                httpRequestParameter, httpCookies);
     }
 
     private static Map<String, String> parseRawHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -71,17 +79,5 @@ public class HttpRequestParser {
                         keyValue -> keyValue[1]
                 ));
         return new HttpRequestParameter(paramMap);
-    }
-
-    private static Map<String, String> parseRequestCookies(String rawRequestCookies) {
-        if (rawRequestCookies == null) {
-            return Map.of();
-        }
-        return Arrays.stream(rawRequestCookies.split(";"))
-                .map(String::trim)
-                .map(pair -> pair.split("="))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1]));
     }
 }

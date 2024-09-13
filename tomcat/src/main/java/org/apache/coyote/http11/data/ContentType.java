@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.data;
 
 public class ContentType {
     private static final String DELIMITER = ";";
@@ -23,12 +23,6 @@ public class ContentType {
             return contents[1];
         }
         return null;
-    }
-
-    public static ContentType from(String postfix) {
-        MediaType mediaType = MediaType.findByPostfix(postfix)
-                .orElseThrow(() -> new IllegalArgumentException(postfix + "로 끝나는 미디어 타입이 없습니다."));
-        return new ContentType(mediaType, null);
     }
 
     public MediaType getMediaType() {

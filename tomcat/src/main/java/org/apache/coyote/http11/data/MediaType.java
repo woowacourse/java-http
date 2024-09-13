@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.data;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,19 +23,6 @@ public enum MediaType {
         return Arrays.stream(MediaType.values())
                 .filter(contentType -> contentType.typeNames.contains(typeName))
                 .findFirst();
-    }
-
-    public static Optional<MediaType> findByPostfix(String postfix) {
-        if (postfix.endsWith("js")) {
-            return Optional.of(JAVASCRIPT);
-        }
-        return Arrays.stream(MediaType.values())
-                .filter(contentType -> contentType.existByPostfix(postfix))
-                .findFirst();
-    }
-
-    private boolean existByPostfix(String postfix) {
-        return typeNames.stream().anyMatch(name -> name.endsWith(postfix));
     }
 
     public String getTypeName() {

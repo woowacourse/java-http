@@ -1,45 +1,42 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponse {
     private HttpVersion httpVersion;
     private HttpStatusCode httpStatusCode;
     private ContentType contentType;
-    private int contentLength;
-    private HttpCookie httpCookie;
+    private List<HttpCookie> httpCookies;
     private String responseBody;
     private String redirectUrl;
 
     public HttpResponse(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-        this.httpCookie = new HttpCookie();
+        this.httpCookies = new ArrayList<>();
     }
 
-    public HttpResponse addHttpStatusCode(HttpStatusCode httpStatusCode) {
+    public HttpResponse setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
         return this;
     }
 
-    public HttpResponse addContentType(ContentType contentType) {
+    public HttpResponse setContentType(ContentType contentType) {
         this.contentType = contentType;
         return this;
     }
 
-    public HttpResponse addContentLength(int contentLength) {
-        this.contentLength = contentLength;
+    public HttpResponse addCookie(HttpCookie httpCookie) {
+        this.httpCookies.add(httpCookie);
         return this;
     }
 
-    public HttpResponse addCookie(String key, String value) {
-        this.httpCookie.setValue(key, value);
-        return this;
-    }
-
-    public HttpResponse addResponseBody(String responseBody) {
+    public HttpResponse setResponseBody(String responseBody) {
         this.responseBody = responseBody;
         return this;
     }
 
-    public HttpResponse addRedirectUrl(String redirectUrl) {
+    public HttpResponse setRedirectUrl(String redirectUrl) {
         this.redirectUrl = redirectUrl;
         return this;
     }
@@ -56,12 +53,8 @@ public class HttpResponse {
         return contentType;
     }
 
-    public int getContentLength() {
-        return contentLength;
-    }
-
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
+    public List<HttpCookie> getHttpCookies() {
+        return new ArrayList<>(httpCookies);
     }
 
     public String getResponseBody() {

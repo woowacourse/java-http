@@ -10,6 +10,9 @@ import java.nio.file.Path;
 
 public class StaticResourceHandler {
 
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
+    private static final String STATIC_RESOURCE_PATH = "static";
+
     private final byte[] resource;
     private final String contentType;
 
@@ -21,10 +24,10 @@ public class StaticResourceHandler {
 
     private Path findPath(String requestURL) throws FileNotFoundException, URISyntaxException {
         if (!requestURL.contains(".")) {
-            requestURL += ".html";
+            requestURL += DEFAULT_FILE_EXTENSION;
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + requestURL);
+        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + requestURL);
         if (resource == null) {
             throw new FileNotFoundException();
         }

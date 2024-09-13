@@ -15,7 +15,7 @@ public class RequestURI {
             return;
         }
         path = requestURI;
-        parameters = new QueryParameters("");
+        parameters = QueryParameters.empty();
     }
 
     public String getPath() {

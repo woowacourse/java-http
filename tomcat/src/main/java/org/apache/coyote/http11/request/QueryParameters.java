@@ -20,4 +20,8 @@ public class QueryParameters {
             this.params.put(param.substring(0, index), param.substring(index + 1));
         }
     }
+
+    public static QueryParameters empty() {
+        return new QueryParameters("");
+    }
 }

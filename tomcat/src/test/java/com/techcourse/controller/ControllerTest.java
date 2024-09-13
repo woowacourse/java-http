@@ -19,21 +19,6 @@ import support.StubSocket;
 
 public class ControllerTest {
 
-    private String createResponseByHttpStatusCodeAndExtensionAndUri(
-            HttpStatus status,
-            String extension,
-            URL url
-    ) throws URISyntaxException, IOException {
-        String file = Files.readString(Path.of(url.toURI()));
-        return String.join("\r\n",
-                String.format("HTTP/1.1 %d %s ", status.getCode(), status.getText()),
-                String.format("Content-Type: text/%s ", extension),
-                String.format("Content-Length: %d ", file.getBytes().length),
-                "",
-                file
-        );
-    }
-
     @DisplayName("GET 요청 테스트")
     @Nested
     class GetRequest {
@@ -91,15 +76,6 @@ public class ControllerTest {
             );
 
             assertThat(socket.output()).isEqualTo(expected);
-        }
-
-        private String createRequestByHttpMethodAndTarget(HttpMethod method, String target) {
-            return String.join("\r\n",
-                    String.format("%s %s HTTP/1.1 ", method.toString(), target),
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    ""
-            );
         }
     }
 
@@ -168,5 +144,29 @@ public class ControllerTest {
                     formData
             );
         }
+    }
+
+    private String createRequestByHttpMethodAndTarget(HttpMethod method, String target) {
+        return String.join("\r\n",
+                String.format("%s %s HTTP/1.1 ", method.toString(), target),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                ""
+        );
+    }
+
+    private String createResponseByHttpStatusCodeAndExtensionAndUri(
+            HttpStatus status,
+            String extension,
+            URL url
+    ) throws URISyntaxException, IOException {
+        String file = Files.readString(Path.of(url.toURI()));
+        return String.join("\r\n",
+                String.format("HTTP/1.1 %d %s ", status.getCode(), status.getText()),
+                String.format("Content-Type: text/%s ", extension),
+                String.format("Content-Length: %d ", file.getBytes().length),
+                "",
+                file
+        );
     }
 }

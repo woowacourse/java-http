@@ -34,6 +34,9 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

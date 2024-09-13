@@ -6,6 +6,13 @@ import java.util.stream.Collectors;
 
 public class Http11Cookie {
 
+    private static final String COOKIE_DELIMITER = ";";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_VALUE_SIZE = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     private Http11Cookie(Map<String, String> cookies) {
@@ -17,18 +24,19 @@ public class Http11Cookie {
             return new Http11Cookie(Map.of());
         }
 
-        Map<String, String> cookieMap = Arrays.stream(cookies.split("; "))
-                .map(cookie -> cookie.split("="))
-                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1])); // ArrayIndexOutOfBoundsException
+        Map<String, String> cookieMap = Arrays.stream(cookies.split(COOKIE_DELIMITER))
+                .map(String::trim)
+                .map(cookie -> cookie.split(KEY_VALUE_DELIMITER, KEY_VALUE_SIZE))
+                .collect(Collectors.toMap(cookie -> cookie[KEY_INDEX], cookie -> cookie[VALUE_INDEX]));
 
         return new Http11Cookie(cookieMap);
     }
 
     public boolean isJSessionIdEmpty() {
-        return !cookies.containsKey("JSESSIONID");
+        return !cookies.containsKey(JSESSIONID);
     }
 
     public String getJSessionId() {
-        return cookies.get("JSESSIONID");
+        return cookies.get(JSESSIONID);
     }
 }

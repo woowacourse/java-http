@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ContentType {
-    HTML("html", "text/html"),
+    HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     SVG("svg", "image/svg+xml");
 
@@ -19,7 +19,7 @@ public enum ContentType {
     public static ContentType from(List<String> acceptTypes) {
         return Arrays.stream(values())
                 .filter(contentType -> acceptTypes.stream()
-                        .anyMatch(acceptType -> acceptType.contains(contentType.contentType)))
+                        .anyMatch(acceptType -> acceptType.contains(contentType.extension)))
                 .findAny()
                 .orElseGet(() -> HTML);
     }

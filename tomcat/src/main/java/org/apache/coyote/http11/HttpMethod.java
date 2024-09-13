@@ -24,10 +24,6 @@ public enum HttpMethod {
         return this == GET;
     }
 
-    public boolean isNotGet() {
-        return !isGet();
-    }
-
     public boolean isPost() {
         return this == POST;
     }

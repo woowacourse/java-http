@@ -3,12 +3,16 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RequestUri {
 
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String EMPTY_STRING = "";
+    private static final String QUERY_PARAMS_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int PARAM_VALUE_INDEX = 1;
 
     private final String path;
     private final String queryString;
@@ -27,23 +31,19 @@ public class RequestUri {
         }
         String path = requestUri.substring(0, index);
         String queryString = requestUri.substring(index + 1);
-        List<String> queryParams = Arrays.asList(queryString.split("&"));
+        List<String> queryParams = Arrays.asList(queryString.split(QUERY_PARAMS_DELIMITER));
         Map<String, String> queryParameters = queryParams.stream()
-                .map(query -> Arrays.asList(query.split("=")))
-                .collect(Collectors.toMap(
-                        param -> param.get(0),
-                        param -> param.size() > 1 ? param.get(1) : ""
-                ));
+                .map(query -> Arrays.asList(query.split(KEY_VALUE_DELIMITER)))
+                .collect(Collectors.toMap(List::getFirst, RequestUri::getParamValue));
 
         return new RequestUri(path, queryString, queryParameters);
     }
 
-    public boolean matches(String requestUri) {
-        return path.equals(requestUri);
-    }
-
-    public boolean hasQueryParameters() {
-        return !queryParameters.isEmpty();
+    private static String getParamValue(List<String> param) {
+        if (param.size() > PARAM_VALUE_INDEX) {
+            return param.get(PARAM_VALUE_INDEX);
+        }
+        return EMPTY_STRING;
     }
 
     public String getRequestUri() {
@@ -53,7 +53,33 @@ public class RequestUri {
         return String.join(QUERY_STRING_DELIMITER, path, queryString);
     }
 
-    public Map<String, String> getQueryParameters() {
-        return queryParameters;
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestUri that = (RequestUri) o;
+        return Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(path);
+    }
+
+    @Override
+    public String toString() {
+        return "RequestUri{" +
+                "path='" + path + '\'' +
+                ", queryString='" + queryString + '\'' +
+                ", queryParameters=" + queryParameters +
+                '}';
     }
 }

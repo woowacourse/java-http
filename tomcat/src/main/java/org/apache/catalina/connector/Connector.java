@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,24 +19,34 @@ public class Connector {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int IDLE_THREAD_COUNT = 150;
+    private static final int MAX_THREAD_COUNT = 250;
+    private static final int THREAD_KEEP_ALIVE_TIME = 60;
+    private static final int TCP_BACKLOG = 50;  // OS에 따라 지켜지지 않을 수 있으며, FIFO가 보장되지 않음
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor threadPoolExecutor;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_COUNT);
     }
 
-    public Connector(int port, int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(int port, int acceptCount, int maxThreads) {
+        int checkedAcceptCount = checkAcceptCount(acceptCount);
+        this.threadPoolExecutor = new ThreadPoolExecutor(
+                IDLE_THREAD_COUNT, maxThreads,
+                THREAD_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(checkedAcceptCount)
+        );
+        this.serverSocket = createServerSocket(port);
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(int port, int acceptCount) {
+    private ServerSocket createServerSocket(int port) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkedPort, TCP_BACKLOG);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -47,7 +61,7 @@ public class Connector {
     }
 
     public void run(Dispatcher dispatcher) {
-        // 클라이언트가 연결될때까지 대기한다.
+        // 클라이언트가 연결될 때까지 대기한다.
         while (!stopped) {
             connect(dispatcher);
         }
@@ -61,14 +75,20 @@ public class Connector {
         }
     }
 
-    private void process(Socket connection, Dispatcher dispatcher) {
+    private void process(Socket connection, Dispatcher dispatcher) throws IOException {
         if (connection == null) {
             return;
         }
         Http11Processor processor = new Http11Processor(connection, dispatcher);
-        Thread thread = new Thread(processor);
-        log.info("new thread created: {}", thread.threadId());
-        thread.start();
+        try {
+            threadPoolExecutor.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.error(e.getMessage(), e);
+            connection.close();
+            log.warn("Server is busy. Rejected task. {} closed.", connection);
+        }
+        log.info("{} 개의 스레드 실행 중", threadPoolExecutor.getActiveCount());
+        log.info("{} 개의 작업 대기 중", threadPoolExecutor.getQueue().size());
     }
 
     public void stop() {

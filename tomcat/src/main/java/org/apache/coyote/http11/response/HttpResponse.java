@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.header.HttpHeader;
+
 public class HttpResponse {
 
     private static final String TYPE_OF_HTML = "text/html";

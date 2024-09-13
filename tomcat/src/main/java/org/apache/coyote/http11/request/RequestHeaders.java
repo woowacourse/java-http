@@ -2,35 +2,18 @@ package org.apache.coyote.http11.request;
 
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpCookie;
-import org.apache.coyote.http11.response.HttpHeader;
+import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.utils.Cookies;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-public class RequestHeaders {
+public class RequestHeaders extends Headers {
 
-    private static final String HEADER_DELIMITER = ":";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
     private static final int DEFAULT_CONTENT_LENGTH = 0;
 
-    private final Map<String, String> headers;
-
     public RequestHeaders(List<String> headers) {
-        this.headers = toMap(headers);
-    }
-
-    private Map<String, String> toMap(List<String> headerLines) {
-        Map<String, String> headers = new LinkedHashMap<>();
-
-        for (String headerLine : headerLines) {
-            String[] headerInfo = headerLine.split(HEADER_DELIMITER);
-            headers.put(headerInfo[KEY_INDEX].trim(), headerInfo[VALUE_INDEX].trim());
-        }
-
-        return headers;
+        super(headers);
     }
 
     public boolean hasJSessionCookie() {
@@ -40,14 +23,6 @@ public class RequestHeaders {
             return get(cookieHeader).contains(Cookies.JSESSIONID);
         }
         return false;
-    }
-
-    public boolean has(HttpHeader httpHeader) {
-        return headers.containsKey(httpHeader.getName());
-    }
-
-    public String get(HttpHeader httpHeader) {
-        return headers.get(httpHeader.getName());
     }
 
     public Session getSession() {

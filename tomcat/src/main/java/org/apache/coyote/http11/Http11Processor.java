@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpServlet servlet = servletContext.mapServlet(request);
             servlet.service(request, response);
 
-            outputStream.write(HttpResponseWriter.write(response).getBytes());
+            outputStream.write(HttpResponseWriter.writeAsBytes(response));
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

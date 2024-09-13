@@ -43,7 +43,7 @@ public class HttpRequest {
                 bodyBuilder.append(buffer, 0, readBytes);
             }
             String content = bodyBuilder.toString();
-            this.body = new HttpBody(content.getBytes());
+            this.body = new HttpBody(content);
         } catch (IOException e) {
             // IOException on reading lines using inputstream, parsing uri
             // IndexOutOfBoundsException on missing tokens in request-line and header

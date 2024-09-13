@@ -14,8 +14,12 @@ public class HttpBody {
         this.content = content;
     }
 
+    public HttpBody(String content) {
+        this(content.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static HttpBody empty() {
-        return new HttpBody(new byte[0]);
+        return new HttpBody("");
     }
 
     public long getContentLength() {

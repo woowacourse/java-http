@@ -11,14 +11,14 @@ class HttpBodyTest {
     @DisplayName("Byte 배열로 HttpBody를 생성한다.")
     void createFromByteArray() {
         String content = "Hello, World!";
-        HttpBody httpBody = new HttpBody(content.getBytes());
+        HttpBody httpBody = new HttpBody(content);
         assertEquals(content, httpBody.getContent());
     }
 
     @Test
     @DisplayName("content가 null이 주어지는 경우, 빈 문자열로 치환해 저장한다.")
     void emptyContentFromNullInput() {
-        HttpBody httpBody = new HttpBody(null);
+        HttpBody httpBody = new HttpBody((String) null);
         assertEquals("", httpBody.getContent());
     }
 }

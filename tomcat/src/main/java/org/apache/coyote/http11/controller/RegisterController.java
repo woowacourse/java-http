@@ -16,7 +16,7 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         response.setStatusCode(HttpStatusCode.FOUND);
-        response.addHeader("Location", "/index.html");
+        response.addLocation("/index.html");
     }
 
     @Override

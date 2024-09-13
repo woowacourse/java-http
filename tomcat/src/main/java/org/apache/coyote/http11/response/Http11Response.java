@@ -52,6 +52,14 @@ public class Http11Response {
         headers.addHeader(key, value);
     }
 
+    public void addLocation(String url) {
+        headers.addLocation(url);
+    }
+
+    public void setCookie(String name, String value) {
+        headers.addSetCookie(name, value);
+    }
+
     public void setStatusCode(HttpStatusCode statusCode) {
         this.statusCode = statusCode;
     }

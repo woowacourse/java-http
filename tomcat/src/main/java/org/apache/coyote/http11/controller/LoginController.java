@@ -23,11 +23,11 @@ public class LoginController extends AbstractController {
         if (optionalUser.isPresent() && (user = optionalUser.get()).checkPassword(body.get("password"))) {
             Session session = Session.getInstance(user);
             SessionManager.add(session);
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            response.setCookie("JSESSIONID", session.getId());
             redirectUri = "/index.html";
         }
 
-        response.addHeader("Location", redirectUri);
+        response.addLocation(redirectUri);
     }
 
     @Override

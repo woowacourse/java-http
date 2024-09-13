@@ -1,10 +1,10 @@
 package org.apache.catalina.connector;
 
+import org.apache.coyote.container.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -23,15 +23,15 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private final Container container;
+    private final ServletContainer container;
 
     private boolean stopped;
 
-    public Connector(Container container) {
+    public Connector(ServletContainer container) {
         this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
     }
 
-    public Connector(final Container container, final int port, final int acceptCount, final int maxThread) {
+    public Connector(final ServletContainer container, final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThread);

@@ -9,7 +9,6 @@ import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
@@ -20,9 +19,9 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final ServletContainer servletContainer;
 
-    public Http11Processor(final Socket connection, Container container) {
+    public Http11Processor(final Socket connection, ServletContainer container) {
         this.connection = connection;
-        this.servletContainer = (ServletContainer) container;
+        this.servletContainer = container;
     }
 
     @Override

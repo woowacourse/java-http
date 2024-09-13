@@ -7,10 +7,9 @@ import org.apache.coyote.request.mapper.RequestMapping;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.HttpStatus;
 
-import java.awt.*;
 import java.util.Optional;
 
-public class RequestContainer extends Container implements ServletContainer {
+public class RequestContainer implements ServletContainer {
 
     private final RequestMapping requestMapping;
 

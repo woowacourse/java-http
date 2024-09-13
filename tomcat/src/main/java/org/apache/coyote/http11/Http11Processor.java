@@ -17,7 +17,6 @@ import com.techcourse.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping requestMapping = new RequestMapping();
 
     private final Socket connection;
 
@@ -47,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void service(final HttpRequest request, final HttpResponse response) throws IOException {
         log.info("요청 = {}", request.getRequestLine());
-        final var controller = requestMapping.getController(request);
+        final var controller = RequestMapping.getController(request);
         controller.service(request, response);
     }
 

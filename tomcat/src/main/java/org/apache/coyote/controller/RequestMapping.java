@@ -15,7 +15,10 @@ public class RequestMapping {
         SUIT_CASE.put("/register", new RegisterController());
     }
 
-    public Controller getController(final HttpRequest request) {
+    private RequestMapping() {
+    }
+
+    public static Controller getController(final HttpRequest request) {
         if (SUIT_CASE.containsKey(request.getPath())) {
             return SUIT_CASE.get(request.getPath());
         }

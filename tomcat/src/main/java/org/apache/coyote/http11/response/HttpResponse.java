@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class HttpResponse {
+    private final Map<String, String> headers = new TreeMap<>();
     private HttpStatus status = HttpStatus.OK;
-    private Map<String, String> headers = new TreeMap<>();
     private String body;
 
     public void setStatus(HttpStatus status) {
@@ -24,15 +24,11 @@ public class HttpResponse {
 
 
     public String normalize() {
-        StringBuilder response = new StringBuilder(String.format("""
-                        HTTP/1.1 %d %s
-                        """,
-                status.getCode(),
-                status.getMessage()
-        ));
+        StringBuilder response = new StringBuilder("HTTP/1.1 " + status.getCode() + " " + status.getMessage());
+        response.append(" \r\n");
 
         for (var entry : headers.entrySet()) {
-            response.append(entry.getKey()).append(" : ").append(entry.getValue()).append("\r\n");
+            response.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
 
         addBody(response);
@@ -43,13 +39,8 @@ public class HttpResponse {
         if (body == null) {
             return;
         }
-        base.append(String.format("""
-                        Content-Length: %d
-                                        
-                        %s
-                        """,
-                body.getBytes().length,
-                body
-        ));
+        base.append("Content-Length: ").append(body.getBytes().length).append(" \r\n")
+                .append("\r\n")
+                .append(body);
     }
 }

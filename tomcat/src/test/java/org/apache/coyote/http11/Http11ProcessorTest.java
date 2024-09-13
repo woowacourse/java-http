@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
+import support.StubProcessor;
 import support.StubSocket;
 
 import java.io.File;
@@ -16,7 +17,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new StubProcessor(socket);
 
         // when
         processor.process(socket);

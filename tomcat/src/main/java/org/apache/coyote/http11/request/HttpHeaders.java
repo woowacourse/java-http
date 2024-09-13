@@ -27,13 +27,17 @@ public class HttpHeaders {
     public static HttpHeaders of(List<String> headers) {
         Map<String, String> map = new HashMap<>();
         for (String header : headers) {
-            if (!isValidHeader(header)) {
-                throw new HttpFormatException("올바르지 않은 헤더 형식입니다.");
-            }
+            validateHeader(header);
             String[] splitHeader = header.split(HEADER_SEPARATOR);
             map.put(splitHeader[KEY_INDEX], splitHeader[VALUE_INDEX]);
         }
         return new HttpHeaders(map);
+    }
+
+    private static void validateHeader(String header) {
+        if (!isValidHeader(header)) {
+            throw new HttpFormatException("올바르지 않은 헤더 형식입니다.");
+        }
     }
 
     private static boolean isValidHeader(String header) {

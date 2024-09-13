@@ -8,6 +8,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
@@ -26,7 +27,8 @@ public class LoginController extends AbstractController {
         if (method.equalsIgnoreCase("GET")) {
             doGet(request, response);
             return;
-        } else if (method.equalsIgnoreCase("POST")) {
+        }
+        if (method.equalsIgnoreCase("POST")) {
             doPost(request, response);
             return;
         }
@@ -36,27 +38,18 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> cookies = request.getCookies();
-        if (cookies.containsKey("JSESSIONID")) {
-            if (sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
-                System.out.println("here!!!!!!!!!1");
-                response.setPath("/index.html");
-                response.setFileType("html");
-                response.setHttpStatusCode(HttpStatusCode.FOUND);
-                final URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
-                if (resource == null) {
-                    throw new IllegalArgumentException("invalid index.html");
-                }
-                final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                response.setResponseBody(responseBody);
-                return;
-            }
+        if (cookies.containsKey("JSESSIONID") && sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
+            response.setPath("/index.html");
+            response.setFileType("html");
+            response.setHttpStatusCode(HttpStatusCode.FOUND);
+            response.setResponseBody(readBodyFromPath(response.getPath()));
+            return;
         }
 
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        response.setPath("/index.html");
         response.setFileType("html");
         response.setHttpStatusCode(HttpStatusCode.OK);
-        response.setResponseBody(responseBody);
+        response.setResponseBody(readBodyFromPath(response.getPath()));
     }
 
     @Override
@@ -84,22 +77,22 @@ public class LoginController extends AbstractController {
             response.setFileType("html");
             response.setHttpStatusCode(HttpStatusCode.FOUND);
             response.setHttp11Cookie(http11Cookie);
-            final URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
-            if (resource == null) {
-                throw new IllegalArgumentException("invalid index.html");
-            }
-            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final var responseBody = readBodyFromPath(response.getPath());
             response.setResponseBody(responseBody);
             return;
         }
         response.setPath("/401.html");
         response.setFileType("html");
         response.setHttpStatusCode(HttpStatusCode.FOUND);
-        final URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
-        if (resource == null) {
-            throw new IllegalArgumentException("invalid 401.html");
-        }
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final var responseBody = readBodyFromPath(response.getPath());
         response.setResponseBody(responseBody);
+    }
+
+    private String readBodyFromPath(String path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource == null) {
+            throw new IllegalArgumentException("invalid " + path);
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

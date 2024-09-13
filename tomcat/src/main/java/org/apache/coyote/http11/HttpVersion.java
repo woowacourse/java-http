@@ -19,4 +19,8 @@ public enum HttpVersion {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP VERSION 요청: " + version));
     }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
 }

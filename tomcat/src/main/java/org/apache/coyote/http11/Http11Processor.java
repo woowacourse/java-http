@@ -11,6 +11,8 @@ import org.apache.coyote.http.cookie.HttpCookies;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleException(OutputStream outputStream) {
         try {
-            sendHttpResponse("/static/500.html", outputStream, "500 INTERNAL SERVER ERROR", "text/html;charset=utf-8", "");
+            sendHttpResponse("/static/500.html", outputStream, HttpStatus.INTERNAL_SERVER_ERROR, MimeType.HTML, "");
         } catch (IOException e) {
             log.error("Failed to send error response", e);
         }
@@ -102,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
                 redirect("", "/", outputStream);
                 return;
             }
-            sendHttpResponse("/static/register.html", outputStream, "400 BAD REQUEST", "text/html;charset=utf-8", "");
+            sendHttpResponse("/static/register.html", outputStream, HttpStatus.BAD_REQUEST, MimeType.HTML, "");
         }
     }
 
@@ -130,8 +132,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String setCookieHeader(String uuid) {
-        return "Set-Cookie: JSESSIONID=" + uuid + " " + "\r\n"
-                + "";
+        return "JSESSIONID=" + uuid + " ";
     }
 
     private boolean register(Map<String, String> requestBody) {
@@ -165,8 +166,6 @@ public class Http11Processor implements Runnable, Processor {
     private void doGet(final HttpRequest httpRequest, final String requestURL,
                        final OutputStream outputStream) throws IOException {
         String cookies = httpRequest.getRequestHeader().getHeaders().get("Cookie");
-        String[] searchResourcePath = determineResourcePath(requestURL);
-
         String sessionId = "";
         HttpCookies httpCookies = HttpCookies.from(cookies);
 
@@ -178,51 +177,43 @@ public class Http11Processor implements Runnable, Processor {
             redirect("", "/", outputStream);
         }
 
-        String httpStatus = searchResourcePath[0];
-        String resourcePath = searchResourcePath[1];
+        HttpStatus httpStatus = HttpStatus.OK;
+        String resourcePath = determineResourcePath(requestURL);
 
-        String contentType = determineContentType(resourcePath);
+        MimeType contentType = determineContentType(resourcePath);
 
         sendHttpResponse(resourcePath, outputStream, httpStatus, contentType, "");
     }
 
-    private String[] determineResourcePath(String requestURL) {
-        String[] result = new String[2];
-        result[0] = "200 OK";
-
+    private String determineResourcePath(String requestURL) {
         if (requestURL.equals("/") || requestURL.equals("/index.html")) {
-            result[1] = "/static/index.html";
-            return result;
+            return "/static/index.html";
         }
 
         if (requestURL.endsWith(SVG)) {
-            result[1] = STATIC + "/assets/img/error-404-monochrome.svg";
-            return result;
+            return STATIC + "/assets/img/error-404-monochrome.svg";
         }
 
         if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
-            result[1] = STATIC + requestURL;
-            return result;
+            return STATIC + requestURL;
         }
 
-        result[1] = STATIC + requestURL + HTML;
-        return result;
+        return STATIC + requestURL + HTML;
     }
 
-    private String determineContentType(String resourcePath) {
+    private MimeType determineContentType(String resourcePath) {
         if (resourcePath.endsWith(CSS)) {
-            return "text/css";
+            return MimeType.CSS;
         }
 
         if (resourcePath.endsWith(JS)) {
-            return "application/javascript";
+            return MimeType.JS;
         }
 
         if (resourcePath.endsWith(SVG)) {
-            return "image/svg+xml";
+            return MimeType.SVG;
         }
-
-        return "text/html;charset=utf-8";
+        return MimeType.HTML;
     }
 
     private Optional<Session> loginPost(Map<String, String> requestBody) {
@@ -300,62 +291,45 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void redirect(String cookieHeader, String path, OutputStream outputStream) throws IOException {
-        String locationHeader = "Location: " + path;
+        String resourcePath = determineResourcePath(path);
 
-        String[] resourcePath = determineResourcePath(path);
+        URL resource = getClass().getResource(resourcePath);
 
-        URL resource = getClass().getResource(resourcePath[1]);
+        byte[] values = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, values);
 
-        String header = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Content-Type: text/html;charset=utf-8  ",
-                "Content-Length: " + responseBody.length + " ",
-                locationHeader,
-                cookieHeader,
-                "");
+        httpResponse.setMimeType(MimeType.HTML);
+        httpResponse.setLocation(path);
+        httpResponse.setCookie(cookieHeader);
 
-        byte[] headerBytes = header.getBytes();
-        byte[] response = new byte[headerBytes.length + responseBody.length];
-
-        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
-        System.arraycopy(responseBody, 0, response, headerBytes.length, responseBody.length);
-
+        byte[] response = httpResponse.toByte();
         writeHttpResponse(response, outputStream);
     }
 
-    private void sendHttpResponse(final String path, final OutputStream outputStream, String httpStatus,
-                                  final String contentType, final String cookie) throws IOException {
+    private void sendHttpResponse(final String path, final OutputStream outputStream, HttpStatus httpStatus,
+                                  final MimeType contentType, final String cookie) throws IOException {
 
         byte[] response = createHttpResponse(httpStatus, contentType, cookie, path);
         writeHttpResponse(response, outputStream);
     }
 
-    private byte[] createHttpResponse(String httpStatus, String contentType, String cookieHeader, final String path) throws IOException {
+    private byte[] createHttpResponse(HttpStatus httpStatus, MimeType contentType, String cookieHeader, final String path) throws IOException {
         URL resource = getClass().getResource(path);
 
         if (resource == null) {
             resource = getClass().getResource("/static/404.html");
-            httpStatus = "404 NOT FOUND";
+            httpStatus = HttpStatus.NOT_FOUND;
         }
 
-        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        byte[] values = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        String header = String.join("\r\n",
-                "HTTP/1.1 " + httpStatus + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                cookieHeader,
-                "");
+        HttpResponse httpResponse = new HttpResponse(httpStatus, values);
 
-        byte[] headerBytes = header.getBytes();
-        byte[] response = new byte[headerBytes.length + responseBody.length];
+        httpResponse.setMimeType(contentType);
+        httpResponse.setCookie(cookieHeader);
 
-        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
-        System.arraycopy(responseBody, 0, response, headerBytes.length, responseBody.length);
-
-        return response;
+        return httpResponse.toByte();
     }
 
     private void writeHttpResponse(byte[] response, OutputStream outputStream) throws IOException {

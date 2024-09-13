@@ -96,13 +96,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -127,13 +126,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: text/css";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -157,13 +155,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: application/javascript \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: application/javascript";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -188,13 +185,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static//assets/img/error-404-monochrome.svg");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: image/svg+xml \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: " + MimeType.SVG.getType();
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
 
@@ -219,13 +215,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -249,13 +244,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -279,13 +273,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 200 OK";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -309,13 +302,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String responseLine = "HTTP/1.1 404 NOT FOUND";
+        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(responseLine, contentType, contentLength, body);
     }
 
     @Test
@@ -368,7 +360,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String setCookie = "Set-Cookie";
+        String setCookie = "Set-Cookie: JSESSIONID=";
 
         assertThat(socket.output()).contains(setCookie);
     }

@@ -1,13 +1,13 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpRequest;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpRequest;
+import org.apache.catalina.connector.HttpResponse;
 import com.techcourse.http.MimeType;
 import com.techcourse.model.User;
 import java.io.IOException;
 import org.apache.catalina.StaticResourceProvider;
-import org.apache.coyote.http11.AbstractController;
+import jakarta.servlet.http.AbstractController;
 
 public class RegisterController extends AbstractController {
 

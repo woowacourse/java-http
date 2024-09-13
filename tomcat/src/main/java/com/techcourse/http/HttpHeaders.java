@@ -1,5 +1,6 @@
 package com.techcourse.http;
 
+import jakarta.servlet.http.HttpCookie;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class HttpHeaders {
 
     public String getHeadersString() {
         if (cookie.isExist()) {
-            headers.put(SET_COOKIE_HEADER, cookie.serialize());
+            headers.put(SET_COOKIE_HEADER, cookie.toMessage());
         }
         StringBuilder headersString = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -41,7 +42,7 @@ public class HttpHeaders {
                     .append(" ")
                     .append(CRLF);
         }
-        headersString.append(cookie.serialize());
+        headersString.append(cookie.toMessage());
         return headersString.toString();
     }
 
@@ -75,5 +76,9 @@ public class HttpHeaders {
 
     public void setHttpOnly(boolean httpOnly) {
         cookie.setHttpOnly(httpOnly);
+    }
+
+    public void setMaxAge(int maxAge) {
+        cookie.setMaxAge(maxAge);
     }
 }

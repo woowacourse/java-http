@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpRequest;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpRequest;
+import org.apache.catalina.connector.HttpResponse;
 import com.techcourse.http.HttpStatusCode;
 import com.techcourse.model.User;
 import java.io.IOException;

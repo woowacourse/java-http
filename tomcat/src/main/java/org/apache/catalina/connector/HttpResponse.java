@@ -1,5 +1,7 @@
-package com.techcourse.http;
+package org.apache.catalina.connector;
 
+import com.techcourse.http.HttpHeaders;
+import com.techcourse.http.HttpStatusCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -84,17 +86,21 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setCookie(String key, String value) {
-        headers.setCookie(key, value);
-        return this;
-    }
-
     public HttpResponse setBody(String body) {
         this.body = body;
         return this;
     }
 
+    public HttpResponse setCookie(String key, String value) {
+        headers.setCookie(key, value);
+        return this;
+    }
+
     public void setHttpOnly(boolean httpOnly) {
         headers.setHttpOnly(httpOnly);
+    }
+
+    public void setMaxAge(int maxAge) {
+        headers.setMaxAge(maxAge);
     }
 }

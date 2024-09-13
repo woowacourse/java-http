@@ -1,7 +1,7 @@
-package org.apache.coyote.http11;
+package jakarta.servlet.http;
 
-import com.techcourse.http.HttpRequest;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpRequest;
+import org.apache.catalina.connector.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 

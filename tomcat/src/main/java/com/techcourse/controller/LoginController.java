@@ -3,14 +3,14 @@ package com.techcourse.controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpRequest;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpRequest;
+import org.apache.catalina.connector.HttpResponse;
 import com.techcourse.http.MimeType;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.catalina.StaticResourceProvider;
-import org.apache.coyote.http11.AbstractController;
+import jakarta.servlet.http.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

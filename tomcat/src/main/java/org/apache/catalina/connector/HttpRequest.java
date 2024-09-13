@@ -1,5 +1,6 @@
-package com.techcourse.http;
+package org.apache.catalina.connector;
 
+import com.techcourse.http.HttpHeaders;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;

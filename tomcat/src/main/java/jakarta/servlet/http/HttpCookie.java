@@ -1,4 +1,4 @@
-package com.techcourse.http;
+package jakarta.servlet.http;
 
 import java.util.LinkedHashMap;
 
@@ -13,13 +13,16 @@ public class HttpCookie {
 
     private final Map<String, String> cookies;
     private boolean httpOnly;
+    private int maxAge;
+
 
     public HttpCookie() {
         this.cookies = new LinkedHashMap<>();
         this.httpOnly = false;
+        this.maxAge = -1;
     }
 
-    public String serialize() {
+    public String toMessage() {
         StringBuilder cookieString = new StringBuilder();
         for (Map.Entry<String, String> entry : cookies.entrySet()) {
             cookieString.append(entry.getKey())
@@ -29,6 +32,11 @@ public class HttpCookie {
         }
         if (httpOnly) {
             cookieString.append(" HttpOnly");
+        }
+        if (maxAge != -1) {
+            cookieString.append(" Max-Age=")
+                    .append(maxAge)
+                    .append(SEPARATOR);
         }
         return cookieString.toString();
     }
@@ -51,5 +59,9 @@ public class HttpCookie {
 
     public void setHttpOnly(boolean httpOnly) {
         this.httpOnly = httpOnly;
+    }
+
+    public void setMaxAge(int maxAge) {
+        this.maxAge = maxAge;
     }
 }

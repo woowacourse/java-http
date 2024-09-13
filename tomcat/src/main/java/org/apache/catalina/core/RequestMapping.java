@@ -1,13 +1,13 @@
-package org.apache.catalina;
+package org.apache.catalina.core;
 
 import com.techcourse.controller.DashBoardController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
-import com.techcourse.http.HttpRequest;
+import org.apache.catalina.connector.HttpRequest;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.Controller;
+import jakarta.servlet.http.Controller;
 
 public class RequestMapping {
 

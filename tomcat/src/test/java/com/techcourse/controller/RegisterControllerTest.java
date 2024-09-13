@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpRequest;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpRequest;
+import org.apache.catalina.connector.HttpResponse;
 import com.techcourse.http.HttpStatusCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

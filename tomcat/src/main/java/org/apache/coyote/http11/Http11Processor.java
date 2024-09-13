@@ -1,14 +1,15 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.Controller;
 import org.apache.catalina.session.SessionManager;
-import com.techcourse.http.HttpRequest;
+import org.apache.catalina.connector.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
-import com.techcourse.http.HttpResponse;
+import org.apache.catalina.connector.HttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.RequestMapping;
+import org.apache.catalina.core.RequestMapping;
 import org.apache.catalina.StaticResourceProvider;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         if (isInvalidJSession(jSession)) {
             response.setLocation("/login.html")
                     .setCookie(JSESSIONID, jSession)
-                    .setCookie("Max-Age", "0");
+                    .setMaxAge(0);
         }
     }
 

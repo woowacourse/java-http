@@ -32,13 +32,13 @@ public class HttpRequestHeader {
 
     private static void validateHeaderForm(String[] splitHeader) {
         if (splitHeader.length != 2) {
-            throw new IllegalArgumentException("잘못된 HTTP/1.1 헤더 양식입니다.");
+            throw new IllegalArgumentException("각 헤더는 key:value쌍으로 이루어져야 합니다.");
         }
     }
 
     private static void validateRequiredHeaderAttribute(Map<String, String> httpRequestHeader) {
         if (!httpRequestHeader.containsKey("Host")) {
-            throw new IllegalArgumentException("잘못된 HTTP/1.1 헤더 양식입니다.");
+            throw new IllegalArgumentException("Host 헤더는 필수입니다.");
         }
     }
 

@@ -17,12 +17,12 @@ class HttpRequestHeaderTest {
         // given
         List<String> headers = List.of("Host: localhost:8080/", "Set-Cookies: 123");
 
-        assertDoesNotThrow(()->HttpRequestHeader.toHttpRequestHeader(headers));
+        assertDoesNotThrow(() -> HttpRequestHeader.toHttpRequestHeader(headers));
     }
 
     @DisplayName("Header양식이 알맞지 않은경우 예외가 발생한다.")
     @ParameterizedTest
-    @ValueSource(strings = {"Host=a", "Host-a", "a","Host:localhost"})
+    @ValueSource(strings = {"Host=a", "Host-a", "a", "Host:localhost"})
     void throw_exception_When_form_incorrect(String incorrectHeaderFrom) {
         // given
         List<String> incorrectHeaderFroms = List.of(incorrectHeaderFrom);
@@ -30,7 +30,7 @@ class HttpRequestHeaderTest {
         // when-then
         assertThatThrownBy(() -> HttpRequestHeader.toHttpRequestHeader(incorrectHeaderFroms))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("잘못된 HTTP/1.1 헤더 양식입니다.");
+                .hasMessage("각 헤더는 key:value쌍으로 이루어져야 합니다.");
     }
 
     @DisplayName("Header에 Host가 없을 경우 예외가 발생한다.")
@@ -42,6 +42,6 @@ class HttpRequestHeaderTest {
         // when-then
         assertThatThrownBy(() -> HttpRequestHeader.toHttpRequestHeader(incorrectHeaderFroms))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("잘못된 HTTP/1.1 헤더 양식입니다.");
+                .hasMessage("Host 헤더는 필수입니다.");
     }
 }

@@ -23,7 +23,7 @@ public class HttpResponse {
     }
 
     public void responseBody(String body) {
-        setDefaultHaders(HttpContentType.TEXT, body);
+        setDefaultHeaders(HttpContentType.TEXT, body);
         write(body);
     }
 
@@ -44,7 +44,7 @@ public class HttpResponse {
         );
     }
 
-    private void setDefaultHaders(HttpContentType httpContentType, String body) {
+    private void setDefaultHeaders(HttpContentType httpContentType, String body) {
         this.headers.addHeader("Content-Type", CONTENT_TYPE_FORMAT.formatted(httpContentType.getContentType()));
         this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
@@ -59,13 +59,13 @@ public class HttpResponse {
         }
 
         HttpContentType contentType = HttpContentType.matchContentType(path);
-        setDefaultHaders(contentType, resource);
+        setDefaultHeaders(contentType, resource);
         write(resource);
     }
 
     public void redirect(String uri) {
         headers.addHeader("Location", uri);
-        setDefaultHaders(HttpContentType.TEXT, "");
+        setDefaultHeaders(HttpContentType.TEXT, "");
         write("");
     }
 

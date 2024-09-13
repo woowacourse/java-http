@@ -39,6 +39,6 @@ class AppTest {
             thread.join();
         }
 
-        assertThat(count.intValue()).isEqualTo(2);
+        assertThat(count.intValue()).isEqualTo(10);
     }
 }

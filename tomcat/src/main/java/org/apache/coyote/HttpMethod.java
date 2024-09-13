@@ -16,4 +16,12 @@ public enum HttpMethod {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("허용되지 않는 HTTP 메서드입니다. method = " + method));
     }
+
+    public boolean isGet() {
+        return this.equals(GET);
+    }
+
+    public boolean isPost() {
+        return this.equals(POST);
+    }
 }

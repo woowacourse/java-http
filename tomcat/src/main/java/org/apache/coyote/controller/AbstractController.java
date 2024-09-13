@@ -17,9 +17,9 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) {
         HttpMethod method = request.getMethod();
 
-        if (HttpMethod.GET.equals(method)) {
+        if (method.isGet()) {
             doGet(request, response);
-        } else if (HttpMethod.POST.equals(method)) {
+        } else if (method.isPost()) {
             doPost(request, response);
         } else {
             throw new UnsupportedOperationException("Unsupported HTTP method: " + method);

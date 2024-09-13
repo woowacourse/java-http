@@ -3,8 +3,12 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 10 # 연결 수가 max-connections 보다 많으면 대기 할 수 있는 요청 수
+    max-connections: 2 # 최대 연결 개수. e,g) 10개의 요청이 동시에 오면 2개의 요청만 was에서 처리한다.
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 2 # 최소 스레드 개수
+      max: 10      # 요청을 동시에 처리할 수 있는 최대 개수, thread 개수와 상관없이 was는 max-connection만큼 처리한다.
+
+
+# 흐름
+# -> accept-count -> process(max-connection) -> thread

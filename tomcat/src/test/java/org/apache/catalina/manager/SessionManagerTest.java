@@ -93,6 +93,6 @@ class SessionManagerTest {
         // then
         Optional<Session> result = sessionManager.findSession(request);
 
-        assertThat(result).isEmpty();
+        assertThat(result.isPresent()).isFalse();
     }
 }

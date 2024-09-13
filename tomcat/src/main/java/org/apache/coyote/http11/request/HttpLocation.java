@@ -31,6 +31,10 @@ public class HttpLocation {
         if (!split.getFirst().startsWith("/")) {
             throw new IllegalArgumentException("location first character parse error");
         }
+        split.set(0, split.getFirst().substring(1));
+        if(split.stream().noneMatch(r -> pattern.matcher(r).matches())){
+            throw new IllegalArgumentException("location character parse error");
+        }
         if (split.size() > 2) {
             throw new IllegalArgumentException("location length parse error");
         }

@@ -20,3 +20,9 @@
 - [x] Session 구현하기
   - [x] 로그인 성공 시 Session 객체의 값으로 User 객체 저장 
   - [x] 로그인된 상태에서 `/login` 접속하면 `index.html`로 리다이렉트
+
+## 3단계 - 리팩터링 
+
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [x] Controller 인터페이스 추가하기

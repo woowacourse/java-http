@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum HeaderKey {
+public enum HeaderName {
 
     COOKIE("Cookie"),
     CONTENT_LENGTH("Content-Length"),
@@ -11,7 +11,7 @@ public enum HeaderKey {
 
     private final String value;
 
-    HeaderKey(String value) {
+    HeaderName(String value) {
         this.value = value;
     }
 

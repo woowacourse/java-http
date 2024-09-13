@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -11,7 +11,7 @@ public class HttpHeaders {
     private final Map<String, String> fields;
 
     public HttpHeaders() {
-        this.fields = new HashMap<>();
+        this.fields = new LinkedHashMap<>();
     }
 
     public void add(String headerLine) {
@@ -23,39 +23,34 @@ public class HttpHeaders {
         fields.put(name, value);
     }
 
-    public void add(HeaderKey headerKey, String value) {
-        add(headerKey.getValue(), value);
+    public void add(HeaderName headerName, String value) {
+        add(headerName.getValue(), value);
     }
 
-    public Optional<String> findByName(HeaderKey headerKey) {
+    public Optional<String> findByName(HeaderName headerName) {
         return fields.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(headerKey.getValue()))
+                .filter(entry -> entry.getKey().equals(headerName.getValue()))
                 .map(Entry::getValue)
                 .findAny();
     }
 
-    public Optional<String> findCookieByName(String name) {
-        Optional<String> rawCookies = findByName(HeaderKey.COOKIE);
-        if (rawCookies.isEmpty()) {
-            return Optional.empty();
-        }
-
-        HttpCookies cookies = new HttpCookies(rawCookies.get());
-        return cookies.findByName(name);
+    public HttpCookies getCookies() {
+        Optional<String> value = findByName(HeaderName.COOKIE);
+        return value.map(HttpCookies::new).orElseGet(HttpCookies::new);
     }
 
     public int getContentLength() {
-        return Integer.parseInt(findByName(HeaderKey.CONTENT_LENGTH).orElse("0"));
+        return Integer.parseInt(findByName(HeaderName.CONTENT_LENGTH).orElse("0"));
     }
 
-    public String build() {
+    public String render() {
         return fields.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(" \r\n", "", " "));
     }
 
     @Override
     public String toString() {
-        return build();
+        return render();
     }
 }

@@ -25,7 +25,7 @@ public class RequestLine {
         return protocolVersion;
     }
 
-    public String build() {
+    public String render() {
         return method + " " + path + " " + protocolVersion;
     }
 }

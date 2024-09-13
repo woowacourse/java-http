@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpCookies {
@@ -20,10 +19,11 @@ public class HttpCookies {
                 .collect(Collectors.toMap(part -> part[0], part -> part[1]));
     }
 
-    public Optional<String> findByName(String name) {
+    public String getByName(String name) {
         return fields.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(name))
                 .map(Map.Entry::getValue)
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("쿠키 값을 찾을 수 없습니다."));
     }
 }

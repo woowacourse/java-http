@@ -2,58 +2,63 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.coyote.http11.component.HttpCookie;
+import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.component.HttpVersion;
+import org.apache.coyote.http11.file.FileDetails;
+import org.apache.coyote.http11.file.FileFinder;
 
-public class HttpResponse<T> {
-
-    private static final String CRLF = "\r\n";
-    private static final String HEADER_DELIMITER = ": ";
-    private static final String SPACE = " ";
+public class HttpResponse {
 
     private final StatusLine statusLine;
-    private final T body;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private String body;
 
-    public HttpResponse(HttpStatus httpStatus, T body, Map<String, String> headers) {
-        this(new StatusLine(httpStatus), body);
-        headers.forEach(this::addHeader);
+    public HttpResponse(HttpVersion httpVersion) {
+        this(new StatusLine(httpVersion), "");
     }
 
-    public HttpResponse(StatusLine statusLine, T body, Map<String, String> headers) {
-        this(statusLine, body);
-        headers.forEach(this::addHeader);
-    }
-
-    public HttpResponse(StatusLine statusLine, T body) {
+    private HttpResponse(StatusLine statusLine, String body) {
         this.statusLine = statusLine;
         this.body = body;
+    }
+
+    public void sendRedirect(String path) {
+        statusLine.setHttpStatus(HttpStatus.FOUND);
+        addHeader(HttpHeaders.LOCATION, path);
+    }
+
+    public void addCookie(HttpCookie httpCookie) {
+        addHeader(HttpHeaders.SET_COOKIE, httpCookie.getCookieToMessage());
     }
 
     public void addHeader(String header, String value) {
         headers.put(header, value);
     }
 
-    public HttpResponse<String> getFileResponse(String body) {
-        return new HttpResponse<>(statusLine, body, headers);
+    public void addStaticResource(String uriPath) {
+        FileDetails fileDetails = FileDetails.from(uriPath);
+        FileFinder fileFinder = new FileFinder(fileDetails);
+        String responseBody = fileFinder.resolve();
+        addHeader(HttpHeaders.CONTENT_TYPE, fileDetails.extension().getMediaType());
+        addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+        setBody(responseBody);
     }
 
-    public String convertToMessage() {
-        StringBuilder stringBuilder = new StringBuilder();
-        String headerMessages = headers.entrySet().stream().map(this::formatHeaderEntry)
-                .collect(Collectors.joining(CRLF));
-
-        stringBuilder.append(statusLine.getStatusLineMessage()).append(CRLF).append(headerMessages).append(CRLF)
-                .append(CRLF).append(body);
-
-        return stringBuilder.toString();
+    public StatusLine getStatusLine() {
+        return statusLine;
     }
 
-    private String formatHeaderEntry(Map.Entry<String, String> entry) {
-        return entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE;
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
-    public T getBody() {
+    public String getBody() {
         return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

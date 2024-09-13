@@ -1,53 +1,66 @@
 package org.apache.coyote.http11.request;
 
-import java.io.IOException;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.component.HttpVersion;
+import org.apache.coyote.http11.request.parser.HttpRequestUriParser;
 
 public class HttpRequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int REQUEST_LINE_COUNT = 3;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final HttpRequestUri requestUri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    public HttpRequestLine(String input) {
-        validateNotNull(input);
-        String[] splitLine = input.split(REQUEST_LINE_DELIMITER);
-        validateLineSize(splitLine);
-        this.httpMethod = HttpMethod.valueOf(splitLine[0]);
-        this.requestUri = HttpRequestUriParser.parse(splitLine[1]);
-        this.httpVersion = splitLine[2];
+    private HttpRequestLine(HttpMethod httpMethod, HttpRequestUri requestUri, HttpVersion httpVersion) {
+        this.httpMethod = httpMethod;
+        this.requestUri = requestUri;
+        this.httpVersion = httpVersion;
     }
 
-    private void validateNotNull(String input) {
-        if (input == null) {
+    public static HttpRequestLine from(String input) {
+        validateNotBlank(input);
+        String[] splitLine = input.split(REQUEST_LINE_DELIMITER);
+        validateLineSize(splitLine);
+        return new HttpRequestLine(
+                HttpMethod.valueOf(splitLine[HTTP_METHOD_INDEX]),
+                HttpRequestUriParser.parse(splitLine[REQUEST_URI_INDEX]),
+                HttpVersion.parse(splitLine[HTTP_VERSION_INDEX])
+        );
+    }
+
+    private static void validateNotBlank(String input) {
+        if (StringUtils.isBlank(input)) {
             throw new UncheckedHttpException(new IllegalArgumentException("Http Request Line은 비어있을 수 없습니다."));
         }
     }
 
-    private void validateLineSize(String[] splitLine) {
+    private static void validateLineSize(String[] splitLine) {
         if (splitLine.length != REQUEST_LINE_COUNT) {
             throw new UncheckedHttpException(new IllegalArgumentException("Http Request Line 형식이 잘못 되었습니다."));
         }
     }
 
-    public HttpResponse<String> getHttpResponse(RequestBody body) throws IOException {
-        if (httpMethod.isGet()) {
-            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod);
-            return requestUri.getHttpResponse(httpResponse);
-        }
-        if (HttpMethod.POST.equals(httpMethod)) {
-            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, body);
-            return requestUri.getHttpResponse(httpResponse);
-        }
-        throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));
+    public Map<String, String> getQueryParams() {
+        return requestUri.queryParams();
     }
 
-    public String getHttpVersion() {
+    public String getPath() {
+        return requestUri.path();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 }

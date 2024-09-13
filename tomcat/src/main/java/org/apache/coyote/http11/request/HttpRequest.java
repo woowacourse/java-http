@@ -1,26 +1,47 @@
 package org.apache.coyote.http11.request;
 
-import java.io.IOException;
 import java.util.Map;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.catalina.Session;
+import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.component.HttpVersion;
 
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
-    private final Map<String, String> headers;
+    private final HttpRequestHeader headers;
     private final RequestBody body;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, RequestBody body) {
+    public HttpRequest(
+            HttpRequestLine httpRequestLine,
+            HttpRequestHeader headers,
+            RequestBody body
+    ) {
         this.httpRequestLine = httpRequestLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public HttpResponse<String> getHttpResponse() throws IOException {
-        return httpRequestLine.getHttpResponse(body);
+    public Session getSession(boolean needSession) {
+        return headers.getSession(needSession);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpMethod getHttpMethod() {
+        return httpRequestLine.getHttpMethod();
+    }
+
+    public HttpVersion getHttpVersion() {
+        return httpRequestLine.getHttpVersion();
+    }
+
+    public String getPath() {
+        return httpRequestLine.getPath();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return httpRequestLine.getQueryParams();
+    }
+
+    public RequestBody getBody() {
+        return body;
     }
 }

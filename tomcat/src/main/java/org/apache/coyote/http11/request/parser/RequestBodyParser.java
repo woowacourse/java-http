@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.bodyparser;
+package org.apache.coyote.http11.request.parser;
 
 import java.util.Map;
 

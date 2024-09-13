@@ -62,7 +62,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedBody);
     }
 
-    @DisplayName("/login Post요청시, 성공 -> default페이지 리다이렉션")
+    @DisplayName("/login Post요청시, 성공 -> root location 리다이렉션")
     @Test
     void response_redirect_default_uri_When_request_post_login_success() throws IOException {
         // given

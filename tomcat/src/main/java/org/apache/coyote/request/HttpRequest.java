@@ -61,4 +61,8 @@ public class HttpRequest {
     public RequestBody getBody() {
         return body;
     }
+
+    public String getBody(String parameter) {
+        return body.get(parameter);
+    }
 }

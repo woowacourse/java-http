@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
 
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
-            Map<String, String> bodys = getBody(request.getBody());
+            Map<String, String> bodys = request.parseQueryParameters();
 
             String account = bodys.get("account");
             String password = bodys.get("password");
@@ -56,15 +56,5 @@ public class LoginController extends AbstractController {
         } catch (Exception e) {
             response.redirect("/401.html");
         }
-    }
-
-    private Map<String, String> getBody(String body) {
-        Map<String, String> bodys = new HashMap<>();
-        String[] pairs = body.split("&");
-        for (String pair : pairs) {
-            String[] keyAndValue = pair.split("=");
-            bodys.put(keyAndValue[0], keyAndValue[1]);
-        }
-        return bodys;
     }
 }

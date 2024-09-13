@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> bodys = getBody(request.getBody());
+        Map<String, String> bodys = request.parseQueryParameters();
 
         String account = bodys.get("account");
         String password = bodys.get("password");
@@ -24,15 +24,5 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         response.redirect("/index.html");
-    }
-
-    private Map<String, String> getBody(String body) {
-        Map<String, String> bodys = new HashMap<>();
-        String[] pairs = body.split("&");
-        for (String pair : pairs) {
-            String[] keyAndValue = pair.split("=");
-            bodys.put(keyAndValue[0], keyAndValue[1]);
-        }
-        return bodys;
     }
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -17,20 +19,30 @@ public class HttpRequest {
         body = parseBody(reader);
     }
 
-    private String parseBody(BufferedReader reader) throws IOException {
-        int contentLength = Integer.parseInt(header.getOrDefault("Content-Length", "0"));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
-    }
-
     public boolean isGet() {
         return firstLine.getMethod() == HttpMethod.GET;
     }
 
     public boolean isPost() {
         return firstLine.getMethod() == HttpMethod.POST;
+    }
+
+    public Map<String, String> parseQueryParameters() {
+        Map<String, String> bodys = new HashMap<>();
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] keyAndValue = pair.split("=");
+            bodys.put(keyAndValue[0], keyAndValue[1]);
+        }
+        return bodys;
+    }
+
+    private String parseBody(BufferedReader reader) throws IOException {
+        int contentLength = Integer.parseInt(header.getOrDefault("Content-Length", "0"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     public String getUrl() {

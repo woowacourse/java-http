@@ -13,7 +13,9 @@ public class Http11RequestBody {
 
     public static Http11RequestBody from(String bodyLine) {
         Map<String, String> map = new HashMap<>();
-        if (bodyLine.isEmpty()) return new Http11RequestBody(map);
+        if (bodyLine.isEmpty()) {
+            return new Http11RequestBody(map);
+        }
 
         for (String data : bodyLine.split("&")) {
             String[] keyValue = data.split("=");

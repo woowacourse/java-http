@@ -16,7 +16,7 @@ public class TestHttpUtils {
 
     public static HttpResponse<String> send(final String path) {
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
+                .uri(URI.create("http://localhost:8081" + path))
                 .timeout(Duration.ofSeconds(1))
                 .build();
 

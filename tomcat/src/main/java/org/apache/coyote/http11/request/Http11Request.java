@@ -15,11 +15,11 @@ import java.util.Objects;
 public class Http11Request {
 
     private static final String protocol = "HTTP/1.1";
-    private static final List<String> extensions = List.of(".html", ".css", ".js", ".ico");
+    private static final List<String> extensions = List.of(".html", ".css", ".js", ".ico", ".svg");
 
     private final Http11RequestMethod method;
     private final Http11RequestHeaders header;
-    private final String uri;
+    private String uri;
     private final Map<String, String> queryParameters;
     private final Http11RequestBody requestBody;
 
@@ -32,29 +32,29 @@ public class Http11Request {
     }
 
     public static Http11Request from(InputStream inputStream) throws IOException {
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-            String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
-            String method = firstLine[0];
-            String uri = firstLine[1];
+        String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
+        String method = firstLine[0];
+        String uri = firstLine[1];
 
-            Http11RequestHeaders headers = parseHeader(br);
-            Http11RequestBody body = parseBody(headers, br);
+        Http11RequestHeaders headers = parseHeader(br);
+        Http11RequestBody body = parseBody(headers, br);
 
-            return new Http11Request(
-                    Http11RequestMethod.from(method),
-                    headers,
-                    uri,
-                    Http11RequestParser.parseQuery(uri),
-                    body);
-        }
+        return new Http11Request(
+                Http11RequestMethod.from(method),
+                headers,
+                uri.split("\\?")[0],
+                Http11RequestParser.parseQuery(uri),
+                body);
+
     }
 
     private static Http11RequestHeaders parseHeader(BufferedReader br) throws IOException {
         StringBuilder headerSb = new StringBuilder();
         String headerLine;
         while (!Objects.equals(headerLine = br.readLine(), "")) {
-            headerSb.append(headerLine).append(System.lineSeparator());
+            headerSb.append(headerLine).append("\r\n");
         }
         return Http11RequestHeaders.from(headerSb.toString());
     }
@@ -72,7 +72,9 @@ public class Http11Request {
 
     private boolean isFile() {
         for (String extension : extensions) {
-            if (uri.endsWith(extension)) return true;
+            if (uri.endsWith(extension)) {
+                return true;
+            }
         }
         return false;
     }
@@ -108,6 +110,18 @@ public class Http11Request {
         return header;
     }
 
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public boolean isGet() {
+        return method == Http11RequestMethod.GET;
+    }
+
+    public boolean isPost() {
+        return method == Http11RequestMethod.POST;
+    }
+
     @Override
     public String toString() {
         return "Http11Request{" +
@@ -129,7 +143,9 @@ public class Http11Request {
         }
 
         static Map<String, String> parseQuery(String url) {
-            if (!url.contains("?")) return Collections.emptyMap();
+            if (!url.contains("?")) {
+                return Collections.emptyMap();
+            }
             Map<String, String> queryMap = new HashMap<>();
 
             String queries = url.split("\\?")[1];

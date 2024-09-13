@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class Http11ResponseHeaders {
 
+    private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
+
     private final Map<String, String> headerMap;
 
     private Http11ResponseHeaders(Map<String, String> headers) {
@@ -23,6 +26,14 @@ public class Http11ResponseHeaders {
 
     public void addHeader(String key, String value) {
         headerMap.put(key, value);
+    }
+
+    public void addLocation(String url) {
+        headerMap.put(LOCATION, url);
+    }
+
+    public void addSetCookie(String name, String value) {
+        headerMap.put(SET_COOKIE, name + "=" + value);
     }
 
     public String asString() {

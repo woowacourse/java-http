@@ -5,10 +5,12 @@ import org.apache.coyote.http11.request.HttpMimeType;
 public class Http11Response {
 
     private static final String protocol = "HTTP/1.1";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
-    private final String responseBody;
-    private final Http11ResponseHeaders headers;
-    private final HttpStatusCode statusCode;
+    private String responseBody;
+    private Http11ResponseHeaders headers;
+    private HttpStatusCode statusCode;
     private String firstLine = "";
 
     public Http11Response(HttpStatusCode httpStatusCode, String responseBody, Http11ResponseHeaders headers) {
@@ -17,20 +19,28 @@ public class Http11Response {
         this.headers = headers;
     }
 
-    public Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
+    private Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
                 Http11ResponseHeaders.builder()
-                        .addHeader("Content-type", HttpMimeType.from(fileExtensions).asString())
-                        .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                        .addHeader(CONTENT_TYPE, HttpMimeType.from(fileExtensions).asString())
+                        .addHeader(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length))
                         .build());
+    }
+
+    public static Http11Response ok() {
+        return new Http11Response(HttpStatusCode.OK, "", "");
     }
 
     public byte[] getBytes() {
         setFirstLine();
-        return String.join(" \r\n",
-                firstLine,
-                headers.asString(),
-                responseBody).getBytes();
+        StringBuilder sb = new StringBuilder();
+        sb.append(firstLine)
+                .append(" \r\n")
+                .append(headers.asString())
+                .append("\r\n")
+                .append(responseBody);
+
+        return sb.toString().getBytes();
     }
 
     private void setFirstLine() {
@@ -42,5 +52,25 @@ public class Http11Response {
 
     public void addHeader(String key, String value) {
         headers.addHeader(key, value);
+    }
+
+    public void addLocation(String url) {
+        headers.addLocation(url);
+    }
+
+    public void setCookie(String name, String value) {
+        headers.addSetCookie(name, value);
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setHeaders(Http11ResponseHeaders headers) {
+        this.headers = headers;
     }
 }

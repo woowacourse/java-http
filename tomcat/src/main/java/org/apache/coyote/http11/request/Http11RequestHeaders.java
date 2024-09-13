@@ -16,7 +16,7 @@ public class Http11RequestHeaders {
     public static Http11RequestHeaders from(String headerLines) {
         Map<String, String> map = new HashMap<>();
 
-        for (String headerLine : headerLines.split(System.lineSeparator())) {
+        for (String headerLine : headerLines.split("\r\n")) {
             String[] keyValue = headerLine.split(": ");
             assert keyValue.length == 2;
             map.put(keyValue[0], keyValue[1]);
@@ -34,7 +34,9 @@ public class Http11RequestHeaders {
     }
 
     public int getContentLength() {
-        if (!headerMap.containsKey(CONTENT_LENGTH)) return 0;
+        if (!headerMap.containsKey(CONTENT_LENGTH)) {
+            return 0;
+        }
         return Integer.parseInt(headerMap.get(CONTENT_LENGTH));
     }
 }

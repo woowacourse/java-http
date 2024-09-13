@@ -33,6 +33,9 @@ public class LoginController extends AbstractController {
     private void findUserFromSession(String sessionId, HttpResponse response) {
         Session session = SessionManager.getInstance().findSessionById(sessionId);
         User user = (User) session.findValue(USER_SESSION_INFO_NAME);
+        if (user == null) {
+            throw new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
+        }
         logger.info("session user : {}", user);
         response.statusCode(HttpStatusCode.FOUND)
                 .staticResource("/index.html");

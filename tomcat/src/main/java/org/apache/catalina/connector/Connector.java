@@ -33,6 +33,7 @@ public class Connector implements Runnable {
         this.requestMappings = requestMappings;
         threadPool = Executors.newFixedThreadPool(maxThreads); // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
         // 단, 처음 maxThreads개의 스레드가 생기기 전에는 새로 생성한다.
+        //acceptCount는 최대 연결 대기 상태의 수다.
         serverSocket = createServerSocket(port, acceptCount);
     }
 

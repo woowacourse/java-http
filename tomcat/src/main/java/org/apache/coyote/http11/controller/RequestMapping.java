@@ -1,13 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.HomePageController;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.StaticResourceController;
+import com.techcourse.controller.HomePageController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

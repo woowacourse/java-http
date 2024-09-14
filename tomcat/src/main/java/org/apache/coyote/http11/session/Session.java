@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.session;
 
 import com.techcourse.model.User;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
@@ -13,7 +13,7 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
-        this.attributes = new ConcurrentHashMap<>();
+        this.attributes = new HashMap<>();
     }
 
     public boolean hasAttribute(String name) {

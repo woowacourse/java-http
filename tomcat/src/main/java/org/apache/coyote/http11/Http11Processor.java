@@ -55,6 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpResponse httpResponse = new HttpResponse();
         try {
             handle(httpRequest, httpResponse);
+            return httpResponse;
         } catch (NotFoundException e) {
             httpResponse.location(httpRequest, NOT_FOUND_PATH);
         } catch (UnauthorizedException e) {

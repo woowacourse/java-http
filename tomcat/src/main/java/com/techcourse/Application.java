@@ -1,27 +1,27 @@
 package com.techcourse;
 
 import java.util.Map;
-import com.techcourse.handler.FrontController;
-import com.techcourse.handler.HandlerMapping;
-import com.techcourse.handler.IndexHandler;
-import com.techcourse.handler.LoginHandler;
-import com.techcourse.handler.RegisterHandler;
-import com.techcourse.handler.UserHandler;
-import org.apache.catalina.Controller;
+import com.techcourse.controller.IndexController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.UserController;
+import com.techcourse.servlet.DispatcherServlet;
+import com.techcourse.servlet.RequestMapping;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(String[] args) {
-        HandlerMapping handlerMapping = new HandlerMapping(Map.of(
-                "/", new IndexHandler(),
-                "/login", new LoginHandler(),
-                "/register", new RegisterHandler(),
-                "/user", new UserHandler()
+        RequestMapping requestMapping = new RequestMapping(Map.of(
+                "/", new IndexController(),
+                "/login", new LoginController(),
+                "/register", new RegisterController(),
+                "/user", new UserController()
         ));
-        Controller controller = new FrontController(handlerMapping);
+        Servlet servlet = new DispatcherServlet(requestMapping);
 
-        Tomcat tomcat = new Tomcat(controller);
+        Tomcat tomcat = new Tomcat(servlet);
         tomcat.start();
     }
 }

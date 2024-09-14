@@ -1,15 +1,16 @@
 package org.apache.catalina.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.techcourse.handler.FrontController;
-import com.techcourse.handler.HandlerMapping;
-import org.apache.catalina.AbstractController;
+import com.techcourse.servlet.AbstractController;
+import com.techcourse.servlet.DispatcherServlet;
+import com.techcourse.servlet.RequestMapping;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -19,10 +20,10 @@ import org.junit.jupiter.api.Test;
 
 class ConnectorTest {
 
-    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of(
+    private final RequestMapping requestMapping = new RequestMapping(Map.of(
             "/", new SlowHandler()
     ));
-    private final FrontController controller = new FrontController(handlerMapping);
+    private final List<Servlet> servlets = List.of(new DispatcherServlet(requestMapping));
     private Connector connector;
 
     @AfterEach
@@ -33,7 +34,7 @@ class ConnectorTest {
     @DisplayName("maxThreads만큼 요청 시 Thread Pool Size는 maxThreads이며 Queue Size는 0이다.")
     @Test
     void maxThreads() throws InterruptedException {
-        connector = new Connector(controller, 1234, 1, 2);
+        connector = new Connector(servlets, 1234, 1, 2);
         connector.start();
 
         int numberOfRequest = 2;
@@ -54,7 +55,7 @@ class ConnectorTest {
     @DisplayName("maxThreads보다 많은 요청 시 Thread Pool Size는 maxThreads이며 Queue Size는 요청 수에서 maxThreads를 뺀 값이다.")
     @Test
     void acceptCount() throws InterruptedException {
-        connector = new Connector(controller, 1234, 2, 3);
+        connector = new Connector(servlets, 1234, 2, 3);
         connector.start();
 
         int numberOfRequest = 6;

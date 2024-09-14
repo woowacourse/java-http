@@ -1,16 +1,16 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.AbstractController;
-import org.apache.catalina.Session;
+import com.techcourse.servlet.AbstractController;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class LoginHandler extends AbstractController {
+public class LoginController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {

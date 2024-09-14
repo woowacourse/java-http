@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package com.techcourse.servlet;
 
 import java.io.IOException;
 import org.apache.coyote.http11.request.HttpRequest;

@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -7,22 +7,28 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import com.techcourse.servlet.DispatcherServlet;
+import com.techcourse.servlet.RequestMapping;
+import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.ServletContainer;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
-    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of(
-            "/login", new LoginHandler()
+    private final RequestMapping requestMapping = new RequestMapping(Map.of(
+            "/login", new LoginController()
     ));
-    private final FrontController controller = new FrontController(handlerMapping);
+    private final List<Servlet> servlet = List.of(new DispatcherServlet(requestMapping));
+    private final ServletContainer servletContainer = ServletContainer.init(servlet);
 
     @Test
     @DisplayName("GET '/login' 요청에 대한 응답이 정상적으로 처리된다.")
@@ -35,7 +41,7 @@ class LoginHandlerTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
 
         // when
         processor.process(socket);
@@ -67,7 +73,7 @@ class LoginHandlerTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
         // when
         processor.process(socket);
 
@@ -95,7 +101,7 @@ class LoginHandlerTest {
                 "account=gugu&password=password"
         );
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
 
         // when
         processor.process(socket);
@@ -121,7 +127,7 @@ class LoginHandlerTest {
                 "account=notfound&password=password"
         );
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
 
         // when
         processor.process(socket);

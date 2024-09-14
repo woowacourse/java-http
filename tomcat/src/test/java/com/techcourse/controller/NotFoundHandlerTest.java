@@ -1,11 +1,16 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
+import com.techcourse.servlet.DispatcherServlet;
+import com.techcourse.servlet.RequestMapping;
+import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +18,11 @@ import support.StubSocket;
 
 class NotFoundHandlerTest {
 
-    private final HandlerMapping handlerMapping = new HandlerMapping(Map.of(
-            "/", new IndexHandler()
+    private final RequestMapping requestMapping = new RequestMapping(Map.of(
+            "/", new IndexController()
     ));
-    private final FrontController controller = new FrontController(handlerMapping);
+    private final List<Servlet> servlet = List.of(new DispatcherServlet(requestMapping));
+    private final ServletContainer servletContainer = ServletContainer.init(servlet);
 
     @Test
     @DisplayName("존재하지 않는 GET 매핑일 경우 404 응답이 반환된다.")
@@ -29,7 +35,7 @@ class NotFoundHandlerTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
 
         // when
         processor.process(socket);
@@ -58,7 +64,7 @@ class NotFoundHandlerTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(controller, socket);
+        Http11Processor processor = new Http11Processor(servletContainer, socket);
 
         // when
         processor.process(socket);

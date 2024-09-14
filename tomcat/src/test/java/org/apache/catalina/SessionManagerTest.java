@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +41,7 @@ class SessionManagerTest {
             """)
     void testSessionManagerConcurrency() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
+        SessionManager.clear();
 
         IntStream.range(0, 1000)
                 .forEach(count -> executorService.submit(() -> SessionManager.add(new Session())));

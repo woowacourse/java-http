@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpCookies;
 import org.apache.coyote.http11.common.HttpHeaders;

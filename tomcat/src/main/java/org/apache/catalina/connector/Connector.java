@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.catalina.Controller;
+import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,19 +22,19 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREADS = 250;
 
-    private final Controller controller;
+    private final ServletContainer servletContainer;
     private final ServerSocket serverSocket;
     private boolean stopped;
     private final ThreadPoolExecutor executor;
 
-    public Connector(final Controller controller) {
+    public Connector(final List<Servlet> servlets) {
         // maxThreads: 스레드 풀에서 동시에 실행할 수 있는 최대 스레드 수입니다. 초과하면 대기 큐에 추가된다.
         // acceptCount: 대기 큐가 가득 찼을 때 추가 요청이 대기할 수 있는 큐의 크기이다.
-        this(controller, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS);
+        this(servlets, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS);
     }
 
-    public Connector(final Controller controller, final int port, final int acceptCount, final int maxThreads) {
-        this.controller = controller;
+    public Connector(final List<Servlet> servlets, final int port, final int acceptCount, final int maxThreads) {
+        this.servletContainer = ServletContainer.init(servlets);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executor = createThreadPool(maxThreads, acceptCount);
@@ -87,7 +89,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        Http11Processor processor = new Http11Processor(controller, connection);
+        Http11Processor processor = new Http11Processor(servletContainer, connection);
         executor.execute(processor);
     }
 

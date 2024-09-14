@@ -3,9 +3,14 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
+import org.apache.coyote.http.HttpBody;
 import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.HttpStatusCode;
+import org.apache.coyote.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticResourceHandler {
 
@@ -13,29 +18,29 @@ public class StaticResourceHandler {
 
     private static final String DEFAULT_PATH = "static";
 
-    private static final List<String> STATIC_EXTENSIONS = List.of(".html", ".css", ".js", ".svg", ".ico");
-
-    public static boolean isStaticResource(final HttpRequest request) {
-        String path = request.getPath();
-        return STATIC_EXTENSIONS.stream().anyMatch(path::endsWith);
+    private StaticResourceHandler() {
     }
 
-    public static String handle(final String requestPath) {
-        Path path = resourcePath(requestPath);
-        String resourceAsString;
-        try {
-            resourceAsString = Files.readString(path);
-        } catch (IOException e) {
-            throw new NoResourceFoundException(path.toString());
-        }
-        return resourceAsString;
+    public static void handle(final HttpRequest request, final HttpResponse response) {
+        String requestPath = request.getPath();
+        String resource = readResource(requestPath);
+        response.setStatusCode(HttpStatusCode.OK);
+        MediaType mediaType = MediaType.findByExtension(requestPath);
+        response.setContentType(mediaType.value());
+        response.setBody(new HttpBody(resource));
     }
 
-    private static Path resourcePath(final String path) {
+    private static String readResource(final String path) {
         final var url = CLASS_LOADER.getResource(DEFAULT_PATH + path);
         if (url == null) {
-            throw new NoResourceFoundException(path);
+            throw new IllegalArgumentException("Resource not found: " + path);
         }
-        return Path.of(url.getPath());
+        var resourcePath = Path.of(url.getPath());
+        try {
+            byte[] resourceByte = Files.readAllBytes(resourcePath);
+            return new String(resourceByte);
+        } catch (IOException e) {
+            return "";
+        }
     }
 }

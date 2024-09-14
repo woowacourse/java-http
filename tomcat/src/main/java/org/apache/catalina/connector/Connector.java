@@ -68,25 +68,18 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        try {
-            var processor = new Http11Processor(connection);
-            executor.execute(processor);
-        } finally {
-            try {
-                connection.close();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
+        var processor = new Http11Processor(connection);
+        executor.execute(processor);
     }
 
     public void stop() {
         stopped = true;
-        executor.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executor.shutdown();
         }
     }
 

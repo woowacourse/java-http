@@ -11,47 +11,6 @@ public class HttpResponse {
 	private List<String> headers = new ArrayList<>();
 	private byte[] responseBody;
 
-	// public HttpResponse(StatusLine statusLine, List<String> headers, byte[] responseBody) {
-	// 	this.statusLine = statusLine;
-	// 	this.headers = headers;
-	// 	this.responseBody = responseBody;
-	// }
-	//
-	// public static HttpResponse ok(String uri, String responseBody) {
-	// 	List<String> headers = new ArrayList<>();
-	// 	headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-	// 	headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
-	//
-	// 	return new HttpResponse(StatusLine.from(HttpStatus.OK), headers, responseBody.getBytes(StandardCharsets.UTF_8));
-	// }
-	//
-	// public static HttpResponse okWithContentType(byte[] responseBody, String contentType) {
-	// 	List<String> headers = new ArrayList<>();
-	// 	headers.add("Content-Type: " + contentType + " ");
-	// 	headers.add("Content-Length: " + responseBody.length + " ");
-	//
-	// 	return new HttpResponse(StatusLine.from(HttpStatus.OK), headers, responseBody);
-	// }
-	//
-	// public static HttpResponse redirect(String uri, String redirectUri) {
-	// 	List<String> headers = new ArrayList<>();
-	// 	headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-	// 	headers.add("Content-Length: " + calculateContentLength(redirectUri) + " ");
-	// 	headers.add("Location: " + redirectUri);
-	//
-	// 	return new HttpResponse(StatusLine.from(HttpStatus.FOUND), headers,
-	// 		redirectUri.getBytes(StandardCharsets.UTF_8));
-	// }
-	//
-	// public static HttpResponse notFound() {
-	// 	List<String> headers = new ArrayList<>();
-	// 	headers.add("Content-Type: text/html; charset=UTF-8");
-	// 	String body = "<h1>404 - Not Found</h1>";
-	// 	headers.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length);
-	//
-	// 	return new HttpResponse(StatusLine.from(HttpStatus.NOT_FOUND), headers, body.getBytes(StandardCharsets.UTF_8));
-	// }
-
 	private HttpResponse() {
 	}
 

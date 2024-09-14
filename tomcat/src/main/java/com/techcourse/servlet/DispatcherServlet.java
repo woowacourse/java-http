@@ -7,7 +7,7 @@ import com.techcourse.servlet.mapping.ResourceHandlerMapping;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 

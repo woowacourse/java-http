@@ -1,12 +1,12 @@
 package com.techcourse.servlet;
 
-import com.techcourse.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.UUID;
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 import org.apache.util.FileUtils;
@@ -30,9 +30,11 @@ public class LoginServlet implements Servlet {
             return;
         }
 
-        UUID sessionId = sessionManager.putUserSession(found.get());
+        Session session = new Session();
+        session.setAttributes("user", found.get());
+        sessionManager.add(session);
 
         response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
-        response.setJsessionCookie(sessionId);
+        response.setJsession(session.getId());
     }
 }

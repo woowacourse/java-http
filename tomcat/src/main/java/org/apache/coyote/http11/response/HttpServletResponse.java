@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.UUID;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMessageBody;
@@ -57,7 +56,7 @@ public class HttpServletResponse {
         return String.join("\r\n", lineMessage, headersMessage, bodyMessage);
     }
 
-    public void setJsessionCookie(UUID uuid) {
+    public void setJsession(String uuid) {
         httpHeaders.putHeader(HttpHeaderName.SET_COOKIE, JSESSION_COOKIE_PREFIX + uuid);
     }
 }

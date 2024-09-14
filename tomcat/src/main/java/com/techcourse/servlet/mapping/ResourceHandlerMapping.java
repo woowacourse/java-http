@@ -1,7 +1,7 @@
 package com.techcourse.servlet.mapping;
 
 import com.techcourse.servlet.StaticResourceServlet;
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.common.HttpProtocol;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.request.line.Method;
@@ -12,7 +12,7 @@ public class ResourceHandlerMapping implements HandlerMapping {
     private static final Method SUPPORTING_METHOD = Method.GET;
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
     private final StaticResourceServlet staticResourceServlet = new StaticResourceServlet();
-    
+
     @Override
     public boolean hasHandlerFor(HttpServletRequest httpServletRequest) {
         return isAvailableResourceRequest(httpServletRequest);

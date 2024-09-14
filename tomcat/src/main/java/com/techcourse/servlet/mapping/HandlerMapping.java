@@ -1,6 +1,6 @@
 package com.techcourse.servlet.mapping;
 
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 
 public interface HandlerMapping {

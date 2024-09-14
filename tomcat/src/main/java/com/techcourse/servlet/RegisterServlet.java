@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 

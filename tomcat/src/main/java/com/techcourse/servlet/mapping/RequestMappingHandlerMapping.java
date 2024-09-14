@@ -11,7 +11,7 @@ import com.techcourse.servlet.RegisterPageServlet;
 import com.techcourse.servlet.RegisterServlet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.http11.Servlet;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 
 public class RequestMappingHandlerMapping implements HandlerMapping {

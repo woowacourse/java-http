@@ -1,13 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.servlet.DispatcherServlet;
+import com.techcourse.servlet.mapping.RequestMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -22,11 +23,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final DispatcherServlet dispatcherServlet;
+    private final RequestMapping requestMapping;
     private final Socket connection;
 
     public Http11Processor(Socket connection) {
-        dispatcherServlet = DispatcherServlet.getInstance();
+        requestMapping = new RequestMapping();
         this.connection = connection;
     }
 
@@ -46,7 +47,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpServletRequest httpServletRequest = parseHttpRequest(bufferedReader);
             HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
 
-            dispatcherServlet.doDispatch(httpServletRequest, httpServletResponse);
+            Servlet servlet = requestMapping.getServlet(httpServletRequest);
+            servlet.doService(httpServletRequest, httpServletResponse);
 
             flushResponse(httpServletResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {

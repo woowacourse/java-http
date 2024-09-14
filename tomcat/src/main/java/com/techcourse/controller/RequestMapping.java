@@ -33,7 +33,7 @@ public class RequestMapping implements Controller {
         log.info("request: \n{}", request.asString());
         String path = request.getPath();
         if (MediaType.isSupportedExtension(path)) {
-            StaticResourceHandler.handle(request, response);
+            new StaticResourceHandler().service(request, response);
             return;
         }
         Controller controller = controllers.get(path);

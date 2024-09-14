@@ -9,19 +9,15 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class StaticResourceHandler {
+public class StaticResourceHandler implements Controller {
 
     private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
     private static final String DEFAULT_PATH = "static";
 
-    private StaticResourceHandler() {
-    }
-
-    public static void handle(final HttpRequest request, final HttpResponse response) {
+    @Override
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         String requestPath = request.getPath();
         String resource = readResource(requestPath);
         response.setStatusCode(HttpStatusCode.OK);

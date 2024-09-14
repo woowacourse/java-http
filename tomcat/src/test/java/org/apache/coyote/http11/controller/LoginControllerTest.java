@@ -4,6 +4,7 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,8 @@ class LoginControllerTest {
     void service_get() throws Exception {
         // given
         LoginController controller = new LoginController();
-        HttpRequest request = new HttpRequest("GET", null, Map.of("key", "value"), null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
+        HttpRequest request = new HttpRequest("GET", null,requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -40,8 +42,9 @@ class LoginControllerTest {
     void service_post() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu"), "password", List.of("password"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -56,7 +59,8 @@ class LoginControllerTest {
     void service_notSupportedMethod_delete() throws Exception {
         // given
         LoginController controller = new LoginController();
-        HttpRequest request = new HttpRequest("DELETE", null, Map.of("key", "value"), null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
+        HttpRequest request = new HttpRequest("DELETE", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when & then
@@ -71,7 +75,8 @@ class LoginControllerTest {
     void service_get_notExistJssessionId() throws Exception {
         // given
         LoginController controller = new LoginController();
-        HttpRequest request = new HttpRequest("GET", null, Map.of("key", "value"), null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
+        HttpRequest request = new HttpRequest("GET", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -86,8 +91,9 @@ class LoginControllerTest {
     void service_post_correctPassword() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu"), "password", List.of("password"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -102,8 +108,9 @@ class LoginControllerTest {
     void service_post_incorrectPassword() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu"), "password", List.of("pasord"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -118,8 +125,9 @@ class LoginControllerTest {
     void service_post_accountNotFound_Exception() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("password", List.of("pasord"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when & then
@@ -134,8 +142,9 @@ class LoginControllerTest {
     void service_post_userNotFound_Exception() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gigi"), "password", List.of("pasord"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when & then
@@ -150,8 +159,9 @@ class LoginControllerTest {
     void service_post_passwordNotFound_Exception() throws Exception {
         // given
         LoginController controller = new LoginController();
+        HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu"));
-        HttpRequest request = new HttpRequest("POST", null, Map.of("key", "value"), null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, requestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when & then

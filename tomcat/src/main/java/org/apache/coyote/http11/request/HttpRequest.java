@@ -7,18 +7,14 @@ public class HttpRequest {
 
     private final String method;
     private final String path;
-    private final Map<String, String> cookies;
-    private final Map<String, List<String>> queryParams;
-    private final String fileType;
+    private final HttpRequestHeader header;
     private final Map<String, List<String>> body;
 
-    public HttpRequest(String method, String path, Map<String, String> cookies,
-                       Map<String, List<String>> queryParams, String fileType, Map<String, List<String>> body) {
+    public HttpRequest(String method, String path,
+                       HttpRequestHeader header, Map<String, List<String>> body) {
         this.method = method;
         this.path = path;
-        this.cookies = cookies;
-        this.queryParams = queryParams;
-        this.fileType = fileType;
+        this.header = header;
         this.body = body;
     }
 
@@ -31,15 +27,15 @@ public class HttpRequest {
     }
 
     public Map<String, String> getCookies() {
-        return cookies;
+        return header.getCookies();
     }
 
     public Map<String, List<String>> getQueryParams() {
-        return queryParams;
+        return header.getQueryParams();
     }
 
     public String getFileType() {
-        return fileType;
+        return header.getFileType();
     }
 
     public Map<String, List<String>> getBody() {
@@ -51,9 +47,8 @@ public class HttpRequest {
         return "HttpRequest{" +
                 "method='" + method + '\'' +
                 ", path='" + path + '\'' +
-                ", cookies=" + cookies +
-                ", queryParams=" + queryParams +
-                ", fileType='" + fileType + '\'' +
+                ", header=" + header +
+                ", body=" + body +
                 '}';
     }
 }

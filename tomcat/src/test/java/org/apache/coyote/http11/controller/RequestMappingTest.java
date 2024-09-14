@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,8 @@ class RequestMappingTest {
     @Test
     void getController_nullPath_exception() {
         // given
-        HttpRequest httpRequest = new HttpRequest(null, null, null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest httpRequest = new HttpRequest(null, null, requestHeader, null);
 
         // when & then
         assertThatThrownBy(
@@ -27,7 +29,8 @@ class RequestMappingTest {
     @Test
     void getController_homeController() {
         // given
-        HttpRequest httpRequest = new HttpRequest(null, "/", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest httpRequest = new HttpRequest(null, "/", requestHeader, null);
 
         // when
         Controller controller = RequestMapping.getController(httpRequest);
@@ -40,7 +43,8 @@ class RequestMappingTest {
     @Test
     void getController_loginController() {
         // given
-        HttpRequest httpRequest = new HttpRequest(null, "/login", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest httpRequest = new HttpRequest(null, "/login", requestHeader, null);
 
         // when
         Controller controller = RequestMapping.getController(httpRequest);
@@ -53,7 +57,8 @@ class RequestMappingTest {
     @Test
     void getController_registerController() {
         // given
-        HttpRequest httpRequest = new HttpRequest(null, "/register", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest httpRequest = new HttpRequest(null, "/register", requestHeader, null);
 
         // when
         Controller controller = RequestMapping.getController(httpRequest);
@@ -66,7 +71,8 @@ class RequestMappingTest {
     @Test
     void getController_pageController() {
         // given
-        HttpRequest httpRequest = new HttpRequest(null, "/index.html", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest httpRequest = new HttpRequest(null, "/index.html", requestHeader, null);
 
         // when
         Controller controller = RequestMapping.getController(httpRequest);

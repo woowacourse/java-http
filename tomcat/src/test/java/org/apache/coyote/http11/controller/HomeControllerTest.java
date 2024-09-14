@@ -1,10 +1,13 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +19,8 @@ class HomeControllerTest {
     void service_get() throws Exception {
         // given
         HomeController controller = new HomeController();
-        HttpRequest request = new HttpRequest("GET", null, null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -31,7 +35,8 @@ class HomeControllerTest {
     void service_notSupportedMethod_delete() throws Exception {
         // given
         HomeController controller = new HomeController();
-        HttpRequest request = new HttpRequest("DELETE", null, null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("DELETE", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when & then

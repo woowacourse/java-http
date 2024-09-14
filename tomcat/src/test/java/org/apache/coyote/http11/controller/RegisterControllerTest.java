@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +20,8 @@ class RegisterControllerTest {
     void service_get() throws Exception {
         // given
         RegisterController controller = new RegisterController();
-        HttpRequest request = new HttpRequest("GET", null, null, null, null, null);
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", null, httpRequestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -34,8 +36,9 @@ class RegisterControllerTest {
     void service_post() throws Exception {
         // given
         RegisterController controller = new RegisterController();
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email", List.of("gugu2@gmail.com"));
-        HttpRequest request = new HttpRequest("POST", null, null, null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, httpRequestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -50,7 +53,8 @@ class RegisterControllerTest {
     void service_notSupportedMethod_delete() throws Exception {
         // given
         RegisterController controller = new RegisterController();
-        HttpRequest request = new HttpRequest("DELETE", null, Map.of("key", "value"), null, null, null);
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
+        HttpRequest request = new HttpRequest("DELETE", null, httpRequestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when & then
@@ -65,7 +69,8 @@ class RegisterControllerTest {
     void service_get_OK() throws Exception {
         // given
         RegisterController controller = new RegisterController();
-        HttpRequest request = new HttpRequest("GET", null, null, null, null, null);
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", null, httpRequestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -80,8 +85,9 @@ class RegisterControllerTest {
     void service_post_found() throws Exception {
         // given
         RegisterController controller = new RegisterController();
+        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
         Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email", List.of("gugu2@gmail.com"));
-        HttpRequest request = new HttpRequest("POST", null, null, null, null, body);
+        HttpRequest request = new HttpRequest("POST", null, httpRequestHeader, body);
         HttpResponse response = new HttpResponse();
 
         // when

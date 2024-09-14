@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -25,9 +22,12 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final Manager sessionManager;
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor threadPoolExecutor;
     private final CoyoteProcessorFactory processorFactory;
+    private final int maxConnections;
+    private final int maxThreads;
 
+    private int counts;
     private boolean stopped;
 
     public Connector(Manager sessionManager) {
@@ -51,15 +51,11 @@ public class Connector implements Runnable {
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = new ThreadPoolExecutor(
-                maxThreads,
-                maxThreads,
-                0L,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingDeque<>(maxConnections)
-        );
+        this.threadPoolExecutor = new TomcatThreadPool(maxThreads, maxConnections);
         this.sessionManager = sessionManager;
         this.processorFactory = processorFactory;
+        this.maxConnections = maxConnections;
+        this.maxThreads = maxThreads;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -90,23 +86,29 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            // max connections 이하인 경우 연결을 accept한다.
+            int queueSizeLimit = this.maxConnections - this.maxThreads;
+            int nowQueueSize = threadPoolExecutor.getQueue().size();
+            if (nowQueueSize < queueSizeLimit) {
+                process(serverSocket.accept());
+            }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         Http11Processor processor = processorFactory.getHttp11Processor(connection, sessionManager);
-        executorService.execute(processor);
+        threadPoolExecutor.execute(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            threadPoolExecutor.close();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -125,5 +127,13 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    public int getActiveConnect() {
+        return threadPoolExecutor.getActiveCount();
+    }
+
+    public int getWaitConnect() {
+        return threadPoolExecutor.getQueue().size();
     }
 }

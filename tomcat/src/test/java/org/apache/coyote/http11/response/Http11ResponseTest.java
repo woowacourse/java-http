@@ -18,7 +18,6 @@ class Http11ResponseTest {
 
         response.ok(MimeType.HTML, body, StandardCharsets.UTF_8);
         String actual = response.getResponseMessage();
-        System.out.println(actual);
         String expected = "HTTP/1.1 200 OK \r\n"
                 + "Content-Type: text/html;charset=utf-8 \r\n"
                 + "Content-Length: " + body.getBytes().length + " \r\n"

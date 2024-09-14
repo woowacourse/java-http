@@ -1,15 +1,15 @@
-package org.apache;
+package com.techcourse.servlet;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.IOException;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.techcourse.servlet.HomeController;
+
+import jakarta.servlet.Controller;
 import support.HttpRequestFixture;
 
 class HomeControllerTest {

@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 
-import org.apache.RequestMapping;
-import org.apache.HomeController;
-import org.apache.LoginController;
-import org.apache.RegisterController;
-import org.apache.StaticResourceController;
+import jakarta.servlet.RequestMapping;
+import com.techcourse.servlet.HomeController;
+import com.techcourse.servlet.LoginController;
+import com.techcourse.servlet.RegisterController;
+import jakarta.servlet.StaticResourceController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

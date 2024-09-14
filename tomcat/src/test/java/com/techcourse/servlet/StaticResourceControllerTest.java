@@ -1,4 +1,4 @@
-package org.apache;
+package com.techcourse.servlet;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import jakarta.servlet.StaticResourceController;
 import support.HttpRequestFixture;
 
 class StaticResourceControllerTest {
@@ -56,7 +57,7 @@ class StaticResourceControllerTest {
 		final HttpResponse response = HttpResponse.empty();
 
 		// when
-		controller.doGet(request, response);
+		controller.service(request, response);
 
 		// then
 		var expected = String.join("\r\n",

@@ -1,8 +1,10 @@
-package org.apache;
+package com.techcourse.servlet;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+
+import jakarta.servlet.AbstractController;
 
 public class HomeController extends AbstractController {
 

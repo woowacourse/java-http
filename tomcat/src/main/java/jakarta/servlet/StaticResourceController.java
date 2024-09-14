@@ -1,4 +1,4 @@
-package org.apache;
+package jakarta.servlet;
 
 import java.io.File;
 import java.net.URL;
@@ -10,6 +10,8 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+
+import jakarta.servlet.AbstractController;
 
 public class StaticResourceController extends AbstractController {
 

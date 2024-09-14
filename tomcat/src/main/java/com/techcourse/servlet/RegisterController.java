@@ -1,4 +1,4 @@
-package org.apache;
+package com.techcourse.servlet;
 
 import java.io.File;
 import java.net.URL;
@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+
+import jakarta.servlet.AbstractController;
 
 public class RegisterController extends AbstractController {
 

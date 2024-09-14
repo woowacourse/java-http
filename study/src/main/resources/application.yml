@@ -8,3 +8,6 @@ server:
     threads:
       max: 2
       min-spare: 2
+
+  compression:
+    enabled: true

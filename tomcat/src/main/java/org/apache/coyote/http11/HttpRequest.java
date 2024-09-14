@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class HttpRequest {
 
+    private static final int MAX_CONTENT_LENGTH = 1 * 1024 * 1024; // body 최대 사이즈 1MB
+
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpRequestBody requestBody;
@@ -27,34 +29,44 @@ public class HttpRequest {
     public static HttpRequest from(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        String firstLine = reader.readLine();
-        RequestLine requestLine = RequestLine.from(firstLine);
-
-        String line;
-        List<String> headerLines = new ArrayList<>();
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
-        HttpHeaders headers = HttpHeaders.from(headerLines);
-
-        HttpRequestBody body = HttpRequestBody.empty();
-        if (requestLine.getMethod() == HttpMethod.POST) {
-            int contentLength = Integer.parseInt(headers.getHeader(HttpHeader.CONTENT_LENGTH).get());
-            char[] unparsedBody = new char[contentLength];
-            if (contentLength > 0) {
-                reader.read(unparsedBody, 0, contentLength);
-            }
-
-            String requestBody = new String(unparsedBody);
-            String decodedBodyLine = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
-            body = HttpRequestBody.from(decodedBodyLine);
-        }
+        RequestLine requestLine = getRequestLine(reader);
+        HttpHeaders headers = getHttpHeaders(reader);
+        HttpRequestBody body = getHttpRequestBody(requestLine, headers, reader);
 
         return new HttpRequest(
             requestLine,
             headers,
             body
         );
+    }
+
+    private static RequestLine getRequestLine(BufferedReader reader) throws IOException {
+        String firstLine = reader.readLine();
+        return RequestLine.from(firstLine);
+    }
+
+    private static HttpHeaders getHttpHeaders(BufferedReader reader) throws IOException {
+        String line;
+        List<String> headerLines = new ArrayList<>();
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
+        }
+        return HttpHeaders.from(headerLines);
+    }
+
+    private static HttpRequestBody getHttpRequestBody(RequestLine requestLine, HttpHeaders headers,
+        BufferedReader reader) throws IOException {
+        if (requestLine.getMethod() == HttpMethod.POST) {
+            int contentLength = headers.getContentLength();
+            char[] buffer = new char[MAX_CONTENT_LENGTH];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            if (bytesRead > 0) {
+                String requestBody = new String(buffer, 0, bytesRead);
+                String decodedBodyLine = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
+                return HttpRequestBody.from(decodedBodyLine);
+            }
+        }
+        return HttpRequestBody.empty();
     }
 
     public Optional<String> getSessionIdFromCookie() {

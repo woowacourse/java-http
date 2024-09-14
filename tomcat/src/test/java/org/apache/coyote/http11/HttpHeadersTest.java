@@ -23,10 +23,10 @@ class HttpHeadersTest {
 		HttpHeaders httpHeaders = HttpHeaders.from(headers);
 
 		//then
-		assertThat(httpHeaders.getHeaderValues(HttpHeader.CACHE_CONTROL)).contains("no-cache", "no-store",
+		assertThat(httpHeaders.getHeaderValues("cache-control")).contains("no-cache", "no-store",
 			"must-revalidate");
-		assertThat(httpHeaders.getHeader(HttpHeader.CONTENT_TYPE).isPresent()).isTrue();
-		assertThat(httpHeaders.getHeader(HttpHeader.CONTENT_TYPE).get()).isEqualTo("text/html;charset=UTF-8");
+		assertThat(httpHeaders.getHeader("content-type").isPresent()).isTrue();
+		assertThat(httpHeaders.getHeader("content-type").get()).isEqualTo("text/html;charset=UTF-8");
 		assertThat(httpHeaders.getCookie("JSESSIONID").isPresent()).isTrue();
 		assertThat(httpHeaders.getCookie("JSESSIONID").get()).isEqualTo("hhhh");
 	}

@@ -6,7 +6,7 @@ public enum HttpMethod implements HttpComponent {
     ;
 
     public static HttpMethod from(final String value) {
-        return valueOf(value.toUpperCase());
+        return valueOf(value);
     }
 
     public boolean isGet() {

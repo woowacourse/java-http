@@ -1,11 +1,13 @@
 package org.apache.coyote.http;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest implements HttpComponent {
 
@@ -13,11 +15,21 @@ public class HttpRequest implements HttpComponent {
     private final HttpHeaders headers;
     private final HttpBody body;
 
-    public HttpRequest(final String httpRequest) throws IOException {
-        this.requestLine = new HttpRequestLine(httpRequest);
-        this.headers = new HttpHeaders(httpRequest);
-        String[] parts = httpRequest.split("\r\n\r\n", 2);
+    public HttpRequest(final InputStream inputStream) throws IOException {
+        String request = inputAsString(inputStream);
+        this.requestLine = new HttpRequestLine(request);
+        this.headers = new HttpHeaders(request);
+        String[] parts = request.split("\r\n\r\n", 2);
         this.body = new HttpBody(parts[1]);
+    }
+
+    private String inputAsString(final InputStream inputStream) throws IOException {
+        var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        var stringBuilder = new StringBuilder();
+        var buffer = new char[inputStream.available()];
+        int readCount = bufferedReader.read(buffer, 0, inputStream.available());
+        stringBuilder.append(buffer, 0, readCount);
+        return stringBuilder.toString();
     }
 
     public HttpMethod getMethod() {
@@ -44,20 +56,14 @@ public class HttpRequest implements HttpComponent {
         return headers.getCookies();
     }
 
-    public Session getSession() {
-        return getSession(true);
-    }
-
     public Session getSession(boolean create) {
-        Manager manager = SessionManager.getInstance();
         String sessionId = headers.getSessionId();
         Session session = null;
         if (sessionId != null) {
-            session = manager.findSession(sessionId);
+            session = new Session(sessionId);
         }
         if (create && session == null) {
             session = new Session();
-            manager.add(session);
         }
         return session;
     }

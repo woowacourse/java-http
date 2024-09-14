@@ -10,6 +10,7 @@ public class HttpQueryParams {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int KEY_VALUE_LENGTH = 2;
 
     private final Map<String, String> params;
 
@@ -25,6 +26,9 @@ public class HttpQueryParams {
         String[] paramSplit = queryString.split(PARAM_SEPARATOR);
         for (String param : paramSplit) {
             String[] keyValue = param.split(KEY_VALUE_SEPARATOR);
+            if (keyValue.length != KEY_VALUE_LENGTH) {
+                throw new IllegalArgumentException("Invalid query string: " + queryString);
+            }
             params.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
     }

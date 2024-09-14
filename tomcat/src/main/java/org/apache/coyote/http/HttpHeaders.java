@@ -52,6 +52,10 @@ public class HttpHeaders implements HttpComponent {
         return null;
     }
 
+    public void setCookie(final HttpCookie cookie) {
+        headers.put(SET_COOKIE, cookie.asString());
+    }
+
     public String getSessionId() {
         HttpCookie cookie = getCookie(JSESSIONID);
         if (cookie != null) {
@@ -70,10 +74,6 @@ public class HttpHeaders implements HttpComponent {
 
     public void setLocation(final String location) {
         headers.put(LOCATION, location);
-    }
-
-    public void setCookie(final HttpCookie cookie) {
-        headers.put(SET_COOKIE, cookie.asString());
     }
 
     @Override

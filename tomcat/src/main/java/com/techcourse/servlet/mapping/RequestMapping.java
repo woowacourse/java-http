@@ -11,6 +11,7 @@ import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 
+    private final Servlet defaultServlet = new DefaultServlet();
     private final Map<String, Servlet> handlers = new ConcurrentHashMap<>();
 
     public RequestMapping() {
@@ -20,6 +21,6 @@ public class RequestMapping {
     }
 
     public Servlet getServlet(HttpRequest httpRequest) {
-        return handlers.getOrDefault(httpRequest.getUriPath(), new DefaultServlet());
+        return handlers.getOrDefault(httpRequest.getUriPath(), defaultServlet);
     }
 }

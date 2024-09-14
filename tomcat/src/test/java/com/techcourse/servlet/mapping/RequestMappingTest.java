@@ -9,7 +9,7 @@ import com.techcourse.servlet.LoginServlet;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
 import org.apache.coyote.http.HttpProtocol;
-import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.line.Method;
 import org.apache.coyote.http.request.line.RequestLine;
 import org.apache.coyote.http.request.line.Uri;
@@ -26,13 +26,13 @@ class RequestMappingTest {
     void getHandler() {
         // given
         RequestLine requestLine = new RequestLine(GET, new Uri("/login"), HTTP_11);
-        HttpServletRequest httpServletRequest = new HttpServletRequest(
+        HttpRequest httpRequest = new HttpRequest(
                 requestLine,
                 new HttpHeaders(),
                 HttpMessageBody.createEmptyBody()
         );
         // when & then
-        assertThat(requestMapping.getServlet(httpServletRequest)).isInstanceOf(LoginServlet.class);
+        assertThat(requestMapping.getServlet(httpRequest)).isInstanceOf(LoginServlet.class);
     }
 
     @DisplayName("매핑 정보가 일치하는 핸들러가 없다면 디폴트 서블릿이 반환된다")
@@ -42,9 +42,9 @@ class RequestMappingTest {
         RequestLine requestLine = new RequestLine(Method.GET, new Uri("/index.html"), HttpProtocol.HTTP_11);
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpMessageBody httpMessageBody = HttpMessageBody.createEmptyBody();
-        HttpServletRequest httpServletRequest = new HttpServletRequest(requestLine, httpHeaders, httpMessageBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, httpMessageBody);
 
         // when & then
-        assertThat(requestMapping.getServlet(httpServletRequest)).isInstanceOf(DefaultServlet.class);
+        assertThat(requestMapping.getServlet(httpRequest)).isInstanceOf(DefaultServlet.class);
     }
 }

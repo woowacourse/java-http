@@ -7,14 +7,14 @@ import org.apache.coyote.http.HttpProtocol;
 import org.apache.coyote.http.request.line.Method;
 import org.apache.coyote.http.request.line.RequestLine;
 
-public class HttpServletRequest {
+public class HttpRequest {
 
     public static final String JSESSION_COOKIE_NAME = "JSESSIONID";
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpServletRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;

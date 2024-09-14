@@ -9,11 +9,11 @@ import java.nio.file.Files;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
 import org.apache.coyote.http.HttpProtocol;
-import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.line.Method;
 import org.apache.coyote.http.request.line.RequestLine;
 import org.apache.coyote.http.request.line.Uri;
-import org.apache.coyote.http.response.HttpServletResponse;
+import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,11 +30,11 @@ class LoginServletTest {
         HttpHeaders headers = new HttpHeaders();
         HttpMessageBody body = HttpMessageBody.createEmptyBody();
 
-        HttpServletRequest httpServletRequest = new HttpServletRequest(requestLine, headers, body);
-        HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, body);
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse();
 
         // when
-        loginServlet.doService(httpServletRequest, httpServletResponse);
+        loginServlet.doService(httpRequest, httpResponse);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");
@@ -44,6 +44,6 @@ class LoginServletTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(httpServletResponse.resolveHttpMessage()).isEqualTo(expected);
+        assertThat(httpResponse.resolveHttpMessage()).isEqualTo(expected);
     }
 }

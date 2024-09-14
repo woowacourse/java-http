@@ -5,8 +5,8 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.catalina.servlet.HttpServlet;
-import org.apache.coyote.http.request.HttpServletRequest;
-import org.apache.coyote.http.response.HttpServletResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.util.FileUtils;
 
 public class RegisterServlet extends HttpServlet {
@@ -20,13 +20,13 @@ public class RegisterServlet extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String fileContent = FileUtils.readFile(PAGE_RESOURCE_PATH);
         response.ok(fileContent, "html");
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getFormData(ACCOUNT_FORM_DATA);
         String password = request.getFormData(PASSWORD_FORM_DATA);
         String email = request.getFormData(EMAIL_FORM_DATA);

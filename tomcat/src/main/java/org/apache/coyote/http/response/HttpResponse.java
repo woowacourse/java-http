@@ -1,30 +1,30 @@
 package org.apache.coyote.http.response;
 
-import org.apache.coyote.http.response.line.HttpStatus;
 import org.apache.coyote.http.HttpHeaderName;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.response.line.HttpStatus;
 import org.apache.coyote.http.response.line.ResponseLine;
 
-public class HttpServletResponse {
+public class HttpResponse {
 
     public static final String JSESSION_COOKIE_PREFIX = "JSESSIONID=";
     private ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpServletResponse(ResponseLine responseLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
+    public HttpResponse(ResponseLine responseLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.responseLine = responseLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;
     }
 
-    public static HttpServletResponse createEmptyResponse() {
+    public static HttpResponse createEmptyResponse() {
         ResponseLine emptyLine = ResponseLine.createEmptyResponseLine();
         HttpHeaders emptyHeaders = new HttpHeaders();
         HttpMessageBody emptyBody = HttpMessageBody.createEmptyBody();
 
-        return new HttpServletResponse(emptyLine, emptyHeaders, emptyBody);
+        return new HttpResponse(emptyLine, emptyHeaders, emptyBody);
     }
 
     public void ok(String responseBody, String contentType) {

@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http.request.HttpServletRequest;
-import org.apache.coyote.http.response.HttpServletResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.util.FileUtils;
 
 public class LoginServlet extends HttpServlet {
@@ -21,7 +21,7 @@ public class LoginServlet extends HttpServlet {
     private static final String PASSWORD_FORM_DATA = "password";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (sessionManager.hasSession(request.getSessionId())) {
             response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
             return;
@@ -32,7 +32,7 @@ public class LoginServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getFormData(ACCOUNT_FORM_DATA);
         String password = request.getFormData(PASSWORD_FORM_DATA);
 

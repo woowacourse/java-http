@@ -1,14 +1,14 @@
 package com.techcourse.servlet;
 
-import java.io.IOException;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.HttpServlet;
 import org.apache.coyote.http11.request.HttpServletRequest;
 import org.apache.coyote.http11.response.HttpServletResponse;
 
-public class GreetingServlet implements Servlet {
+public class GreetingServlet extends HttpServlet {
+
 
     @Override
-    public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         response.ok("Hello world!", "plain");
     }
 }

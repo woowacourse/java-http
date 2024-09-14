@@ -4,7 +4,7 @@ import static org.apache.coyote.http11.common.HttpProtocol.HTTP_11;
 import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.servlet.LoginPageServlet;
+import com.techcourse.servlet.LoginServlet;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMessageBody;
 import org.apache.coyote.http11.request.HttpServletRequest;
@@ -57,6 +57,6 @@ class RequestMappingHandlerMappingTest {
                 HttpMessageBody.createEmptyBody()
         );
         // when & then
-        assertThat(requestMappingHandlerMapping.getHandler(httpServletRequest)).isInstanceOf(LoginPageServlet.class);
+        assertThat(requestMappingHandlerMapping.getHandler(httpServletRequest)).isInstanceOf(LoginServlet.class);
     }
 }

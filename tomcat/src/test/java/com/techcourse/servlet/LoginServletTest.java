@@ -18,9 +18,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("로그인 페이지 서블릿 테스트")
-class LoginPageServletTest {
+class LoginServletTest {
 
-    private final LoginPageServlet loginPageServlet = new LoginPageServlet();
+    private final LoginServlet loginServlet = new LoginServlet();
 
     @DisplayName("로그인 페이지 요청을 처리할 수 있다")
     @Test
@@ -34,7 +34,7 @@ class LoginPageServletTest {
         HttpServletResponse httpServletResponse = HttpServletResponse.createEmptyResponse();
 
         // when
-        loginPageServlet.doService(httpServletRequest, httpServletResponse);
+        loginServlet.doService(httpServletRequest, httpServletResponse);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");

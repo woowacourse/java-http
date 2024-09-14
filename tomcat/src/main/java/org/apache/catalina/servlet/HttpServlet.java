@@ -16,7 +16,7 @@ public abstract class HttpServlet implements Servlet {
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {

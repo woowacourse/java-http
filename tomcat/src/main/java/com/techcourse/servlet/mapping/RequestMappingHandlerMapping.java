@@ -5,9 +5,7 @@ import static org.apache.coyote.http11.request.line.Method.GET;
 import static org.apache.coyote.http11.request.line.Method.POST;
 
 import com.techcourse.servlet.GreetingServlet;
-import com.techcourse.servlet.LoginPageServlet;
 import com.techcourse.servlet.LoginServlet;
-import com.techcourse.servlet.RegisterPageServlet;
 import com.techcourse.servlet.RegisterServlet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,9 +18,9 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
 
     public RequestMappingHandlerMapping() {
         handlers.put(new RequestMappingInformation(GET, "/", HTTP_11), new GreetingServlet());
-        handlers.put(new RequestMappingInformation(GET, "/login", HTTP_11), new LoginPageServlet());
+        handlers.put(new RequestMappingInformation(GET, "/login", HTTP_11), new LoginServlet());
         handlers.put(new RequestMappingInformation(POST, "/login", HTTP_11), new LoginServlet());
-        handlers.put(new RequestMappingInformation(GET, "/register", HTTP_11), new RegisterPageServlet());
+        handlers.put(new RequestMappingInformation(GET, "/register", HTTP_11), new RegisterServlet());
         handlers.put(new RequestMappingInformation(POST, "/register", HTTP_11), new RegisterServlet());
     }
 

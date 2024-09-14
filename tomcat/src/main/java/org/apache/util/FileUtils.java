@@ -2,12 +2,12 @@ package org.apache.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 
 public class FileUtils {
 
-    private static final String STATIC_RESOURCE_PATH = "static";
 
     private FileUtils() {
     }
@@ -21,8 +21,12 @@ public class FileUtils {
         return fileName.substring(lastDotIndex + 1);
     }
 
-    public static String readFile(String fileName) throws IOException {
-        URL resource = FileUtils.class.getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    public static String readFile(String fileName) {
+        try {
+            URL resource = FileUtils.class.getClassLoader().getResource(fileName);
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.techcourse.servlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +9,6 @@ import java.util.UUID;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpResponse;
@@ -43,17 +41,13 @@ public class LoginController extends AbstractController {
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
 		Optional<String> sessionId = request.getSessionIdFromCookie();
 		if (sessionId.isEmpty() || sessionManager.findSession(sessionId.get()) == null) {
-			setRedirectResponse(request, response, "login.html");
+			URL resource = getClass().getClassLoader().getResource("static/" + "login.html");
+			File file = new File(resource.getPath());
+			final Path path = file.toPath();
+			response.ok(request.getUri(), Files.readAllBytes(path));
 			return;
 		}
-		setRedirectResponse(request, response, "index.html");
-	}
-
-	private void setRedirectResponse(HttpRequest request, HttpResponse response, String location) throws IOException {
-		URL resource = Http11Processor.class.getClassLoader().getResource("static/" + location);
-		File file = new File(resource.getPath());
-		final Path path = file.toPath();
-		response.redirect(request.getUri(), Files.readAllBytes(path), location);
+		response.redirect(request.getUri(), "index.html");
 	}
 
 	@Override
@@ -66,11 +60,11 @@ public class LoginController extends AbstractController {
 			session.setAttribute("user", user);
 			sessionManager.add(session);
 
-			setRedirectResponse(request, response, "index.html");
+			response.redirect(request.getUri(), "index.html");
 			response.setCookie("JSESSIONID", uuid.toString());
 			return;
 		} catch (RuntimeException exception) {
-			setRedirectResponse(request, response, "401.html");
+			response.redirect(request.getUri(), "401.html");
 		}
 		super.doPost(request, response);
 	}

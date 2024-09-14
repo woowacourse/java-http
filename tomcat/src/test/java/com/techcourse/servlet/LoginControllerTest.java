@@ -36,13 +36,11 @@ class LoginControllerTest {
 		handler.doGet(request, response);
 
 		// then
-		URL resource = Http11Processor.class.getClassLoader().getResource("static/login.html");
+		URL resource = getClass().getClassLoader().getResource("static/login.html");
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
 		var responseBody = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 		assertThat(response.getResponseBody()).isEqualTo(responseBody);
-		assertThat(response.getHeaders())
-			.anyMatch(header -> header.startsWith("Location:"));
 	}
 
 	@DisplayName("쿠키에 유효한 세션이 존재할 경우 index.html 파일을 반환한다.")

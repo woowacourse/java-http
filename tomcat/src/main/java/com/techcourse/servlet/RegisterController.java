@@ -31,10 +31,10 @@ public class RegisterController extends AbstractController {
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-		URL resource = Http11Processor.class.getClassLoader().getResource("static/register.html");
+		URL resource = getClass().getClassLoader().getResource("static/register.html");
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.redirect(request.getUri(), Files.readAllBytes(path), "register.html");
+		response.ok(request.getUri(), Files.readAllBytes(path));
 		super.doGet(request, response);
 	}
 
@@ -46,12 +46,7 @@ public class RegisterController extends AbstractController {
 		if (isSucceed) {
 			redirectUri = "index.html";
 		}
-
-		URL resource = Http11Processor.class.getClassLoader().getResource("static/" + redirectUri);
-		File file = new File(resource.getPath());
-		final Path path = file.toPath();
-		response.redirect(request.getUri(), Files.readAllBytes(path), redirectUri);
-
+		response.redirect(request.getUri(), redirectUri);
 		super.doPost(request, response);
 	}
 

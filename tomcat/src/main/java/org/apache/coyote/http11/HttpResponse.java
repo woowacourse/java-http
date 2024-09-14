@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,11 +25,9 @@ public class HttpResponse {
 		setContentLength();
 	}
 
-	public void redirect(String uri, byte[] response, String location) {
+	public void redirect(String uri, String location) {
 		setStatusLine(StatusLine.from(HttpStatus.FOUND));
 		setContentType(uri);
-		setResponseBody(response);
-		setContentLength();
 		setLocation("/" + location);
 	}
 
@@ -100,7 +97,10 @@ public class HttpResponse {
 	public String toString() {
 		String statusLineString = statusLine.getLine() + " \r\n";
 		String headersString = String.join("\r\n", headers);
-		String bodyString = new String(responseBody, StandardCharsets.UTF_8);
+		String bodyString = "";
+		if (responseBody != null) {
+			bodyString = new String(responseBody, StandardCharsets.UTF_8);
+		}
 		return statusLineString + headersString + "\r\n\r\n" + bodyString;
 	}
 

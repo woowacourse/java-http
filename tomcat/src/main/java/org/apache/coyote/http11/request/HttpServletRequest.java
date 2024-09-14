@@ -6,7 +6,6 @@ import org.apache.coyote.http11.common.HttpMessageBody;
 import org.apache.coyote.http11.common.HttpProtocol;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.request.line.Uri;
 
 public class HttpServletRequest {
 
@@ -25,12 +24,16 @@ public class HttpServletRequest {
         return requestLine.isMethod(method);
     }
 
-    public boolean protocolEquals(HttpProtocol httpProtocol) {
-        return requestLine.isHttpProtocol(httpProtocol);
+    public boolean isGet() {
+        return requestLine.isMethod(Method.GET);
     }
 
-    public boolean uriEquals(Uri uri) {
-        return requestLine.isUri(uri);
+    public boolean isPost() {
+        return requestLine.isMethod(Method.POST);
+    }
+
+    public boolean protocolEquals(HttpProtocol httpProtocol) {
+        return requestLine.isHttpProtocol(httpProtocol);
     }
 
     public boolean isUriHome() {

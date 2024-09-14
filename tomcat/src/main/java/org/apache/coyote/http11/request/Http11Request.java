@@ -21,7 +21,7 @@ public class Http11Request implements HttpRequest {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
     private static final int HEADER_INDEX_SIZE = 2;
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Http11RequestStartLine startLine;
     private final Http11RequestHeader headers;

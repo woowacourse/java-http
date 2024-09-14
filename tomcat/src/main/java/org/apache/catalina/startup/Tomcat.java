@@ -1,15 +1,15 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-public class Tomcat {
+public class Tomcat implements Server {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
+    @Override
     public void start() {
         var connector = new Connector();
         connector.start();

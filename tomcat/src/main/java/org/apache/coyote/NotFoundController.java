@@ -1,6 +1,5 @@
 package org.apache.coyote;
 
-import com.techcourse.controller.AbstractRequestController;
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;

@@ -122,7 +122,8 @@ public class HttpResponse {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(httpStatusLine.createStatusLineResponse())
                 .append(RESPONSE_LINE_DELIMITER)
-                .append(httpResponseHeader.createHeadersResponse());
+                .append(httpResponseHeader.createHeadersResponse())
+                .append(RESPONSE_LINE_DELIMITER);
         if (httpResponseBody != null) {
             stringBuilder.append(RESPONSE_LINE_DELIMITER)
                     .append(httpResponseBody.getBody());

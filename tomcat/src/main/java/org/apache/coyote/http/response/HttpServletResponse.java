@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http.response;
 
-import org.apache.coyote.http11.common.HttpHeaderName;
-import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.common.HttpMessageBody;
-import org.apache.coyote.http11.response.line.HttpStatus;
-import org.apache.coyote.http11.response.line.ResponseLine;
+import org.apache.coyote.http.response.line.HttpStatus;
+import org.apache.coyote.http.HttpHeaderName;
+import org.apache.coyote.http.HttpHeaders;
+import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.response.line.ResponseLine;
 
 public class HttpServletResponse {
 

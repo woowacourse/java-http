@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.line;
+package org.apache.coyote.http.request.line;
 
 import java.util.Objects;
 

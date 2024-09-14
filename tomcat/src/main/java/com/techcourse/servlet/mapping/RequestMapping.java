@@ -7,7 +7,7 @@ import com.techcourse.servlet.RegisterServlet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.servlet.Servlet;
-import org.apache.coyote.http11.request.HttpServletRequest;
+import org.apache.coyote.http.request.HttpServletRequest;
 
 public class RequestMapping {
 

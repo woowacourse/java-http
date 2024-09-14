@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet;
 
 import java.io.IOException;
-import org.apache.coyote.http11.request.HttpServletRequest;
-import org.apache.coyote.http11.response.HttpServletResponse;
+import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.response.HttpServletResponse;
 
 public abstract class HttpServlet implements Servlet {
 

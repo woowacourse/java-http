@@ -3,14 +3,14 @@ package com.techcourse.servlet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.common.HttpMessageBody;
-import org.apache.coyote.http11.common.HttpProtocol;
-import org.apache.coyote.http11.request.HttpServletRequest;
-import org.apache.coyote.http11.request.line.Method;
-import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.request.line.Uri;
-import org.apache.coyote.http11.response.HttpServletResponse;
+import org.apache.coyote.http.HttpHeaders;
+import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.HttpProtocol;
+import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.request.line.Method;
+import org.apache.coyote.http.request.line.RequestLine;
+import org.apache.coyote.http.request.line.Uri;
+import org.apache.coyote.http.response.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

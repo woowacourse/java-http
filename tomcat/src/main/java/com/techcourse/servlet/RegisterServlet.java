@@ -5,8 +5,8 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.catalina.servlet.HttpServlet;
-import org.apache.coyote.http11.request.HttpServletRequest;
-import org.apache.coyote.http11.response.HttpServletResponse;
+import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.response.HttpServletResponse;
 import org.apache.util.FileUtils;
 
 public class RegisterServlet extends HttpServlet {

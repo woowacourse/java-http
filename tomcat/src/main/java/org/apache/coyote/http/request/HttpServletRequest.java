@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http.request;
 
-import org.apache.coyote.http11.common.HttpCookies;
-import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.common.HttpMessageBody;
-import org.apache.coyote.http11.common.HttpProtocol;
-import org.apache.coyote.http11.request.line.Method;
-import org.apache.coyote.http11.request.line.RequestLine;
+import org.apache.coyote.http.HttpCookies;
+import org.apache.coyote.http.HttpHeaders;
+import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.HttpProtocol;
+import org.apache.coyote.http.request.line.Method;
+import org.apache.coyote.http.request.line.RequestLine;
 
 public class HttpServletRequest {
 

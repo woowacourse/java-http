@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.response.line;
+package org.apache.coyote.http.response.line;
 
-import org.apache.coyote.http11.common.HttpProtocol;
+import org.apache.coyote.http.HttpProtocol;
 
 public class ResponseLine {
 

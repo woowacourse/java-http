@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.line;
+package org.apache.coyote.http.response.line;
 
 public enum HttpStatus {
 

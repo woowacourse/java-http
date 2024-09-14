@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.request.HttpServletRequest;
-import org.apache.coyote.http11.response.HttpServletResponse;
+import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.response.HttpServletResponse;
 import org.apache.util.FileUtils;
 
 public class LoginServlet extends HttpServlet {

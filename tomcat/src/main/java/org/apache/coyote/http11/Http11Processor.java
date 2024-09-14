@@ -10,12 +10,12 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.common.HttpHeaderName;
-import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.common.HttpMessageBody;
-import org.apache.coyote.http11.request.HttpServletRequest;
-import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.HttpServletResponse;
+import org.apache.coyote.http.HttpHeaderName;
+import org.apache.coyote.http.HttpHeaders;
+import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.request.HttpServletRequest;
+import org.apache.coyote.http.request.line.RequestLine;
+import org.apache.coyote.http.response.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

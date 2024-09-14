@@ -11,31 +11,30 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.servlet.Servlet;
 
 public class DispatcherServlet implements Servlet {
+
     private static final Map<String, Controller> APPLICATION_HANDLER_MAPPER = Map.ofEntries(
             Map.entry("/", new HomeController()), Map.entry("/login", new LoginController()),
             Map.entry("/register", new RegisterController()));
 
-    private final Map<String, Controller> handlerMapper;
+    private final RequestMapping requestMapping;
 
     public DispatcherServlet() {
-        this.handlerMapper = APPLICATION_HANDLER_MAPPER;
+        this.requestMapping = new RequestMapping(APPLICATION_HANDLER_MAPPER);
     }
 
-    public DispatcherServlet(Map<String, Controller> handlerMapper) {
-        this.handlerMapper = handlerMapper;
+    public DispatcherServlet(RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
     @Override
     public boolean canService(HttpRequest request) {
-        return handlerMapper.containsKey(request.getPath());
+        return requestMapping.getController(request).isPresent();
     }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        handlerMapper.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(request.getPath()))
-                .findFirst()
-                .ifPresent(entry -> doService(request, response, entry.getValue()));
+        requestMapping.getController(request)
+                .ifPresent(controller -> doService(request, response, controller));
     }
 
     private void doService(HttpRequest request, HttpResponse response, Controller controller) {

@@ -22,10 +22,7 @@ public class HttpResponse {
     }
 
     public HttpResponse() {
-        this.headers = new HttpResponseHeaders();
-        this.status = HttpStatus.OK;
-        this.body = EMPTY_BODY;
-        headers.addContentLength(body.getBytes().length);
+        this(new HttpResponseHeaders(), HttpStatus.OK, EMPTY_BODY);
     }
 
     public void sendTextFiles(String text) {
@@ -40,17 +37,25 @@ public class HttpResponse {
     }
 
     public void sendStaticResource(HttpStatus status, String filePath) {
-        this.status = status;
-        body = StaticFileResponseUtils.readStaticFile(filePath);
+        setStatus(status);
+        setBody(StaticFileResponseUtils.readStaticFile(filePath));
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
         headers.addContentLength(body.getBytes().length);
     }
 
     public void sendRedirect(String location) {
-        status = HttpStatus.FOUND;
-        body = EMPTY_BODY;
+        setStatus(HttpStatus.FOUND);
+        setBody(EMPTY_BODY);
         headers.addLocation(location);
         headers.addContentLength(body.getBytes().length);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public void setSession(Session session) {

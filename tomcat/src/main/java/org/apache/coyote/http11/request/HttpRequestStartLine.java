@@ -18,8 +18,7 @@ public class HttpRequestStartLine {
         this.url = new HttpUrl(url);
     }
 
-    public HttpRequestStartLine(HttpMethod method, HttpUrl url, String protocolVersion) {
-        validateVersion(protocolVersion);
+    public HttpRequestStartLine(HttpMethod method, HttpUrl url) {
         this.method = method;
         this.url = url;
     }

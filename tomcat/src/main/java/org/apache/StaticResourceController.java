@@ -10,8 +10,6 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.StatusLine;
 
 public class StaticResourceController extends AbstractController {
 
@@ -34,9 +32,6 @@ public class StaticResourceController extends AbstractController {
 		URL resource = Http11Processor.class.getClassLoader().getResource("static" + request.getUri());
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.setResponseBody(Files.readAllBytes(path));
-		response.setContentType(request.getUri());
-		response.setContentLength();
-		response.setStatusLine(StatusLine.from(HttpStatus.OK));
+		response.ok(request.getUri(), Files.readAllBytes(path));
 	}
 }

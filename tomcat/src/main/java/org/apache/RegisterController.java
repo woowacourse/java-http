@@ -10,8 +10,6 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +32,7 @@ public class RegisterController extends AbstractController {
 		URL resource = Http11Processor.class.getClassLoader().getResource("static/register.html");
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.setResponseBody(Files.readAllBytes(path));
-		response.setContentType(request.getUri());
-		response.setContentLength();
-		response.setStatusLine(StatusLine.from(HttpStatus.OK));
+		response.redirect(request.getUri(), Files.readAllBytes(path), "register.html");
 		super.doGet(request, response);
 	}
 
@@ -53,10 +48,7 @@ public class RegisterController extends AbstractController {
 		URL resource = Http11Processor.class.getClassLoader().getResource("static/" + redirectUri);
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.setContentType(request.getUri());
-		response.setResponseBody(Files.readAllBytes(path));
-		response.setContentLength();
-		response.setLocation("/" + redirectUri);
+		response.redirect(request.getUri(), Files.readAllBytes(path), redirectUri);
 
 		super.doPost(request, response);
 	}

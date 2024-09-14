@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,21 @@ public class HttpResponse {
 
 	public static HttpResponse empty() {
 		return new HttpResponse();
+	}
+
+	public void ok(String uri, byte[] response) {
+		setStatusLine(StatusLine.from(HttpStatus.OK));
+		setContentType(uri);
+		setResponseBody(response);
+		setContentLength();
+	}
+
+	public void redirect(String uri, byte[] response, String location) {
+		setStatusLine(StatusLine.from(HttpStatus.FOUND));
+		setContentType(uri);
+		setResponseBody(response);
+		setContentLength();
+		setLocation("/" + location);
 	}
 
 	public void setStatusLine(StatusLine statusLine) {

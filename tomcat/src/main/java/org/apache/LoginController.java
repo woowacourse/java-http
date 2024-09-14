@@ -41,20 +41,17 @@ public class LoginController extends AbstractController {
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
 		Optional<String> sessionId = request.getSessionIdFromCookie();
 		if (sessionId.isEmpty() || sessionManager.findSession(sessionId.get()) == null) {
-			setRedirect(request,response, "login.html");
+			setRedirectResponse(request, response, "login.html");
 			return;
 		}
-		setRedirect(request, response, "index.html");
+		setRedirectResponse(request, response, "index.html");
 	}
 
-	private static void setRedirect(HttpRequest request, HttpResponse response, String location) throws IOException {
+	private void setRedirectResponse(HttpRequest request, HttpResponse response, String location) throws IOException {
 		URL resource = Http11Processor.class.getClassLoader().getResource("static/" + location);
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.setContentType(request.getUri());
-		response.setResponseBody(Files.readAllBytes(path));
-		response.setContentLength();
-		response.setLocation("/" + location);
+		response.redirect(request.getUri(), Files.readAllBytes(path), location);
 	}
 
 	@Override
@@ -67,11 +64,11 @@ public class LoginController extends AbstractController {
 			session.setAttribute("user", user);
 			sessionManager.add(session);
 
-			setRedirect(request, response ,"index.html");
+			setRedirectResponse(request, response, "index.html");
 			response.setCookie("JSESSIONID", uuid.toString());
 			return;
 		} catch (RuntimeException exception) {
-			setRedirect(request, response, "401.html");
+			setRedirectResponse(request, response, "401.html");
 		}
 		super.doPost(request, response);
 	}

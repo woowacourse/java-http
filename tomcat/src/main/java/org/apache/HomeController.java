@@ -1,12 +1,8 @@
 package org.apache;
 
-import java.io.IOException;
-
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.StatusLine;
 
 public class HomeController extends AbstractController {
 
@@ -21,10 +17,7 @@ public class HomeController extends AbstractController {
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
 		super.doGet(request, response);
-		response.setStatusLine(StatusLine.from(HttpStatus.OK));
-		response.setContentType(URI_PATTERN);
-		response.setResponseBody(HOME_PAGE_CONTENT.getBytes());
-		response.setContentLength();
+		response.ok(URI_PATTERN, HOME_PAGE_CONTENT.getBytes());
 	}
 
 	@Override

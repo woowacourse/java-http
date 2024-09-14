@@ -20,9 +20,9 @@ import static org.mockito.Mockito.when;
 
 class ConnectorTest {
 
-    private static final int MAX_CONNECTIONS = 150;
     private static final int MAX_THREADS = 100;
-    public static final int WAIT_EXPECTED = 50;
+    private static final int ACCEPT_COUNT = 50;
+    private static final int WAIT_EXPECTED = 50;
 
     @Test
     @DisplayName("최대 Thread Pool의 크기가 100, 모든 Thread가 사용 중인(Busy) 상태이면 50명까지 대기 상태로 만든다.")
@@ -43,33 +43,34 @@ class ConnectorTest {
 
         Connector connector = new Connector(
                 8080,
-                100,
-                MAX_CONNECTIONS,
+                ACCEPT_COUNT, // accept count만큼 추가로 accept한다.
                 MAX_THREADS,
                 mock(Manager.class),
                 mockFactory
         );
         connector.start();
 
-        // maxConnections + 100번 요청한다.
+        // acceptCount + maxThreads + 100번 요청한다.
         setUpConnection(testEndLatch);
 
-        // maxConnections + 100번 요청을 보내도, 활성 스레드 수는 max thread 수와 일치한다.
+        // acceptCount + maxThreads + 100번 요청을 보내도, 활성 스레드 수는 max thread 수와 일치한다.
         assertThat(connector.getActiveConnect()).isEqualTo(MAX_THREADS);
 
-        // 대기 큐의 사이즈는 최대 maxConnections - maxThreads이다.
-        assertThat(connector.getWaitConnect()).isEqualTo(WAIT_EXPECTED);
+        // 대기 큐의 사이즈는 최대 accept count이다.
+        assertThat(connector.getWaitConnect())
+                .isEqualTo(ACCEPT_COUNT)
+                .isEqualTo(WAIT_EXPECTED);
 
         // connector.process 내부 getHttp11Processor의 호출 수는 connector의 accept 수이다.
-        // maxConnections + 100번 요청해도 accept는 max_connections만큼 한다.
-        verify(mockFactory, times(MAX_CONNECTIONS)).getHttp11Processor(any(), any());
+        // acceptCount + maxThreads + 100번 요청해도 accept()는 최대 accept count + max thread만큼 한다.
+        verify(mockFactory, times(ACCEPT_COUNT + MAX_THREADS)).getHttp11Processor(any(), any());
 
         testEndLatch.countDown();
         connector.stop();
     }
 
     private void setUpConnection(CountDownLatch testEndLatch) throws Exception {
-        int connectionCount = MAX_CONNECTIONS + 100;
+        int connectionCount = ACCEPT_COUNT + MAX_THREADS + 100;
         ExecutorService executorService = Executors.newFixedThreadPool(connectionCount);
         CountDownLatch taskLatch = new CountDownLatch(connectionCount);
 

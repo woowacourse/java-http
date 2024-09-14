@@ -15,14 +15,14 @@ class TomcatThreadPool extends ThreadPoolExecutor {
 
     public TomcatThreadPool(
             int maxThreads,
-            int maxConnections
+            int acceptCount
     ) {
         super(
                 maxThreads,
                 maxThreads,
                 0,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(maxConnections - maxThreads),
+                new LinkedBlockingQueue<>(acceptCount),
                 saturationPolicy
         );
     }

@@ -18,23 +18,19 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_THREADS = 200;
-    private static final int DEFAULT_MAX_CONNECTIONS = 8192;
 
     private final ServerSocket serverSocket;
     private final Manager sessionManager;
     private final ThreadPoolExecutor threadPoolExecutor;
     private final CoyoteProcessorFactory processorFactory;
-    private final int maxConnections;
-    private final int maxThreads;
+    private final int acceptCount;
 
-    private int counts;
     private boolean stopped;
 
     public Connector(Manager sessionManager) {
         this(
                 DEFAULT_PORT,
                 DEFAULT_ACCEPT_COUNT,
-                DEFAULT_MAX_CONNECTIONS,
                 DEFAULT_THREADS,
                 sessionManager,
                 new CoyoteProcessorFactory()
@@ -44,18 +40,16 @@ public class Connector implements Runnable {
     public Connector(
             final int port,
             final int acceptCount,
-            final int maxConnections,
             final int maxThreads,
             final Manager sessionManager,
             final CoyoteProcessorFactory processorFactory
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.threadPoolExecutor = new TomcatThreadPool(maxThreads, maxConnections);
+        this.threadPoolExecutor = new TomcatThreadPool(maxThreads, acceptCount);
         this.sessionManager = sessionManager;
         this.processorFactory = processorFactory;
-        this.maxConnections = maxConnections;
-        this.maxThreads = maxThreads;
+        this.acceptCount = acceptCount;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -86,10 +80,9 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            // max connections 이하인 경우 연결을 accept한다.
-            int queueSizeLimit = this.maxConnections - this.maxThreads;
+            // acceptCount 이하인 경우 연결을 accept한다.
             int nowQueueSize = threadPoolExecutor.getQueue().size();
-            if (nowQueueSize < queueSizeLimit) {
+            if (nowQueueSize < acceptCount) {
                 process(serverSocket.accept());
             }
         } catch (IOException e) {

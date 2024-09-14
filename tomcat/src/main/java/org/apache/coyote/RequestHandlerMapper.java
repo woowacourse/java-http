@@ -2,7 +2,6 @@ package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.NotFoundController;
 import org.apache.ResourceReader;
 
 public class RequestHandlerMapper {

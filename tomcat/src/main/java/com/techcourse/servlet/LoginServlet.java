@@ -23,7 +23,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (sessionManager.hasSession(request.getSessionId())) {
-            response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+            response.sendRedirect(LOGIN_SUCCESS_REDIRECT_URI);
             return;
         }
 
@@ -46,7 +46,7 @@ public class LoginServlet extends HttpServlet {
         session.setAttributes("user", found.get());
         sessionManager.add(session);
 
-        response.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+        response.sendRedirect(LOGIN_SUCCESS_REDIRECT_URI);
         response.setJsession(session.getId());
     }
 }

@@ -33,6 +33,6 @@ public class RegisterServlet extends HttpServlet {
 
         User user = new User(userIdGenerator.getAndIncrement(), account, password, email);
         InMemoryUserRepository.save(user);
-        response.redirect(REGISTER_SUCCESS_REDIRECT_URI);
+        response.sendRedirect(REGISTER_SUCCESS_REDIRECT_URI);
     }
 }

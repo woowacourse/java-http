@@ -37,9 +37,9 @@ public class HttpResponse {
         writeBody(responseBody, contentType);
     }
 
-    public void redirect(String uri) {
+    public void sendRedirect(String location) {
         responseLine.setHttpStatus(HttpStatus.FOUND);
-        httpHeaders.putHeader(HttpHeaderName.LOCATION, uri);
+        httpHeaders.putHeader(HttpHeaderName.LOCATION, location);
     }
 
     private void writeBody(String bodyMessage, String contentType) {

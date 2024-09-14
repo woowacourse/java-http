@@ -36,6 +36,7 @@ public class Connector implements Runnable {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
+
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -78,6 +79,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

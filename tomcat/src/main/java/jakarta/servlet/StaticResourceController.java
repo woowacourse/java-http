@@ -11,8 +11,6 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-import jakarta.servlet.AbstractController;
-
 public class StaticResourceController extends AbstractController {
 
 	private static final String[] CAN_HANDLE_SUFFIX = {".html", ".css", ".js", ".ico"};

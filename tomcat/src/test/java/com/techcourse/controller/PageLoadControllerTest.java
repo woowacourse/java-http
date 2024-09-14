@@ -74,11 +74,12 @@ class PageLoadControllerTest {
 
             final URL resource = getClass().getClassLoader().getResource("static/" + path);
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + bytes.length + " ",
+                    "",
+                    new String(bytes));
 
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);

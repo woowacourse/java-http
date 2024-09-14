@@ -7,11 +7,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 
-import org.apache.catalina.http.ContentType;
 import org.apache.catalina.mvc.Controller;
 import org.apache.catalina.parser.HttpRequestParser;
 import org.apache.catalina.parser.RequestMapping;
-import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.reader.RequestReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.request.RequestBody;
@@ -27,9 +25,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
-    private static final String BAD_REQUEST_PAGE = "/400.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String NOT_FOUND_PAGE = "/404.html";
     private final Socket connection;
     private final RequestMapping requestMapping;
 
@@ -77,37 +72,13 @@ public class Http11Processor implements Runnable, Processor {
         try {
             Controller controller = requestMapping.getController(request);
             controller.handleRequest(request, response);
-            return response;
         } catch (IllegalArgumentException e) {
-            return get404HttpResponse(request);
+            response.setError(HttpStatus.BAD_REQUEST);
         } catch (IllegalStateException e) {
-            return get401HttpResponse(request);
+            response.setError(HttpStatus.UNAUTHORIZED);
         } catch (RuntimeException e) {
-            return get400HttpResponse(request);
+            response.setError(HttpStatus.NOT_FOUND);
         }
-    }
-
-    private static HttpResponse get400HttpResponse(HttpRequest request) {
-        HttpResponse response = HttpResponse.of(request);
-        response.setHttpStatus(HttpStatus.BAD_REQUEST);
-        response.setBody(FileReader.loadFileContent(BAD_REQUEST_PAGE));
-        response.setContentType(ContentType.HTML);
-        return response;
-    }
-
-    private static HttpResponse get401HttpResponse(HttpRequest request) {
-        HttpResponse response = HttpResponse.of(request);
-        response.setHttpStatus(HttpStatus.UNAUTHORIZED);
-        response.setBody(FileReader.loadFileContent(UNAUTHORIZED_PAGE));
-        response.setContentType(ContentType.HTML);
-        return response;
-    }
-
-    private static HttpResponse get404HttpResponse(HttpRequest request) {
-        HttpResponse response = HttpResponse.of(request);
-        response.setHttpStatus(HttpStatus.NOT_FOUND);
-        response.setBody(FileReader.loadFileContent(NOT_FOUND_PAGE));
-        response.setContentType(ContentType.HTML);
         return response;
     }
 }

@@ -64,11 +64,12 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static" + fileName);
         byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + bytes.length + " \r\n" +
-                "\r\n" +
-                new String(bytes);
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                new String(bytes));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -93,11 +94,12 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: " + bytes.length + " \r\n" +
-                "\r\n" +
-                new String(bytes);
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                new String(bytes));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -122,11 +124,12 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
         byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + bytes.length + " \r\n" +
-                "\r\n" +
-                new String(bytes);
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                new String(bytes));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -134,7 +137,7 @@ class Http11ProcessorTest {
     @ParameterizedTest
     @ValueSource(strings = {"/login", "/register"})
     @DisplayName("성공 : 로그인 성공 후 /* 페이지 접근 시 index 페이지로 리다이렉션")
-    void urlAfterLoginSuccess(String url) throws IOException {
+    void urlAfterLoginSuccess(String url) {
         // given
         String id = UUID.randomUUID().toString();
         Session session = new Session(id);
@@ -156,15 +159,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + bytes.length + " \r\n" +
-                "Location: http://localhost:8080/index.html" + " \r\n" +
-                "\r\n" +
-                new String(bytes);
-
+        var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Length: 0 ",
+                "Location: http://localhost:8080/index.html" + " ",
+                "\r\n");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -194,18 +193,19 @@ class Http11ProcessorTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 401 Unauthorized ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + bytes.length + " ",
+                    "",
+                    new String(bytes));
 
             assertThat(socket.output()).isEqualTo(expected);
         }
 
         @Test
         @DisplayName("성공 : 로그인 성공으로 index.html로 리다이렉션")
-        void loginSuccess() throws IOException {
+        void loginSuccess() {
             // given
             String body = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
@@ -223,16 +223,13 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
             String JSessionId = socket.output().split("JSESSIONID=")[1].split(" \r\n")[0];
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Set-Cookie: JSESSIONID=" + JSessionId + " ",
+                    "Location: http://localhost:8080/index.html" + " ",
+                    "\r\n");
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -243,7 +240,7 @@ class Http11ProcessorTest {
     class register {
         @Test
         @DisplayName("성공 : 회원가입 성공으로 index.html로 리다이렉션")
-        void registerSuccess() throws IOException {
+        void registerSuccess() {
             // given
             final String body = "account=kyum3&password=password&email=kyum@naver.com";
             final String httpRequest = String.join("\r\n",
@@ -261,14 +258,11 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Location: http://localhost:8080/index.html" + " ",
+                    "\r\n");
 
             assertThat(socket.output()).isEqualTo(expected);
         }

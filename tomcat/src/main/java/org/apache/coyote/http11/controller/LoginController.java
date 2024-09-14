@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.setPath("/index.html");
+        response.setPath("/login.html");
         response.setFileType("html");
         response.setHttpStatusCode(HttpStatusCode.OK);
         response.setResponseBody(readBodyFromPath(response.getPath()));

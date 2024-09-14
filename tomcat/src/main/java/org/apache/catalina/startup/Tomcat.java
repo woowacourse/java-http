@@ -1,17 +1,20 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
+import java.util.Map;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.container.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start() {
-        var connector = new Connector();
+    public void start(Map<String, Object> mapping) {
+        Container container = new Container();
+        container.addMapping(mapping);
+        var connector = new Connector(container);
         connector.start();
 
         try {

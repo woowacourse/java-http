@@ -1,8 +1,5 @@
 package org.apache.catalina.connector;
 
-import com.techcourse.controller.LoginRequestController;
-import com.techcourse.controller.RootRequestController;
-import com.techcourse.controller.SignupRequestController;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -11,6 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.catalina.container.Container;
 import org.apache.coyote.RequestHandlerMapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -28,13 +26,20 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService pool;
+    private final RequestHandlerMapper requestHandlerMapper;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
+    public Connector(Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreadCount) {
+    public Connector(
+            final Container container,
+            final int port,
+            final int acceptCount,
+            final int maxThreadCount
+    ) {
+        this.requestHandlerMapper = container.getRequestHandlerMapper();
         this.pool = createThreadPool(maxThreadCount);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
@@ -89,10 +94,6 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
-        requestHandlerMapper.addController(new LoginRequestController(), "/login");
-        requestHandlerMapper.addController(new SignupRequestController(), "/register");
-        requestHandlerMapper.addController(new RootRequestController(), "/");
         var processor = new Http11Processor(connection, requestHandlerMapper);
         pool.execute(processor);
     }

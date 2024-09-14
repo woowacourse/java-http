@@ -87,8 +87,10 @@ public class Connector {
             connection.close();
             log.warn("Server is busy. Rejected task. {} closed.", connection);
         }
-        log.info("{} 개의 스레드 실행 중", threadPoolExecutor.getActiveCount());
-        log.info("{} 개의 작업 대기 중", threadPoolExecutor.getQueue().size());
+        log.info(
+                "Active Thread Count: {} | Queued Task Count : {}",
+                threadPoolExecutor.getActiveCount(), threadPoolExecutor.getQueue().size()
+        );
     }
 
     public void stop() {

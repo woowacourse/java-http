@@ -104,14 +104,17 @@ public class Connector implements Runnable {
     private void shutdown() {
         try {
             executor.shutdown(); // 실행 중인 모든 Task가 수행되면 종료
-            // 800ms 이내에 종료되지 않으면 실행 중인 모든 Task를 즉시 종료
-            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
-                executor.shutdownNow();
-            }
+            awaitTerminationAndShutDownNow();
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
             executor.shutdownNow(); // 인터럽트 발생 경우에도 종료
             Thread.currentThread().interrupt(); // 인터럽트 상태를 다시 설정
+        }
+    }
+
+    private void awaitTerminationAndShutDownNow() throws InterruptedException {
+        if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+            executor.shutdownNow(); // 실행 중인 모든 Task를 즉시 종료
         }
     }
 

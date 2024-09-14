@@ -48,6 +48,10 @@ public class HttpRequest implements HttpComponent {
         return requestLine.getVersion();
     }
 
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
     public String getAccept() {
         return headers.get(HttpHeaders.ACCEPT);
     }

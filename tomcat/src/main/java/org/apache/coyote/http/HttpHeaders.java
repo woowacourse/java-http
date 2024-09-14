@@ -2,13 +2,16 @@ package org.apache.coyote.http;
 
 import static org.apache.coyote.http.HttpCookie.JSESSIONID;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpHeaders implements HttpComponent {
 
     private static final int NAME_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int HEADER_SPLIT_LENGTH = 2;
 
     private static final String SEPARATOR = ": ";
 
@@ -30,8 +33,11 @@ public class HttpHeaders implements HttpComponent {
         String[] lines = httpRequest.split(LINE_FEED);
         int i = 1;
         while ((i < lines.length) && !lines[i].isEmpty()) {
-            String[] headerLine = lines[i].split(SEPARATOR);
-            headers.put(headerLine[NAME_INDEX], headerLine[VALUE_INDEX]);
+            String[] headerLine = lines[i].split(SEPARATOR, HEADER_SPLIT_LENGTH);
+            System.out.println(Arrays.toString(headerLine));
+            String name = headerLine[NAME_INDEX].trim();
+            String value = headerLine[VALUE_INDEX].trim();
+            headers.put(name, value);
             i++;
         }
     }
@@ -78,15 +84,12 @@ public class HttpHeaders implements HttpComponent {
 
     @Override
     public String asString() {
-        final var result = new StringBuilder();
+        final var result = new StringJoiner("\r\n");
         for (String key : headers.keySet()) {
             String value = headers.get(key);
-            result.append(key)
-                    .append(SEPARATOR)
-                    .append(value)
-                    .append(SPACE)
-                    .append(LINE_FEED);
+            result.add(key + SEPARATOR + value + SPACE);
         }
+        result.add("");
         return result.toString();
     }
 }

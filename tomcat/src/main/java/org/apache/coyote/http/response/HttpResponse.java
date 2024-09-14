@@ -3,12 +3,15 @@ package org.apache.coyote.http.response;
 import org.apache.coyote.http.HttpHeaderName;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
+import org.apache.coyote.http.MimeType;
 import org.apache.coyote.http.response.line.HttpStatus;
 import org.apache.coyote.http.response.line.ResponseLine;
+import org.apache.util.FileUtils;
 
 public class HttpResponse {
 
     public static final String JSESSION_COOKIE_PREFIX = "JSESSIONID=";
+    public static final String CHARSET_UTF_8 = ";charset=utf-8";
     private ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
@@ -27,14 +30,9 @@ public class HttpResponse {
         return new HttpResponse(emptyLine, emptyHeaders, emptyBody);
     }
 
-    public void ok(String responseBody, String contentType) {
+    public void ok(String fileName) {
         responseLine.setHttpStatus(HttpStatus.OK);
-        writeBody(responseBody, contentType);
-    }
-
-    public void unauthorized(String responseBody, String contentType) {
-        responseLine.setHttpStatus(HttpStatus.UNAUTHORIZED);
-        writeBody(responseBody, contentType);
+        writeBody(FileUtils.readFile(fileName), MimeType.from(fileName).getContentType());
     }
 
     public void sendRedirect(String location) {
@@ -42,9 +40,14 @@ public class HttpResponse {
         httpHeaders.putHeader(HttpHeaderName.LOCATION, location);
     }
 
+    public void sendError(HttpStatus statusCode, String fileName) {
+        responseLine.setHttpStatus(statusCode);
+        writeBody(FileUtils.readFile(fileName), MimeType.from(fileName).getContentType());
+    }
+
     private void writeBody(String bodyMessage, String contentType) {
-        httpHeaders.putHeader(HttpHeaderName.CONTENT_TYPE, "text/" + contentType + ";charset=utf-8 ");
-        httpHeaders.putHeader(HttpHeaderName.CONTENT_LENGTH, bodyMessage.getBytes().length + " ");
+        httpHeaders.putHeader(HttpHeaderName.CONTENT_TYPE, contentType + CHARSET_UTF_8);
+        httpHeaders.putHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(bodyMessage.getBytes().length));
         httpMessageBody.write(bodyMessage);
     }
 

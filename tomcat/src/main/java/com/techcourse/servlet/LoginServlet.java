@@ -9,14 +9,14 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
-import org.apache.util.FileUtils;
+import org.apache.coyote.http.response.line.HttpStatus;
 
 public class LoginServlet extends HttpServlet {
 
     private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final String PAGE_RESOURCE_PATH = "static/login.html";
-    private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String LOGIN_FAIL_PAGE = "static/401.html";
+    private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String ACCOUNT_FORM_DATA = "account";
     private static final String PASSWORD_FORM_DATA = "password";
 
@@ -27,8 +27,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        String fileContent = FileUtils.readFile(PAGE_RESOURCE_PATH);
-        response.ok(fileContent, "html");
+        response.ok(PAGE_RESOURCE_PATH);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class LoginServlet extends HttpServlet {
 
         Optional<User> found = InMemoryUserRepository.findByAccount(account);
         if (found.isEmpty() || !found.get().checkPassword(password)) {
-            response.unauthorized(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
+            response.sendError(HttpStatus.UNAUTHORIZED, LOGIN_FAIL_PAGE);
             return;
         }
 

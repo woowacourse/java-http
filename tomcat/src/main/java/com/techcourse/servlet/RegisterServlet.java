@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
-import org.apache.util.FileUtils;
 
 public class RegisterServlet extends HttpServlet {
 
@@ -15,14 +14,13 @@ public class RegisterServlet extends HttpServlet {
     private static final String PASSWORD_FORM_DATA = "password";
     private static final String EMAIL_FORM_DATA = "email";
     private static final String REGISTER_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
-    private static final AtomicLong userIdGenerator = new AtomicLong(2L);
     private static final String PAGE_RESOURCE_PATH = "static/register.html";
+    private static final AtomicLong userIdGenerator = new AtomicLong(2L);
 
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        String fileContent = FileUtils.readFile(PAGE_RESOURCE_PATH);
-        response.ok(fileContent, "html");
+        response.ok(PAGE_RESOURCE_PATH);
     }
 
     @Override

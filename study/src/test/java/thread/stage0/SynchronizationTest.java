@@ -41,7 +41,7 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public synchronized void calculate() {
+        public void calculate() {
             setSum(getSum() + 1);
         }
 

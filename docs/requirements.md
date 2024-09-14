@@ -21,6 +21,6 @@
   - [x] 그리고 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
 
 ## 3단계 - 리팩터링
-- [ ] 1\. HttpRequest 클래스 구현하기
-- [ ] 2\. HttpResponse 클래스 구현하기
-- [ ] 3\. Controller 인터페이스 추가하기
+- [x] 1\. HttpRequest 클래스 구현하기
+- [x] 2\. HttpResponse 클래스 구현하기
+- [x] 3\. Controller 인터페이스 추가하기

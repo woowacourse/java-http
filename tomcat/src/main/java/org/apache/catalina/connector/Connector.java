@@ -61,8 +61,14 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        Thread thread = new Thread(this);
+        thread.setDaemon(true);
+        /*
+         * 데몬 스레드는 주 스레드의 어떤 기능을 보조하는 목적으로 사용하는 스레드로 주 스레드가 종료되면 같이 종료된다.
+         * 여기서 주 스레드가 종료되면 당연히 더이상 서버와의 연결을 수락해선 안되므로 데몬 스레드로 설정한다.
+         * */
+        thread.start();
         stopped = false;
-        new Thread(this).start();
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 

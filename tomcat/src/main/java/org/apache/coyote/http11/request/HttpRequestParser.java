@@ -17,8 +17,6 @@ public class HttpRequestParser {
 
     private static final String DELIMITER_PARAMETER_VALUE = "=";
 
-    private static final String EMPTY_LINE = "";
-
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
     private static final HttpRequestParser instance = new HttpRequestParser();
@@ -37,7 +35,7 @@ public class HttpRequestParser {
         if (httpMethod.equals(HttpMethod.POST)) {
             httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
         }
-        if (!httpRequestHeaders.getCookies().equals(EMPTY_LINE)) {
+        if (!httpRequestHeaders.getCookies().isEmpty()) {
             httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
         }
         return new HttpRequest(httpMethod, httpRequestPath, queryString,
@@ -77,7 +75,7 @@ public class HttpRequestParser {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();
-        while (!EMPTY_LINE.equals(headerLine)) {
+        while (!headerLine.isEmpty()) {
             splitSingleString(headers, headerLine, DELIMITER_HEADER);
             headerLine = bufferedReader.readLine();
         }

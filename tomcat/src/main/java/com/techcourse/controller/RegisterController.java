@@ -19,10 +19,6 @@ public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PASSWORD_KEY = "password";
 
-    private static final String INDEX_PAGE = "/index.html";
-
-    private static final String REGISTER_PAGE = "/register.html";
-
     private RegisterController() {
     }
 
@@ -35,7 +31,7 @@ public class RegisterController extends AbstractController {
             User user = new User(account, password, email);
             checkDuplicatedUser(user);
             InMemoryUserRepository.save(user);
-            redirect(response, INDEX_PAGE);
+            redirect(response, PageEndpoint.INDEX_PAGE.getEndpoint());
         } catch (UserException e) {
             setFailResponse(request, response);
         }
@@ -57,7 +53,7 @@ public class RegisterController extends AbstractController {
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {
-        request.setHttpRequestPath(REGISTER_PAGE);
+        request.setHttpRequestPath(PageEndpoint.REGISTER_PAGE.getEndpoint());
         response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
     }
 

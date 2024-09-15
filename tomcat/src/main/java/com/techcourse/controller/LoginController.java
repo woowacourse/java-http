@@ -25,10 +25,6 @@ public class LoginController extends AbstractController {
 
     private static final String LOGIN_PASSWORD_KEY = "password";
 
-    private static final String INDEX_PAGE = "/index.html";
-
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-
     private LoginController() {
     }
 
@@ -49,7 +45,7 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         if (checkLogin(request)) {
-            redirect(response, INDEX_PAGE);
+            redirect(response, PageEndpoint.INDEX_PAGE.getEndpoint());
         }
         setResponseContent(request, response);
     }
@@ -58,7 +54,7 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             log.info("user : " + user);
             response.setHttpStatusCode(HttpStatusCode.FOUND);
-            redirect(response, INDEX_PAGE);
+            redirect(response, PageEndpoint.INDEX_PAGE.getEndpoint());
             setSessionAtResponseHeader(user, response);
         }
     }
@@ -81,7 +77,7 @@ public class LoginController extends AbstractController {
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {
-        request.setHttpRequestPath(UNAUTHORIZED_PAGE);
+        request.setHttpRequestPath(PageEndpoint.UNAUTHORIZED_PAGE.getEndpoint());
         response.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
     }
 

@@ -21,6 +21,8 @@ public class HttpRequestParser {
 
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
+    private static final int VALID_REQUEST_LINE_COUNT = 3;
+
     private static final HttpRequestParser instance = new HttpRequestParser();
 
     private HttpRequestParser() {
@@ -28,6 +30,7 @@ public class HttpRequestParser {
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
         String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
+        validateRequestLine(requestLine);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
@@ -42,6 +45,12 @@ public class HttpRequestParser {
         }
         return new HttpRequest(httpMethod, httpRequestPath, queryString,
                 httpRequestHeaders, httpRequestBody, httpCookie);
+    }
+
+    private void validateRequestLine(String[] requestLine) {
+        if (requestLine.length != VALID_REQUEST_LINE_COUNT) {
+            throw new IllegalArgumentException("유효하지 않은 요청입니다.");
+        }
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {

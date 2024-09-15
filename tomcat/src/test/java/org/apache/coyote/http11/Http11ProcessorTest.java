@@ -21,6 +21,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class Http11ProcessorTest {
 
@@ -69,6 +70,20 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void requestLineTest() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /index.html",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> parseRawRequest(httpRequest));
     }
 
     @Test

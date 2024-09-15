@@ -1,4 +1,4 @@
-package org.apache.catalina.controller;
+package com.techcourse.controller;
 
 import com.techcourse.model.User;
 import org.apache.catalina.HttpRequestFixture;

@@ -1,6 +1,10 @@
 package org.apache.catalina;
 
-import org.apache.catalina.controller.*;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.HelloWorldController;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 

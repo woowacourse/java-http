@@ -5,8 +5,9 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -33,7 +34,13 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThread, final Dispatcher dispatcher) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThread);
+        this.executorService = new ThreadPoolExecutor(
+                maxThread,
+                maxThread,
+                0,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT)
+        );
         this.dispatcher = dispatcher;
         this.acceptQueue = new LinkedBlockingQueue<>(acceptCount);
     }
@@ -75,6 +82,7 @@ public class Connector implements Runnable {
         while (!stopped) {
             try {
                 acceptQueue.put(this::connect);
+                executorService.execute(acceptQueue.take());
             } catch (InterruptedException e) {
                 log.error("최대 요청 처리 수를 초과 했습니다. - 대기 중인 작업 : {}", acceptQueue.size());
                 Thread.currentThread().interrupt();
@@ -96,7 +104,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, dispatcher);
-        executorService.execute(processor);
+        processor.process(connection);
     }
 
     public void stop() {

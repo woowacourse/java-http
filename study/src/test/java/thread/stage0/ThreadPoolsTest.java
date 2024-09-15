@@ -30,7 +30,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
+        // change
         final int expectedPoolSize = 2;
         final int expectedQueueSize = 1;
 
@@ -45,7 +45,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
+        // change
         final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 

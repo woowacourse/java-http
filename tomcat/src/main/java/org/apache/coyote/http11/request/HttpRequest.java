@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.FileReader;
+import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpRequest {
 
@@ -14,7 +15,7 @@ public class HttpRequest {
 
     private HttpRequestPath httpRequestPath;
 
-    private HttpCookie httpCookie;
+    private final HttpCookie httpCookie;
 
     public HttpRequest(HttpMethod httpMethod,
                        HttpRequestPath httpRequestPath,
@@ -66,7 +67,7 @@ public class HttpRequest {
         return httpRequestBody.getValue(key);
     }
 
-    public String getJSESSIONID() {
-        return httpCookie.getCookieValue("JSESSIONID");
+    public HttpCookie getHttpCookie() {
+        return this.httpCookie;
     }
 }

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.cookie.HttpCookieExtractor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

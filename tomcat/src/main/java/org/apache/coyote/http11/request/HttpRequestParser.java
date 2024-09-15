@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.cookie.HttpCookieExtractor;
 
 public class HttpRequestParser {
 

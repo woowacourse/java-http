@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
@@ -63,7 +64,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean checkLogin(HttpRequest request) {
-        String jsessionid = request.getJSESSIONID();
+        HttpCookie httpCookie = request.getHttpCookie();
+        String jsessionid = httpCookie.getJsessionid();
         if (jsessionid.isEmpty()) {
             return false;
         }

@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.request.HttpRequestHeaders;
 
 public class HttpCookieExtractor {
 

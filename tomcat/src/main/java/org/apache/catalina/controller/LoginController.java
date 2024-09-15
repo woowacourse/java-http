@@ -19,8 +19,8 @@ import com.techcourse.model.User;
 
 public class LoginController extends AbstractController {
 
-    public static final String ACCOUNT = "account";
-    public static final String PASSWORD = "password";
+    public static final String KEY_ACCOUNT = "account";
+    public static final String KEY_PASSWORD = "password";
     public static final String SUCCESS_LOCATION = "index.html";
     public static final String FAIL_LOCATION = "401.html";
     public static final String SET_COOKIE_HEADER = "Set-Cookie";
@@ -30,10 +30,10 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final Request request, final Response response) throws Exception {
         final RequestBody body = request.getBody();
-        final User user = InMemoryUserRepository.findByAccount(body.getByName(ACCOUNT))
+        final User user = InMemoryUserRepository.findByAccount(body.getByName(KEY_ACCOUNT))
                 .orElseThrow(() -> new IllegalArgumentException("해당 account가 존재하지 않습니다."));
         response.setStatusLine(new StatusLine("HTTP/1.1", "302", "Found"));
-        if (user.checkPassword(body.getByName(PASSWORD))) {
+        if (user.checkPassword(body.getByName(KEY_PASSWORD))) {
             log.info("user : {}", user);
             final String sessionId = SessionIdGenerator.generateUUID().toString();
             final Session session = new Session(sessionId);

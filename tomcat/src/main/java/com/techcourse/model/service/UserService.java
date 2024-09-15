@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.service;
+package com.techcourse.model.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

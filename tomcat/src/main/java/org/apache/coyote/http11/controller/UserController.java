@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.resolver.RequestBodyResolver;
 import org.apache.coyote.http11.request.resolver.UserResolver;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.service.UserService;
+import com.techcourse.model.service.UserService;
 
 public class UserController extends AbstractController {
 

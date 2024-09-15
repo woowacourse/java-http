@@ -3,6 +3,7 @@ package org.apache.coyote.http11.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
+import com.techcourse.model.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

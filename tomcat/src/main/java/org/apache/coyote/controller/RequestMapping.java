@@ -32,10 +32,10 @@ public class RequestMapping {
     }
 
     private Controller getController(String path) {
-        Controller controller = controllers.get(path);
-        if (controller == null) {
+        if (!controllers.containsKey(path)) {
             return new NotFoundController();
         }
-        return controller;
+
+        return controllers.get(path);
     }
 }

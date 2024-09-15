@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
@@ -98,5 +99,47 @@ class LoginControllerTest {
                 () -> assertThat(response.toByte()).contains(expectedLocationHeader.getBytes()),
                 () -> assertThat(response.toByte()).contains(expectedContentType.getBytes())
         );
+    }
+
+    @DisplayName("사용자를 찾을 수 없을 경우, 예외를 발생한다.")
+    @Test
+    void userNotFound() throws IOException {
+        // given
+        String body = buildRequestBody(Map.of("account", "gugugu", "password", "invalidPassword"));
+        HttpRequest request = buildHttpRequest("POST", "/login", body);
+        HttpResponse response = new HttpResponse();
+
+        // when&then
+        assertThatThrownBy(() -> loginController.doPost(request, response))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("사용자를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("account 없는 body일 경우, 예외를 발생한다.")
+    @Test
+    void validateBody_AccountMissing() throws IOException {
+        // given
+        String body = buildRequestBody(Map.of("password", "invalidPassword"));
+        HttpRequest request = buildHttpRequest("POST", "/login", body);
+        HttpResponse response = new HttpResponse();
+
+        // when&then
+        assertThatThrownBy(() -> loginController.doPost(request, response))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("account가 존재하지 않습니다.");
+    }
+
+    @DisplayName("password 없는 body일 경우, 예외를 발생한다.")
+    @Test
+    void validateBody_PasswordMissing() throws IOException {
+        // given
+        String body = buildRequestBody(Map.of("account", "gugu"));
+        HttpRequest request = buildHttpRequest("POST", "/login", body);
+        HttpResponse response = new HttpResponse();
+
+        // when&then
+        assertThatThrownBy(() -> loginController.doPost(request, response))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("password가 존재하지 않습니다.");
     }
 }

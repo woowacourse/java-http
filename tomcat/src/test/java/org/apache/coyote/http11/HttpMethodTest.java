@@ -27,4 +27,24 @@ class HttpMethodTest {
                 () -> assertThat(postFound).isEqualTo(HttpMethod.POST)
         );
     }
+
+    @DisplayName("GET 요청인지 검증한다.")
+    @Test
+    void isGet() {
+        // given
+        HttpMethod get = HttpMethod.GET;
+
+        // when & then
+        assertThat(get.isGet()).isTrue();
+    }
+
+    @DisplayName("POST 요청인지 검증한다.")
+    @Test
+    void isPost() {
+        // given
+        HttpMethod post = HttpMethod.POST;
+
+        // when & then
+        assertThat(post.isPost()).isTrue();
+    }
 }

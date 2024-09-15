@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,19 +17,22 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final Manager manager;
+    private final ExecutorService executor;
     private boolean stopped;
 
     public Connector(Manager manager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, manager);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, manager, MAX_THREADS);
     }
 
-    public Connector(int port, int acceptCount, Manager manager) {
+    public Connector(int port, int acceptCount, Manager manager, int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.manager = manager;
+        this.executor = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -83,7 +88,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, manager);
-        new Thread(processor).start();
+        executor.execute(processor);
     }
 
     public void stop() {
@@ -92,6 +97,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executor.shutdown();
         }
     }
 }

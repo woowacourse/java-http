@@ -29,6 +29,10 @@ public class ResponseHeader {
         addHeader(CONTENT_TYPE, contentType);
     }
 
+    private void addHeader(String key, String value) {
+        header.put(key, value);
+    }
+
     public boolean existsSession() {
         if (!header.containsKey(SET_COOKIE)) {
             return false;
@@ -48,10 +52,6 @@ public class ResponseHeader {
 
     public void setLocation(String location) {
         addHeader(LOCATION, location);
-    }
-
-    private void addHeader(String key, String value) {
-        header.put(key, value);
     }
 
     public String toHeaderString() {

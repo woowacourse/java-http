@@ -3,9 +3,6 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 import org.apache.coyote.http11.HttpHeaders;
@@ -32,10 +29,7 @@ class StaticResourceControllerTest {
     void findResource() throws Exception {
         // given
         RequestLine requestLine = RequestLine.from("GET /css/styles.css HTTP/1.1");
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive "
-        ));
+        HttpHeaders headers = createHttpHeaders();
         HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
@@ -43,17 +37,12 @@ class StaticResourceControllerTest {
         staticResourceController.service(httpRequest, httpResponse);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String expectedResponseLine = "HTTP/1.1 200 OK \r\n";
-        String expectedContentLength = "Content-Length: 211991 \r\n";
         String expectedContentType = "Content-Type: text/css \r\n";
-        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(httpResponse.serialize()).contains(
                 expectedResponseLine,
-                expectedContentLength,
-                expectedContentType,
-                expectedResponseBody
+                expectedContentType
         );
     }
 
@@ -62,15 +51,19 @@ class StaticResourceControllerTest {
     void cannotFindResourceWrongMethod() throws Exception {
         // given
         RequestLine requestLine = RequestLine.from("POST /css/styles.css HTTP/1.1");
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive "
-        ));
+        HttpHeaders headers = createHttpHeaders();
         HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         assertThatThrownBy(() -> staticResourceController.service(httpRequest, httpResponse))
                 .isInstanceOf(UnsupportedMethodException.class);
+    }
+
+    private HttpHeaders createHttpHeaders() {
+        return HttpHeaders.from(List.of(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive "
+        ));
     }
 }

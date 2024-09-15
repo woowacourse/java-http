@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.common.Headers;
 
 public class Request {
 

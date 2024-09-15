@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.common.Headers;
 
 public class Response {
 
@@ -54,7 +54,6 @@ public class Response {
             return;
         }
         try (InputStream inputStream = new ByteArrayInputStream(content.getBytes())) {
-            // MIME 타입을 추측합니다.
             String contentType = URLConnection.guessContentTypeFromStream(inputStream);
             if (contentType == null) {
                 contentType = "text/html";
@@ -64,9 +63,6 @@ public class Response {
                 option = ENCODING_OPTION;
             }
             headers.add("Content-Type", contentType + option);
-
-            // MIME 타입을 출력합니다.
-            System.out.println("MIME Type: " + contentType);
         } catch (IOException e) {
             e.printStackTrace();
         }

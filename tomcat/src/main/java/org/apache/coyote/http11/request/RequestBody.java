@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.coyote.exception.ContentLengthExceededException;
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.common.Headers;
 
 public class RequestBody {
 

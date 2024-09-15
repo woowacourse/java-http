@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mockStatic;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -40,14 +41,8 @@ class RegisterControllerTest {
     void loginSuccess() throws IOException {
         // given
         RequestLine requestLine = RequestLine.from("POST /register HTTP/1.1 ");
-        String body = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
-        ));
-        RequestBody requestBody = new RequestBody(body);
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
+        String body = "account=gugu&password=password&email=hkkang@woowahan.com";
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(body), new RequestBody(body));
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -66,13 +61,7 @@ class RegisterControllerTest {
         // given
         RequestLine requestLine = RequestLine.from("POST /register HTTP/1.1 ");
         String body = "account=gugu&password=password&email=";
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
-        ));
-        RequestBody requestBody = new RequestBody(body);
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(body), new RequestBody(body));
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -90,11 +79,7 @@ class RegisterControllerTest {
     void registerPage() throws IOException {
         // given
         RequestLine requestLine = RequestLine.from("GET /register HTTP/1.1 ");
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive "
-        ));
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(null), new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -108,5 +93,16 @@ class RegisterControllerTest {
                 expectedResponseLine,
                 expectedLocationHeader
         );
+    }
+
+    private HttpHeaders createHeaders(String body) {
+        HttpHeaders headers = HttpHeaders.from(List.of(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive "
+        ));
+        if (Objects.nonNull(body)) {
+            headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
+        }
+        return headers;
     }
 }

@@ -69,11 +69,10 @@ public class LoginController extends AbstractController {
     }
 
     private void setSessionAtResponseHeader(User user, HttpResponse response) {
-        String jsessionid = UUID.randomUUID().toString();
-        Session session = new Session(jsessionid);
+        Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session.getId(), session);
-        response.setHttpResponseHeader("Set-Cookie", "JSESSIONID=" + jsessionid);
+        response.setHttpResponseHeader("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {

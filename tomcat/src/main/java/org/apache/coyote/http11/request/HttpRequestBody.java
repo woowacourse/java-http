@@ -10,10 +10,6 @@ public class HttpRequestBody {
         this.requestBody = requestBody;
     }
 
-    public String[] getKeys() {
-        return requestBody.keySet().toArray(new String[0]);
-    }
-
     public String getValue(String key) {
         return requestBody.get(key);
     }

@@ -42,14 +42,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String getResponse(InputStream inputStream) throws Exception {
-        RequestMapper requestMapper = RequestMapper.getInstance();
         HttpRequestParser httpRequestParser = HttpRequestParser.getInstance();
         HttpResponseParser httpResponseParser = HttpResponseParser.getInstance();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
         HttpResponse httpResponse = new HttpResponse();
-        Controller controller = requestMapper.mapRequest(httpRequest);
+        Controller controller = RequestMapper.mapRequest(httpRequest);
         controller.service(httpRequest, httpResponse);
         return httpResponseParser.parseResponse(httpResponse);
     }

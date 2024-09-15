@@ -4,35 +4,21 @@ import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticPageController;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapper {
 
-    private static final RequestMapper instance = new RequestMapper();
-
-    private final LoginController loginController;
-
-    private final RegisterController registerController;
-
-    private final StaticPageController staticPageController;
+    private static final Map<String, Controller> controllers = new HashMap<>();
 
     private RequestMapper() {
-        this.loginController = LoginController.getInstance();
-        this.registerController = RegisterController.getInstance();
-        this.staticPageController = StaticPageController.getInstance();
+        controllers.put("/login", LoginController.getInstance());
+        controllers.put("/register", RegisterController.getInstance());
+        controllers.put("/", StaticPageController.getInstance());
     }
 
-    public Controller mapRequest(HttpRequest request) {
-        if (request.getHttpRequestPath().contains("/login")) {
-            return loginController;
-        }
-        if (request.getHttpRequestPath().contains("/register")) {
-            return registerController;
-        }
-        return staticPageController;
-    }
-
-    public static RequestMapper getInstance() {
-        return instance;
+    public static Controller mapRequest(HttpRequest request) {
+        return controllers.getOrDefault(request.getHttpRequestPath(), StaticPageController.getInstance());
     }
 }

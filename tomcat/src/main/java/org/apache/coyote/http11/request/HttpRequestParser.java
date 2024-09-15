@@ -29,22 +29,21 @@ public class HttpRequestParser {
     }
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
-        String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
-        validateRequestLine(requestLine);
+        String[] requestLine = parseReqestLines(bufferedReader);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
         HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
-        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
-        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
-        if (httpMethod.equals(HttpMethod.POST)) {
-            httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
-        }
-        if (!httpRequestHeaders.getCookies().isEmpty()) {
-            httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
-        }
+        HttpRequestBody httpRequestBody = setHttpRequestBody(httpMethod, httpRequestHeaders, bufferedReader);
+        HttpCookie httpCookie = setHttpCookie(httpRequestHeaders);
         return new HttpRequest(httpMethod, httpRequestPath, queryString,
                 httpRequestHeaders, httpRequestBody, httpCookie);
+    }
+
+    private String[] parseReqestLines(BufferedReader bufferedReader) throws IOException {
+        String[] requestLines = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
+        validateRequestLine(requestLines);
+        return requestLines;
     }
 
     private void validateRequestLine(String[] requestLine) {
@@ -91,6 +90,23 @@ public class HttpRequestParser {
             headerLine = bufferedReader.readLine();
         }
         return new HttpRequestHeaders(headers);
+    }
+
+    private HttpRequestBody setHttpRequestBody(HttpMethod method, HttpRequestHeaders headers,
+                                               BufferedReader bufferedReader) throws IOException {
+        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
+        if (method.equals(HttpMethod.POST)) {
+            httpRequestBody = parseHttpRequestBody(headers, bufferedReader);
+        }
+        return httpRequestBody;
+    }
+
+    private HttpCookie setHttpCookie(HttpRequestHeaders headers) {
+        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
+        if (!headers.getCookies().isEmpty()) {
+            httpCookie = HttpCookieExtractor.extractCookie(headers);
+        }
+        return httpCookie;
     }
 
     private HttpRequestBody parseHttpRequestBody(

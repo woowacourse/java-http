@@ -16,7 +16,7 @@ import support.StubSocket;
 
 class ConnectorTest {
 
-    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_PORT = 8081;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREAD_POOL_COUNT = 10;
     private static final int CLIENT_REQUEST_COUNT = 100;

@@ -52,6 +52,19 @@ class HttpCookieTest {
         assertThat(result).isEqualTo("JSESSIONID=12345");
     }
 
+    @DisplayName("JSESSIONID가 있는 경우 hasJsessionid는 참을 반환한다.")
+    @Test
+    void hasJsessionid() {
+        // given
+        String cookieHeader = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+
+        // when
+        HttpCookie httpCookie = new HttpCookie(cookieHeader);
+
+        // then
+        assertThat(httpCookie.hasJSessionId()).isTrue();
+    }
+
     @DisplayName("JSESSIONID가 없는 경우 hasJSessionId의 결과 false를 반환한다.")
     @Test
     void doesNotHaveJSessionId() {
@@ -65,6 +78,19 @@ class HttpCookieTest {
         assertThat(httpCookie.hasJSessionId()).isFalse();
     }
 
+    @DisplayName("JSESSIONID가 있는 경우 id를 반환한다.")
+    @Test
+    void getJsessionid() {
+        // given
+        String cookieHeader = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+
+        // when
+        HttpCookie httpCookie = new HttpCookie(cookieHeader);
+
+        // then
+        assertThat(httpCookie.getJsessionid()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+    }
+
     @DisplayName("JSESSIONID가 없는 경우 getJsessionid은 null을 반환한다.")
     @Test
     void cannotGetJsessionid() {
@@ -76,18 +102,5 @@ class HttpCookieTest {
 
         // then
         assertThat(httpCookie.getJsessionid()).isNull();
-    }
-
-    @DisplayName("JSESSIONID가 없는 경우 getJsessionid 테스트")
-    @Test
-    void getJsessionid() {
-        // given
-        String cookieHeader = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
-
-        // when
-        HttpCookie httpCookie = new HttpCookie(cookieHeader);
-
-        // then
-        assertThat(httpCookie.getJsessionid()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 }

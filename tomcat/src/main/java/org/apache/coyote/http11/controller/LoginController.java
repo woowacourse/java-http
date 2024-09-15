@@ -46,6 +46,7 @@ public class LoginController extends AbstractController {
                 parameter.getValue("password").isEmpty()) {
             response.statusCode(HttpStatusCode.OK)
                     .staticResource("/login.html");
+            return;
         }
         login(parameter, response);
     }

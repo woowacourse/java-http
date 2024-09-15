@@ -12,11 +12,11 @@ class RequestBodyTest {
     @Test
     void parseRequestBody() {
         // given
-        Map<String, String> expected = Map.of("account", "validUser", "password", "wrongPassword");
-        RequestBody requestBody = new RequestBody("account=validUser&password=wrongPassword");
+        Map<String, String> expected = Map.of("account", "validUser", "password", "password!");
+        String body = "account=validUser&password=password!";
 
         // when
-        RequestBody result = requestBody;
+        RequestBody result = new RequestBody(body);
 
         // then
         assertThat(result.getBody()).containsAllEntriesOf(expected);

@@ -2,15 +2,21 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class Cookie {
-    private static final String COOKIE_DELIMITER = "&";
+
+    private static final String COOKIE_DELIMITER = "; ";
     private static final String SPLIT_DELIMITER = "=";
 
     private final Map<String, String> values;
 
     public Cookie(Map<String, String> values) {
         this.values = values;
+    }
+
+    public static Cookie ofSessionId(String sessionId) {
+        return new Cookie(Map.of("JSESSIONID", sessionId));
     }
 
     public static Cookie parse(String cookie) {
@@ -29,5 +35,13 @@ public class Cookie {
 
     public String getValue(String key) {
         return values.getOrDefault(key, null);
+    }
+
+    public String toStringFormat() {
+        StringJoiner stringJoiner = new StringJoiner(COOKIE_DELIMITER);
+        for (String key : values.keySet()) {
+            stringJoiner.add(key + SPLIT_DELIMITER + values.get(key));
+        }
+        return stringJoiner.toString();
     }
 }

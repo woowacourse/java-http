@@ -93,6 +93,10 @@ public class HttpRequest {
         return this.httpRequestLine.matchesMethod(httpMethod);
     }
 
+    public boolean hasJSessionId() {
+        return getJSessionId() != null;
+    }
+
     public String findRequestBodyBy(String key) {
         return this.httpRequestBody.findBy(key);
     }

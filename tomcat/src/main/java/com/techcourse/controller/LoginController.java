@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         Session session = null;
-        if (request.getJSessionId() != null) {
+        if (request.hasJSessionId()) {
             session = sessionManager.findSession(request.getJSessionId());
         }
 

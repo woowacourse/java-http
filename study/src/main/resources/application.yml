@@ -3,8 +3,9 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 # 대기열에 들어갈 수 있는 최대 값을 의미
+    # 기존 설정은 최대 1개의 연결만 허용하여 테스트가 실패함. 따라서 최대 연결 개수를 2개로 맞춰줌.
+    max-connections: 2   # TCP 연결 가능한 최대 수를 의미
     threads:
-      max: 2
-      min-spare: 2
+      max: 2  # 스레드 풀에 들어갈 수 있는 최대 스레드 개수를 의미
+      min-spare: 2 # 스레드 풀에 남아있어야 할 최소 스레드 개수를 의미함. 개수가 설정보다 부족하면 새로 생성한다.

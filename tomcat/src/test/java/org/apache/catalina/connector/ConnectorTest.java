@@ -29,7 +29,7 @@ class ConnectorTest {
     void testServerStop() {
         final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(250);
         for (int i = 0; i < 350; i++) {
-            executor.submit(logWithSleep());
+            executor.submit(threadSleep());
         }
         final int expectedPoolSize = 250;
         final int expectedQueueSize = 100;
@@ -38,7 +38,7 @@ class ConnectorTest {
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
     }
 
-    private Runnable logWithSleep() {
+    private Runnable threadSleep() {
         return () -> {
             try {
                 Thread.sleep(1000);

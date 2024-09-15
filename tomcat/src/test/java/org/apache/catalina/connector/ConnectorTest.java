@@ -3,6 +3,7 @@ package org.apache.catalina.connector;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,7 +21,7 @@ class ConnectorTest {
 
         assertThatThrownBy(() -> {
             try (Socket clientSocket = new Socket("localhost", 8080)) {}
-        }).isInstanceOf(Exception.class);
+        }).isInstanceOf(ConnectException.class);
     }
 
     @DisplayName("스레드 풀의 크기는 250이다")

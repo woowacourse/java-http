@@ -19,6 +19,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    public static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
@@ -27,7 +28,11 @@ public class Connector implements Runnable {
 
     private final ExecutorService threadPool;
 
-    public Connector(RequestMappings requestMappings, int maxThreads) {
+    public Connector(RequestMappings requestMappings) {
+        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+    }
+
+    private Connector(RequestMappings requestMappings, int maxThreads) {
         this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
     }
 

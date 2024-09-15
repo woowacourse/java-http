@@ -36,7 +36,7 @@ class ConnectorTest {
         RequestMapping slow = getSlowRequestMapping();
         RequestMapping fast = getFastRequestMapping();
         RequestMappings requestMappings = new RequestMappings(slow, fast);
-        return new Connector(requestMappings, 250);
+        return new Connector(requestMappings);
     }
 
     private RequestMapping getSlowRequestMapping() {

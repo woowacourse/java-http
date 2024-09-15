@@ -1,42 +1,30 @@
 package org.apache.catalina.response;
 
-import org.apache.catalina.Cookie;
-import org.apache.catalina.ResourceResolver;
+import java.util.Map;
+import java.util.StringJoiner;
 
 public class ResponseParser {
 
-    private final ResourceResolver resourceResolver;
-
-    public ResponseParser() {
-        this.resourceResolver = new ResourceResolver();
-    }
+    private static final String STATUS_LINE_FORMAT = "%s %d %s";
+    private static final String HEADER_FORMAT = "%s: %s";
+    private static final String LINE_SEPARATOR = "\r\n";
 
     public String parse(HttpResponse response) {
-        String responseBody = resourceResolver.resolve(response.getResource());
+        StringJoiner responseJoiner = new StringJoiner(" " + LINE_SEPARATOR);
+        StatusLine statusLine = response.getStatusLine();
+        responseJoiner.add(String.format(STATUS_LINE_FORMAT,
+                statusLine.getProtocolVersion(),
+                statusLine.getStatusCode(),
+                statusLine.getStatusMessage()));
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("HTTP/1.1 %d OK ", response.getStatusCode())).append("\r\n");
-
-        Cookie cookie = response.getCookie();
-        if (cookie != null) {
-            stringBuilder.append("Set-Cookie: JSESSIONID=" + cookie.getValue("JSESSIONID") + "\r\n");
+        Map<Header, String> headers = response.getHeaders();
+        for (Header header : headers.keySet()) {
+            responseJoiner.add(String.format(HEADER_FORMAT,
+                    header.value(),
+                    headers.get(header)));
         }
+        responseJoiner.add(LINE_SEPARATOR + response.getBody());
 
-        if (response.getStatusCode() == 302) {
-            stringBuilder.append("Location: " + response.getResource() + "\r\n");
-        }
-
-        stringBuilder.append("Content-Length: " + responseBody.getBytes().length + " ").append("\r\n")
-                .append("Content-Type: " + getContentType(response.getResource())).append("\r\n")
-                .append("\r\n").append(responseBody);
-
-        return stringBuilder.toString();
-    }
-
-    private String getContentType(String contentType) {
-        if (contentType.endsWith(".css")) {
-            return "text/css ";
-        }
-        return "text/html;charset=utf-8 ";
+        return responseJoiner.toString();
     }
 }

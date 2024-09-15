@@ -44,21 +44,20 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream();
+             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
 
             StartLine startLine = readStartLine(in);
             RequestHeader requestHeader = readHeader(in);
             RequestBody requestBody = readBody(in, requestHeader);
             HttpRequest httpRequest = new HttpRequest(startLine, requestHeader, requestBody);
 
-            HttpResponse httpResponse = handlerAdapter.handle(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
+            handlerAdapter.handle(httpRequest, httpResponse);
 
             String response = responseParser.parse(httpResponse);
             outputStream.write(response.getBytes());
             outputStream.flush();
-
-            in.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

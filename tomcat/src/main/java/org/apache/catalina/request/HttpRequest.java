@@ -20,8 +20,8 @@ public class HttpRequest {
         return startLine.getHttpMethod();
     }
 
-    public String getUrl() {
-        return startLine.getUrl();
+    public String getUri() {
+        return startLine.getUri();
     }
 
     public Map<String, String> getBody() {

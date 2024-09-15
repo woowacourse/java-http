@@ -3,6 +3,7 @@ package org.apache.coyote.request;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.apache.catalina.request.RequestHeader;
 import org.junit.jupiter.api.Test;
 
 class RequestHeaderTest {

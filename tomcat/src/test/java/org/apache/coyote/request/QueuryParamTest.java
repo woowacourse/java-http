@@ -1,8 +1,8 @@
 package org.apache.coyote.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+import org.apache.catalina.request.QueuryParam;
 import org.junit.jupiter.api.Test;
 
 class QueuryParamTest {

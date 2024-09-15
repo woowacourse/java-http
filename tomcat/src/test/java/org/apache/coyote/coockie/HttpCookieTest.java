@@ -1,6 +1,8 @@
 package org.apache.coyote.coockie;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.apache.catalina.coockie.HttpCookie;
 import org.junit.jupiter.api.Test;
 
 class HttpCookieTest {

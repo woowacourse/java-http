@@ -1,0 +1,30 @@
+package org.apache.catalina.controller;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.http.StatusCode;
+import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.request.RequestBody;
+import org.apache.catalina.response.HttpResponse;
+
+public class RegisterController extends AbstractController {
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        String email = requestBody.get("email");
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader(HeaderName.LOCATION, "/index.html");
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatusCode(StatusCode.OK);
+        response.setBody("/register.html");
+    }
+}

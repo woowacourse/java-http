@@ -2,6 +2,7 @@ package org.apache.coyote.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.catalina.response.ResponseBody;
 import org.junit.jupiter.api.Test;
 
 class ResponseBodyTest {

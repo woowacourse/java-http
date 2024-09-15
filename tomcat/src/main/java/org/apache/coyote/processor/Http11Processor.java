@@ -4,10 +4,10 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.Dispatcher;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.RequestReader;
-import org.apache.coyote.response.HttpResponse;
+import org.apache.catalina.http11.Dispatcher;
+import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.request.RequestReader;
+import org.apache.catalina.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

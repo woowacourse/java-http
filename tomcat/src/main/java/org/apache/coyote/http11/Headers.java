@@ -11,6 +11,8 @@ public class Headers {
 
     private static final String FIELD_VALUE_SEPARATOR = ": ";
     private static final String CRLF = "\r\n";
+    private static final String SPACE = " ";
+    private static final List<String> TEXT_TYPES = List.of("text/", "application/json", "application/xml", "application/x-www-form-urlencoded");
     private static final int FIELD_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -44,6 +46,10 @@ public class Headers {
         return headers.containsKey(field);
     }
 
+    public static boolean isTextType(final String contentType) {
+        return TEXT_TYPES.stream().anyMatch(contentType::startsWith);
+    }
+
     public String getByField(final String field) {
         return headers.getOrDefault(field, null);
     }
@@ -55,7 +61,7 @@ public class Headers {
     public String format() {
         final List<String> headerLines = new ArrayList<>();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            headerLines.add(String.join(FIELD_VALUE_SEPARATOR, entry.getKey(), entry.getValue()));
+            headerLines.add(String.join(FIELD_VALUE_SEPARATOR, entry.getKey(), entry.getValue()) + SPACE);
         }
         return String.join(CRLF, headerLines);
     }

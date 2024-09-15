@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,6 +11,7 @@ import org.apache.coyote.http11.Headers;
 public class Response {
 
     private static final String BLANK_LINE_CONTENT = "";
+    private static final String ENCODING_OPTION = ";charset=utf-8";
 
     private StatusLine statusLine;
     private Headers headers;
@@ -45,16 +49,27 @@ public class Response {
         if (body == null) {
             return;
         }
-        final String path = body.getPath();
-        if (path == null) {
+        final String content = body.getContent();
+        if (content == null || content.isBlank()) {
             return;
         }
-        String contentType = URLConnection.guessContentTypeFromName(path);
-        if (contentType == null) {
-            headers.add("Content-Type", "text/html");
-            return;
+        try (InputStream inputStream = new ByteArrayInputStream(content.getBytes())) {
+            // MIME 타입을 추측합니다.
+            String contentType = URLConnection.guessContentTypeFromStream(inputStream);
+            if (contentType == null) {
+                contentType = "text/html";
+            }
+            String option = "";
+            if (Headers.isTextType(contentType)) {
+                option = ENCODING_OPTION;
+            }
+            headers.add("Content-Type", contentType + option);
+
+            // MIME 타입을 출력합니다.
+            System.out.println("MIME Type: " + contentType);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        headers.add("Content-Type", contentType);
     }
 
     public void addContentLength() {

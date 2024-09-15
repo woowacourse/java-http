@@ -23,7 +23,7 @@ public class ResponseBody {
     public static ResponseBody form(final RequestLine requestLine) throws URISyntaxException, IOException {
         final String resource = requestLine.getPath();
         if (resource.equals("/")) {
-            return new ResponseBody(null, "Hello World");
+            return new ResponseBody(null, "Hello world!");
         }
         // todo: 수정
         final URL url = Http11Processor.class.getResource("/static" + makefileExtension(resource));

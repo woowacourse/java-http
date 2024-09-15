@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 public class StatusLine {
 
     private static final String SEPARATOR = " ";
+    private static final String SPACE = " ";
 
     private final String httpVersion;
     private final String statusCode;
@@ -15,6 +16,6 @@ public class StatusLine {
     }
 
     public String format() {
-        return String.join(SEPARATOR, httpVersion, statusCode, reasonPhrase);
+        return String.join(SEPARATOR, httpVersion, statusCode, reasonPhrase) + SPACE;
     }
 }

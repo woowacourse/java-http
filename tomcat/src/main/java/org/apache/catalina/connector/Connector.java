@@ -45,7 +45,9 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        threadPoolExecutor.execute(this);
+        Thread thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
@@ -78,6 +80,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            threadPoolExecutor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

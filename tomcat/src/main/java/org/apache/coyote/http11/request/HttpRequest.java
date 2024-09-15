@@ -45,7 +45,7 @@ public class HttpRequest {
     }
 
     private RequestBody parseBody(BufferedReader bufferedReader) throws IOException {
-        if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
+        if (requestLine.getHttpMethod().isGet()) {
             return RequestBody.empty();
         }
 

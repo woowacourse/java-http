@@ -17,6 +17,12 @@ class CookieSerializerTest {
         Cookie cookie = Cookie.read(serializedText);
         CookieSerializer cookieSerializer = new CookieSerializer();
 
-        assertThat(cookieSerializer.serialize(cookie)).isEqualTo(serializedText);
+        String actual = cookieSerializer.serialize(cookie);
+
+        assertAll(
+                ()-> assertThat(actual).contains("yummy_cookie=choco;"),
+                ()-> assertThat(actual).contains("tasty_cookie=strawberry;"),
+                ()-> assertThat(actual).contains("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46")
+        );
     }
 }

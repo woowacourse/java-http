@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
@@ -54,7 +55,6 @@ class LoginControllerTest {
         mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
                 .thenReturn(Optional.of(mockUser));
 
-
         // when
         loginController.service(httpRequest, httpResponse);
 
@@ -67,6 +67,40 @@ class LoginControllerTest {
                 expectedResponseLine,
                 expectedLocationHeader,
                 expectedCookie
+        );
+    }
+
+    @DisplayName("세션이 존재하는 로그인 요청에 대해 기존 세션을 제거하고, 새로운 세션을 발급한다.")
+    @Test
+    void loginSuccessWithCookie() throws IOException {
+        // given
+        RequestLine requestLine = RequestLine.from("POST /login HTTP/1.1 ");
+        Session session = getSession(new User("user", "password", "email"));
+        String body = "account=validUser&password=correctPassword";
+        HttpHeaders headers = createHttpHeadersWithSession(session);
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody(body));
+        HttpResponse httpResponse = new HttpResponse();
+
+        User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
+        mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
+                .thenReturn(Optional.of(mockUser));
+
+        // when
+        loginController.service(httpRequest, httpResponse);
+
+        // then
+        String expectedResponseLine = "HTTP/1.1 302 FOUND";
+        String expectedLocationHeader = "Location: index.html";
+        String expectedCookie = "Set-Cookie: JSESSIONID=";
+        String unexpectedCookie = "Set-Cookie: JSESSIONID=" + session.getId();
+
+        assertAll(
+                () -> assertThat(httpResponse.serialize()).contains(
+                        expectedResponseLine,
+                        expectedLocationHeader,
+                        expectedCookie
+                ).doesNotContain(unexpectedCookie),
+                () -> assertThat(SessionManager.getInstance().findSession(httpRequest)).isEmpty()
         );
     }
 
@@ -123,11 +157,7 @@ class LoginControllerTest {
         // given
         Session session = getSession(new User("user", "password", "email"));
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1 ");
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: " + HttpCookie.ofJSessionId(session.getId())
-        ));
+        HttpHeaders headers = createHttpHeadersWithSession(session);
         HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
@@ -142,6 +172,14 @@ class LoginControllerTest {
                 expectedResponseLine,
                 expectedLocationHeader
         );
+    }
+
+    private HttpHeaders createHttpHeadersWithSession(Session session) {
+        return HttpHeaders.from(List.of(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: " + HttpCookie.ofJSessionId(session.getId())
+        ));
     }
 
     private static Session getSession(User user) {

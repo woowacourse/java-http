@@ -1,7 +1,7 @@
 package org.apache.catalina.manager;
 
-import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +27,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Optional<Session> findSession(HttpRequest request) throws IOException {
+    public Optional<Session> findSession(HttpRequest request) {
         HttpCookie cookie = request.getCookie();
         if (cookie.hasJSessionId()) {
             return Optional.ofNullable(SESSIONS.get(cookie.getJsessionid()));
@@ -38,5 +38,14 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public Optional<Session> getByAttribute(String attribute, Object value) {
+        for (Entry<String, Session> entry : SESSIONS.entrySet()) {
+            if (entry.getValue().hasAttribute(attribute, value)) {
+                return Optional.ofNullable(entry.getValue());
+            }
+        }
+        return Optional.empty();
     }
 }

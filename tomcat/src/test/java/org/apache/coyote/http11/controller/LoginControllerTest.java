@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.exception.ClientRequestException;
 import org.junit.jupiter.api.DisplayName;
@@ -53,11 +54,11 @@ class LoginControllerTest extends AbstractControllerTest {
         HttpRequest request = HttpRequestBuilder.builder()
                 .setRequest("GET", "/login?account=gugu&password=password")
                 .build();
-        LoginController controller = new LoginController();
+        Controller controller = new LoginController();
         List<String> expected = List.of("302 Found", "Location: index.html");
 
         // when
-        controller.doGet(request, response);
+        controller.service(request, response);
         String actual = outputStream.toString();
 
         // then
@@ -71,11 +72,11 @@ class LoginControllerTest extends AbstractControllerTest {
         HttpRequest request = HttpRequestBuilder.builder()
                 .setRequest("GET", "/login?account=gugu&password=password")
                 .build();
-        LoginController controller = new LoginController();
+        Controller controller = new LoginController();
         String expected = "gugu";
 
         // when
-        controller.doGet(request, response);
+        controller.service(request, response);
         String httpResponse = outputStream.toString();
         String sessionId = getSessionId(httpResponse);
         Session session = SessionManager.getInstance().findSessionById(sessionId);
@@ -89,17 +90,17 @@ class LoginControllerTest extends AbstractControllerTest {
     @DisplayName("로그인이 성공한 후 GET /login 시 index.html로 리디렉트 한다.")
     @TestFactory
     Stream<DynamicTest> redirectIndexAfterLoginSuccess() {
+        Controller controller = new LoginController();
         return Stream.of(
                 dynamicTest("로그인에 성공한다.", () -> {
                     // given
                     HttpRequest request = HttpRequestBuilder.builder()
                             .setRequest("GET", "/login?account=gugu&password=password")
                             .build();
-                    LoginController controller = new LoginController();
                     List<String> expected = List.of("302 Found", "Location: index.html", "Set-Cookie: JSESSIONID=");
 
                     // when
-                    controller.doGet(request, response);
+                    controller.service(request, response);
                     String actual = outputStream.toString();
 
                     // then
@@ -109,11 +110,10 @@ class LoginControllerTest extends AbstractControllerTest {
                     HttpRequest request = HttpRequestBuilder.builder()
                             .setRequest("GET", "/login")
                             .build();
-                    LoginController controller = new LoginController();
                     List<String> expected = List.of("302 Found", "Location: index.html");
 
                     // when
-                    controller.doGet(request, response);
+                    controller.service(request, response);
                     String actual = outputStream.toString();
 
                     // then
@@ -129,10 +129,10 @@ class LoginControllerTest extends AbstractControllerTest {
         HttpRequest request = HttpRequestBuilder.builder()
                 .setRequest("GET", "/login?account=gugu&password=invalid_password")
                 .build();
-        LoginController controller = new LoginController();
+        Controller controller = new LoginController();
 
         // when
-        assertThatThrownBy(() -> controller.doGet(request, response))
+        assertThatThrownBy(() -> controller.service(request, response))
                 .isInstanceOf(ClientRequestException.class);
     }
 
@@ -143,14 +143,15 @@ class LoginControllerTest extends AbstractControllerTest {
         HttpRequest request = HttpRequestBuilder.builder()
                 .setRequest("GET", "/login?account=poke&password=invalid_password")
                 .build();
-        LoginController controller = new LoginController();
+        Controller controller = new LoginController();
 
         // when
-        assertThatThrownBy(() -> controller.doGet(request, response))
+        assertThatThrownBy(() -> controller.service(request, response))
+                // then
                 .isInstanceOf(ClientRequestException.class);
     }
 
-    @DisplayName("잘못된 세션일 경우. login.html로 이동한다.")
+    @DisplayName("잘못된 세션일 경우, login.html로 이동한다.")
     @Test
     void loginFailInvalidSession() throws IOException {
         // given
@@ -158,12 +159,12 @@ class LoginControllerTest extends AbstractControllerTest {
                 .setRequest("GET", "/login")
                 .addRequestHeader("Cookie:", "JSESSIONID=invalid_session")
                 .build();
-        LoginController controller = new LoginController();
+        Controller controller = new LoginController();
         URL resource = getClass().getClassLoader().getResource("static/login.html");
         String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         // when
-        controller.doGet(request, response);
+        controller.service(request, response);
         String actual = outputStream.toString();
 
         // then

@@ -1,34 +1,29 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
  * - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우
  * - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할 경우
- *
+ * <p>
  * 위 경우는 동기화(synchronization)를 적용시키거나 객체가 상태를 갖지 않도록 한다.
  * 객체를 불변 객체로 만드는 방법도 있다.
- *
+ * <p>
  * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다.
  * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
     /**
      * 1. getUsers() 메서드에 synchronized 붙이기
-     *
+     * <p>
      * synchronize메서드는 인스턴스 단위로 lock을 건다. 이때, synchronized가 적용된 모든 object에 대해서 lock을 공유한다.
      * 따라서, 동기화가 필요하지 않은 작업도 lock이 걸려 수행할 수 없다. 그렇기 때문에 성능적으로는 좋지 않다.
      * 추가로, transactional을 함께 사용할 경우, 병렬로 실행되면서 원하지 않는 결과가 생길 수 있다.
+     * <p>
      * 참고: https://tecoble.techcourse.co.kr/post/2023-08-16-concurrency-managing/
-     */
-
-    /**
-     * 2. 객체가 상태를 갖지 않도록 한다.
-     *
-     * 음.......
      */
     @Test
     void test() throws InterruptedException {

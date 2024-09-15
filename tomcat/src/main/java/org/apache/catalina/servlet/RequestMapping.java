@@ -2,9 +2,7 @@ package org.apache.catalina.servlet;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.tomcat.util.http.ResourceURI;
-
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;

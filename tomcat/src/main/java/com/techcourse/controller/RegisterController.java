@@ -1,9 +1,6 @@
 package com.techcourse.controller;
 
-import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
-
 import java.util.Map;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.servlet.AbstractController;
@@ -11,9 +8,10 @@ import org.apache.tomcat.util.http.ResourceURI;
 import org.apache.tomcat.util.http.parser.QueryStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+
+import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
 
 public class RegisterController extends AbstractController {
 

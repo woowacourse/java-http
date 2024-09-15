@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-
 import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 

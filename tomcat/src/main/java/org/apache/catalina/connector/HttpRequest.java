@@ -1,10 +1,7 @@
 package org.apache.catalina.connector;
 
-import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
-
 import java.util.Map;
 import java.util.Objects;
-
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.tomcat.util.http.HttpMethod;
@@ -15,6 +12,8 @@ import org.apache.tomcat.util.http.header.HttpCookie;
 import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.apache.tomcat.util.http.parser.HttpCookieParser;
+
+import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
 
 public record HttpRequest(HttpRequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
 

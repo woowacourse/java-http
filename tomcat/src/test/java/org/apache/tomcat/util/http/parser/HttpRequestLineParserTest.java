@@ -1,17 +1,16 @@
 package org.apache.tomcat.util.http.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-
 import org.apache.tomcat.util.http.HttpMethod;
 import org.apache.tomcat.util.http.HttpRequestLine;
 import org.apache.tomcat.util.http.HttpVersion;
 import org.apache.tomcat.util.http.ResourceURI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestLineParserTest {
 

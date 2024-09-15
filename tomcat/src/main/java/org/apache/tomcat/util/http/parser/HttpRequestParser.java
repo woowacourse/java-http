@@ -2,7 +2,6 @@ package org.apache.tomcat.util.http.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.tomcat.util.http.HttpRequestLine;
 import org.apache.tomcat.util.http.body.HttpBody;

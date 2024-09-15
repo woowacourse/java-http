@@ -1,11 +1,11 @@
 package org.apache.tomcat.util.http.header;
 
-import static org.apache.catalina.connector.HttpResponse.NEW_LINE;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+
+import static org.apache.catalina.connector.HttpResponse.NEW_LINE;
 
 public class HttpHeaders {
 

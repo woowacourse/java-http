@@ -10,11 +10,11 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public static SessionManager getInstance() {
-        return new SessionManager();
+    private SessionManager() {
     }
 
-    private SessionManager() {
+    public static SessionManager getInstance() {
+        return new SessionManager();
     }
 
     public String findSessionId(final User user) {

@@ -28,6 +28,7 @@ public class LoginController extends AbstractController {
     private static final String UNAUTHORIZED = "/401.html";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
@@ -105,7 +106,3 @@ public class LoginController extends AbstractController {
         redirect(LOGIN_PAGE, response);
     }
 }
-
-
-
-

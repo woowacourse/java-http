@@ -20,6 +20,10 @@ public class RequestBody {
         this.values = parseValues(values);
     }
 
+    public static RequestBody empty() {
+        return new RequestBody(EMPTY_VALUE);
+    }
+
     public Map<String, String> parseValues(String values) {
         if (values == null || values.isEmpty()) {
             return Collections.emptyMap();
@@ -31,10 +35,6 @@ public class RequestBody {
                         result -> result[KEY_INDEX],
                         result -> result[VALUE_INDEX])
                 );
-    }
-
-    public static RequestBody empty() {
-        return new RequestBody(EMPTY_VALUE);
     }
 
     public Map<String, String> getValues() {

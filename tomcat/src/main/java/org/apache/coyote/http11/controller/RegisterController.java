@@ -13,14 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RegisterController extends AbstractController {
-    private static void saveUserByBody(Map<String, List<String>> body) {
-        String account = body.get("account").getFirst();
-        String password = body.get("password").getFirst();
-        String email = body.get("email").getFirst();
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-    }
-
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         String method = request.getMethod();
@@ -50,6 +42,14 @@ public class RegisterController extends AbstractController {
         saveUserByBody(body);
         response.setPath("/index.html");
         doPostResponse(response);
+    }
+
+    private void saveUserByBody(Map<String, List<String>> body) {
+        String account = body.get("account").getFirst();
+        String password = body.get("password").getFirst();
+        String email = body.get("email").getFirst();
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
     }
 
     private void doPostResponse(HttpResponse response) throws IOException {

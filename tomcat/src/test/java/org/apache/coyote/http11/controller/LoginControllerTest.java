@@ -1,23 +1,16 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LoginControllerTest {
 
@@ -27,7 +20,7 @@ class LoginControllerTest {
         // given
         LoginController controller = new LoginController();
         HttpRequestHeader requestHeader = new HttpRequestHeader(Map.of("key", "value"), null, null);
-        HttpRequest request = new HttpRequest("GET", null,requestHeader, null);
+        HttpRequest request = new HttpRequest("GET", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when

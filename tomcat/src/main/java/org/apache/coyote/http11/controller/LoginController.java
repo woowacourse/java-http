@@ -2,8 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.Http11Cookie;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
@@ -73,25 +73,34 @@ public class LoginController extends AbstractController {
         doPostErrorPage(response);
     }
 
-    private static String findAccountFromBody(Map<String, List<String>> body) {
+    private String findAccountFromBody(Map<String, List<String>> body) {
         return Optional.ofNullable(body.get("account"))
                 .filter(list -> !list.isEmpty())
                 .map(List::getFirst)
                 .orElseThrow(() -> new IllegalArgumentException("account not found"));
     }
 
-    private static User findUserByAccount(String account) {
+    private User findUserByAccount(String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
     }
 
-    private static void validatePassword(Map<String, List<String>> body) {
+    private void validatePassword(Map<String, List<String>> body) {
         if (!body.containsKey("password")) {
             throw new IllegalArgumentException("password not found");
         }
     }
+    
+    private Http11Cookie createLoginSession(User user) {
+        Session session = Session.createRandomSession();
+        session.setAttribute("user", user);
+        Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
+        sessionManager.add(session);
+        return http11Cookie;
+    }
 
-    private boolean doPostSuccessLogin(HttpResponse response, User user, Map<String, List<String>> body) throws IOException {
+    private boolean doPostSuccessLogin(HttpResponse response, User user, Map<String, List<String>> body)
+            throws IOException {
         if (user.checkPassword(body.get("password").getFirst())) {
             log.info("user : {}", user);
             Http11Cookie http11Cookie = createLoginSession(user);
@@ -99,14 +108,6 @@ public class LoginController extends AbstractController {
             return true;
         }
         return false;
-    }
-
-    private static Http11Cookie createLoginSession(User user) {
-        Session session = Session.createRandomSession();
-        session.setAttribute("user", user);
-        Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
-        sessionManager.add(session);
-        return http11Cookie;
     }
 
     private void doPostSuccessLoginPage(HttpResponse response, Http11Cookie http11Cookie) throws IOException {

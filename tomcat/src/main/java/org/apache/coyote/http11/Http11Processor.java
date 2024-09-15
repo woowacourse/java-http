@@ -49,10 +49,14 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.serialize().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
+
+            sendErrorResponse(connection, 400, "Bad Request", "Invalid request format.");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            sendInternalServerError(connection);
+            sendErrorResponse(connection, 500, "Internal Server Error", "Unexpected error occurred.");
         }
     }
 
@@ -86,16 +90,13 @@ public class Http11Processor implements Runnable, Processor {
         return new RequestBody(body.toString());
     }
 
-    private void sendInternalServerError(Socket connection) {
+    private void sendErrorResponse(Socket connection, int statusCode, String statusMessage, String body) {
         try (var outputStream = connection.getOutputStream()) {
-            String errorResponse = """
-                        HTTP/1.1 500 Internal Server Error
-                        Content-Type: text/html
-                        Content-Length: 79
-
-                        <html><body><h1>500 Internal Server Error</h1><p>Unexpected error occurred.</p></body></html>
-                    """;
-
+            String responseBody = String.format("<html><body><h1>%d %s</h1><p>%s</p></body></html>", statusCode, statusMessage, body);
+            String errorResponse = String.format(
+                    "HTTP/1.1 %d %s\r\nContent-Type: text/html\r\nContent-Length: %d\r\n\r\n%s",
+                    statusCode, statusMessage, responseBody.getBytes(StandardCharsets.UTF_8).length, responseBody
+            );
             outputStream.write(errorResponse.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException ioException) {

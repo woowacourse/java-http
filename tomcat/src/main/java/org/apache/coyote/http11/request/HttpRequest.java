@@ -26,7 +26,7 @@ public final class HttpRequest {
     }
 
     public boolean isResource() {
-        return requestLine.hasCss() || requestLine.hasJs() || requestLine.hasHtml();
+        return requestLine.isCss() || requestLine.isJs() || requestLine.isHtml();
     }
 
     public String getUrl() {

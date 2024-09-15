@@ -5,13 +5,13 @@ import java.util.Map;
 
 public class RequestBody {
 
-    private final String body;
+    private final Map<String, String> body;
 
     public RequestBody(String body) {
-        this.body = body;
+        this.body = convertBody(body);
     }
 
-    public Map<String, String> getBody() {
+    public Map<String, String> convertBody(String body) {
         Map<String, String> requestBody = new HashMap<>();
         String[] split = body.split("&");
         for (String line : split) {
@@ -19,5 +19,9 @@ public class RequestBody {
             requestBody.put(component[0], component[1]);
         }
         return requestBody;
+    }
+
+    public Map<String, String> getBody() {
+        return body;
     }
 }

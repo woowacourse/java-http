@@ -10,7 +10,7 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Parameter;
-import org.apache.coyote.http11.exception.RequestException;
+import org.apache.coyote.http11.exception.ClientRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
         Session session = SessionManager.getInstance().findSessionById(sessionId);
         User user = (User) session.findValue(USER_SESSION_INFO_NAME);
         if (user == null) {
-            throw new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
+            throw new ClientRequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
         logger.info("session user : {}", user);
         response.statusCode(HttpStatusCode.FOUND)
@@ -54,7 +54,7 @@ public class LoginController extends AbstractController {
         String account = parameter.getValue("account");
         String password = parameter.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html"));
+                .orElseThrow(() -> new ClientRequestException(HttpStatusCode.UNAUTHORIZED, "/401.html"));
         if (user.checkPassword(password)) {
             loginSuccess(user, response);
         }
@@ -68,6 +68,6 @@ public class LoginController extends AbstractController {
     }
 
     private void loginFail(HttpResponse response) {
-        throw new RequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
+        throw new ClientRequestException(HttpStatusCode.UNAUTHORIZED, "/401.html");
     }
 }

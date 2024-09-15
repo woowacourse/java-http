@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.List;
-import org.apache.coyote.http11.exception.RequestException;
+import org.apache.coyote.http11.exception.ClientRequestException;
 
 public class RequestLine {
 
@@ -24,7 +24,7 @@ public class RequestLine {
 
     private void validateRequestPartLength(List<String> requestPart) {
         if (requestPart.size() != 3) {
-            throw new RequestException(HttpStatusCode.BAD_REQUEST, "/500.html");
+            throw new ClientRequestException(HttpStatusCode.BAD_REQUEST, "/500.html");
         }
     }
 

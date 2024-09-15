@@ -37,7 +37,7 @@ public class RequestLine {
 
         String[] line = requestLine.split(DELIMITER_SPACE);
 
-        if (line.length < REQUEST_LINE_SIZE) {
+        if (line.length != REQUEST_LINE_SIZE) {
             throw new IllegalArgumentException("RequestLine의 길이가 올바르지 않습니다.");
         }
         return line;

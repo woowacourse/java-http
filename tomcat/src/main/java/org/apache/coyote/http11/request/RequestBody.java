@@ -10,18 +10,18 @@ public class RequestBody {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int SIZE = 2;
-    private static final String KEY_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";
-    private static final String EMPTY_VALUE = "";
+    private static final String KEY_DELIMITER = "=";
+    private static final String EMPTY_PAYLOAD = "";
 
-    private final Map<String, String> values;
+    private final Map<String, String> payloads;
 
-    public RequestBody(String values) {
-        this.values = parseValues(values);
+    public RequestBody(String payloads) {
+        this.payloads = parseValues(payloads);
     }
 
     public static RequestBody empty() {
-        return new RequestBody(EMPTY_VALUE);
+        return new RequestBody(EMPTY_PAYLOAD);
     }
 
     public Map<String, String> parseValues(String values) {
@@ -30,14 +30,14 @@ public class RequestBody {
         }
 
         return Arrays.stream(values.split(PARAMETER_DELIMITER))
-                .map(cookie -> cookie.trim().split(KEY_DELIMITER, SIZE))
+                .map(param -> param.trim().split(KEY_DELIMITER, SIZE))
                 .collect(Collectors.toMap(
                         result -> result[KEY_INDEX],
                         result -> result[VALUE_INDEX])
                 );
     }
 
-    public Map<String, String> getValues() {
-        return values;
+    public Map<String, String> getPayloads() {
+        return payloads;
     }
 }

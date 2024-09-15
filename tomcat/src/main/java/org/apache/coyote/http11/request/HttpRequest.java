@@ -95,6 +95,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getRequestBody() {
-        return body.getValues();
+        return body.getPayloads();
     }
 }

@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
     private static SessionManager instance = null;
 

@@ -2,9 +2,9 @@ package org.apache.catalina.server;
 
 import org.apache.catalina.container.Container;
 
-public interface Server {
+public interface ApplicationContext {
 
     Container getContainer();
 
-    ServerProperties getServerProperties();
+    ApplicationConfig getServerProperties();
 }

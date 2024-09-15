@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.catalina.container.Container;
-import org.apache.catalina.server.Server;
-import org.apache.catalina.server.ServerProperties;
+import org.apache.catalina.server.ApplicationContext;
+import org.apache.catalina.server.ApplicationConfig;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +24,14 @@ public class Connector implements Runnable {
     private final Container container;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private final ServerProperties serverProperties;
+    private final ApplicationConfig applicationConfig;
     private boolean stopped;
 
-    public Connector(final Server server) {
-        this.serverProperties = server.getServerProperties();
-        this.container = server.getContainer();
-        this.serverSocket = createServerSocket(serverProperties.getPort(), serverProperties.getAcceptCount());
-        this.executorService = Executors.newFixedThreadPool(serverProperties.getMaxThreads());
+    public Connector(final ApplicationContext applicationContext) {
+        this.applicationConfig = applicationContext.getServerProperties();
+        this.container = applicationContext.getContainer();
+        this.serverSocket = createServerSocket(applicationConfig.getPort(), applicationConfig.getAcceptCount());
+        this.executorService = Executors.newFixedThreadPool(applicationConfig.getMaxThreads());
         this.stopped = false;
     }
 

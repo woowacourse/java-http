@@ -29,6 +29,14 @@ public class RequestLine {
         return new RequestLine(elements[METHOD_INDEX], elements[PATH_INDEX], elements[HTTP_VERSION_INDEX]);
     }
 
+    public boolean isGet() {
+        return "GET".equals(method);
+    }
+
+    public boolean isPost() {
+        return "POST".equals(method);
+    }
+
     public boolean isNull() {
         return isNull(method) || isNull(path) || isNull(httpVersion);
     }

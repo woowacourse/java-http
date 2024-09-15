@@ -7,13 +7,13 @@ import java.io.InputStreamReader;
 
 import org.apache.coyote.http11.Headers;
 
-public class HttpRequest {
+public class Request {
 
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody body;
 
-    public HttpRequest(
+    public Request(
             final RequestLine requestLine,
             final Headers headers,
             final RequestBody body
@@ -23,17 +23,15 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest form(final InputStream inputStream) throws IOException {
+    public static Request form(final InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final RequestLine requestLine = RequestLine.from(bufferedReader);
-        if (requestLine.isNull()) {
-            return null;
-        }
         final Headers headers = Headers.form(bufferedReader);
+        // todo: get 요청 바디 어떻게 처리되는지 확인
         final RequestBody body = RequestBody.of(bufferedReader, headers);
-        return new HttpRequest(requestLine, headers, body);
+        return new Request(requestLine, headers, body);
     }
 
     public RequestLine getRequestLine() {

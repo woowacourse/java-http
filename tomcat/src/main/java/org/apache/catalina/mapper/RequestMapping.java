@@ -1,16 +1,23 @@
 package org.apache.catalina.mapper;
 
+import org.apache.catalina.controller.BaseController;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.coyote.http11.request.Request;
 
 public class RequestMapping {
 
-    public Controller getController(final String startLine) {
-        if (startLine.equals("/login")) {
-            return null;
+    private RequestMapping() {}
+
+    public static Controller getController(final Request request) {
+        final String path = request.getRequestLine().getPath();
+        if (path.equals("/login")) {
+            return new LoginController();
         }
-        if (startLine.equals("/registry")) {
-            return null;
+        if (path.equals("/register")) {
+            return new RegisterController();
         }
-        return null;
+        return new BaseController();
     }
 }

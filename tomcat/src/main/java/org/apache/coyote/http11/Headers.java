@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Headers {
 
@@ -14,14 +14,16 @@ public class Headers {
     private static final int FIELD_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> values;
+    public static final String REQUEST_HEADER_COOKIE = "Cookie";
 
-    public Headers(final Map<String, String> values) {
-        this.values = values;
+    private final Map<String, String> headers;
+
+    public Headers(final Map<String, String> headers) {
+        this.headers = headers;
     }
 
     public static Headers form(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new ConcurrentHashMap<>();
 
         String headerLine;
         while ((headerLine = bufferedReader.readLine()) != null) {
@@ -34,17 +36,25 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public void add(final String field, final String value) {
+        headers.put(field, value);
+    }
+
     public boolean containsField(final String field) {
-        return values.containsKey(field);
+        return headers.containsKey(field);
     }
 
     public String getByField(final String field) {
-        return values.getOrDefault(field, null);
+        return headers.getOrDefault(field, null);
+    }
+
+    public HttpCookies getCookie() {
+        return new HttpCookies(headers.get(REQUEST_HEADER_COOKIE));
     }
 
     public String format() {
         final List<String> headerLines = new ArrayList<>();
-        for (Map.Entry<String, String> entry : values.entrySet()) {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
             headerLines.add(String.join(FIELD_VALUE_SEPARATOR, entry.getKey(), entry.getValue()));
         }
         return String.join(CRLF, headerLines);

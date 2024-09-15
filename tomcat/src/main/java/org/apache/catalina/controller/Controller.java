@@ -1,9 +1,9 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response) throws Exception;
+    void service(Request request, Response response) throws Exception;
 }

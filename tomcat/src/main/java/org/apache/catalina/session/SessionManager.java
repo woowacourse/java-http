@@ -9,9 +9,9 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static SessionManager SESSION_MANAGER;
 
-    public SessionManager() {
-    }
+    private SessionManager() {}
 
     @Override
     public void add(final Session session) {
@@ -44,5 +44,12 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public static synchronized SessionManager getInstance() {
+        if (SESSION_MANAGER == null) {
+            return new SessionManager();
+        }
+        return SESSION_MANAGER;
     }
 }

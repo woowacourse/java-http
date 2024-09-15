@@ -1,12 +1,12 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final Request request, final Response response) throws Exception {
         final String method = request.getRequestLine().getMethod();
         if (method.equals("POST")) {
             doPost(request, response);
@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {}
+    protected void doPost(final Request request, final Response response) throws Exception {}
 
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {}
+    protected void doGet(final Request request, final Response response) throws Exception {}
 }

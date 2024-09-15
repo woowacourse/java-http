@@ -5,6 +5,9 @@ import java.util.StringTokenizer;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String EMPTY = "";
+
     private final HashMap<String, String> cookie = new HashMap<>();
 
     public HttpCookie(String cookies) {
@@ -20,5 +23,13 @@ public class HttpCookie {
 
     public boolean hasKey(String key) {
         return cookie.containsKey(key);
+    }
+
+    public boolean hasSessionId() {
+        return cookie.containsKey(JSESSIONID);
+    }
+
+    public String getSessionId() {
+        return cookie.getOrDefault(JSESSIONID, EMPTY);
     }
 }

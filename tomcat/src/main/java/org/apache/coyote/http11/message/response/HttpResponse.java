@@ -1,8 +1,13 @@
 package org.apache.coyote.http11.message.response;
 
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
+
+    protected static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String NEWLINE = "\r\n";
@@ -22,6 +27,11 @@ public class HttpResponse {
 
     public void addHeader(String header, String value) {
         headers.add(header, value);
+    }
+
+    public void addCookie(Session session) {
+        log.info("쿠키에 세션 등록!! {}", session.getId());
+        headers.add("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     public void setBody(String body) {

@@ -138,7 +138,7 @@ class Http11ProcessorTest {
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
-                    "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                    "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; ",
                     "Content-Length: 30 ",
                     "Connection: keep-alive ",
                     "",

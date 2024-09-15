@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.StringTokenizer;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.message.common.Cookie;
-import org.apache.coyote.http11.message.common.CookieManager;
-import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.ViewResolver;
+import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.StatusCode;
@@ -22,9 +19,12 @@ public class LoginController extends AbstractController {
         String cookies = request.getCookies();
         HttpCookie httpCookie = new HttpCookie(cookies);
         if (httpCookie.hasKey("JSESSIONID")) {
-            response.addHeader("Content-Type", "text/html;charset=utf-8");
-            response.sendRedirect("http://localhost:8080/index.html");
-            return;
+            Session session = request.getSession(false);
+            if (session != null && session.getAttribute("user") != null) {
+                response.addHeader("Content-Type", "text/html;charset=utf-8");
+                response.sendRedirect("http://localhost:8080/index.html");
+                return;
+            }
         }
         response.setStatus(StatusCode.OK);
         response.addHeader("Content-Type", "text/html;charset=utf-8");
@@ -50,20 +50,11 @@ public class LoginController extends AbstractController {
             if (user.checkPassword(password)) {
                 log.info("로그인 성공! 아이디: {}", user.getAccount());
 
-                String cookies = request.getCookies();
-                HttpCookie httpCookie = new HttpCookie(cookies);
-                if (httpCookie.hasKey("JSESSIONID")) {
-                    response.addHeader("Content-Type", "text/html;charset=utf-8");
-                    response.sendRedirect("http://localhost:8080/index.html");
-                    return;
-                }
-                Cookie cookie = CookieManager.setCookie();
-                Session session = new Session(cookie.getValue());
+                Session session = request.getSession(true);
                 session.setAttribute("user", user);
-                SessionManager.getInstance().add(session);
+                response.addCookie(session);
                 response.addHeader("Content-Type", "text/html;charset=utf-8");
                 response.sendRedirect("http://localhost:8080/index.html");
-                response.addHeader("Set-Cookie", cookie.getKeyValue());
                 return;
             }
         }

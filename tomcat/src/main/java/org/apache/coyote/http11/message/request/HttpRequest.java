@@ -6,6 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 
 public class HttpRequest {
@@ -68,6 +72,20 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession(boolean enableCreation) {
+        HttpCookie httpCookie = new HttpCookie(headers.getCookies());
+        if (httpCookie.hasSessionId()) {
+            String sessionId = httpCookie.getSessionId();
+            return SessionManager.getInstance().findSession(sessionId);
+        }
+        if (enableCreation) {
+            Session session = new Session(UUID.randomUUID().toString());
+            SessionManager.getInstance().add(session);
+            return session;
+        }
+        return null;
     }
 
     @Override

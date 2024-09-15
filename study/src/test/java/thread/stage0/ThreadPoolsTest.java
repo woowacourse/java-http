@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 // 스레드 풀안의 스레드의 개수를 고정시킬 수 있고(newFixedThreadPool)
 // 처리 양에 따라 필요한 만큼 생성할 수 있다(newCachedThreadPool).
 // FixedThreadPool에 스레드가 전부 작업을 실행하게 되면 나머지 작업들은 BlockingQueue에 저장된다.
-// 작업의 개수는 queue의 ite 사이즈다.
+// 작업의 개수는 queue의 사이즈다.
 // 반면, newCachedThreadPool은 필요한 작업만큼 thread를 생성하여 처리하고 사용하지 않을경우 60초 뒤에 제거된다.
 class ThreadPoolsTest {
 

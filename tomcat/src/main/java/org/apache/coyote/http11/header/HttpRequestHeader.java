@@ -15,6 +15,7 @@ public class HttpRequestHeader {
     public static final int HEDAER_KEY_INDEX = 0;
     public static final int HEADER_VALUE_INDEX = 1;
 
+
     private final Map<String, String> payLoads;
     private final Cookie cookie;
 

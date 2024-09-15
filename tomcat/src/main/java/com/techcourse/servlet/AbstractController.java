@@ -1,9 +1,10 @@
-package org.apache.catalina;
+package com.techcourse.servlet;
 
 import java.io.IOException;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -17,12 +18,21 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        throw new UnsupportedOperationException("지원하지 않는 Http Method 입니다.");
+
+        responseMethodNotAllowedPage(response);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+        responseMethodNotAllowedPage(response);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        responseMethodNotAllowedPage(response);
+    }
+
+    private void responseMethodNotAllowedPage(HttpResponse response) throws IOException {
+        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStaticResourceResponse("/405.html");
+        response.write();
     }
 }

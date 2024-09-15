@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,5 +20,13 @@ public class SessionManager {
 
     public static void remove(String id) {
         SESSIONS.remove(id);
+    }
+
+    public static int size() {
+        return SESSIONS.size();
+    }
+
+    public static void clear() {
+        SESSIONS.clear();
     }
 }

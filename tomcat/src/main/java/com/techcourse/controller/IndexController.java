@@ -1,11 +1,11 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
-import org.apache.catalina.AbstractController;
+import com.techcourse.servlet.AbstractController;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class IndexHandler extends AbstractController {
+public class IndexController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {

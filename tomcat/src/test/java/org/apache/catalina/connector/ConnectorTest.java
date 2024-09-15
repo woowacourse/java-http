@@ -27,11 +27,11 @@ class ConnectorTest {
     @DisplayName("스레드 풀의 크기는 250이다")
     @Test
     void testServerStop() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(250);
+        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Connector.DEFAULT_MAX_THREADS);
         for (int i = 0; i < 350; i++) {
             executor.submit(threadSleep());
         }
-        final int expectedPoolSize = 250;
+        final int expectedPoolSize = Connector.DEFAULT_MAX_THREADS;
         final int expectedQueueSize = 100;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

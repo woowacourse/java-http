@@ -11,7 +11,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RegisterControllerTest {
 
@@ -37,7 +36,8 @@ class RegisterControllerTest {
         // given
         RegisterController controller = new RegisterController();
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
-        Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email", List.of("gugu2@gmail.com"));
+        Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email",
+                List.of("gugu2@gmail.com"));
         HttpRequest request = new HttpRequest("POST", null, httpRequestHeader, body);
         HttpResponse response = new HttpResponse();
 
@@ -86,7 +86,8 @@ class RegisterControllerTest {
         // given
         RegisterController controller = new RegisterController();
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(null, null, null);
-        Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email", List.of("gugu2@gmail.com"));
+        Map<String, List<String>> body = Map.of("account", List.of("gugu2"), "password", List.of("password"), "email",
+                List.of("gugu2@gmail.com"));
         HttpRequest request = new HttpRequest("POST", null, httpRequestHeader, body);
         HttpResponse response = new HttpResponse();
 

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,8 @@ public class HttpRequestParser {
         return readHttpRequest(reader, requestLine, header);
     }
 
-    private static HttpRequest readHttpRequest(BufferedReader reader, String requestLine, List<String> header) throws IOException {
+    private static HttpRequest readHttpRequest(BufferedReader reader, String requestLine, List<String> header)
+            throws IOException {
         HttpRequestHeader httpRequestHeader = readHttpRequestHeader(requestLine, header);
 
         String method = readMethod(requestLine);
@@ -104,7 +104,9 @@ public class HttpRequestParser {
     }
 
     private static String readBody(BufferedReader reader, String contentLengthStr) throws IOException {
-        if (contentLengthStr == null) return null;
+        if (contentLengthStr == null) {
+            return null;
+        }
         int contentLength = Integer.parseInt(contentLengthStr);
         char[] bodyChars = new char[contentLength];
         reader.read(bodyChars, 0, contentLength);

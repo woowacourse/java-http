@@ -25,7 +25,7 @@ class SessionTest {
         String id = "id";
         Session session = new Session(id);
 
-       // when
+        // when
         String name = "name";
         String value = "value";
         session.setAttribute(name, value);
@@ -47,7 +47,6 @@ class SessionTest {
 
         // when
         session.removeAttribute(name);
-
 
         // then
         assertThat(session.getAttribute(name)).isNull();

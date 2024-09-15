@@ -38,49 +38,87 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> cookies = request.getCookies();
-        if (cookies.containsKey("JSESSIONID") && sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
-            response.setPath("/index.html");
-            response.setFileType("html");
-            response.setHttpStatusCode(HttpStatusCode.FOUND);
-            response.setResponseBody(readBodyFromPath(response.getPath()));
+        if (doGetToLoginUser(response, cookies)) {
             return;
         }
+        doGetPage(response, "/login.html", HttpStatusCode.OK);
+    }
 
-        response.setPath("/login.html");
+    private boolean doGetToLoginUser(HttpResponse response, Map<String, String> cookies) throws IOException {
+        if (cookies.containsKey("JSESSIONID") && sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
+            doGetPage(response, "/index.html", HttpStatusCode.FOUND);
+            return true;
+        }
+        return false;
+    }
+
+    private void doGetPage(HttpResponse response, String path, HttpStatusCode ok) throws IOException {
+        response.setPath(path);
         response.setFileType("html");
-        response.setHttpStatusCode(HttpStatusCode.OK);
+        response.setHttpStatusCode(ok);
         response.setResponseBody(readBodyFromPath(response.getPath()));
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, List<String>> body = request.getBody();
-        String account = Optional.ofNullable(body.get("account"))
+
+        String account = findAccountFromBody(body);
+        User user = findUserByAccount(account);
+        validatePassword(body);
+
+        if (doPostSuccessLogin(response, user, body)) {
+            return;
+        }
+        doPostErrorPage(response);
+    }
+
+    private static String findAccountFromBody(Map<String, List<String>> body) {
+        return Optional.ofNullable(body.get("account"))
                 .filter(list -> !list.isEmpty())
                 .map(List::getFirst)
                 .orElseThrow(() -> new IllegalArgumentException("account not found"));
+    }
 
-        User user = InMemoryUserRepository.findByAccount(account)
+    private static User findUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
+    }
 
+    private static void validatePassword(Map<String, List<String>> body) {
         if (!body.containsKey("password")) {
             throw new IllegalArgumentException("password not found");
         }
+    }
 
+    private boolean doPostSuccessLogin(HttpResponse response, User user, Map<String, List<String>> body) throws IOException {
         if (user.checkPassword(body.get("password").getFirst())) {
             log.info("user : {}", user);
-            Session session = Session.createRandomSession();
-            session.setAttribute("user", user);
-            Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
-            sessionManager.add(session);
-            response.setPath("/index.html");
-            response.setFileType("html");
-            response.setHttpStatusCode(HttpStatusCode.FOUND);
-            response.setHttp11Cookie(http11Cookie);
-            final var responseBody = readBodyFromPath(response.getPath());
-            response.setResponseBody(responseBody);
-            return;
+            Http11Cookie http11Cookie = createLoginSession(user);
+            doPostSuccessLoginPage(response, http11Cookie);
+            return true;
         }
+        return false;
+    }
+
+    private static Http11Cookie createLoginSession(User user) {
+        Session session = Session.createRandomSession();
+        session.setAttribute("user", user);
+        Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
+        sessionManager.add(session);
+        return http11Cookie;
+    }
+
+    private void doPostSuccessLoginPage(HttpResponse response, Http11Cookie http11Cookie) throws IOException {
+        response.setPath("/index.html");
+        response.setFileType("html");
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setHttp11Cookie(http11Cookie);
+        final var responseBody = readBodyFromPath(response.getPath());
+        response.setResponseBody(responseBody);
+    }
+
+    private void doPostErrorPage(HttpResponse response) throws IOException {
         response.setPath("/401.html");
         response.setFileType("html");
         response.setHttpStatusCode(HttpStatusCode.FOUND);

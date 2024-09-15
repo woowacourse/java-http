@@ -8,6 +8,10 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
+import static org.apache.coyote.http11.HttpHeaderKey.LOCATION;
+import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_LENGTH;
+
 public abstract class AbstractController implements Controller {
 
     @Override
@@ -29,15 +33,15 @@ public abstract class AbstractController implements Controller {
 
     protected void redirect(HttpResponse response, String path) {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
-        response.setHttpResponseHeader("Location", path);
+        response.setHttpResponseHeader(LOCATION.getKeyName(), path);
     }
 
     protected void setResponseContent(HttpRequest request, HttpResponse response)
             throws URISyntaxException, IOException {
         FileReader fileReader = FileReader.getInstance();
         response.setHttpResponseBody(fileReader.readFile(request.getHttpRequestPath()));
-        response.setHttpResponseHeader("Content-Type", request.getContentType() + ";charset=utf-8");
-        response.setHttpResponseHeader("Content-Length",
+        response.setHttpResponseHeader(CONTENT_TYPE.getKeyName(), request.getContentType() + ";charset=utf-8");
+        response.setHttpResponseHeader(CONTENT_LENGTH.getKeyName(),
                 String.valueOf(response.getHttpResponseBody().body().getBytes().length));
     }
 }

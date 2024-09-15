@@ -2,13 +2,12 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
+import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeaderKey.COOKIE;
+
 public class HttpRequestHeaders {
 
     private static final String contentTypeKey = "Accept";
-
-    private static final String contentLengthKey = "Content-Length";
-
-    private static final String cookieKey = "Cookie";
 
     private static final String DELIMITER = ",";
 
@@ -23,10 +22,10 @@ public class HttpRequestHeaders {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(this.headers.get(contentLengthKey));
+        return Integer.parseInt(this.headers.get(CONTENT_LENGTH.getKeyName()));
     }
 
     public String getCookies() {
-        return this.headers.getOrDefault(cookieKey, "");
+        return this.headers.getOrDefault(COOKIE.getKeyName(), "");
     }
 }

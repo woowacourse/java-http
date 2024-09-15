@@ -5,7 +5,6 @@ import com.techcourse.exception.UserException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,6 +13,8 @@ import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.coyote.http11.HttpHeaderKey.SET_COOKIE;
 
 public class LoginController extends AbstractController {
 
@@ -72,7 +73,7 @@ public class LoginController extends AbstractController {
         Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session.getId(), session);
-        response.setHttpResponseHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.setHttpResponseHeader(SET_COOKIE.getKeyName(), "JSESSIONID=" + session.getId());
     }
 
     private void setFailResponse(HttpRequest request, HttpResponse response) {

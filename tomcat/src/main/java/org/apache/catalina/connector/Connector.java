@@ -24,7 +24,6 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final Dispatcher dispatcher;
     private final ExecutorService executorService;
-    private final LinkedBlockingQueue<Runnable> acceptQueue;
     private boolean stopped;
 
     public Connector(Dispatcher dispatcher) {
@@ -37,12 +36,11 @@ public class Connector implements Runnable {
         this.executorService = new ThreadPoolExecutor(
                 maxThread,
                 maxThread,
-                0,
+                60L,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT)
         );
         this.dispatcher = dispatcher;
-        this.acceptQueue = new LinkedBlockingQueue<>(acceptCount);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -80,14 +78,7 @@ public class Connector implements Runnable {
     @Override
     public void run() {
         while (!stopped) {
-            try {
-                acceptQueue.put(this::connect);
-                executorService.execute(acceptQueue.take());
-            } catch (InterruptedException e) {
-                log.error("최대 요청 처리 수를 초과 했습니다. - 대기 중인 작업 : {}", acceptQueue.size());
-                Thread.currentThread().interrupt();
-                break;
-            }
+            executorService.execute(this::connect);
         }
     }
 
@@ -105,10 +96,20 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection, dispatcher);
         processor.process(connection);
+        close(connection);
+    }
+
+    private void close(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException exception) {
+            log.error("soket을 닫는 과정에서 에러가 발생했습니다. : ", exception);
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdownNow();
         try {
             serverSocket.close();
         } catch (IOException e) {

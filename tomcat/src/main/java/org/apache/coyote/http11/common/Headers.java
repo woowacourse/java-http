@@ -33,7 +33,7 @@ public class Headers {
                 break;
             }
             final String[] header = headerLine.split(FIELD_VALUE_SEPARATOR);
-            headers.put(header[FIELD_INDEX], header[VALUE_INDEX]);
+            headers.put(header[FIELD_INDEX], header[VALUE_INDEX].trim());
         }
         return new Headers(headers);
     }

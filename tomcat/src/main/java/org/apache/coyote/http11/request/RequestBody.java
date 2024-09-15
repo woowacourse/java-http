@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.apache.coyote.exception.ContentLengthExceededException;
 import org.apache.coyote.http11.common.Headers;
 
 public class RequestBody {
@@ -17,10 +16,10 @@ public class RequestBody {
     public static final int NAME_INDEX = 0;
     public static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> form;
+    private final Map<String, String> query;
 
-    public RequestBody(final Map<String, String> form) {
-        this.form = form;
+    public RequestBody(final Map<String, String> query) {
+        this.query = query;
     }
 
     public static RequestBody of(final BufferedReader bufferedReader, final Headers headers) throws IOException {
@@ -38,11 +37,11 @@ public class RequestBody {
 
     private static String readBodyLine(final BufferedReader bufferedReader, final Headers headers) throws IOException {
         if (headers.containsField(HEADER_FIELD_FOR_BODY)) {
-            int expectLength = Integer.parseInt(headers.getByField(HEADER_FIELD_FOR_BODY));
-            char[] buffer = new char[expectLength];
-            int actualLength = bufferedReader.read(buffer, 0, expectLength);
-            if (actualLength != expectLength) {
-                throw new ContentLengthExceededException("Content-Length 와 Request Body 길이가 같지 않습니다.");
+            final int expectLength = Integer.parseInt(headers.getByField(HEADER_FIELD_FOR_BODY));
+            final char[] buffer = new char[expectLength];
+            final int actualLength = bufferedReader.read(buffer, 0, expectLength);
+            if (expectLength > actualLength) {
+                return new String(buffer).substring(0, actualLength);
             }
             return new String(buffer);
         }
@@ -50,8 +49,8 @@ public class RequestBody {
     }
 
     public String getByName(final String name) {
-        if (form.containsKey(name)) {
-            return form.get(name);
+        if (query.containsKey(name)) {
+            return query.get(name);
         }
         throw new NoSuchElementException("요청 바디에 찾고자 하는 파라미터 이름이 존재하지 않습니다.");
     }

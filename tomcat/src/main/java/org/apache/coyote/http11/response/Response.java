@@ -4,7 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.coyote.http11.common.Headers;
 
@@ -26,7 +29,7 @@ public class Response {
     public Response() {
         this.statusLine = new StatusLine(null, null, null);
         this.headers = new Headers(new ConcurrentHashMap<>());
-        this.body = new ResponseBody(null, null);
+        this.body = new ResponseBody(null);
     }
 
     public void setStatusLine(final StatusLine statusLine) {
@@ -54,18 +57,22 @@ public class Response {
             return;
         }
         try (InputStream inputStream = new ByteArrayInputStream(content.getBytes())) {
-            String contentType = URLConnection.guessContentTypeFromStream(inputStream);
-            if (contentType == null) {
-                contentType = "text/html";
-            }
-            String option = "";
-            if (Headers.isTextType(contentType)) {
-                option = ENCODING_OPTION;
-            }
-            headers.add("Content-Type", contentType + option);
+            final String contentType = guessContentType(inputStream);
+            headers.add("Content-Type", contentType);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String guessContentType(final InputStream inputStream) throws IOException {
+        String contentType = URLConnection.guessContentTypeFromStream(inputStream);
+        if (contentType == null) {
+            contentType = "text/html";
+        }
+        if (Headers.isTextType(contentType)) {
+            return contentType + ENCODING_OPTION;
+        }
+        return contentType;
     }
 
     public void addContentLength() {
@@ -85,11 +92,13 @@ public class Response {
     }
 
     public String format() {
-        return String.join("\r\n",
-                statusLine.format(),
-                headers.format(),
-                BLANK_LINE_CONTENT,
-                body.getContent()
-        );
+        return Stream.of(
+                        statusLine.format(),
+                        headers.format(),
+                        BLANK_LINE_CONTENT,
+                        body.getContent()
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\r\n"));
     }
 }

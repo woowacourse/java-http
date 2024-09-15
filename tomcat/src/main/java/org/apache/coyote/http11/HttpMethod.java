@@ -4,8 +4,7 @@ import java.util.Arrays;
 
 public enum HttpMethod {
     POST("POST"),
-    GET("GET"),
-    NONE("NONE");
+    GET("GET");
 
     private final String value;
 

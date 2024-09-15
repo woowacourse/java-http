@@ -6,10 +6,12 @@ import static org.mockito.Mockito.mockStatic;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -45,13 +47,7 @@ class LoginControllerTest {
         // given
         RequestLine requestLine = RequestLine.from("POST /login HTTP/1.1 ");
         String body = "account=validUser&password=correctPassword";
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
-        ));
-        RequestBody requestBody = new RequestBody(body);
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(body), new RequestBody(body));
         HttpResponse httpResponse = new HttpResponse();
 
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
@@ -80,13 +76,7 @@ class LoginControllerTest {
         // given
         RequestLine requestLine = RequestLine.from("POST /login HTTP/1.1 ");
         String body = "account=validUser&password=wrongPassword";
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
-        ));
-        RequestBody requestBody = new RequestBody(body);
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(body), new RequestBody(body));
         HttpResponse httpResponse = new HttpResponse();
 
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
@@ -111,11 +101,7 @@ class LoginControllerTest {
     void loginPage() throws IOException {
         // given
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1 ");
-        HttpHeaders headers = HttpHeaders.from(List.of(
-                "Host: localhost:8080 ",
-                "Connection: keep-alive "
-        ));
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
+        HttpRequest httpRequest = new HttpRequest(requestLine, createHeaders(null), new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
 
         // when
@@ -135,16 +121,12 @@ class LoginControllerTest {
     @Test
     void homePage() throws IOException {
         // given
-        Session session = Session.createRandomSession();
-        User user = new User("user", "password", "email");
-        session.setAttribute("user", user);
-        SessionManager sessionManager = SessionManager.getInstance();
-        sessionManager.add(session);
+        Session session = getSession(new User("user", "password", "email"));
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1 ");
         HttpHeaders headers = HttpHeaders.from(List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=" + session.getId()
+                "Cookie: " + HttpCookie.ofJSessionId(session.getId())
         ));
         HttpRequest httpRequest = new HttpRequest(requestLine, headers, new RequestBody());
         HttpResponse httpResponse = new HttpResponse();
@@ -160,5 +142,24 @@ class LoginControllerTest {
                 expectedResponseLine,
                 expectedLocationHeader
         );
+    }
+
+    private static Session getSession(User user) {
+        Session session = Session.createRandomSession();
+        session.setAttribute("user", user);
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        return session;
+    }
+
+    private HttpHeaders createHeaders(String body) {
+        HttpHeaders headers = HttpHeaders.from(List.of(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive "
+        ));
+        if (Objects.nonNull(body)) {
+            headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
+        }
+        return headers;
     }
 }

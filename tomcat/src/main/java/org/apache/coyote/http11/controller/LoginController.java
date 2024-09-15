@@ -58,6 +58,7 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new ClientRequestException(HttpStatusCode.UNAUTHORIZED, "/401.html"));
         if (user.checkPassword(password)) {
             loginSuccess(user, response);
+            return;
         }
         loginFail(response);
     }

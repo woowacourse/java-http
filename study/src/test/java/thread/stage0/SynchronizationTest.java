@@ -41,7 +41,10 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public void calculate() {
+        /**
+         * calculate 메서드에 synchronized 키워드를 설정해서 하나의 스레드만 해당 메서드를 실행할 수 있게 조치함.
+         */
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 

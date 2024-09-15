@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,6 @@ public class RequestHeader {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Collections.unmodifiableMap(headers);
     }
 }

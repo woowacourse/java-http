@@ -1,6 +1,7 @@
 package org.apache.coyote.http.cookie;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,6 +48,6 @@ public class HttpCookies {
     }
 
     public Map<String, HttpCookie> getCookies() {
-        return values;
+        return Collections.unmodifiableMap(values);
     }
 }

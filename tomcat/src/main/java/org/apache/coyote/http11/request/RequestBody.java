@@ -31,13 +31,13 @@ public class RequestBody {
 
         return Arrays.stream(values.split(PARAMETER_DELIMITER))
                 .map(param -> param.trim().split(KEY_DELIMITER, SIZE))
-                .collect(Collectors.toMap(
+                .collect(Collectors.toUnmodifiableMap(
                         result -> result[KEY_INDEX],
                         result -> result[VALUE_INDEX])
                 );
     }
 
     public Map<String, String> getPayloads() {
-        return payloads;
+        return Collections.unmodifiableMap(payloads);
     }
 }

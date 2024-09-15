@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.MimeType;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -52,6 +53,6 @@ public class ResponseHeader {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Collections.unmodifiableMap(headers);
     }
 }

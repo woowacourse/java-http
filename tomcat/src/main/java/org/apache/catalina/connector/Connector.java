@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -22,7 +19,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ThreadPoolExecutor threadPoolExecutor;
+    private final ThreadPoolManager threadPoolManager;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
@@ -31,7 +28,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        threadPoolExecutor = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(acceptCount));
+        this.threadPoolManager = new ThreadPoolManager(maxThreads, acceptCount);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -73,14 +70,14 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        threadPoolExecutor.execute(processor);
+        threadPoolManager.run(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
-            threadPoolExecutor.shutdown();
+            threadPoolManager.terminate();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -101,10 +98,10 @@ public class Connector implements Runnable {
     }
 
     public int getPoolSize() {
-        return threadPoolExecutor.getPoolSize();
+        return threadPoolManager.getPoolSize();
     }
 
     public int getQueueSize() {
-        return threadPoolExecutor.getQueue().size();
+        return threadPoolManager.getQueueSize();
     }
 }

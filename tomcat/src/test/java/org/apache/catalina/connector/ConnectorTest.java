@@ -1,11 +1,15 @@
 package org.apache.catalina.connector;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.RequestMappings;
 import org.junit.jupiter.api.DisplayName;
@@ -13,46 +17,44 @@ import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
 
 class ConnectorTest {
-    /*
-    반드시 단독으로 실행해야 합니다. 다른 테스트와 함깨 실행할 경우 실패합니다.
-     */
+
+    private static volatile boolean sendResponse = false;
+
     @Test
     @DisplayName("350번째 연결 요청은 성공하고 351번째 요청은 실패한다.")
     void requestFailWhenTooMany() throws InterruptedException {
-        var connector = makeSlowConnector();
+        var connector = makeTestConnector();
         connector.start();
         Thread.sleep(1000);
         ExecutorService executorService = Executors.newFixedThreadPool(349);
-        for (int i = 0; i < 349; i++) {
-            executorService.submit(() -> TestHttpUtils.send("/", 400000));
+        List<Future<HttpResponse<String>>> submits = new ArrayList<>();
+        for (int i = 0; i < 351; i++) {
+            submits.add(executorService.submit(() -> TestHttpUtils.send("/", 400000)));
+            if (i == 350) {
+                sendResponse = true;
+            }
         }
+        Thread.sleep(4000);
+        Future<HttpResponse<String>> beforeLast = submits.get(349);
+        Future<HttpResponse<String>> last = submits.getLast();
         assertAll(
-                () -> assertDoesNotThrow(() -> TestHttpUtils.send("/fast", 3)),
-                () -> assertThatThrownBy(() -> TestHttpUtils.send("/fast", 3))
+                () -> assertThat(beforeLast.isDone()).isTrue(),
+                () -> assertThatThrownBy(last::exceptionNow)
         );
     }
 
-    private Connector makeSlowConnector() {
+    private Connector makeTestConnector() {
         RequestMapping slow = getSlowRequestMapping();
-        RequestMapping fast = getFastRequestMapping();
-        RequestMappings requestMappings = new RequestMappings(slow, fast);
+        RequestMappings requestMappings = new RequestMappings(slow);
         return new Connector(requestMappings);
     }
 
     private RequestMapping getSlowRequestMapping() {
         return new RequestMapping((request, response) -> {
-            try {
-                Thread.sleep(10000000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            while (!sendResponse) {
+                Thread.onSpinWait();
             }
             response.setRedirect("/index.html");
         }, "/");
-    }
-
-    private RequestMapping getFastRequestMapping() {
-        return new RequestMapping((request, response) -> {
-            response.setRedirect("/index.html");
-        }, "/fast");
     }
 }

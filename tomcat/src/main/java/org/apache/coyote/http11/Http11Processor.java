@@ -1,30 +1,27 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestProcessor;
+import org.apache.coyote.ServletContainer;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.Socket;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestProcessor requestProcessor;
+    private final ServletContainer servletContainer;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, ServletContainer container) {
         this.connection = connection;
-        this.requestProcessor = new RequestProcessor();
+        this.servletContainer = container;
     }
 
     @Override
@@ -42,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestConverter.convertFrom(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            requestProcessor.process(httpRequest, httpResponse);
+            servletContainer.invoke(httpRequest, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

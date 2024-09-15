@@ -1,12 +1,17 @@
 package org.apache.catalina.connector;
 
+import org.apache.coyote.ServletContainer;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -14,17 +19,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREAD = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
+    private final ServletContainer container;
+
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(ServletContainer container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final ServletContainer container, final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThread);
+        this.container = container;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -65,16 +76,26 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        var processor = new Http11Processor(connection, container);
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            executorService.shutdown();
+            waitUntilTermination();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void waitUntilTermination() throws InterruptedException {
+        if (executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+            executorService.shutdownNow();
         }
     }
 
@@ -90,5 +111,9 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    public boolean isShutdown() {
+        return executorService.isShutdown();
     }
 }

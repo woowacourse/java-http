@@ -8,15 +8,15 @@ import org.apache.coyote.util.HttpStatus;
 
 import java.util.Optional;
 
-public class RequestProcessor {
+public class ServletContainer {
 
     private final RequestMapping requestMapping;
 
-    public RequestProcessor() {
+    public ServletContainer() {
         this.requestMapping = new RequestMapping();
     }
 
-    public void process(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void invoke(HttpRequest httpRequest, HttpResponse httpResponse) {
         Optional<Controller> mappedController = requestMapping.findController(httpRequest);
 
         mappedController.ifPresentOrElse(controller -> controller.service(httpRequest, httpResponse),

@@ -13,7 +13,10 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private static final String HEADER_DELIMITER = ": ";
+    private static final String HEADER_DELIMITER = ":";
+    private static final int OFFSET = 0;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final RequestHeader header;
@@ -36,8 +39,8 @@ public class HttpRequest {
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] headerLine = line.split(HEADER_DELIMITER);
 
-            String key = URLDecoder.decode(headerLine[0]);
-            String value = URLDecoder.decode(headerLine[1]);
+            String key = URLDecoder.decode(headerLine[KEY_INDEX]).trim();
+            String value = URLDecoder.decode(headerLine[VALUE_INDEX]).trim();
 
             requestHeader.addHeader(key, value);
         }
@@ -49,13 +52,21 @@ public class HttpRequest {
             return RequestBody.empty();
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < header.getContentLength(); i++) {
-            stringBuilder.append((char) bufferedReader.read());
-        }
+        StringBuilder stringBuilder = parsePayloads(bufferedReader);
 
         return new RequestBody(stringBuilder.toString());
+    }
+
+    private StringBuilder parsePayloads(BufferedReader bufferedReader) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        int contentLength = header.getContentLength();
+        char[] buffer = new char[contentLength];
+
+        bufferedReader.read(buffer, OFFSET, contentLength);
+        stringBuilder.append(buffer);
+
+        return stringBuilder;
     }
 
     public boolean existsSession() {

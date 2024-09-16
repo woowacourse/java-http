@@ -1,10 +1,11 @@
 package org.apache.coyote.processor;
 
-import org.apache.catalina.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.exception.UncheckedServletException;
+import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.http.StatusCode;
-import org.apache.catalina.http11.Dispatcher;
+import org.apache.catalina.http11.ServletContainer;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.coyote.connector.RequestReader;
@@ -34,20 +35,28 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = RequestReader.readRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
+            setBasicHeader(httpResponse, httpRequest);
 
             if (httpRequest.isStaticRequest()) {
                 httpResponse.setStatusCode(StatusCode.OK);
                 httpResponse.setBody(httpRequest.getPath());
             }
             if (!httpRequest.isStaticRequest()) {
-                Dispatcher dispatcher = new Dispatcher();
-                dispatcher.run(httpRequest, httpResponse);
+                ServletContainer servletContainer = new ServletContainer();
+                servletContainer.run(httpRequest, httpResponse);
             }
 
             outputStream.write(httpResponse.getReponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private static void setBasicHeader(HttpResponse httpResponse, HttpRequest httpRequest) {
+        httpResponse.addHeader(HeaderName.CONTENT_TYPE, httpRequest.getContentType());
+        if (httpRequest.hasCookie()) {
+            httpResponse.addHeader(HeaderName.SET_COOKIE, httpRequest.getHttpCookie());
         }
     }
 }

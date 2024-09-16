@@ -31,7 +31,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.threadPool = new ThreadPoolExecutor(maxThreads, maxThreads,
-                60L, TimeUnit.SECONDS,
+                0, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(acceptCount));
         this.stopped = false;
     }

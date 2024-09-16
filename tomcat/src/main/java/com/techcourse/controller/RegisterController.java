@@ -17,12 +17,12 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        User user = createUser(request.getQueryParameters());
-        InMemoryUserRepository.save(user);
+        saveUser(request.getQueryParameters());
         response.redirect(request.getVersion(), "/index.html");
     }
 
-    private User createUser(QueryParameters queryParameters) {
-        return new User(queryParameters.get("account"), queryParameters.get("password"), queryParameters.get("email"));
+    private void saveUser(QueryParameters queryParameters) {
+        User user = new User(queryParameters.get("account"), queryParameters.get("password"), queryParameters.get("email"));
+        InMemoryUserRepository.save(user);
     }
 }

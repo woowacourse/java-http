@@ -1,18 +1,29 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.container;
 
-class ResourceProcessor {
+import jakarta.controller.Controller;
+import jakarta.controller.ResourceFinder;
+import jakarta.controller.StaticResourceController;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+
+public class ResourceProcessor {
 
     private final RequestMapping requestMapping;
+    private final ResourceFinder resourceFinder;
     private final StaticResourceController staticResourceController;
 
-    public ResourceProcessor(RequestMapping requestMapping, StaticResourceController staticResourceController) {
+    public ResourceProcessor(
+            RequestMapping requestMapping,
+            ResourceFinder resourceFinder,
+            StaticResourceController staticResourceController) {
         this.requestMapping = requestMapping;
+        this.resourceFinder = resourceFinder;
         this.staticResourceController = staticResourceController;
     }
 
     public HttpResponse processResponse(HttpRequest request) throws Exception {
-        HttpResponse response = HttpResponse.createHttp11Response();
-        boolean hasResource = ResourceFinder.hasResource(request.getPath(), getClass().getClassLoader());
+        HttpResponse response = HttpResponse.createHttpResponse(null);
+        boolean hasResource = resourceFinder.hasResource(request.getPath());
         if (hasResource) {
             return processStaticResource(request, response);
         }

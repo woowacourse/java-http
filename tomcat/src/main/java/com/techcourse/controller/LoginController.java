@@ -26,12 +26,18 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        Session session = sessionManager.findSession(request.getJSessionId());
+        Session session = null;
+        if (request.hasJSessionId()) {
+            session = sessionManager.findSession(request.getJSessionId());
+        }
+
         if (isAuthenticated(session)) {
+            response.setHttpVersion(request.getHttpVersion());
             response.addHttpResponseHeader(HttpHeader.LOCATION, "/index.html");
             response.setHttpStatus(HttpStatus.FOUND);
             return;
         }
+        response.setHttpVersion(request.getHttpVersion());
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpResponseBody(request.getUrlPath());
     }
@@ -52,6 +58,7 @@ public class LoginController extends AbstractController {
             session.setAttribute("user", user);
             sessionManager.add(session);
 
+            response.setHttpVersion(request.getHttpVersion());
             response.setJSessionId(session.getId());
             response.addHttpResponseHeader(HttpHeader.LOCATION, "/index.html");
             response.setHttpStatus(HttpStatus.FOUND);
@@ -60,6 +67,7 @@ public class LoginController extends AbstractController {
             log.info("user : {}", user);
 
         } catch (IllegalArgumentException e) {
+            response.setHttpVersion(request.getHttpVersion());
             response.addHttpResponseHeader(HttpHeader.LOCATION, "/401.html");
             response.setHttpStatus(HttpStatus.FOUND);
             response.setContentType(ContentType.TEXT_HTML);

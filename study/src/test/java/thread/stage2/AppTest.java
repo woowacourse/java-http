@@ -23,19 +23,19 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
-        final var NUMBER_OF_THREAD = 10;
-        var threads = new Thread[NUMBER_OF_THREAD];
+        final int NUMBER_OF_THREAD = 10;
+        Thread[] threads = new Thread[NUMBER_OF_THREAD];
 
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));
         }
 
-        for (final var thread : threads) {
+        for (final Thread thread : threads) {
             thread.start();
             Thread.sleep(50);
         }
 
-        for (final var thread : threads) {
+        for (final Thread thread : threads) {
             thread.join();
         }
 

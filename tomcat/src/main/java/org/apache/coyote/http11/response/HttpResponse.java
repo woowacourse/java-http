@@ -11,7 +11,6 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
-    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
     private static final String FILE_EXTENSION_DELIMITER = ".";
     private static final String CRLF = "\r\n";
@@ -21,9 +20,13 @@ public class HttpResponse {
     private String httpResponseBody;
 
     public HttpResponse() {
-        this.httpStatusLine = new HttpStatusLine(HTTP_VERSION, HttpStatus.OK);
+        this.httpStatusLine = new HttpStatusLine();
         this.httpResponseHeader = new HttpResponseHeader();
         this.httpResponseBody = "";
+    }
+
+    public void setHttpVersion(String httpVersion) {
+        this.httpStatusLine.setHttpVersion(httpVersion);
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {

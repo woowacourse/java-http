@@ -16,6 +16,13 @@ public class HttpRequest {
     private static final String PARAMETER_DELIMITER = "&";
     private static final String REQUEST_BODY_DELIMITER = "=";
     private static final int REQUEST_BODY_TOKEN_COUNT = 2;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int URL_PATH_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final int REQUEST_HEADER_KEY_INDEX = 0;
+    private static final int REQUEST_HEADER_VALUE_INDEX = 1;
+    private static final int REQUEST_BODY_KEY_INDEX = 0;
+    private static final int REQUEST_BODY_VALUE_INDEX = 1;
 
     private HttpRequestLine httpRequestLine;
     private HttpRequestHeader httpRequestHeader;
@@ -31,7 +38,11 @@ public class HttpRequest {
         String line = bufferedReader.readLine();
         validateNotNull(line);
         String[] tokens = splitByDelimiter(line, REQUEST_LINE_DELIMITER, REQUEST_LINE_TOKEN_COUNT);
-        return new HttpRequestLine(HttpMethod.findByName(tokens[0]), tokens[1], tokens[2]);
+        return new HttpRequestLine(
+                HttpMethod.findByName(tokens[HTTP_METHOD_INDEX]),
+                tokens[URL_PATH_INDEX],
+                tokens[HTTP_VERSION_INDEX].trim()
+        );
     }
 
     private void validateNotNull(String line) {
@@ -49,7 +60,7 @@ public class HttpRequest {
         Map<String, String> httpRequestHeaders = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] tokens = splitByDelimiter(line, HEADER_DELIMITER, HEADER_TOKEN_COUNT);
-            httpRequestHeaders.put(tokens[0], tokens[1]);
+            httpRequestHeaders.put(tokens[REQUEST_HEADER_KEY_INDEX], tokens[REQUEST_HEADER_VALUE_INDEX]);
         }
         return new HttpRequestHeader(httpRequestHeaders);
     }
@@ -74,12 +85,16 @@ public class HttpRequest {
     private void parseRequestBody(HttpRequestBody httpRequestBody, String httpRequestBodyLine) {
         for (String line : splitByDelimiter(httpRequestBodyLine, PARAMETER_DELIMITER, 0)) {
             String[] tokens = splitByDelimiter(line, REQUEST_BODY_DELIMITER, REQUEST_BODY_TOKEN_COUNT);
-            httpRequestBody.add(tokens[0], tokens[1]);
+            httpRequestBody.add(tokens[REQUEST_BODY_KEY_INDEX], tokens[REQUEST_BODY_VALUE_INDEX]);
         }
     }
 
     public boolean matchesMethod(HttpMethod httpMethod) {
         return this.httpRequestLine.matchesMethod(httpMethod);
+    }
+
+    public boolean hasJSessionId() {
+        return getJSessionId() != null;
     }
 
     public String findRequestBodyBy(String key) {
@@ -96,5 +111,9 @@ public class HttpRequest {
 
     public String getFileExtension() {
         return this.httpRequestLine.getFileExtension();
+    }
+
+    public String getHttpVersion() {
+        return this.httpRequestLine.getHttpVersion();
     }
 }

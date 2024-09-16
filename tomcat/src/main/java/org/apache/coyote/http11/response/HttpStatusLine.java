@@ -4,12 +4,18 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class HttpStatusLine {
 
+    private static final String HTTP_VERSION = "HTTP/1.1";
+
     private String httpVersion;
     private HttpStatus httpStatus;
 
-    public HttpStatusLine(String httpVersion, HttpStatus httpStatus) {
+    public HttpStatusLine() {
+        this.httpVersion = HTTP_VERSION;
+        this.httpStatus = HttpStatus.OK;
+    }
+
+    public void setHttpVersion(String httpVersion) {
         this.httpVersion = httpVersion;
-        this.httpStatus = httpStatus;
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {

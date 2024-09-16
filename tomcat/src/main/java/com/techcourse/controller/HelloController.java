@@ -9,6 +9,7 @@ public class HelloController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        response.setHttpVersion(request.getHttpVersion());
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpResponseBody("Hello world!");
     }

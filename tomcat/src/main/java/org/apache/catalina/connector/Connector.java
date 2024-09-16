@@ -70,17 +70,21 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            // acceptCount 미만인 경우 연결을 accept한다.
-            final var nowQueueSize = threadPoolExecutor.getQueue().size();
-            if (nowQueueSize < acceptCount) {
-                process(serverSocket.accept());
-            }
+            accept();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) throws IOException {
+    private void accept() throws IOException {
+        // acceptCount 미만인 경우 연결을 accept한다.
+        final var nowQueueSize = threadPoolExecutor.getQueue().size();
+        if (nowQueueSize < acceptCount) {
+            process(serverSocket.accept());
+        }
+    }
+
+    private void process(final Socket connection) {
         if (connection == null) {
             return;
         }

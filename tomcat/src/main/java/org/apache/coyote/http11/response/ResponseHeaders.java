@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.constant.HeaderKey;
+import org.apache.coyote.http11.constant.MimeType;
 
 public class ResponseHeaders {
 
@@ -17,18 +19,18 @@ public class ResponseHeaders {
 
     public void addContentTypeByFileExtension(String filePath) {
         MimeType mimeType = MimeType.find(filePath);
-        add("Content-Type", String.format(FORMAT_OF_DEFAULT_CONTENT_TYPE, mimeType.getType()));
-    } // TODO: headerKey Enum 클래스로 관리하기
+        add(HeaderKey.CONTENT_TYPE, String.format(FORMAT_OF_DEFAULT_CONTENT_TYPE, mimeType.getType()));
+    }
 
     public void addContentLength(int value) {
-        add("Content-Length", String.valueOf(value));
+        add(HeaderKey.CONTENT_LENGTH, String.valueOf(value));
     }
 
     public void addLocation(String value) {
-        add("Location", value);
+        add(HeaderKey.LOCATION, value);
     } // TODO: 테스트 방식 고민해보기
 
-    private void add(String key, String value) {
+    private void add(HeaderKey key, String value) {
         headers.add(new ResponseHeader(key, value));
     }
 

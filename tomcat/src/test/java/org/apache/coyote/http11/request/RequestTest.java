@@ -15,7 +15,7 @@ class RequestTest {
     void should_parseComponents_when_construct() throws IOException {
         // given
         String input = "POST /path HTTP/1.1\r\n"
-                + "headerKey: headerValue\r\n"
+                + "Host: localhost:8080\r\n"
                 + "\r\n"
                 + "body\r\n";
         BufferedReader reader = new BufferedReader(new StringReader(input));

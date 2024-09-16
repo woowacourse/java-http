@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.constant.HeaderKey;
 
 public class ResponseCookies {
 
     private static final String DELIMITER_OF_COOKIE = "; ";
-    private static final String FORMAT_OF_COOKIE_HEADER = "Set-Cookie: %s";
+    private static final String DELIMITER_OF_HEADER_KEY_VALUE = ": ";
     private static final String KEY_OF_LOGIN_COOKIE = "JSESSIONID";
 
     private final List<ResponseCookie> cookies = new ArrayList<>();
@@ -28,8 +29,9 @@ public class ResponseCookies {
         if (cookies.isEmpty()) {
             return;
         }
-        messageJoiner.add(String.format(FORMAT_OF_COOKIE_HEADER, cookies.stream()
+        String cookies = this.cookies.stream()
                 .map(ResponseCookie::buildHttpMessage)
-                .collect(Collectors.joining(DELIMITER_OF_COOKIE))));
+                .collect(Collectors.joining(DELIMITER_OF_COOKIE));
+        messageJoiner.add(HeaderKey.SET_COOKIE.getValue() + DELIMITER_OF_HEADER_KEY_VALUE + cookies);
     }
 }

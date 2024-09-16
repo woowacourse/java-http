@@ -3,12 +3,13 @@ package org.apache.coyote.http11.request;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.coyote.http11.constant.HeaderKey;
 
 public class RequestCookies {
 
     private static final String DELIMITER_OF_COOKIES = "; ";
-    private static final String HEADER_KEY_OF_REQUEST_COOKIE = "Cookie";
     private static final String KEY_OF_LOGIN_COOKIE = "JSESSIONID";
+    private static final HeaderKey HEADER_KEY_OF_REQUEST_COOKIE = HeaderKey.COOKIE;
 
     private final List<RequestCookie> cookies = new ArrayList<>();
 

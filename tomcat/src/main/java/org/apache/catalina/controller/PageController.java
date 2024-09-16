@@ -18,9 +18,4 @@ public class PageController extends AbstractController {
         httpResponse.setResponseBody(responseBody);
         httpResponse.setContentLength(responseBody.getBytes().length);
     }
-
-    @Override
-    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatusLine(OK);
-    }
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.Request;
@@ -38,11 +40,18 @@ public class LoginController extends AbstractController {
 
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty() || !rawUser.get().checkPassword(password)) {
-            response.unauthorized();
-            response.addFileBody("/401.html");
+            failLogin(response);
             return;
         }
-        User user = rawUser.get();
+        successLogin(response, rawUser.get());
+    }
+
+    private void failLogin(Response response) throws URISyntaxException, IOException {
+        response.unauthorized();
+        response.addFileBody("/401.html");
+    }
+
+    private void successLogin(Response response, User user) {
         log.info("로그인 사용자 정보: {}", user);
         String sessionId = sessionManager.create("user", user);
         response.addLoginCookie(sessionId);

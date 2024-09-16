@@ -1,7 +1,6 @@
 package org.apache.coyote.controller;
 
 import org.apache.catalina.AuthManager;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Session;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.apache.catalina.AuthManager.AUTHENTICATION_COOKIE_NAME;
 import static org.apache.coyote.http11.Status.FOUND;
 import static org.apache.coyote.http11.Status.OK;
 
@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
             Session session = AuthManager.authenticate(httpRequest.getRequestBody());
 
             httpResponse.setStatusLine(FOUND);
-            httpResponse.setCookie("JSESSIONID", session.getId());
+            httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
             httpResponse.setLocation("/index.html");
         } catch (IllegalArgumentException exception) {
             httpResponse.setStatusLine(FOUND);
@@ -37,11 +37,11 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
 
-        if (httpRequest.getCookie("JSESSIONID") != null && getSession(httpRequest.getCookie("JSESSIONID")) != null) {
-            Session session = getSession(httpRequest.getCookie("JSESSIONID"));
+        if (AuthManager.isAuthenticated(httpRequest)) {
+            Session session = AuthManager.getAuthenticatedSession(httpRequest);
 
             httpResponse.setStatusLine(FOUND);
-            httpResponse.setCookie("JSESSIONID", session.getId());
+            httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
             httpResponse.setLocation("/index.html");
 
             return httpResponse;
@@ -55,10 +55,6 @@ public class LoginController extends AbstractController {
         httpResponse.setContentLength(responseBody.getBytes().length);
 
         return httpResponse;
-    }
-
-    private Session getSession(String cookie) {
-        return SessionManager.findSession(cookie);
     }
 
     private String getResource(String path) throws IOException {

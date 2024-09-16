@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.apache.catalina.AuthManager.AUTHENTICATION_COOKIE_NAME;
 import static org.apache.coyote.http11.Status.FOUND;
 import static org.apache.coyote.http11.Status.OK;
 
@@ -23,7 +24,7 @@ public class RegisterController extends AbstractController {
         Session session = register(httpRequest);
 
         httpResponse.setStatusLine(FOUND);
-        httpResponse.setCookie("JSESSIONID", session.getId());
+        httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
         httpResponse.setLocation("/index.html");
 
         return httpResponse;

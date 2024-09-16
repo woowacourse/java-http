@@ -2,11 +2,14 @@ package org.apache.catalina;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.Session;
 import java.util.Optional;
 import java.util.UUID;
 
 public class AuthManager {
+
+    public static final String AUTHENTICATION_COOKIE_NAME = "JSESSIONID";
 
     public static Session authenticate(String requestBody) {
         if (!isUserExist(requestBody)) {
@@ -28,5 +31,18 @@ public class AuthManager {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
         return optionalUser.isPresent() && optionalUser.get().checkPassword(password);
+    }
+
+    public static boolean isAuthenticated(HttpRequest httpRequest) {
+        return httpRequest.getCookie(AUTHENTICATION_COOKIE_NAME) != null
+                && SessionManager.findSession(httpRequest.getCookie(AUTHENTICATION_COOKIE_NAME)) != null;
+    }
+
+    public static Session getAuthenticatedSession(HttpRequest httpRequest) {
+        if (isAuthenticated(httpRequest)) {
+            throw new IllegalArgumentException("인증되지 않은 유저입니다.");
+        }
+
+        return SessionManager.findSession(httpRequest.getCookie(AUTHENTICATION_COOKIE_NAME));
     }
 }

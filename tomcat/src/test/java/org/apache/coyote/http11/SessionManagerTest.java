@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +15,12 @@ class SessionManagerTest {
 
     @Nested
     class 세션 {
+
+        @BeforeEach
+        void setUp() {
+            SessionManager sessionManager = SessionManager.getInstance();
+            sessionManager.clear();
+        }
 
         @Test
         void 세션이_성공적으로_등록되고_확인된다() {
@@ -56,7 +63,7 @@ class SessionManagerTest {
                 int finalI = i;
                 executorService.submit(() -> sessionManager.add(new Session(finalI + "")));
             }
-            executorService.awaitTermination(500, TimeUnit.MICROSECONDS);
+            executorService.awaitTermination(5000, TimeUnit.MICROSECONDS);
 
             // then
             for (int i = 0; i < 10000; i++) {

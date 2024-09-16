@@ -15,6 +15,11 @@ public class SessionManager implements Manager {
         return instance;
     }
 
+    public void clear() {
+        SESSIONS.clear();
+    }
+
+
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);

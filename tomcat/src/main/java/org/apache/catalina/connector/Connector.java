@@ -79,15 +79,13 @@ public class Connector implements Runnable {
     @Override
     public void run() {
         while (!stopped) {
-            try {
-                Socket connection = serverSocket.accept();
-                executorService.execute(() -> connect(connection));
-            } catch (IOException e) {
-                if (!stopped) {
-                    log.error("클라이언트 연결 요청 에러 : ", e);
+            executorService.execute(() -> {
+                try {
+                    connect(serverSocket.accept());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                log.error(e.getMessage(), e);
-            }
+            });
         }
     }
 

@@ -6,10 +6,7 @@ import java.util.Arrays;
 public enum Method {
 
     GET,
-    POST,
-    PUT,
-    PATCH,
-    DELETE;
+    POST;
 
     public static Method from(String method) {
         return Arrays.stream(Method.values())

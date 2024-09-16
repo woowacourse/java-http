@@ -32,11 +32,11 @@ public class SessionManager implements Manager {
     private SessionManager() {
     }
 
-    private static class SingletonHolder {
-        private static final SessionManager INSTANCE = new SessionManager();
-    }
-
     public static SessionManager getInstance() {
         return SingletonHolder.INSTANCE;
+    }
+
+    private static class SingletonHolder {
+        private static final SessionManager INSTANCE = new SessionManager();
     }
 }

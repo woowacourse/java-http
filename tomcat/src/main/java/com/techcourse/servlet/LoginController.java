@@ -67,7 +67,6 @@ public class LoginController extends AbstractController {
 		} catch (RuntimeException exception) {
 			response.redirect("401.html");
 		}
-		super.doPost(request, response);
 	}
 
 	private User login(String account, String password) {

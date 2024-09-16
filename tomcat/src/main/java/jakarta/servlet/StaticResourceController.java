@@ -29,7 +29,6 @@ public class StaticResourceController extends AbstractController {
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-		super.doGet(request, response);
 		URL resource = getClass().getClassLoader().getResource("static" + request.getUri());
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();

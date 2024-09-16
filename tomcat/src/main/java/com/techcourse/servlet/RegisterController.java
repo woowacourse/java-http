@@ -36,7 +36,6 @@ public class RegisterController extends AbstractController {
 		final Path path = file.toPath();
 		response.setContentType("text/html");
 		response.ok(Files.readAllBytes(path));
-		super.doGet(request, response);
 	}
 
 	@Override
@@ -48,7 +47,6 @@ public class RegisterController extends AbstractController {
 			redirectUri = "index.html";
 		}
 		response.redirect(redirectUri);
-		super.doPost(request, response);
 	}
 
 	private boolean register(String account, String password, String email) {

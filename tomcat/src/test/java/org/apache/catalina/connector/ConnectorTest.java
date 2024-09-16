@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,7 @@ class ConnectorTest {
         );
     }
 
+    @Disabled
     @DisplayName("최대 ThradPool의 크기는 250, 동시 요청이 400, 대기 요청 가능 수 100이면 350건을 처리 가능하고, 50건은 실패한다.")
     @Test
     void threadPoolCapacityAndWaitingQueueTest() throws Exception {

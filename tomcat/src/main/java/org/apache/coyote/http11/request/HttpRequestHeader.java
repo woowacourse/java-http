@@ -22,8 +22,12 @@ public class HttpRequestHeader {
         }
     }
 
-    public String getContentLength() {
-        return headers.get(CONTENT_LENGTH.getHeaderName());
+    public int getContentLength() {
+        String contentLength = headers.get(CONTENT_LENGTH.getHeaderName());
+        if (contentLength == null) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength);
     }
 
     public Map<String, String> getHeaders() {

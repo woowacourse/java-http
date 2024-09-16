@@ -74,11 +74,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readRequestBody(HttpRequestHeader requestHeader, BufferedReader reader) throws IOException {
-        String contentLengthHeader = requestHeader.getContentLength();
-        if (contentLengthHeader == null) {
-            return "";
-        }
-        int contentLength = Integer.parseInt(contentLengthHeader);
+        int contentLength = requestHeader.getContentLength();
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);

@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
-import java.io.IOException;
 import org.apache.catalina.Session;
-import org.apache.coyote.http11.ViewResolver;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeader;
 import org.apache.coyote.http11.message.common.HttpHeaders;
@@ -30,10 +28,6 @@ public class HttpResponse {
         addHeader(HttpHeader.CONTENT_LENGTH, NO_CONTENT_LENGTH);
     }
 
-    public void setStatus(StatusCode statusCode) {
-        statusLine = new StatusLine(HTTP_VERSION, statusCode);
-    }
-
     public void addHeader(HttpHeader header, String value) {
         headers.add(header, value);
     }
@@ -43,14 +37,22 @@ public class HttpResponse {
         headers.add(HttpHeader.SET_COOKIE, JSESSIONID + session.getId());
     }
 
+    public void setStatus(StatusCode statusCode) {
+        statusLine = new StatusLine(HTTP_VERSION, statusCode);
+    }
+
     public void setBody(String body) {
         headers.add(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         this.body = body;
     }
 
-    public void setView(String url) throws IOException {
-        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(url).getValue());
-        setBody(ViewResolver.getInstance().resolveViewName(url));
+    public void setViewUri(String uri){
+        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(uri).getValue());
+        setBody(uri);
+    }
+
+    public void setView(String view) {
+        setBody(view);
     }
 
     public void sendRedirect(HttpRequest httpRequest, String url) {
@@ -58,6 +60,16 @@ public class HttpResponse {
         addHeader(HttpHeader.LOCATION, HTTP_PROTOCOL + host + url);
         addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(url).getValue());
         addHeader(HttpHeader.CONTENT_LENGTH, NO_CONTENT_LENGTH);
+    }
+
+    public boolean containsView() {
+        return statusLine.isNotRedirect() && containsViewName(body);
+    }
+
+    private boolean containsViewName(String body) {
+        return ContentType.getViewExtension()
+                .stream()
+                .anyMatch(body::endsWith);
     }
 
     public String convertMessage() {
@@ -68,6 +80,10 @@ public class HttpResponse {
                 END_OF_HEADERS,
                 body
         );
+    }
+
+    public String getBody() {
+        return body;
     }
 
     @Override

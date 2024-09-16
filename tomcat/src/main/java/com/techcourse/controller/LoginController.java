@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.setStatus(StatusCode.OK);
-        response.setView("/login.html");
+        response.setViewUri("/login.html");
     }
 
     @Override

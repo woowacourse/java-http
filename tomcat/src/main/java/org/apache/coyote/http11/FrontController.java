@@ -12,5 +12,11 @@ public class FrontController {
     public static void service(HttpRequest request, HttpResponse response) throws Exception {
         Controller controller = RequestMapping.getController(request);
         controller.service(request, response);
+
+        if (response.containsView()) {
+            String uri = response.getBody();
+            String view = ViewResolver.getInstance().resolveViewName(uri);
+            response.setView(view);
+        }
     }
 }

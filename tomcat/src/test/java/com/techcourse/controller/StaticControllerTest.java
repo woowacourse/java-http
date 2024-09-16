@@ -3,10 +3,7 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import org.apache.coyote.http11.message.parser.HttpRequestParser;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -31,14 +28,11 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertThat(httpResponse.convertMessage()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
-                "Content-Length: " + expectedBody.getBytes().length,
-                expectedBody);
+                "/index.html"
+        );
     }
 
     @DisplayName("GET /js/scripts.js -> 200 js 페이지")
@@ -60,14 +54,11 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertThat(httpResponse.convertMessage()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/javascript;charset=utf-8",
-                "Content-Length: " + expectedBody.getBytes().length,
-                expectedBody);
+                "/js/scripts.js"
+        );
     }
 
     @DisplayName("GET /css/styles.css -> 200 css 페이지")
@@ -89,14 +80,10 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertThat(httpResponse.convertMessage()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/css;charset=utf-8",
-                "Content-Length: " + expectedBody.getBytes().length,
-                expectedBody
+                "/css/styles.css"
         );
     }
 }

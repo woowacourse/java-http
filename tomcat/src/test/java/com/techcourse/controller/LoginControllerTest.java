@@ -4,10 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -58,7 +55,7 @@ class LoginControllerTest {
             return session.getId();
         }
 
-        @DisplayName("로그인 안 되어있으면 login 페이지로 이동한다.")
+        @DisplayName("로그인 안 되어있으면 login 페이지 경로를 body에 담는다.")
         @Test
         void getLoginPageWithNoLogin() throws IOException {
             String request = String.join("\r\n",
@@ -75,14 +72,10 @@ class LoginControllerTest {
             new LoginController().doGet(httpRequest, httpResponse);
 
             // then
-            URL resource = getClass().getClassLoader().getResource("static/login.html");
-            String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
             assertThat(httpResponse.convertMessage()).contains(
                     "HTTP/1.1 200 OK",
                     "Content-Type: text/html;charset=utf-8",
-                    "Content-Length: " + expectedBody.getBytes().length,
-                    expectedBody
+                    "/login.html"
             );
         }
     }

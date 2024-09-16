@@ -35,14 +35,10 @@ class RegisterControllerTest {
         new RegisterController().doGet(httpRequest, httpResponse);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertThat(httpResponse.convertMessage()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
-                "Content-Length: " + expectedBody.getBytes().length,
-                expectedBody
+                "/register.html"
         );
     }
 

@@ -14,7 +14,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         response.setStatus(StatusCode.OK);
-        response.setView("/register.html");
+        response.setViewUri("/register.html");
     }
 
     @Override

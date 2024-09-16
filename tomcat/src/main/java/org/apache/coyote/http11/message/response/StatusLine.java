@@ -12,6 +12,10 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
+    public boolean isNotRedirect() {
+        return statusCode != StatusCode.FOUND;
+    }
+
     public String convertMessage() {
         return String.join(DELIMITER, protocolVersion, statusCode.getCode(), statusCode.getDisplayName());
     }

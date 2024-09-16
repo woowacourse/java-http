@@ -10,7 +10,7 @@ public class StaticController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String uri = request.getUri();
-        response.setView(uri);
         response.setStatus(StatusCode.OK);
+        response.setViewUri(uri);
     }
 }

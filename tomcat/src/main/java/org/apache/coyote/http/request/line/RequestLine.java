@@ -27,10 +27,6 @@ public class RequestLine {
         return protocol.equals(target);
     }
 
-    public boolean isUri(Uri target) {
-        return uri.equals(target);
-    }
-
     public boolean isUriHome() {
         return uri.isHome();
     }

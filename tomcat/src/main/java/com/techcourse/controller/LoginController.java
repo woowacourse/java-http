@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.SessionManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -27,29 +28,48 @@ public class LoginController extends Controller {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getBodyParameter("account");
-        String password = request.getBodyParameter("password");
+        try {
+            String account = request.getBodyParameter("account");
+            String password = request.getBodyParameter("password");
 
-        if (account == null || password == null) {
+            String sessionId = login(account, password);
+
+            response.setStatus(HttpStatus.FOUND);
+            response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + sessionId);
+            response.addHeader(HttpHeader.LOCATION, "/index.html");
+        } catch (IllegalArgumentException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED);
             response.setBodyWithStaticResource("/401.html");
-            return;
         }
+    }
 
+    private String login(String account, String password) {
+        validateBlank(account, password);
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-
-        if (optionalUser.isEmpty() || !optionalUser.get().checkPassword(password)) {
-            response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.setBodyWithStaticResource("/401.html");
-            return;
-        }
-
+        validateUserExist(optionalUser);
         User user = optionalUser.get();
-        log.info(user.toString());
-        String sessionId = SessionManager.put(user);
+        validatePassword(user, password);
 
-        response.setStatus(HttpStatus.FOUND);
-        response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + sessionId);
-        response.addHeader(HttpHeader.LOCATION, "/index.html");
+        String sessionId = SessionManager.put(user);
+        log.info(user.toString());
+        return sessionId;
+    }
+
+    private void validateBlank(String account, String password) {
+        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) {
+            throw new IllegalArgumentException("parameter could not be blank.");
+        }
+    }
+
+    private void validateUserExist(Optional<User> optionalUser) {
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("No such user.");
+        }
+    }
+
+    private void validatePassword(User user, String password) {
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("invalid password.");
+        }
     }
 }

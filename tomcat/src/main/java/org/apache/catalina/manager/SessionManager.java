@@ -13,7 +13,7 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         if (instance == null) {
-            return new SessionManager();
+            instance = new SessionManager();
         }
         return instance;
     }

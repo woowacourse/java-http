@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import jakarta.http.HttpBody;
 

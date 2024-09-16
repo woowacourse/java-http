@@ -1,9 +1,9 @@
 package com.techcourse;
 
-import com.techcourse.handler.HelloController;
-import com.techcourse.handler.LoginController;
-import com.techcourse.handler.NotFoundController;
-import com.techcourse.handler.RegisterController;
+import com.techcourse.controller.HelloController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.NotFoundController;
+import com.techcourse.controller.RegisterController;
 import jakarta.controller.Controller;
 import org.apache.catalina.container.RequestMapping;
 import org.apache.catalina.startup.Tomcat;

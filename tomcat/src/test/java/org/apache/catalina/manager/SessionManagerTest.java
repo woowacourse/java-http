@@ -10,8 +10,9 @@ public class SessionManagerTest {
     private static final int SESSIONS_PER_THREAD = 1000;
 
     @Test
-    public void testConcurrencyIssue() throws InterruptedException {
+    public void testHashMapConcurrencyIssueInSessionManager() throws InterruptedException {
         SessionManager sessionManager = SessionManager.getInstance();
+        int beforeSize = sessionManager.findAllSessions().size();
 
         Thread[] threads = new Thread[THREAD_COUNT];
 
@@ -36,7 +37,7 @@ public class SessionManagerTest {
         }
 
         // 실제로 추가된 세션의 개수가 기대한 값과 같은지 확인
-        int expectedSize = THREAD_COUNT * SESSIONS_PER_THREAD;
-        assertEquals(expectedSize, sessionManager.findAllSessions().size(), "HashMap에서 동시성 문제로 인해 세션이 유실되었습니다.");
+        int expectedSize = THREAD_COUNT * SESSIONS_PER_THREAD + beforeSize;
+        assertEquals(expectedSize, sessionManager.findAllSessions().size(), "세션 매니저에서 동시성 문제로 인해 세션이 유실되었습니다.");
     }
 }

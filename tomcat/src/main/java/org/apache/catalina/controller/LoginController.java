@@ -3,7 +3,7 @@ package org.apache.catalina.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.HeaderName;
 import org.apache.catalina.http.StatusCode;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.manager.SessionManager;
@@ -19,8 +19,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getBody("account");
-        String password = request.getBody("password");
+        String account = request.getBodyParam("account");
+        String password = request.getBodyParam("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {

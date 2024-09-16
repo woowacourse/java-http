@@ -58,11 +58,11 @@ public class HttpRequest {
         return header.hasSession();
     }
 
-    public RequestBody getBody() {
-        return body;
+    public String getBodyParam(String parameter) {
+        return body.get(parameter);
     }
 
-    public String getBody(String parameter) {
-        return body.get(parameter);
+    public RequestBody getBody() {
+        return body;
     }
 }

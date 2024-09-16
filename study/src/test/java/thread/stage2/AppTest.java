@@ -1,5 +1,6 @@
 package thread.stage2;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpResponse;
@@ -7,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);

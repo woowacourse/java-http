@@ -226,7 +226,7 @@ class Http11ProcessorTest {
                     "Content-Type: application/x-www-form-urlencoded ",
                     "Accept: */* ",
                     "",
-                    "account=gugu&password=password&email=hkkang%40woowahan.com ");
+                    "account=newjojo&password=password&email=jojo@email.com ");
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

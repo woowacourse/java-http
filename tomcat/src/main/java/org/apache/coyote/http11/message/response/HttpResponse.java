@@ -27,6 +27,7 @@ public class HttpResponse {
 
     public HttpResponse() {
         headers = new HttpHeaders();
+        addHeader(HttpHeader.CONTENT_LENGTH, NO_CONTENT_LENGTH);
     }
 
     public void setStatus(StatusCode statusCode) {

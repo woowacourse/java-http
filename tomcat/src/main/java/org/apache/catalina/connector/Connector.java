@@ -39,8 +39,8 @@ public class Connector implements Runnable {
     ) {
         this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.threadPoolExecutor = new TomcatThreadPool(maxThreads, acceptCount);
         this.acceptCount = checkAcceptCount(acceptCount);
+        this.threadPoolExecutor = new TomcatThreadPool(checkMaxThreads(maxThreads), acceptCount);
         this.stopped = false;
     }
 
@@ -114,6 +114,10 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(int maxThreads) {
+        return Math.min(maxThreads, DEFAULT_THREADS);
     }
 
     public int getActiveConnect() {

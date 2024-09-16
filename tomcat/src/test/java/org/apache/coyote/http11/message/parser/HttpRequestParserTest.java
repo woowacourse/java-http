@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message.request;
+package org.apache.coyote.http11.message.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.coyote.http11.message.common.HttpHeader;
 import org.apache.coyote.http11.message.common.HttpHeaders;
-import org.apache.coyote.http11.message.parser.HttpRequestParser;
+import org.apache.coyote.http11.message.request.HttpMethod;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -3,7 +3,6 @@ package org.apache.coyote.http.request;
 import org.apache.coyote.http.HttpCookies;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
-import org.apache.coyote.http.HttpProtocol;
 import org.apache.coyote.http.request.line.Method;
 import org.apache.coyote.http.request.line.RequestLine;
 
@@ -20,24 +19,12 @@ public class HttpRequest {
         this.httpMessageBody = httpMessageBody;
     }
 
-    public boolean methodEquals(Method method) {
-        return requestLine.isMethod(method);
-    }
-
     public boolean isGet() {
         return requestLine.isMethod(Method.GET);
     }
 
     public boolean isPost() {
         return requestLine.isMethod(Method.POST);
-    }
-
-    public boolean protocolEquals(HttpProtocol httpProtocol) {
-        return requestLine.isHttpProtocol(httpProtocol);
-    }
-
-    public boolean isUriHome() {
-        return requestLine.isUriHome();
     }
 
     public String getUriPath() {
@@ -55,9 +42,5 @@ public class HttpRequest {
 
     public Method getMethod() {
         return requestLine.getMethod();
-    }
-
-    public HttpProtocol getProtocol() {
-        return requestLine.getProtocol();
     }
 }

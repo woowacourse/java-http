@@ -19,12 +19,12 @@ class ConnectorTest {
     void poolSizeAndQueueSizeTest() {
         //given
         final var executor = (ThreadPoolExecutor) new Connector().getExecutorService();
-        final int expectedPoolSize = 10;
+        final int expectedPoolSize = 250;
         final int expectedQueueSize = 100;
 
 
         //when
-        for (int i = 0; i < 110; i++) {
+        for (int i = 0; i < 350; i++) {
             executor.submit(logWithSleep("hello fixed thread pools " + i));
         }
 

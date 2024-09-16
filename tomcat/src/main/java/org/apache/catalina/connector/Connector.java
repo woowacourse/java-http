@@ -71,7 +71,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executor.execute(processor);
+        executor.submit(processor);
     }
 
     public void stop() {
@@ -80,6 +80,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executor.shutdown();
         }
     }
 

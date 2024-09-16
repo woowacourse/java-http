@@ -6,17 +6,18 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeader;
 
 public class HttpResponse {
 
     private static final String DEFAULT_RESPONSE_BODY = "";
     public static final String FILE_EXTENSION_DELIMITER = ".";
 
-    private Map<String, String> headers = new LinkedHashMap<>();
+    private Map<HttpHeader, String> headers = new LinkedHashMap<>();
     private HttpStatus status = HttpStatus.OK;
     private String body = DEFAULT_RESPONSE_BODY;
 
-    public void addHeader(String key, String value) {
+    public void addHeader(HttpHeader key, String value) {
         headers.put(key, value);
     }
 
@@ -42,8 +43,8 @@ public class HttpResponse {
 
     public void setBodyWithContentType(String body, String contentType) {
         this.body = body;
-        this.headers.put("Content-Type", contentType);
-        this.headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        this.headers.put(HttpHeader.CONTENT_TYPE, contentType);
+        this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 
     private String getFileExtension(String filePath) {

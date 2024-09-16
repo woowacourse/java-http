@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -18,7 +19,7 @@ public class LoginController extends Controller {
             log.info(user.toString());
 
             response.setStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/index.html");
+            response.addHeader(HttpHeader.LOCATION, "/index.html");
         } catch (IllegalArgumentException e) {
             response.setBodyWithStaticResource("/login.html");
         }
@@ -48,7 +49,7 @@ public class LoginController extends Controller {
         String sessionId = SessionManager.put(user);
 
         response.setStatus(HttpStatus.FOUND);
-        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + sessionId);
+        response.addHeader(HttpHeader.LOCATION, "/index.html");
     }
 }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.utils.Separator;
 
 public class RequestHeaders {
@@ -17,7 +18,7 @@ public class RequestHeaders {
     }
 
     public String getCookieValue(String cookieName) {
-        String rawCookies = headers.get("Cookie");
+        String rawCookies = headers.get(HttpHeader.COOKIE.getHeaderName());
         if (rawCookies == null) {
             throw new IllegalArgumentException("Cookie header not exists.");
         }

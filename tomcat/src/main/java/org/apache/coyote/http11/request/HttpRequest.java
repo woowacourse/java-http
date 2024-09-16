@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.utils.Separator;
 
 public class HttpRequest {
+
+    private static final String HEADER_KEY_VALUE_SEPARATOR = ":";
 
     private RequestLine requestLine;
     private RequestHeaders requestHeaders;
@@ -18,7 +21,7 @@ public class HttpRequest {
         String requestLine = bufferedReader.readLine();
         Map<String, String> headers = readHeaders(bufferedReader);
 
-        String contentLength = headers.get("Content-Length");
+        String contentLength = headers.get(HttpHeader.CONTENT_LENGTH.getHeaderName());
         String body = readBody(bufferedReader, contentLength);
 
         return new HttpRequest(
@@ -42,7 +45,7 @@ public class HttpRequest {
             headerLine = bufferedReader.readLine();
         }
 
-        return Separator.separateKeyValueBy(headerLines, ":");
+        return Separator.separateKeyValueBy(headerLines, HEADER_KEY_VALUE_SEPARATOR);
     }
 
     private static String readBody(BufferedReader bufferedReader, String rawContentLength) throws IOException {

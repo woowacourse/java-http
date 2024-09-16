@@ -43,8 +43,7 @@ public class LoginController extends AbstractController {
         }
         User user = (User) session.getAttribute("user");
         if (user != null && validateUser(user)) {
-            response.found();
-            response.redirectPage("/index.html");
+            response.found("/index.html");
             return true;
         }
         return false;
@@ -74,7 +73,6 @@ public class LoginController extends AbstractController {
                         user -> successLogin(user, request, response),
                         () -> failLogin(response)
                 );
-        response.found();
     }
 
     private void successLogin(User user, HttpRequest request, HttpResponse response) {
@@ -82,10 +80,10 @@ public class LoginController extends AbstractController {
         Session session = request.getSession();
         session.setAttribute("user", user);
         response.setHttpCookie(HttpCookie.ofJSessionId(session.getId()));
-        response.redirectPage("/index.html");
+        response.found("/index.html");
     }
 
     private void failLogin(HttpResponse response) {
-        response.redirectPage("/401.html");
+        response.found("/401.html");
     }
 }

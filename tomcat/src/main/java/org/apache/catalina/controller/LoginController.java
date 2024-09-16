@@ -22,15 +22,19 @@ public class LoginController extends AbstractController {
         String account = request.getBodyParam("account");
         String password = request.getBodyParam("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
+        if (!isMember(user, password)) {
             response.setStatusCode(StatusCode.UNAUTHORIZED);
             response.setBody("/401.html");
         }
-        if (user.isPresent() && user.get().checkPassword(password)) {
+        if (isMember(user, password)) {
             response.setStatusCode(StatusCode.FOUND);
             response.setBody("/index.html");
             login(response, user.get());
         }
+    }
+
+    private boolean isMember(Optional<User> user, String password) {
+        return user.isPresent() && user.get().checkPassword(password);
     }
 
     private void login(HttpResponse response, User user) {

@@ -9,12 +9,8 @@ import java.util.List;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpRequestParser {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
     private HttpRequestParser() {
     }

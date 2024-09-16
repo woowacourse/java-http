@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.helper.FileReader;
 
 public class ResponseBody {
 

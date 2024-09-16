@@ -42,7 +42,7 @@ public class AuthManager {
     }
 
     public static Session getAuthenticatedSession(HttpRequest httpRequest) {
-        if (isAuthenticated(httpRequest)) {
+        if (!isAuthenticated(httpRequest)) {
             throw new IllegalArgumentException("인증되지 않은 유저입니다.");
         }
 

@@ -2,16 +2,15 @@ package org.apache.catalina;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.Session;
 import java.util.Optional;
 import java.util.UUID;
 
 public class AuthManager {
 
-    public static Session authenticate(HttpRequest httpRequest) {
-        if (!isAuthenticated(httpRequest)) {
-            throw new IllegalArgumentException("인증된 유저가 아닙니다.");
+    public static Session authenticate(String requestBody) {
+        if (!isUserExist(requestBody)) {
+            throw new IllegalArgumentException("회원가입된 유저가 아닙니다.");
         }
 
         String uuid = UUID.randomUUID().toString();
@@ -22,9 +21,7 @@ public class AuthManager {
         return session;
     }
 
-    private static boolean isAuthenticated(HttpRequest httpRequest) {
-        String requestBody = httpRequest.getRequestBody();
-
+    private static boolean isUserExist(String requestBody) {
         String account = requestBody.split("&")[0].split("=")[1];
         String password = requestBody.split("&")[1].split("=")[1];
 

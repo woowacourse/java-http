@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
         HttpResponse httpResponse = new HttpResponse();
 
         try {
-            Session session = AuthManager.authenticate(httpRequest);
+            Session session = AuthManager.authenticate(httpRequest.getRequestBody());
 
             httpResponse.setStatusLine(FOUND);
             httpResponse.setCookie("JSESSIONID", session.getId());

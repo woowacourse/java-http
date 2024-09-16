@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http.HttpBody;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpQueryParams;
 import org.apache.coyote.http.HttpRequest;
@@ -26,7 +25,7 @@ public class LoginController extends AbstractController {
     private final Manager sessionManager = SessionManager.getInstance();
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (isLoggedIn(request)) {
             response.sendRedirect(ROOT_RESOURCE_PATH);
             return;
@@ -57,7 +56,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean login(final HttpRequest request, final HttpResponse response) throws IOException {
-        HttpQueryParams queryParams = parseFormBody(request);
+        HttpQueryParams queryParams = request.getQueryParamsFromBody();
         if (queryParams == null) {
             return false;
         }
@@ -74,28 +73,12 @@ public class LoginController extends AbstractController {
         return false;
     }
 
-    private HttpQueryParams parseFormBody(HttpRequest request) {
-        HttpBody body = request.getBody();
-        String content = body.getContent();
-        HttpQueryParams queryParams;
-        try {
-            queryParams = new HttpQueryParams(content);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-        return queryParams;
-    }
-
     private User getUser(final HttpQueryParams queryParams) {
         String account = queryParams.get("account");
-        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-        if (user == null) {
-            return null;
-        }
-        return user;
+        return InMemoryUserRepository.findByAccount(account).orElse(null);
     }
 
-    private void saveUserInSession(final HttpResponse response, final User user) throws IOException {
+    private void saveUserInSession(final HttpResponse response, final User user) {
         Session session = new Session();
         session.setAttribute("user", user);
         sessionManager.add(session);

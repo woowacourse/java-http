@@ -44,6 +44,13 @@ public class HttpRequest implements HttpComponent {
         return requestLine.getQueryParams();
     }
 
+    public HttpQueryParams getQueryParamsFromBody() {
+        String content = body.asString();
+        HttpQueryParams queryParams;
+        queryParams = new HttpQueryParams(content);
+        return queryParams;
+    }
+
     public HttpVersion getHttpVersion() {
         return requestLine.getVersion();
     }

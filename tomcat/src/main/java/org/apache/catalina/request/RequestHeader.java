@@ -44,4 +44,8 @@ public class RequestHeader {
     public String getHttpCookie() {
         return httpCookie.getResponse();
     }
+
+    public boolean hasCookie() {
+        return httpCookie.hasCookie();
+    }
 }

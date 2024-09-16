@@ -44,6 +44,10 @@ public class HttpCookie {
         return cookies.get(JSESSIONID_VALUE);
     }
 
+    public boolean hasCookie() {
+        return !cookies.isEmpty();
+    }
+
     public String getResponse() {
         if (cookies.isEmpty()) {
             return "";

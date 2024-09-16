@@ -42,16 +42,16 @@ public class HttpRequest {
         return header.getHttpCookie();
     }
 
+    public boolean hasCookie() {
+        return header.hasCookie();
+    }
+
     public boolean isMethod(HttpMethod httpMethod) {
         return requestLine.isMethod(httpMethod);
     }
 
     public boolean isStaticRequest() {
         return requestLine.isStaticRequest();
-    }
-
-    public boolean hasQueryParam() {
-        return requestLine.hasQueryParam();
     }
 
     public boolean hasSession() {

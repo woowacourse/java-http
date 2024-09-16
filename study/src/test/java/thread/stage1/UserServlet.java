@@ -7,12 +7,17 @@ public class UserServlet {
 
     private final List<User> users = new ArrayList<>();
 
-    public void service(final User user) {
+    public synchronized void service(final User user) {
         join(user);
     }
 
     private void join(final User user) {
         if (!users.contains(user)) {
+            try {
+                Thread.sleep(1); // Expected context switching to another thread
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             users.add(user);
         }
     }

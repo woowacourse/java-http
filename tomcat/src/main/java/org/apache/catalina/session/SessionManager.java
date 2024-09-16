@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ public class SessionManager implements Manager {
     public static SessionManager getInstance() {
         return sessionManager;
     }
+
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);

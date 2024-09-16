@@ -1,15 +1,15 @@
 package org.apache.catalina.session;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager {
     private static final SessionManager sessionManager = new SessionManager(new ConcurrentHashMap<>());
 
-    private Map<String, Session> sessions;
+    private ConcurrentMap<String, Session> sessions;
 
-    private SessionManager(Map<String, Session> sessions) {
+    private SessionManager(ConcurrentMap<String, Session> sessions) {
         this.sessions = sessions;
     }
 
@@ -23,7 +23,7 @@ public class SessionManager {
 
     public String storeSession(Session session) {
         String sessionId = UUID.randomUUID().toString();
-        sessions.put(sessionId, session);
+        sessions.putIfAbsent(sessionId, session);
         return sessionId;
     }
 }

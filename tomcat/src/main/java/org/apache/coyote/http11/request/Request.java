@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 public class Request {
 
@@ -27,11 +28,7 @@ public class Request {
                 .orElse(CONTENT_LENGTH_WHEN_EMPTY_BODY);
     }
 
-    public boolean hasLoginCookie() {
-        return cookies.hasLoginCookie();
-    }
-
-    public RequestCookie getLoginCookie() {
+    public Optional<RequestCookie> getLoginCookie() {
         return cookies.getLoginCookie();
     }
 

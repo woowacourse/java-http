@@ -25,7 +25,7 @@ class RequestCookiesTest {
         RequestCookies requestCookies = new RequestCookies(headers);
 
         // then
-        assertThat(requestCookies.get("key1").getValue()).isEqualTo("value1");
-        assertThat(requestCookies.get("key2").getValue()).isEqualTo("value2");
+        assertThat(requestCookies.get("key1").get().getValue()).isEqualTo("value1");
+        assertThat(requestCookies.get("key2").get().getValue()).isEqualTo("value2");
     }
 }

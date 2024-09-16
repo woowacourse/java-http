@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.http11.constant.HeaderKey;
 
 public class RequestCookies {
@@ -24,19 +25,13 @@ public class RequestCookies {
                 .forEach(this.cookies::add);
     }
 
-    public boolean hasLoginCookie() {
-        return cookies.stream()
-                .anyMatch(cookie -> cookie.hasKey(KEY_OF_LOGIN_COOKIE));
-    }
-
-    public RequestCookie getLoginCookie() {
+    public Optional<RequestCookie> getLoginCookie() {
         return get(KEY_OF_LOGIN_COOKIE);
     }
 
-    public RequestCookie get(String key) {
+    public Optional<RequestCookie> get(String key) {
         return cookies.stream()
                 .filter(cookie -> cookie.hasKey(key))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("해당 키를 가진 쿠키가 존재하지 않습니다."));
+                .findAny();
     }
 }

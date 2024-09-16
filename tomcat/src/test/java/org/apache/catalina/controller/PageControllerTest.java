@@ -1,17 +1,14 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpRequestHeaders;
+import org.apache.catalina.ResourceManager;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Method;
 import org.apache.coyote.http11.RequestLine;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 
 class PageControllerTest {
 
@@ -31,16 +28,9 @@ class PageControllerTest {
 
         // when
         pageController.service(httpRequest, httpResponse);
-        String resource = getResource(expectedPath);
+        String resource = ResourceManager.getFileResource(expectedPath);
 
         // then
         Assertions.assertThat(httpResponse.getContentLength()).isEqualTo(resource.length());
-    }
-
-    //TODO 리팩토링
-    private String getResource(String path) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + path);
-        File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()));
     }
 }

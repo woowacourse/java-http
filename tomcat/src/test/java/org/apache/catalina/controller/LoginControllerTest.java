@@ -17,7 +17,7 @@ class LoginControllerTest {
 
     @DisplayName("사용자 인증정보가 존재하면 index.html로 리다이렉트한다.")
     @Test
-    void redirect_whenSessionExist() throws Exception {
+    void redirect_whenSessionExist() {
         // given
         AbstractController loginController = new LoginController();
 
@@ -43,7 +43,7 @@ class LoginControllerTest {
 
     @DisplayName("사용자 인증정보가 존재하지 않으면 요청된 페이지를 반환한다.")
     @Test
-    void doGet_whenLoginSessionNotExist() throws Exception {
+    void doGet_whenLoginSessionNotExist() {
         // given
         AbstractController loginController = new LoginController();
 
@@ -65,7 +65,7 @@ class LoginControllerTest {
 
     @DisplayName("쿠키가 존재하지 않으면 요청된 페이지를 반환한다.")
     @Test
-    void doGet_whenSessionNotExist() throws Exception {
+    void doGet_whenSessionNotExist() {
         // given
         AbstractController loginController = new LoginController();
 

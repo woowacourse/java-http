@@ -39,6 +39,14 @@ public class HttpRequest {
         return this.httpMethod;
     }
 
+    public QueryString getQueryString() {
+        return this.queryString;
+    }
+
+    public HttpRequestHeaders getHttpRequestHeaders() {
+        return this.httpRequestHeaders;
+    }
+
     public String getHttpRequestPath() {
         return httpRequestPath.uri();
     }

@@ -28,4 +28,8 @@ public class HttpRequestHeaders {
     public String getCookies() {
         return this.headers.getOrDefault(COOKIE.getKeyName(), "");
     }
+
+    public boolean isEmpty() {
+        return headers.isEmpty();
+    }
 }

@@ -2,7 +2,6 @@ package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.coyote.http.request.HttpRequest;
@@ -19,7 +18,7 @@ public class RegisterServlet extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.ok(PAGE_RESOURCE_PATH);
     }
 

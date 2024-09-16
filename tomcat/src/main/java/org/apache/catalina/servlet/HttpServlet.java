@@ -1,13 +1,12 @@
 package org.apache.catalina.servlet;
 
-import java.io.IOException;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
 public abstract class HttpServlet implements Servlet {
 
     @Override
-    public void doService(HttpRequest request, HttpResponse response) throws IOException {
+    public void doService(HttpRequest request, HttpResponse response) {
         if (request.isGet()) {
             doGet(request, response);
         }
@@ -16,7 +15,7 @@ public abstract class HttpServlet implements Servlet {
         }
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {

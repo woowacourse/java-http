@@ -2,7 +2,6 @@ package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -20,7 +19,7 @@ public class LoginServlet extends HttpServlet {
     private static final String PASSWORD_FORM_DATA = "password";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (sessionManager.hasSession(request.getSessionId())) {
             response.sendRedirect(LOGIN_SUCCESS_REDIRECT_URI);
             return;

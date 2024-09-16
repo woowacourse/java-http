@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.IOException;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.line.HttpStatus;
@@ -22,7 +21,7 @@ class DefaultServletTest {
 
     @DisplayName("static 하위에 있는 파일을 서비스 할 수 있다")
     @Test
-    void service() throws IOException {
+    void service() {
         // given
         HttpRequest request = new HttpRequest(INDEX_REQUEST_LINE, EMPTY_HEADER, EMPTY_BODY);
         HttpResponse response = HttpResponse.createEmptyResponse();

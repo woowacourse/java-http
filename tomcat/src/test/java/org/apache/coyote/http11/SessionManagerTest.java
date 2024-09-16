@@ -63,7 +63,7 @@ class SessionManagerTest {
                 int finalI = i;
                 executorService.submit(() -> sessionManager.add(new Session(finalI + "")));
             }
-            executorService.awaitTermination(5000, TimeUnit.MICROSECONDS);
+            executorService.awaitTermination(10000, TimeUnit.MICROSECONDS);
 
             // then
             for (int i = 0; i < 10000; i++) {

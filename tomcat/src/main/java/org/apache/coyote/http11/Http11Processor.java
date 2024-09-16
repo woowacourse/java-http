@@ -39,24 +39,17 @@ public class Http11Processor implements Processor {
     }
 
     @Override
-    public void process(HttpResponse response) {
-        try (OutputStream outputStream = connection.getOutputStream()) {
-            response.setHttpVersion(HttpVersion.HTTP_1_1);
-            outputStream.write(response.serialize());
-            outputStream.flush();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    public void process(HttpResponse response) throws IOException {
+        OutputStream outputStream = connection.getOutputStream();
+        response.setHttpVersion(HttpVersion.HTTP_1_1);
+        outputStream.write(response.serialize());
+        outputStream.flush();
     }
 
     @Override
-    public HttpRequest getRequest() {
-        try (InputStream inputStream = connection.getInputStream()) {
-            return createHttpRequest(inputStream);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new IllegalArgumentException("처리할 수 없는 HTTP 메시지입니다.", e);
-        }
+    public HttpRequest getRequest() throws IOException {
+        InputStream inputStream = connection.getInputStream();
+        return createHttpRequest(inputStream);
     }
 
     private HttpRequest createHttpRequest(InputStream inputStream) throws IOException {

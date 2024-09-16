@@ -19,6 +19,8 @@ package org.apache.coyote;
 import jakarta.http.HttpRequest;
 import jakarta.http.HttpResponse;
 
+import java.io.IOException;
+
 /**
  * Common interface for processors of all protocols.
  */
@@ -29,10 +31,10 @@ public interface Processor {
      * data arrives) that allows processing to continue for a connection that is
      * not currently being processed.
      */
-    void process(HttpResponse response);
+    void process(HttpResponse response) throws IOException;
 
     /**
      * @return The request associated with this processor.
      */
-    HttpRequest getRequest();
+    HttpRequest getRequest() throws IOException;
 }

@@ -43,7 +43,7 @@ public class Container {
         return () -> {
             Processor processor = new Http11Processor(connection, httpSessionWrapper);
 
-            try {
+            try (connection) {
                 HttpRequest httpRequest = processor.getRequest();
                 HttpResponse response = resourceProcessor.processResponse(httpRequest);
                 processor.process(response);

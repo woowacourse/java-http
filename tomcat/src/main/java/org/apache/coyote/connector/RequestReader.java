@@ -10,38 +10,44 @@ import org.apache.catalina.request.HttpRequest;
 
 public class RequestReader {
 
-    public static HttpRequest readRequest(InputStream inputStream) {
+    private RequestReader() {
+    }
+
+    public static HttpRequest readRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
         List<String> headerLines = new ArrayList<>();
         String rawLine;
-        String contentLengthHeader = "";
-        try {
-            while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
-                headerLines.add(rawLine);
+        String contentLengthHeader = null;
 
-                if (rawLine.startsWith("Content-Length")) {
-                    contentLengthHeader = rawLine.split(": ")[1];
-                }
-            }
-
-            String bodyLine = "";
-            if (!contentLengthHeader.isEmpty()) {
-                bodyLine = readBody(bufferedReader, contentLengthHeader);
-            }
-
-            return new HttpRequest(headerLines, bodyLine);
-
-        } catch (IOException e) {
-            throw new IllegalStateException("Error reading input stream", e);
+        while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
+            headerLines.add(rawLine);
+            contentLengthHeader = getContentLength(rawLine);
         }
+        String bodyLine = readBody(bufferedReader, contentLengthHeader);
+
+        return new HttpRequest(headerLines, bodyLine);
+    }
+
+    private static String getContentLength(String rawLine) {
+        if (rawLine.toLowerCase().startsWith("content-length:")) {
+            return rawLine.split(":")[1].trim();
+        }
+        return null;
     }
 
     private static String readBody(BufferedReader bufferedReader, String contentLengthHeader) throws IOException {
+        if (contentLengthHeader == null) {
+            return "";
+        }
+        if (!contentLengthHeader.matches("\\d+")) {
+            throw new IllegalArgumentException("Invalid Content-Length header: " + contentLengthHeader);
+        }
         int contentLength = Integer.parseInt(contentLengthHeader);
+
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength); // 본문을 버퍼로 읽어들임
-        return new String(buffer);  // 읽은 버퍼를 문자열로 변환
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }
+

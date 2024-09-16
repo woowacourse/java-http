@@ -82,6 +82,7 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.shutdown();
     }
 
     private int checkPort(final int port) {

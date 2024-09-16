@@ -71,6 +71,9 @@ public class Connector implements Runnable {
     }
 
     private void process(final Socket connection) {
+        if (connection == null) {
+            return;
+        }
         threadPool.submit(new Http11Processor(connection));
     }
 

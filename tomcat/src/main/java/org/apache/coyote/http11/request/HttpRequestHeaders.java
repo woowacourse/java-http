@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Map;
-
 import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeaderKey.COOKIE;
+
+import java.util.Map;
 
 public class HttpRequestHeaders {
 

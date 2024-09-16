@@ -1,13 +1,12 @@
 package org.apache.coyote.http11.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Map;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.cookie.HttpCookieExtractor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.*;
 
 public class HttpCookieExtractorTest {
 

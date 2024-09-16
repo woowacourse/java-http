@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,9 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HttpRequestParserTest {
 
@@ -28,7 +28,8 @@ public class HttpRequestParserTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
+        assertThrows(IllegalArgumentException.class,
+                () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
     }
 
     @Test
@@ -45,7 +46,8 @@ public class HttpRequestParserTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
+        assertThrows(IllegalArgumentException.class,
+                () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
     }
 
     @Test
@@ -85,7 +87,8 @@ public class HttpRequestParserTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         //when & then
-        assertThrows(StringIndexOutOfBoundsException.class, () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
+        assertThrows(StringIndexOutOfBoundsException.class,
+                () -> HttpRequestParser.getInstance().parseRequest(bufferedReader));
     }
 
     @Test

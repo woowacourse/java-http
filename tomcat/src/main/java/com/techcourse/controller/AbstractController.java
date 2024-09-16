@@ -1,5 +1,9 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpHeaderKey.LOCATION;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import org.apache.coyote.http11.FileReader;
@@ -7,10 +11,6 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
-
-import static org.apache.coyote.http11.HttpHeaderKey.LOCATION;
-import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_TYPE;
-import static org.apache.coyote.http11.HttpHeaderKey.CONTENT_LENGTH;
 
 public abstract class AbstractController implements Controller {
 

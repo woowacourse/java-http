@@ -1,5 +1,7 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http11.HttpHeaderKey.SET_COOKIE;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UserException;
 import com.techcourse.model.User;
@@ -13,8 +15,6 @@ import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.coyote.http11.HttpHeaderKey.SET_COOKIE;
 
 public class LoginController extends AbstractController {
 

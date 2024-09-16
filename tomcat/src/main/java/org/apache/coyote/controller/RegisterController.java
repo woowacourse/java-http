@@ -22,9 +22,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doPost(HttpRequest httpRequest) {
         HttpResponse httpResponse = new HttpResponse();
 
-        String requestBody = httpRequest.getRequestBody();
-
-        Session session = register(requestBody);
+        Session session = register(httpRequest);
 
         httpResponse.setStatusLine(FOUND);
         httpResponse.setCookie("JSESSIONID", session.getId());
@@ -47,7 +45,9 @@ public class RegisterController extends AbstractController {
         return httpResponse;
     }
 
-    private Session register(String requestBody) {
+    private Session register(HttpRequest httpRequest) {
+        String requestBody = httpRequest.getRequestBody();
+
         String account = requestBody.split("&")[0].split("=")[1];
         String password = requestBody.split("&")[1].split("=")[1];
         String email = requestBody.split("&")[2].split("=")[1];

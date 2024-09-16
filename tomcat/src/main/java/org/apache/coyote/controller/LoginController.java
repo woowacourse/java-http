@@ -1,18 +1,14 @@
 package org.apache.coyote.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import org.apache.catalina.AuthManager;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Session;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.apache.coyote.http11.Status.FOUND;
 import static org.apache.coyote.http11.Status.OK;
@@ -23,17 +19,15 @@ public class LoginController extends AbstractController {
     protected HttpResponse doPost(HttpRequest httpRequest) {
         HttpResponse httpResponse = new HttpResponse();
 
-        String requestBody = httpRequest.getRequestBody();
+        try {
+            Session session = AuthManager.authenticate(httpRequest);
 
-        Session session = authenticate(requestBody);
-
-        if (session == null) {
-            httpResponse.setStatusLine(FOUND);
-            httpResponse.setLocation("/401.html");
-        } else {
             httpResponse.setStatusLine(FOUND);
             httpResponse.setCookie("JSESSIONID", session.getId());
             httpResponse.setLocation("/index.html");
+        } catch (IllegalArgumentException exception) {
+            httpResponse.setStatusLine(FOUND);
+            httpResponse.setLocation("/401.html");
         }
 
         return httpResponse;
@@ -61,24 +55,6 @@ public class LoginController extends AbstractController {
         httpResponse.setContentLength(responseBody.getBytes().length);
 
         return httpResponse;
-    }
-
-    private Session authenticate(String requestBody) {
-        String account = requestBody.split("&")[0].split("=")[1];
-        String password = requestBody.split("&")[1].split("=")[1];
-
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-
-        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-            String uuid = UUID.randomUUID().toString();
-            Session session = new Session(uuid);
-            session.setAttribute("user", session);
-            SessionManager.add(session);
-
-            return session;
-        }
-
-        return null;
     }
 
     private Session getSession(String cookie) {

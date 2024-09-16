@@ -42,12 +42,9 @@ class ThreadPoolsTest {
     @Test
     void testNewCachedThreadPool() {
         final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        for (int i = 0; i < 10000; i++) {
-
-            executor.submit(logWithSleep("hello cached thread pools"));
-            executor.submit(logWithSleep("hello cached thread pools"));
-            executor.submit(logWithSleep("hello cached thread pools"));
-        }
+        executor.submit(logWithSleep("hello cached thread pools"));
+        executor.submit(logWithSleep("hello cached thread pools"));
+        executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
         final int expectedPoolSize = 3;

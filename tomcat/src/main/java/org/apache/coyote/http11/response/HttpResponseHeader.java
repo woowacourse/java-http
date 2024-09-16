@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponseHeader {
+    private static final String ASSIGN_OPERATOR = "=";
+    private static final String COOKIE_SEPARATOR = "; ";
+
     private final Map<String, String> headers;
 
     public HttpResponseHeader() {
@@ -18,18 +21,12 @@ public class HttpResponseHeader {
 
     public void putCookie(String name, Map<String, String> cookies) {
         String value = cookies.keySet().stream()
-                .map(cookie -> cookie + "=" + cookies.get(cookie))
-                .collect(Collectors.joining("; "));
+                .map(cookie -> cookie + ASSIGN_OPERATOR + cookies.get(cookie))
+                .collect(Collectors.joining(COOKIE_SEPARATOR));
         headers.put(name, value);
     }
 
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
-    }
-
-    public String toString() {
-        return headers.entrySet().stream()
-                .map(header -> header.getKey() + ": " + header.getValue())
-                .collect(Collectors.joining("\r\n"));
     }
 }

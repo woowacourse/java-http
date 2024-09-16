@@ -3,6 +3,7 @@ package org.apache.coyote.processor;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.http.StatusCode;
 import org.apache.coyote.Processor;
 import org.apache.catalina.http11.Dispatcher;
 import org.apache.catalina.request.HttpRequest;
@@ -35,8 +36,14 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = RequestReader.readRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
 
-            Dispatcher dispatcher = new Dispatcher();
-            dispatcher.run(httpRequest, httpResponse);
+            if (httpRequest.isStaticRequest()) {
+                httpResponse.setStatusCode(StatusCode.OK);
+                httpResponse.setBody(httpRequest.getPath());
+            }
+            if (!httpRequest.isStaticRequest()) {
+                Dispatcher dispatcher = new Dispatcher();
+                dispatcher.run(httpRequest, httpResponse);
+            }
 
             outputStream.write(httpResponse.getReponse().getBytes());
             outputStream.flush();

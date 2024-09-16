@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -9,20 +8,28 @@ import java.nio.file.Files;
 public class ViewResolver {
 
     private static final String PREFIX = "static";
+    private static final String NOT_FOUND_VIEW = "/404.html";
 
-    private static class ViewResolverHolder {
-        private static final ViewResolver INSTANCE = new ViewResolver();
+    public String resolveViewName(String viewName) throws IOException {
+        URL resource = findURL(viewName);
+        if (resource == null) {
+            resource = findURL(NOT_FOUND_VIEW);
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private URL findURL(String viewName) {
+        return getClass().getClassLoader().getResource(PREFIX + viewName);
+    }
+
+    private ViewResolver() {
     }
 
     public static ViewResolver getInstance() {
         return ViewResolver.ViewResolverHolder.INSTANCE;
     }
 
-    public String resolveViewName(String viewName) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(PREFIX + viewName);
-        if (resource == null) {
-            throw new FileNotFoundException("페이지가 없습니다.");
-        }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    private static class ViewResolverHolder {
+        private static final ViewResolver INSTANCE = new ViewResolver();
     }
 }

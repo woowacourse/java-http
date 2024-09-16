@@ -38,8 +38,9 @@ public class Connector implements Runnable {
                 maxThread,
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT)
+                new LinkedBlockingQueue<>(acceptCount)
         );
+
         this.dispatcher = dispatcher;
     }
 
@@ -78,16 +79,20 @@ public class Connector implements Runnable {
     @Override
     public void run() {
         while (!stopped) {
-            executorService.execute(this::connect);
+            try {
+                Socket connection = serverSocket.accept();
+                executorService.execute(() -> connect(connection));
+            } catch (IOException e) {
+                if (!stopped) {
+                    log.error("클라이언트 연결 요청 에러 : ", e);
+                }
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void connect() {
-        try {
-            process(serverSocket.accept(), dispatcher);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    private void connect(Socket connection) {
+        process(connection, dispatcher);
     }
 
     private void process(final Socket connection, final Dispatcher dispatcher) {

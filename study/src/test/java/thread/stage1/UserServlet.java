@@ -7,7 +7,7 @@ public class UserServlet {
 
     private final List<User> users = new ArrayList<>();
 
-    public void service(final User user) {
+    public synchronized void service(final User user) {
         join(user);
     }
 

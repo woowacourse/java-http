@@ -1,12 +1,19 @@
 package org.apache.coyote.http;
 
+import java.util.Map;
+
 public enum HttpMethod implements HttpComponent {
     GET,
     POST,
     ;
 
+    private static final Map<String, HttpMethod> CACHE = Map.of(
+            "GET", GET,
+            "POST", POST
+    );
+
     public static HttpMethod from(final String value) {
-        return valueOf(value);
+        return CACHE.get(value);
     }
 
     public boolean isGet() {

@@ -40,7 +40,7 @@ public class Connector implements Runnable {
         this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.threadPoolExecutor = new TomcatThreadPool(maxThreads, acceptCount);
-        this.acceptCount = acceptCount;
+        this.acceptCount = checkAcceptCount(acceptCount);
         this.stopped = false;
     }
 

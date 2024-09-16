@@ -25,9 +25,9 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isLoginActive(Request request) {
-        boolean hasLoginCookie = request.hasLoginCookie();
-        String loginSessionId = request.getLoginCookie().getValue();
-        return hasLoginCookie && sessionManager.contains(loginSessionId);
+        return request.getLoginCookie()
+                .map(cookie -> sessionManager.contains(cookie.getValue()))
+                .orElse(false);
     }
 
     @Override

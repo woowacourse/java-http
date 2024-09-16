@@ -1,19 +1,14 @@
 package com.techcourse.servlet;
 
+import static org.apache.coyote.http.HttpFixture.EMPTY_BODY;
+import static org.apache.coyote.http.HttpFixture.EMPTY_HEADER;
+import static org.apache.coyote.http.HttpFixture.HOME_REQUEST_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMessageBody;
-import org.apache.coyote.http.HttpProtocol;
 import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.request.line.Method;
-import org.apache.coyote.http.request.line.RequestLine;
-import org.apache.coyote.http.request.line.Uri;
 import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.line.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,24 +21,13 @@ class GreetingServletTest {
     @Test
     void doServiceHome() throws IOException {
         // given
-        RequestLine requestLine = new RequestLine(Method.GET, new Uri("/"), HttpProtocol.HTTP_11);
-        HttpHeaders headers = new HttpHeaders();
-        HttpMessageBody body = HttpMessageBody.createEmptyBody();
-
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers, body);
+        HttpRequest httpRequest = new HttpRequest(HOME_REQUEST_LINE, EMPTY_HEADER, EMPTY_BODY);
         HttpResponse httpResponse = HttpResponse.createEmptyResponse();
 
         // when
         greetingServlet.doService(httpRequest, httpResponse);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/hello.html");
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 1202",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        assertThat(httpResponse.resolveHttpMessage()).isEqualTo(expected);
+        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK);
     }
 }

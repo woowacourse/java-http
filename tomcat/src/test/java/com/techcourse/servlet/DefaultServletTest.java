@@ -26,8 +26,10 @@ class DefaultServletTest {
         // given
         HttpRequest request = new HttpRequest(INDEX_REQUEST_LINE, EMPTY_HEADER, EMPTY_BODY);
         HttpResponse response = HttpResponse.createEmptyResponse();
+
         // when
         defaultServlet.doGet(request, response);
+
         //then
         assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.OK);
     }
@@ -38,6 +40,7 @@ class DefaultServletTest {
         // given
         HttpRequest request = new HttpRequest(NO_RESOURCE_LINE, EMPTY_HEADER, EMPTY_BODY);
         HttpResponse response = HttpResponse.createEmptyResponse();
+
         // when & then
         assertThatThrownBy(() -> defaultServlet.doGet(request, response))
                 .isInstanceOf(UncheckedServletException.class)

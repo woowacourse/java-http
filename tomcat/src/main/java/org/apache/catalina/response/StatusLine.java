@@ -14,13 +14,7 @@ public class StatusLine {
     }
 
     public String getResponse() {
-        StringBuilder response = new StringBuilder();
-        response.append(versionOfProtocol.getValue())
-                .append(" ")
-                .append(statusCode.getCode())
-                .append(" ")
-                .append(statusCode.getMessage());
-        return String.valueOf(response);
+        return "%s %s %s".formatted(versionOfProtocol.getValue(), statusCode.getCode(), statusCode.getMessage());
     }
 
     public void setStatusCode(StatusCode statusCode) {

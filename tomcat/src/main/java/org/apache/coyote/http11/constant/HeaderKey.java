@@ -37,7 +37,7 @@ public enum HeaderKey {
     public static HeaderKey find(String rawKey) {
         return Arrays.stream(values())
                 .filter(value -> value.value.equals(rawKey))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 헤더입니다."));
     }
 

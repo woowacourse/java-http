@@ -24,7 +24,7 @@ public enum MimeType {
         validateNull(filePath);
         return Arrays.stream(values())
                 .filter(value -> filePath.endsWith(value.extension))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 파일 경로입니다."));
     }
 

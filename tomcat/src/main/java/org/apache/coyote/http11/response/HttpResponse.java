@@ -89,12 +89,12 @@ public class HttpResponse {
         return responseBody;
     }
 
-    public HttpStatusCode getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public HttpStatusCode getHttpStatusCode() {
+        return httpStatusCode;
     }
 
     public void setHttpStatusCode(HttpStatusCode httpStatusCode) {

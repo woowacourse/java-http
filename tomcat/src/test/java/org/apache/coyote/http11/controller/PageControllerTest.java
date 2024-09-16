@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class PageControllerTest {
 
@@ -17,7 +17,8 @@ class PageControllerTest {
     void service_get() throws Exception {
         // given
         PageController controller = new PageController();
-        HttpRequest request = new HttpRequest("GET", "/index.html", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", "/index.html", requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -32,7 +33,8 @@ class PageControllerTest {
     void service_notSupportedMethod_delete() throws Exception {
         // given
         PageController controller = new PageController();
-        HttpRequest request = new HttpRequest("DELETE", null, null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("DELETE", null, requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when & then
@@ -47,7 +49,8 @@ class PageControllerTest {
     void service_get_validPath() throws Exception {
         // given
         PageController controller = new PageController();
-        HttpRequest request = new HttpRequest("GET", "/index.html", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", "/index.html", requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when
@@ -62,7 +65,8 @@ class PageControllerTest {
     void service_get_invalidPath_exception() throws Exception {
         // given
         PageController controller = new PageController();
-        HttpRequest request = new HttpRequest("GET", "/i.html", null, null, null, null);
+        HttpRequestHeader requestHeader = new HttpRequestHeader(null, null, null);
+        HttpRequest request = new HttpRequest("GET", "/i.html", requestHeader, null);
         HttpResponse response = new HttpResponse();
 
         // when & then

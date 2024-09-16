@@ -6,6 +6,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
@@ -28,7 +29,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final URL resource = findResource("/register.html");
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         response.setFileType("html");
         response.setHttpStatusCode(HttpStatusCode.OK);
@@ -38,21 +39,32 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, List<String>> body = request.getBody();
+        saveUserByBody(body);
+        response.setPath("/index.html");
+        doPostResponse(response);
+    }
+
+    private void saveUserByBody(Map<String, List<String>> body) {
         String account = body.get("account").getFirst();
         String password = body.get("password").getFirst();
         String email = body.get("email").getFirst();
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+    }
 
-        response.setPath("/index.html");
+    private void doPostResponse(HttpResponse response) throws IOException {
+        final URL resource = findResource(response.getPath());
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         response.setFileType("html");
-        final URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setResponseBody(responseBody);
+    }
+
+    private URL findResource(String path) {
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
             throw new IllegalArgumentException("Resource not found");
         }
-
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        response.setResponseBody(responseBody);
-        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        return resource;
     }
 }

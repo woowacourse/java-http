@@ -28,7 +28,7 @@ public class ViewResolver {
         }
     }
 
-    public Optional<Path> findViewPath(String url) {
+    private Optional<Path> findViewPath(String url) {
         try {
             URL foundUrl = ClassLoader.getSystemClassLoader().getResource(DEFAULT_DIRECTORY_NAME + url);
 

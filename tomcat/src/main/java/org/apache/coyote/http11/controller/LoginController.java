@@ -8,7 +8,7 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.service.LoginService;
+import com.techcourse.model.service.LoginService;
 
 public class LoginController extends AbstractController {
     private static final String SESSION_ID_KEY = "JSESSIONID";
@@ -46,7 +46,6 @@ public class LoginController extends AbstractController {
         }
 
         loginView(httpResponse);
-
     }
 
     private void loginView(HttpResponse httpResponse) {
@@ -59,7 +58,8 @@ public class LoginController extends AbstractController {
         String jsessionid = cookie.getByKey(SESSION_ID_KEY);
 
         if (!InMemorySessionRepository.existsById(jsessionid)) {
-            throw new SecurityException("잘못된 세션 정보입니다.");
+            loginView(httpResponse);
+            return;
         }
 
         httpResponse.redirect("/index.html");

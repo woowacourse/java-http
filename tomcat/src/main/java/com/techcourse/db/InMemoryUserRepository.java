@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
 
+    //4단계 : 동시성 컬렉션 적용
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {

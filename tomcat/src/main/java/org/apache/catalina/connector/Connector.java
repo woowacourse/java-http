@@ -41,11 +41,11 @@ public class Connector implements Runnable {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executor = new ThreadPoolExecutor(
-                DEFAULT_THREAD_POOL_COUNT,
-                maxThreads,
-                0L,
+                DEFAULT_THREAD_POOL_COUNT, // corePoolsize
+                maxThreads, // maxPoolsize
+                0L, // keep-alive-time
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(acceptCount)
+                new LinkedBlockingQueue<Runnable>(acceptCount) // queue는 무한으로 대기 가능
         );
     }
 
@@ -88,7 +88,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executor.execute(processor);
+        executor.execute(processor); //new Thread > executor.execute
     }
 
     public void stop() {

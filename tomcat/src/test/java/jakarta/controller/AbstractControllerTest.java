@@ -1,5 +1,8 @@
-package org.apache.coyote.http11;
+package jakarta.controller;
 
+import jakarta.http.HttpMethod;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

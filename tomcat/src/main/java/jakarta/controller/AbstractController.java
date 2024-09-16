@@ -1,6 +1,12 @@
-package org.apache.coyote.http11;
+package jakarta.controller;
+
+import jakarta.http.HttpMethod;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
 
 public class AbstractController implements Controller {
+
+    private final ResourceFinder resourceFinder = new ResourceFinder();
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -25,6 +31,6 @@ public class AbstractController implements Controller {
     }
 
     protected final byte[] readResource(String resourceName) {
-        return ResourceFinder.readResource(resourceName, getClass().getClassLoader());
+        return resourceFinder.readResource(resourceName);
     }
 }

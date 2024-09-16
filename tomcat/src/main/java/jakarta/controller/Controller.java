@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package jakarta.controller;
+
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
 
 public interface Controller {
 

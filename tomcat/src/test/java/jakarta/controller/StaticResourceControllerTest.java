@@ -1,6 +1,12 @@
-package org.apache.coyote.http11;
+package jakarta.controller;
 
-import org.apache.catalina.Manager;
+import jakarta.http.Header;
+import jakarta.http.HttpBody;
+import jakarta.http.HttpHeaderKey;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpSessionWrapper;
+import jakarta.http.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +24,7 @@ class StaticResourceControllerTest {
     void handleResource() throws Exception {
         StaticResourceController staticResourceController = new StaticResourceController();
         HttpRequest request = createHttpRequest("GET /sample.txt HTTP/1.1");
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
 
         staticResourceController.service(request, response);
 
@@ -35,17 +41,18 @@ class StaticResourceControllerTest {
     void cantHandle() {
         StaticResourceController staticResourceController = new StaticResourceController();
         HttpRequest request = createHttpRequest("GET /none.txt HTTP/1.1");
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
 
         assertThatThrownBy(() -> staticResourceController.service(request, response))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
     private HttpRequest createHttpRequest(String requestLine) {
-        return HttpRequest.createHttp11Request(requestLine,
+        return HttpRequest.createHttpRequest(requestLine,
                 Header.empty(),
                 mock(HttpBody.class),
-                mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                mock(HttpSessionWrapper.class)
         );
     }
 }

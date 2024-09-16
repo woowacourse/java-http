@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package jakarta.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,8 @@ class ResourceFinderTest {
     @CsvSource(value = {"sample.txt:true", "unknown.txt:false"}, delimiter = ':')
     @DisplayName("리소스가 존재하는지 확인할 수 있다.")
     void hasResource(String source, boolean expected) {
-        boolean result = ResourceFinder.hasResource(source, getClass().getClassLoader());
+        ResourceFinder resourceFinder = new ResourceFinder();
+        boolean result = resourceFinder.hasResource(source);
 
         assertThat(result).isEqualTo(expected);
     }
@@ -24,7 +25,8 @@ class ResourceFinderTest {
     @Test
     @DisplayName("리소스를 불러올 수 있다.")
     void read() {
-        byte[] result = ResourceFinder.readResource("sample.txt", getClass().getClassLoader());
+        ResourceFinder resourceFinder = new ResourceFinder();
+        byte[] result = resourceFinder.readResource("sample.txt");
         String resultString = new String(result);
 
         assertThat(resultString).isEqualTo("sample");
@@ -33,7 +35,9 @@ class ResourceFinderTest {
     @Test
     @DisplayName("리소스가 존재하지 않으면 불러올 수 없다.")
     void readNonExistsResource() {
-        assertThatThrownBy(() -> ResourceFinder.readResource("unknown.txt", getClass().getClassLoader()))
+        ResourceFinder resourceFinder = new ResourceFinder();
+
+        assertThatThrownBy(() -> resourceFinder.readResource("unknown.txt"))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 리소스입니다.");
     }

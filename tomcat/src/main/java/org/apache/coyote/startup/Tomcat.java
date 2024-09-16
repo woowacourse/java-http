@@ -1,10 +1,9 @@
 package org.apache.coyote.startup;
 
+import java.io.IOException;
 import org.apache.coyote.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 

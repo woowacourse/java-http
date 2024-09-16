@@ -3,8 +3,8 @@ package org.apache.catalina.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.coockie.HttpCookie;
 import org.apache.catalina.HeaderName;
+import org.apache.catalina.coockie.HttpCookie;
 
 public class RequestHeader {
 

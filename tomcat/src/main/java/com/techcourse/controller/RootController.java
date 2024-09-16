@@ -1,5 +1,7 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http.MediaType.TEXT_HTML;
+
 import org.apache.coyote.http.HttpBody;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
@@ -10,7 +12,7 @@ public class RootController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatusCode(HttpStatusCode.OK);
-        response.setContentType("text/html");
+        response.setContentType(TEXT_HTML.value());
         response.setBody(new HttpBody("Hello world!"));
     }
 }

@@ -1,6 +1,6 @@
-package org.apache.coyote.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.PathFilter;
+import org.apache.catalina.PathFilter;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import java.io.IOException;

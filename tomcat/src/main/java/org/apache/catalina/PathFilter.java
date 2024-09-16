@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina;
 
 import org.apache.coyote.http11.HttpRequest;
 import java.util.Map;

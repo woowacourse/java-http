@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.catalina.controller;
 
 import org.apache.catalina.ResourceManager;
 import org.apache.catalina.AuthManager;

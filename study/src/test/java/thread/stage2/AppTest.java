@@ -1,15 +1,20 @@
 package thread.stage2;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);
+
+    private static void incrementIfOk(final HttpResponse<String> response) {
+        if (response.statusCode() == 200) {
+            count.incrementAndGet();
+        }
+    }
 
     /**
      * 1. App 클래스의 애플리케이션을 실행시켜 서버를 띄운다.
@@ -40,11 +45,5 @@ class AppTest {
         }
 
         assertThat(count.intValue()).isEqualTo(2);
-    }
-
-    private static void incrementIfOk(final HttpResponse<String> response) {
-        if (response.statusCode() == 200) {
-            count.incrementAndGet();
-        }
     }
 }

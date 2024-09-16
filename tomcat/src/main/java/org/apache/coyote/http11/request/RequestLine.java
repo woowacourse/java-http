@@ -11,12 +11,12 @@ public class RequestLine {
     private static final int REQUEST_LINE_SIZE = 3;
 
     private final HttpMethod httpMethod;
-    private final String path;
+    private final String requestURL;
     private final HttpVersion httpVersion;
 
-    private RequestLine(HttpMethod httpMethod, String path, HttpVersion httpVersion) {
+    private RequestLine(HttpMethod httpMethod, String requestURL, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
-        this.path = path;
+        this.requestURL = requestURL;
         this.httpVersion = httpVersion;
     }
 
@@ -24,10 +24,10 @@ public class RequestLine {
         String[] line = parseRequestLine(requestLine);
 
         HttpMethod httpMethod = HttpMethod.from(line[METHOD_INDEX]);
-        String path = line[PATH_INDEX];
+        String requestURL = line[PATH_INDEX];
         HttpVersion httpVersion = HttpVersion.from(line[VERSION_INDEX]);
 
-        return new RequestLine(httpMethod, path, httpVersion);
+        return new RequestLine(httpMethod, requestURL, httpVersion);
     }
 
     private static String[] parseRequestLine(String requestLine) {
@@ -47,8 +47,8 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public String getPath() {
-        return path;
+    public String getRequestURL() {
+        return requestURL;
     }
 
     public HttpVersion getHttpVersion() {

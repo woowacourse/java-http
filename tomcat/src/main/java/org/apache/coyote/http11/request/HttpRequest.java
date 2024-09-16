@@ -81,8 +81,8 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String getPath() {
-        return requestLine.getPath();
+    public String getRequestURL() {
+        return requestLine.getRequestURL();
     }
 
     public RequestHeader getRequestHeader() {

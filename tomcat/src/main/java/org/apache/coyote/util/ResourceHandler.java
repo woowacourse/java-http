@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 public class ResourceHandler {
 
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        String path = httpRequest.getPath();
+        String path = httpRequest.getRequestURL();
         try {
             httpResponse.setResponseBody(FileReader.read(path));
         } catch (IOException | URISyntaxException exception) {

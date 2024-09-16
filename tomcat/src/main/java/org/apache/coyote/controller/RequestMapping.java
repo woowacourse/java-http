@@ -29,7 +29,7 @@ public class RequestMapping {
     public HttpResponse dispatch(HttpRequest httpRequest) throws Exception {
         HttpResponse httpResponse = new HttpResponse();
 
-        String path = httpRequest.getPath();
+        String path = httpRequest.getRequestURL();
 
         if ((path.equals("/") || path.equals("/index")) || MimeType.isValidFileExtension(path)) {
             ResourceHandler resourceHandler = new ResourceHandler();

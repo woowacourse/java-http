@@ -18,18 +18,10 @@ public class HttpResponse {
         this(null, new ResponseHeader(), null);
     }
 
-    public HttpResponse(HttpStatus httpStatus, ResponseHeader responseHeader, byte[] values) {
+    public HttpResponse(HttpStatus httpStatus, ResponseHeader responseHeader, byte[] contents) {
         this.statusLine = StatusLine.of11(httpStatus);
         this.requestHeader = responseHeader;
-        this.responseBody = new ResponseBody(values);
-
-        setContentLength(responseBody.getLength());
-    }
-
-    public HttpResponse(HttpStatus httpStatus, byte[] values) {
-        this.statusLine = StatusLine.of11(httpStatus);
-        this.requestHeader = new ResponseHeader();
-        this.responseBody = new ResponseBody(values);
+        this.responseBody = new ResponseBody(contents);
 
         setContentLength(responseBody.getLength());
     }

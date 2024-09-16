@@ -1,8 +1,8 @@
 package org.apache.tomcat.util.http.header;
 
-import static org.apache.tomcat.util.http.header.HttpContentEncodingType.UTF8;
-
 import java.util.Arrays;
+
+import static org.apache.tomcat.util.http.header.HttpContentEncodingType.UTF8;
 
 public enum HttpContentType {
 

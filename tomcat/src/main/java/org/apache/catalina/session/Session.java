@@ -11,9 +11,9 @@ public class Session {
     private static final int DEFAULT_EXPIRATION_TIME_IN_SECONDS = 1800;
     private final String sessionId;
     private final LocalDateTime creationTime;
-    private Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new HashMap<>();
     private LocalDateTime lastAccessTime;
-    private long expirationTimeInSeconds = DEFAULT_EXPIRATION_TIME_IN_SECONDS;
+    private final long expirationTimeInSeconds = DEFAULT_EXPIRATION_TIME_IN_SECONDS;
 
     public Session() {
         this.sessionId = UUID.randomUUID().toString();

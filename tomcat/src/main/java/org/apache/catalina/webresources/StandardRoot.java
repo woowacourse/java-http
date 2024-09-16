@@ -1,12 +1,11 @@
 package org.apache.catalina.webresources;
 
-import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
-
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
-
 import org.apache.tomcat.util.http.ResourceURI;
+
+import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
 
 public class StandardRoot {
 

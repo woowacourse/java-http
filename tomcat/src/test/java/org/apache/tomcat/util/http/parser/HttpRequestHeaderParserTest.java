@@ -1,16 +1,15 @@
 package org.apache.tomcat.util.http.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
-
 import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestHeaderParserTest {
 

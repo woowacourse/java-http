@@ -2,7 +2,6 @@ package org.apache.tomcat.util.http.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-
 import org.apache.tomcat.util.http.HttpMethod;
 import org.apache.tomcat.util.http.HttpRequestLine;
 import org.apache.tomcat.util.http.HttpVersion;

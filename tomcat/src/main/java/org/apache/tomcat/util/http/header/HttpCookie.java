@@ -1,11 +1,10 @@
 package org.apache.tomcat.util.http.header;
 
-import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.catalina.session.Session;
+
+import static org.apache.catalina.session.Session.SESSION_ID_IDENTIFICATION;
 
 public class HttpCookie {
 

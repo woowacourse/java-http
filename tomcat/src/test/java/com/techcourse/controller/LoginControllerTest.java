@@ -1,11 +1,6 @@
 package com.techcourse.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 import java.util.Map;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.session.Session;
@@ -21,6 +16,10 @@ import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 class LoginControllerTest {
     @DisplayName("로그인 페이지를 반환한다.")

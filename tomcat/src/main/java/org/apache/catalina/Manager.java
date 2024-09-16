@@ -1,7 +1,6 @@
 package org.apache.catalina;
 
 import java.io.IOException;
-
 import org.apache.catalina.session.Session;
 
 /**

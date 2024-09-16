@@ -1,11 +1,11 @@
 package org.apache.catalina.servlet;
 
-import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.catalina.webresources.WebResource;
+
+import static org.apache.catalina.webresources.FileResource.NOT_FOUND_RESOURCE_URI;
 
 public class DefaultServlet extends AbstractController {
 

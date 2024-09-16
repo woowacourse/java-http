@@ -1,7 +1,5 @@
 package org.apache.catalina.servlet;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.catalina.connector.HttpResponse;
 import org.apache.catalina.webresources.StandardRoot;
@@ -13,6 +11,8 @@ import org.apache.tomcat.util.http.body.HttpBody;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DefaultServletTest {
 

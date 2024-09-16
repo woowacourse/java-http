@@ -1,11 +1,7 @@
 package org.apache.tomcat.util.http.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
-
 import org.apache.catalina.connector.HttpRequest;
 import org.apache.tomcat.util.http.HttpRequestLine;
 import org.apache.tomcat.util.http.body.HttpBody;
@@ -13,6 +9,9 @@ import org.apache.tomcat.util.http.header.HttpHeaderType;
 import org.apache.tomcat.util.http.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class HttpRequestParserTest {
     @DisplayName("Http Request 로 파싱할 수 있다.")

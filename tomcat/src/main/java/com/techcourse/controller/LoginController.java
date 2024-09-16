@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
     private void createNewSession(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
         Session session = new Session(UUID.randomUUID().toString());
 
-        if (httpRequest.existsSession()) {
+        if (httpRequest.existsSession() && sessionManager.findSession(httpRequest.getSession().getId()) != null) {
             session = httpRequest.getSession();
         }
         session.setAttribute(USER_KEY, user);

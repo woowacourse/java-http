@@ -17,10 +17,10 @@ public class SessionManager implements Manager {
         return new SessionManager();
     }
 
-    public String findSessionId(final User user) {
+    public Session findSession(final User user) {
         for (String key : SESSIONS.keySet()) {
             if (SESSIONS.get(key).getAttribute("user") == user) {
-                return key;
+                return findSession(key);
             }
         }
         return null;

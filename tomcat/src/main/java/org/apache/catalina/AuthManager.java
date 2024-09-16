@@ -11,6 +11,9 @@ public class AuthManager {
 
     public static final String AUTHENTICATION_COOKIE_NAME = "JSESSIONID";
 
+    private AuthManager() {
+    }
+
     public static Session authenticate(String requestBody) {
         if (!isUserExist(requestBody)) {
             throw new IllegalArgumentException("회원가입된 유저가 아닙니다.");

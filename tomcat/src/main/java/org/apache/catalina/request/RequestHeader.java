@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.coockie.HttpCookie;
-import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.HeaderName;
 
 public class RequestHeader {
 

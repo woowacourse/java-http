@@ -1,4 +1,4 @@
-package org.apache.catalina.http11;
+package org.apache.catalina;
 
 public enum ProtocolVersion {
     HTTP1_1("HTTP/1.1"),

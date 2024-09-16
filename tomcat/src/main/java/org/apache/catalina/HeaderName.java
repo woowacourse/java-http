@@ -1,4 +1,4 @@
-package org.apache.catalina.http;
+package org.apache.catalina;
 
 import java.util.Arrays;
 

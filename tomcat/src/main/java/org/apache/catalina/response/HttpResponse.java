@@ -1,6 +1,6 @@
 package org.apache.catalina.response;
 
-import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.HeaderName;
 import org.apache.catalina.http.StatusCode;
 
 public class HttpResponse {

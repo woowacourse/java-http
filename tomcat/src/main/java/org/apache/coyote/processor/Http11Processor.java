@@ -6,7 +6,7 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.catalina.http11.Dispatcher;
 import org.apache.catalina.request.HttpRequest;
-import org.apache.catalina.request.RequestReader;
+import org.apache.coyote.connector.RequestReader;
 import org.apache.catalina.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

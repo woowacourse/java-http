@@ -1,4 +1,4 @@
-package org.apache.catalina.startup;
+package org.apache.coyote.startup;
 
 import org.apache.coyote.connector.Connector;
 import org.slf4j.Logger;

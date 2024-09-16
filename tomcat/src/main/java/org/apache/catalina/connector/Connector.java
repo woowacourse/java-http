@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class Connector implements Runnable {
         thread.setDaemon(true);
         thread.start();
         stopped = false;
+
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -95,5 +97,10 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    public int getMaximumPoolSize() {
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
+        return threadPoolExecutor.getMaximumPoolSize();
     }
 }

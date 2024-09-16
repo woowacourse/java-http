@@ -1,8 +1,8 @@
 package org.apache.catalina.container;
 
+import com.techcourse.Application;
 import jakarta.http.HttpSessionWrapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import support.StubSocket;
 
 import java.io.File;
@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class ContainerTest {
 
@@ -18,8 +19,9 @@ class ContainerTest {
     void process() {
         // given
         StubSocket socket = new StubSocket();
-        Container container = new Container(Mockito.mock(HttpSessionWrapper.class));
+        Container container = new Container(Application.requestMapping(), mock(HttpSessionWrapper.class));
         Runnable runnable = container.acceptConnection(socket);
+
 
         // when
         runnable.run();
@@ -46,7 +48,7 @@ class ContainerTest {
                 "");
         // given
         StubSocket socket = new StubSocket(httpRequest);
-        Container container = new Container(Mockito.mock(HttpSessionWrapper.class));
+        Container container = new Container(Application.requestMapping(), mock(HttpSessionWrapper.class));
         Runnable runnable = container.acceptConnection(socket);
 
         // when

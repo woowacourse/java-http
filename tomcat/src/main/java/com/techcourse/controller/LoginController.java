@@ -1,5 +1,9 @@
 package com.techcourse.controller;
 
+import static com.techcourse.controller.RequestPath.INDEX;
+import static com.techcourse.controller.RequestPath.LOGIN;
+import static com.techcourse.controller.RequestPath.UNAUTHORIZED;
+
 import java.io.IOException;
 
 import org.apache.catalina.Manager;
@@ -19,18 +23,20 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private static final String RESOURCE_PATH = "/login.html";
-    private static final String ROOT_RESOURCE_PATH = "/index.html";
+    private static final String SESSION_KEY = "user";
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     private final Manager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (isLoggedIn(request)) {
-            response.sendRedirect(ROOT_RESOURCE_PATH);
+            response.sendRedirect(INDEX.path());
             return;
         }
-        response.sendRedirect(RESOURCE_PATH);
+        response.sendRedirect(LOGIN.path());
     }
 
     @Override
@@ -38,7 +44,7 @@ public class LoginController extends AbstractController {
         if (login(request, response)) {
             return;
         }
-        response.sendRedirect("/401.html");
+        response.sendRedirect(UNAUTHORIZED.path());
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
@@ -50,7 +56,7 @@ public class LoginController extends AbstractController {
         if (savedSession == null) {
             return false;
         }
-        User user = (User) savedSession.getAttribute("user");
+        User user = (User) savedSession.getAttribute(SESSION_KEY);
         log.info("user: {}", user);
         return user != null;
     }
@@ -64,7 +70,7 @@ public class LoginController extends AbstractController {
         if (user == null) {
             return false;
         }
-        String password = queryParams.get("password");
+        String password = queryParams.get(PASSWORD);
         if (user.checkPassword(password)) {
             log.info("user: {}", user);
             saveUserInSession(response, user);
@@ -74,15 +80,15 @@ public class LoginController extends AbstractController {
     }
 
     private User getUser(final HttpQueryParams queryParams) {
-        String account = queryParams.get("account");
+        String account = queryParams.get(ACCOUNT);
         return InMemoryUserRepository.findByAccount(account).orElse(null);
     }
 
     private void saveUserInSession(final HttpResponse response, final User user) {
         Session session = new Session();
-        session.setAttribute("user", user);
+        session.setAttribute(SESSION_KEY, user);
         sessionManager.add(session);
         response.setCookie(HttpCookie.ofJSessionId(session.getId()));
-        response.sendRedirect(ROOT_RESOURCE_PATH);
+        response.sendRedirect(INDEX.path());
     }
 }

@@ -1,5 +1,7 @@
 package com.techcourse.controller;
 
+import static com.techcourse.controller.RequestPath.METHOD_NOT_ALLOWED;
+
 import java.util.Map;
 
 import org.apache.coyote.http.HttpMethod;
@@ -37,6 +39,6 @@ public abstract class AbstractController implements Controller {
     }
 
     private void sendNotAllowed(HttpRequest request, HttpResponse response) {
-        response.sendRedirect("/405.html");
+        response.sendRedirect(METHOD_NOT_ALLOWED.path());
     }
 }

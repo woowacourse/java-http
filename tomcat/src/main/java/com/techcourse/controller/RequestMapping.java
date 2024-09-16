@@ -1,5 +1,9 @@
 package com.techcourse.controller;
 
+import static com.techcourse.controller.RequestPath.LOGIN;
+import static com.techcourse.controller.RequestPath.REGISTER;
+import static com.techcourse.controller.RequestPath.ROOT;
+
 import java.util.Map;
 
 import org.apache.coyote.http.HttpRequest;
@@ -14,9 +18,9 @@ public class RequestMapping implements Controller {
 
     public RequestMapping() {
         controllers = Map.of(
-                "/", new RootController(),
-                "/login", new LoginController(),
-                "/register", new RegisterController()
+                ROOT.path(), new RootController(),
+                LOGIN.path(), new LoginController(),
+                REGISTER.path(), new RegisterController()
         );
     }
 

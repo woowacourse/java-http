@@ -1,10 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.catalina.controller.Controller;
 import com.techcourse.controller.NotFoundController;
-import org.apache.catalina.controller.ControllerMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

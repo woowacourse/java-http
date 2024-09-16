@@ -1,6 +1,5 @@
 package org.apache.coyote.http;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
@@ -18,7 +17,7 @@ public class HttpResponse implements HttpComponent {
         body = new HttpBody("");
     }
 
-    public void sendRedirect(final String location) throws IOException {
+    public void sendRedirect(final String location) {
         setStatusCode(HttpStatusCode.FOUND);
         setLocation(location);
     }

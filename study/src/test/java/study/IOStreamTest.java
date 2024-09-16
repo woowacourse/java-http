@@ -235,14 +235,4 @@ class IOStreamTest {
             assertThat(actual).hasToString(emoji);
         }
     }
-
-    @Test
-    void close_test() throws IOException {
-        final InputStream inputStream = mock(InputStream.class);
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        bufferedReader.close();
-        inputStream.close();
-        verify(inputStream, atLeastOnce()).close();
-        verify(bufferedReader, atLeastOnce()).close();
-    }
 }

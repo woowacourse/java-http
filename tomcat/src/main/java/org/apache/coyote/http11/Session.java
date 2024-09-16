@@ -12,10 +12,10 @@ public class Session implements HttpSession {
 
     private final String id;
     private final long creationTime;
+    private final Map<String, Object> attributes;
     private long lastAccessedTime;
     private boolean isNew;
     private int maxInactiveInterval;
-    private final Map<String, Object> attributes;
 
     public Session(String id) {
         this.id = id;
@@ -47,13 +47,13 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(int interval) {
-        this.maxInactiveInterval = interval;
+    public int getMaxInactiveInterval() {
+        return maxInactiveInterval;
     }
 
     @Override
-    public int getMaxInactiveInterval() {
-        return maxInactiveInterval;
+    public void setMaxInactiveInterval(int interval) {
+        this.maxInactiveInterval = interval;
     }
 
     @Override

@@ -6,8 +6,8 @@ import org.apache.coyote.request.HttpRequest;
 
 public class HttpResponseStartLine {
 
-    private HttpStatus httpStatus;
     private final HttpVersion httpVersion;
+    private HttpStatus httpStatus;
 
     public HttpResponseStartLine(HttpStatus httpStatus, HttpVersion httpVersion) {
         this.httpStatus = httpStatus;

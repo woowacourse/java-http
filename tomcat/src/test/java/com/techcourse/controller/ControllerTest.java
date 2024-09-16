@@ -77,15 +77,6 @@ public class ControllerTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
-
-        private String createRequestByHttpMethodAndTarget(HttpMethod method, String target) {
-            return String.join("\r\n",
-                    String.format("%s %s HTTP/1.1 ", method.toString(), target),
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    ""
-            );
-        }
     }
 
     @DisplayName("POST 요청 테스트")
@@ -153,6 +144,15 @@ public class ControllerTest {
                     formData
             );
         }
+    }
+
+    private String createRequestByHttpMethodAndTarget(HttpMethod method, String target) {
+        return String.join("\r\n",
+                String.format("%s %s HTTP/1.1 ", method.toString(), target),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                ""
+        );
     }
 
     private String createResponseByHttpStatusCodeAndExtensionAndUri(

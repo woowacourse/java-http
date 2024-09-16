@@ -3,12 +3,12 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.servlet.view.StaticResourceView;
 import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.RequestBodyParser;
-import com.techcourse.servlet.view.StaticResourceView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

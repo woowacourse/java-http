@@ -1,17 +1,13 @@
 handlebars:
   suffix: .html
 
-spring:
-  main:
-    web-application-type: none
-
 server:
   tomcat:
     accept-count: 1 # 스레드별 작업 대기열 큐 대기 갯수
-    max-connections: 4 # 최대 동시 요청 수 : 3개의 요청이 오면 connections만큼 요청이 수락되고 count인 1만큼 요청이 수락되고, 나머지 2개 요청은 거절된다
+    max-connections: 2 # 최대로 처리 가능한 요청 수
     threads:
-      min-spare: 2
-      max: 2  #스레드 풀에 대기 상태로 존재하는 최대 스레드 개수
+      min-spare: 1 # default 풀 사이즈
+      max: 2  # 생성할 수 있는 최대 스레드 개수
 
   compression:
     enabled: true

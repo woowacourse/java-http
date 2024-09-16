@@ -1,6 +1,8 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.Dispatcher;
 import org.slf4j.Logger;

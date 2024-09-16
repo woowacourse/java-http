@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.HttpMessageBodyInfo;
 
 public class HttpResponseHeader {
 
@@ -18,40 +19,56 @@ public class HttpResponseHeader {
     }
 
     public void add(String name, String value) {
-        if ("Content-Type".equals(name)) {
+        if (HttpMessageBodyInfo.isContentType(name)) {
             addContentType(value);
+            return;
         }
-        if ("Content-Length".equals(name)) {
-            addContentLength(value.getBytes().length);
+        if (HttpMessageBodyInfo.isContentLength(name)) {
+            addContentLength(Integer.parseInt(value));
+            return;
         }
         this.values.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
     }
 
     public void addCookie(String key, String value) {
         cookie.add(key, value);
-        values.computeIfAbsent("Set-Cookie", k -> new ArrayList<>()).add(key + "=" + value);
+        values.computeIfAbsent(HttpMessageBodyInfo.SET_COOKIE.getValue(), k -> new ArrayList<>())
+                .add(key + "=" + value);
     }
 
     public void addContentType(String contentType) {
+        List<String> contentTypes = new ArrayList<>();
         if (contentType.equals("text/html")) {
-            values.put("Content-Type", List.of(contentType + ";charset=utf-8"));
+            contentTypes.add(contentType + ";charset=utf-8");
+            values.put(HttpMessageBodyInfo.CONTENT_TYPE.getValue(), contentTypes);
             return;
         }
-        values.put("Content-Type", List.of(contentType));
+        contentTypes.add(contentType);
+        values.put(HttpMessageBodyInfo.CONTENT_TYPE.getValue(), contentTypes);
     }
 
     public void addContentLength(int length) {
-        values.put("Content-Length", List.of(String.valueOf(length)));
+        List<String> contentLengths = new ArrayList<>();
+        contentLengths.add(String.valueOf(length));
+        values.put(HttpMessageBodyInfo.CONTENT_LENGTH.getValue(), contentLengths);
     }
 
     public void addLocation(String redirectUri) {
-        values.put("Location", List.of(redirectUri));
+        List<String> locations = new ArrayList<>();
+        locations.add(redirectUri);
+        values.put(HttpMessageBodyInfo.LOCATION.getValue(), locations);
     }
 
     @Override
     public String toString() {
         return values.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + String.join(";", entry.getValue()) + " ")
+                .map(entry -> {
+                    List<String> values = entry.getValue();
+                    if (values.size() == 1) {
+                        return entry.getKey() + ": " + values.get(0) + " ";
+                    }
+                    return entry.getKey() + ": " + String.join("; ", values) + " ";
+                })
                 .collect(Collectors.joining("\r\n"));
     }
 }

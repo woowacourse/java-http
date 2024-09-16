@@ -8,10 +8,19 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateIsBlank(account);
+        validateIsBlank(password);
+        validateIsBlank(email);
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    private void validateIsBlank(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("빈 값을 입력할 수 없습니다.");
+        }
     }
 
     public User(String account, String password, String email) {

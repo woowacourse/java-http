@@ -1,9 +1,9 @@
 package com.techcourse.servlet.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.techcourse.servlet.view.StaticResourceResolver;
 import com.techcourse.servlet.view.ViewResolver;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ViewMapping {
 

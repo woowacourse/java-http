@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.HttpMessageBodyInfo;
 import org.apache.coyote.util.CookieUtil;
 
 public class HttpRequestHeader {
@@ -15,27 +16,27 @@ public class HttpRequestHeader {
     }
 
     public int getContentLength() {
-        if (values.containsKey("Content-Length")) {
-            return Integer.parseInt(values.get("Content-Length").getFirst());
+        if (values.containsKey(HttpMessageBodyInfo.CONTENT_LENGTH.getValue())) {
+            return Integer.parseInt(values.get(HttpMessageBodyInfo.CONTENT_LENGTH.getValue()).getFirst());
         }
         return 0;
     }
 
     public Cookie getCookie() {
         if (hasCookie()) {
-            return CookieUtil.read(values.get("Cookie"));
+            return CookieUtil.read(values.get(HttpMessageBodyInfo.COOKIE.getValue()));
         }
         return null;
     }
 
     public boolean hasCookie() {
-        return values.containsKey("Cookie");
+        return values.containsKey(HttpMessageBodyInfo.COOKIE.getValue());
     }
 
     public boolean hasSession() {
         if (hasCookie()) {
-            Cookie cookie = CookieUtil.read(values.get("Cookie"));
-            return cookie.containsSessionId();
+            Cookie cookie = CookieUtil.read(values.get(HttpMessageBodyInfo.COOKIE.getValue()));
+            return cookie.containsSession();
         }
         return false;
     }

@@ -30,14 +30,16 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public void doPost(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        String account = request.getRequestBodyValue(LOGIN_ACCOUNT_KEY);
-        String password = request.getRequestBodyValue(LOGIN_PASSWORD_KEY);
+    public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         try {
+            String account = request.getRequestBodyValue(LOGIN_ACCOUNT_KEY);
+            String password = request.getRequestBodyValue(LOGIN_PASSWORD_KEY);
+            validateLoginInput(account, password);
             User foundUser = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new UserException(account + "는 존재하지 않는 계정입니다."));
             loginProcess(password, foundUser, response);
-        } catch (UserException e) {
+        } catch (UserException | IllegalArgumentException e) {
+            log.info(e.getMessage());
             setFailResponse(request, response);
         }
         setResponseContent(request, response);
@@ -49,6 +51,15 @@ public class LoginController extends AbstractController {
             redirect(response, PageEndpoint.INDEX_PAGE.getEndpoint());
         }
         setResponseContent(request, response);
+    }
+
+    private void validateLoginInput(String account, String password) {
+        if (account.isEmpty()) {
+            throw new IllegalArgumentException("아이디가 입력되지 않았습니다.");
+        }
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("비밀번호가 입력되지 않았습니다.");
+        }
     }
 
     private void loginProcess(String password, User user, HttpResponse response) {

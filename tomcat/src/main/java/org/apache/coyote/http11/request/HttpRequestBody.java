@@ -11,6 +11,6 @@ public class HttpRequestBody {
     }
 
     public String getValue(String key) {
-        return requestBody.get(key);
+        return requestBody.getOrDefault(key, "");
     }
 }

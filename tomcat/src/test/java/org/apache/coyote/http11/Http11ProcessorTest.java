@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -73,7 +72,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void requestLineTest() throws IOException {
+    void requestLineTest() {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html",
@@ -88,7 +87,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인에 성공하면 /index.html로 redirect한다.")
-    void should_redirect_to_index_when_login_success() throws IOException, URISyntaxException {
+    void should_redirect_to_index_when_login_success() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -111,7 +110,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인에 실패하면 /401.html로 redirect한다.")
-    void should_redirect_to_401_when_login_fail() throws IOException, URISyntaxException {
+    void should_redirect_to_401_when_login_fail() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -134,7 +133,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("회원가입에 성공하면 /index.html로 redirect한다.")
-    void should_redirect_to_index_when_register_success() throws IOException, URISyntaxException {
+    void should_redirect_to_index_when_register_success() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",
@@ -157,7 +156,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("이미 존재하는 계정으로 회원가입을 시도하면 Bad Request를 응답하고 회원가입 페이지로 돌아간다.")
-    void should_redirect_to_register_when_login_fail() throws IOException, URISyntaxException {
+    void should_redirect_to_register_when_login_fail() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",

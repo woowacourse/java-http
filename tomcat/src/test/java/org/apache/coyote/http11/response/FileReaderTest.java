@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.helper;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

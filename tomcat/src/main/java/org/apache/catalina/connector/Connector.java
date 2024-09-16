@@ -94,13 +94,14 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
+        threadPoolExecutor.shutdown();
         try {
-            threadPoolExecutor.shutdown();
             threadPoolExecutor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            threadPoolExecutor.shutdownNow();
             serverSocket.close();
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            threadPoolExecutor.shutdownNow();
         }
     }
 

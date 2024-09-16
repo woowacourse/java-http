@@ -2,6 +2,9 @@ package org.apache.coyote.http11.message.request;
 
 public class RequestLine {
 
+    private static final String QUERY_DELIMITER = "\\?";
+    private static final int PATH_INDEX = 0;
+
     private final HttpMethod method;
     private final String uri;
     private final String protocolVersion;
@@ -25,7 +28,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        return uri.split("\\?")[0];
+        return uri.split(QUERY_DELIMITER)[PATH_INDEX];
     }
 
     public HttpMethod getMethod() {

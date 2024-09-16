@@ -17,7 +17,7 @@ public class StaticResourceHandler implements Controller {
     private static final String DEFAULT_PATH = "static";
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) {
         String requestPath = request.getPath();
         String resource = readResource(requestPath);
         response.setStatusCode(HttpStatusCode.OK);

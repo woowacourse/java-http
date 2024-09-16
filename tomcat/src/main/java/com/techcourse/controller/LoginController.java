@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         if (login(request, response)) {
             return;
         }
@@ -61,7 +61,7 @@ public class LoginController extends AbstractController {
         return user != null;
     }
 
-    private boolean login(final HttpRequest request, final HttpResponse response) throws IOException {
+    private boolean login(final HttpRequest request, final HttpResponse response) {
         HttpQueryParams queryParams = request.getQueryParamsFromBody();
         if (queryParams == null) {
             return false;

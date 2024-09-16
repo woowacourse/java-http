@@ -22,7 +22,6 @@ class ContainerTest {
         Container container = new Container(Application.requestMapping(), mock(HttpSessionWrapper.class));
         Runnable runnable = container.acceptConnection(socket);
 
-
         // when
         runnable.run();
 

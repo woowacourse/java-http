@@ -57,7 +57,7 @@ class ConnectorTest {
                 .isEqualTo(ACCEPT_COUNT)
                 .isEqualTo(WAIT_EXPECTED);
 
-        // connector.process 내부 getHttp11Processor의 호출 수는 connector의 accept 수이다.
+        // connector.process 내부 container.accpetConnection 호출 수는 connector의 accept 수이다.
         // acceptCount + maxThreads + 100번 요청해도 accept()는 최대 accept count + max thread만큼 한다.
         verify(container, times(ACCEPT_COUNT + MAX_THREADS)).acceptConnection(any());
 

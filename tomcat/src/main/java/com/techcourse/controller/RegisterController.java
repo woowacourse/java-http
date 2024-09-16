@@ -31,9 +31,17 @@ public class RegisterController extends AbstractController {
         String account = values.get("account");
         String password = values.get("password");
         String email = values.get("email");
+        validateDuplicatedAccount(account);
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         response.found("/index.html");
+    }
+
+    private void validateDuplicatedAccount(String account) {
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(user -> {
+                    throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+                });
     }
 }

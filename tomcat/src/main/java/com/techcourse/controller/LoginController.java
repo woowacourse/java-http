@@ -13,12 +13,6 @@ import org.apache.catalina.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
-    private final SessionManager sessionManager;
-
-    public LoginController() {
-        this.sessionManager = SessionManager.getInstance();
-    }
-
     @Override
     protected void doGet(Request request, Response response) throws Exception {
         response.addFileBody("/login.html");

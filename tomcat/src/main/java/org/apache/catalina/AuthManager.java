@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.Session;
-import java.util.Optional;
 import java.util.UUID;
 
 public class AuthManager {
@@ -51,9 +50,9 @@ public class AuthManager {
         String account = httpRequest.getRequestBodyValue(ACCOUNT_NAME);
         String password = httpRequest.getRequestBodyValue(PASSWORD_NAME);
 
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-
-        return optionalUser.isPresent() && optionalUser.get().checkPassword(password);
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
     }
 
     public static boolean isAuthenticated(HttpRequest httpRequest) {

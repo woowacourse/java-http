@@ -8,7 +8,9 @@ public enum MimeType {
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
     ICO(".ico", "image/vnd.microsoft.icon"),
-    JSON(".json","application/json");
+    JSON(".json","application/json"),
+    SVG(".svg","image/svg+xml"),
+    ;
 
     private final String extension;
     private final String type;

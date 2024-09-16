@@ -6,12 +6,26 @@ public enum HeaderKey {
 
     HOST("Host"),
     ACCEPT("Accept"),
+    ACCEPT_ENCODING("Accept-Encoding"),
+    ACCEPT_LANGUAGE("Accept-Language"),
     CONNECTION("Connection"),
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
     LOCATION("Location"),
     SET_COOKIE("Set-Cookie"),
     COOKIE("Cookie"),
+    CACHE_CONTROL("Cache-Control"),
+    SEC_FETCH_DEST("Sec-Fetch-Dest"),
+    SEC_FETCH_MODE("Sec-Fetch-Mode"),
+    SEC_FETCH_SITE("Sec-Fetch-Site"),
+    SEC_FETCH_USER("Sec-Fetch-User"),
+    SEC_CH_UA("sec-ch-ua"),
+    SEC_CH_UA_MOBILE("sec-ch-ua-mobile"),
+    SEC_CH_UA_PLATFORM("sec-ch-ua-platform"),
+    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
+    USER_AGENT("User-Agent"),
+    REFERER("Referer"),
+    ORIGIN("Origin"),
     ;
 
     private final String value;

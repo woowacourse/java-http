@@ -16,7 +16,8 @@
  */
 package org.apache.coyote;
 
-import java.net.Socket;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
 
 /**
  * Common interface for processors of all protocols.
@@ -28,5 +29,10 @@ public interface Processor {
      * data arrives) that allows processing to continue for a connection that is
      * not currently being processed.
      */
-    void process(Socket socket);
+    void process(HttpResponse response);
+
+    /**
+     * @return The request associated with this processor.
+     */
+    HttpRequest getRequest();
 }

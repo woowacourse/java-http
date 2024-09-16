@@ -44,11 +44,9 @@ public class Connector implements Runnable {
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(final int port, final int checkedAcceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkPort(port), checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -116,7 +114,7 @@ public class Connector implements Runnable {
         return Math.min(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 
-    private int checkMaxThreads(int maxThreads) {
+    private int checkMaxThreads(final int maxThreads) {
         return Math.min(maxThreads, DEFAULT_THREADS);
     }
 

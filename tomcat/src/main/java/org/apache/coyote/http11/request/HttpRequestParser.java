@@ -29,7 +29,7 @@ public class HttpRequestParser {
     }
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
-        String[] requestLine = parseReqestLines(bufferedReader);
+        String[] requestLine = parseRequestLines(bufferedReader);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
@@ -40,7 +40,7 @@ public class HttpRequestParser {
                 httpRequestHeaders, httpRequestBody, httpCookie);
     }
 
-    private String[] parseReqestLines(BufferedReader bufferedReader) throws IOException {
+    private String[] parseRequestLines(BufferedReader bufferedReader) throws IOException {
         String[] requestLines = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
         validateRequestLine(requestLines);
         return requestLines;

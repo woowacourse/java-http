@@ -24,4 +24,9 @@ public class SimpleSessionManager implements Manager {
     public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
     }
+
+    @Override
+    public HttpSession createSession(String sessionId) {
+        return new SimpleSession(sessionId);
+    }
 }

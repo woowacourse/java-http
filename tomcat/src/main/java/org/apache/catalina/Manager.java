@@ -53,4 +53,19 @@ public interface Manager {
      * @param session Session to be removed
      */
     void remove(HttpSession session);
+
+    /**
+     * Construct and return a new session object, based on the default settings specified by this Manager's properties.
+     * The session id specified will be used as the session id. If a new session cannot be created for any reason,
+     * return <code>null</code>.
+     *
+     * @param sessionId The session id which should be used to create the new session; if <code>null</code>, the session
+     *                      id will be assigned by this method, and available via the getId() method of the returned
+     *                      session.
+     *
+     * @exception IllegalStateException if a new session cannot be instantiated for any reason
+     *
+     * @return An empty Session object with the given ID or a newly created session ID if none was specified
+     */
+    HttpSession createSession(String sessionId);
 }

@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpSessionContext;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class SimpleSession implements HttpSession {
 
-    private final UUID sessionId = UUID.randomUUID();
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values;
+    private final String sessionId;
+
+    public SimpleSession(String sessionId) {
+        this.sessionId = sessionId;
+        this.values = new HashMap<>();
+    }
 
     @Override
     public long getCreationTime() {
@@ -36,7 +40,6 @@ public class SimpleSession implements HttpSession {
 
     @Override
     public void setMaxInactiveInterval(int interval) {
-
     }
 
     @Override
@@ -76,22 +79,18 @@ public class SimpleSession implements HttpSession {
 
     @Override
     public void putValue(String name, Object value) {
-
     }
 
     @Override
     public void removeAttribute(String name) {
-
     }
 
     @Override
     public void removeValue(String name) {
-
     }
 
     @Override
     public void invalidate() {
-
     }
 
     @Override

@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 public class HttpCookie {
 
     private static final String JSESSIONID_VALUE = "JSESSIONID";
+    public static final String COOKIE_DELIMITER = "; ";
+    public static final String COOKIE_VALUE_DELIMITER = "=";
 
     private final Map<String, String> cookies;
 
@@ -19,15 +21,16 @@ public class HttpCookie {
     }
 
     private static Map<String, String> mapCookies(String rawCookies) {
-        Map<String, String> cookieGroup = new HashMap<>();
+        if (rawCookies == null || rawCookies.isBlank()) {
+            return Map.of();
+        }
 
-        if (rawCookies != null && !rawCookies.isBlank()) {
-            String[] cookiesElements = rawCookies.split("; ");
-            for (int i = 0; i < cookiesElements.length; i++) {
-                String[] cookiePair = cookiesElements[i].split("=");
-                if (cookiePair.length > 1) {
-                    cookieGroup.put(cookiePair[0], cookiePair[1]);
-                }
+        Map<String, String> cookieGroup = new HashMap<>();
+        String[] cookiesElements = rawCookies.split(COOKIE_DELIMITER);
+        for (String cookiesElement : cookiesElements) {
+            String[] cookiePair = cookiesElement.split(COOKIE_VALUE_DELIMITER);
+            if (cookiePair.length == 2) {
+                cookieGroup.put(cookiePair[0], cookiePair[1]);
             }
         }
         return cookieGroup;
@@ -49,7 +52,7 @@ public class HttpCookie {
         StringBuilder response = new StringBuilder();
         for (Entry<String, String> stringStringEntry : cookies.entrySet()) {
             response.append(stringStringEntry.getKey())
-                    .append("=")
+                    .append(COOKIE_VALUE_DELIMITER)
                     .append(stringStringEntry.getValue())
                     .append(";");
         }

@@ -1,6 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.container;
 
-import org.apache.catalina.Manager;
+import jakarta.controller.Controller;
+import jakarta.http.HttpSessionWrapper;
+import jakarta.http.HttpVersion;
+import jakarta.http.Header;
+import jakarta.http.HttpBody;
+import jakarta.http.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,11 +36,12 @@ class RequestMappingTest {
     void getController() {
         Controller mockController = mock(Controller.class);
         RequestMapping requestMapping = new RequestMapping(Collections.emptyMap(), mockController);
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "GET / HTTP/1.1",
                 Header.empty(),
                 mock(HttpBody.class),
-                mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                mock(HttpSessionWrapper.class)
         );
 
         Controller controller = requestMapping.getController(request);

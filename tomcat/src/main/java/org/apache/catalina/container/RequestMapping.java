@@ -1,9 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.container;
+
+import jakarta.controller.Controller;
+import jakarta.http.HttpRequest;
 
 import java.util.Map;
 import java.util.Objects;
 
-class RequestMapping {
+public class RequestMapping {
 
     private final Map<String, Controller> controllerMap;
     private final Controller defaultcontroller;

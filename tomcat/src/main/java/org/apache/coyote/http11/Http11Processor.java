@@ -3,12 +3,11 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 
-import org.apache.HandlerMapping;
-import org.apache.HomeRequestHandler;
-import org.apache.HttpRequest;
-import org.apache.LoginRequestHandler;
-import org.apache.RegisterRequestHandler;
-import org.apache.StaticResourceRequestHandler;
+import jakarta.servlet.RequestMapping;
+import com.techcourse.servlet.HomeController;
+import com.techcourse.servlet.LoginController;
+import com.techcourse.servlet.RegisterController;
+import jakarta.servlet.StaticResourceController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,15 +20,15 @@ public class Http11Processor implements Runnable, Processor {
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
 	private final Socket connection;
-	private final HandlerMapping handlerMapping;
+	private final RequestMapping requestMapping;
 
 	public Http11Processor(final Socket connection) {
 		this.connection = connection;
-		this.handlerMapping = new HandlerMapping();
-		handlerMapping.register(new StaticResourceRequestHandler());
-		handlerMapping.register(new HomeRequestHandler());
-		handlerMapping.register(new LoginRequestHandler(SessionManager.getInstance()));
-		handlerMapping.register(new RegisterRequestHandler());
+		this.requestMapping = new RequestMapping();
+		requestMapping.register(new StaticResourceController());
+		requestMapping.register(new HomeController());
+		requestMapping.register(new LoginController(SessionManager.getInstance()));
+		requestMapping.register(new RegisterController());
 	}
 
 	@Override
@@ -44,17 +43,20 @@ public class Http11Processor implements Runnable, Processor {
 			 final var outputStream = connection.getOutputStream()) {
 
 			HttpRequest request = HttpRequest.from(inputStream);
+			HttpResponse response = HttpResponse.empty();
 
 			if (!request.isHttp11VersionRequest()) {
 				throw new IOException("not http1.1 request");
 			}
 
-			var response = handlerMapping.getHandler(request).handle(request);
+			requestMapping.getController(request).service(request, response);
 
 			outputStream.write(response.getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

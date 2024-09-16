@@ -3,7 +3,7 @@ package org.apache.catalina.request;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueuryParam {
+public class QueuyParam {
 
     public static final String QUERY_INDICATOR = "?";
     public static final String QUERY_COMPONENT_DELIMITER = "&";
@@ -11,7 +11,7 @@ public class QueuryParam {
 
     private final Map<String, String> params;
 
-    public QueuryParam(String requestLineEntry) {
+    public QueuyParam(String requestLineEntry) {
         this.params = mapQueryParam(requestLineEntry);
     }
 

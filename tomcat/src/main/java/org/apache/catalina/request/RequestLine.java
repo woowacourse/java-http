@@ -11,13 +11,13 @@ public class RequestLine {
     private final HttpMethod httpMethod;
     private final String path;
     private final String versionOfProtocol;
-    private final QueuryParam queryParams;
+    private final QueuyParam queryParams;
 
     public RequestLine(String headerLines) {
         String[] requestLineEntries = headerLines.split(" ");
 
         this.httpMethod = HttpMethod.valueOf(requestLineEntries[0]);
-        this.queryParams = new QueuryParam(requestLineEntries[1]);
+        this.queryParams = new QueuyParam(requestLineEntries[1]);
         this.path = mapPath(requestLineEntries[1]);
         this.versionOfProtocol = requestLineEntries[2];
     }

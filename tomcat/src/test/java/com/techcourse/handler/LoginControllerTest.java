@@ -17,6 +17,7 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
@@ -50,7 +51,7 @@ class LoginControllerTest {
         HttpSession session = mock(HttpSession.class);
         when(session.getId())
                 .thenReturn("1234");
-        when(httpSessionWrapper.getSession(any(), any()))
+        when(httpSessionWrapper.getSession(anyBoolean(), any()))
                 .thenReturn(session);
 
         HttpRequest request = HttpRequest.createHttpRequest(

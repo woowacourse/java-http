@@ -24,7 +24,7 @@ class ResourceProcessorTest {
     @DisplayName("정적 데이터를 처리한다.")
     void processResponse() throws Exception {
         StaticResourceController resourceController = mock(StaticResourceController.class);
-        ResourceFinder resourceFinder = mock(ResourceFinder.class);
+        ResourceFinder resourceFinder = new ResourceFinder();
         Controller controller = mock(Controller.class);
         Controller defaultController = mock(Controller.class);
         HashMap<String, Controller> map = new HashMap<>();

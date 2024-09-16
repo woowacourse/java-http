@@ -26,7 +26,7 @@ public enum ControllerMapper {
     public static Controller find(String path) {
         return Arrays.stream(values())
                 .filter(value -> value.path.equals(path))
-                .findFirst()
+                .findAny()
                 .orElse(NOT_FOUND)
                 .controller;
     }

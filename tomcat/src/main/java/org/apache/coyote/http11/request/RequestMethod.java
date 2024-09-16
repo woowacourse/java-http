@@ -11,7 +11,7 @@ public enum RequestMethod {
     public static RequestMethod find(String rawMethod) {
         return Arrays.stream(values())
                 .filter(value -> value.name().equals(rawMethod))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP 메서드입니다."));
     }
 

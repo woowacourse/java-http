@@ -5,6 +5,11 @@ import java.util.Map;
 
 public class RequestBody {
 
+    public static final String COMPONENT_DELIMITER = "&";
+    public static final String COMPONENT_VALUE_DELIMITER = "=";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
     private final Map<String, String> body;
 
     public RequestBody() {
@@ -18,10 +23,10 @@ public class RequestBody {
     private Map<String, String> mapBody(String bodyLine) {
         Map<String, String> rawBody = new HashMap<>();
 
-        String[] bodyElements = bodyLine.split("&");
+        String[] bodyElements = bodyLine.split(COMPONENT_DELIMITER);
         for (int i = 0; i < bodyElements.length; i++) {
-            String[] info = bodyElements[i].split("=");
-            rawBody.put(info[0], info[1]);
+            String[] info = bodyElements[i].split(COMPONENT_VALUE_DELIMITER);
+            rawBody.put(info[KEY_INDEX], info[VALUE_INDEX]);
         }
         return rawBody;
     }

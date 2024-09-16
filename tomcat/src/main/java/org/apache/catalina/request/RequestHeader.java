@@ -8,6 +8,12 @@ import org.apache.catalina.HeaderName;
 
 public class RequestHeader {
 
+    public static final String NAME_VALUE_DELIMITER = ": ";
+    public static final int NAME_VALUE_COUNT = 2;
+    public static final int NAME_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
+
     private final Map<String, String> header;
     private final HttpCookie httpCookie;
 
@@ -27,8 +33,8 @@ public class RequestHeader {
         Map<String, String> rawHeader = new HashMap<>();
 
         for (String line : headerLines) {
-            String[] headerEntry = line.split(": ", 2);
-            rawHeader.put(headerEntry[0], headerEntry[1]);
+            String[] headerEntry = line.split(NAME_VALUE_DELIMITER, NAME_VALUE_COUNT);
+            rawHeader.put(headerEntry[NAME_INDEX], headerEntry[VALUE_INDEX]);
         }
         return rawHeader;
     }

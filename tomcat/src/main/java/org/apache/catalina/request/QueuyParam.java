@@ -6,8 +6,10 @@ import java.util.Map;
 public class QueuyParam {
 
     public static final String QUERY_INDICATOR = "?";
-    public static final String QUERY_COMPONENT_DELIMITER = "&";
-    public static final String QUERY_COMPONENT_VALUE_DELIMITER = "=";
+    public static final String COMPONENT_DELIMITER = "&";
+    public static final String COMPONENT_VALUE_DELIMITER = "=";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
 
     private final Map<String, String> params;
 
@@ -23,12 +25,12 @@ public class QueuyParam {
 
         int queryParamIndex = requestLineEntry.indexOf(QUERY_INDICATOR);
         String queryString = requestLineEntry.substring(queryParamIndex + 1);
-        String[] splittedQueryString = queryString.split(QUERY_COMPONENT_DELIMITER);
+        String[] splittedQueryString = queryString.split(COMPONENT_DELIMITER);
 
         for (String queryParamEntry : splittedQueryString) {
             mappedQueryParams.put(
-                    queryParamEntry.split(QUERY_COMPONENT_VALUE_DELIMITER)[0],
-                    queryParamEntry.split(QUERY_COMPONENT_VALUE_DELIMITER)[1]
+                    queryParamEntry.split(COMPONENT_VALUE_DELIMITER)[KEY_INDEX],
+                    queryParamEntry.split(COMPONENT_VALUE_DELIMITER)[VALUE_INDEX]
             );
         }
         return mappedQueryParams;

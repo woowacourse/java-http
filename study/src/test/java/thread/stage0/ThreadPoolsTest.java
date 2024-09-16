@@ -36,6 +36,7 @@ class ThreadPoolsTest {
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        executor.close();
     }
 
     @Test
@@ -51,6 +52,7 @@ class ThreadPoolsTest {
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        executor.close();
     }
 
     private Runnable logWithSleep(final String message) {

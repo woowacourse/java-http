@@ -1,29 +1,33 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executor;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.executor = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -43,6 +47,7 @@ public class Connector implements Runnable {
         thread.setDaemon(true);
         thread.start();
         stopped = false;
+
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -67,13 +72,14 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executor.submit(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -91,5 +97,10 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    public int getMaximumPoolSize() {
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
+        return threadPoolExecutor.getMaximumPoolSize();
     }
 }

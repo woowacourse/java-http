@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.dispatcher.DispatcherServlet;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
@@ -25,7 +26,7 @@ class LoginControllerTest {
                     "GET /login HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, new HttpHeaders(), null);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -45,7 +46,7 @@ class LoginControllerTest {
             Query body = Query.create("account=gugu&password=password");
             HttpRequest request = new HttpRequest(startLine, new HttpHeaders(), body);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -61,7 +62,7 @@ class LoginControllerTest {
             Query body = Query.create("account=NoExist&password=NoExist");
             HttpRequest request = new HttpRequest(startLine, new HttpHeaders(), body);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -77,7 +78,7 @@ class LoginControllerTest {
             Query body = Query.create("account=gugu&password=password");
             HttpRequest request = new HttpRequest(startLine, new HttpHeaders(), body);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -92,7 +93,7 @@ class LoginControllerTest {
             Query body = Query.create("account=gugu&password=password");
             HttpRequest request = new HttpRequest(startLine, new HttpHeaders(), body);
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);

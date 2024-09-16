@@ -16,6 +16,8 @@ import org.apache.coyote.view.ViewResolver;
 
 public class ControllerAdviser {
 
+    private ControllerAdviser() {}
+
     private static final Map<Class<? extends UncheckedServletException>, Consumer<HttpResponse>> exceptionStatusMap = new ConcurrentHashMap<>();
 
     static {

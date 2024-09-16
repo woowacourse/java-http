@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.ControllerAdviser;
-import com.techcourse.controller.FrontController;
+import org.apache.coyote.dispatcher.DispatcherServlet;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -62,8 +62,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
         HttpResponse response = new HttpResponse();
-        FrontController frontController = FrontController.getInstance();
-        frontController.service(request, response);
+        DispatcherServlet dispatcherServlet = DispatcherServlet.getInstance();
+        dispatcherServlet.service(request, response);
         return response;
     }
 }

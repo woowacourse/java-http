@@ -12,11 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class GreetingController {
 
     @GetMapping("/")
-    public ResponseEntity<String> index() {
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache().cachePrivate())
-                .header(HttpHeaders.CONTENT_ENCODING, "gzip")
-                .body("index");
+    public String index() {
+        System.out.println("GreetingController.index");
+        return "index";
     }
 
     /**

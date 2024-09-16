@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.dispatcher.DispatcherServlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -19,7 +20,7 @@ class MainPageControllerTest {
             // given
             HttpRequest request = HttpRequest.create("GET / HTTP/1.1");
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);
@@ -33,7 +34,7 @@ class MainPageControllerTest {
             // given
             HttpRequest request = HttpRequest.create("POST / HTTP/1.1");
             HttpResponse response = new HttpResponse();
-            FrontController controller = FrontController.getInstance();
+            DispatcherServlet controller = DispatcherServlet.getInstance();
 
             // when
             controller.service(request, response);

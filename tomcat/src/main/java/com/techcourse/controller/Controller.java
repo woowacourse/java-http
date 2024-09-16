@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 public interface Controller {
 
-
     Logger log = LoggerFactory.getLogger(Controller.class);
 
     void service(HttpRequest request, HttpResponse response);

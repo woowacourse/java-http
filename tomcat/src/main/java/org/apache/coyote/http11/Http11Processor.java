@@ -2,12 +2,12 @@ package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.FrontController;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.FrontController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

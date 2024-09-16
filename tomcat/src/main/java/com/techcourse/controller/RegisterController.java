@@ -41,7 +41,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final var path = request.getRequestPath();
+        final String path = request.getRequestPath();
         response.ok();
         response.setContentType(FileType.HTML);
         response.setContentOfResources(path + HTML_SUFFIX);

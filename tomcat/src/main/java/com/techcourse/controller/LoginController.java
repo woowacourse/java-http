@@ -41,7 +41,7 @@ public class LoginController extends AbstractController {
         if (isLogin(request, response)) {
             return;
         }
-        final var path = request.getRequestPath();
+        final String path = request.getRequestPath();
         response.ok();
         response.setContentType(FileType.HTML);
         response.setContentOfResources(path + HTML_SUFFIX);
@@ -58,9 +58,9 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isLogin(final HttpRequest request, final HttpResponse response) {
-        final var cookies = request.getCookies();
+        final HttpCookie cookies = request.getCookies();
         if (cookies.containsSession() && hasSession(cookies)) {
-            final var session = SessionManager.findSession(cookies.getSessionCookie());
+            final Session session = SessionManager.findSession(cookies.getSessionCookie());
             buildLoginSuccessResponse(response, session);
             return true;
         }
@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean hasSession(final HttpCookie cookies) {
-        final var sessionId = cookies.getSessionCookie();
+        final String sessionId = cookies.getSessionCookie();
         return SessionManager.contains(sessionId);
     }
 

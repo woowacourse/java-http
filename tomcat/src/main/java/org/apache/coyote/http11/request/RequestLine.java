@@ -15,13 +15,14 @@ public class RequestLine {
         this.path = path;
     }
 
-    public static RequestLine of(final String requestLine) {
+    public static RequestLine from(final String requestLine) {
         if (requestLine == null) {
             return null;
         }
-        final var requestLineTokens = requestLine.split(DELIMITER);
-        final var method = HttpMethod.valueOf(requestLineTokens[METHOD_INDEX]);
-        final var path = requestLineTokens[PATH_INDEX];
+        final String[] requestLineTokens = requestLine.split(DELIMITER);
+        final HttpMethod method = HttpMethod.valueOf(requestLineTokens[METHOD_INDEX]);
+        final String path = requestLineTokens[PATH_INDEX];
+      
         return new RequestLine(method, path);
     }
 

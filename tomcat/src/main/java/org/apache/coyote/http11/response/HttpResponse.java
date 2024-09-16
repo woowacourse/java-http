@@ -16,9 +16,8 @@ public class HttpResponse {
 
     public HttpResponse(HttpResponseHeaders headers, HttpStatus status, String body) {
         this.headers = headers;
-        this.status = status;
-        this.body = body;
-        headers.addContentLength(body.getBytes().length);
+        setStatus(status);
+        setBody(body);
     }
 
     public HttpResponse() {
@@ -26,10 +25,9 @@ public class HttpResponse {
     }
 
     public void sendTextFiles(String text) {
-        status = HttpStatus.OK;
-        body = text;
+        setStatus(HttpStatus.OK);
+        setBody(text);
         headers.addContentType("text/html;charset=utf-8");
-        headers.addContentLength(body.getBytes().length);
     }
 
     public void sendStaticResource(String filePath) {
@@ -40,14 +38,12 @@ public class HttpResponse {
         setStatus(status);
         setBody(StaticFileResponseUtils.readStaticFile(filePath));
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
-        headers.addContentLength(body.getBytes().length);
     }
 
     public void sendRedirect(String location) {
         setStatus(HttpStatus.FOUND);
         setBody(EMPTY_BODY);
         headers.addLocation(location);
-        headers.addContentLength(body.getBytes().length);
     }
 
     public void setStatus(HttpStatus status) {
@@ -56,6 +52,7 @@ public class HttpResponse {
 
     public void setBody(String body) {
         this.body = body;
+        headers.addContentLength(body.getBytes().length);
     }
 
     public void setSession(Session session) {

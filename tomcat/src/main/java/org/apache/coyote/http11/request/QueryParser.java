@@ -32,7 +32,6 @@ public class QueryParser {
             String value = token.split(DELIMITER_OF_KEY_VALUE)[INDEX_OF_QUERY_VALUE];
             result.put(key, value);
         }
-        result.forEach(System.out::printf);
         return result;
     }
 

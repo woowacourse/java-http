@@ -49,6 +49,7 @@ class ConnectorTest {
 
         // then
         assertThat(executorService.isTerminated()).isTrue();
+        connector.stop();
     }
 
     @Test
@@ -56,7 +57,7 @@ class ConnectorTest {
         // given
         int acceptCount = 11;
         ExecutorService executorService = Executors.newFixedThreadPool(acceptCount);
-        Connector connector = new Connector(8080, acceptCount, 1);
+        Connector connector = new Connector(808, acceptCount, 1);
 
         String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -87,5 +88,6 @@ class ConnectorTest {
 
         // then
         assertThat(executorService.isTerminated()).isTrue();
+        connector.stop();
     }
 }

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import org.apache.coyote.http11.constant.HeaderKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +26,9 @@ class RequestHeadersTest {
         RequestHeaders requestHeaders = new RequestHeaders(reader);
 
         // then
-        assertThat(requestHeaders.get("Host").get().getValue()).isEqualTo("localhost:8080");
-        assertThat(requestHeaders.get("Connection").get().getValue()).isEqualTo("keep-alive");
-        assertThat(requestHeaders.get("Accept").get().getValue()).isEqualTo("*/*");
+        assertThat(requestHeaders.get(HeaderKey.HOST).get().getValue()).isEqualTo("localhost:8080");
+        assertThat(requestHeaders.get(HeaderKey.CONNECTION).get().getValue()).isEqualTo("keep-alive");
+        assertThat(requestHeaders.get(HeaderKey.ACCEPT).get().getValue()).isEqualTo("*/*");
     }
 
     @DisplayName("객체 생성 시 헤더의 형태가 아닌 문자열이 입력된 경우 예외가 발생한다.")

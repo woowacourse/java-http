@@ -25,6 +25,12 @@ public class HttpResponse {
         this.status = status;
     }
 
+    public void setBody(String body) {
+        this.body = body;
+        this.headers.put(HttpHeader.CONTENT_TYPE, "text/plain;charset=utf-8");
+        this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    }
+
     public void setBodyWithStaticResource(String filePath) {
         try {
             URL resource = getClass().getClassLoader().getResource("static" + filePath);
@@ -35,16 +41,12 @@ public class HttpResponse {
             byte[] fileContents = Files.readAllBytes(new File(resource.getFile()).toPath());
             String fileExtension = getFileExtension(filePath);
 
-            setBodyWithContentType(new String(fileContents), "text/" + fileExtension + ";charset=utf-8");
+            this.body = new String(fileContents);
+            this.headers.put(HttpHeader.CONTENT_TYPE, "text/" + fileExtension + ";charset=utf-8");
+            this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         } catch (IOException e) {
             this.status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
-    }
-
-    public void setBodyWithContentType(String body, String contentType) {
-        this.body = body;
-        this.headers.put(HttpHeader.CONTENT_TYPE, contentType);
-        this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 
     private String getFileExtension(String filePath) {

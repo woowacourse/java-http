@@ -7,6 +7,6 @@ public class HomeController extends Controller {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        response.setBodyWithContentType("Hello world!", "text/html;charset=utf-8");
+        response.setBody("Hello world!");
     }
 }

@@ -10,7 +10,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import jakarta.servlet.StaticResourceController;
+import org.apache.catalina.servlets.StaticResourceController;
 import support.HttpRequestFixture;
 
 class StaticResourceControllerTest {

@@ -1,7 +1,5 @@
 package org.apache.catalina.controller;
 
-import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.controller.PageController;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -29,8 +27,10 @@ class PageControllerTest {
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
         AbstractController pageController = new PageController();
 
+        HttpResponse httpResponse = new HttpResponse();
+
         // when
-        HttpResponse httpResponse = pageController.service(httpRequest);
+        pageController.service(httpRequest, httpResponse);
         String resource = getResource(expectedPath);
 
         // then

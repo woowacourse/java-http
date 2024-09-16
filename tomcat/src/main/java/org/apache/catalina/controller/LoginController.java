@@ -14,9 +14,7 @@ import static org.apache.coyote.http11.Status.OK;
 public class LoginController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
-        HttpResponse httpResponse = new HttpResponse();
-
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             Session session = AuthManager.authenticate(httpRequest);
 
@@ -27,14 +25,10 @@ public class LoginController extends AbstractController {
             httpResponse.setStatusLine(FOUND);
             httpResponse.setLocation("/401.html");
         }
-
-        return httpResponse;
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        HttpResponse httpResponse = new HttpResponse();
-
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (AuthManager.isAuthenticated(httpRequest)) {
             Session session = AuthManager.getAuthenticatedSession(httpRequest);
 
@@ -42,7 +36,7 @@ public class LoginController extends AbstractController {
             httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
             httpResponse.setLocation("/index.html");
 
-            return httpResponse;
+            return;
         }
 
         String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
@@ -51,7 +45,5 @@ public class LoginController extends AbstractController {
         httpResponse.setContentType(httpRequest.getContentType());
         httpResponse.setResponseBody(responseBody);
         httpResponse.setContentLength(responseBody.getBytes().length);
-
-        return httpResponse;
     }
 }

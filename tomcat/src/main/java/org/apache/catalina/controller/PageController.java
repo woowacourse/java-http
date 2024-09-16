@@ -10,21 +10,17 @@ import static org.apache.coyote.http11.Status.OK;
 public class PageController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        HttpResponse httpResponse = new HttpResponse();
-
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
 
         httpResponse.setStatusLine(OK);
         httpResponse.setContentType(httpRequest.getContentType());
         httpResponse.setResponseBody(responseBody);
         httpResponse.setContentLength(responseBody.getBytes().length);
-
-        return httpResponse;
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
-        return null;
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.setStatusLine(OK);
     }
 }

@@ -1,8 +1,6 @@
 package org.apache.catalina.controller;
 
 import org.apache.catalina.SessionManager;
-import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.controller.LoginController;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -34,8 +32,10 @@ class LoginControllerTest {
         HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 
+        HttpResponse httpResponse = new HttpResponse();
+
         // when
-        HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         Assertions.assertThat(httpResponse.getStatusMessage()).isEqualTo(Status.FOUND.getStatusMessage());
@@ -53,8 +53,10 @@ class LoginControllerTest {
         HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 
+        HttpResponse httpResponse = new HttpResponse();
+
         // when
-        HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         Assertions.assertThat(httpResponse.getStatusMessage()).isEqualTo(Status.OK.getStatusMessage());
@@ -72,8 +74,10 @@ class LoginControllerTest {
         HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
 
+        HttpResponse httpResponse = new HttpResponse();
+
         // when
-        HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         Assertions.assertThat(httpResponse.getStatusMessage()).isEqualTo(Status.OK.getStatusMessage());

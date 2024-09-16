@@ -62,11 +62,11 @@ public class HttpResponse {
         addHeader(HttpHeader.CONTENT_LENGTH, NO_CONTENT_LENGTH);
     }
 
-    public boolean containsView() {
-        return statusLine.isNotRedirect() && containsViewName(body);
+    public boolean containsViewUri() {
+        return statusLine.isNotRedirect() && containsViewUri(body);
     }
 
-    private boolean containsViewName(String body) {
+    private boolean containsViewUri(String body) {
         return ContentType.getViewExtension()
                 .stream()
                 .anyMatch(body::endsWith);

@@ -13,7 +13,7 @@ public class FrontController {
         Controller controller = RequestMapping.getController(request);
         controller.service(request, response);
 
-        if (response.containsView()) {
+        if (response.containsViewUri()) {
             String uri = response.getBody();
             String view = ViewResolver.getInstance().resolveViewName(uri);
             response.setView(view);

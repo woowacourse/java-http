@@ -43,13 +43,13 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest request = ObjectMapper.deserialize(bufferedReader);
+            final HttpRequest request = ObjectMapper.getInstance().deserialize(bufferedReader);
 
             RequestHandler requestHandler = requestHandlerMapper.getRequestHandler(request);
             HttpResponse response = new Http11Response();
             requestHandler.handle(request, response);
 
-            outputStream.write(ObjectMapper.serialize(response));
+            outputStream.write(ObjectMapper.getInstance().serialize(response));
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

@@ -1,10 +1,8 @@
-package com.techcourse.controller;
+package org.apache.coyote;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.nio.charset.StandardCharsets;
 import org.apache.ResourceReader;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
 
 public class NotFoundController extends AbstractRequestController {
 

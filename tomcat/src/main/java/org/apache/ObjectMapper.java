@@ -13,29 +13,38 @@ import org.apache.coyote.http11.request.Http11RequestLine;
 
 public class ObjectMapper {
 
+    private static ObjectMapper instance;
+
+    public static ObjectMapper getInstance() {
+        if (instance == null) {
+            return new ObjectMapper();
+        }
+        return instance;
+    }
+
     private ObjectMapper() {
     }
 
-    public static byte[] serialize(HttpResponse response) {
+    public byte[] serialize(HttpResponse response) {
         return response.getResponseMessage().getBytes();
     }
 
-    public static HttpRequest deserialize(BufferedReader bufferedReader) throws IOException {
+    public HttpRequest deserialize(BufferedReader bufferedReader) throws IOException {
         return readRequest(bufferedReader);
     }
 
-    private static HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
+    private HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
         Http11RequestLine requestLine = getLine(bufferedReader);
         Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
         Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getContentLength());
         return new Http11Request(requestLine, requestHeaders, requestBody);
     }
 
-    private static Http11RequestLine getLine(BufferedReader bufferedReader) throws IOException {
+    private Http11RequestLine getLine(BufferedReader bufferedReader) throws IOException {
         return new Http11RequestLine(bufferedReader.readLine());
     }
 
-    private static Http11RequestHeaders getHeaders(BufferedReader bufferedReader) throws IOException {
+    private Http11RequestHeaders getHeaders(BufferedReader bufferedReader) throws IOException {
         List<String> lines = new LinkedList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
@@ -44,7 +53,7 @@ public class ObjectMapper {
         return new Http11RequestHeaders(lines);
     }
 
-    private static Http11RequestBody getBody(BufferedReader bufferedReader, String contentLength) throws IOException {
+    private Http11RequestBody getBody(BufferedReader bufferedReader, String contentLength) throws IOException {
         try {
             int bodyLength = Integer.parseInt(contentLength);
             char[] buffer = new char[bodyLength];

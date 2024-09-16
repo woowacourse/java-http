@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.NotFoundController;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;

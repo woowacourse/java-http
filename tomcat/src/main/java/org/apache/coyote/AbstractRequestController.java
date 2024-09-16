@@ -1,8 +1,4 @@
-package com.techcourse.controller;
-
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.RequestHandler;
+package org.apache.coyote;
 
 public abstract class AbstractRequestController implements RequestHandler {
 

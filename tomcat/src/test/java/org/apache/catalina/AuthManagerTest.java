@@ -2,7 +2,7 @@ package org.apache.catalina;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.Method;
 import org.apache.coyote.http11.RequestLine;
@@ -21,9 +21,9 @@ class AuthManagerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
         String requestBody = "account=zeze&password=1234";
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders, requestBody);
 
         // when & then
         Assertions.assertThatCode(() -> AuthManager.authenticate(httpRequest))
@@ -40,9 +40,9 @@ class AuthManagerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
         String requestBody = "account=zeze&password=1234";
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders, requestBody);
 
         // when & then
         Assertions.assertThatCode(() -> AuthManager.authenticate(httpRequest))
@@ -57,8 +57,8 @@ class AuthManagerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         // when
         boolean authenticated = AuthManager.isAuthenticated(httpRequest);
@@ -81,8 +81,8 @@ class AuthManagerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d; JSESSIONID=" + invalidSessionId);
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         // when
         boolean authenticated = AuthManager.isAuthenticated(httpRequest);
@@ -103,8 +103,8 @@ class AuthManagerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d; JSESSIONID=" + sessionId);
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         // when
         boolean authenticated = AuthManager.isAuthenticated(httpRequest);

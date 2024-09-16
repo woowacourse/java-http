@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Method;
@@ -23,8 +23,8 @@ class PageControllerTest {
         String expectedPath = "/home.html";
 
         RequestLine requestLine = new RequestLine(Method.GET, defaultPath, "HTTP/1.1");
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders();
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
         AbstractController pageController = new PageController();
 
         HttpResponse httpResponse = new HttpResponse();

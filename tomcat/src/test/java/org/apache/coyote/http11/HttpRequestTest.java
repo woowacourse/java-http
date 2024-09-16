@@ -15,8 +15,8 @@ class HttpRequestTest {
         String expectedFileExtension = "css";
 
         RequestLine requestLine = new RequestLine(Method.GET, path + fileExtension, "HTTP/1.1");
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders();
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         // when
         String contentType = httpRequest.getContentType();
@@ -33,8 +33,8 @@ class HttpRequestTest {
         String expectedContentType = "text/html";
 
         RequestLine requestLine = new RequestLine(Method.GET, path, "HTTP/1.1");
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders();
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         // when
         String contentType = httpRequest.getContentType();
@@ -53,10 +53,10 @@ class HttpRequestTest {
         String expectedAccount = "zeze";
         String expectedPassword = "1234";
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
-        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders();
         String requestBody = accountName + "=" + expectedAccount + "&" + passwordName + "=" + expectedPassword;
 
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders, requestBody);
 
         // when
         String accountValue = httpRequest.getRequestBodyValue(accountName);

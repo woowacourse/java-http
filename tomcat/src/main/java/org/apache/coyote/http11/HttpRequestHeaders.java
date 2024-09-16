@@ -4,21 +4,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-public class HttpHeaders {
+public class HttpRequestHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpHeaders() {
+    public HttpRequestHeaders() {
         this.headers = new HashMap<>();
     }
 
-    public HttpHeaders(Map<String, String> headers) {
+    public HttpRequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public HttpHeaders(BufferedReader bufferedReader) throws IOException {
+    public HttpRequestHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine = bufferedReader.readLine();
 
@@ -47,15 +46,5 @@ public class HttpHeaders {
 
     public String findField(String key) {
         return this.headers.get(key);
-    }
-
-    public void setField(String key, String value) {
-        this.headers.put(key, value);
-    }
-
-    public void getHeadersToString(StringBuilder stringBuilder) {
-        for (Entry<String, String> headers : this.headers.entrySet()) {
-            stringBuilder.append(headers.getKey() + ": " + headers.getValue() + " ").append("\r\n");
-        }
     }
 }

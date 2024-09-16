@@ -1,30 +1,33 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeaderField.*;
+import static org.apache.coyote.http11.Protocol.*;
+
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private HttpHeaders httpHeaders;
+    private HttpResponseHeaders httpHeaders;
     private String responseBody;
 
     public HttpResponse() {
-        this.httpHeaders = new HttpHeaders();
+        this.httpHeaders = new HttpResponseHeaders();
         this.responseBody = "";
     }
 
     public void setStatusLine(Status status) {
-        statusLine = new StatusLine("HTTP/1.1", status);
+        statusLine = new StatusLine(HTTP_1_1, status);
     }
 
     public void setContentType(String contentType) {
-        httpHeaders.setField("Content-Type", contentType + ";charset=utf-8 ");
+        httpHeaders.setField(CONTENT_TYPE, contentType + ";charset=utf-8 ");
     }
 
     public void setContentLength(int contentLength) {
-        httpHeaders.setField("Content-Length", String.valueOf(contentLength));
+        httpHeaders.setField(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void setLocation(String location) {
-        httpHeaders.setField("Location", location);
+        httpHeaders.setField(LOCATION, location);
     }
 
     public void setResponseBody(String responseBody) {
@@ -32,7 +35,7 @@ public class HttpResponse {
     }
 
     public void setCookie(String key, String value) {
-        httpHeaders.setField("Set-Cookie", key + "=" + value);
+        httpHeaders.setField(SET_COOKIE, key + "=" + value);
     }
 
     public String getStatusMessage() {
@@ -40,11 +43,11 @@ public class HttpResponse {
     }
 
     public String getContentType() {
-        return this.httpHeaders.findField("Content-Type");
+        return this.httpHeaders.findField(CONTENT_TYPE);
     }
 
     public int getContentLength() {
-        return Integer.parseInt(this.httpHeaders.findField("Content-Length"));
+        return Integer.parseInt(this.httpHeaders.findField(CONTENT_LENGTH));
     }
 
     public String getResponse() {

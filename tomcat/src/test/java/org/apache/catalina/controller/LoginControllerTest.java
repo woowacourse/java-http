@@ -1,7 +1,7 @@
 package org.apache.catalina.controller;
 
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequestHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Method;
@@ -29,8 +29,8 @@ class LoginControllerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d; JSESSIONID=" + sessionId);
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         HttpResponse httpResponse = new HttpResponse();
 
@@ -50,8 +50,8 @@ class LoginControllerTest {
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         HttpResponse httpResponse = new HttpResponse();
 
@@ -71,8 +71,8 @@ class LoginControllerTest {
 
         RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
         HashMap<String, String> requestHeaders = new HashMap<>();
-        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
-        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(requestHeaders);
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpRequestHeaders);
 
         HttpResponse httpResponse = new HttpResponse();
 

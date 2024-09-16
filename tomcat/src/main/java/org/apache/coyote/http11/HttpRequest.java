@@ -11,17 +11,17 @@ public class HttpRequest {
 
     private static final int FILE_EXTENSION_INDEX = 1;
     private final RequestLine requestLine;
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
     private String requestBody = "";
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders) {
         this.requestLine = requestLine;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
     }
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, String requestBody) {
         this.requestLine = requestLine;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;
     }
 
@@ -30,7 +30,7 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         this.requestLine = new RequestLine(bufferedReader);
-        this.httpHeaders = new HttpHeaders(bufferedReader);
+        this.httpRequestHeaders = new HttpRequestHeaders(bufferedReader);
 
         if (isMethod(POST)) {
             this.requestBody = readRequestBody(bufferedReader);
@@ -38,7 +38,7 @@ public class HttpRequest {
     }
 
     private String readRequestBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = Integer.parseInt(httpHeaders.findField("Content-Length"));
+        int contentLength = Integer.parseInt(httpRequestHeaders.findField("Content-Length"));
         char[] buffer = readRequestBodyByLength(bufferedReader, contentLength);
         return new String(buffer);
     }
@@ -69,11 +69,11 @@ public class HttpRequest {
     }
 
     public String getCookie(String key) {
-        if (httpHeaders.findField("Cookie") == null) {
+        if (httpRequestHeaders.findField("Cookie") == null) {
             return null;
         }
 
-        String[] cookies = parseWithTrim(httpHeaders.findField("Cookie"), ";");
+        String[] cookies = parseWithTrim(httpRequestHeaders.findField("Cookie"), ";");
 
         for (String cookie : cookies) {
             if (cookie.startsWith(key)) {

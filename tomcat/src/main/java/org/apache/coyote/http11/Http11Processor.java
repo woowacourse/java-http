@@ -33,10 +33,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("[요청] - {}", request);
 
             HttpResponse response = new HttpResponse();
-
-            RequestMapping.getInstance()
-                    .getController(request)
-                    .service(request, response);
+            FrontController.service(request, response);
             log.info("[응답] - {}", response);
 
             outputStream.write(response.convertMessage().getBytes());

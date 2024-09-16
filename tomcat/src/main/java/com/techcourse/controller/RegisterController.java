@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class RegisterController extends Controller {
 
@@ -16,7 +17,7 @@ public class RegisterController extends Controller {
             User user = SessionManager.get(sessionId);
 
             log.info(user.toString());
-            response.setStatusCode("302 Found");
+            response.setStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/index.html");
         } catch (IllegalArgumentException e) {
             response.setBodyWithStaticResource("/register.html");
@@ -30,7 +31,7 @@ public class RegisterController extends Controller {
         String bodyInputEmail = request.getBodyParameter("email");
 
         if (bodyInputAccount == null || bodyInputPassword == null || bodyInputEmail == null) {
-            response.setStatusCode("400 Bad Request");
+            response.setStatus(HttpStatus.BAD_REQUEST);
             response.setBodyWithStaticResource("/register.html");
             return;
         }
@@ -38,7 +39,7 @@ public class RegisterController extends Controller {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(bodyInputAccount);
 
         if (!optionalUser.isEmpty()) {
-            response.setStatusCode("400 Bad Request");
+            response.setStatus(HttpStatus.BAD_REQUEST);
             response.setBodyWithStaticResource("/register.html");
             return;
         }
@@ -48,7 +49,7 @@ public class RegisterController extends Controller {
         log.info(user.toString());
 
         String sessionId = SessionManager.put(user);
-        response.setStatusCode("302 Found");
+        response.setStatus(HttpStatus.FOUND);
         response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         response.addHeader("Location", "/index.html");
     }

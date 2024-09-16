@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class LoginController extends Controller {
 
@@ -16,7 +17,7 @@ public class LoginController extends Controller {
             User user = SessionManager.get(sessionId);
             log.info(user.toString());
 
-            response.setStatusCode("302 Found");
+            response.setStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/index.html");
         } catch (IllegalArgumentException e) {
             response.setBodyWithStaticResource("/login.html");
@@ -29,7 +30,7 @@ public class LoginController extends Controller {
         String password = request.getBodyParameter("password");
 
         if (account == null || password == null) {
-            response.setStatusCode("401 Unauthorized");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
             response.setBodyWithStaticResource("/401.html");
             return;
         }
@@ -37,7 +38,7 @@ public class LoginController extends Controller {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
         if (optionalUser.isEmpty() || !optionalUser.get().checkPassword(password)) {
-            response.setStatusCode("401 Unauthorized");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
             response.setBodyWithStaticResource("/401.html");
             return;
         }
@@ -46,7 +47,7 @@ public class LoginController extends Controller {
         log.info(user.toString());
         String sessionId = SessionManager.put(user);
 
-        response.setStatusCode("302 Found");
+        response.setStatus(HttpStatus.FOUND);
         response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         response.addHeader("Location", "/index.html");
     }

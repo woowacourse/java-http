@@ -9,20 +9,19 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private static final String DEFAULT_STATUS_CODE = "200 OK";
     private static final String DEFAULT_RESPONSE_BODY = "";
     public static final String FILE_EXTENSION_DELIMITER = ".";
 
     private Map<String, String> headers = new LinkedHashMap<>();
-    private String statusCode = DEFAULT_STATUS_CODE;
+    private HttpStatus status = HttpStatus.OK;
     private String body = DEFAULT_RESPONSE_BODY;
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 
-    public void setStatusCode(String statusCode) {
-        this.statusCode = statusCode;
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 
     public void setBodyWithStaticResource(String filePath) {
@@ -37,7 +36,7 @@ public class HttpResponse {
 
             setBodyWithContentType(new String(fileContents), "text/" + fileExtension + ";charset=utf-8");
         } catch (IOException e) {
-            this.statusCode = "500 Internal Server Error";
+            this.status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }
 
@@ -59,7 +58,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        String statusLine = "HTTP/1.1 " + this.statusCode + " ";
+        String statusLine = "HTTP/1.1 " + this.status + " ";
         StringBuilder headerBuilder = new StringBuilder();
         headers.entrySet()
                 .stream()

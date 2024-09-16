@@ -5,7 +5,7 @@ import java.net.Socket;
 import org.apache.catalina.exception.UncheckedServletException;
 import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.http.StatusCode;
-import org.apache.catalina.http11.ServletContainer;
+import org.apache.catalina.ServletContainer;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.coyote.connector.RequestReader;

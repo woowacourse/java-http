@@ -2,14 +2,14 @@ package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.controller.AbstractController;
+import jakarta.http.ContentType;
+import jakarta.http.Header;
+import jakarta.http.HttpBody;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpStatus;
 import jakarta.servlet.http.HttpSession;
-import org.apache.coyote.http11.AbstractController;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Header;
-import org.apache.coyote.http11.HttpBody;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 
 import java.util.NoSuchElementException;
 
@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        HttpBody body = request.getBody();
+        HttpBody body = request.getHttpBody();
         Header header = response.getHeader();
         String account = getAccount(body);
         String password = getPassword(body);

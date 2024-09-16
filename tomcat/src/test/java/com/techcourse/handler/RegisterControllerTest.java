@@ -2,11 +2,12 @@ package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Header;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import jakarta.http.HttpSessionWrapper;
+import jakarta.http.HttpVersion;
+import jakarta.http.Header;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class RegisterControllerTest {
     @DisplayName("GET 요청을 처리할 수 있다.")
     void doGet() throws Exception {
         RegisterController registerController = new RegisterController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
 
         registerController.doGet(Mockito.mock(HttpRequest.class), response);
 
@@ -38,14 +39,15 @@ class RegisterControllerTest {
     @DisplayName("POST 요청을 처리할 수 있다. (회원가입 처리)")
     void doPost() throws Exception {
         RegisterController registerController = new RegisterController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("lee", "1234", "email@email.com");
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /register HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         registerController.doPost(request, response);
@@ -58,14 +60,15 @@ class RegisterControllerTest {
     @DisplayName("account는 필수 값이다.")
     void requireAccount() throws Exception {
         RegisterController registerController = new RegisterController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody(null, "1234", "email@email.com");
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /register HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         assertThatThrownBy(() -> registerController.doPost(request, response))
@@ -77,14 +80,15 @@ class RegisterControllerTest {
     @DisplayName("password는 필수 값이다.")
     void requirePassword() throws Exception {
         RegisterController registerController = new RegisterController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("lee", null, "email@email.com");
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /register HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         assertThatThrownBy(() -> registerController.doPost(request, response))
@@ -96,14 +100,15 @@ class RegisterControllerTest {
     @DisplayName("email은 필수 값이다.")
     void requireEmail() throws Exception {
         RegisterController registerController = new RegisterController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("lee", "1234", null);
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /register HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         assertThatThrownBy(() -> registerController.doPost(request, response))

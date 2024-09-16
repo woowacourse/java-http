@@ -1,12 +1,13 @@
 package com.techcourse.handler;
 
+import jakarta.http.HttpSessionWrapper;
+import jakarta.http.HttpVersion;
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Header;
-import org.apache.coyote.http11.HttpHeaderKey;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import jakarta.http.Header;
+import jakarta.http.HttpHeaderKey;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class LoginControllerTest {
     @DisplayName("GET 요청을 처리할 수 있다.")
     void doGet() throws Exception {
         LoginController loginController = new LoginController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
 
         loginController.doGet(mock(HttpRequest.class), response);
 
@@ -43,20 +44,21 @@ class LoginControllerTest {
     @DisplayName("POST 요청을 처리할 수 있다. (로그인 처리)")
     void doPost() throws Exception {
         LoginController loginController = new LoginController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("gugu", "password");
-        Manager manager = mock(Manager.class);
+        HttpSessionWrapper httpSessionWrapper = mock(HttpSessionWrapper.class);
         HttpSession session = mock(HttpSession.class);
         when(session.getId())
                 .thenReturn("1234");
-        when(manager.findSession(any()))
+        when(httpSessionWrapper.getSession(any(), any()))
                 .thenReturn(session);
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /login HTTP/1.1",
                 Header.empty(),
                 body,
-                manager
+                HttpVersion.HTTP_1_1,
+                httpSessionWrapper
         );
 
         loginController.doPost(request, response);
@@ -70,14 +72,15 @@ class LoginControllerTest {
     @DisplayName("로그인 실패시 401.html로 리다이렉션 처리한다.")
     void doPostWithLoginFail() throws Exception {
         LoginController loginController = new LoginController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("gugu", "wrongPassword");
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /login HTTP/1.1",
                 Header.empty(),
                 body,
-                mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                mock(HttpSessionWrapper.class)
         );
 
         loginController.doPost(request, response);
@@ -92,14 +95,15 @@ class LoginControllerTest {
     @DisplayName("account는 필수 값이다.")
     void requireAccount() throws Exception {
         LoginController loginController = new LoginController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody(null, "1234");
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /login HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         assertThatThrownBy(() -> loginController.doPost(request, response))
@@ -111,14 +115,15 @@ class LoginControllerTest {
     @DisplayName("password는 필수 값이다.")
     void requirePassword() throws Exception {
         LoginController loginController = new LoginController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         SimpleBody body = createBody("lee", null);
 
-        HttpRequest request = HttpRequest.createHttp11Request(
+        HttpRequest request = HttpRequest.createHttpRequest(
                 "POST /login HTTP/1.1",
                 Header.empty(),
                 body,
-                Mockito.mock(Manager.class)
+                HttpVersion.HTTP_1_1,
+                Mockito.mock(HttpSessionWrapper.class)
         );
 
         assertThatThrownBy(() -> loginController.doPost(request, response))

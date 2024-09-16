@@ -1,10 +1,10 @@
 package com.techcourse.handler;
 
-import org.apache.coyote.http11.AbstractController;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import jakarta.controller.AbstractController;
+import jakarta.http.ContentType;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpStatus;
 
 public class NotFoundController extends AbstractController {
 

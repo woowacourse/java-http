@@ -1,6 +1,6 @@
 package com.techcourse.handler;
 
-import org.apache.coyote.http11.HttpBody;
+import jakarta.http.HttpBody;
 
 import java.util.HashMap;
 import java.util.Map;

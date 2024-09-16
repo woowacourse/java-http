@@ -1,8 +1,9 @@
 package com.techcourse.handler;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpStatus;
+import jakarta.http.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,7 +16,7 @@ class NotFoundControllerTest {
     @DisplayName("404 응답을 처리할 수 있다.")
     void service() throws Exception {
         NotFoundController notFoundController = new NotFoundController();
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
 
         notFoundController.service(Mockito.mock(HttpRequest.class), response);
 

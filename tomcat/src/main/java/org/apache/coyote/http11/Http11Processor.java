@@ -15,7 +15,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Socket connection;
+    protected final Socket connection;
     private final Adapter adapter;
 
     public Http11Processor(final Socket connection, final Adapter adapter) {
@@ -37,7 +37,6 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = HttpRequestReader.accept(requestReader);
             final var response = HttpResponse.create();
-            log.info("request: {}", request);
             adapter.service(request, response);
 
             outputStream.write(response.serialize());

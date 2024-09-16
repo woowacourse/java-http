@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Connector implements Runnable {
+abstract class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
@@ -61,13 +60,7 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
-        if (connection == null) {
-            return;
-        }
-        var processor = new Http11Processor(connection, new CatalinaAdapter());
-        new Thread(processor).start();
-    }
+    abstract void process(final Socket connection);
 
     public void stop() {
         stopped = true;

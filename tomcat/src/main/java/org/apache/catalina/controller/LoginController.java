@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import static org.apache.catalina.AuthManager.AUTHENTICATION_COOKIE_NAME;
 import static org.apache.coyote.http11.Status.FOUND;
+import static org.apache.coyote.http11.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.Status.OK;
 
 public class LoginController extends AbstractController {
@@ -28,22 +29,29 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (AuthManager.isAuthenticated(httpRequest)) {
-            Session session = AuthManager.getAuthenticatedSession(httpRequest);
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        try {
+            if (AuthManager.isAuthenticated(httpRequest)) {
+                Session session = AuthManager.getAuthenticatedSession(httpRequest);
 
+                httpResponse.setStatusLine(FOUND);
+                httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
+                httpResponse.setLocation("/index.html");
+
+                return;
+            }
+
+            String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
+
+            httpResponse.setStatusLine(OK);
+            httpResponse.setContentType(httpRequest.getContentType());
+            httpResponse.setResponseBody(responseBody);
+            httpResponse.setContentLength(responseBody.getBytes().length);
+        } catch (IllegalArgumentException exception) {
             httpResponse.setStatusLine(FOUND);
-            httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
-            httpResponse.setLocation("/index.html");
-
-            return;
+            httpResponse.setLocation("/401.html");
+        } catch (IOException exception) {
+            httpResponse.setStatusLine(INTERNAL_SERVER_ERROR);
         }
-
-        String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
-
-        httpResponse.setStatusLine(OK);
-        httpResponse.setContentType(httpRequest.getContentType());
-        httpResponse.setResponseBody(responseBody);
-        httpResponse.setContentLength(responseBody.getBytes().length);
     }
 }

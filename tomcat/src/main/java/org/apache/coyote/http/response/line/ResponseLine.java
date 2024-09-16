@@ -28,4 +28,8 @@ public class ResponseLine {
                 httpStatus.getStatusMessage()
         );
     }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 }

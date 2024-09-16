@@ -62,4 +62,8 @@ public class HttpResponse {
     public void setJsession(String uuid) {
         httpHeaders.putHeader(HttpHeaderName.SET_COOKIE, JSESSION_COOKIE_PREFIX + uuid);
     }
+
+    public HttpStatus getHttpStatus() {
+        return responseLine.getHttpStatus();
+    }
 }

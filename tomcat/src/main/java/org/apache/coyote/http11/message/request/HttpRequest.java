@@ -1,16 +1,12 @@
 package org.apache.coyote.http11.message.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.message.common.HttpCookie;
+import org.apache.coyote.http11.message.common.HttpHeader;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.apache.coyote.http11.message.parser.HttpCookieParser;
 
 public class HttpRequest {
 
@@ -18,36 +14,10 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String body;
 
-    public HttpRequest(InputStream inputStream) throws IOException { //TODO : 파싱 클래스 분리
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        requestLine = generateHttpLine(bufferedReader);
-        headers = generateHeaders(bufferedReader);
-        body = generateBody(bufferedReader);
-    }
-
-    private RequestLine generateHttpLine(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("HTTP line은 null일 수 없습니다.");
-        }
-        return new RequestLine(line);
-    }
-
-    private HttpHeaders generateHeaders(BufferedReader bufferedReader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
-        return new HttpHeaders(headerLines);
-    }
-
-    private String generateBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = headers.getContentLength();
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
     }
 
     public boolean isGetMethod() {
@@ -74,8 +44,20 @@ public class HttpRequest {
         return body;
     }
 
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public String getHost() {
+        return getHeaders().getValue(HttpHeader.HOST);
+    }
+
     public Session getSession(boolean enableCreation) {
-        HttpCookie httpCookie = new HttpCookie(headers.getCookies());
+        HttpCookie httpCookie = HttpCookieParser.parse(headers.getCookies());
         if (httpCookie.hasSessionId()) {
             String sessionId = httpCookie.getSessionId();
             return SessionManager.getInstance().findSession(sessionId);

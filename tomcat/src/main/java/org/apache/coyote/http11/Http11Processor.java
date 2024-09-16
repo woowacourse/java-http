@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.parser.HttpRequestParser;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = new HttpRequest(inputStream);
+            HttpRequest request = HttpRequestParser.parse(inputStream);
             log.info("[요청] - {}", request);
 
             HttpResponse response = new HttpResponse();

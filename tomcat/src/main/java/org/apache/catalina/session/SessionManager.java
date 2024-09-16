@@ -8,8 +8,7 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>() {
-    };
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(Session session) {

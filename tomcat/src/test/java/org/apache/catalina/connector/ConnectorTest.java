@@ -8,23 +8,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import support.StubSocket;
 
 class ConnectorTest {
 
     private static final int DEFAULT_PORT = 8081;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int MAX_THREAD_POOL_COUNT = 10;
-    private static final int CLIENT_REQUEST_COUNT = 100;
 
     @Test
     void concurrencyRequestTest() throws InterruptedException {
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
+        final int DEFAULT_ACCEPT_COUNT = 100;
+        final int MAX_THREAD_POOL_COUNT = 10;
+        final int CLIENT_REQUEST_COUNT = 100;
 
         Connector connector = new Connector(
                 DEFAULT_PORT,
@@ -34,30 +29,25 @@ class ConnectorTest {
         );
         connector.start();
 
-        CountDownLatch latch = new CountDownLatch(CLIENT_REQUEST_COUNT);
-        ExecutorService executorService = Executors.newFixedThreadPool(CLIENT_REQUEST_COUNT);
+        TestHttpClient testHttpClient = new TestHttpClient();
+        ExecutorService clientExecutor = Executors.newFixedThreadPool(CLIENT_REQUEST_COUNT);
+        CountDownLatch requestLatch = new CountDownLatch(CLIENT_REQUEST_COUNT);
         for (int i = 0; i < CLIENT_REQUEST_COUNT; i++) {
-            executorService.submit(() -> {
+            clientExecutor.submit(() -> {
                 try {
-                    StubSocket socket = new StubSocket();
-                    Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
-                    processor.process(socket);
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
+                    testHttpClient.send("/");
                 } finally {
-                    latch.countDown();
+                    requestLatch.countDown();
                 }
             });
         }
-        executorService.shutdown();
-        executorService.awaitTermination(1, TimeUnit.SECONDS);
-        latch.await(1, TimeUnit.SECONDS);
+        requestLatch.await(2, TimeUnit.SECONDS);
+        clientExecutor.shutdown();
         connector.stop();
 
         assertAll(
-                () -> assertThat(successCount.get()).isEqualTo(CLIENT_REQUEST_COUNT),
-                () -> assertThat(failCount.get()).isEqualTo(0)
+                () -> assertThat(testHttpClient.getSuccessCount()).isEqualTo(CLIENT_REQUEST_COUNT),
+                () -> assertThat(testHttpClient.getFailCount()).isEqualTo(0)
         );
     }
 
@@ -77,18 +67,20 @@ class ConnectorTest {
         connector.start();
 
         TestHttpClient testHttpClient = new TestHttpClient();
-        var threads = new Thread[TOTAL_REQUESTS];
+        ExecutorService clientExecutor = Executors.newFixedThreadPool(TOTAL_REQUESTS);
+        CountDownLatch requestLatch = new CountDownLatch(TOTAL_REQUESTS);
         for (int i = 0; i < TOTAL_REQUESTS; i++) {
-            threads[i] = new Thread(() -> testHttpClient.send("/"));
+            clientExecutor.submit(() -> {
+                try {
+                    testHttpClient.send("/");
+                } finally {
+                    requestLatch.countDown();
+                }
+            });
         }
-
-        for (final var thread : threads) {
-            thread.start();
-        }
-
-        for (final var thread : threads) {
-            thread.join();
-        }
+        requestLatch.await(2, TimeUnit.SECONDS);
+        clientExecutor.shutdown();
+        connector.stop();
 
         assertAll(
                 () -> assertThat(testHttpClient.getSuccessCount()).isEqualTo(THREAD_POOL_SIZE + QUEUE_CAPACITY),

@@ -100,4 +100,8 @@ public class Connector implements Runnable {
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
+
+    protected ExecutorService getThreadPool() {
+        return threadPool;
+    }
 }

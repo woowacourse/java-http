@@ -5,9 +5,9 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.HeaderName;
 import org.apache.catalina.http.StatusCode;
-import org.apache.catalina.response.HttpResponse;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
@@ -22,7 +22,6 @@ public class LoginController extends AbstractController {
         String account = request.getBodyParam("account");
         String password = request.getBodyParam("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             response.setStatusCode(StatusCode.UNAUTHORIZED);
             response.setBody("/401.html");
@@ -30,10 +29,13 @@ public class LoginController extends AbstractController {
         if (user.isPresent() && user.get().checkPassword(password)) {
             response.setStatusCode(StatusCode.FOUND);
             response.setBody("/index.html");
-
-            String sessionId = sessionManager.generateSession(user.get());
-            response.addHeader(HeaderName.SET_COOKIE, "JSESSIONID=" + sessionId);
+            login(response, user.get());
         }
+    }
+
+    private void login(HttpResponse response, User user) {
+        String sessionId = sessionManager.generateSession(user);
+        response.addHeader(HeaderName.SET_COOKIE, "JSESSIONID=" + sessionId);
     }
 
     @Override

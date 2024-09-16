@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
 import java.util.ArrayList;
 import java.util.List;

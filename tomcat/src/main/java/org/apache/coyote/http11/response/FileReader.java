@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.helper;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

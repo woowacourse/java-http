@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.SessionManager;
 
 public class LoginController extends AbstractController {
 

@@ -26,10 +26,14 @@ public class HttpQueryParams {
         String[] paramSplit = queryString.split(PARAM_SEPARATOR);
         for (String param : paramSplit) {
             String[] keyValue = param.split(KEY_VALUE_SEPARATOR);
-            if (keyValue.length != KEY_VALUE_LENGTH) {
-                throw new IllegalArgumentException("Invalid query string: " + queryString);
-            }
+            validateFormat(queryString, keyValue);
             params.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+        }
+    }
+
+    private void validateFormat(final String queryString, final String[] keyValue) {
+        if (keyValue.length != KEY_VALUE_LENGTH) {
+            throw new IllegalArgumentException("Invalid query string: " + queryString);
         }
     }
 

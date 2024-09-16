@@ -62,7 +62,7 @@ class StaticResourceControllerTest {
 		// then
 		var expected = String.join("\r\n",
 			"HTTP/1.1 200 OK ",
-			"Content-Type: text/css;charset=utf-8 ",
+			"Content-Type: text/css ",
 			"Content-Length: 211991 ");
 
 		assertThat(response.toString().startsWith(expected)).isTrue();

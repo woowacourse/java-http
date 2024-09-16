@@ -34,7 +34,8 @@ public class RegisterController extends AbstractController {
 		URL resource = getClass().getClassLoader().getResource("static/register.html");
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.ok(request.getUri(), Files.readAllBytes(path));
+		response.setContentType("text/html");
+		response.ok(Files.readAllBytes(path));
 		super.doGet(request, response);
 	}
 
@@ -46,7 +47,7 @@ public class RegisterController extends AbstractController {
 		if (isSucceed) {
 			redirectUri = "index.html";
 		}
-		response.redirect(request.getUri(), redirectUri);
+		response.redirect(redirectUri);
 		super.doPost(request, response);
 	}
 

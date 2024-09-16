@@ -19,7 +19,7 @@ public class HomeController extends AbstractController {
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
 		super.doGet(request, response);
-		response.ok(URI_PATTERN, HOME_PAGE_CONTENT.getBytes());
+		response.ok(HOME_PAGE_CONTENT.getBytes());
 	}
 
 	@Override

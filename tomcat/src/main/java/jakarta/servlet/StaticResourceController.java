@@ -6,19 +6,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class StaticResourceController extends AbstractController {
 
-	private static final String[] CAN_HANDLE_SUFFIX = {".html", ".css", ".js", ".ico"};
+	private static final String[] CAN_HANDLE_EXTENSION = {".html", ".css", ".js", ".ico"};
+	public static final int EXTENSION_BEGIN_INDEX = 1;
 
 	@Override
 	public boolean canHandle(HttpRequest request) {
 		return request.hasMethod(HttpMethod.GET) &&
-			Stream.of(CAN_HANDLE_SUFFIX).anyMatch(suffix -> request.getUri().endsWith(suffix));
+			Stream.of(CAN_HANDLE_EXTENSION).anyMatch(suffix -> request.getUri().endsWith(suffix));
 	}
 
 	@Override
@@ -32,6 +33,16 @@ public class StaticResourceController extends AbstractController {
 		URL resource = getClass().getClassLoader().getResource("static" + request.getUri());
 		File file = new File(resource.getPath());
 		final Path path = file.toPath();
-		response.ok(request.getUri(), Files.readAllBytes(path));
+		String extension = getExtension(request);
+		response.setContentType(ContentType.getByExtension(extension));
+		response.ok(Files.readAllBytes(path));
+	}
+
+	private String getExtension(HttpRequest request) {
+		return Stream.of(CAN_HANDLE_EXTENSION)
+			.filter(suffix -> request.getUri().endsWith(suffix))
+			.findFirst()
+			.map(extension -> extension.substring(EXTENSION_BEGIN_INDEX))
+			.orElseThrow(() -> new IllegalArgumentException("cannot find extension"));
 	}
 }

@@ -1,10 +1,14 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.handler.HelloController;
-import com.techcourse.handler.LoginController;
-import com.techcourse.handler.NotFoundController;
-import com.techcourse.handler.RegisterController;
-import org.apache.catalina.Manager;
+import jakarta.http.ContentType;
+import jakarta.http.Header;
+import jakarta.http.HttpBody;
+import jakarta.http.HttpBodyFactory;
+import jakarta.http.HttpHeaderKey;
+import jakarta.http.HttpRequest;
+import jakarta.http.HttpResponse;
+import jakarta.http.HttpSessionWrapper;
+import jakarta.http.HttpVersion;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,51 +20,42 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class Http11Processor implements Runnable, Processor {
+public class Http11Processor implements Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_CONTENT_LENGTH = "0";
     private static final String DEFAULT_CONTENT_TYPE = "";
 
     private final Socket connection;
-    private final Manager sessionManager;
-    private final ResourceProcessor resourceProcessor;
+    private final HttpSessionWrapper httpSessionWrapper;
 
-    public Http11Processor(Socket connection, Manager sessionManager) {
-        this.connection = connection;
-        this.sessionManager = sessionManager;
-        this.resourceProcessor = new ResourceProcessor(createRequestMapping(), new StaticResourceController());
-    }
 
-    private RequestMapping createRequestMapping() {
-        Map<String, Controller> mapping = new HashMap<>();
-        mapping.put("/", new HelloController());
-        mapping.put("/login", new LoginController());
-        mapping.put("/register", new RegisterController());
-
-        return new RequestMapping(mapping, new NotFoundController());
-    }
-
-    @Override
-    public void run() {
+    public Http11Processor(Socket connection, HttpSessionWrapper httpSessionWrapper) {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        process(connection);
+        this.connection = connection;
+        this.httpSessionWrapper = httpSessionWrapper;
     }
 
     @Override
-    public void process(Socket connection) {
-        try (InputStream inputStream = connection.getInputStream();
-             OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest request = createHttpRequest(inputStream);
-            HttpResponse response = resourceProcessor.processResponse(request);
+    public void process(HttpResponse response) {
+        try (OutputStream outputStream = connection.getOutputStream()) {
+            response.setHttpVersion(HttpVersion.HTTP_1_1);
             outputStream.write(response.serialize());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public HttpRequest getRequest() {
+        try (InputStream inputStream = connection.getInputStream()) {
+            return createHttpRequest(inputStream);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new IllegalArgumentException("처리할 수 없는 HTTP 메시지입니다.", e);
         }
     }
 
@@ -70,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         Header header = createHeader(bufferedReader);
         HttpBody body = createRequestBody(bufferedReader, header);
 
-        return HttpRequest.createHttp11Request(requestLine, header, body, sessionManager);
+        return HttpRequest.createHttpRequest(requestLine, header, body, HttpVersion.HTTP_1_1, httpSessionWrapper);
     }
 
     private Header createHeader(BufferedReader bufferedReader) throws IOException {

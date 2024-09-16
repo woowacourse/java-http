@@ -1,7 +1,6 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.catalina.container.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,36 +21,27 @@ public class Connector implements Runnable {
     private static final int SHUTDOWN_TIMEOUT_SECONDS = 5;
 
     private final ServerSocket serverSocket;
-    private final Manager sessionManager;
     private final ThreadPoolExecutor threadPoolExecutor;
-    private final CoyoteProcessorFactory processorFactory;
+    private final Container container;
     private final int acceptCount;
 
     private boolean stopped;
 
-    public Connector(Manager sessionManager) {
-        this(
-                DEFAULT_PORT,
-                DEFAULT_ACCEPT_COUNT,
-                DEFAULT_THREADS,
-                sessionManager,
-                new CoyoteProcessorFactory()
-        );
+    public Connector(Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREADS);
     }
 
     public Connector(
+            final Container container,
             final int port,
             final int acceptCount,
-            final int maxThreads,
-            final Manager sessionManager,
-            final CoyoteProcessorFactory processorFactory
+            final int maxThreads
     ) {
+        this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
         this.threadPoolExecutor = new TomcatThreadPool(maxThreads, acceptCount);
-        this.sessionManager = sessionManager;
-        this.processorFactory = processorFactory;
         this.acceptCount = acceptCount;
+        this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -96,8 +86,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        Http11Processor processor = processorFactory.getHttp11Processor(connection, sessionManager);
-        threadPoolExecutor.execute(processor);
+
+        threadPoolExecutor.execute(container.acceptConnection(connection));
     }
 
     public void stop() {

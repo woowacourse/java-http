@@ -1,10 +1,8 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.catalina.container.Container;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import support.TestProcessor;
 
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
@@ -30,23 +28,21 @@ class ConnectorTest {
         // 테스트를 종료할때 사용한다.
         CountDownLatch testEndLatch = new CountDownLatch(1);
 
-        // 테스트가 종료될때까지 대기한다.
-        Http11Processor http11Processor = new TestProcessor(
-                null,
-                null,
-                testEndLatch
-        );
-
-        CoyoteProcessorFactory mockFactory = mock(CoyoteProcessorFactory.class);
-        when(mockFactory.getHttp11Processor(any(), any()))
-                .thenReturn(http11Processor);
+        Container container = mock(Container.class);
+        when(container.acceptConnection(any()))
+                .thenReturn(() -> {
+                    try {
+                        testEndLatch.await();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
         Connector connector = new Connector(
+                container,
                 8080,
                 ACCEPT_COUNT, // accept count만큼 추가로 accept한다.
-                MAX_THREADS,
-                mock(Manager.class),
-                mockFactory
+                MAX_THREADS
         );
         connector.start();
 
@@ -63,7 +59,7 @@ class ConnectorTest {
 
         // connector.process 내부 getHttp11Processor의 호출 수는 connector의 accept 수이다.
         // acceptCount + maxThreads + 100번 요청해도 accept()는 최대 accept count + max thread만큼 한다.
-        verify(mockFactory, times(ACCEPT_COUNT + MAX_THREADS)).getHttp11Processor(any(), any());
+        verify(container, times(ACCEPT_COUNT + MAX_THREADS)).acceptConnection(any());
 
         testEndLatch.countDown();
         connector.stop();

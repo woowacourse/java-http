@@ -31,4 +31,8 @@ public class InMemoryUserRepository {
                 .filter(user -> user.checkPassword(password))
                 .findAny();
     }
+
+    public static void deleteAll() {
+        database.clear();
+    }
 }

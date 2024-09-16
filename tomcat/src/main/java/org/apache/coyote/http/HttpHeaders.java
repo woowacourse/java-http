@@ -34,7 +34,6 @@ public class HttpHeaders implements HttpComponent {
         int i = 1;
         while ((i < lines.length) && !lines[i].isEmpty()) {
             String[] headerLine = lines[i].split(SEPARATOR, HEADER_SPLIT_LENGTH);
-            System.out.println(Arrays.toString(headerLine));
             String name = headerLine[NAME_INDEX].trim();
             String value = headerLine[VALUE_INDEX].trim();
             headers.put(name, value);

@@ -15,7 +15,6 @@ public class ThreadPoolConnector extends Connector {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_IDLE_THREAD_COUNT = 10;
     private static final int DEFAULT_MAX_THREAD_COUNT = 250;
     private static final int DEFAULT_KEEP_ALIVE_TIME = 20000;
     private static final int DEFAULT_MAX_CONNECTION_COUNT = 250;

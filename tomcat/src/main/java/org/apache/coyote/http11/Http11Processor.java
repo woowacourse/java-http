@@ -15,7 +15,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
-import org.apache.coyote.http11.request.RequestMapping;
+import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

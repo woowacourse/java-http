@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +9,10 @@ import java.nio.file.Files;
 import java.util.List;
 
 import org.apache.catalina.controller.Controller;
+import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.techcourse.controller.LoginController;
 
 class RequestMappingTest {
 

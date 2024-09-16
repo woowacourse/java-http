@@ -19,6 +19,12 @@ public class HttpRequest {
         this.httpHeaders = httpHeaders;
     }
 
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
+        this.requestLine = requestLine;
+        this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
+    }
+
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

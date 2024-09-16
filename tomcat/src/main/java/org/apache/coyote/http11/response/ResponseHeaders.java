@@ -28,7 +28,7 @@ public class ResponseHeaders {
 
     public void addLocation(String value) {
         add(HeaderKey.LOCATION, value);
-    } // TODO: 테스트 방식 고민해보기
+    }
 
     private void add(HeaderKey key, String value) {
         headers.add(new ResponseHeader(key, value));

@@ -3,7 +3,10 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 0 # 요청의 개수가 Max-Connections를 초과했을 경우에, accept만 해둘 수 있는 요청의 개수
-    max-connections: 2 # 서버가 accept하고 process할 수 있는 요청의 개수
+    accept-count: 0 # 요청의 개수가 Max-Connections를 초과했을 경우에, 운영체제에서 accept만 해둘 수 있는 요청의 개수
+    max-connections: 2 # 서버가 주어진 시간에 수락하고 처리할 수 있는 최대 커넥션 개수
     threads:
-      max: 2 # 동시에 처리할 수 있는 스레드의 개수
+      max: 2 # Tomcat의 최대 스레드 수, 동시에 처리할 수 있는 스레드의 개수
+
+# 참고 자료 1 : https://dev-ws.tistory.com/96 [maxThreads, maxConnections, acceptCount로 Tomcat 튜닝하기]
+# 참고 자료 2 : https://leeyh0216.github.io/posts/truth_of_threadpoolexecutor [ThreadPoolExecutor의 오해와 진실]

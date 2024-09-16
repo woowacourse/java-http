@@ -21,6 +21,7 @@ public class StringUtils {
         return bodies.stream()
                 .map(String::trim)
                 .map(s -> s.split(keyValueSeparator))
+                .filter(s -> s.length > 1)
                 .collect(Collectors.toMap(s -> s[KEY_INDEX], s -> s[VALUE_INDEX]));
     }
 

@@ -25,3 +25,8 @@
 
 - [x] Request, Response 객체 분리
 - [x] Controller 인터페이스 추가
+
+# 4단계 - 동시성 확장하기
+
+- [x] Thread pool 적용
+- [x] 세션 매니저에 동시성 컬랙션 적용

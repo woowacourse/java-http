@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package jakarta.http;
 
-enum HttpVersion {
+public enum HttpVersion {
 
     HTTP_1_1("HTTP/1.1"),
     ;

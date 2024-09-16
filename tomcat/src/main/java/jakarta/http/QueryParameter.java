@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package jakarta.http;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class HttpXW3UrlEncodedBody implements HttpBody {
+public class QueryParameter {
 
     private static final String PAIR_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";
@@ -13,19 +13,18 @@ class HttpXW3UrlEncodedBody implements HttpBody {
     private static final int KEY_POSITION = 0;
     private static final int VALUE_POSITION = 1;
 
-    private final Map<String, String> pairs = new HashMap<>();
+    private final Map<String, String> queryParameter = new HashMap<>();
 
-    public HttpXW3UrlEncodedBody(char[] body) {
-        String bodyToken = "";
-        if (body != null) {
-            bodyToken = new String(body);
+    public QueryParameter(String queryParameter) {
+        if (queryParameter == null) {
+            queryParameter = "";
         }
 
-        parseBody(bodyToken);
+        parseQueryParameter(queryParameter);
     }
 
-    private void parseBody(String bodyToken) {
-        String[] pairs = bodyToken.split(PARAMETER_DELIMITER);
+    private void parseQueryParameter(String queryParameter) {
+        String[] pairs = queryParameter.split(PARAMETER_DELIMITER);
 
         Arrays.stream(pairs).forEach(this::parsePair);
     }
@@ -44,21 +43,18 @@ class HttpXW3UrlEncodedBody implements HttpBody {
         String key = keyValuePair[KEY_POSITION];
         String value = keyValuePair[VALUE_POSITION];
 
-        pairs.put(key, value);
+        queryParameter.put(key, value);
     }
 
-    @Override
     public Optional<String> get(String key) {
-        return Optional.ofNullable(pairs.get(key));
+        return Optional.ofNullable(queryParameter.get(key));
     }
 
-    @Override
     public boolean isEmpty() {
-        return pairs.isEmpty();
+        return queryParameter.isEmpty();
     }
 
-    @Override
     public int getSize() {
-        return pairs.size();
+        return queryParameter.size();
     }
 }

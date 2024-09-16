@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package jakarta.http;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +11,7 @@ class HttpResponseTest {
     @Test
     @DisplayName("redirect 처리할 수 있다.")
     void sendRedirect() {
-        HttpResponse response = HttpResponse.createHttp11Response();
+        HttpResponse response = HttpResponse.createHttpResponse(HttpVersion.HTTP_1_1);
         response.sendRedirect("index.html");
 
         HttpStatus status = response.getStatus();

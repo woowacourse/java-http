@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package jakarta.http;
 
 import java.util.Map;
 
@@ -25,9 +25,9 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse createHttp11Response() {
+    public static HttpResponse createHttpResponse(HttpVersion version) {
         return new HttpResponse(
-                HttpVersion.HTTP_1_1,
+                version,
                 HttpStatus.OK,
                 Header.empty(),
                 new byte[]{}
@@ -80,5 +80,9 @@ public class HttpResponse {
 
     public void setContentType(ContentType contentType) {
         this.header.append(HttpHeaderKey.CONTENT_TYPE, contentType.getName());
+    }
+
+    public void setHttpVersion(HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
     }
 }

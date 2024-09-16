@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package jakarta.http;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,30 +11,30 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HttpXW3UrlEncodedBodyTest {
+class QueryParameterTest {
 
     @Test
-    @DisplayName("urlEncodedBody는 null이 될 수 있다.")
+    @DisplayName("쿼리 파라미터 문자열은 null이 될 수 있다.")
     void createWithNull() {
-        HttpBody urlEncodedBody = new HttpXW3UrlEncodedBody(null);
+        QueryParameter queryParameter = new QueryParameter(null);
 
-        assertThat(urlEncodedBody.isEmpty()).isTrue();
+        assertThat(queryParameter.isEmpty()).isTrue();
     }
 
     @Test
     @DisplayName("키값 페어는 a=b 형식만 인식한다.")
     void checkFormat() {
-        HttpBody urlEncodedBody = new HttpXW3UrlEncodedBody("a-2".toCharArray());
+        QueryParameter queryParameter = new QueryParameter("a-2");
 
-        assertThat(urlEncodedBody.isEmpty()).isTrue();
+        assertThat(queryParameter.isEmpty()).isTrue();
     }
 
     @Test
     @DisplayName("단일 키값 페어를 조회한다.")
     void single() {
-        HttpBody urlEncodedBody = new HttpXW3UrlEncodedBody("a=2".toCharArray());
+        QueryParameter queryParameter = new QueryParameter("a=2");
 
-        Optional<String> result = urlEncodedBody.get("a");
+        Optional<String> result = queryParameter.get("a");
 
         assertThat(result).hasValue("2");
     }
@@ -44,12 +44,12 @@ class HttpXW3UrlEncodedBodyTest {
     void multi() {
         List<String> strings = List.of("a=1", "b=2", "c=3");
         String input = String.join("&", strings);
-        HttpBody urlEncodedBody = new HttpXW3UrlEncodedBody(input.toCharArray());
+        QueryParameter queryParameter = new QueryParameter(input);
 
         Assertions.assertAll(
-                () -> assertThat(urlEncodedBody.get("a")).hasValue("1"),
-                () -> assertThat(urlEncodedBody.get("b")).hasValue("2"),
-                () -> assertThat(urlEncodedBody.get("c")).hasValue("3")
+                () -> assertThat(queryParameter.get("a")).hasValue("1"),
+                () -> assertThat(queryParameter.get("b")).hasValue("2"),
+                () -> assertThat(queryParameter.get("c")).hasValue("3")
         );
     }
 
@@ -57,9 +57,9 @@ class HttpXW3UrlEncodedBodyTest {
     @CsvSource(value = {"=&:0", "a:0", "a=1:1", "a=2&b=2:2", "a=2&a=2:1", "&a=1&:1", "a=1&b=2&c=3:3"}, delimiter = ':')
     @DisplayName("여러 표현식을 처리한다.")
     void parametrized(String source, int expectedSize) {
-        HttpBody urlEncodedBody = new HttpXW3UrlEncodedBody(source.toCharArray());
+        QueryParameter queryParameter = new QueryParameter(source);
 
-        int result = urlEncodedBody.getSize();
+        int result = queryParameter.getSize();
 
         assertThat(result).isEqualTo(expectedSize);
     }

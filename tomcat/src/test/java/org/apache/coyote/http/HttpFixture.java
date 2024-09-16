@@ -14,6 +14,7 @@ public class HttpFixture {
     public static final RequestLine HOME_REQUEST_LINE = new RequestLine(GET, new Uri("/"), HTTP_11);
     public static final RequestLine LOGIN_PAGE_REQUEST_LINE = new RequestLine(GET, new Uri("/login"), HTTP_11);
     public static final RequestLine LOGIN_REQUEST_LINE = new RequestLine(POST, new Uri("/login"), HTTP_11);
+    public static final RequestLine REGISTER_REQUEST_LINE = new RequestLine(GET, new Uri("/register"), HTTP_11);
 
     public static final HttpHeaders EMPTY_HEADER = new HttpHeaders();
     public static final HttpHeaders LOGIN_REQUEST_HEADER = new HttpHeaders();

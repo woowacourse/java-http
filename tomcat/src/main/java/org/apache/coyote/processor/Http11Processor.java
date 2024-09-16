@@ -1,13 +1,12 @@
 package org.apache.coyote.processor;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.catalina.http.StatusCode;
 import org.apache.catalina.http11.Dispatcher;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
-import org.apache.coyote.Processor;
 import org.apache.coyote.connector.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

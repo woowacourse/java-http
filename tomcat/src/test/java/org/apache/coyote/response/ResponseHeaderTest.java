@@ -2,7 +2,7 @@ package org.apache.coyote.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.catalina.HeaderName;
+import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.response.ResponseHeader;
 import org.junit.jupiter.api.Test;
 

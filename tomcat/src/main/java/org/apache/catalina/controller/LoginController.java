@@ -3,7 +3,7 @@ package org.apache.catalina.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.catalina.HeaderName;
+import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.http.StatusCode;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.catalina.request.HttpRequest;

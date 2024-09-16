@@ -1,7 +1,7 @@
 package org.apache.catalina.http11;
 
 import java.util.Map;
-import org.apache.catalina.HeaderName;
+import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.HomeController;
 import org.apache.catalina.controller.LoginController;

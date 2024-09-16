@@ -3,7 +3,7 @@ package org.apache.catalina.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.catalina.HeaderName;
+import org.apache.catalina.http.HeaderName;
 
 public class ResponseHeader {
 

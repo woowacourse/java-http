@@ -1,6 +1,6 @@
 package org.apache.catalina.response;
 
-import org.apache.catalina.ProtocolVersion;
+import org.apache.catalina.http.ProtocolVersion;
 import org.apache.catalina.http.StatusCode;
 
 public class StatusLine {

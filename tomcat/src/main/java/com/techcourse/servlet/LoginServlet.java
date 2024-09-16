@@ -3,7 +3,6 @@ package com.techcourse.servlet;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.util.Optional;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -35,14 +34,16 @@ public class LoginServlet extends HttpServlet {
         String account = request.getFormData(ACCOUNT_FORM_DATA);
         String password = request.getFormData(PASSWORD_FORM_DATA);
 
-        Optional<User> found = InMemoryUserRepository.findByAccount(account);
-        if (found.isEmpty() || !found.get().checkPassword(password)) {
-            response.sendError(HttpStatus.UNAUTHORIZED, LOGIN_FAIL_PAGE);
-            return;
-        }
+        InMemoryUserRepository.findByAccountAndPassword(account, password)
+                .ifPresentOrElse(
+                        user -> sendLoginSuccessResponse(response, user),
+                        () -> response.sendError(HttpStatus.UNAUTHORIZED, LOGIN_FAIL_PAGE)
+                );
+    }
 
+    private void sendLoginSuccessResponse(HttpResponse response, User loginedUser) {
         Session session = new Session();
-        session.setAttributes("user", found.get());
+        session.setAttributes("user", loginedUser);
         sessionManager.add(session);
 
         response.sendRedirect(LOGIN_SUCCESS_REDIRECT_URI);

@@ -2,7 +2,10 @@ package com.techcourse.servlet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMessageBody;
 import org.apache.coyote.http.HttpProtocol;
@@ -34,13 +37,13 @@ class GreetingServletTest {
         greetingServlet.doService(httpRequest, httpResponse);
 
         // then
+        URL resource = getClass().getClassLoader().getResource("static/hello.html");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
-                "Content-Type: text/plain;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 1202",
                 "",
-                "Hello world!");
-
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
         assertThat(httpResponse.resolveHttpMessage()).isEqualTo(expected);
     }
 }

@@ -12,7 +12,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    void process() {
+    void process() throws IOException {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
@@ -21,13 +21,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        URL resource = getClass().getClassLoader().getResource("static/hello.html");
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
-                "Content-Type: text/plain;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 1202",
                 "",
-                "Hello world!");
-
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -36,8 +36,8 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -50,8 +50,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -63,8 +63,8 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -77,8 +77,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3447 \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 3447\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -104,8 +104,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 4319 \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 4319\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -132,8 +132,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         var expected = "HTTP/1.1 401 Unauthorized\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 2426\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

@@ -11,7 +11,7 @@ public class RequestLine {
     private static final int VERSION_INDEX = 2;
 
     private final Method method;
-    private String path; //TODO final 필요
+    private String path;
     private final String version;
 
     public RequestLine(Method method, String path, String version) {
@@ -29,6 +29,10 @@ public class RequestLine {
 
     public String getPath() {
         return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public boolean isMethod(Method method) {

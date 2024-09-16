@@ -32,7 +32,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
 
-        String responseBody = ResourceManager.getFileResource(httpRequest.getPath() + ".html");
+        String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
 
         httpResponse.setStatusLine(OK);
         httpResponse.setContentType(httpRequest.getContentType());

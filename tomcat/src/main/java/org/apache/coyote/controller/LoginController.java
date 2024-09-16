@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
             return httpResponse;
         }
 
-        String responseBody = ResourceManager.getFileResource(httpRequest.getPath() + ".html");
+        String responseBody = ResourceManager.getFileResource(httpRequest.getPath());
 
         httpResponse.setStatusLine(OK);
         httpResponse.setContentType(httpRequest.getContentType());

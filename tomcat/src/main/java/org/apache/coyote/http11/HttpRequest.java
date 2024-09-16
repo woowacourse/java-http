@@ -97,4 +97,8 @@ public class HttpRequest {
     public String getRequestBody() {
         return requestBody;
     }
+
+    public void setPath(String path) {
+        requestLine.setPath(path);
+    }
 }

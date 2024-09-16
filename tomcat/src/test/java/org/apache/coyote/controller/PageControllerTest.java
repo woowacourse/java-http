@@ -17,7 +17,7 @@ class PageControllerTest {
 
     @DisplayName("/ 경로이면 /home.html로 반환한다.")
     @Test
-    void doGet_whenDefault() throws IOException {
+    void doGet_whenDefault() throws Exception {
         // given
         String defaultPath = "/";
         String expectedPath = "/home.html";
@@ -25,10 +25,10 @@ class PageControllerTest {
         RequestLine requestLine = new RequestLine(Method.GET, defaultPath, "HTTP/1.1");
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders);
-        PageController pageController = new PageController();
+        AbstractController pageController = new PageController();
 
         // when
-        HttpResponse httpResponse = pageController.doGet(httpRequest);
+        HttpResponse httpResponse = pageController.service(httpRequest);
         String resource = getResource(expectedPath);
 
         // then

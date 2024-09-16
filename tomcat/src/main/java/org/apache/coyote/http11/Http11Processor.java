@@ -48,18 +48,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private void execute(Request request, Response response) throws Exception {
         log.info("request path = {}", request.getPath());
-        try {
-            Controller controller = ControllerMapper.find(request.getPath());
-            controller.service(request, response);
-        } catch (IllegalArgumentException e) {
-            response.addFileBody(selectResourceFilePath(request.getPath()));
+        if (isResourceFile(request.getPath())) {
+            response.addFileBody(request.getPath());
+            return;
         }
+        Controller controller = ControllerMapper.find(request.getPath());
+        controller.service(request, response);
     }
 
-    private String selectResourceFilePath(String requestPath) {
-        if (requestPath.contains(".")) {
-            return requestPath;
-        }
-        return requestPath + ".html";
+    private boolean isResourceFile(String requestPath) {
+        return requestPath.contains(".");
     }
 }

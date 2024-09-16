@@ -71,7 +71,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             // acceptCount 미만인 경우 연결을 accept한다.
-            int nowQueueSize = threadPoolExecutor.getQueue().size();
+            final var nowQueueSize = threadPoolExecutor.getQueue().size();
             if (nowQueueSize < acceptCount) {
                 process(serverSocket.accept());
             }

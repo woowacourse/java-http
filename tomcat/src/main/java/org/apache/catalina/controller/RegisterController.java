@@ -1,9 +1,7 @@
 package org.apache.catalina.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import org.apache.catalina.ResourceManager;
 import org.apache.catalina.AuthManager;
+import org.apache.catalina.ResourceManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Session;
@@ -19,7 +17,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doPost(HttpRequest httpRequest) {
         HttpResponse httpResponse = new HttpResponse();
 
-        Session session = register(httpRequest);
+        Session session = AuthManager.register(httpRequest);
 
         httpResponse.setStatusLine(FOUND);
         httpResponse.setCookie(AUTHENTICATION_COOKIE_NAME, session.getId());
@@ -40,16 +38,5 @@ public class RegisterController extends AbstractController {
         httpResponse.setContentLength(responseBody.getBytes().length);
 
         return httpResponse;
-    }
-
-    private Session register(HttpRequest httpRequest) {
-        String requestBody = httpRequest.getRequestBody();
-
-        String account = requestBody.split("&")[0].split("=")[1];
-        String password = requestBody.split("&")[1].split("=")[1];
-        String email = requestBody.split("&")[2].split("=")[1];
-
-        InMemoryUserRepository.save(new User(account, password, email));
-        return AuthManager.authenticate(requestBody);
     }
 }

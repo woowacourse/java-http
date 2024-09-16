@@ -12,7 +12,7 @@ public class HttpRequest {
     private static final int FILE_EXTENSION_INDEX = 1;
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
-    private String requestBody = ""; // 추후 GET, POST 리팩토링
+    private String requestBody = "";
 
     public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders) {
         this.requestLine = requestLine;
@@ -96,6 +96,18 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public String getRequestBodyValue(String key) {
+        String[] values = requestBody.split("&");
+
+        for (String value : values) {
+            if (value.startsWith(key)) {
+                return value.split("=")[1];
+            }
+        }
+
+        return null;
     }
 
     public void setPath(String path) {

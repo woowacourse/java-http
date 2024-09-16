@@ -18,10 +18,15 @@ class AuthManagerTest {
     @Test
     void not_authenticate() {
         // given
+        RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
+        HashMap<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
+        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         String requestBody = "account=zeze&password=1234";
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
 
         // when & then
-        Assertions.assertThatCode(() -> AuthManager.authenticate(requestBody))
+        Assertions.assertThatCode(() -> AuthManager.authenticate(httpRequest))
                         .isInstanceOf(IllegalArgumentException.class)
                         .hasMessage("회원가입된 유저가 아닙니다.");
     }
@@ -31,10 +36,16 @@ class AuthManagerTest {
     void authenticate() {
         // given
         InMemoryUserRepository.save(new User("zeze", "1234", "zeze@gmail.com"));
+
+        RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
+        HashMap<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Cookie", "Idea-56f698fe=c5be6597-c8ed-4450-bd98-59a6db9c0a1d;");
+        HttpHeaders httpHeaders = new HttpHeaders(requestHeaders);
         String requestBody = "account=zeze&password=1234";
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
 
         // when & then
-        Assertions.assertThatCode(() -> AuthManager.authenticate(requestBody))
+        Assertions.assertThatCode(() -> AuthManager.authenticate(httpRequest))
                 .doesNotThrowAnyException();
 
     }

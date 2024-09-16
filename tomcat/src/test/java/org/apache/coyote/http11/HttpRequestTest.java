@@ -42,4 +42,26 @@ class HttpRequestTest {
         // then
         Assertions.assertThat(contentType).endsWith(expectedContentType);
     }
+
+    @DisplayName("쿼리 스트링 값을 반환한다.")
+    @Test
+    void getRequestBodyValue() {
+        // given
+        String accountName = "account";
+        String passwordName = "password";
+
+        String expectedAccount = "zeze";
+        String expectedPassword = "1234";
+        RequestLine requestLine = new RequestLine(Method.GET, "/login", "HTTP/1.1");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String requestBody = accountName + "=" + expectedAccount + "&" + passwordName + "=" + expectedPassword;
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, requestBody);
+
+        // when
+        String accountValue = httpRequest.getRequestBodyValue(accountName);
+
+        // then
+        Assertions.assertThat(accountValue).isEqualTo(expectedAccount);
+    }
 }

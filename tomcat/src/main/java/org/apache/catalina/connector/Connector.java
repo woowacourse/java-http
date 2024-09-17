@@ -1,7 +1,6 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.catalina.container.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +8,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -16,27 +17,36 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREADS = 200;
+    private static final int SHUTDOWN_TIMEOUT_SECONDS = 5;
 
     private final ServerSocket serverSocket;
-    private final Manager sessionManager;
+    private final ThreadPoolExecutor threadPoolExecutor;
+    private final Container container;
+    private final int acceptCount;
 
     private boolean stopped;
 
-    public Connector(Manager sessionManager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, sessionManager);
+    public Connector(Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, final Manager sessionManager) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(
+            final Container container,
+            final int port,
+            final int acceptCount,
+            final int maxThreads
+    ) {
+        this.container = container;
+        this.acceptCount = checkAcceptCount(acceptCount);
+        this.serverSocket = createServerSocket(port, this.acceptCount);
+        this.threadPoolExecutor = new TomcatThreadPool(checkMaxThreads(maxThreads), this.acceptCount);
         this.stopped = false;
-        this.sessionManager = sessionManager;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(final int port, final int checkedAcceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkPort(port), checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -60,9 +70,17 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            accept();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void accept() throws IOException {
+        // acceptCount 미만인 경우 연결을 accept한다.
+        final var nowQueueSize = threadPoolExecutor.getQueue().size();
+        if (nowQueueSize < acceptCount) {
+            process(serverSocket.accept());
         }
     }
 
@@ -70,16 +88,20 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager);
-        new Thread(processor).start();
+
+        threadPoolExecutor.execute(container.acceptConnection(connection));
     }
 
     public void stop() {
         stopped = true;
+        threadPoolExecutor.shutdown();
         try {
+            threadPoolExecutor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             serverSocket.close();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            threadPoolExecutor.shutdownNow();
         }
     }
 
@@ -94,6 +116,18 @@ public class Connector implements Runnable {
     }
 
     private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+        return Math.min(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        return Math.min(maxThreads, DEFAULT_THREADS);
+    }
+
+    public int getActiveConnect() {
+        return threadPoolExecutor.getActiveCount();
+    }
+
+    public int getWaitConnect() {
+        return threadPoolExecutor.getQueue().size();
     }
 }

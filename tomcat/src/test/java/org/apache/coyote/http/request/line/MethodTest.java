@@ -7,6 +7,7 @@ import com.techcourse.exception.UncheckedServletException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("Http 메서드 테스트")
 class MethodTest {
 
     @Test

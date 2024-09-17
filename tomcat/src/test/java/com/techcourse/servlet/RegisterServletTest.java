@@ -18,6 +18,7 @@ import org.apache.coyote.http.response.line.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("회원가입 서블릿 테스트")
 class RegisterServletTest {
 
     private final RegisterServlet registerServlet = new RegisterServlet();

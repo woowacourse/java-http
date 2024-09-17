@@ -15,11 +15,15 @@ import org.apache.catalina.servlet.http.response.HttpResponse;
  */
 public class DefaultServlet implements Servlet {
 
-    private static DefaultServlet instance;
+    private static volatile DefaultServlet instance;
 
-    public static synchronized DefaultServlet getInstance() {
+    public static DefaultServlet getInstance() {
         if (instance == null) {
-            instance = new DefaultServlet();
+            synchronized (DefaultServlet.class) {
+                if (instance == null) {
+                    instance = new DefaultServlet();
+                }
+            }
         }
         return instance;
     }

@@ -8,11 +8,15 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> session = new ConcurrentHashMap<>();
 
-    private static SessionManager instance;
+    private static volatile SessionManager instance;
 
-    public static synchronized SessionManager getInstance() {
+    public static SessionManager getInstance() {
         if (instance == null) {
-            instance = new SessionManager();
+            synchronized (SessionManager.class) {
+                if (instance == null) {
+                    instance = new SessionManager();
+                }
+            }
         }
         return instance;
     }

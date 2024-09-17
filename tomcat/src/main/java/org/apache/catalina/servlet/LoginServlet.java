@@ -12,15 +12,19 @@ import org.apache.catalina.servlet.http.response.HttpResponse;
 
 public class LoginServlet extends AbstractServlet {
 
-    private static LoginServlet instance;
+    private static volatile LoginServlet instance;
     private final LoginController loginController = new LoginController();
 
     private LoginServlet() {
     }
 
-    public static synchronized LoginServlet getInstance() {
+    public static LoginServlet getInstance() {
         if (instance == null) {
-            instance = new LoginServlet();
+            synchronized (LoginServlet.class) {
+                if (instance == null) {
+                    instance = new LoginServlet();
+                }
+            }
         }
         return instance;
     }

@@ -3,6 +3,7 @@ package org.apache.coyote.controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -10,7 +11,7 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         HttpMethod httpMethod = request.getHttpMethod();
 
-        validateMethod(httpMethod);
+        validateMethod(httpMethod, response);
 
         if (httpMethod.isPost()) {
             doPost(request, response);
@@ -21,15 +22,20 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    private static void validateMethod(HttpMethod httpMethod) {
+    private static void validateMethod(HttpMethod httpMethod, HttpResponse response) {
         if (!httpMethod.isValidMethod(httpMethod)) {
-            throw new UnsupportedOperationException("지원하지 않는 HTTP METHOD 요청: " + httpMethod);
+            response.setStatus(HttpStatus.NOT_IMPLEMENTED);
+            response.redirectTo("/501.html");
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.redirectTo("/405.html");
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.redirectTo("/405.html");
     }
 }

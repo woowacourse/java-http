@@ -17,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ServletContainer servletContainer;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.servletContainer = new ServletContainer(new ControllerMapper());
     }
 
     @Override
@@ -42,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse.setBody(httpRequest.getPath());
             }
             if (!httpRequest.isStaticRequest()) {
-                ServletContainer servletContainer = new ServletContainer();
+//                ServletContainer servletContainer = new ServletContainer();
                 servletContainer.run(httpRequest, httpResponse);
             }
 

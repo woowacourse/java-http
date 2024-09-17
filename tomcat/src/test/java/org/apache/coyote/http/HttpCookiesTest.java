@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +16,10 @@ public class HttpCookiesTest {
         HttpCookies cookies = new HttpCookies(cookieLine);
 
         // then
-        assertThat(cookies.get("username").getValue()).isEqualTo("JohnDoe");
-        assertThat(cookies.get("sessionId").getValue()).isEqualTo("abc123");
+        assertAll(
+                () -> assertThat(cookies.get("username").getValue()).isEqualTo("JohnDoe"),
+                () -> assertThat(cookies.get("sessionId").getValue()).isEqualTo("abc123")
+        );
     }
 
     @Test
@@ -80,7 +83,9 @@ public class HttpCookiesTest {
         cookies.add(cookie2);
 
         // then
-        assertThat(cookies.get("username").getValue()).isEqualTo("JaneDoe");
-        assertThat(cookies.get("sessionId").getValue()).isEqualTo("xyz456");
+        assertAll(
+                () -> assertThat(cookies.get("username").getValue()).isEqualTo("JaneDoe"),
+                () -> assertThat(cookies.get("sessionId").getValue()).isEqualTo("xyz456")
+        );
     }
 }

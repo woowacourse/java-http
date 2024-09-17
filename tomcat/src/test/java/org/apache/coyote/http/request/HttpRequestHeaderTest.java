@@ -1,6 +1,7 @@
 package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +24,12 @@ public class HttpRequestHeaderTest {
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(lines);
 
         // then
-        assertThat(httpRequestHeader.get("Host")).isEqualTo("localhost:8080");
-        assertThat(httpRequestHeader.get("Connection")).isEqualTo("keep-alive");
-        assertThat(httpRequestHeader.get("Content-Length")).isEqualTo("123");
-        assertThat(httpRequestHeader.get("Cookie")).isEqualTo("sessionId=abc123; username=John");
+        assertAll(
+                () -> assertThat(httpRequestHeader.get("Host")).isEqualTo("localhost:8080"),
+                () -> assertThat(httpRequestHeader.get("Connection")).isEqualTo("keep-alive"),
+                () -> assertThat(httpRequestHeader.get("Content-Length")).isEqualTo("123"),
+                () -> assertThat(httpRequestHeader.get("Cookie")).isEqualTo("sessionId=abc123; username=John")
+        );
     }
 
     @Test
@@ -45,7 +48,6 @@ public class HttpRequestHeaderTest {
 
         assertThat(sessionCookie).isPresent();
         assertThat(sessionCookie.get().getValue()).isEqualTo("abc123");
-
         assertThat(usernameCookie).isPresent();
         assertThat(usernameCookie.get().getValue()).isEqualTo("John");
     }

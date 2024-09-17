@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,10 +17,12 @@ public class HttpContentTypeTest {
         String icoExtension = ".ico";
 
         // when & then
-        assertThat(HttpContentType.findByExtension(htmlExtension)).isEqualTo(HttpContentType.HTML);
-        assertThat(HttpContentType.findByExtension(cssExtension)).isEqualTo(HttpContentType.CSS);
-        assertThat(HttpContentType.findByExtension(jsExtension)).isEqualTo(HttpContentType.JAVASCRIPT);
-        assertThat(HttpContentType.findByExtension(icoExtension)).isEqualTo(HttpContentType.ICO);
+        assertAll(
+                () -> assertThat(HttpContentType.findByExtension(htmlExtension)).isEqualTo(HttpContentType.HTML),
+                () -> assertThat(HttpContentType.findByExtension(cssExtension)).isEqualTo(HttpContentType.CSS),
+                () -> assertThat(HttpContentType.findByExtension(jsExtension)).isEqualTo(HttpContentType.JAVASCRIPT),
+                () -> assertThat(HttpContentType.findByExtension(icoExtension)).isEqualTo(HttpContentType.ICO)
+        );
     }
 
     @Test
@@ -42,10 +45,12 @@ public class HttpContentTypeTest {
         HttpContentType icoType = HttpContentType.ICO;
 
         // when & then
-        assertThat(htmlType.getMimeType()).isEqualTo("text/html;charset=utf-8");
-        assertThat(cssType.getMimeType()).isEqualTo("text/css;charset=utf-8");
-        assertThat(jsType.getMimeType()).isEqualTo("application/javascript");
-        assertThat(icoType.getMimeType()).isEqualTo("image/x-icon");
+        assertAll(
+                () -> assertThat(htmlType.getMimeType()).isEqualTo("text/html;charset=utf-8"),
+                () -> assertThat(cssType.getMimeType()).isEqualTo("text/css;charset=utf-8"),
+                () -> assertThat(jsType.getMimeType()).isEqualTo("application/javascript"),
+                () -> assertThat(icoType.getMimeType()).isEqualTo("image/x-icon")
+        );
     }
 
 }

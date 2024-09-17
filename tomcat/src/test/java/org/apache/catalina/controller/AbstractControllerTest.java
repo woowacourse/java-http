@@ -1,5 +1,6 @@
 package org.apache.catalina.controller;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,8 +43,10 @@ public class AbstractControllerTest {
         controller.service(request, response);
 
         // Then
-        assertTrue(controller.doGetCalled);
-        assertFalse(controller.doPostCalled);
+        assertAll(
+                () -> assertTrue(controller.doGetCalled),
+                () -> assertFalse(controller.doPostCalled)
+        );
     }
 
     @Test
@@ -59,8 +62,10 @@ public class AbstractControllerTest {
         controller.service(request, response);
 
         // Then
-        assertTrue(controller.doPostCalled);
-        assertFalse(controller.doGetCalled);
+        assertAll(
+                () -> assertTrue(controller.doPostCalled),
+                () -> assertFalse(controller.doGetCalled)
+        );
     }
 
     @Test
@@ -76,8 +81,10 @@ public class AbstractControllerTest {
         controller.service(request, response);
 
         // Then
-        assertFalse(controller.doGetCalled);
-        assertFalse(controller.doPostCalled);
-        assertEquals(HttpStatusCode.METHOD_NOT_ALLOWED.getValue(), response.getStatusCode());
+        assertAll(
+                () -> assertFalse(controller.doGetCalled),
+                () -> assertFalse(controller.doPostCalled),
+                () -> assertEquals(HttpStatusCode.METHOD_NOT_ALLOWED.getValue(), response.getStatusCode())
+        );
     }
 }

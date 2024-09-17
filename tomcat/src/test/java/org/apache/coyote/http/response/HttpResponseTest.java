@@ -1,6 +1,7 @@
 package org.apache.coyote.http.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 import org.apache.coyote.http.HttpContentType;
@@ -32,8 +33,10 @@ public class HttpResponseTest {
 
         // then
         Map<String, String> headers = response.getHeader();
-        assertThat(headers.get("Location")).isEqualTo("/new-location");
-        assertThat(response.getContentLength()).isEqualTo(0);
+        assertAll(
+                () -> assertThat(headers.get("Location")).isEqualTo("/new-location"),
+                () -> assertThat(response.getContentLength()).isEqualTo(0)
+        );
     }
 
     @Test
@@ -62,9 +65,11 @@ public class HttpResponseTest {
 
         // then
         Map<String, String> headers = response.getHeader();
-        assertThat(headers.get("Content-Type")).isEqualTo("text/html;charset=utf-8");
-        assertThat(response.getContentLength()).isEqualTo(content.getBytes().length);
-        assertThat(response.getBody()).isEqualTo(content);
+        assertAll(
+                () -> assertThat(headers.get("Content-Type")).isEqualTo("text/html;charset=utf-8"),
+                () -> assertThat(response.getContentLength()).isEqualTo(content.getBytes().length),
+                () -> assertThat(response.getBody()).isEqualTo(content)
+        );
     }
 
     @Test
@@ -81,9 +86,11 @@ public class HttpResponseTest {
 
         // then
         Map<String, String> headers = response.getHeader();
-        assertThat(headers.size()).isEqualTo(3);
-        assertThat(headers.get("Set-Cookie")).isEqualTo("sessionId=abc123");
-        assertThat(headers.get("Content-Type")).isEqualTo("text/html;charset=utf-8");
-        assertThat(headers.get("Content-Length")).isEqualTo(String.valueOf(content.getBytes().length));
+        assertAll(
+                () -> assertThat(headers.size()).isEqualTo(3),
+                () -> assertThat(headers.get("Set-Cookie")).isEqualTo("sessionId=abc123"),
+                () -> assertThat(headers.get("Content-Type")).isEqualTo("text/html;charset=utf-8"),
+                () -> assertThat(headers.get("Content-Length")).isEqualTo(String.valueOf(content.getBytes().length))
+        );
     }
 }

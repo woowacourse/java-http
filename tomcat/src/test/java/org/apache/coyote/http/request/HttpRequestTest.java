@@ -2,6 +2,7 @@ package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,9 +29,11 @@ public class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
         // then
-        assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(httpRequest.getRequestURI()).isEqualTo("/index.html");
-        assertThat(httpRequest.getBody().get("username")).isEqualTo("John");
+        assertAll(
+                () -> assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(httpRequest.getRequestURI()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getBody().get("username")).isEqualTo("John")
+        );
     }
 
     @Test
@@ -49,8 +52,10 @@ public class HttpRequestTest {
         Session session = httpRequest.createSession();
 
         // then
-        assertThat(session).isNotNull();
-        assertThat(httpRequest.findSession()).isEmpty();
+        assertAll(
+                () -> assertThat(session).isNotNull(),
+                () -> assertThat(httpRequest.findSession()).isEmpty()
+        );
     }
 
     @Test
@@ -69,9 +74,11 @@ public class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
         // then
-        assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(httpRequest.getRequestURI()).isEqualTo("/login");
-        assertThat(httpRequest.getBody().get("username")).isEqualTo("Jane");
+        assertAll(
+                () -> assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
+                () -> assertThat(httpRequest.getRequestURI()).isEqualTo("/login"),
+                () -> assertThat(httpRequest.getBody().get("username")).isEqualTo("Jane")
+        );
     }
 
     @Test

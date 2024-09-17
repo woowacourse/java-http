@@ -42,7 +42,7 @@ class HttpResponseTest {
         Assertions.assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK),
                 () -> assertThat(httpHeaders.getHeaderValue(HttpHeaderName.CONTENT_TYPE))
-                        .isEqualTo(MimeType.from(fileName).getContentType() + HttpResponse.CHARSET_UTF_8),
+                        .isEqualTo(MimeType.from(fileName).getContentType()),
                 () -> assertThat(httpMessageBody.resolveBodyMessage()).isEqualTo(FileUtils.readFile(fileName))
         );
     }
@@ -78,7 +78,7 @@ class HttpResponseTest {
         Assertions.assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED),
                 () -> assertThat(httpHeaders.getHeaderValue(HttpHeaderName.CONTENT_TYPE))
-                        .isEqualTo(MimeType.from(fileName).getContentType() + HttpResponse.CHARSET_UTF_8),
+                        .isEqualTo(MimeType.from(fileName).getContentType()),
                 () -> assertThat(httpMessageBody.resolveBodyMessage()).isEqualTo(FileUtils.readFile(fileName))
         );
     }

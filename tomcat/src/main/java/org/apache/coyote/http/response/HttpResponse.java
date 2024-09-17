@@ -11,7 +11,6 @@ import org.apache.util.FileUtils;
 public class HttpResponse {
 
     public static final String JSESSION_COOKIE_PREFIX = "JSESSIONID=";
-    public static final String CHARSET_UTF_8 = ";charset=utf-8";
 
     private final ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
@@ -47,7 +46,7 @@ public class HttpResponse {
     }
 
     private void writeBody(String bodyMessage, String contentType) {
-        httpHeaders.putHeader(HttpHeaderName.CONTENT_TYPE, contentType + CHARSET_UTF_8);
+        httpHeaders.putHeader(HttpHeaderName.CONTENT_TYPE, contentType);
         httpHeaders.putHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(bodyMessage.getBytes().length));
         httpMessageBody.write(bodyMessage);
     }

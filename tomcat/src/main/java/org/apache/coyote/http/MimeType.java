@@ -16,6 +16,8 @@ public enum MimeType {
     TEXT("text/plain"),
     PDF("application/pdf");
 
+    public static final String CHARSET_UTF_8 = ";charset=utf-8";
+
     private final String contentType;
 
     MimeType(String contentType) {
@@ -30,6 +32,9 @@ public enum MimeType {
     }
 
     public String getContentType() {
+        if (contentType.startsWith("text")) {
+            return contentType + CHARSET_UTF_8;
+        }
         return contentType;
     }
 }

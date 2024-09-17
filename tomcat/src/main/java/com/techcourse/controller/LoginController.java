@@ -7,7 +7,6 @@ import com.techcourse.service.UserService;
 import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -87,15 +86,14 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatusLine(HttpStatus.OK);
 
-        HttpCookies cookies = request.getCookies();
-        HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
+        Session session = request.getSession();
 
-        String path = determinePagePath(cookie);
+        String path = determinePagePath(session);
         response.setStaticBody(path);
     }
 
-    private String determinePagePath(HttpCookie sessionCookie) {
-        if (sessionManager.isExistSession(sessionCookie.getValue())) {
+    private String determinePagePath(Session session) {
+        if (sessionManager.isExistSession(session.getId())) {
             return DEFAULT_PATH + INDEX_HTML;
         }
         return DEFAULT_PATH + LOGIN_HTML;

@@ -2,10 +2,13 @@ package org.apache.coyote.http11.message.request;
 
 import java.net.URI;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;
 
@@ -50,5 +53,16 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return requestLine.getMethod();
+    }
+
+    public Session getSession() {
+        HttpCookies cookies = getCookies();
+        HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
+        Session session = SessionManager.getInstance().findSession(cookie.getValue());
+
+        if (session == null) {
+            return new Session();
+        }
+        return session;
     }
 }

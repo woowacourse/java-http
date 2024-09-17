@@ -1,11 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
@@ -40,13 +35,17 @@ public class HttpResponse {
         this.headers.setHeaders(HttpHeaderField.CONTENT_TYPE.getName(), contentType.getType());
     }
 
-    public void setStaticBody(String source) throws URISyntaxException, IOException {
-        URL url = ResourceReader.readResource(source);
-        Path path = new File(url.getPath()).toPath();
-        String contentType = Files.probeContentType(path);
+    public void setStaticBody(String source) throws IOException {
+        try {
+            String content = ResourceReader.readContent(source);
+            String contentType = ResourceReader.readeContentType(source);
 
-        setContentType(contentType);
-        setBody(new String(Files.readAllBytes(path)));
+            setContentType(contentType);
+            setBody(content);
+
+        } catch (IOException exception) {
+            throw new IllegalArgumentException("해당 파일을 찾을 수 없습니다: " + source);
+        }
     }
 
     public void setContentType(String contentType) {

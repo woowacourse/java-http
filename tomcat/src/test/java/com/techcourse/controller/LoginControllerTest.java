@@ -4,19 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.service.UserService;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
 import org.apache.util.ResourceReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +21,11 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     private UserService userService;
-    private SessionManager sessionManager;
     private LoginController loginController;
 
     @BeforeEach
     void setUp() {
         userService = new UserService();
-        sessionManager = SessionManager.getInstance();
         loginController = new LoginController(userService);
 
         InMemoryUserRepository.truncate();
@@ -94,15 +87,13 @@ class LoginControllerTest {
         );
         HttpResponse response = new HttpResponse();
 
-        URL url = ResourceReader.readResource("static/login.html");
-        Path path = new File(url.getPath()).toPath();
-        String body = new String(Files.readAllBytes(path));
+        String content = ResourceReader.readContent("static/login.html");
 
         // when
         loginController.doGet(request, response);
 
         // then
         assertThat(response.toString()).contains("HTTP/1.1 200 OK ");
-        assertThat(response.toString()).contains(body);
+        assertThat(response.toString()).contains(content);
     }
 }

@@ -13,10 +13,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class LoginController extends AbstractController {
 
@@ -36,10 +36,10 @@ public class LoginController extends AbstractController {
         try {
             Map<String, String> loginUserInfo = parseUserInfo(request.getRequestBody());
             User loginUser = login(loginUserInfo);
-            createNewSession(request, response, loginUser);
+            setSession(request, response, loginUser);
             response.redirectTo(INDEX_PAGE);
 
-        } catch (IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
             response.redirectTo(UNAUTHORIZED_PAGE);
         }
@@ -65,14 +65,9 @@ public class LoginController extends AbstractController {
         return user;
     }
 
-    private void createNewSession(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
-        Session session = new Session(UUID.randomUUID().toString());
-
-        if (httpRequest.existsSession() && sessionManager.findSession(httpRequest.getSession().getId()) != null) {
-            session = httpRequest.getSession();
-        }
+    private void setSession(HttpRequest httpRequest, HttpResponse httpResponse, User user) throws IOException {
+        Session session = httpRequest.getSession(sessionManager);
         session.setAttribute(USER_KEY, user);
-        sessionManager.add(session);
 
         httpResponse.setCookie(HttpCookie.setCookieHeader(session.getId()));
     }

@@ -24,7 +24,12 @@ public class RequestHeader {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+        String key = CONTENT_LENGTH;
+
+        if (headers.containsKey(key)) {
+            return Integer.parseInt(headers.get(key));
+        }
+        return 0;
     }
 
     public String getCookies() {

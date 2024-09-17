@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package com.techcourse;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import org.apache.catalina.Controller;
+import org.apache.catalina.resource.ResourceHandler;
 import org.apache.coyote.http11.data.HttpRequest;
-import org.apache.coyote.http11.resource.ResourceHandler;
 
 public class RequestMapping {
     public static Controller getController(HttpRequest request) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.resource;
+package org.apache.catalina.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

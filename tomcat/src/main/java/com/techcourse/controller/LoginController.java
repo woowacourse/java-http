@@ -3,7 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.coyote.http11.AbstractController;
+import org.apache.catalina.AbstractController;
+import org.apache.catalina.resource.ResourceReader;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpCookie;
 import org.apache.coyote.http11.data.HttpRequest;
@@ -11,8 +13,6 @@ import org.apache.coyote.http11.data.HttpRequestParameter;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.MediaType;
-import org.apache.coyote.http11.resource.ResourceReader;
-import org.apache.catalina.session.SessionManager;
 
 public class LoginController extends AbstractController {
     private static final LoginController INSTANCE = new LoginController();
@@ -31,7 +31,8 @@ public class LoginController extends AbstractController {
         HttpRequestParameter requestParameter = request.getHttpRequestParameter();
         try {
             String sessionId = UserService.login(requestParameter);
-            HttpCookie httpCookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, sessionId, Map.of("Max-Age", "600"));
+            HttpCookie httpCookie = new HttpCookie(HttpRequest.SESSION_ID_COOKIE_KEY, sessionId,
+                    Map.of("Max-Age", "600"));
             response.setHttpStatusCode(HttpStatusCode.FOUND)
                     .addCookie(httpCookie)
                     .setRedirectUrl("/index.html");

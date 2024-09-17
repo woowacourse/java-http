@@ -12,7 +12,8 @@ public class HttpResponse {
 
     public static final String JSESSION_COOKIE_PREFIX = "JSESSIONID=";
     public static final String CHARSET_UTF_8 = ";charset=utf-8";
-    private ResponseLine responseLine;
+
+    private final ResponseLine responseLine;
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 

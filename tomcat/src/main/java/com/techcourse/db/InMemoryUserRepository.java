@@ -32,7 +32,7 @@ public class InMemoryUserRepository {
                 .findAny();
     }
 
-    public static void deleteAll() {
-        database.clear();
+    public static void deleteByAccount(String account) {
+        database.remove(account);
     }
 }

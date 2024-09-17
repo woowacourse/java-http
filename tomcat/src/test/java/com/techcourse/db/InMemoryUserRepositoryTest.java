@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 @DisplayName("인메모리 데이터베이스 테스트")
 class InMemoryUserRepositoryTest {
 
-    private User user = new User(1L, "account", "password", "email@test.com");
+    private User user = new User(2L, "account", "password", "email@test.com");
 
     @AfterEach
     void tearDown() {
-        InMemoryUserRepository.deleteAll();
+        InMemoryUserRepository.deleteByAccount(user.getAccount());
     }
 
     @DisplayName("유저를 저장할 수 있다")
@@ -51,13 +51,13 @@ class InMemoryUserRepositoryTest {
         );
     }
 
-    @DisplayName("데이터베이스를 지울 수 있다")
+    @DisplayName("account로 유저 정보를 데이터베이스에서 지울 수 있다")
     @Test
     void cleanUp() {
         // given
         InMemoryUserRepository.save(user);
         // when
-        InMemoryUserRepository.deleteAll();
+        InMemoryUserRepository.deleteByAccount(user.getAccount());
         // then
         assertThat(InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty());
     }

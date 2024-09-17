@@ -24,7 +24,12 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public Map<String, String> getKeyValueBodies() {
+    public String getBodyParameter(String key) {
+        Map<String, String> keyValueBodies = this.getKeyValueBodies();
+        return keyValueBodies.get(key);
+    }
+
+    private Map<String, String> getKeyValueBodies() {
         ContentType contentType = this.getContentType();
         Parser parser = BodyParserFactory.getParser(contentType);
 

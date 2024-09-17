@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.Map;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
@@ -70,18 +69,6 @@ class HttpRequestTest {
                 () -> assertThat(result.getContentType()).isEqualTo(ContentType.FORM_DATA),
                 () -> assertThat(result.getCookies().toString()).hasToString(cookie),
                 () -> assertThat(result.getBody()).isEqualTo(body)
-        );
-    }
-
-    @DisplayName("getKeyValueBodies() 메서드는 본문을 파싱하여 키-값 쌍을 반환한다.")
-    @Test
-    void getKeyValueBodies() {
-        // when
-        Map<String, String> keyValueBodies = httpRequest.getKeyValueBodies();
-
-        // then
-        assertAll(
-                () -> assertThat(keyValueBodies).containsEntry("key", "value")
         );
     }
 

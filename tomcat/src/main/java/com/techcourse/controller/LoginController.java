@@ -4,7 +4,6 @@ import com.techcourse.except.UnauthorizedException;
 import com.techcourse.except.UserNotFoundException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
-import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
@@ -38,9 +37,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> params = request.getKeyValueBodies();
-        String account = params.get(ACCOUNT);
-        String password = params.get(PASSWORD);
+        String account = request.getBodyParameter(ACCOUNT);
+        String password = request.getBodyParameter(PASSWORD);
 
         try {
             User user = userService.findBy(account);

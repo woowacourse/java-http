@@ -2,7 +2,7 @@ package org.apache.catalina.server;
 
 import org.apache.catalina.container.Container;
 
-public interface ApplicationContext {
+public interface Context {
 
     Container getContainer();
 

@@ -1,15 +1,15 @@
 package com.techcourse;
 
 import org.apache.catalina.container.Container;
-import org.apache.catalina.server.ApplicationContext;
+import org.apache.catalina.server.Context;
 import org.apache.catalina.server.ApplicationConfig;
 
-public class MyApplicationContext implements ApplicationContext {
+public class MyContext implements Context {
 
     private final Container container;
     private final ApplicationConfig applicationConfig;
 
-    public MyApplicationContext() {
+    public MyContext() {
         this.container = MyContainer.getInstance();
         this.applicationConfig =  MyApplicationConfig.getInstance();
     }

@@ -10,12 +10,11 @@ public class HttpResponse {
 
     private final HttpResponseStartLine startLine;
     private final HttpResponseHeader header;
-    private final HttpResponseBody body;
+    private HttpResponseBody body;
 
     public HttpResponse() {
         this.startLine = new HttpResponseStartLine();
         this.header = new HttpResponseHeader();
-        this.body = new HttpResponseBody();
     }
 
     public void setStatusCode(HttpStatusCode statusCode) {
@@ -40,7 +39,7 @@ public class HttpResponse {
     public void setContent(HttpContentType type, String content) {
         header.setContentType(type);
         header.setContentLength(content.getBytes().length);
-        body.setContent(content);
+        body = new HttpResponseBody(content);
     }
 
     public String getStatusCode() {
@@ -53,6 +52,10 @@ public class HttpResponse {
 
     public int getContentLength() {
         return header.getContentLength();
+    }
+
+    public boolean hasBody() {
+        return body != null;
     }
 
     public String getBody() {

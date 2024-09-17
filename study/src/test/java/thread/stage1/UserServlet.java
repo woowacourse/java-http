@@ -11,8 +11,14 @@ public class UserServlet {
         join(user);
     }
 
-    private void join(final User user) {
+    private synchronized void join(final User user) {
         if (!users.contains(user)) {
+            // 회원가입이 0.5초 걸린다는 가정
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             users.add(user);
         }
     }

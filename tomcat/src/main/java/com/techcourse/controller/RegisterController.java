@@ -6,7 +6,6 @@ import org.apache.catalina.mvc.AbstractController;
 import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
-import org.apache.catalina.response.HttpStatus;
 
 import com.techcourse.service.AuthService;
 import com.techcourse.service.RegisterService;
@@ -37,8 +36,6 @@ public class RegisterController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) {
         String sessionId = request.getCookie().getAuthSessionId();
         if (authService.isLogin(sessionId)) {
-            response.setHttpStatus(HttpStatus.FOUND);
-            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
             response.setRedirection(INDEX_PAGE);
             return;
         }
@@ -67,8 +64,6 @@ public class RegisterController extends AbstractController {
         String email = bodyParams.get(EMAIL);
         registerService.registerUser(account, password, email);
 
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.setBody(FileReader.loadFileContent(INDEX_PAGE));
         response.setRedirection(INDEX_PAGE);
     }
 }

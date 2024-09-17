@@ -27,9 +27,8 @@ class RootControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            RootController rootController = new RootController();
 
-            boolean actual = rootController.isMatchesRequest(httpRequest);
+            boolean actual = new RootController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isTrue();
         }
@@ -43,9 +42,8 @@ class RootControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            RootController rootController = new RootController();
 
-            boolean actual = rootController.isMatchesRequest(httpRequest);
+            boolean actual = new RootController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isFalse();
         }

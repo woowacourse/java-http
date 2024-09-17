@@ -9,7 +9,6 @@ import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
-import org.apache.catalina.response.HttpStatus;
 
 import com.techcourse.model.User;
 import com.techcourse.service.AuthService;
@@ -40,8 +39,6 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         if (authService.isLogin(request.getCookie().getAuthSessionId())) {
-            response.setHttpStatus(HttpStatus.FOUND);
-            response.setBody(FileReader.loadFileContent(INDEX_PAGE));
             response.setRedirection(INDEX_PAGE);
             return;
         }
@@ -68,9 +65,7 @@ public class LoginController extends AbstractController {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.addAuthSessionId(session.getId());
 
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.setBody(FileReader.loadFileContent(INDEX_PAGE));
-        response.setRedirection(INDEX_PAGE);
         response.setCookie(httpCookie.toString());
+        response.setRedirection(INDEX_PAGE);
     }
 }

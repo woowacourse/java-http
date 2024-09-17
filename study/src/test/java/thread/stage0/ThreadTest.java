@@ -1,5 +1,9 @@
 package thread.stage0;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.lang.Thread.State;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +32,16 @@ class ThreadTest {
     void testExtendedThread() throws InterruptedException {
         // 하단의 ExtendedThread 클래스를 Thread 클래스로 상속하고 스레드 객체를 생성한다.
         Thread thread = new ExtendedThread("hello thread");
+        assertThat(thread.getState()).isEqualTo(State.NEW);
 
         // 생성한 thread 객체를 시작한다.
          thread.start();
+        assertThat(thread.getState()).isEqualTo(Thread.State.RUNNABLE);
 
         // thread의 작업이 완료될 때까지 기다린다.
          thread.join();
+        assertThat(thread.getState()).isEqualTo(State.TERMINATED);
+
     }
 
     /**
@@ -44,12 +52,15 @@ class ThreadTest {
     void testRunnableThread() throws InterruptedException {
         // 하단의 RunnableThread 클래스를 Runnable 인터페이스의 구현체로 만들고 Thread 클래스를 활용하여 스레드 객체를 생성한다.
         Thread thread = new Thread(new RunnableThread("hello thread"));
+        assertThat(thread.getState()).isEqualTo(State.NEW);
 
         // 생성한 thread 객체를 시작한다.
          thread.start();
+        assertThat(thread.getState()).isEqualTo(Thread.State.RUNNABLE);
 
         // thread의 작업이 완료될 때까지 기다린다.
          thread.join();
+        assertThat(thread.getState()).isEqualTo(State.TERMINATED);
     }
 
     private static final class ExtendedThread extends Thread {

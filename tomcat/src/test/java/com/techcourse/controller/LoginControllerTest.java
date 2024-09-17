@@ -104,7 +104,7 @@ class LoginControllerTest {
     class doGet {
         @Test
         @DisplayName("성공 : 로그인 성공 후 접근 시 index.html response 반환")
-        void doGetSuccessLoginSuccess() throws IOException {
+        void doGetSuccessLoginSuccess() {
             User user = new User("kyum", "password", "kyum@naver.com");
             InMemoryUserRepository.save(user);
             Session session = new AuthService().createSession(user);
@@ -117,14 +117,11 @@ class LoginControllerTest {
 
             new LoginController().doGet(request, response);
 
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Location: http://localhost:8080/index.html ",
+                    "\r\n");
 
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);
@@ -146,11 +143,12 @@ class LoginControllerTest {
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + bytes.length + " ",
+                    "",
+                    new String(bytes));
 
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);
@@ -163,7 +161,7 @@ class LoginControllerTest {
     class doPost {
         @Test
         @DisplayName("성공 : login 시도 성공 시 index.html response 반환")
-        void doPostSuccess() throws IOException {
+        void doPostSuccess() {
             User user = new User("kyum", "password", "kyum@naver.com");
             InMemoryUserRepository.save(user);
             HttpRequest request = new HttpRequest(
@@ -175,17 +173,14 @@ class LoginControllerTest {
 
             new LoginController().doPost(request, response);
 
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
             String actual = response.toString();
             String JSessionId = actual.split("JSESSIONID=")[1].split(" \r\n")[0];
-            String expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            String expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Set-Cookie: JSESSIONID=" + JSessionId + " ",
+                    "Location: http://localhost:8080/index.html ",
+                    "\r\n");
 
             assertThat(actual).isEqualTo(expected);
         }

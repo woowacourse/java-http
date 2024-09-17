@@ -1,12 +1,12 @@
 package org.apache.catalina.auth;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager instance = new SessionManager();
 
     private SessionManager() {}
@@ -16,7 +16,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void add(Session session) {
+    public synchronized void add(Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
@@ -29,7 +29,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(Session session) {
+    public synchronized void remove(Session session) {
         SESSIONS.keySet().stream()
                 .filter(key -> SESSIONS.get(key).equals(session))
                 .findAny()

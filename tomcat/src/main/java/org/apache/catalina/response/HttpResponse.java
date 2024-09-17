@@ -1,11 +1,14 @@
 package org.apache.catalina.response;
 
 import org.apache.catalina.http.ContentType;
+import org.apache.catalina.reader.FileReader;
 import org.apache.catalina.request.HttpRequest;
 
 public class HttpResponse {
 
     private static final String BASE_URL = "http://localhost:8080";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String URL_PREFIX = "/";
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
@@ -46,7 +49,16 @@ public class HttpResponse {
     }
 
     public void setRedirection(String url) {
+        setHttpStatus(HttpStatus.FOUND);
+        responseHeader.removeContentType();
         responseHeader.setRedirection(BASE_URL + url);
+    }
+
+    public void setError(HttpStatus httpStatus) {
+        String errorPageUrl = URL_PREFIX + httpStatus.getValue() + HTML_EXTENSION;
+        setHttpStatus(httpStatus);
+        setContentType(ContentType.HTML);
+        setBody(FileReader.loadFileContent(errorPageUrl));
     }
 
     public void addHeader(String key, String value) {

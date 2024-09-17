@@ -39,9 +39,8 @@ class RegisterControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            RegisterController registerController = new RegisterController();
 
-            boolean actual = registerController.isMatchesRequest(httpRequest);
+            boolean actual = new RegisterController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isTrue();
         }
@@ -55,9 +54,8 @@ class RegisterControllerTest {
                     new RequestHeader(),
                     new RequestBody()
             );
-            RegisterController registerController = new RegisterController();
 
-            boolean actual = registerController.isMatchesRequest(httpRequest);
+            boolean actual = new RegisterController().isMatchesRequest(httpRequest);
 
             assertThat(actual).isFalse();
         }
@@ -69,7 +67,7 @@ class RegisterControllerTest {
 
         @Test
         @DisplayName("성공 : 로그인 성공 후 접근 시 index.html response 반환")
-        void doGetSuccessLoginSuccess() throws IOException {
+        void doGetSuccessLoginSuccess() {
             User user = new User("kyum", "password", "kyum@naver.com");
             InMemoryUserRepository.save(user);
             Session session = new AuthService().createSession(user);
@@ -82,14 +80,11 @@ class RegisterControllerTest {
 
             new RegisterController().doGet(request, response);
 
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Location: http://localhost:8080/index.html" + " ",
+                    "\r\n");
 
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);
@@ -128,7 +123,7 @@ class RegisterControllerTest {
 
         @Test
         @DisplayName("성공 : 회원가입 성공 index.html response 반환")
-        void doPostSuccess() throws IOException {
+        void doPostSuccess() {
             HttpRequest request = new HttpRequest(
                     new RequestLine("POST /register HTTP/1.1"),
                     new RequestHeader(),
@@ -138,14 +133,11 @@ class RegisterControllerTest {
 
             new RegisterController().doPost(request, response);
 
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-            var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: " + bytes.length + " \r\n" +
-                    "Location: http://localhost:8080/index.html" + " \r\n" +
-                    "\r\n" +
-                    new String(bytes);
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Content-Length: 0 ",
+                    "Location: http://localhost:8080/index.html" + " ",
+                    "\r\n");
 
             String actual = response.toString();
             assertThat(actual).isEqualTo(expected);

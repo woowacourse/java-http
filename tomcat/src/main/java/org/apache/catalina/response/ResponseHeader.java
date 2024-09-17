@@ -38,6 +38,14 @@ public class ResponseHeader {
         headers.put(key, value);
     }
 
+    public void removeContentType() {
+        headers.remove(CONTENT_TYPE);
+    }
+
+    public void remove(String key) {
+        headers.remove(key);
+    }
+
     @Override
 
     public String toString() {

@@ -25,12 +25,14 @@ public class RegisterControllerTest {
         Http11Request request = Http11Request.from(new ByteArrayInputStream(register.getBytes()));
         Http11Response response = Http11Response.ok();
 
-        LoginController loginController = new LoginController();
-        loginController.doPost(request, response);
+        RegisterController registerController = new RegisterController();
+        registerController.doPost(request, response);
 
-        assertThat(new String(response.getBytes()))
+        String actual = new String(response.getBytes());
+        System.out.println("actual = " + actual);
+        assertThat(actual)
                 .contains("302 Found")
-                .contains("Set-Cookie");
+                .contains("index.html");
     }
 
     @Test

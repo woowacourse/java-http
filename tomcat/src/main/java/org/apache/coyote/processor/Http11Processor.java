@@ -44,7 +44,6 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse.setBody(httpRequest.getPath());
             }
             if (!httpRequest.isStaticRequest()) {
-//                ServletContainer servletContainer = new ServletContainer();
                 servletContainer.run(httpRequest, httpResponse);
             }
 

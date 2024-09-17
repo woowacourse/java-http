@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.catalina.container.Container;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.Processor;
 import org.apache.http.header.HttpHeaderName;
 import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -24,9 +26,9 @@ class Http11ProcessorTest {
     @DisplayName("루트 Get 요청 처리")
     void process() {
         // given
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket();
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -50,9 +52,9 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -77,9 +79,9 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -101,9 +103,9 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=1");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -128,9 +130,9 @@ class Http11ProcessorTest {
                 "",
                 "account=gugu&password=password");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -148,9 +150,9 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Connection: keep-alive");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -172,9 +174,9 @@ class Http11ProcessorTest {
                 "",
                 "account=gugu&email=hi@naver.com&password=password");
 
-        final var container = MyContainer.getInstance();
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, container);
+        final Container container = MyContainer.getInstance();
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);

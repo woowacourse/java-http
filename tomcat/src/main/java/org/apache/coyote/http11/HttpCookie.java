@@ -37,17 +37,6 @@ public class HttpCookie {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(name).append(KEY_VALUE_REGEX).append(value);
-
-        if (httpOnly) {
-            sb.append("; HttpOnly");
-        }
-        return sb.toString();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -62,5 +51,16 @@ public class HttpCookie {
     @Override
     public int hashCode() {
         return Objects.hash(name, value);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append(KEY_VALUE_REGEX).append(value);
+
+        if (httpOnly) {
+            sb.append("; HttpOnly");
+        }
+        return sb.toString();
     }
 }

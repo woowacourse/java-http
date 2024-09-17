@@ -3,6 +3,7 @@ package com.techcourse;
 import org.apache.catalina.server.ApplicationConfig;
 
 public class MyApplicationConfig extends ApplicationConfig {
+
     private static final MyApplicationConfig INSTANCE = new MyApplicationConfig();
 
     private MyApplicationConfig() {

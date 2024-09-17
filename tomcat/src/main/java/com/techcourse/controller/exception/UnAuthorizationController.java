@@ -5,6 +5,7 @@ import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
 public class UnAuthorizationController extends AbstractController {
+
     private static final UnAuthorizationController INSTANCE = new UnAuthorizationController();
 
     private UnAuthorizationController() {

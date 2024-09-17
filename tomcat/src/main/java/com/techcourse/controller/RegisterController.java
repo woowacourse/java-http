@@ -8,6 +8,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class RegisterController extends AbstractController {
+
     private static final RegisterController INSTANCE = new RegisterController();
 
     private RegisterController() {

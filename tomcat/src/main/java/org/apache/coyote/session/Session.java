@@ -15,7 +15,7 @@ public class Session {
         this(UUID.randomUUID().toString());
     }
 
-    public Session(String id) {
+    private Session(String id) {
         this.id = id;
     }
 

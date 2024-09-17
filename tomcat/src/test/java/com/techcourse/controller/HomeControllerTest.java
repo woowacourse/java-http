@@ -19,10 +19,9 @@ class HomeControllerTest {
     @DisplayName("/ 경로로 GET 요청하면 Hello world! 를 반환한다.")
     void get() throws Exception {
         HttpRequest request = HttpRequestTestSupport.homeGet();
-        HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+        HttpResponse response = new HttpResponse();
 
-        homeController.service(request, builder);
-        HttpResponse response = builder.build();
+        homeController.service(request, response);
 
         assertEquals(response.getResponseBody(), "Hello world!");
     }
@@ -36,9 +35,9 @@ class HomeControllerTest {
         BufferedReader reader = new BufferedReader(new StringReader(requestString));
 
         HttpRequest request = HttpRequest.from(reader);
-        HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+        HttpResponse response = new HttpResponse();
 
-        assertThatThrownBy(() -> homeController.service(request, builder))
+        assertThatThrownBy(() -> homeController.service(request, response))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

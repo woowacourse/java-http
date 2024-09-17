@@ -10,7 +10,7 @@ import org.apache.catalina.Controller;
 import org.apache.catalina.resource.ResourceHandler;
 import org.apache.coyote.http11.data.HttpMethod;
 import org.apache.coyote.http11.data.HttpRequest;
-import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

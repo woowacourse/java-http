@@ -2,6 +2,7 @@ package org.apache.coyote.http11.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.HttpVersion;
 
 public class HttpResponse {
     private HttpVersion httpVersion;

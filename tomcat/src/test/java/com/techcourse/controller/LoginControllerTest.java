@@ -13,7 +13,7 @@ import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpRequestParameter;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
-import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.data.MediaType;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;

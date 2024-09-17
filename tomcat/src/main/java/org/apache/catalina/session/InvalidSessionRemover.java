@@ -5,7 +5,7 @@ import org.apache.coyote.http11.data.HttpCookie;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
-import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.HttpVersion;
 
 public class InvalidSessionRemover {
     public static HttpResponse remove(HttpRequest request) {

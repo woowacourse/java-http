@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpCookie;
 import org.apache.coyote.http11.data.HttpMethod;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpRequestParameter;
-import org.apache.coyote.http11.data.HttpVersion;
 import org.apache.coyote.http11.data.MediaType;
 
 public class HttpRequestParser {
@@ -27,8 +27,11 @@ public class HttpRequestParser {
         HttpMethod httpMethod = HttpMethod.from(httpMethodName)
                 .orElseThrow(() -> new IllegalArgumentException("이름이 " + httpMethodName + "인 HTTP 메소드가 없습니다."));
         String path = requestParts[1].trim();
-        HttpVersion httpVersion = HttpVersion.from(requestParts[2].trim())
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP 버전입니다."));
+        String rawHttpVersion = requestParts[2].trim();
+        if (!HttpVersion.HTTP_1_1.isSameVersion(rawHttpVersion)) {
+            throw new IllegalArgumentException("유효하지 않은 HTTP 버전입니다.");
+        }
+        HttpVersion httpVersion = HttpVersion.HTTP_1_1;
 
         Map<String, String> rawHttpRequestHeader = parseRawHttpRequestHeader(bufferedReader);
         ContentType contentType = null;

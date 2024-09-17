@@ -8,7 +8,7 @@ import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
-import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.data.MediaType;
 
 public class HttpRequestHandler {

@@ -21,6 +21,8 @@ public class Http11RequestHeaders {
             assert index != -1;
             String key = headerLine.substring(0, index);
             String value = headerLine.substring(index + 1);
+            assert !key.isBlank();
+            assert !value.isBlank();
             map.put(key.trim(), value.trim());
         }
 

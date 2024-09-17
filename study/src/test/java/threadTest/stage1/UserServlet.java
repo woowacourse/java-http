@@ -1,4 +1,4 @@
-package thread.stage1;
+package threadTest.stage1;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(Http11Request request, Http11Response response) throws Exception {
+    protected void doPost(Http11Request request, Http11Response response) {
         Http11RequestBody requestBody = request.getRequestBody();
         User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
+    protected void doGet(Http11Request request, Http11Response response) {
         request.setUri(request.getUri() + ".html");
     }
 }

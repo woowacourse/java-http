@@ -12,7 +12,7 @@ public class ViewResolver {
     private static final String STATIC_PATH_PREFIX = "static";
 
     public static String resolve(String resourcePath) {
-        final String staticPath = parseStaticPath(resourcePath);
+        final String staticPath = resolveStaticPath(resourcePath);
         final URL resource = ViewResolver.class.getClassLoader().getResource(staticPath);
         if (resource == null) {
             throw new IllegalArgumentException("해당 경로의 응답 파일이 존재하지 않습니다: " + staticPath); // TODO: 404 처리
@@ -25,7 +25,7 @@ public class ViewResolver {
         }
     }
 
-    private static String parseStaticPath(String filePath) {
-        return STATIC_PATH_PREFIX + filePath;
+    private static String resolveStaticPath(String resourcePath) {
+        return STATIC_PATH_PREFIX + resourcePath;
     }
 }

@@ -17,9 +17,11 @@ public class Http11RequestHeaders {
         Map<String, String> map = new HashMap<>();
 
         for (String headerLine : headerLines.split("\r\n")) {
-            String[] keyValue = headerLine.split(": ");
-            assert keyValue.length == 2;
-            map.put(keyValue[0], keyValue[1]);
+            int index = headerLine.indexOf(":");
+            assert index != -1;
+            String key = headerLine.substring(0, index);
+            String value = headerLine.substring(index + 1);
+            map.put(key.trim(), value.trim());
         }
 
         return new Http11RequestHeaders(map);

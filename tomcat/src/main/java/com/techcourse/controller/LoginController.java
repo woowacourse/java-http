@@ -73,8 +73,7 @@ public class LoginController extends AbstractController {
     private HttpCookie makeUserCookie(User user) {
         Session session = makeUserSession(user);
 
-        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
-        httpCookie.setValue(session.getId());
+        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID, session.getId());
         httpCookie.setHttpOnly(true);
         return httpCookie;
     }

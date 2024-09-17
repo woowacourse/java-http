@@ -3,13 +3,13 @@ package org.apache.catalina.controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http.request.HttpRequest;
 
 public class ControllerRegistry {
 
-    private static final Map<String, Controller> mappings = new ConcurrentHashMap<>();
+    private static final Map<String, Controller> mappings = new HashMap<>();
     private static final StaticResourceController defaultController = new StaticResourceController();
 
     static {

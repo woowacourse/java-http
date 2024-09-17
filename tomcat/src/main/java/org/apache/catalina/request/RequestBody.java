@@ -21,8 +21,11 @@ public class RequestBody {
     }
 
     private Map<String, String> mapBody(String bodyLine) {
-        Map<String, String> rawBody = new HashMap<>();
+        if (bodyLine == null || bodyLine.isEmpty()) {
+            return Map.of();
+        }
 
+        Map<String, String> rawBody = new HashMap<>();
         String[] bodyElements = bodyLine.split(COMPONENT_DELIMITER);
         for (int i = 0; i < bodyElements.length; i++) {
             String[] info = bodyElements[i].split(COMPONENT_VALUE_DELIMITER);

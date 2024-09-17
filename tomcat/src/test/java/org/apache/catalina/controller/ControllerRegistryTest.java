@@ -1,5 +1,6 @@
 package org.apache.catalina.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,7 +42,7 @@ public class ControllerRegistryTest {
 
         // Then
         assertNotNull(controller);
-        assertTrue(controller instanceof RegisterController);
+        assertThat(controller).isInstanceOf(RegisterController.class);
     }
 
     @Test

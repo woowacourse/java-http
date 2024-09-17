@@ -6,12 +6,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final String responseBody;
+    private final String requestBody;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, String responseBody) {
+    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, String requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
-        this.responseBody = responseBody;
+        this.requestBody = requestBody;
     }
 
     public String getUrl() {
@@ -40,7 +40,7 @@ public class HttpRequest {
         if ("GET".equals(method)) {
             return getParameterFromUrl(getUrl());
         }
-        return getParameterFromBody(responseBody);
+        return getParameterFromBody(requestBody);
     }
 
 

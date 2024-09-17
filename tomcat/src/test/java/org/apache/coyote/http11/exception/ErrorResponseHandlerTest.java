@@ -34,8 +34,8 @@ public class ErrorResponseHandlerTest {
 
         // when
         try {
-            throw new RequestException(HttpStatusCode.BAD_REQUEST, "/401.html");
-        } catch (RequestException e) {
+            throw new ClientRequestException(HttpStatusCode.BAD_REQUEST, "/401.html");
+        } catch (ClientRequestException e) {
             e.handleErrorResponse();
             String actual = outputStream.toString(StandardCharsets.UTF_8);
             // then

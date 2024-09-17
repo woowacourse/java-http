@@ -12,7 +12,7 @@ import org.apache.catalina.servlet.http.response.HttpResponse;
 
 public class RegisterServlet extends AbstractServlet {
 
-    private static RegisterServlet instance;
+    private static volatile RegisterServlet instance;
     private final RegisterController registerController = new RegisterController();
 
     private RegisterServlet() {
@@ -20,7 +20,11 @@ public class RegisterServlet extends AbstractServlet {
 
     public static RegisterServlet getInstance() {
         if (instance == null) {
-            instance = new RegisterServlet();
+            synchronized (RegisterServlet.class) {
+                if (instance == null) {
+                    instance = new RegisterServlet();
+                }
+            }
         }
         return instance;
     }

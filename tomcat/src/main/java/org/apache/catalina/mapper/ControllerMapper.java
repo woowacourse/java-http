@@ -24,7 +24,7 @@ public class ControllerMapper {
 
     private ControllerMapper() {}
 
-    public static ControllerMapper getInstance() {
+    public static synchronized ControllerMapper getInstance() {
         if (instance == null) {
             instance = new ControllerMapper();
         }

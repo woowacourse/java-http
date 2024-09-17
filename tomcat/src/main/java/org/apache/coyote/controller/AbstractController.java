@@ -1,10 +1,8 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -33,11 +31,5 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-    }
-
-    protected void redirect(String location, HttpResponse response) {
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation(location);
-        response.setMimeType(MimeType.from(location));
     }
 }

@@ -26,11 +26,11 @@ public class RegisterController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
             register(request.getRequestBody());
-            redirect(INDEX_PAGE, response);
+            response.redirectTo(INDEX_PAGE);
 
         } catch (IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
-            redirect(REGISTER_PAGE, response);
+            response.redirectTo(REGISTER_PAGE);
         }
     }
 
@@ -61,6 +61,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        redirect(REGISTER_PAGE, response);
+        response.redirectTo(REGISTER_PAGE);
     }
 }

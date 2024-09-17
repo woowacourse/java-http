@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
     private static final String USER_KEY = "user";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
-    private static final String UNAUTHORIZED = "/401.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -37,11 +37,11 @@ public class LoginController extends AbstractController {
             Map<String, String> loginUserInfo = parseUserInfo(request.getRequestBody());
             User loginUser = login(loginUserInfo);
             createNewSession(request, response, loginUser);
-            redirect(INDEX_PAGE, response);
+            response.redirectTo(INDEX_PAGE);
 
         } catch (IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
-            redirect(UNAUTHORIZED, response);
+            response.redirectTo(UNAUTHORIZED_PAGE);
         }
     }
 
@@ -96,13 +96,13 @@ public class LoginController extends AbstractController {
             String id = cookies.getJsessionId();
 
             if (request.existsSession() && sessionManager.findSession(id) != null) {
-                redirect(INDEX_PAGE, response);
+                response.redirectTo(INDEX_PAGE);
                 return;
             }
         } catch (NullPointerException e) {
             log.info("JSESSION 쿠키 값이 없습니다");
-            redirect(LOGIN_PAGE, response);
+            response.redirectTo(LOGIN_PAGE);
         }
-        redirect(LOGIN_PAGE, response);
+        response.redirectTo(LOGIN_PAGE);
     }
 }

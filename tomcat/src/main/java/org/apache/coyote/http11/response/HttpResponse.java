@@ -22,6 +22,12 @@ public class HttpResponse {
         setContentLength(responseBody.getLength());
     }
 
+    public void redirectTo(String location) {
+        setStatus(HttpStatus.FOUND);
+        setLocation(location);
+        setMimeType(MimeType.from(location));
+    }
+
     public void setStatus(HttpStatus httpStatus) {
         statusLine.setHttpStatus(httpStatus);
     }

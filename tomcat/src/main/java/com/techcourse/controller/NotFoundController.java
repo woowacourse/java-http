@@ -10,6 +10,6 @@ public class NotFoundController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        redirect(NOT_FOUND_PAGE, response);
+        response.redirectTo(NOT_FOUND_PAGE);
     }
 }

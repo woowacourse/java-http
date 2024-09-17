@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import org.apache.coyote.http11.FileFinder;
 import org.apache.coyote.http11.message.body.HttpBody;
-import org.apache.coyote.http11.message.header.HttpHeader;
+import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -48,7 +48,7 @@ public class NotFoundController extends AbstractController {
             final String content
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.NOT_FOUND);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 CONTENT_TYPE.getValue(), HTML.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(content.length())
         ));
@@ -61,7 +61,7 @@ public class NotFoundController extends AbstractController {
     private void setServerErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 LOCATION.getValue(), ERROR_MESSAGE,
                 CONTENT_TYPE.getValue(), PLAIN.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length())

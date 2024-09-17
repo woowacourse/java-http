@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @DisplayName("HttpHeaderAcceptType 테스트")
-class HttpHeaderAcceptTypeTest {
+class HttpHeadersAcceptTypeTest {
 
     @DisplayName("유효한 Http header accept 값이 입력되면 해당하는 Enum 객체를 반환한다.")
     @MethodSource("inputAndExceptForGetByValue")
@@ -46,6 +46,6 @@ class HttpHeaderAcceptTypeTest {
         // When & Then
         assertThatThrownBy(() -> HttpHeaderAcceptType.getByValue(input))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 HTTP Header Accept 값 입니다. - " + input);
+                .hasMessage("유효하지 않은 HTTP Header Accept 입니다. - " + input);
     }
 }

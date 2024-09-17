@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import org.apache.coyote.http11.FileFinder;
 import org.apache.coyote.http11.message.body.HttpBody;
-import org.apache.coyote.http11.message.header.HttpHeader;
+import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -56,7 +56,7 @@ public class RegisterController extends AbstractController {
             final String content
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 CONTENT_TYPE.getValue(), HTML.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(content.length())
         ));
@@ -69,7 +69,7 @@ public class RegisterController extends AbstractController {
     private void setServerErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 LOCATION.getValue(), ERROR_MESSAGE,
                 CONTENT_TYPE.getValue(), PLAIN.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length())
@@ -83,7 +83,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final HttpRequestLine requestLine = request.getRequestLine();
-        final Map<String, String> formData = request.getBody().parseFormDataKeyAndValue();
+        final Map<String, String> formData = request.getBody().get().parseFormDataKeyAndValue();
         final String account = formData.get("account");
         final String password = formData.get("password");
         final String email = formData.get("email");
@@ -128,7 +128,7 @@ public class RegisterController extends AbstractController {
     private void setDuplicateUserAccountErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final String responseBody = "{\"message\": \"이미 존재하는 사용자 계정입니다.\"}";
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.BAD_REQUEST);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 CONTENT_TYPE.getValue(), JSON.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
         ));
@@ -140,7 +140,7 @@ public class RegisterController extends AbstractController {
 
     private void setHandlePostSuccessResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 LOCATION.getValue(), "http://localhost:8080/index.html",
                 CONTENT_TYPE.getValue(), HTML.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(0)

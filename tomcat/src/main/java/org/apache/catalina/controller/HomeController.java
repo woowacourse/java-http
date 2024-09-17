@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTEN
 import java.util.Map;
 
 import org.apache.coyote.http11.message.body.HttpBody;
-import org.apache.coyote.http11.message.header.HttpHeader;
+import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -25,7 +25,7 @@ public class HomeController extends AbstractController {
         final String responseBody = "Hello world!";
         final HttpRequestLine requestLine = request.getRequestLine();
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 CONTENT_TYPE.getValue(), PLAIN.getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
         ));

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum HttpHeaderAcceptType {
     PLAIN("text/plain"),
-    HTML("text/html; charset=utf-8"),
+    HTML("text/html"),
     CSS("text/css"),
     JS("application/javascript"),
     SVG("image/svg+xml"),
@@ -22,7 +22,7 @@ public enum HttpHeaderAcceptType {
         return Arrays.stream(HttpHeaderAcceptType.values())
                 .filter(item -> item.getValue().equals(value) || item.name().equals(value))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HTTP Header Accept 값 입니다. - " + value));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP Header Accept 입니다. - " + value));
     }
 
     public String getValue() {

@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.apache.coyote.http11.FileExtensionType;
 import org.apache.coyote.http11.FileFinder;
 import org.apache.coyote.http11.message.body.HttpBody;
-import org.apache.coyote.http11.message.header.HttpHeader;
+import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.header.HttpHeaderAcceptType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
@@ -53,7 +53,7 @@ public class StaticResourceController implements Controller {
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
         final FileExtensionType fileExtensionType = requestLine.getFileExtensionType().get();
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
+        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                 CONTENT_TYPE.getValue(), HttpHeaderAcceptType.getByValue(fileExtensionType.getValue().toUpperCase()).getValue(),
                 CONTENT_LENGTH.getValue(), String.valueOf(content.length())
         ));
@@ -67,7 +67,7 @@ public class StaticResourceController implements Controller {
         try {
             final String content = fileFinder.readFileContent(NOT_FOUND_URI).get();
             final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.NOT_FOUND);
-            final HttpHeader responseHeader = new HttpHeader(Map.of(
+            final HttpHeaders responseHeader = new HttpHeaders(Map.of(
                     CONTENT_TYPE.getValue(), HTML.getValue(),
                     CONTENT_LENGTH.getValue(), String.valueOf(content.length())
             ));

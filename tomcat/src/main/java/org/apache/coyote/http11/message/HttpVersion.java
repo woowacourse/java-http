@@ -18,9 +18,9 @@ public enum HttpVersion {
 
     public static HttpVersion getByValue(final String value) {
         return Arrays.stream(HttpVersion.values())
-                .filter(item -> item.getValue().equals(value.trim()))
+                .filter(item -> item.getValue().equals(value))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HTTP Version 값 입니다. - " + value));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP Version 입니다. - " + value));
     }
 
     public String getValue() {

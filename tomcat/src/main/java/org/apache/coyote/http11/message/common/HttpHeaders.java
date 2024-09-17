@@ -11,7 +11,7 @@ public class HttpHeaders {
     private static final String DEFAULT_CONTENT_LENGTH = "0";
     private static final String CRLF = "\r\n";
     private static final String LINE_FEED = "\n";
-    private static final String HEADER_REGEX = ": ";
+    private static final String HEADER_DELIMITER = ": ";
     private static final String DEFAULT_VALUE = "";
 
     private final Map<String, String> headers;
@@ -29,7 +29,7 @@ public class HttpHeaders {
 
         String[] headers = header.split(LINE_FEED);
         for (String value : headers) {
-            String[] keyValue = value.split(HEADER_REGEX);
+            String[] keyValue = value.split(HEADER_DELIMITER);
             map.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
         return map;
@@ -60,7 +60,7 @@ public class HttpHeaders {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(HEADER_REGEX).append(entry.getValue()).append(CRLF);
+            sb.append(entry.getKey()).append(HEADER_DELIMITER).append(entry.getValue()).append(CRLF);
         }
         return sb.toString();
     }

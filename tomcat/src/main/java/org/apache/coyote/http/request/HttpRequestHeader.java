@@ -30,8 +30,9 @@ public class HttpRequestHeader {
         cookies = new HttpCookies(cookieLine);
     }
 
-    public HttpCookie getCookie(final String name) {
-        return cookies.get(name);
+    public Optional<HttpCookie> findCookie(final String name) {
+        HttpCookie cookie = cookies.get(name);
+        return Optional.ofNullable(cookie);
     }
 
     public int getContentLength() {

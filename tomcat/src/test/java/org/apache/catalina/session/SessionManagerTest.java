@@ -2,6 +2,7 @@ package org.apache.catalina.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class SessionManagerTest {
@@ -14,23 +15,23 @@ public class SessionManagerTest {
 
         // when
         sessionManager.add(session);
-        Session retrievedSession = sessionManager.findSession(session.getId());
+        Optional<Session> retrievedSession = sessionManager.findSession(session.getId());
 
         // then
-        assertThat(retrievedSession).isNotNull();
-        assertThat(retrievedSession.getId()).isEqualTo(session.getId());
+        assertThat(retrievedSession).isPresent();
+        assertThat(retrievedSession.get().getId()).isEqualTo(session.getId());
     }
 
     @Test
-    void 존재하지_않는_세션을_조회하면_null을_반환한다() {
+    void 존재하지_않는_세션을_조회하면_빈_Optional을_반환한다() {
         // given
         SessionManager sessionManager = new SessionManager();
 
         // when
-        Session session = sessionManager.findSession("nonExistingId");
+        Optional<Session> session = sessionManager.findSession("nonExistingId");
 
         // then
-        assertThat(session).isNull();
+        assertThat(session).isEmpty();
     }
 
     @Test
@@ -46,7 +47,8 @@ public class SessionManagerTest {
         sessionManager.add(secondSession);
 
         // then
-        Session retrievedSession = sessionManager.findSession(sessionId);
-        assertThat(retrievedSession).isEqualTo(secondSession);
+        Optional<Session> retrievedSession = sessionManager.findSession(sessionId);
+        assertThat(retrievedSession).isPresent();
+        assertThat(retrievedSession.get()).isEqualTo(secondSession);
     }
 }

@@ -50,7 +50,7 @@ public class HttpRequestTest {
 
         // then
         assertThat(session).isNotNull();
-        assertThat(httpRequest.getSession()).isNull();
+        assertThat(httpRequest.findSession()).isEmpty();
     }
 
     @Test

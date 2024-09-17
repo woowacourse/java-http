@@ -3,6 +3,7 @@ package org.apache.coyote.http.request;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.http.HttpCookie;
 import org.junit.jupiter.api.Test;
 
@@ -39,11 +40,14 @@ public class HttpRequestHeaderTest {
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(lines);
 
         // then
-        HttpCookie sessionCookie = httpRequestHeader.getCookie("JSESSIONID");
-        HttpCookie usernameCookie = httpRequestHeader.getCookie("username");
+        Optional<HttpCookie> sessionCookie = httpRequestHeader.findCookie("JSESSIONID");
+        Optional<HttpCookie> usernameCookie = httpRequestHeader.findCookie("username");
 
-        assertThat(sessionCookie.getValue()).isEqualTo("abc123");
-        assertThat(usernameCookie.getValue()).isEqualTo("John");
+        assertThat(sessionCookie).isPresent();
+        assertThat(sessionCookie.get().getValue()).isEqualTo("abc123");
+
+        assertThat(usernameCookie).isPresent();
+        assertThat(usernameCookie.get().getValue()).isEqualTo("John");
     }
 
     @Test
@@ -57,7 +61,7 @@ public class HttpRequestHeaderTest {
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(lines);
 
         // then
-        assertThat(httpRequestHeader.getCookie("cookieName")).isNull();
+        assertThat(httpRequestHeader.findCookie("cookieName")).isEmpty();
     }
 
     @Test

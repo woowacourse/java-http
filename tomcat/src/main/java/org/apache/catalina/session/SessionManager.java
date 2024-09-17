@@ -1,6 +1,7 @@
 package org.apache.catalina.session;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
@@ -10,8 +11,9 @@ public class SessionManager {
     public SessionManager() {
     }
 
-    public Session findSession(String id) {
-        return SESSIONS.get(id);
+    public Optional<Session> findSession(String id) {
+        Session session = SESSIONS.get(id);
+        return Optional.ofNullable(session);
     }
 
     public void add(Session session) {

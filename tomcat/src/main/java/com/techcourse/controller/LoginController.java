@@ -4,8 +4,6 @@ import com.techcourse.except.UnauthorizedException;
 import com.techcourse.except.UserNotFoundException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
@@ -40,7 +38,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> params = request.getKeyValueBodies();
         String account = params.get(ACCOUNT);
         String password = params.get(PASSWORD);
@@ -63,7 +61,7 @@ public class LoginController extends AbstractController {
         LOGGER.info("로그인한 회원: {}", user);
     }
 
-    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
+    private void handleFailedLogin(HttpResponse response) {
         String path = DEFAULT_PATH + UNAUTHORIZED_HTML;
 
         response.setStaticBody(path);
@@ -86,7 +84,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatusLine(HttpStatus.OK);
 
         HttpCookies cookies = request.getCookies();

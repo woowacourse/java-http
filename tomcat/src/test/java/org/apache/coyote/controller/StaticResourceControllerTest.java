@@ -19,7 +19,7 @@ class StaticResourceControllerTest {
 
     @DisplayName("StaticResourceController는 GET 요청에 대해 올바른 정적 리소스를 반환한다.")
     @Test
-    void doGet() throws Exception {
+    void doGet() {
         // given
         HttpRequest request = new HttpRequest(new HttpRequestLine(HttpMethod.GET, URI.create("/test.html"), "HTTP/1.1"),
                 new HttpHeaders(), new HttpBody(""));

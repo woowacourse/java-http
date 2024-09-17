@@ -35,7 +35,7 @@ public class HttpResponse {
         this.headers.setHeaders(HttpHeaderField.CONTENT_TYPE.getName(), contentType.getType());
     }
 
-    public void setStaticBody(String source) throws IOException {
+    public void setStaticBody(String source) {
         try {
             String content = ResourceReader.readContent(source);
             String contentType = ResourceReader.readeContentType(source);

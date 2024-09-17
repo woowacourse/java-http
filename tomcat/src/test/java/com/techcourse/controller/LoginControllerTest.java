@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.service.UserService;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -33,7 +31,7 @@ class LoginControllerTest {
 
     @DisplayName("사용자가 로그인에 성공하면 인덱스 페이지로 리다이렉트 되고 쿠키가 설정된다.")
     @Test
-    void doPostSuccess() throws IOException, URISyntaxException {
+    void doPostSuccess() {
         // given
         String account = "testUser";
         String password = "password123";
@@ -60,7 +58,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 실패 시 401 페이지가 반환된다.")
     @Test
-    void doPostFailure() throws IOException, URISyntaxException {
+    void doPostFailure() {
         // given
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine("POST /login HTTP/1.1"),

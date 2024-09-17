@@ -20,18 +20,20 @@ public class StaticResourceHandler {
 
     public static final String RESOURCE_BASE_PATH = "static";
 
-    private static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
+    private static class LazyHolder {
+        private static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
+    }
 
     private StaticResourceHandler() {
     }
 
     public static StaticResourceHandler getInstance() {
-        return INSTANCE;
+        return LazyHolder.INSTANCE;
     }
 
     public boolean canHandleRequest(HttpRequest request) {
         String path = request.getPath();
-        if (path.equals("/")) {
+        if (path.equals("/" )) {
             return false;
         }
         URL resource = findResource(request.getPath());
@@ -41,7 +43,7 @@ public class StaticResourceHandler {
     public void handle(HttpRequest request, HttpResponse response) throws IOException {
         URL requestResource = findResource(request.getPath());
         if (requestResource == null || !checkGetMethod(request)) {
-            URL notFoundUrl = findResource("/404.html");
+            URL notFoundUrl = findResource("/404.html" );
             String notFountContent = getResourceContent(notFoundUrl);
             response.setResponse(HttpStatusCode.NOT_FOUND, null, new ResponseBody(notFountContent));
             return;

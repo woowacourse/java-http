@@ -40,7 +40,7 @@ class RegisterControllerTest {
         // given
         RequestLine requestLine = new RequestLine("GET", "/register", null, "HTTP/1.1");
         String accountName = "ted";
-        String formData = "account=" + accountName + "&password=password";
+        String formData = "account=" + accountName + "&password=password&email=email";
         RequestBody requestBody = new RequestBody(formData);
 
         HttpRequest request = new HttpRequest(requestLine, new RequestHeader(new HashMap<>()), requestBody);
@@ -56,7 +56,7 @@ class RegisterControllerTest {
         assertAll(
                 () -> assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.FOUND),
                 () -> assertThat(result.getHeaders()).containsEntry("Location", "/index.html"),
-                () -> assertThat(account.isPresent()).isTrue()
+                () -> assertThat(account).isPresent()
         );
     }
 

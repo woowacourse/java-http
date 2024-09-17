@@ -16,7 +16,9 @@ import org.was.view.ViewResolver;
 
 public class FrontController {
 
-    private static final FrontController INSTANCE = new FrontController();
+    private static class LazyHolder {
+        private static final FrontController INSTANCE = new FrontController();
+    }
 
     private final RequestMapping requestMapping = RequestMapping.getInstance();
     private final ViewResolver viewResolver = ViewResolver.getInstance();
@@ -26,7 +28,7 @@ public class FrontController {
     }
 
     public static FrontController getInstance() {
-        return INSTANCE;
+        return LazyHolder.INSTANCE;
     }
 
     public void service(HttpRequest request, HttpResponse response) throws IOException {

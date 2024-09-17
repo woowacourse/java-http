@@ -1,4 +1,4 @@
-package threadTest.stage1;
+package thread.stage1;
 
 public class HttpProcessor implements Runnable {
 

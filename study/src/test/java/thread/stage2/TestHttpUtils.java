@@ -1,4 +1,4 @@
-package threadTest.stage2;
+package thread.stage2;
 
 import java.io.IOException;
 import java.net.URI;

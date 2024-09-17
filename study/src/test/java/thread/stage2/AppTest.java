@@ -1,4 +1,4 @@
-package threadTest.stage2;
+package thread.stage2;
 
 import org.junit.jupiter.api.Test;
 

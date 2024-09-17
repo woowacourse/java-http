@@ -9,6 +9,9 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
+    private InMemoryUserRepository() {
+    }
+
     static {
         User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
@@ -22,6 +25,14 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {
+    public static Optional<User> findByAccountAndPassword(String account, String password) {
+        return database.values().stream()
+                .filter(user -> account.equals(user.getAccount()))
+                .filter(user -> user.checkPassword(password))
+                .findAny();
+    }
+
+    public static void deleteByAccount(String account) {
+        database.remove(account);
     }
 }

@@ -4,12 +4,12 @@ import org.apache.catalina.servlet.HttpServlet;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public class GreetingServlet extends HttpServlet {
+public class DefaultServlet extends HttpServlet {
 
-    private static final String PAGE_RESOURCE_PATH = "static/hello.html";
+    private static final String RESOURCE_PATH_PREFIX = "static";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.ok(PAGE_RESOURCE_PATH);
+        response.ok(RESOURCE_PATH_PREFIX + request.getUriPath());
     }
 }

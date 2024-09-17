@@ -11,12 +11,12 @@ import org.apache.util.parser.Parser;
 
 public class HttpRequest {
 
-    private final HttpRequestLine startLine;
+    private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpBody body;
 
-    public HttpRequest(HttpRequestLine startLine, HttpHeaders headers, HttpBody body) {
-        this.startLine = startLine;
+    public HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
@@ -37,11 +37,11 @@ public class HttpRequest {
     }
 
     public URI getUri() {
-        return startLine.getUri();
+        return requestLine.getUri();
     }
 
     public boolean hasPath(String path) {
-        return startLine.hasPath(path);
+        return requestLine.hasPath(path);
     }
 
     public HttpCookies getCookies() {
@@ -49,6 +49,6 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return startLine.getMethod();
+        return requestLine.getMethod();
     }
 }

@@ -13,6 +13,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequestReader;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            HttpRequest httpRequest = HttpRequest.from(reader);
+            HttpRequest httpRequest = HttpRequestReader.from(reader);
             HttpResponse httpResponse = new HttpResponse();
 
             AbstractController controller = RequestMapping.getController(httpRequest);

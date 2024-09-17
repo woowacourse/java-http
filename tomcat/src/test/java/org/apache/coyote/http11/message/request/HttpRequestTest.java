@@ -61,7 +61,7 @@ class HttpRequestTest {
         BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
 
         // when
-        HttpRequest result = HttpRequest.from(reader);
+        HttpRequest result = HttpRequestReader.from(reader);
 
         // then
         assertAll(

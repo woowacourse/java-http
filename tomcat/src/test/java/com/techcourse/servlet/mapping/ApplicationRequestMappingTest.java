@@ -17,9 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("요청 매핑 핸들러 조회 테스트")
-class RequestMappingTest {
+class ApplicationRequestMappingTest {
 
-    private final RequestMapping requestMapping = new RequestMapping();
+    private final ApplicationRequestMapping applicationRequestMapping = new ApplicationRequestMapping();
 
     @DisplayName("매핑 정보가 일치하는 핸들러를 가져올 수 있다")
     @Test
@@ -32,7 +32,7 @@ class RequestMappingTest {
                 HttpMessageBody.createEmptyBody()
         );
         // when & then
-        assertThat(requestMapping.getServlet(httpRequest)).isInstanceOf(LoginServlet.class);
+        assertThat(applicationRequestMapping.getServlet(httpRequest)).isInstanceOf(LoginServlet.class);
     }
 
     @DisplayName("매핑 정보가 일치하는 핸들러가 없다면 디폴트 서블릿이 반환된다")
@@ -45,6 +45,6 @@ class RequestMappingTest {
         HttpRequest httpRequest = new HttpRequest(requestLine, httpHeaders, httpMessageBody);
 
         // when & then
-        assertThat(requestMapping.getServlet(httpRequest)).isInstanceOf(DefaultServlet.class);
+        assertThat(applicationRequestMapping.getServlet(httpRequest)).isInstanceOf(DefaultServlet.class);
     }
 }

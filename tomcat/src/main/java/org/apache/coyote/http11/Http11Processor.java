@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.servlet.mapping.RequestMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpHeaderName;
@@ -26,8 +26,8 @@ public class Http11Processor implements Runnable, Processor {
     private final RequestMapping requestMapping;
     private final Socket connection;
 
-    public Http11Processor(Socket connection) {
-        requestMapping = new RequestMapping();
+    public Http11Processor(Socket connection, RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
         this.connection = connection;
     }
 

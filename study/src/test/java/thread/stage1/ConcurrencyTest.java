@@ -1,19 +1,15 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
+
 /**
- * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
- * - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우
- * - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할 경우
- *
- * 위 경우는 동기화(synchronization)를 적용시키거나 객체가 상태를 갖지 않도록 한다.
- * 객체를 불변 객체로 만드는 방법도 있다.
- *
- * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다.
- * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
+ * 스레드를 다룰 때 어떤 상황을 조심해야 할까? - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우 - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할 경우
+ * <p>
+ * 위 경우는 동기화(synchronization)를 적용시키거나 객체가 상태를 갖지 않도록 한다. 객체를 불변 객체로 만드는 방법도 있다.
+ * <p>
+ * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다. 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
 

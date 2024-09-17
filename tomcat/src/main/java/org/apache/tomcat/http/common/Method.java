@@ -17,7 +17,7 @@ public enum Method {
     CONNECT("CONNECT");
 
     private static final Map<String, Method> CONVERTER = Arrays.stream(Method.values())
-            .collect(Collectors.toMap(Method::getValue, Function.identity()));
+            .collect(Collectors.toConcurrentMap(Method::getValue, Function.identity()));
 
     private final String value;
 

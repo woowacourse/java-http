@@ -70,13 +70,14 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        executorService.submit(() -> new Http11Processor(connection).run());
+        executorService.submit(new Http11Processor(connection));
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

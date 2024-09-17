@@ -12,7 +12,7 @@ import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.MediaType;
 import org.apache.coyote.http11.resource.ResourceReader;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.SessionManager;
 
 public class LoginController extends AbstractController {
     private static final LoginController INSTANCE = new LoginController();

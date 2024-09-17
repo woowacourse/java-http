@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.session;
 
 import java.util.Map;
 import org.apache.coyote.http11.data.HttpCookie;
@@ -6,7 +6,6 @@ import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.HttpVersion;
-import org.apache.coyote.http11.session.SessionManager;
 
 public class InvalidSessionRemover {
     public static HttpResponse remove(HttpRequest request) {

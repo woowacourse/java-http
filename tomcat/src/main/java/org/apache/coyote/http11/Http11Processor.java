@@ -16,6 +16,7 @@ import org.apache.coyote.http11.data.HttpVersion;
 import org.apache.coyote.http11.data.MediaType;
 import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
+import org.apache.catalina.session.InvalidSessionRemover;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

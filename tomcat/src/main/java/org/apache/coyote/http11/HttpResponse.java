@@ -40,10 +40,6 @@ public class HttpResponse {
         return response.toString().getBytes();
     }
 
-    public void redirectPage(String path) {
-        this.location = path;
-    }
-
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
@@ -76,7 +72,8 @@ public class HttpResponse {
         this.httpStatus = HttpStatus.OK;
     }
 
-    public void found() {
+    public void found(String path) {
+        this.location = path;
         this.httpStatus = HttpStatus.FOUND;
     }
 }

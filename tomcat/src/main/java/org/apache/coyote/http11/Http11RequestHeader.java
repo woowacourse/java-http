@@ -42,6 +42,10 @@ public class Http11RequestHeader {
     }
 
     private static List<String> extractHeaderValues(String[] parts) {
+        if (parts.length < 2) {
+            return List.of();
+        }
+
         return Arrays.stream(parts[HEADER_VALUE_INDEX].split(HEADER_VALUE_DELIMITER))
                 .map(String::trim)
                 .toList();

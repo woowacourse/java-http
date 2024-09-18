@@ -4,7 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cookies {
-    private List<Cookie> cookies = new ArrayList<>();
+    private List<Cookie> cookies;
+
+    public Cookies(String[] cookieLine) {
+        this.cookies = new ArrayList<>();
+        for (String cookie : cookieLine) {
+            String[] cookieKeyValue = cookie.split("=");
+            setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
+        }
+    }
+
+    public Cookies() {
+        this.cookies = new ArrayList<>();
+    }
 
     public boolean hasName(String name) {
         return cookies.stream()

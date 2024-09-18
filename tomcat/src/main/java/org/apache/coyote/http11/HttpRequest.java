@@ -46,16 +46,11 @@ public class HttpRequest {
     }
 
     private static Cookies getHttpCookies(Map<String, String> headers) {
-        Cookies cookies = new Cookies();
         if (headers.containsKey("Cookie")) {
             String[] cookieLine = headers.get("Cookie").split("; ");
-            for (String cookie : cookieLine) {
-                String[] cookieKeyValue = cookie.split("=");
-                cookies.setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
-            }
+            return new Cookies(cookieLine);
         }
-
-        return cookies;
+        return new Cookies();
     }
 
     private static Map<String, String> getQueries(String[] requestFirstLine) {

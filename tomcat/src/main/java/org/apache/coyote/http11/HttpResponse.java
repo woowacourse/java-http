@@ -52,7 +52,6 @@ public class HttpResponse {
         StringJoiner message = new StringJoiner("\r\n");
         message.add("HTTP/1.1 %s ".formatted(httpStatus)); // TODO: HTTP 버전은 Request 정보 받아오기
         message.add("Content-Type: %s;charset=utf-8 ".formatted(mimeType));
-        message.add("Content-Type: %s;charset=utf-8 ".formatted(mimeType));
         message.add("Content-Length: " + contentLength + " ");
         if(location != null) {
             message.add("Location: " + location + " ");

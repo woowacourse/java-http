@@ -6,6 +6,7 @@ import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.util.ResourceHandler;
 
 import java.util.HashMap;
@@ -28,12 +29,11 @@ public class RequestMapping {
 
     public HttpResponse dispatch(HttpRequest httpRequest) throws Exception {
         HttpResponse httpResponse = new HttpResponse();
-
         String path = httpRequest.getRequestURL();
 
-        if ((path.equals("/") || path.equals("/index")) || MimeType.isValidFileExtension(path)) {
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.handle(httpRequest, httpResponse);
+        handleStaticResource(httpRequest, path, httpResponse);
+
+        if (httpResponse.getStatusLine().getHttpStatus() == HttpStatus.OK) {
             return httpResponse;
         }
 
@@ -41,6 +41,13 @@ public class RequestMapping {
         controller.service(httpRequest, httpResponse);
 
         return httpResponse;
+    }
+
+    private void handleStaticResource(HttpRequest httpRequest, String path, HttpResponse httpResponse) {
+        if ((path.equals("/") || path.equals("/index")) || MimeType.isValidFileExtension(path)) {
+            ResourceHandler resourceHandler = new ResourceHandler();
+            resourceHandler.handle(httpRequest, httpResponse);
+        }
     }
 
     public Controller getHandler(String path) {

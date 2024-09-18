@@ -15,11 +15,12 @@ public class ResourceHandler {
         String path = httpRequest.getRequestURL();
         try {
             httpResponse.setResponseBody(FileReader.read(path));
-        } catch (IOException | URISyntaxException exception) {
+            httpResponse.setMimeType(MimeType.from(path));
+            httpResponse.setStatus(HttpStatus.OK);
+        } catch (IOException | URISyntaxException | NullPointerException exception) {
             httpResponse.setResponseBody("".getBytes(StandardCharsets.UTF_8));
+            httpResponse.setMimeType(MimeType.NONE);
+            httpResponse.setStatus(HttpStatus.NOT_FOUND);
         }
-
-        httpResponse.setMimeType(MimeType.from(path));
-        httpResponse.setStatus(HttpStatus.OK);
     }
 }

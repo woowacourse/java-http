@@ -13,11 +13,6 @@ public class UserServlet {
 
     private synchronized void join(final User user) {
         if (!users.contains(user)) {
-            try{
-                Thread.sleep(1);
-            }catch (InterruptedException e){
-                throw new RuntimeException(e);
-            }
             users.add(user);
         }
     }

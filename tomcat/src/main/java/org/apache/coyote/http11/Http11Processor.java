@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.controller.Dispatcher;
+import org.apache.catalina.startup.WAS;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.Socket;
@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              var writer = new Http11Writer(connection.getOutputStream())) {
 
             HttpRequest request = new Http11Request(reader.readLines());
-            HttpResponse response = Dispatcher.dispatch(request);
+            HttpResponse response = WAS.dispatch(request);
             writer.flushWith(response.normalize());
 
             log.info("request = {}", request);

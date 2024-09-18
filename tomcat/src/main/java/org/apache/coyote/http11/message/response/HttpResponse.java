@@ -9,16 +9,6 @@ public class HttpResponse {
     private HttpHeaders header;
     private HttpBody httpBody;
 
-    public HttpResponse(
-            final HttpStatusLine statusLine,
-            final HttpHeaders header,
-            final HttpBody httpBody
-    ) {
-        this.statusLine = statusLine;
-        this.header = header;
-        this.httpBody = httpBody;
-    }
-
     public void setStatusLine(final HttpStatusLine statusLine) {
         this.statusLine = statusLine;
     }

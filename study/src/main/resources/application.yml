@@ -7,4 +7,4 @@ server:
     max-connections: 1
     threads:
       max: 2
-      min-spare: 2
+      min-spare: 1

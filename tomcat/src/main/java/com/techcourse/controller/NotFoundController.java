@@ -1,21 +1,14 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.http.HttpBody;
+import static com.techcourse.controller.RequestPath.NOT_FOUND;
+
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.HttpStatusLine;
 
-public class NotFoundController implements Controller {
+public class NotFoundController extends AbstractController {
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        HttpStatusLine statusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatusCode.NOT_FOUND);
-        String resource = StaticResourceHandler.handle("/404.html");
-        HttpBody responseBody = new HttpBody(resource);
-        return HttpResponse.builder()
-                .statusLine(statusLine)
-                .body(responseBody)
-                .build();
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response.sendRedirect(NOT_FOUND.path());
     }
 }

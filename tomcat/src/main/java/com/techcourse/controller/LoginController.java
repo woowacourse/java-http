@@ -1,77 +1,94 @@
 package com.techcourse.controller;
 
-import static org.apache.coyote.http.MediaType.TEXT_HTML;
+import static com.techcourse.controller.RequestPath.INDEX;
+import static com.techcourse.controller.RequestPath.LOGIN;
+import static com.techcourse.controller.RequestPath.UNAUTHORIZED;
 
+import java.io.IOException;
+
+import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http.HttpBody;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpQueryParams;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpResponseBuilder;
-import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.HttpStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
+    private static final String SESSION_KEY = "user";
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+
+    private final Manager sessionManager = SessionManager.getInstance();
+
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        return process(request).build();
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        if (isLoggedIn(request)) {
+            response.sendRedirect(INDEX.path());
+            return;
+        }
+        response.sendRedirect(LOGIN.path());
     }
 
-    private HttpResponseBuilder process(final HttpRequest request) {
-        HttpMethod method = request.getMethod();
-        if (method == HttpMethod.GET) {
-            return get(request);
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        if (login(request, response)) {
+            return;
         }
-        if (method == HttpMethod.POST) {
-            return post(request);
-        }
-        throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+        response.sendRedirect(UNAUTHORIZED.path());
     }
 
-    private HttpResponseBuilder get(final HttpRequest request) {
-        User user = getUser(request.getSession());
+    private boolean isLoggedIn(final HttpRequest request) {
+        final Session requestSession = request.getSession(false);
+        if (requestSession == null) {
+            return false;
+        }
+        final Session savedSession = sessionManager.findSession(requestSession.getId());
+        if (savedSession == null) {
+            return false;
+        }
+        User user = (User) savedSession.getAttribute(SESSION_KEY);
+        log.info("user: {}", user);
+        return user != null;
+    }
+
+    private boolean login(final HttpRequest request, final HttpResponse response) {
+        HttpQueryParams queryParams = request.getQueryParamsFromBody();
+        if (queryParams == null) {
+            return false;
+        }
+        User user = getUser(queryParams);
         if (user == null) {
-            return HttpResponse.builder().redirect("/login.html");
+            return false;
         }
-        HttpStatusLine statusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatusCode.OK);
-        String resource = StaticResourceHandler.handle("/index.html");
-        HttpBody responseBody = new HttpBody(resource);
-        return HttpResponse.builder()
-                .statusLine(statusLine)
-                .body(responseBody)
-                .contentType(TEXT_HTML.defaultCharset());
-    }
-
-    private HttpResponseBuilder post(final HttpRequest request) {
-        HttpBody body = request.getBody();
-        String content = body.getContent();
-        HttpQueryParams queryParams = new HttpQueryParams(content);
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-        if ((user != null) && user.checkPassword(password)) {
+        String password = queryParams.get(PASSWORD);
+        if (user.checkPassword(password)) {
             log.info("user: {}", user);
-            Session session = request.getSession();
-            session.setAttribute("user", user);
-            return HttpResponse.builder()
-                    .setCookie(HttpCookie.ofJSessionId(session.getId()))
-                    .redirect("/index.html");
+            saveUserInSession(response, user);
+            return true;
         }
-        return HttpResponse.builder()
-                .redirect("/401.html");
+        return false;
     }
 
-    private User getUser(final Session session) {
-        return (User) session.getAttribute("user");
+    private User getUser(final HttpQueryParams queryParams) {
+        String account = queryParams.get(ACCOUNT);
+        return InMemoryUserRepository.findByAccount(account).orElse(null);
+    }
+
+    private void saveUserInSession(final HttpResponse response, final User user) {
+        Session session = new Session();
+        session.setAttribute(SESSION_KEY, user);
+        sessionManager.add(session);
+        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+        response.sendRedirect(INDEX.path());
     }
 }

@@ -2,11 +2,19 @@ package org.apache.coyote.http;
 
 public class HttpStatusLine implements HttpComponent {
 
-    private final HttpVersion version;
-    private final HttpStatusCode statusCode;
+    private HttpVersion version;
+    private HttpStatusCode statusCode;
 
-    public HttpStatusLine(final HttpVersion version, final HttpStatusCode statusCode) {
-        this.version = version;
+    public HttpStatusLine(final HttpStatusCode statusCode) {
+        this.version = HttpVersion.HTTP11;
+        this.statusCode = statusCode;
+    }
+
+    public HttpStatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
         this.statusCode = statusCode;
     }
 

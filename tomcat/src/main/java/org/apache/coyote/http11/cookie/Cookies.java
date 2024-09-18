@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cookies {
+    private static final String COOKIE_DELIMITER = "=";
+
     private List<Cookie> cookies;
 
     public Cookies(String[] cookieLine) {
         this.cookies = new ArrayList<>();
         for (String cookie : cookieLine) {
-            String[] cookieKeyValue = cookie.split("=");
+            String[] cookieKeyValue = cookie.split(COOKIE_DELIMITER);
             setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
         }
     }

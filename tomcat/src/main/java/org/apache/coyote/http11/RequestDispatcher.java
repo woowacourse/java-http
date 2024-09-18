@@ -19,6 +19,6 @@ public class RequestDispatcher {
             new StaticResourceController().service(request, response);
             return;
         }
-        response.sendRedirect("/404.html");
+        response.setRedirectResponse("/404.html");
     }
 }

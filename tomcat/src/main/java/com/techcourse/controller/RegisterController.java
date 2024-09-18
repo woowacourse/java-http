@@ -9,7 +9,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.sendStaticResourceResponse("/register.html");
+        response.setStaticResourceResponse("/register.html");
     }
 
     @Override
@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
         validateInput(account, password, email);
 
         InMemoryUserRepository.save(new User(account, password, email));
-        response.sendRedirect("/index.html");
+        response.setRedirectResponse("/index.html");
     }
 
     private void validateInput(String account, String password, String email) {

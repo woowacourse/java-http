@@ -29,12 +29,13 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
+            String body = "Hello world!";
             String expected = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 12 ",
+                    "Content-Length: " + body.length() + " ",
                     "",
-                    "Hello world!");
+                    body);
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -58,11 +59,12 @@ class Http11ProcessorTest {
 
             // then
             URL resource = getClass().getClassLoader().getResource("static/index.html");
+            Path path = new File(resource.getFile()).toPath();
             String expected = "HTTP/1.1 200 OK \r\n" +
                               "Content-Type: text/html;charset=utf-8 \r\n" +
-                              "Content-Length: 5564 \r\n" +
+                              "Content-Length: " + Files.size(path) + " \r\n" +
                               "\r\n" +
-                              new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                              new String(Files.readAllBytes(path));
 
             assertThat(socket.output()).isEqualToIgnoringWhitespace(expected);
         }
@@ -87,10 +89,9 @@ class Http11ProcessorTest {
             // then
             URL resource = getClass().getClassLoader().getResource("static/login.html");
             Path path = new File(resource.getFile()).toPath();
-            long fileSize = Files.size(path);
             String expected = "HTTP/1.1 200 OK \r\n" +
                               "Content-Type: text/html;charset=utf-8 \r\n" +
-                              "Content-Length: " + fileSize + " \r\n" +
+                              "Content-Length: " + Files.size(path) + " \r\n" +
                               "\r\n" +
                               new String(Files.readAllBytes(path));
 
@@ -161,15 +162,16 @@ class Http11ProcessorTest {
         @Test
         void loginSuccess() throws IOException {
             // given
+            String body = "account=gugu&password=password";
             String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Content-Length: 30",
+                    "Content-Length: " + body.length(),
                     "Content-Type: application/x-www-form-urlencoded",
                     "Accept: */*",
                     "",
-                    "account=gugu&password=password");
+                    body);
 
             StubSocket socket = new StubSocket(httpRequest);
             Http11Processor processor = new Http11Processor(socket);
@@ -191,15 +193,16 @@ class Http11ProcessorTest {
         @Test
         void loginFailure() throws IOException {
             // given
+            String body = "account=unknown&password=unknown";
             String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Content-Length: 35",
+                    "Content-Length: " + body.length(),
                     "Content-Type: application/x-www-form-urlencoded",
                     "Accept: */*",
                     "",
-                    "account=unknown&password=unknown");
+                    body);
 
             StubSocket socket = new StubSocket(httpRequest);
             Http11Processor processor = new Http11Processor(socket);
@@ -220,15 +223,16 @@ class Http11ProcessorTest {
         @Test
         void registerSuccess() throws IOException {
             // given
+            String body = "account=newuser&password=password&email=newuser%40woowahan.com";
             String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Content-Length: 64",
+                    "Content-Length: " + body.length(),
                     "Content-Type: application/x-www-form-urlencoded",
                     "Accept: */*",
                     "",
-                    "account=newuser&password=password&email=newuser%40woowahan.com");
+                    body);
 
             StubSocket socket = new StubSocket(httpRequest);
             Http11Processor processor = new Http11Processor(socket);

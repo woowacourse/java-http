@@ -109,7 +109,7 @@ public class HttpRequestTest {
 
     @DisplayName("응답 헤더 쿠키에 JSESSIONID가 없으면 true를 반환한다.")
     @Test
-    void sessionNotExists() throws IOException {
+    void checkSessionNotExists() throws IOException {
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -120,12 +120,12 @@ public class HttpRequestTest {
         Socket socket = new StubSocket(httpRequest);
         HttpRequest request = HttpRequest.of(socket.getInputStream());
 
-        assertTrue(request.sessionNotExists());
+        assertTrue(request.checkSessionNotExists());
     }
 
     @DisplayName("응답 헤더 쿠키 JSESSIONID가 있으면 false를 반환한다.")
     @Test
-    void sessionNotExistsWithJSESSIONID() throws IOException {
+    void checkSessionNotExistsWithJSESSIONID() throws IOException {
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -137,7 +137,7 @@ public class HttpRequestTest {
         Socket socket = new StubSocket(httpRequest);
         HttpRequest request = HttpRequest.of(socket.getInputStream());
 
-        assertFalse(request.sessionNotExists());
+        assertFalse(request.checkSessionNotExists());
     }
 
     @DisplayName("응답 헤더 쿠키의 JSESSIONID가 유효하면 세션을 찾아 반환한다.")

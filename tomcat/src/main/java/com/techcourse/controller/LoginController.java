@@ -14,19 +14,18 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (isLoggedIn(request, response)) return;
+        if (isLoggedIn(request)) {
+            response.setRedirectResponse("/index.html");
+            return;
+        }
 
-        response.sendStaticResourceResponse("/login.html");
+        response.setStaticResourceResponse("/login.html");
     }
 
-    private boolean isLoggedIn(HttpRequest request, HttpResponse response) throws IOException {
+    private boolean isLoggedIn(HttpRequest request) {
         Session session = request.getSession(false);
 
-        if (session == null || session.getAttribute(SESSION_USER_ATTRIBUTE) == null) {
-            return false;
-        }
-        response.sendRedirect("/index.html");
-        return true;
+        return session != null && session.getAttribute(SESSION_USER_ATTRIBUTE) != null;
     }
 
     @Override
@@ -34,22 +33,19 @@ public class LoginController extends AbstractController {
         String account = request.findBodyValueByKey("account");
         String password = request.findBodyValueByKey("password");
 
-        User user = InMemoryUserRepository.findByAccount(account)
+        InMemoryUserRepository.findByAccount(account)
                 .filter(it -> it.checkPassword(password))
-                .orElse(null);
+                .ifPresentOrElse(user -> processLoginSuccess(request, response, user),
+                        () -> response.setRedirectResponse("/401.html"));
+    }
 
-        if (user == null) {
-            response.sendRedirect("/401.html");
-            return;
-        }
-
+    private void processLoginSuccess(HttpRequest request, HttpResponse response, User user) {
         initializeSessionIfNotExists(request, response, user);
-
-        response.sendRedirect("/index.html");
+        response.setRedirectResponse("/index.html");
     }
 
     private void initializeSessionIfNotExists(HttpRequest request, HttpResponse response, User user) {
-        if (request.sessionNotExists()) {
+        if (request.checkSessionNotExists()) {
             Session session = request.getSession(true);
             session.setAttribute(SESSION_USER_ATTRIBUTE, user);
             response.setCookie(Cookie.createSessionCookie(session.getId()));

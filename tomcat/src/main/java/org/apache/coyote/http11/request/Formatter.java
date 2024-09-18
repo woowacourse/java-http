@@ -14,8 +14,9 @@ public class Formatter {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int SIZE = 2;
+    public static final int REQUEST_HEADER_SIZE = 2;
     private static final int REQUEST_LINE_SIZE = 3;
-    private static final String HEADER_DELIMITER = ":";
+    private static final String HEADER_DELIMITER = ": ";
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_DELIMITER = "=";
     private static final String SPACE = " ";
@@ -39,6 +40,11 @@ public class Formatter {
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] headerLine = line.split(HEADER_DELIMITER);
+
+            if (headerLine.length != REQUEST_HEADER_SIZE) {
+                System.out.println(Arrays.toString(headerLine));
+                throw new IllegalArgumentException("RequestHeader의 형식이 올바르지 않습니다.");
+            }
 
             String key = URLDecoder.decode(headerLine[KEY_INDEX]).trim();
             String value = URLDecoder.decode(headerLine[VALUE_INDEX]).trim();

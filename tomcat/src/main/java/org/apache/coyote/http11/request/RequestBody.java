@@ -5,7 +5,13 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private static final int KEY = 0;
+    private static final int VALUE = 1;
     private final Map<String, String> body;
+
+    public RequestBody() {
+        this.body = new HashMap<>();
+    }
 
     public RequestBody(String body) {
         this.body = convertBody(body);
@@ -16,7 +22,7 @@ public class RequestBody {
         String[] split = body.split("&");
         for (String line : split) {
             String[] component = line.split("=");
-            requestBody.put(component[0], component[1]);
+            requestBody.put(component[KEY], component[VALUE]);
         }
         return requestBody;
     }

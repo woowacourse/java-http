@@ -1,14 +1,12 @@
-package thread.stage2;
+package thread_for_review.stage2;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
-@Disabled
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);

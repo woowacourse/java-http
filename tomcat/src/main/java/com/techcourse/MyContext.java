@@ -20,7 +20,7 @@ public class MyContext implements Context {
     }
 
     @Override
-    public ApplicationConfig getServerProperties() {
+    public ApplicationConfig getApplicationConfig() {
         return applicationConfig;
     }
 }

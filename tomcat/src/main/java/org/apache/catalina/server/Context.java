@@ -6,5 +6,5 @@ public interface Context {
 
     Container getContainer();
 
-    ApplicationConfig getServerProperties();
+    ApplicationConfig getApplicationConfig();
 }

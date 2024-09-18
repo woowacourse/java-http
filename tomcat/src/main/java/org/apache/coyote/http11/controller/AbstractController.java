@@ -16,6 +16,13 @@ public abstract class AbstractController implements Controller {
     private static final String FILE_EXTENSION_SEPARATOR_REGEX = "\\.";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
     private static final String FILE_EXTENSION_SEPARATOR = ".";
+    protected static final String INDEX_PAGE = "/index.html";
+    protected static final String UNAUTHORIZED_PAGE = "/401.html";
+    protected static final String NOT_FOUND_PAGE = "/404.html";
+    protected static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+    protected static final String ACCOUNT = "account";
+    protected static final String PASSWORD = "account";
+    protected static final String EMAIL = "account";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -39,9 +46,9 @@ public abstract class AbstractController implements Controller {
         String path = addDefaultExtensionIfMissing(request.getPath());
         String body = getStaticFileContent(path);
         if (body == null) {
-            String notFoundPage = getStaticFileContent("/404.html");
+            String notFoundPage = getStaticFileContent(NOT_FOUND_PAGE);
             response.addStatusLine(HttpStatusCode.OK);
-            response.addHeader(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
+            response.addHeader(HttpHeader.CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
             response.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(notFoundPage.getBytes().length));
             response.addBody(notFoundPage);
             response.writeResponse();

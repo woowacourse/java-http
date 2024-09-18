@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -12,6 +12,7 @@ import java.nio.file.Files;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;

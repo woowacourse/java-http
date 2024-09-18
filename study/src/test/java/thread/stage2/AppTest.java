@@ -39,6 +39,7 @@ class AppTest {
             thread.join();
         }
 
+        // max-connections : 2로 설정하면 나머지 8개의 요청이 무시되므로 아래 테스트 코드를 통과할 수 있다.
         assertThat(count.intValue()).isEqualTo(2);
     }
 

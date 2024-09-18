@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.message.CookieParser;
 
 public class HttpHeaders {
@@ -26,7 +27,7 @@ public class HttpHeaders {
     }
 
     private void validateHttpHeadersIsNullOrBlank(final String httpHeaders) {
-        if (httpHeaders == null || httpHeaders.isBlank()) {
+        if (StringUtils.isBlank(httpHeaders)) {
             throw new IllegalArgumentException("HTTP Headers는 null 혹은 빈 값이 입력될 수 없습니다. - " + httpHeaders);
         }
     }
@@ -47,20 +48,12 @@ public class HttpHeaders {
         return fieldKeyAndValue;
     }
 
-    public Optional<String> findValueByKey(final HttpHeaderFieldType key) {
-        return findValue(key.getValue());
-    }
-
     private Optional<String> findValue(final String key) {
         if (!values.containsKey(key)) {
             return Optional.empty();
         }
 
         return Optional.of(values.get(key));
-    }
-
-    public Optional<String> findValueByKey(final String key) {
-        return findValue(key);
     }
 
     public Map<String, String> parseCookie(final CookieParser parser) {
@@ -73,6 +66,7 @@ public class HttpHeaders {
                 .forEach(key ->
                         sb.append(key).append(HTTP_HEADER_FIELD_KEY_AND_VALUE_SEPARATOR)
                                 .append(values.get(key))
+                                .append(" ")
                                 .append(HTTP_HEADER_FIELD_SEPARATOR)
                 );
 

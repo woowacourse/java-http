@@ -23,10 +23,12 @@ public class HttpReader {
         String firstLine = bufferedReader.readLine();
 
         RequestLine requestLine = getRequestLine(firstLine);
-        System.out.println(requestLine.getRequestUrl());
         HttpHeader headers = getHeaders(bufferedReader);
-        RequestBody requestBody = new RequestBody(readBody(bufferedReader, headers.getContentLength()));
-
+        String body = readBody(bufferedReader, headers.getContentLength());
+        if (body.isBlank()) {
+            return new HttpRequest(requestLine, headers, new RequestBody());
+        }
+        RequestBody requestBody = new RequestBody(body);
         return new HttpRequest(requestLine, headers, requestBody);
     }
 

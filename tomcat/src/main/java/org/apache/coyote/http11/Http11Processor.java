@@ -75,6 +75,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Controller handleStaticRequest(HttpRequest httpRequest) {
-        return httpRequest.isStaticResource() ? new DefaultController() : new NotFoundController();
+        if (httpRequest.isStaticResource()) {
+            return new DefaultController();
+        }
+
+        return new NotFoundController();
     }
 }

@@ -15,6 +15,6 @@ public class RootController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setContentType(ContentType.HTML);
-        response.write("Hello world!");
+        response.setBody("Hello world!");
     }
 }

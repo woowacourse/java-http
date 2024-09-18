@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.PLAIN;
+import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.HTML;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 
@@ -16,20 +16,26 @@ import org.apache.coyote.http11.message.response.HttpStatusLine;
 
 public class HomeController extends AbstractController {
 
-    public HomeController(final String baseUri) {
-        super(baseUri);
+    private final String endPoint = "/";
+
+    @Override
+    public boolean canHandle(final HttpRequest request) {
+        return matchRequestUriWithBaseUri(request, endPoint);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final String responseBody = "Hello world!";
         final HttpRequestLine requestLine = request.getRequestLine();
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
+
+        final String responseBody = "Hello world!";
+        final HttpBody httpBody = new HttpBody(responseBody);
+
         final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(), PLAIN.getValue(),
+                CONTENT_TYPE.getValue(), HTML.getValue() + ";charset=utf-8",
                 CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
         ));
-        final HttpBody httpBody = new HttpBody(responseBody);
+
         response.setStatusLine(httpStatusLine);
         response.setHeader(responseHeader);
         response.setHttpBody(httpBody);
@@ -37,6 +43,6 @@ public class HomeController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        // TODO : 지원하지 않는 기능을 어떻게 처리할지 개선 필요
+        /* NOOP */
     }
 }

@@ -7,12 +7,11 @@ import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTEN
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.LOCATION;
 
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.coyote.http11.FileFinder;
+import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.message.body.HttpBody;
 import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -30,22 +29,22 @@ public class RegisterController extends AbstractController {
 
     private static final String ERROR_MESSAGE = "파일을 찾는 과정에서 문제가 발생하였습니다.";
 
-    public RegisterController(final String baseUri) {
-        super(baseUri);
+    private final String endPoint = "/register";
+
+    @Override
+    public boolean canHandle(final HttpRequest request) {
+        return matchRequestUriWithBaseUri(request, endPoint);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpRequestLine requestLine = request.getRequestLine();
 
-        final FileFinder fileFinder = new FileFinder();
+        final FileReader fileReader = new FileReader();
         try {
-            final Optional<String> fileContent = fileFinder.readFileContent("/register.html");
-            fileContent.ifPresentOrElse(
-                    content -> setHandleGetSuccessResponse(requestLine, response, content),
-                    () -> setServerErrorResponse(requestLine, response)
-            );
-        } catch (URISyntaxException e) {
+            final String fileContent = fileReader.readFileContent("/register.html");
+            setHandleGetSuccessResponse(requestLine, response, fileContent);
+        } catch (IllegalStateException e) {
             setServerErrorResponse(requestLine, response);
         }
     }

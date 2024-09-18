@@ -1,17 +1,17 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.*;
+import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.HTML;
+import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.PLAIN;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.LOCATION;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.SET_COOKIE;
 
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.coyote.http11.FileFinder;
+import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.message.CookieParser;
 import org.apache.coyote.http11.message.body.HttpBody;
 import org.apache.coyote.http11.message.header.HttpHeaders;
@@ -32,8 +32,11 @@ public class LoginController extends AbstractController {
     private static final String NO_CONTENT_LENGTH = "0";
     private static final String ERROR_MESSAGE = "파일을 찾는 과정에서 문제가 발생하였습니다.";
 
-    public LoginController(final String baseUri) {
-        super(baseUri);
+    private final String endPoint = "/login";
+
+    @Override
+    public boolean canHandle(final HttpRequest request) {
+        return matchRequestUriWithBaseUri(request, endPoint);
     }
 
     @Override
@@ -48,14 +51,11 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        final FileFinder fileFinder = new FileFinder();
+        final FileReader fileReader = new FileReader();
         try {
-            final Optional<String> fileContent = fileFinder.readFileContent("/login.html");
-            fileContent.ifPresentOrElse(
-                    content -> setHandleGetSuccessResponse(requestLine, response, content),
-                    () -> setServerErrorResponse(requestLine, response)
-            );
-        } catch (URISyntaxException e) {
+            final String fileContent = fileReader.readFileContent("/login.html");
+            setHandleGetSuccessResponse(requestLine, response, fileContent);
+        } catch (IllegalStateException e) {
             setServerErrorResponse(requestLine, response);
         }
     }
@@ -73,7 +73,8 @@ public class LoginController extends AbstractController {
     private void setAlreadyLoginResponse(final HttpResponse response, final HttpRequestLine requestLine) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
         final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                LOCATION.getValue(), "http://localhost:8080/index.html",
+//                LOCATION.getValue(), "http://localhost:8080/index.html",
+                LOCATION.getValue(), "/index.html",
                 CONTENT_TYPE.getValue(), HTML.getValue(),
                 CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH
         ));
@@ -122,9 +123,9 @@ public class LoginController extends AbstractController {
         final String password = formData.get("password");
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        final FileFinder fileFinder = new FileFinder();
+        final FileReader fileReader = new FileReader();
         if (!validateLoginCredential(user, password)) {
-            processNotValidate(requestLine, response, fileFinder);
+            processNotValidate(requestLine, response, fileReader);
             return;
         }
 
@@ -139,14 +140,12 @@ public class LoginController extends AbstractController {
                 .orElse(false);
     }
 
-    private void processNotValidate(final HttpRequestLine requestLine, final HttpResponse response, final FileFinder fileFinder) {
+    private void processNotValidate(final HttpRequestLine requestLine, final HttpResponse response,
+                                    final FileReader fileReader) {
         try {
-            final Optional<String> fileContent = fileFinder.readFileContent("/401.html");
-            fileContent.ifPresentOrElse(
-                    content -> setNotValidateUserResponse(requestLine, response, content),
-                    () -> setServerErrorResponse(requestLine, response)
-            );
-        } catch (URISyntaxException e) {
+            final String fileContent = fileReader.readFileContent("/401.html");
+            setNotValidateUserResponse(requestLine, response, fileContent);
+        } catch (IllegalStateException e) {
             setServerErrorResponse(requestLine, response);
         }
     }

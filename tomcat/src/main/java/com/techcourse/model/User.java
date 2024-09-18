@@ -2,7 +2,7 @@ package com.techcourse.model;
 
 public class User {
 
-    private final Long id;
+    private final Long id;;
     private final String account;
     private final String password;
     private final String email;

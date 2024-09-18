@@ -7,12 +7,14 @@ import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTEN
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.LOCATION;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.message.body.HttpBody;
+import org.apache.coyote.http11.message.header.HttpHeaderField;
 import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
@@ -55,10 +57,10 @@ public class RegisterController extends AbstractController {
             final String content
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(content.length())
-        ));
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length())
+                )));
         final HttpBody httpBody = new HttpBody(content);
         response.setStatusLine(httpStatusLine);
         response.setHeader(responseHeader);
@@ -68,11 +70,11 @@ public class RegisterController extends AbstractController {
     private void setServerErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                LOCATION.getValue(), ERROR_MESSAGE,
-                CONTENT_TYPE.getValue(), PLAIN.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length())
-        ));
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(LOCATION.getValue(), ERROR_MESSAGE),
+                new HttpHeaderField(CONTENT_TYPE.getValue(), PLAIN.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length())
+                )));
         final HttpBody httpBody = new HttpBody(ERROR_MESSAGE);
         response.setStatusLine(httpStatusLine);
         response.setHeader(responseHeader);
@@ -127,9 +129,9 @@ public class RegisterController extends AbstractController {
     private void setDuplicateUserAccountErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final String responseBody = "{\"message\": \"이미 존재하는 사용자 계정입니다.\"}";
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.BAD_REQUEST);
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(), JSON.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), JSON.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length()))
         ));
         final HttpBody httpBody = new HttpBody(responseBody);
         response.setStatusLine(httpStatusLine);
@@ -139,10 +141,10 @@ public class RegisterController extends AbstractController {
 
     private void setHandlePostSuccessResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                LOCATION.getValue(), "http://localhost:8080/index.html",
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(0)
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(LOCATION.getValue(), "/index.html"),
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField( CONTENT_LENGTH.getValue(), String.valueOf(0))
         ));
         final HttpBody httpBody = new HttpBody("");
         response.setStatusLine(httpStatusLine);

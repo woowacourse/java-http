@@ -4,12 +4,13 @@ import static org.apache.coyote.http11.FileExtensionType.HTML;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 
-import java.util.Map;
+import java.util.List;
 
 import org.apache.coyote.http11.FileExtensionType;
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.message.body.HttpBody;
 import org.apache.coyote.http11.message.header.HttpHeaderAcceptType;
+import org.apache.coyote.http11.message.header.HttpHeaderField;
 import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
@@ -48,10 +49,10 @@ public class StaticResourceController implements Controller {
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
         final FileExtensionType fileExtensionType = requestLine.getFileExtensionType().get();
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(),
-                HttpHeaderAcceptType.getByValue(fileExtensionType.getValue().toUpperCase()).getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(content.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(),
+                        HttpHeaderAcceptType.getByValue(fileExtensionType.getValue().toUpperCase()).getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length()))
         ));
         final HttpBody httpBody = new HttpBody(content);
         response.setStatusLine(httpStatusLine);
@@ -67,9 +68,9 @@ public class StaticResourceController implements Controller {
         final String content = fileReader.readFileContent(NOT_FOUND_URI);
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(),
                 HttpStatus.NOT_FOUND);
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(content.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length()))
         ));
         final HttpBody httpBody = new HttpBody(content);
         response.setStatusLine(httpStatusLine);

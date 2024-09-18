@@ -4,9 +4,10 @@ import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.HTML;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 
-import java.util.Map;
+import java.util.List;
 
 import org.apache.coyote.http11.message.body.HttpBody;
+import org.apache.coyote.http11.message.header.HttpHeaderField;
 import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
@@ -31,10 +32,9 @@ public class HomeController extends AbstractController {
         final String responseBody = "Hello world!";
         final HttpBody httpBody = new HttpBody(responseBody);
 
-        final HttpHeaders responseHeader = new HttpHeaders(Map.of(
-                CONTENT_TYPE.getValue(), HTML.getValue() + ";charset=utf-8",
-                CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
-        ));
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue() + ";charset=utf-8"),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length()))));
 
         response.setStatusLine(httpStatusLine);
         response.setHeader(responseHeader);

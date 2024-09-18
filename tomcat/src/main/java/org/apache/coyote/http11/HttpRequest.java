@@ -135,6 +135,11 @@ public class HttpRequest {
         return cookies.hasName(name);
     }
 
+    public boolean hasBody(String key) {
+        return body.entrySet().stream()
+                .anyMatch(body -> body.getKey().equals(key));
+    }
+
     public String getQueryValue(String key) {
         return queries.entrySet().stream()
                 .filter(queryKey -> queryKey.getKey().equals(key))

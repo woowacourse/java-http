@@ -26,6 +26,10 @@ public class RegisterController implements Controller {
             resp.setResponse("200 OK", requestFile);
         } else if (req.getMethod().equals(HttpMethod.POST)) {
             try {
+                if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD) || req.hasBody(EMAIL)) {
+                    log.error("요청에 필요한 값이 존재하지 않습니다.");
+                    resp.setResponse("404 Not Found", ResourceParser.getRequestFile("/404.html"));
+                }
                 String account = req.getBodyValue(ACCOUNT);
                 String password = req.getBodyValue(PASSWORD);
                 String email = req.getBodyValue(EMAIL);

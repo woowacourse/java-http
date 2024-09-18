@@ -39,6 +39,10 @@ public class LoginController implements Controller {
             resp.setResponse("200 OK", requestFile);
 
         } else if (req.getMethod().equals(HttpMethod.POST)) {
+            if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD)) {
+                log.error("요청에 필요한 값이 존재하지 않습니다.");
+                resp.setResponse("404 Not Found", ResourceParser.getRequestFile("/404.html"));
+            }
             String account = req.getBodyValue(ACCOUNT);
             String password = req.getBodyValue(PASSWORD);
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import static support.FakeRequests.invalidGetRequest;
 import static support.FakeRequests.validGetRequest;
 
+import org.apache.coyote.http11.request.requestline.HttpRequestLine;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

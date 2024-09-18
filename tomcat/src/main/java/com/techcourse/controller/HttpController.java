@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.exception.UnsupportedHttpMethodException;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

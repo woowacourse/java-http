@@ -11,7 +11,7 @@ public class Controllers {
     public Controllers(HttpController... controller) {
         value = Arrays.stream(controller).toList();
     }
-    
+
     boolean contains(String path) {
         return value.stream().anyMatch(r -> r.getPath().equals(path));
     }

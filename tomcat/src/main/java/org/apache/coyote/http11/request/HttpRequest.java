@@ -2,8 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
+import org.apache.coyote.http11.request.requestline.HttpRequestLine;
 
-public abstract class HttpRequest {
+public class HttpRequest {
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpPayload payload;

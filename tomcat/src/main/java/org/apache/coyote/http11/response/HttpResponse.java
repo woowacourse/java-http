@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.response;
 
 
-import org.apache.coyote.HttpStatus;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.coyote.HttpStatus;
 
 public class HttpResponse {
     private final Map<String, String> headers = new TreeMap<>();

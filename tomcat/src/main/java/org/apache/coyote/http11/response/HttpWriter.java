@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-public class Http11Writer extends OutputStreamWriter {
+public class HttpWriter extends OutputStreamWriter {
 
 
-    public Http11Writer(OutputStream out) {
+    public HttpWriter(OutputStream out) {
         super(out);
     }
 

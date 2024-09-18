@@ -2,13 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.startup.WAS;
-import org.apache.coyote.http11.request.Http11Reader;
-import org.apache.coyote.http11.response.Http11Writer;
+import org.apache.coyote.http11.request.HttpReader;
+import org.apache.coyote.http11.response.HttpWriter;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +30,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
-        try (var reader = new Http11Reader(connection.getInputStream());
-             var writer = new Http11Writer(connection.getOutputStream())) {
+        try (var reader = new HttpReader(connection.getInputStream());
+             var writer = new HttpWriter(connection.getOutputStream())) {
 
-            HttpRequest request = new Http11Request(reader.readLines());
+            HttpRequest request = new HttpRequest(reader.readLines());
             HttpResponse response = WAS.dispatch(request);
             writer.flushWith(response.normalize());
 

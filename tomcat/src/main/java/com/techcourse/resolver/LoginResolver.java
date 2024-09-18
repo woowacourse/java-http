@@ -1,7 +1,7 @@
 package com.techcourse.resolver;
 
-import com.techcourse.session.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.session.SessionManager;
 import java.util.Map;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;

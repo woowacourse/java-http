@@ -17,7 +17,7 @@ public class InMemoryUserRepository {
 
         SessionManager sessionManager = new SessionManager();
         Session newSession = new Session("gugu");
-        newSession.setAttribute("JSESSIONID",UUID.randomUUID().toString());
+        newSession.setAttribute("JSESSIONID", UUID.randomUUID().toString());
         sessionManager.add(newSession);
     }
 

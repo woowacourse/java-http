@@ -1,47 +1,31 @@
 package org.apache.coyote.http11.message.request;
 
 import java.net.URI;
-import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
-import org.apache.util.parser.BodyParserFactory;
-import org.apache.util.parser.Parser;
 
 public class HttpRequest {
 
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
-    private final HttpBody body;
+    private final HttpRequestBody requestBody;
 
-    public HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, HttpBody body) {
+    public HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, HttpRequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
+        this.requestBody = requestBody;
     }
 
     public String getBodyParameter(String key) {
-        Map<String, String> keyValueBodies = this.getKeyValueBodies();
-        return keyValueBodies.get(key);
-    }
-
-    private Map<String, String> getKeyValueBodies() {
-        ContentType contentType = this.getContentType();
-        Parser parser = BodyParserFactory.getParser(contentType);
-
-        return parser.parse(this.getBody());
+        return requestBody.getBodyParameter(key);
     }
 
     public ContentType getContentType() {
         return headers.getContentType();
-    }
-
-    public String getBody() {
-        return body.getBody();
     }
 
     public URI getUri() {

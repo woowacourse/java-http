@@ -8,7 +8,6 @@ import java.io.StringReader;
 import java.net.URI;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,9 +35,9 @@ class HttpRequestTest {
         );
 
         body = "key=value";
-        HttpBody httpBody = new HttpBody(body);
+        HttpRequestBody httpRequestBody = new HttpRequestBody(ContentType.FORM_DATA, body);
 
-        httpRequest = new HttpRequest(startLine, headers, httpBody);
+        httpRequest = new HttpRequest(startLine, headers, httpRequestBody);
     }
 
     @DisplayName("BufferedReader를 사용하여 HttpRequest를 생성한다.")
@@ -67,8 +66,7 @@ class HttpRequestTest {
                 () -> assertThat(result.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(result.getUri().toString()).hasToString("/path"),
                 () -> assertThat(result.getContentType()).isEqualTo(ContentType.FORM_DATA),
-                () -> assertThat(result.getCookies().toString()).hasToString(cookie),
-                () -> assertThat(result.getBody()).isEqualTo(body)
+                () -> assertThat(result.getCookies().toString()).hasToString(cookie)
         );
     }
 
@@ -80,16 +78,6 @@ class HttpRequestTest {
 
         // then
         assertThat(contentType).isEqualTo(ContentType.FORM_DATA);
-    }
-
-    @DisplayName("getBody() 메서드는 요청 본문을 반환한다.")
-    @Test
-    void getBody() {
-        // when
-        String actualBody = httpRequest.getBody();
-
-        // then
-        assertThat(actualBody).isEqualTo(body);
     }
 
     @DisplayName("getUri() 메서드는 요청 URI를 반환한다.")

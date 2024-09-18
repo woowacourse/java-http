@@ -4,9 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.service.UserService;
-import org.apache.coyote.http11.message.common.HttpBody;
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequestBody;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.session.Session;
@@ -41,7 +42,7 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine("POST /login HTTP/1.1"),
                 new HttpHeaders("Content-Type: application/x-www-form-urlencoded"),
-                new HttpBody("account=testUser&password=password123")
+                new HttpRequestBody(ContentType.FORM_DATA, "account=testUser&password=password123")
         );
         HttpResponse response = new HttpResponse();
 
@@ -63,7 +64,7 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine("POST /login HTTP/1.1"),
                 new HttpHeaders("Content-Type: application/x-www-form-urlencoded"),
-                new HttpBody("account=testUser&password=wrongPassword")
+                new HttpRequestBody(ContentType.FORM_DATA, "account=testUser&password=wrongPassword")
         );
         HttpResponse response = new HttpResponse();
 
@@ -81,7 +82,7 @@ class LoginControllerTest {
         HttpRequest request = new HttpRequest(
                 new HttpRequestLine("GET /login HTTP/1.1"),
                 new HttpHeaders(),
-                new HttpBody("")
+                new HttpRequestBody(null)
         );
         HttpResponse response = new HttpResponse();
 

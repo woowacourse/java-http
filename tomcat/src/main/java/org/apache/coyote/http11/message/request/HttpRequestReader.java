@@ -3,7 +3,7 @@ package org.apache.coyote.http11.message.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.message.common.HttpBody;
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 
 public class HttpRequestReader {
@@ -16,9 +16,11 @@ public class HttpRequestReader {
     public static HttpRequest from(BufferedReader reader) throws IOException {
         HttpRequestLine httpRequestLine = new HttpRequestLine(parseStartLine(reader));
         HttpHeaders httpHeaders = new HttpHeaders(parseHeaders(reader));
-        HttpBody httpBody = new HttpBody(parseBody(reader, httpHeaders.getContentLength()));
+        ContentType contentType = httpHeaders.getContentType();
+        HttpRequestBody httpRequestBody =
+                new HttpRequestBody(contentType, parseBody(reader, httpHeaders.getContentLength()));
 
-        return new HttpRequest(httpRequestLine, httpHeaders, httpBody);
+        return new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);
     }
 
     private static String parseStartLine(BufferedReader reader) throws IOException {

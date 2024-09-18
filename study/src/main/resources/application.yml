@@ -3,11 +3,13 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 # 현재 할당된 커넥션 수가 max-connections개 여도, 일단 요청을 받아둘 큐의 size.
+                    # 단, 현재 학습테스트에서는 큐에 들어간 요청들은 응답을 받기까지 1000ms가 넘는 시간동안 대기해야하므로 큐에 들어간 요청은 timeout이 발생
+                    # 커넥션을 물고있던 요청들이 sleep 하는 시간 500ms + 큐에서 나와 커넥션을 획득한 요청이 sleep하는 시간 500ms
+    max-connections: 2  # 한번에 최대 n개의 Connection만 처리 가능
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 2  # core 스레드 수
+      max: 2  # 최대 스레드 생성 수
   compression:
     enabled: true
     min-response-size: 10

@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceFinder {

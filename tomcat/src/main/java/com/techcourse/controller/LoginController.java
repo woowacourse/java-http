@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnknownAccountException;
 import com.techcourse.session.SessionManager;
 import java.util.Map;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

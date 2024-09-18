@@ -26,7 +26,7 @@ public class SessionManager {
     }
 
     public static boolean isValidJSessionId(String jSessionId) {
-        return SESSIONS.values().stream().anyMatch(session -> session.getAttribute("JSESSIONID").equals(jSessionId));
+        return SESSIONS.values().stream().anyMatch(session -> session.getJSessionIdAttribute().equals(jSessionId));
     }
 
     public static void remove(HttpSession session) {

@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.startup.WAS;
+import org.apache.coyote.http11.request.Http11Reader;
+import org.apache.coyote.http11.response.Http11Writer;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.Socket;

@@ -8,6 +8,8 @@ public class Session {
     private final String id;
     private final Map<String, String> values = new HashMap<>();
 
+    public static final String JSESSIONID = "JSESSIONID";
+
     public Session(String id) {
         this.id = id;
         setJSessionIdAttribute();
@@ -33,7 +35,10 @@ public class Session {
         values.clear();
     }
 
+    public String getJSessionIdAttribute() {
+        return this.getAttribute(JSESSIONID);
+    }
     private void setJSessionIdAttribute() {
-        setAttribute("JSESSIONID", UUID.randomUUID().toString());
+        setAttribute(JSESSIONID, UUID.randomUUID().toString());
     }
 }

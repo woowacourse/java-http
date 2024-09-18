@@ -1,17 +1,22 @@
 package org.apache.catalina.startup;
 
 import com.techcourse.controller.HttpController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class WAS {
     private final Server tomcat;
-    private final Controllers controllers;
 
-    public WAS(Server tomcat, Controllers controllers) {
+    private static final Controllers controllers = new Controllers(
+            new LoginController("/login"),
+            new RegisterController("/register")
+    );
+
+    public WAS(Server tomcat) {
         this.tomcat = tomcat;
-        this.controllers = controllers;
     }
 
     public void start() {
@@ -27,8 +32,9 @@ public class WAS {
             return response;
         }
 
-        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(
-                response);
+        String body = new ResourceFinder(request.getLocation(), request.getExtension())
+                .getStaticResource(response);
+
         response.setBody(body);
         return response;
     }

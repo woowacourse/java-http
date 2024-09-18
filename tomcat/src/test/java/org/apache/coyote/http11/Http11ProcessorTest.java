@@ -53,7 +53,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
 //                "Content-Length: 5564 \r\n" +
-                "Content-Length: 5448 \r\n" +   // index.html 내부 파일 크기를 측정했을 5448이 나와서 우선 변경함.
+                "Content-Length: 5518 \r\n" +   // index.html 내부 파일 크기를 측정했을 5518이 나와서 우선 변경함.
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

@@ -18,7 +18,7 @@ import com.techcourse.model.User;
 
 public class LoginController extends AbstractController {
 
-    private static final String AUTHENTICATION_COOKIE_NAME = "JSESSIONID";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String USER_SESSION_KEY = "user";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final var cookie = request.getHeaders().get(HttpHeaderField.COOKIE.getValue());
         final var httpCookie = HttpCookie.parse(cookie);
-        if (httpCookie.containsKey(AUTHENTICATION_COOKIE_NAME)) {
+        if (httpCookie.containsKey(SESSION_COOKIE_NAME)) {
             findUser(response, httpCookie);
             response.setHttpStatusCode(HttpStatusCode.FOUND);
         } else {
@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
     }
 
     private void findUser(final HttpResponse response, final HttpCookie httpCookie) {
-        final var jSessionId = httpCookie.get(AUTHENTICATION_COOKIE_NAME);
+        final var jSessionId = httpCookie.get(SESSION_COOKIE_NAME);
         final var session = sessionManager.findSession(jSessionId);
         if (session == null) {
             log.warn("유효하지 않은 세션입니다.");
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
             response.setHttpStatusCode(HttpStatusCode.FOUND);
             final var user = login(request, account);
             final var uuid = UUID.randomUUID();
-            response.putHeader(HttpHeaderField.SET_COOKIE.getValue(), AUTHENTICATION_COOKIE_NAME + "=" + uuid);
+            response.putHeader(HttpHeaderField.SET_COOKIE.getValue(), SESSION_COOKIE_NAME + "=" + uuid);
             response.putHeader(HttpHeaderField.LOCATION.getValue(), "index.html");
             saveSession(uuid, user);
         } catch (final IllegalArgumentException e) {

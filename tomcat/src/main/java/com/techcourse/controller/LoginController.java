@@ -33,17 +33,14 @@ public class LoginController extends AbstractController {
         String account = request.findBodyValueByKey("account");
         String password = request.findBodyValueByKey("password");
 
-        User user = InMemoryUserRepository.findByAccount(account)
+        InMemoryUserRepository.findByAccount(account)
                 .filter(it -> it.checkPassword(password))
-                .orElse(null);
+                .ifPresentOrElse(user -> processLoginSuccess(request, response, user),
+                        () -> response.setRedirectResponse("/401.html"));
+    }
 
-        if (user == null) {
-            response.setRedirectResponse("/401.html");
-            return;
-        }
-
+    private void processLoginSuccess(HttpRequest request, HttpResponse response, User user) {
         initializeSessionIfNotExists(request, response, user);
-
         response.setRedirectResponse("/index.html");
     }
 

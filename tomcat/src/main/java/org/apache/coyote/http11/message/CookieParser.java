@@ -14,7 +14,7 @@ public class CookieParser {
 
     public Map<String, String> parseCookie(final String cookieValue) {
         if (cookieValue == null) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         final String[] cookies = cookieValue.split(COOKIE_SEPARATOR);
 

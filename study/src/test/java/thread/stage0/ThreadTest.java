@@ -30,10 +30,14 @@ class ThreadTest {
         Thread thread = new ExtendedThread("hello thread");
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        // log.info("before start");
+        thread.start(); // ! run() 실행 !
+        // log.info("after start");
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        // log.info("before join");
+        thread.join();
+        // log.info("after join");
     }
 
     /**
@@ -46,10 +50,16 @@ class ThreadTest {
         Thread thread = new Thread(new RunnableThread("hello thread"));
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        // log.info("before start");
+        thread.start();
+        // log.info("after start");
+
+        // ! run() 실행 !
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        // log.info("before join");
+        thread.join();
+        // log.info("after join");
     }
 
     private static final class ExtendedThread extends Thread {

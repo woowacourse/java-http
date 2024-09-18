@@ -1,13 +1,13 @@
 package org.apache.catalina.session;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SessionManager {
 
     private static SessionManager INSTANCE;
 
-    private final List<Session> sessions = new ArrayList<>();
+    private final List<Session> sessions = new CopyOnWriteArrayList<>();
 
     public static SessionManager getInstance() {
         if (INSTANCE == null) {
@@ -19,14 +19,14 @@ public class SessionManager {
     private SessionManager() {
     }
 
-    public String create(String key, Object value) {
+    public synchronized String create(String key, Object value) {
         Session session = new Session();
         session.addAttribute(key, value);
         sessions.add(session);
         return session.getId();
     }
 
-    public boolean contains(String id) {
+    public synchronized boolean contains(String id) {
         return sessions.stream()
                 .anyMatch(session -> session.hasId(id));
     }

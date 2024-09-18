@@ -37,4 +37,5 @@ class ConcurrencyTest {
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
         assertThat(userServlet.getUsers()).hasSize(1);
     }
+    // 각 스레드 중단점 걸고 동시에 실행 -> synchronized 붙이면 동기로 처리하여 해결 (두번째 스레드는 아예 중단점 안 걸림)
 }

@@ -27,20 +27,22 @@ class AppTest {
         var threads = new Thread[NUMBER_OF_THREAD];
 
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {
-            threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));
+            threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test"))); // 요청 10번
         }
 
+        // 완전히 동시에 요청을 보내지는 않는 환경임
         for (final var thread : threads) {
-            thread.start();
+            thread.start(); // 요청
             Thread.sleep(50);
         }
 
         for (final var thread : threads) {
-            thread.join();
+            thread.join(); // 완료될 때가지 대기
         }
 
         assertThat(count.intValue()).isEqualTo(2);
     }
+    // 해결: max-connections => 2
 
     private static void incrementIfOk(final HttpResponse<String> response) {
         if (response.statusCode() == 200) {

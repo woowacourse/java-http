@@ -54,11 +54,11 @@ public class HttpResponse {
         setBody(new ResponseBody(ContentMimeType.getMimeByExtension(extension), responseBody));
     }
 
-    public void set200Response() throws IOException {
+    public void set200Response() {
         this.statusLine = new StatusLine(HttpStatus.OK);
     }
 
-    public void setRedirectResponse(String location) throws IOException {
+    public void setRedirectResponse(String location) {
         this.statusLine = new StatusLine(HttpStatus.FOUND);
         headers.add(HttpHeaderKey.LOCATION, location);
     }

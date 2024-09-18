@@ -2,7 +2,6 @@ package org.apache.coyote.http11.message.response;
 
 import java.io.IOException;
 import org.apache.coyote.http11.message.common.ContentType;
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.util.ResourceReader;
@@ -15,13 +14,13 @@ public class HttpResponse {
 
     private final HttpStatusLine statusLine;
     private final HttpHeaders headers;
-    private final HttpBody body;
+    private final HttpResponseBody body;
 
     public HttpResponse() {
-        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpBody(DEFAULT_BODY));
+        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpResponseBody(DEFAULT_BODY));
     }
 
-    public HttpResponse(HttpStatusLine statusLine, HttpHeaders headers, HttpBody body) {
+    public HttpResponse(HttpStatusLine statusLine, HttpHeaders headers, HttpResponseBody body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;

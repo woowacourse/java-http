@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.CoyoteException;
 
@@ -16,7 +16,7 @@ public class HttpCookie {
     private final Map<String, String> cookies;
 
     public HttpCookie() {
-        this.cookies = new ConcurrentHashMap<>();
+        this.cookies = new HashMap<>();
     }
 
     public static HttpCookie ofSessionId(String sessionId) {
@@ -26,7 +26,7 @@ public class HttpCookie {
     }
 
     public HttpCookie(String rawCookies) {
-        this.cookies = new ConcurrentHashMap<>();
+        this.cookies = new HashMap<>();
         parse(rawCookies);
     }
 

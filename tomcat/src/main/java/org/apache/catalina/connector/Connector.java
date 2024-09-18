@@ -18,7 +18,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_MAX_THREAD_COUNT = 250;
+    private static final int DEFAULT_MAX_THREAD_COUNT = 5;
 
     private final ServerSocket serverSocket;
     private final ServletContainer servletContainer;
@@ -48,7 +48,9 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        executorService.submit(this);
+        var thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }

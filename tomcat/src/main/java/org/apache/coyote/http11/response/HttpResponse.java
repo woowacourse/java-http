@@ -24,7 +24,7 @@ public class HttpResponse {
 
     public void setRoot(String protocol) {
         body = "Hello world!";
-        statusLine = new StatusLine(protocol, Status.OK.getCode(), Status.OK.getMessage());
+        statusLine = new StatusLine(protocol, Status.OK);
         httpHeader.putHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpHeader.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
@@ -32,7 +32,7 @@ public class HttpResponse {
     public void setResource(String protocol, String url) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + url);
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-        statusLine = new StatusLine(protocol, Status.OK.getCode(), Status.OK.getMessage());
+        statusLine = new StatusLine(protocol, Status.OK);
 
         httpHeader.putContentType(getExtension(url));
         httpHeader.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
@@ -41,7 +41,7 @@ public class HttpResponse {
     public void setNotFound(String protocol) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + "/404.html");
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-        statusLine = new StatusLine(protocol, Status.NOT_FOUND.getCode(), Status.NOT_FOUND.getMessage());
+        statusLine = new StatusLine(protocol, Status.NOT_FOUND);
 
         httpHeader.putHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpHeader.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
@@ -50,8 +50,7 @@ public class HttpResponse {
     public void setLoginFail(String protocol) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + "/500.html");
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-        statusLine = new StatusLine(protocol, Status.INTERNET_SERVER_ERROR.getCode(),
-                Status.INTERNET_SERVER_ERROR.getMessage());
+        statusLine = new StatusLine(protocol, Status.INTERNET_SERVER_ERROR);
 
         httpHeader.putHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpHeader.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
@@ -60,18 +59,18 @@ public class HttpResponse {
     public void setLoginPage(String protocol, String url) throws IOException {
         URL path = getClass().getClassLoader().getResource("static" + url + ".html");
         body = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-        statusLine = new StatusLine(protocol, Status.OK.getCode(), Status.OK.getMessage());
+        statusLine = new StatusLine(protocol, Status.OK);
         httpHeader.putHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpHeader.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 
     public void successLogin(String protocol) {
-        statusLine = new StatusLine(protocol, Status.REDIRECT.getCode(), Status.REDIRECT.getMessage());
+        statusLine = new StatusLine(protocol, Status.REDIRECT);
         httpHeader.putHeader(LOCATION, "/index.html");
     }
 
     public void failLogin(String protocol) {
-        statusLine = new StatusLine(protocol, Status.REDIRECT.getCode(), Status.REDIRECT.getMessage());
+        statusLine = new StatusLine(protocol, Status.REDIRECT);
         httpHeader.putHeader(LOCATION, "/401.html");
     }
 

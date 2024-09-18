@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory;
  * 웹서버는 여러 사용자가 동시에 접속을 시도하기 때문에 동시성 이슈가 생길 수 있다.
  * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
-class
-ConcurrencyTest {
+class ConcurrencyTest {
 
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyTest.class);
 

@@ -13,16 +13,11 @@ import java.net.Socket;
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_ACCEPT_ACCOUNT = 10;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
-    }
 
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
@@ -91,6 +86,6 @@ public class Connector implements Runnable {
     }
 
     private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+        return Math.max(acceptCount, DEFAULT_ACCEPT_ACCOUNT);
     }
 }

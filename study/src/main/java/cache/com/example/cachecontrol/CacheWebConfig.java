@@ -9,7 +9,8 @@ public class CacheWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new NoCacheInterceptor()).addPathPatterns("/**");
         registry.addInterceptor(new OneYearCacheInterceptor()).addPathPatterns("/resources/**");
+        registry.addInterceptor(new NoCacheInterceptor()).addPathPatterns("/**")
+                .excludePathPatterns("/resources/**");
     }
 }

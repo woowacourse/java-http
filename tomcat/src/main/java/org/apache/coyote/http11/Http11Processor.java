@@ -16,7 +16,7 @@ import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger("ConsoleTraceLogger");
     private final ServletContainer servletContainer;
     private final Socket connection;
 

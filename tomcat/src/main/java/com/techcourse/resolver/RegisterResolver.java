@@ -14,8 +14,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 @Location("/register")
 public class RegisterResolver extends HttpRequestResolver {
 
-    private final SessionManager sessionManager = new SessionManager();
-
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
@@ -31,7 +29,7 @@ public class RegisterResolver extends HttpRequestResolver {
 
         Session newSession = new Session(payload.get("account"));
         newSession.setAttribute("JSESSIONID", UUID.randomUUID().toString());
-        sessionManager.add(newSession);
+        SessionManager.add(newSession);
 
         InMemoryUserRepository.save(
                 new User(payload.get("account"), payload.get("password"), payload.get("email"))

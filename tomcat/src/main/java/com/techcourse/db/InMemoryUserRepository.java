@@ -12,13 +12,11 @@ public class InMemoryUserRepository {
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
-        User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        User gugu = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        database.put(gugu.getAccount(), gugu);
 
-        SessionManager sessionManager = new SessionManager();
-        Session newSession = new Session("gugu");
-        newSession.setAttribute("JSESSIONID", UUID.randomUUID().toString());
-        sessionManager.add(newSession);
+        Session newSession = new Session(gugu.getAccount());
+        SessionManager.add(newSession);
     }
 
     private InMemoryUserRepository() {

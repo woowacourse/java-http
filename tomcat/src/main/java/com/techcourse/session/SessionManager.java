@@ -8,23 +8,27 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public void add(Session session) {
+    private SessionManager() {
+        throw new IllegalStateException("this class can not be constructed.");
+    }
+
+    public static void add(Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String sessionId) {
+    public static Session findSession(String sessionId) {
         return SESSIONS.get(sessionId);
     }
 
-    public boolean contains(String sessionId) {
+    public static boolean contains(String sessionId) {
         return SESSIONS.containsKey(sessionId);
     }
 
-    public boolean isValidJSessionId(String jSessionId) {
+    public static boolean isValidJSessionId(String jSessionId) {
         return SESSIONS.values().stream().anyMatch(session -> session.getAttribute("JSESSIONID").equals(jSessionId));
     }
 
-    public void remove(HttpSession session) {
+    public static void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
     }
 }

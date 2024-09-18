@@ -2,6 +2,7 @@ package com.techcourse.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
     private final String id;
@@ -9,6 +10,7 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
+        values.put("JSESSION", UUID.randomUUID().toString());
     }
 
     public String getId() {

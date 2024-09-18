@@ -13,6 +13,6 @@ public class HttpStatusLine {
     }
 
     public String convertHttpStatusLineMessage() {
-        return httpVersion.getValue() + " " + httpStatus.getCode() + " " + httpStatus.getDescription();
+        return httpVersion.getValue() + " " + httpStatus.getCode() + " " + httpStatus.getDescription() + " ";
     }
 }

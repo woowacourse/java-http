@@ -10,7 +10,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.catalina.server.Context;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,11 +20,13 @@ import com.techcourse.MyContext;
 
 class ConnectorTest {
 
+    private Context context;
     private Connector connector;
 
     @BeforeEach
     void setUp() {
-        connector = new Connector(new MyContext());
+        context = new MyContext();
+        connector = new Connector(context);
         connector.start();
     }
 
@@ -35,6 +39,35 @@ class ConnectorTest {
         assertAll(
                 () -> assertEquals(0, connector.getPendingRequestCount()),
                 () -> assertEquals(concurrentRequests, connector.getCompletedRequestCount())
+        );
+    }
+
+    @Test
+    @Disabled("동시 요청이 최대 쓰레드 이상이여도 모든 요청 처리 성공")
+    @DisplayName("동시 요청이 최대 쓰레드 이상이며, 최대 요청보다 많고 대기 큐보다 적을 때 일부 요청 대기\n")
+    void testConcurrentRequestsOverMaxThreads() throws InterruptedException {
+        int concurrentRequests = 300;
+        int pendingRequest = concurrentRequests - context.getApplicationConfig().getMaxThreads();
+        sendRequests(concurrentRequests);
+
+        assertAll(
+                () -> assertEquals(pendingRequest, connector.getPendingRequestCount()),
+                () -> assertEquals(context.getApplicationConfig().getMaxThreads(), connector.getCompletedRequestCount())
+        );
+    }
+
+    @Test
+    @Disabled("동시 요청이 최대 쓰레드 이상이여도 모든 요청 처리 성공")
+    @DisplayName("동시 요청이 최대 쓰레드 이상이며, 대기 큐보다 클 때 일부 요청 거절")
+    void testConcurrentRequestsOverMaxThreadsAndQueue() throws InterruptedException {
+        int concurrentRequests = 500;
+        int maxAcceptRequest = context.getApplicationConfig().getMaxThreads() + context.getApplicationConfig()
+                .getAcceptCount();
+        sendRequests(concurrentRequests);
+
+        assertAll(
+                () -> assertEquals(maxAcceptRequest, connector.getPendingRequestCount()),
+                () -> assertEquals(context.getApplicationConfig().getMaxThreads(), connector.getCompletedRequestCount())
         );
     }
 

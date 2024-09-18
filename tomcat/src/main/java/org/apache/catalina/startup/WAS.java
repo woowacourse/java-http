@@ -1,14 +1,13 @@
 package org.apache.catalina.startup;
 
-import com.techcourse.resolver.Resolver;
+import com.techcourse.controller.HttpController;
 import java.util.List;
-import com.techcourse.resolver.Dispatcher;
-import org.apache.catalina.startup.Server;
+import com.techcourse.controller.Dispatcher;
 
 public class WAS implements Server {
     private final Server tomcat;
 
-    public WAS(Server tomcat, List<Resolver> resolvers) {
+    public WAS(Server tomcat, List<HttpController> resolvers) {
         this.tomcat = tomcat;
         resolvers.forEach(Dispatcher::register);
     }

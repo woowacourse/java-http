@@ -10,7 +10,7 @@ public class HttpLocation {
     private final String fileName;
     private final String extension;
 
-    private static final Pattern validPattern = Pattern.compile("^[A-Za-z0-9-_~.]+$");
+    private static final Pattern validPattern = Pattern.compile("^[A-Za-z0-9-_~./]+$");
 
     public HttpLocation(String data) {
         if (data == null || data.codePoints().filter(r -> r == '.').count() > 1) {
@@ -40,9 +40,7 @@ public class HttpLocation {
             throw new IllegalArgumentException("location length parse error");
         }
 
-        if (split.stream().skip(1).anyMatch(r -> !validPattern.matcher(r).matches()) ||
-            (!split.getFirst().substring(1).isBlank() && !validPattern.matcher(split.getFirst().substring(1)).matches())
-        ) {
+        if (split.stream().anyMatch(r -> !validPattern.matcher(r).matches())) {
             throw new IllegalArgumentException("location character parse error");
         }
     }

@@ -14,7 +14,10 @@ public class Http11Reader extends BufferedReader {
 
     public List<String> readLines() throws IOException {
         List<String> result = new ArrayList<>(readLinesWhileBuffered());
-        result.add(readWhileBuffered());
+        if(ready()) {
+            result.add("");
+            result.add(readWhileBuffered());
+        }
         return result;
     }
 

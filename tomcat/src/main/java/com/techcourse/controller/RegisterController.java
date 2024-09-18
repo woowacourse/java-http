@@ -1,4 +1,4 @@
-package com.techcourse.resolver;
+package com.techcourse.controller;
 
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -11,8 +11,11 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-@Location("/register")
-public class RegisterResolver extends HttpRequestResolver {
+public class RegisterController extends HttpController {
+
+    public RegisterController(String path) {
+        super(path);
+    }
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {

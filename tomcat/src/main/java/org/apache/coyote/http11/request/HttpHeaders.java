@@ -17,7 +17,6 @@ public class HttpHeaders {
         if (lines.size() < 2) {
             throw new IllegalArgumentException("request must be more than two lines");
         }
-
         Map<String, String> value = new HashMap<>();
         int startIndex = 1;
         for (int index = startIndex; index < lines.size(); index++) {

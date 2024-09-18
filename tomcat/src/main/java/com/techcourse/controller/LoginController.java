@@ -1,4 +1,4 @@
-package com.techcourse.resolver;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnknownAccountException;
@@ -8,12 +8,15 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+public class LoginController extends HttpController {
+    public LoginController(String path) {
+        super(path);
+    }
 
-@Location("/login")
-public class LoginResolver extends HttpRequestResolver {
     @Override
-    public void doGet(HttpRequest request, HttpResponse response) {
-        if (request.containsHeader("Cookie") && SessionManager.isValidJSessionId(request.getCookie())) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        if (request.containsHeader("Cookie")) {
+            System.out.println(request.getCookie());
             response.setStatus(HttpStatus.FOUND);
             response.addHeader("Content-Type", "text/html");
             response.addHeader("Location", "/index.html");

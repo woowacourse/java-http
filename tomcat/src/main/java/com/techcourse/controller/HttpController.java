@@ -5,7 +5,13 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class AbstractController implements Controller {
+public abstract class HttpController implements Controller {
+
+    private final String path;
+
+    protected HttpController(String path) {
+        this.path = path;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -14,7 +20,8 @@ public abstract class AbstractController implements Controller {
             return;
         }
         if (request.getMethod() == HttpMethod.POST) {
-            doGet(request, response);
+            doPost(request, response);
+            return;
         }
         throw new UnsupportedHttpMethodException(request.getMethod().name());
     }
@@ -25,5 +32,9 @@ public abstract class AbstractController implements Controller {
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         throw new IllegalStateException("implement get method before invoke.");
+    }
+
+    public String getPath() {
+        return path;
     }
 }

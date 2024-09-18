@@ -1,4 +1,4 @@
-package com.techcourse.resolver;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -10,7 +10,7 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
-        values.put("JSESSIONID", UUID.randomUUID().toString());
+        setJSessionIdAttribute();
     }
 
     public String getId() {
@@ -31,5 +31,9 @@ public class Session {
 
     public void invalidate() {
         values.clear();
+    }
+
+    private void setJSessionIdAttribute() {
+        setAttribute("JSESSIONID", UUID.randomUUID().toString());
     }
 }

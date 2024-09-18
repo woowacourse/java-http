@@ -51,7 +51,7 @@ public class StaticResourceController implements Controller {
         final FileExtensionType fileExtensionType = requestLine.getFileExtensionType().get();
         final HttpHeaders responseHeader = new HttpHeaders(List.of(
                 new HttpHeaderField(CONTENT_TYPE.getValue(),
-                        HttpHeaderAcceptType.getByValue(fileExtensionType.getValue().toUpperCase()).getValue()),
+                        HttpHeaderAcceptType.getByValue(fileExtensionType.getValue().toUpperCase()).getValue() + ";charset=utf-8"),
                 new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length()))
         ));
         final HttpBody httpBody = new HttpBody(content);

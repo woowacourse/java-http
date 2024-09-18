@@ -5,13 +5,18 @@ import java.util.Arrays;
 public enum HttpMethod {
     POST,
     GET,
+    NONE,
     ;
 
     public static HttpMethod from(String method) {
+        if (method == null) {
+            return NONE;
+        }
+
         return Arrays.stream(HttpMethod.values())
-                .filter(value -> method.equals(value.name()))
+                .filter(value -> method.equalsIgnoreCase(value.name()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 HTTP METHOD 요쳥: " + method));
+                .orElse(NONE);
     }
 
     public boolean isPost() {
@@ -22,7 +27,7 @@ public enum HttpMethod {
         return this.equals(GET);
     }
 
-    public boolean isValidMethod(HttpMethod httpMethod) {
-        return Arrays.asList(values()).contains(httpMethod);
+    public boolean isValidMethod() {
+        return !this.equals(NONE);
     }
 }

@@ -23,7 +23,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private static void validateMethod(HttpMethod httpMethod, HttpResponse response) {
-        if (!httpMethod.isValidMethod(httpMethod)) {
+        if (!httpMethod.isValidMethod()) {
             response.setStatus(HttpStatus.NOT_IMPLEMENTED);
             response.redirectTo("/501.html");
         }

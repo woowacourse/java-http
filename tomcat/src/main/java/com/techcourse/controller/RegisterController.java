@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.domain.User;
 import com.techcourse.model.dto.UserRegistration;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ public class RegisterController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {

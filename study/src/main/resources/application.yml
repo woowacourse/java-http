@@ -5,3 +5,9 @@ server:
   compression:
     enabled: true
     min-response-size: 10
+  tomcat:
+    accept-count: 1 # 사용할 수 있는 스레드가 생길 때 까지 기다리는 요청의 최대 개수
+    max-connections: 2 # 동시에 처리 가능한 최대 요청 수
+    threads:
+      min-spare: 10 # 톰캣이 요청을 처리하는 스레드의 최소 개수
+      max: 10 # 톰캣이 요청을 처리하는 스레드의 최대 개수

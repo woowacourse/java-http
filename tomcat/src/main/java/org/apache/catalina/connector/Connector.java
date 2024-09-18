@@ -3,7 +3,11 @@ package org.apache.catalina.connector;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMappings;
 import org.slf4j.Logger;
@@ -15,20 +19,40 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    public static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
 
     private final RequestMappings requestMappings;
 
+    private final ExecutorService threadPool;
+
     public Connector(RequestMappings requestMappings) {
-        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(requestMappings, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final RequestMappings requestMappings, final int port, final int acceptCount) {
+    private Connector(RequestMappings requestMappings, final int port, final int acceptCount, final int maxThreads) {
         this.requestMappings = requestMappings;
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
+
+        threadPool = new ThreadPoolExecutor(
+                maxThreads, // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
+                maxThreads, // maxThreads 의 고정된 스레드 개수를 가진 풀 생성
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(acceptCount),
+                demonThreadFactory() // 요청의 처리 역시 서버가 중지되면 종료되는 것이 타당하다.
+        );
+        // 단, 처음 maxThreads개의 스레드가 생기기 전에는 새로 생성한다.
+        //acceptCount는 최대 연결 대기 상태의 수다.
+        serverSocket = createServerSocket(port, acceptCount);
+    }
+
+    private ThreadFactory demonThreadFactory() {
+        return r -> {
+            Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            return thread;
+        };
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -42,8 +66,12 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        Thread thread = new Thread(this);
         thread.setDaemon(true);
+        /*
+         * 데몬 스레드는 주 스레드의 어떤 기능을 보조하는 목적으로 사용하는 스레드로 주 스레드가 종료되면 같이 종료된다.
+         * 여기서 주 스레드가 종료되면 당연히 더이상 서버와의 연결을 수락해선 안되므로 데몬 스레드로 설정한다.
+         * */
         thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
@@ -58,19 +86,17 @@ public class Connector implements Runnable {
     }
 
     private void connect() {
+        threadPool.execute(this::acceptAndProcess);
+    }
+
+    private void acceptAndProcess() {
         try {
-            process(serverSocket.accept());
+            var connection = serverSocket.accept();
+            var processor = new Http11Processor(connection, requestMappings);
+            processor.run();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void process(final Socket connection) {
-        if (connection == null) {
-            return;
-        }
-        var processor = new Http11Processor(connection, requestMappings);
-        new Thread(processor).start();
     }
 
     public void stop() {

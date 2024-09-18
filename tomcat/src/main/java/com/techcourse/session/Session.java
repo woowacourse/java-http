@@ -10,7 +10,7 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
-        values.put("JSESSION", UUID.randomUUID().toString());
+        values.put("JSESSIONID", UUID.randomUUID().toString());
     }
 
     public String getId() {

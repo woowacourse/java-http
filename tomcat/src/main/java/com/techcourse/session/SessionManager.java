@@ -1,5 +1,6 @@
 package com.techcourse.session;
 
+import com.techcourse.exception.IllegalConstructionException;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,7 @@ public class SessionManager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private SessionManager() {
-        throw new IllegalStateException("this class can not be constructed.");
+        throw new IllegalConstructionException(this.getClass());
     }
 
     public static void add(Session session) {

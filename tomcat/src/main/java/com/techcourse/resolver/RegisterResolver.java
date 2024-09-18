@@ -2,11 +2,11 @@ package com.techcourse.resolver;
 
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.DuplicatedAccountException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,16 +23,16 @@ public class RegisterResolver extends HttpRequestResolver {
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> payload = request.getPayload();
-        if (InMemoryUserRepository.findByAccount(payload.get("account")).isPresent()) {
-            throw new IllegalArgumentException("duplicated user name");
+        String account = payload.get("account");
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new DuplicatedAccountException(account);
         }
 
-        Session newSession = new Session(payload.get("account"));
-        newSession.setAttribute("JSESSIONID", UUID.randomUUID().toString());
+        Session newSession = new Session(account);
         SessionManager.add(newSession);
 
         InMemoryUserRepository.save(
-                new User(payload.get("account"), payload.get("password"), payload.get("email"))
+                new User(account, payload.get("password"), payload.get("email"))
         );
 
         response.setStatus(HttpStatus.FOUND);

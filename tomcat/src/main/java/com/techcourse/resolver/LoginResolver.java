@@ -1,6 +1,7 @@
 package com.techcourse.resolver;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnknownAccountException;
 import com.techcourse.session.SessionManager;
 import java.util.Map;
 import org.apache.coyote.http11.HttpStatus;
@@ -25,10 +26,11 @@ public class LoginResolver extends HttpRequestResolver {
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> payload = request.getPayload();
-        if (InMemoryUserRepository.findByAccount(payload.get("account")).isEmpty()) {
-            throw new IllegalArgumentException("account does not exists");
+        String account = payload.get("account");
+        if (InMemoryUserRepository.findByAccount(account).isEmpty()) {
+            throw new UnknownAccountException(account);
         }
-        String jSession = SessionManager.findSession(payload.get("account"))
+        String jSession = SessionManager.findSession(account)
                 .getAttribute("JSESSIONID");
         response.setStatus(HttpStatus.FOUND);
         response.addHeader("Content-Type", "text/html");

@@ -1,5 +1,6 @@
 package com.techcourse.db;
 
+import com.techcourse.exception.IllegalConstructionException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
@@ -14,13 +15,11 @@ public class InMemoryUserRepository {
     static {
         User gugu = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(gugu.getAccount(), gugu);
-
-        Session newSession = new Session(gugu.getAccount());
-        SessionManager.add(newSession);
+        SessionManager.add(new Session(gugu.getAccount()));
     }
 
     private InMemoryUserRepository() {
-
+        throw new IllegalConstructionException(this.getClass());
     }
 
     public static void save(User user) {

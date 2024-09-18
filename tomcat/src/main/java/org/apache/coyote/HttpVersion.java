@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.data;
+package org.apache.coyote;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -17,6 +17,10 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.value.equals(value))
                 .findAny();
+    }
+
+    public boolean isSameVersion(String version) {
+        return this.value.equals(version);
     }
 
     public String getValue() {

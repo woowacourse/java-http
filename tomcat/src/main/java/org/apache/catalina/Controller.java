@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import java.io.IOException;
 import org.apache.coyote.http11.data.HttpRequest;

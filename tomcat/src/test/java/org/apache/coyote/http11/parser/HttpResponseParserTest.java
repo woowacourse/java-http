@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.coyote.http11.data.HttpCookie;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
-import org.apache.coyote.http11.data.HttpVersion;
+import org.apache.coyote.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

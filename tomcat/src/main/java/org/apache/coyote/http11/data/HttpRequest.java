@@ -2,6 +2,7 @@ package org.apache.coyote.http11.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.HttpVersion;
 
 public class HttpRequest {
     public static final String SESSION_ID_COOKIE_KEY = "JSESSIONID";

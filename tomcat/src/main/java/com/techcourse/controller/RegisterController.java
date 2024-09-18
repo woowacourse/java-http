@@ -2,14 +2,14 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import java.io.IOException;
-import org.apache.coyote.http11.AbstractController;
+import org.apache.catalina.AbstractController;
+import org.apache.catalina.resource.ResourceReader;
 import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpRequestParameter;
 import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.HttpStatusCode;
 import org.apache.coyote.http11.data.MediaType;
-import org.apache.coyote.http11.resource.ResourceReader;
 
 public class RegisterController extends AbstractController {
     private static final RegisterController INSTANCE = new RegisterController();

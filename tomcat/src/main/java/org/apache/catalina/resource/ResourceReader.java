@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.resource;
+package org.apache.catalina.resource;
 
 import java.io.BufferedReader;
 import java.io.File;

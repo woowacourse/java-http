@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.resource;
+package org.apache.catalina.resource;
 
 import java.io.IOException;
-import org.apache.coyote.http11.Controller;
+import org.apache.catalina.Controller;
 import org.apache.coyote.http11.data.ContentType;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;

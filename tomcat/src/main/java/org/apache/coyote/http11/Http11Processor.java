@@ -5,6 +5,8 @@ import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.Formatter;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,26 +35,36 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             performProcess(inputStream, outputStream);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            sendErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private void performProcess(final InputStream inputStream, final OutputStream outputStream) throws IOException {
+    private void performProcess(final InputStream inputStream, final OutputStream outputStream) throws Exception {
         try {
             HttpRequest httpRequest = new HttpRequest(inputStream);
-
             RequestMapping requestMapping = RequestMapping.getInstance();
             HttpResponse response = requestMapping.dispatch(httpRequest);
 
             outputStream.write(Formatter.toResponseFormat(response));
             outputStream.flush();
-        } catch (IOException | IllegalArgumentException | URISyntaxException e) {
+        } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            sendErrorResponse(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void sendErrorResponse(HttpStatus httpStatus) {
+        try (var outputStream = connection.getOutputStream()) {
+            HttpResponse errorResponse = new HttpResponse(httpStatus, new ResponseHeader(), null);
+            errorResponse.redirectTo("/" + httpStatus.getCode() + ".html");
+
+            outputStream.write(Formatter.toResponseFormat(errorResponse));
+            outputStream.flush();
+        } catch (RuntimeException | IOException e) {
+            log.error("에러 핸들링 실패: {}", e.getMessage(), e);
         }
     }
 }

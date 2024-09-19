@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.response.HttpStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +12,7 @@ import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.regex.Matcher;
@@ -95,31 +95,40 @@ class Http11ProcessorTest {
         testResourceResponse(requestPath, contentType, expectedFilePath);
     }
 
-    @Disabled // 어떻게 해야 성공시킬 수 있을까요...
     @Test
-    @DisplayName("process 동작 중 IOException이 발생하면 /static/500.html 페이지를 응답힌다.")
-    void process_fail_500() throws IOException {
+    @DisplayName("request 처리 중 IllegalArgumentException이 발생하면 /static/400.html 페이지로 리다이렉트한다.")
+    void failProcess400() {
         // given
-        final String httpRequest = buildHttpRequest(GET, "/", "");
+        final String httpRequest = String.join("\r\n",
+                "ERROR",
+                "Host: localhost:8080",
+                "");
 
-        final var socket = new StubSocket(httpRequest);
-        socket.setThrowIOException(true);
-        final Http11Processor processor = new Http11Processor(socket);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /400.html"});
+    }
+
+    @Test
+    @DisplayName("request 처리 중 IOException이 발생하면 /static/500.html 페이지로 리다이렉트한다.")
+    void processRequest_throwsIOException_returns500() {
+        // given
+        StubSocket socket = new StubSocket("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n") {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                throw new IOException("Test IOException");
+            }
+        };
+        Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/500.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        String response = socket.output();
+        String status = HttpStatus.FOUND.getStatus();
+        String location = "Location: /500.html";
 
-        var expected = "HTTP/1.1 500 INTERNAL SERVER ERROR \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).contains(status, CONTENT_TYPE_HTML, location);
     }
 
     @Test

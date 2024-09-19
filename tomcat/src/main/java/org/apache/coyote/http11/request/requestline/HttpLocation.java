@@ -15,17 +15,17 @@ public class HttpLocation {
 
 
     public HttpLocation(String data) {
-        valdiateDelimiterCount(data);
-        List<String> split = Arrays.stream(data.split("\\."))
+        validateDelimiterCount(data);
+        List<String> fileAndExtension = Arrays.stream(data.split("\\."))
                 .collect(Collectors.toList());
 
-        validate(split);
+        validate(fileAndExtension);
 
-        fileName = split.getFirst();
-        extension = split.size() == 1 ? DEFAULT_EXTENSION : split.get(1);
+        fileName = fileAndExtension.getFirst();
+        extension = fileAndExtension.size() == 1 ? DEFAULT_EXTENSION : fileAndExtension.get(1);
     }
 
-    private void valdiateDelimiterCount(String data) {
+    private void validateDelimiterCount(String data) {
         if (data == null || data.codePoints().filter(r -> r == LOCATION_DELIMITER).count() > 1) {
             throw new IllegalArgumentException("location's dot must less than one");
         }

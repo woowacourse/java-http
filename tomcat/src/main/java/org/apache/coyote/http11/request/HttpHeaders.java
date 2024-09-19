@@ -36,7 +36,8 @@ public class HttpHeaders {
     }
 
     private static void validate(String[] split) {
-        if (split.length < 2) {
+        if (
+                split.length < 2) {
             throw new IllegalArgumentException("key value not matched");
         }
         if (split[0].isBlank() || split[1].isBlank()) {

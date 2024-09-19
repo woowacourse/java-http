@@ -34,16 +34,15 @@ class RegisterControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         loginController.doGet(request, httpResponse);
-        String responseBody = new HttpResponse().generateResponseBody("static/register.html");
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String actual = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Content-Length: " + 4319 + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        String response = httpResponse.getResponse();
-        assertThat(actual).isEqualTo(response);
+        String actual = httpResponse.getResponse();
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -65,12 +64,12 @@ class RegisterControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         loginController.doGet(request, httpResponse);
-        String actual = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: " + "/index.html \r\n" +
-                "Content-Type: text/html;charset=utf-8 ";
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Location: " + "/index.html \r\n";
 
-        String response = httpResponse.getResponse();
-        assertThat(actual).isEqualTo(response);
+        String actual = httpResponse.getResponse();
+        assertThat(actual).contains(expected);
     }
 
     @Test

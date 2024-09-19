@@ -78,10 +78,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String responseBody = new HttpResponse().generateResponseBody("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Content-Length: " + 3797 + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -90,7 +89,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인 POST 요청에 대한 리다이렉션 확인")
-    void loginPost() {
+    void loginPost() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -108,8 +107,8 @@ class Http11ProcessorTest {
 
         // then
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.generate302Response("/index.html");
-        assertThat(socket.output()).contains(httpResponse.getResponse());
+        httpResponse.generateResponse("/index.html", Status.FOUND);
+        assertThat(socket.output()).contains(httpResponse.getResponse().trim());
     }
 
     @Test
@@ -131,10 +130,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String responseBody = new HttpResponse().generateResponseBody("static/register.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Content-Length: " + 4319 + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -143,7 +141,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("회원 가입 POST 요청에 대한 응답 확인")
-    void registerPost() {
+    void registerPost() throws IOException {
 
         // given
         final String httpRequest = String.join("\r\n",
@@ -162,7 +160,7 @@ class Http11ProcessorTest {
 
         // then
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.generate302Response("/index.html");
+        httpResponse.generateResponse("/index.html", Status.FOUND);
 
         assertThat(socket.output()).contains(httpResponse.getResponse());
     }

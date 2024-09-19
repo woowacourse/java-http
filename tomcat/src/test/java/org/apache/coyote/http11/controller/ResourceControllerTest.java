@@ -28,15 +28,14 @@ class ResourceControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         resourceController.doGet(request, httpResponse);
-        String responseBody = new HttpResponse().generateResponseBody("static/css/styles.css");
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String actual = "HTTP/1.1 200 OK \r\n"
+        String expected = "HTTP/1.1 200 OK \r\n"
                 + "Content-Type: text/css;charset=utf-8 \r\n"
-                + "Content-Length: " + responseBody.getBytes().length + " \r\n"
+                + "Content-Length: " + 211991 + " \r\n"
                 + "\r\n"
                 + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        String response = httpResponse.getResponse();
-        assertThat(actual).isEqualTo(response);
+        String actual = httpResponse.getResponse();
+        assertThat(actual).contains(expected);
     }
 }

@@ -1,7 +1,7 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
@@ -9,7 +9,7 @@ public class Session {
     private static final String SPACE = " ";
 
     private final String id;
-    private final Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;

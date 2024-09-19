@@ -6,8 +6,6 @@ import com.techcourse.exception.UnknownAccountException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
-import java.util.Map;
-import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -18,27 +16,35 @@ public class LoginController extends HttpController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
-        response.setBody(body);
+        ResourceFinder.setStaticResponse(request, response);
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> payload = request.getPayload();
-        String account = payload.get("account");
-        String password = payload.get("password");
+        String account = request.getPayload().get("account");
+        String password = request.getPayload().get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnknownAccountException(account));
 
+        validateUserPassword(user, password);
+
+        Session loginSession = createSession(user);
+
+        response.setCookie(Session.SESSION_KEY, loginSession.getId());
+        response.setHomeRedirection();
+    }
+
+    private void validateUserPassword(User user, String password) {
         if (!user.checkPassword(password)) {
             throw new IncorrectPasswordException();
         }
+    }
 
+    private Session createSession(User user) {
         Session loginSession = new Session();
         loginSession.setAttribute("user", user);
         SessionManager.add(loginSession);
-        response.addHeader("Set-Cookie", Session.SESSION_KEY + "=" + loginSession.getId() + " ");
-        response.setRedirect("/index.html");
+        return loginSession;
     }
 }

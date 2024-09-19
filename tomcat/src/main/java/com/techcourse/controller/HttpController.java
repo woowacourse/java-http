@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.exception.UnsupportedHttpMethodException;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
-import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,8 +17,8 @@ public abstract class HttpController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (SessionManager.validate(request.getCookieValue(Session.SESSION_KEY))) {
-            response.setRedirect("/index.html");
+        if (sessionAndCookieValid(request)) {
+            response.setHomeRedirection();
             return;
         }
         if (request.getMethod() == HttpMethod.GET) {
@@ -33,6 +32,10 @@ public abstract class HttpController implements Controller {
         throw new UnsupportedHttpMethodException(request.getMethod().name());
     }
 
+    private boolean sessionAndCookieValid(HttpRequest request) {
+        return SessionManager.validate(request.getCookieValue(Session.SESSION_KEY));
+    }
+
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new IllegalStateException("implement post method before invoke.");
     }
@@ -41,7 +44,7 @@ public abstract class HttpController implements Controller {
         throw new IllegalStateException("implement get method before invoke.");
     }
 
-    public String getPath() {
-        return path;
+    public boolean hasSamePath(String path) {
+        return this.path.equals(path);
     }
 }

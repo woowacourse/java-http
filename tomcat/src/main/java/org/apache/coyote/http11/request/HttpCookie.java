@@ -13,15 +13,17 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(String data) {
-        Map<String, String> ret = new HashMap<>();
+        Map<String, String> buffer = new HashMap<>();
         for (String keyValue : data.split(COOKIE_DELIMITER)) {
-            String[] split = keyValue.split("=");
-            ret.put(split[0], split[1]);
+            String[] cookie = keyValue.split("=");
+            String cookieKey = cookie[0];
+            String cookieValue = cookie[1];
+            buffer.put(cookieKey, cookieValue);
         }
-        return new HttpCookie(ret);
+        return new HttpCookie(buffer);
     }
 
-    public String getValue(String key){
+    public String getValue(String key) {
         return value.get(key);
     }
 }

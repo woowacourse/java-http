@@ -9,9 +9,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class WAS {
 
+    private static final LoginController LOGIN_CONTROLLER = new LoginController("/login");
+    private static final RegisterController REGISTER_CONTROLLER = new RegisterController("/register");
     private static final Controllers controllers = new Controllers(
-            new LoginController("/login"),
-            new RegisterController("/register")
+            LOGIN_CONTROLLER,
+            REGISTER_CONTROLLER
     );
 
     private final Server tomcat;
@@ -32,10 +34,7 @@ public class WAS {
             targetController.service(request, response);
             return response;
         }
-
-        String body = new ResourceFinder(request.getLocation(), request.getExtension())
-                .getStaticResource(response);
-        response.setBody(body);
+        ResourceFinder.setStaticResponse(request, response);
 
         return response;
     }

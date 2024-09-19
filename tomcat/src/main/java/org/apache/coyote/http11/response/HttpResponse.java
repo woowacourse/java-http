@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.response;
 
 
-import com.techcourse.session.Session;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.HttpStatus;
 
 public class HttpResponse {
@@ -17,6 +17,10 @@ public class HttpResponse {
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
+    }
+
+    public void setCookie(String key, String value){
+        headers.put("Set-Cookie", String.format("%s=%s;", key, value));
     }
 
     public void setBody(String body) {
@@ -42,11 +46,17 @@ public class HttpResponse {
         addHeader("Location", location);
     }
 
+    public void setHomeRedirection(){
+        setRedirect("/index.html");
+    }
+
     private void addBody(StringBuilder base) {
-        if (body == null) {
+        if (Objects.isNull(body)) {
             return;
         }
-        base.append("Content-Length: ").append(body.getBytes().length).append(" \r\n")
+
+        base.append("Content-Length: ").append(body.getBytes().length)
+                .append(" \r\n")
                 .append("\r\n")
                 .append(body);
     }

@@ -4,8 +4,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.DuplicatedAccountException;
 import com.techcourse.model.User;
-import java.util.Map;
-import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -17,22 +15,21 @@ public class RegisterController extends HttpController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
-        response.setBody(body);
+        ResourceFinder.setStaticResponse(request, response);
     }
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> payload = request.getPayload();
-        String account = payload.get("account");
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+        String account = request.getPayload().get("account");
+        String password = request.getPayload().get("password");
+        String email = request.getPayload().get("email");
+
+        InMemoryUserRepository.findByAccount(account).ifPresent(x -> {
             throw new DuplicatedAccountException(account);
-        }
+        });
 
-        InMemoryUserRepository.save(
-                new User(account, payload.get("password"), payload.get("email"))
-        );
+        InMemoryUserRepository.save(new User(account, password, email));
 
-        response.setRedirect("/index.html");
+        response.setHomeRedirection();
     }
 }

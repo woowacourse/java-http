@@ -14,14 +14,14 @@ public class Controllers {
     }
 
     boolean contains(String path) {
-        return value.stream().anyMatch(r -> r.getPath().equals(path));
+        return value.stream()
+                .anyMatch(controller -> controller.hasSamePath(path));
     }
 
     public HttpController get(String path) {
         return value.stream()
-                .filter(r -> r.getPath().equals(path))
+                .filter(controller -> controller.hasSamePath(path))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Path incorrect"));
     }
-
 }

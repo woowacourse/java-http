@@ -24,15 +24,20 @@ public class HttpRequestLine {
 
     private void setQueriesIfExist(String location) {
         String[] locationAndQuery = location.split("\\?");
-        if (locationAndQuery.length == 1) {
+        if (isNotParamQueryFormat(locationAndQuery)) {
             return;
         }
+
         for (int i = 1; i < locationAndQuery.length; i++) {
             String[] keyValue = locationAndQuery[i].split(QUERY_DELIMITER);
-            String key = keyValue[0];
-            String value = keyValue[1];
-            queries.put(key, value);
+            String queryKey = keyValue[0];
+            String queryValue = keyValue[1];
+            queries.put(queryKey, queryValue);
         }
+    }
+
+    private boolean isNotParamQueryFormat(String[] locationAndQuery) {
+        return locationAndQuery.length == 1;
     }
 
     public static HttpRequestLine from(List<String> clientData) {
@@ -41,15 +46,16 @@ public class HttpRequestLine {
         }
 
         String requestLine = clientData.getFirst();
-        List<String> split = Arrays.stream(requestLine.split(REQUEST_LINE_DELIMITER)).toList();
+        List<String> requestLineArguments = Arrays.stream(requestLine.split(REQUEST_LINE_DELIMITER))
+                .toList();
 
-        if (split.size() != REQUEST_LINE_ARGUMENT_COUNT) {
+        if (requestLineArguments.size() != REQUEST_LINE_ARGUMENT_COUNT) {
             throw new IllegalArgumentException("request line must have " + REQUEST_LINE_DELIMITER + "arguments");
         }
 
-        String method = split.get(0);
-        String location = split.get(1);
-        String version = split.get(2);
+        String method = requestLineArguments.get(0);
+        String location = requestLineArguments.get(1);
+        String version = requestLineArguments.get(2);
         return new HttpRequestLine(method, location, version);
 
     }

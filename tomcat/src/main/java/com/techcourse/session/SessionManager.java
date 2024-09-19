@@ -3,6 +3,7 @@ package com.techcourse.session;
 import com.techcourse.exception.IllegalConstructionException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SessionManager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
@@ -17,7 +18,8 @@ public class SessionManager {
 
     public static boolean validate(String cookieId) {
         Session session = findSession(cookieId);
-        return session != null && session.getId().equals(cookieId);
+
+        return Objects.nonNull(session) && session.getId().equals(cookieId);
     }
 
     public static Session findSession(String sessionId) {

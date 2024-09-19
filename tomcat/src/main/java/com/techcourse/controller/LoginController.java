@@ -1,5 +1,9 @@
 package com.techcourse.controller;
 
+import static org.apache.coyote.http11.HttpResponse.KEY_VALUE_SEPARATOR;
+import static org.apache.coyote.http11.HttpResponse.SESSION_ID_NAME;
+import static org.apache.coyote.http11.HttpResponse.SET_COOKIE_PREFIX;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
@@ -55,7 +59,8 @@ public class LoginController extends AbstractController {
             log.info("로그인 성공! 아이디 : {}", optionalUser.get().getAccount());
             final var session = getSession();
             session.setAttribute("user", user);
-            response.generateResponse("/index.html", Status.FOUND, session.getId());
+            response.generateResponse("/index.html", Status.FOUND);
+            response.addHeader(SET_COOKIE_PREFIX, SESSION_ID_NAME + KEY_VALUE_SEPARATOR + session.getId());
             return;
         }
         response.generateResponse("/401.html", Status.FOUND);

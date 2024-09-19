@@ -1,33 +1,23 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpResponse.KEY_VALUE_SEPARATOR;
-import static org.apache.coyote.http11.HttpResponse.SESSION_ID_NAME;
-import static org.apache.coyote.http11.HttpResponse.SET_COOKIE_PREFIX;
 import static org.apache.coyote.http11.Status.FOUND;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResponseHeader {
 
     private final StatusLine statusLine;
+    private final Map<String, String> headers = new HashMap<>();
     private String contentType = "";
     private String contentLength = "";
     private String location = "";
-    private String cookie = "";
 
     public ResponseHeader(String path, Status status, int bodyLength) {
         this.statusLine = StatusLine.from(status);
         setContentType(path);
         setContentLength(status, bodyLength);
         setLocation(path, status);
-    }
-
-    public void setCookieHeader(String sessionId) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SET_COOKIE_PREFIX)
-                .append(SESSION_ID_NAME)
-                .append(KEY_VALUE_SEPARATOR)
-                .append(sessionId)
-                .append(" \r\n");
-        cookie = stringBuilder.toString();
     }
 
     private void setContentLength(Status status, int length) {
@@ -66,15 +56,27 @@ public class ResponseHeader {
         location = stringBuilder.toString();
     }
 
+    public void addHeader(String key, String value) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(key + ": ")
+                .append(value)
+                .append(" ")
+                .append("\r\n");
+        String headerValue = stringBuilder.toString();
+        headers.put(key, headerValue);
+    }
+
     public String getHeader() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(statusLine.getStatusLine())
                 .append("\r\n")
                 .append(contentType)
                 .append(contentLength)
-                .append(location)
-                .append(cookie)
-                .append("\r\n");
+                .append(location);
+
+        for (String key : headers.keySet()) {
+            stringBuilder.append(headers.get(key));
+        }
         return stringBuilder.toString();
     }
 }

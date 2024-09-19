@@ -9,11 +9,10 @@ import java.nio.file.Files;
 
 public class HttpResponse {
 
-    public static final String SET_COOKIE_PREFIX = "Set-Cookie: ";
+    public static final String SET_COOKIE_PREFIX = "Set-Cookie";
     public static final String SESSION_ID_NAME = "JSESSIONID";
     public static final String KEY_VALUE_SEPARATOR = "=";
 
-    private String response = "";
     private String body = "";
     private ResponseHeader responseHeader;
 
@@ -40,20 +39,17 @@ public class HttpResponse {
     public void generateResponse(String path, Status status) throws IOException {
         generateResponseBody(path, status);
         responseHeader = new ResponseHeader(path, status, body.getBytes().length);
-        String header = responseHeader.getHeader();
-        StringBuilder stringBuilder = new StringBuilder(header);
-        stringBuilder.append(body);
-        response = stringBuilder.toString();
     }
 
-    public void generateResponse(String path, Status status, String sessionId) throws IOException {
-        generateResponseBody(path, status);
-        responseHeader = new ResponseHeader(path, status, body.getBytes().length);
-        responseHeader.setCookieHeader(sessionId);
-        response = responseHeader.getHeader();
+    public void addHeader(String key, String value) {
+        responseHeader.addHeader(key, value);
     }
 
     public String getResponse() {
-        return response;
+        String header = responseHeader.getHeader();
+        StringBuilder stringBuilder = new StringBuilder(header);
+        stringBuilder.append("\r\n")
+                .append(body);
+        return stringBuilder.toString();
     }
 }

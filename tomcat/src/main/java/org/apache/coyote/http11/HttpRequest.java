@@ -16,7 +16,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpRequestHeaders httpRequestHeaders;
-    private String requestBody = "";
+    private String requestBody;
 
     public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders) {
         this.requestLine = requestLine;

@@ -3,6 +3,7 @@ package org.apache.http.header;
 import java.util.Objects;
 
 public class HttpHeader {
+
     private static final String KEY_VALUE_DELIMITER = ": ";
     private static final int KEY_VALUE_COUNT = 2;
     private static final int KEY_ORDER = 0;

@@ -14,7 +14,7 @@ import org.apache.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class StaticResourceControllerTest {
+class DefaultControllerTest {
 
     @Test
     @DisplayName("정적 리소스 처리: 기본적으로 /static 경로에 있는 리소스를 반환")
@@ -24,7 +24,7 @@ class StaticResourceControllerTest {
 
         final RequestLine requestLine = new RequestLine("GET", "/404.html", "HTTP/1.1");
         final HttpRequest httpRequest = new HttpRequest(requestLine);
-        final HttpResponse httpResponse = StaticResourceController.getInstance().handle(httpRequest);
+        final HttpResponse httpResponse = DefaultController.getInstance().handle(httpRequest);
 
         final HttpResponse actual = HttpResponse.builder()
                 .addHeader(HttpHeaderName.CONTENT_TYPE, "text/html")
@@ -41,7 +41,7 @@ class StaticResourceControllerTest {
 
         final RequestLine requestLine = new RequestLine("GET", "/css/styles.css", "HTTP/1.1");
         final HttpRequest httpRequest = new HttpRequest(requestLine);
-        final HttpResponse httpResponse = StaticResourceController.getInstance().handle(httpRequest);
+        final HttpResponse httpResponse = DefaultController.getInstance().handle(httpRequest);
 
         final HttpResponse actual = HttpResponse.builder()
                 .body(responseBody)
@@ -57,7 +57,7 @@ class StaticResourceControllerTest {
         final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
 
         final HttpRequest httpRequest = new HttpRequest(new RequestLine("GET", "/404.html", "HTTP/1.1"));
-        final HttpResponse httpResponse = StaticResourceController.getInstance().handle(httpRequest);
+        final HttpResponse httpResponse = DefaultController.getInstance().handle(httpRequest);
 
         final HttpResponse actual = HttpResponse.builder()
                 .addHeader(HttpHeaderName.CONTENT_TYPE, "text/html")

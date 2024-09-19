@@ -5,6 +5,7 @@ import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
 public class InternalServerErrorController extends AbstractController {
+
     private static final InternalServerErrorController INSTANCE = new InternalServerErrorController();
 
     private InternalServerErrorController() {

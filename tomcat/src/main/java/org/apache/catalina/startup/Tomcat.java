@@ -3,6 +3,7 @@ package org.apache.catalina.startup;
 import java.io.IOException;
 
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.server.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
+    private final Context context;
+
+    public Tomcat(final Context context) {
+        this.context = context;
+    }
+
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(context);
         connector.start();
 
         try {

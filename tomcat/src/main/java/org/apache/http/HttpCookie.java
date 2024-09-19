@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final int KEY_VALUE_COUNT = 2;

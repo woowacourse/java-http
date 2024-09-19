@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.apache.http.HttpCookie;
 
 public class HttpHeaders {
+
     private final List<HttpHeader> headers;
 
     public HttpHeaders(HttpHeader... headers) {

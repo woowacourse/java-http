@@ -6,8 +6,8 @@ server:
     enabled: true
     min-response-size: 10
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 10
+    max-connections: 10
     threads:
       min-spare: 2
       max: 2

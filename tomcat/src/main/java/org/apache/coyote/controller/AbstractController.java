@@ -8,12 +8,12 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.getMethod() == HttpMethod.POST) {
+        if (request.getMethod().isSameMethod(HttpMethod.POST)) {
             doPost(request, response);
             return;
         }
 
-        if (request.getMethod() == HttpMethod.GET) {
+        if (request.getMethod().isSameMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;
         }

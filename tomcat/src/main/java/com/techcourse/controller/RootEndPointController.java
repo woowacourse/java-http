@@ -6,6 +6,7 @@ import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
 public class RootEndPointController extends AbstractController {
+
     private static final RootEndPointController INSTANCE = new RootEndPointController();
 
     private RootEndPointController() {

@@ -1,22 +1,33 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
- *
+ * <p>
  * InputStream은 데이터를 읽고, OutputStream은 데이터를 쓴다.
  * FilterStream은 InputStream이나 OutputStream에 연결될 수 있다.
  * FilterStream은 읽거나 쓰는 데이터를 수정할 때 사용한다. (e.g. 암호화, 압축, 포맷 변환)
- *
+ * <p>
  * Stream은 데이터를 바이트로 읽고 쓴다.
  * 바이트가 아닌 텍스트(문자)를 읽고 쓰려면 Reader와 Writer 클래스를 연결한다.
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.
@@ -26,7 +37,7 @@ class IOStreamTest {
 
     /**
      * OutputStream 학습하기
-     *
+     * <p>
      * 자바의 기본 출력 클래스는 java.io.OutputStream이다.
      * OutputStream의 write(int b) 메서드는 기반 메서드이다.
      * <code>public abstract void write(int b) throws IOException;</code>
@@ -39,7 +50,7 @@ class IOStreamTest {
          * OutputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 쓰기 위해 write(int b) 메서드를 사용한다.
          * 예를 들어, FilterOutputStream은 파일로 데이터를 쓸 때,
          * 또는 DataOutputStream은 자바의 primitive type data를 다른 매체로 데이터를 쓸 때 사용한다.
-         * 
+         * <p>
          * write 메서드는 데이터를 바이트로 출력하기 때문에 비효율적이다.
          * <code>write(byte[] data)</code>와 <code>write(byte b[], int off, int len)</code> 메서드는
          * 1바이트 이상을 한 번에 전송 할 수 있어 훨씬 효율적이다.
@@ -49,11 +60,7 @@ class IOStreamTest {
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            /**
-             * todo
-             * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
-             */
-
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");
@@ -63,7 +70,7 @@ class IOStreamTest {
         /**
          * 효율적인 전송을 위해 스트림에서 버퍼링을 사용 할 수 있다.
          * BufferedOutputStream 필터를 연결하면 버퍼링이 가능하다.
-         * 
+         *
          * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
          * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
@@ -78,6 +85,9 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            // 애플리케이션은 바이트가 쓰여질 때마다 기본 시스템을 호출할 필요 없이 기본 출력 스트림에 바이트를 쓸 수 있습니다.
+            // ByteArrayOutputStream
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -91,24 +101,22 @@ class IOStreamTest {
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final OutputStream outputStream = mock(OutputStream.class);
 
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
-
+//            try (outputStream) {
+//
+//            }
+            outputStream.close();
             verify(outputStream, atLeastOnce()).close();
         }
     }
 
     /**
      * InputStream 학습하기
-     *
+     * <p>
      * 자바의 기본 입력 클래스는 java.io.InputStream이다.
      * InputStream은 다른 매체로부터 바이트로 데이터를 읽을 때 사용한다.
      * InputStream의 read() 메서드는 기반 메서드이다.
      * <code>public abstract int read() throws IOException;</code>
-     * 
+     * <p>
      * InputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 읽기 위해 read() 메서드를 사용한다.
      */
     @Nested
@@ -124,11 +132,7 @@ class IOStreamTest {
             byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
-            /**
-             * todo
-             * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
-             */
-            final String actual = "";
+            final String actual = new String(inputStream.readAllBytes());
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -143,11 +147,9 @@ class IOStreamTest {
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final InputStream inputStream = mock(InputStream.class);
 
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
+            try (inputStream) {
+
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -155,7 +157,7 @@ class IOStreamTest {
 
     /**
      * FilterStream 학습하기
-     *
+     * <p>
      * 필터는 필터 스트림, reader, writer로 나뉜다.
      * 필터는 바이트를 다른 데이터 형식으로 변환 할 때 사용한다.
      * reader, writer는 UTF-8, ISO 8859-1 같은 형식으로 인코딩된 텍스트를 처리하는 데 사용된다.
@@ -169,12 +171,12 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual = inputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -204,8 +206,18 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
             final StringBuilder actual = new StringBuilder();
+            try (final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                String line = bufferedReader.readLine();
+                while (line != null) {
+                    actual.append(line).append("\r\n");
+                    line = bufferedReader.readLine();
+                }
+            } catch (IOException e) {
+
+            }
 
             assertThat(actual).hasToString(emoji);
         }

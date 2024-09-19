@@ -112,7 +112,7 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder addLocation(String value) {
+        public Builder location(String value) {
             headers.add(new HttpHeader(HttpHeaderName.LOCATION, value));
             return this;
         }
@@ -161,7 +161,7 @@ public class HttpResponse {
 
         public HttpResponse foundBuild(String redirectUrl) {
             status = HttpStatus.FOUND;
-            return this.addLocation(redirectUrl).build();
+            return this.location(redirectUrl).build();
         }
 
         public HttpResponse internalServerErrorBuild() {

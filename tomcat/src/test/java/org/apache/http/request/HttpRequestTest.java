@@ -148,24 +148,19 @@ class HttpRequestTest {
             );
         }
 
-        @Test // TOOD: 마저
-        @DisplayName("HttpCookie 파싱 성공")
+        @Test
+        @DisplayName("HttpCookie 파싱 실패: 쿠키 헤더가 없는 경우")
         void parseCookie_WhenNotExists_ReturnNull() {
             // given
             final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
-            final HttpHeaders headers = new HttpHeaders(
-                    new HttpHeader(HttpHeaderName.COOKIE, "sessionId=abc123; userId=john"));
+            final HttpHeaders headers = new HttpHeaders();
             final HttpRequest request = new HttpRequest(requestLine, headers, null);
 
             // when
             final HttpCookie cookie = request.getHttpCookie();
 
             // then
-            assertAll(
-                    () -> assertThat(cookie).isNotNull(),
-                    () -> assertThat(cookie.getValue("sessionId")).isEqualTo("abc123"),
-                    () -> assertThat(cookie.getValue("userId")).isEqualTo("john")
-            );
+            assertThat(cookie).isNull();
         }
     }
 

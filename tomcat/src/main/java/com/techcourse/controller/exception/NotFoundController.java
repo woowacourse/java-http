@@ -5,6 +5,7 @@ import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 
 public class NotFoundController extends AbstractController {
+
     private static final NotFoundController INSTANCE = new NotFoundController();
 
     private NotFoundController() {

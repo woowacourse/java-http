@@ -27,6 +27,10 @@ public class HttpResponse {
             body = "Hello world!";
             return;
         }
+        generateStaticResponseBody(path);
+    }
+
+    private void generateStaticResponseBody(String path) throws IOException {
         if (!path.contains(".")) {
             final URL resource = getClass().getClassLoader().getResource(path + ".html");
             body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

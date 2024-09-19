@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -17,6 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConcurrencyTest {
 
+    /*
+    * 해결법
+    * 1. double-checked lock
+    * 2. CAS
+    * */
     @Test
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();

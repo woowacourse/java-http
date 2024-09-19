@@ -1,6 +1,6 @@
 package cache.com.example.version;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
@@ -23,6 +23,7 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler(PREFIX_STATIC_RESOURCES + "/" + version.getVersion() + "/**")
                 .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic());
+                .setCachePeriod(31536000)
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic());
     }
 }

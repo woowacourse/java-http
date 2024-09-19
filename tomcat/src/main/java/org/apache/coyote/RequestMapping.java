@@ -21,7 +21,7 @@ public class RequestMapping {
         controllers.put("/register", new RegisterController());
     }
 
-    public void matchService(HttpRequest request, HttpResponse response) throws Exception {
+    public void doService(HttpRequest request, HttpResponse response) throws Exception {
         Controller controller = selectController(request);
 
         controller.service(request, response);

@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpReader(inputStream).getHttpRequest();
             HttpResponse response = new HttpResponse();
 
-            requestMapping.matchService(request, response);
+            requestMapping.doService(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();

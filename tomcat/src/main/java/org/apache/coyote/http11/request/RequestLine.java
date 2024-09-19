@@ -20,15 +20,15 @@ public class RequestLine {
         return method.equals("POST");
     }
 
-    public boolean hasCss() {
+    public boolean isCss() {
         return requestUrl.contains(".css");
     }
 
-    public boolean hasJs() {
+    public boolean isJs() {
         return requestUrl.contains(".js");
     }
 
-    public boolean hasHtml() {
+    public boolean isHtml() {
         return requestUrl.contains(".html");
     }
 

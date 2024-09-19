@@ -27,26 +27,17 @@ public class RequestReader {
         String contentLengthHeader = null;
         while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
             headerLines.add(rawLine);
-            contentLengthHeader = getContentLength(rawLine);
-        }
-
-        if (contentLengthHeader == null) {
-            return "";
-        }
-        if (!contentLengthHeader.matches("\\d+")) {
-            throw new IllegalArgumentException("Invalid Content-Length header: " + contentLengthHeader);
+            if (rawLine.startsWith("Content-Length")) {
+                contentLengthHeader = rawLine.split(": ")[1];
+            }
         }
         return contentLengthHeader;
     }
 
-    private static String getContentLength(String rawLine) {
-        if (rawLine.toLowerCase().startsWith("content-length:")) {
-            return rawLine.split(":")[1].trim();
-        }
-        return null;
-    }
-
     private static String readBody(BufferedReader bufferedReader, String contentLengthHeader) throws IOException {
+        if (contentLengthHeader == null) {
+            return "";
+        }
         int contentLength = Integer.parseInt(contentLengthHeader);
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

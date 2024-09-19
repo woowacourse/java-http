@@ -183,7 +183,7 @@ public class LoginController extends AbstractController {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
         final HttpHeaders responseHeader = new HttpHeaders(List.of(
                 new HttpHeaderField(SET_COOKIE.getValue(), SESSION_COOKIE_KEY_NAME + "=" + sessionId),
-                new HttpHeaderField(LOCATION.getValue(), "http://localhost:8080/index.html"),
+                new HttpHeaderField(LOCATION.getValue(), "/index.html"),
                 new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
                 new HttpHeaderField(CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH)
         ));

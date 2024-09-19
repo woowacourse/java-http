@@ -27,17 +27,6 @@ public class Session {
         values.put(name, value);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
-    }
-
-    public String getJSessionIdAttribute() {
-        return this.getAttribute(JSESSIONID);
-    }
     private void setJSessionIdAttribute() {
         setAttribute(JSESSIONID, UUID.randomUUID().toString());
     }

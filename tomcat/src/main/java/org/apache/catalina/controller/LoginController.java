@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
         }
         if (isMember(user, password)) {
             response.setStatusCode(StatusCode.FOUND);
-            response.setBody("/index.html");
+            response.addHeader(HeaderName.LOCATION, "/index.html");
             login(response, user.get());
         }
     }
@@ -45,6 +45,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (hasLogined(request)) {
+            response.setStatusCode(StatusCode.FOUND);
             response.addHeader(HeaderName.LOCATION, "/index.html");
         }
         if (!hasLogined(request)) {

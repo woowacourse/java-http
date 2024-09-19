@@ -7,11 +7,18 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class Tomcat {
-
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
+    private final int port;
+    private final int acceptAccount;
+
+    public Tomcat(int port, int acceptAccount) {
+        this.port = port;
+        this.acceptAccount = acceptAccount;
+    }
+
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(port, acceptAccount);
         connector.start();
 
         try {

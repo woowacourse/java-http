@@ -2,35 +2,55 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Map.Entry;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.Cookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
 public class HttpRequest {
-    private final HttpMethod method;
-    private final HttpProtocol protocol;
-    private final String path;
-    private final Map<String, String> queries;
-    private final Map<String, String> headers;
+    private HttpMethod method;
+    private HttpProtocol protocol;
+    private String httpVersion;
+    private String path;
+    private Map<String, String> queries;
+    private Map<String, String> headers;
+    private Cookies cookies;
+    private Map<String, String> body;
 
     public static HttpRequest from(BufferedReader request) {
         try {
-            String[] requestFirstLine = request.readLine().split(" ");
-            HttpMethod method = HttpMethod.findByValue(requestFirstLine[0]);
-            Map<String, String> queries = getQueries(requestFirstLine);
-            String path = requestFirstLine[1];
-            String protocol = requestFirstLine[2].split("/")[0];
-            String version = requestFirstLine[2].split("/")[1];
+            String[] requestLine = request.readLine().split(" ");
+            HttpMethod method = HttpMethod.findByValue(requestLine[0]);
+            String httpVersion = requestLine[2];
+            Map<String, String> queries = getQueries(requestLine);
+            String path = requestLine[1];
+            String protocol = requestLine[2].split("/")[0];
+            String version = requestLine[2].split("/")[1];
             HttpProtocol httpProtocol = new HttpProtocol(protocol, version);
             Map<String, String> headers = getHttpHeaders(request);
+            Map<String, String> body = getHttpBody(request, headers);
+            Cookies cookies = getHttpCookies(headers);
 
-            return new HttpRequest(method, httpProtocol, path, queries, headers);
+            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers, body, cookies);
 
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다.", e);
         }
+    }
+
+    private static Cookies getHttpCookies(Map<String, String> headers) {
+        if (headers.containsKey("Cookie")) {
+            String[] cookieLine = headers.get("Cookie").split("; ");
+            return new Cookies(cookieLine);
+        }
+        return new Cookies();
     }
 
     private static Map<String, String> getQueries(String[] requestFirstLine) {
@@ -70,24 +90,70 @@ public class HttpRequest {
         return httpHeader;
     }
 
-    public HttpRequest(HttpMethod method, HttpProtocol protocol, String path, Map<String, String> queries,
-                       Map<String, String> headers) {
+    private static Map<String, String> getHttpBody(BufferedReader request, Map<String, String> httpHeaders)
+            throws IOException {
+        Map<String, String> httpBody = new HashMap<>();
+
+        if (!httpHeaders.containsKey("Content-Length")) {
+            return httpBody;
+        }
+
+        int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+
+        char[] buffer = new char[1024];
+        int bytesRead;
+        int totalBytesRead = 0;
+
+        StringBuilder sb = new StringBuilder();
+        while (totalBytesRead < contentLength
+                && (bytesRead = request.read(buffer, 0, Math.min(buffer.length, contentLength - totalBytesRead)))
+                != -1) {
+            sb.append(buffer, 0, bytesRead);
+            totalBytesRead += bytesRead;
+        }
+        for (String body : sb.toString().split("&")) {
+            String[] keyValue = body.split("=");
+            httpBody.put(keyValue[0], keyValue[1]);
+        }
+        return httpBody;
+    }
+
+    public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path,
+                       Map<String, String> queries,
+                       Map<String, String> headers, Map<String, String> body, Cookies cookies) {
         this.method = method;
         this.protocol = protocol;
+        this.httpVersion = httpVersion;
         this.path = path;
         this.queries = queries;
         this.headers = headers;
+        this.body = body;
+        this.cookies = cookies;
     }
 
-    public boolean hasFilePath() {
-        if (path.contains(".")) {
-            int extensionIndex = path.lastIndexOf(".");
-            if (path.substring(extensionIndex).length() > 1) {
-                return true;
-            }
-        }
+    public boolean hasCookie(String name) {
+        return cookies.hasName(name);
+    }
 
-        return false;
+    public boolean hasBody(String key) {
+        return body.entrySet().stream()
+                .anyMatch(body -> body.getKey().equals(key));
+    }
+
+    public String getQueryValue(String key) {
+        return queries.entrySet().stream()
+                .filter(queryKey -> queryKey.getKey().equals(key))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Key(%s) 값이 존재하지 않습니다.".formatted(key)))
+                .getValue();
+    }
+
+    public String getBodyValue(String key) {
+        return body.entrySet().stream()
+                .filter(queryKey -> queryKey.getKey().equals(key))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Key(%s) 값이 존재하지 않습니다.".formatted(key)))
+                .getValue();
     }
 
     public HttpMethod getMethod() {
@@ -116,5 +182,37 @@ public class HttpRequest {
         } catch (Exception e) {
             throw new IllegalArgumentException("'%s' Header가 존재하지 않습니다.".formatted(header));
         }
+    }
+
+    public Session getSession(boolean create) {
+        boolean hasCookie = hasCookie("JSESSIONID");
+        if (hasCookie) {
+            Cookie sessionCookie = cookies.getCookie("JSESSIONID");
+            String jSessionId = sessionCookie.getValue();
+            Session session = SessionManager.getInstance().findSession(jSessionId);
+
+            if (session != null) {
+                return session;
+            } else {
+                if(!create) {
+                    return null;
+                }
+                Session newSession = new Session();
+                SessionManager.getInstance().add(newSession);
+                return newSession;
+            }
+        } else {
+            if(!create) {
+                return null;
+            }
+            Session newSession = new Session();
+            SessionManager.getInstance().add(newSession);
+            return newSession;
+        }
+    }
+
+
+    public Cookie getCookie(String name) {
+        return cookies.getCookie(name);
     }
 }

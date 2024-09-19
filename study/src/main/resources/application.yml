@@ -3,7 +3,8 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 # 서버가 동시에 처리할 수 있는 최대 연결 수를 초과했을 때 대기할 수 있는 연결의 수를 나타냅니다.
+    max-connections: 2 # Tomcat 서버가 동시에 처리할 수 있는 최대 연결 수를 설정합니다.
     threads:
-      max: 2
+      min-spare: 2
+      max: 2 # Tomcat 서버에서 사용할 수 있는 최대 스레드 수를 설정합니다. 여기서는 최대 2개의 스레드가 사용될 수 있습니다.

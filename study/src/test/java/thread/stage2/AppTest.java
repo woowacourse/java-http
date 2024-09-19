@@ -30,6 +30,11 @@ class AppTest {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));
         }
 
+        // 0.5초 사용
+        // 50ms 대기
+        // 0.5초 사용 -- 이 중간에 1초 지남
+
+        // 2개의 요청씩 처리하게 만들어야함
         for (final var thread : threads) {
             thread.start();
             Thread.sleep(50);

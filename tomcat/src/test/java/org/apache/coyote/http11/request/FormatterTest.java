@@ -23,8 +23,10 @@ class FormatterTest {
     @Test
     @DisplayName("문자열로 입력받은 requestLine을 HttpRequestLine 형식에 맞게 포맷팅한다.")
     void toReqeustLineFormat() {
-        //when
+        //given
         String requestLine = "POST /index HTTP/1.1";
+
+        //when
         String[] result = Formatter.toRequestLineFormat(requestLine);
 
         //then

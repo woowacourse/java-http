@@ -50,7 +50,7 @@ public class Formatter {
         StringJoiner stringJoiner = new StringJoiner(CRLF);
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            stringJoiner.add(entry.getKey() + KEY_DELIMITER + SPACE_SEPARATOR + entry.getValue() + SPACE_SEPARATOR);
+            stringJoiner.add(entry.getKey() + KEY_DELIMITER + SPACE_SEPARATOR + entry.getValue());
         }
         return stringJoiner.toString();
     }

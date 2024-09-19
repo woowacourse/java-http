@@ -5,7 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
 
-class WelcomeControllerTest {
+class WelcomeServletTest {
 
     @Test
     void 요청_URI가_비어있다면_WelcomePage로_이동한다() {

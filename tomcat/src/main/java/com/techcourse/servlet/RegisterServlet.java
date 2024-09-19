@@ -38,6 +38,11 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpRequest req, HttpResponse resp) {
         try {
+            if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD) || req.hasBody(EMAIL)) {
+                log.error("요청에 필요한 값이 존재하지 않습니다.");
+                resp.setResponse("404 Not Found", ResourceParser.getRequestFile("/404.html"));
+            }
+
             String account = req.getBodyValue(ACCOUNT);
             String password = req.getBodyValue(PASSWORD);
             String email = req.getBodyValue(EMAIL);

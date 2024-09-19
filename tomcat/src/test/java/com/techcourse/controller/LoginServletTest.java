@@ -1,17 +1,16 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-import org.apache.coyote.resource.ResourceParser;
+import org.apache.coyote.http11.resource.ResourceParser;
 import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
 
-class LoginControllerTest {
+class LoginServletTest {
 
     @Test
     void 요청_URI가_login이고_GET_메서드라면_로그인_페이지로_이동한다() throws IOException {

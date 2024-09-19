@@ -6,11 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-import org.apache.coyote.resource.ResourceParser;
+import org.apache.coyote.http11.resource.ResourceParser;
 import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
 
-class RegisterControllerTest {
+class RegisterServletTest {
 
     @Test
     void 요청_URI가_register이고_GET_메서드라면_회원가입_페이지로_이동한다() throws IOException {

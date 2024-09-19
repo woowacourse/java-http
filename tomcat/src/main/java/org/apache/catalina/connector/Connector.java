@@ -73,7 +73,7 @@ public class Connector implements Runnable {
         }
 
         Http11Processor processor = new Http11Processor(connection);
-        threadPoolExecutor.submit(() -> new Thread(processor).start());
+        threadPoolExecutor.submit(processor);
     }
 
     public void stop() {

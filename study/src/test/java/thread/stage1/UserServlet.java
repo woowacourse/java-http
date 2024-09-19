@@ -13,6 +13,7 @@ public class UserServlet {
 
     private void join(final User user) {
         if (!users.contains(user)) {
+            // 이곳에 두 개의 스레드가 동시에 진입할 수 있다.
             users.add(user);
         }
     }

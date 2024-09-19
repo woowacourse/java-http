@@ -6,32 +6,52 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceFinder {
-    public static void setStaticResponse(HttpRequest request, HttpResponse response) {
-        String location = request.getLocation();
-        String fileName = location.equals("/") ? "/index" : location;
-        String extension = request.getExtension();
-        URL url = ResourceFinder.class.getClassLoader().getResource("static" + fileName + "." + extension);
-        response.addHeader("Content-Type", String.format("text/%s;charset=utf-8", getResponseExtension(extension)));
 
-        if (Objects.isNull(url)) {
-            url = ResourceFinder.class.getClassLoader().getResource("static" + "/404.html");
-            response.setStatus(HttpStatus.NOT_FOUND);
-        }
+    public static final String FILE_DELIMITER = ".";
+    public static final String STATIC_RESOURCE_PREFIX = "static";
+    public static final String NOT_FOUND_LOCATION = "/404.html";
+    public static final String HOME_LOCATION = "/index";
+    public static final String FORMATTED_JAVASCRIPT_EXTENSION = "javascript";
+
+    public static void setStaticResponse(HttpRequest request, HttpResponse response) {
+        String fileName = getLocation(request);
+        String extension = request.getExtension();
+        String fullName = fileName + FILE_DELIMITER + extension;
+
+        URL url = getStaticUrl(fullName);
+        response.setContentType(String.format("text/%s;charset=utf-8", getFormattedExtension(extension)));
+
+        String content = getContent(url);
+        response.setBody(content);
+    }
+
+    private static String getContent(URL url) {
         try {
             Path filePath = Path.of(url.toURI());
-            String content = Files.readString(filePath);
-            response.setBody(content);
-        } catch (IOException | URISyntaxException e) {
+            return Files.readString(filePath);
+        } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static String getResponseExtension(String extension) {
-        return extension.equals("js") ? "javascript" : extension;
+    private static URL getStaticUrl(String fullName) {
+        ClassLoader classLoader = ResourceFinder.class.getClassLoader();
+        URL resource = classLoader.getResource(STATIC_RESOURCE_PREFIX + fullName);
+        if (Objects.isNull(resource)) {
+            resource = classLoader.getResource(STATIC_RESOURCE_PREFIX + NOT_FOUND_LOCATION);
+        }
+        return resource;
+    }
+
+    private static String getLocation(HttpRequest request) {
+        return request.getLocation().equals("/") ? HOME_LOCATION : request.getLocation();
+    }
+
+    private static String getFormattedExtension(String extension) {
+        return extension.equals("js") ? FORMATTED_JAVASCRIPT_EXTENSION : extension;
     }
 }

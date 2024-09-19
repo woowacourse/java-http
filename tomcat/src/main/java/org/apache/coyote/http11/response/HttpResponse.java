@@ -19,6 +19,10 @@ public class HttpResponse {
         headers.put(key, value);
     }
 
+    public void setContentType(String value){
+        headers.put("Content-Type", value);
+    }
+
     public void setCookie(String key, String value){
         headers.put("Set-Cookie", String.format("%s=%s;", key, value));
     }

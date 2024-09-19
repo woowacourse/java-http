@@ -17,9 +17,8 @@ public class SessionManager {
     }
 
     public static boolean validate(String cookieId) {
-        Session session = findSession(cookieId);
-
-        return Objects.nonNull(session) && session.getId().equals(cookieId);
+        Session cookieSession = findSession(cookieId);
+        return Objects.nonNull(cookieSession) && cookieSession.hasSameIdWith(cookieId);
     }
 
     public static Session findSession(String sessionId) {

@@ -12,8 +12,12 @@ public class Session {
 
 
     public Session() {
-        this.id = UUID.randomUUID().toString();
+        this.id = generateRandomId();
         setAttribute(SESSION_KEY, id);
+    }
+
+    private String generateRandomId() {
+        return UUID.randomUUID().toString();
     }
 
     public String getId() {
@@ -26,5 +30,9 @@ public class Session {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
+    }
+
+    public boolean hasSameIdWith(String otherId) {
+        return this.id.equals(otherId);
     }
 }

@@ -11,26 +11,26 @@ public class WAS {
 
     private static final LoginController LOGIN_CONTROLLER = new LoginController("/login");
     private static final RegisterController REGISTER_CONTROLLER = new RegisterController("/register");
-    private static final Controllers controllers = new Controllers(
+    private static final Controllers CONTROLLERS = new Controllers(
             LOGIN_CONTROLLER,
             REGISTER_CONTROLLER
     );
 
-    private final Server tomcat;
+    private final Server server;
 
-    public WAS(Server tomcat) {
-        this.tomcat = tomcat;
+    public WAS(Server server) {
+        this.server = server;
     }
 
     public void start() {
-        tomcat.start();
+        server.start();
     }
 
     public static HttpResponse dispatch(HttpRequest request) throws Exception {
         HttpResponse response = new HttpResponse();
 
-        if (controllers.contains(request.getLocation())) {
-            HttpController targetController = controllers.get(request.getLocation());
+        if (CONTROLLERS.contains(request.getLocation())) {
+            HttpController targetController = CONTROLLERS.get(request.getLocation());
             targetController.service(request, response);
             return response;
         }

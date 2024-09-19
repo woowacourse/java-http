@@ -17,7 +17,7 @@ public abstract class HttpController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (sessionAndCookieValid(request)) {
+        if (isSessionAlive(request)) {
             response.setHomeRedirection();
             return;
         }
@@ -32,16 +32,16 @@ public abstract class HttpController implements Controller {
         throw new UnsupportedHttpMethodException(request.getMethod().name());
     }
 
-    private boolean sessionAndCookieValid(HttpRequest request) {
+    private boolean isSessionAlive(HttpRequest request) {
         return SessionManager.validate(request.getCookieValue(Session.SESSION_KEY));
-    }
-
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        throw new IllegalStateException("implement post method before invoke.");
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         throw new IllegalStateException("implement get method before invoke.");
+    }
+
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        throw new IllegalStateException("implement post method before invoke.");
     }
 
     public boolean hasSamePath(String path) {

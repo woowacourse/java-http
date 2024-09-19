@@ -45,7 +45,6 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (hasLogined(request)) {
-            response.setStatusCode(StatusCode.FOUND); //
             response.addHeader(HeaderName.LOCATION, "/index.html");
         }
         if (!hasLogined(request)) {

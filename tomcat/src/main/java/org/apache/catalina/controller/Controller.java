@@ -5,5 +5,5 @@ import org.apache.catalina.request.HttpRequest;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response);
+    void service(HttpRequest request, HttpResponse response) throws NoSuchMethodException;
 }

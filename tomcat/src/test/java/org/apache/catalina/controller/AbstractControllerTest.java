@@ -1,7 +1,6 @@
 package org.apache.catalina.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.apache.catalina.request.HttpRequest;
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class AbstractControllerTest {
 
     @Test
-    void doGet() {
+    void doGet() throws NoSuchMethodException {
         // given
         AbstractController abstractController = new TestController();
         HttpRequest request = new HttpRequest(List.of("GET / HTTP/1.1"), "");
@@ -25,7 +24,7 @@ class AbstractControllerTest {
     }
 
     @Test
-    void doPost() {
+    void doPost() throws NoSuchMethodException {
         // given
         AbstractController abstractController = new TestController();
         HttpRequest request = new HttpRequest(List.of("POST / HTTP/1.1"), "");

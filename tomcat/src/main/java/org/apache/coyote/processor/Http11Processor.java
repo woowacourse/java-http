@@ -2,10 +2,10 @@ package org.apache.coyote.processor;
 
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.ServletContainer;
 import org.apache.catalina.exception.UncheckedServletException;
 import org.apache.catalina.http.HeaderName;
 import org.apache.catalina.http.StatusCode;
-import org.apache.catalina.ServletContainer;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.HttpResponse;
 import org.apache.coyote.connector.RequestReader;
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.getReponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
         }
     }

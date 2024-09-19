@@ -7,7 +7,7 @@ import org.apache.catalina.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) throws NoSuchMethodException {
         if (request.isMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;
@@ -19,8 +19,12 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("HttpMethod not found");
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) { /* NOOP */ }
+    protected void doPost(HttpRequest request, HttpResponse response) throws NoSuchMethodException {
+        throw new NoSuchMethodException("HttpMethod not found");
+    }
 
-    protected void doGet(HttpRequest request, HttpResponse response) { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) throws NoSuchMethodException {
+        throw new NoSuchMethodException("HttpMethod not found");
+    }
 }
 

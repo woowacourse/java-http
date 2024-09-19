@@ -19,9 +19,7 @@ public abstract class HttpController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (SessionManager.validate(request.getCookieValue(Session.SESSION_KEY))) {
-            response.setStatus(HttpStatus.FOUND);
-            response.addHeader("Content-Type", "text/html");
-            response.addHeader("Location", "/index.html");
+            response.setRedirect("/index.html");
             return;
         }
         if (request.getMethod() == HttpMethod.GET) {

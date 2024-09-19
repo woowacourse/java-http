@@ -38,10 +38,7 @@ public class LoginController extends HttpController {
         Session loginSession = new Session();
         loginSession.setAttribute("user", user);
         SessionManager.add(loginSession);
-
-        response.setStatus(HttpStatus.FOUND);
-        response.addHeader("Content-Type", "text/html");
-        response.addHeader("Location", "/index.html");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + loginSession.getId() + " ");
+        response.addHeader("Set-Cookie", Session.SESSION_KEY + "=" + loginSession.getId() + " ");
+        response.setRedirect("/index.html");
     }
 }

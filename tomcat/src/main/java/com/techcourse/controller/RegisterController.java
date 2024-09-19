@@ -33,7 +33,6 @@ public class RegisterController extends HttpController {
                 new User(account, payload.get("password"), payload.get("email"))
         );
 
-        response.setStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/index.html");
+        response.setRedirect("/index.html");
     }
 }

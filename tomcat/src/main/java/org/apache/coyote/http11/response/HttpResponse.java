@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.response;
 
 
+import com.techcourse.session.Session;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import org.apache.coyote.HttpStatus;
 
 public class HttpResponse {
@@ -34,6 +34,12 @@ public class HttpResponse {
 
         addBody(response);
         return response.toString();
+    }
+
+    public void setRedirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        addHeader("Content-Type", "text/html");
+        addHeader("Location", location);
     }
 
     private void addBody(StringBuilder base) {

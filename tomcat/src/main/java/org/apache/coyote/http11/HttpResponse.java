@@ -42,6 +42,10 @@ public class HttpResponse {
             throw new IllegalArgumentException("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(pagePath));
         }
     }
+    
+    public void setNotFound() {
+        setResponse(HttpStatus.NOT_FOUND, "/404.html");
+    }
 
     public void setCookie(Cookie cookie) {
         cookies.setCookie(cookie);
@@ -62,9 +66,5 @@ public class HttpResponse {
         message.add(body);
 
         return message.toString();
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 }

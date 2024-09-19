@@ -23,8 +23,14 @@ public class RegisterServlet extends HttpServlet {
     public void service(HttpRequest req, HttpResponse resp) {
         if (req.isMethod(HttpMethod.GET)) {
             doGet(req, resp);
-        } else if (req.isMethod(HttpMethod.POST)) {
+        } else if(req.isMethod(HttpMethod.POST)) {
             doPost(req, resp);
+        } else if(req.isMethod(HttpMethod.PUT)) {
+            doPut(req, resp);
+        } else if(req.isMethod(HttpMethod.DELETE)) {
+            doDelete(req, resp);
+        } else if(req.isMethod(HttpMethod.PATCH)) {
+            doPatch(req, resp);
         }
     }
 
@@ -64,13 +70,16 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpRequest req, HttpResponse resp) {
+        resp.setNotFound();
     }
 
     @Override
     protected void doDelete(HttpRequest req, HttpResponse resp) {
+        resp.setNotFound();
     }
 
     @Override
     protected void doPatch(HttpRequest req, HttpResponse resp) {
+        resp.setNotFound();
     }
 }

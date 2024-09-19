@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.cookie.Cookies;
+import org.apache.coyote.http11.resource.ResourceParser;
 
 public class HttpResponse {
     //TODO: http상태코드 관리
@@ -35,11 +36,16 @@ public class HttpResponse {
         }
     }
 
-    public void setResponse(HttpStatus httpStatus, String body) {
-        this.httpStatus = httpStatus;
-        this.mimeType = "text/html";
-        this.body = body;
-        this.contentLength = body.getBytes().length;
+    public void setResponse(HttpStatus httpStatus, String pagePath) {
+        try {
+            File pageFile = ResourceParser.getRequestFile(pagePath);
+            this.httpStatus = httpStatus;
+            this.mimeType = "text/html";
+            this.body = new String(Files.readAllBytes(pageFile.toPath()));
+            this.contentLength = body.getBytes().length;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(pagePath));
+        }
     }
 
     public void setCookie(Cookie cookie) {
@@ -51,10 +57,10 @@ public class HttpResponse {
         message.add("HTTP/1.1 %s ".formatted(httpStatus.getMessage())); // TODO: HTTP 버전은 Request 정보 받아오기
         message.add("Content-Type: %s;charset=utf-8 ".formatted(mimeType));
         message.add("Content-Length: " + contentLength + " ");
-        if(location != null) {
+        if (location != null) {
             message.add("Location: " + location + " ");
         }
-        if(cookies.hasCookie()) {
+        if (cookies.hasCookie()) {
             message.add("Set-Cookie: " + cookies.toMessage() + " ");
         }
         message.add("");

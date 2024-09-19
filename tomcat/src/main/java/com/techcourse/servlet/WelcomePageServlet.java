@@ -18,7 +18,7 @@ public class WelcomePageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpRequest req, HttpResponse resp) {
-        resp.setResponse(HttpStatus.OK, "Hello world!");
+        resp.setResponse(HttpStatus.OK, "/welcome.html");
     }
 
     @Override

@@ -1,11 +1,9 @@
 package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.AuthenticationException;
 import com.techcourse.model.User;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -19,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LOGIN_PAGE_PATH = "/login.html";
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -44,42 +43,45 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        File requestFile = ResourceParser.getRequestFile("/login.html");
-        resp.setResponse(HttpStatus.OK, requestFile);
+        resp.setResponse(HttpStatus.OK, LOGIN_PAGE_PATH);
     }
 
     @Override
     protected void doPost(HttpRequest req, HttpResponse resp) {
-        if(!validateHasBody(req, ACCOUNT, PASSWORD)) {
-            resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/login.html"));
+        if (!validateHasBody(req, ACCOUNT, PASSWORD)) {
+            resp.setResponse(HttpStatus.BAD_REQUEST, LOGIN_PAGE_PATH);
             return;
         }
 
+        try {
+            User user = findUser(req);
+            addUserSession(req, resp, user);
+            resp.setRedirect(HttpStatus.FOUND, "/index.html");
+        } catch (AuthenticationException e) {
+            resp.setResponse(HttpStatus.UNAUTHORIZED, "/401.html");
+        }
+    }
+
+    private User findUser(HttpRequest req) {
         String account = req.getBodyValue(ACCOUNT);
         String password = req.getBodyValue(PASSWORD);
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .orElseThrow(() -> new AuthenticationException(
+                        "찾으시는 유저 정보가 잘못되었습니다. (Account: %s, Password: %s)".formatted(account, password)));
+    }
 
-        Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-        if (findUser.isEmpty()) {
-            log.error("찾으시는 유저가 존재하지 않습니다. (Account: {})", account);
-            resp.setResponse(HttpStatus.UNAUTHORIZED, ResourceParser.getRequestFile("/401.html"));
-            return;
-        }
-        if (!findUser.get().checkPassword(password)) {
-            log.error("찾으시는 유저 정보가 잘못되었습니다. (Account: {}, Password: {})", account, password);
-            resp.setResponse(HttpStatus.UNAUTHORIZED, ResourceParser.getRequestFile("/401.html"));
-            return;
-        }
-
+    private void addUserSession(HttpRequest req, HttpResponse resp, User user) {
         Session session = req.getSession(true);
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
+        User userInSession = (User) session.getAttribute("user");
+
+        if (userInSession != null) {
             log.info("이미 로그인된 유저입니다. (account: {})", user.getAccount());
-        } else {
-            session.addAttribute("user", findUser.get());
-            resp.setCookie(new Cookie("JSESSIONID", session.getId()));
-            log.info("로그인 성공 (Account: {})", findUser.get().getAccount());
+            return;
         }
-        resp.setRedirect(HttpStatus.FOUND, "/index.html");
+        session.addAttribute("user", user);
+        resp.setCookie(new Cookie("JSESSIONID", session.getId()));
+        log.info("로그인 성공 (Account: {})", user.getAccount());
     }
 
     @Override

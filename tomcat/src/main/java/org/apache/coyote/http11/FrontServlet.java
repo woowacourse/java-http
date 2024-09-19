@@ -11,21 +11,22 @@ import org.apache.coyote.http11.resource.ResourceParser;
 
 public class FrontServlet implements Servlet {
 
-    private static final FrontServlet instance = new FrontServlet();
-    private static final Map<String, Servlet> controllerMap = new HashMap<>();
+    private static final FrontServlet INSTANCE = new FrontServlet();
 
-    static {
+    private final Map<String, Servlet> controllerMap;
+
+    private FrontServlet() {
+        Map<String, Servlet> controllerMap = new HashMap<>();
         controllerMap.put("/", new WelcomePageServlet());
         controllerMap.put("/index", new IndexServlet());
         controllerMap.put("/login", new LoginServlet());
         controllerMap.put("/register", new RegisterServlet());
-    }
 
-    private FrontServlet() {
+        this.controllerMap = controllerMap;
     }
 
     public static FrontServlet getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override

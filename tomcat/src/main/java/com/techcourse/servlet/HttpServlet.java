@@ -3,13 +3,14 @@ package com.techcourse.servlet;
 import static org.apache.coyote.http11.HttpStatus.METHOD_NOT_SUPPORTED;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Servlet;
+import org.apache.coyote.http11.resource.ResourceParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

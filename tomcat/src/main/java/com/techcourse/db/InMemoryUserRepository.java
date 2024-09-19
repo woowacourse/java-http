@@ -8,9 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
 
-    private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final Map<String, User> database;
 
     static {
+        database = new ConcurrentHashMap<>();
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }

@@ -34,7 +34,6 @@ class RegisterServletTest {
 		RegisterServlet servlet = new RegisterServlet();
 		servlet.doPost(request, response);
 
-		User expectedUser = new User("testAccount", "test@mail.com", "testPassword");
 		User savedUser = InMemoryUserRepository.findByAccount("testAccount").orElse(null);
 		assertThat(savedUser).isNotNull();
 

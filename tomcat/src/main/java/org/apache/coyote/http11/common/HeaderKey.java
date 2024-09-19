@@ -5,8 +5,9 @@ public enum HeaderKey {
 	CONTENT_TYPE("Content-Type"),
 	COOKIE("Cookie"),
 	SET_COOKIE("Set-Cookie"),
-	LOCATION("Location")
-	;
+	LOCATION("Location"),
+	HOST("Host"),
+	CONNECTION("Connection");
 
 	private final String value;
 

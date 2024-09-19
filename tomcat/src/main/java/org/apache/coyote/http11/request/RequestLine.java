@@ -29,7 +29,7 @@ public class RequestLine {
     }
 
     public boolean isGetMethod() {
-        return httpMethod.isGet();
+        return httpMethod.isMethod(HttpMethod.GET);
     }
 
     public HttpMethod getHttpMethod() {

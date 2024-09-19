@@ -16,11 +16,11 @@ public abstract class AbstractController implements Controller {
 
         validateMethod(httpMethod, response);
 
-        if (httpMethod.isPost()) {
+        if (httpMethod.isMethod(HttpMethod.POST)) {
             doPost(request, response);
         }
 
-        if (httpMethod.isGet()) {
+        if (httpMethod.isMethod(HttpMethod.GET)) {
             doGet(request, response);
         }
     }

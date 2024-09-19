@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.IncorrectPasswordException;
 import com.techcourse.exception.UnknownAccountException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
@@ -31,9 +32,14 @@ public class LoginController extends HttpController {
     public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> payload = request.getPayload();
         String account = payload.get("account");
+        String password = payload.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnknownAccountException(account));
+
+        if (!user.checkPassword(password)) {
+            throw new IncorrectPasswordException();
+        }
 
         Session loginSession = new Session();
         loginSession.setAttribute("user", user);

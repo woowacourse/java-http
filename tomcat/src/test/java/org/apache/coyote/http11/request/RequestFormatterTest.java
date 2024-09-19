@@ -125,7 +125,7 @@ class RequestFormatterTest {
         RequestBody result = RequestFormatter.toBody(bufferedReader, isGet, contentLength);
 
         // then
-        assertThat(result.getPayloads()).isEmpty();
+        assertThat(result.getContents()).isEmpty();
     }
 
     @Test
@@ -141,8 +141,8 @@ class RequestFormatterTest {
 
         // then
         assertAll(
-                () -> assertThat(result.getPayloads()).containsEntry("account", "gugu"),
-                () -> assertThat(result.getPayloads()).containsEntry("password", "password")
+                () -> assertThat(result.getContents()).containsEntry("account", "gugu"),
+                () -> assertThat(result.getContents()).containsEntry("password", "password")
         );
     }
 
@@ -159,6 +159,6 @@ class RequestFormatterTest {
         RequestBody result = RequestFormatter.toBody(bufferedReader, isGet, contentLength);
 
         // then
-        assertThat(result.getPayloads()).isEmpty();
+        assertThat(result.getContents()).isEmpty();
     }
 }

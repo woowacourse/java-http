@@ -61,6 +61,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getRequestBody() {
-        return body.getPayloads();
+        return body.getContents();
     }
 }

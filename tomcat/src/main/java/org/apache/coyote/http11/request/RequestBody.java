@@ -17,7 +17,7 @@ public class RequestBody {
         return new RequestBody(EMPTY_PAYLOAD);
     }
 
-    public Map<String, String> getPayloads() {
+    public Map<String, String> getContents() {
         return Collections.unmodifiableMap(payloads);
     }
 }

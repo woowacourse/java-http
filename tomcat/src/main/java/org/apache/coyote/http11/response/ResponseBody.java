@@ -21,7 +21,7 @@ public class ResponseBody {
         return values == null || values.length == ZERO;
     }
 
-    public byte[] getValues() {
+    public byte[] getContents() {
         return values;
     }
 }

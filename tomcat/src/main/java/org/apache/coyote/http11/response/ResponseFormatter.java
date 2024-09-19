@@ -37,7 +37,7 @@ public class ResponseFormatter {
         byte[] response = new byte[headerBytes.length + responseBody.getLength()];
 
         System.arraycopy(headerBytes, INDEX_ZERO, response, INDEX_ZERO, headerBytes.length);
-        System.arraycopy(responseBody.getValues(), INDEX_ZERO, response, headerBytes.length, responseBody.getLength());
+        System.arraycopy(responseBody.getContents(), INDEX_ZERO, response, headerBytes.length, responseBody.getLength());
 
         return response;
     }

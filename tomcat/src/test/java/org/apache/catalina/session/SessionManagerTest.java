@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SessionManagerTest {
@@ -20,7 +18,7 @@ class SessionManagerTest {
     void setUp() {
         user = new User("test", "password", "test@email.com");
 
-        sessionId = UUID.randomUUID().toString();
+        sessionId = "id";
         session = new Session(sessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);

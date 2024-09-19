@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

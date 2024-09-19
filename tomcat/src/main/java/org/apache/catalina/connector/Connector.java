@@ -5,7 +5,8 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -28,9 +29,14 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.threadPool = Executors.newFixedThreadPool(maxThreads);
+        this.threadPool = createThreadPool(acceptCount, maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+    }
+
+    private ExecutorService createThreadPool(final int acceptCount, final int maxThreads) {
+        return new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(acceptCount));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

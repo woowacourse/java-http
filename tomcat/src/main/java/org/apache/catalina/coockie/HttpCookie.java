@@ -6,9 +6,12 @@ import java.util.Map.Entry;
 
 public class HttpCookie {
 
-    private static final String JSESSIONID_VALUE = "JSESSIONID";
     public static final String COOKIE_DELIMITER = "; ";
     public static final String COOKIE_VALUE_DELIMITER = "=";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+    public static final int KEY_VALUE_COUNT = 2;
+    private static final String JSESSIONID_VALUE = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
@@ -29,8 +32,8 @@ public class HttpCookie {
         String[] cookiesElements = rawCookies.split(COOKIE_DELIMITER);
         for (String cookiesElement : cookiesElements) {
             String[] cookiePair = cookiesElement.split(COOKIE_VALUE_DELIMITER);
-            if (cookiePair.length == 2) {
-                cookieGroup.put(cookiePair[0], cookiePair[1]);
+            if (cookiePair.length == KEY_VALUE_COUNT) {
+                cookieGroup.put(cookiePair[KEY_INDEX], cookiePair[VALUE_INDEX]);
             }
         }
         return cookieGroup;

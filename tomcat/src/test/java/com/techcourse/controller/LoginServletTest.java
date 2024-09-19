@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.resource.ResourceParser;
 import org.junit.jupiter.api.Test;
 import support.TestHttpUtils;
@@ -46,14 +47,14 @@ class LoginServletTest {
     }
 
     @Test
-    void 요청_URI가_login이고_POST_메서드일때_로그인에_필요한_파라미터가_없으면_() throws IOException {
-        String body = "account=notExist&password=password";
+    void 요청_URI가_login이고_POST_메서드일때_로그인에_필요한_파라미터가_없으면_404를_반환하고_로그인페이지로_이동한다() throws IOException {
+        String body = "account=notExist";
         final var result = TestHttpUtils.sendPost("http://127.0.0.1:8080", "/login", body);
 
-        File errorPage = ResourceParser.getRequestFile("/401.html");
-        String expectBody = new String(Files.readAllBytes(errorPage.toPath()));
+        File responsePage = ResourceParser.getRequestFile("/login.html");
+        String expectBody = new String(Files.readAllBytes(responsePage.toPath()));
 
-        assertThat(result.statusCode()).isEqualTo(401);
+        assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.getStatusCode());
         assertThat(result.body()).isEqualTo(expectBody);
     }
 }

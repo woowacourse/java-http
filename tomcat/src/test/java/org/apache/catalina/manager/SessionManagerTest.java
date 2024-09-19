@@ -1,6 +1,6 @@
 package org.apache.catalina.manager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +38,7 @@ public class SessionManagerTest {
 
         // 실제로 추가된 세션의 개수가 기대한 값과 같은지 확인
         int expectedSize = THREAD_COUNT * SESSIONS_PER_THREAD + beforeSize;
-        assertEquals(expectedSize, sessionManager.findAllSessions().size(), "세션 매니저에서 동시성 문제로 인해 세션이 유실되었습니다.");
+        int actualSize = sessionManager.findAllSessions().size();
+        assertThat(actualSize).isEqualTo(expectedSize);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.constants;
 
 public enum ContentType {
     HTML("html", "text/html"),
@@ -12,8 +12,9 @@ public enum ContentType {
     AVIF("avif", "image/avif"),
     WEBP("webp", "image/webp"),
     APNG("apng", "image/apng"),
-    ASTERISK("*", "*/*")
-    ;
+    ASTERISK("*", "*/*");
+
+    private static final String CHARSET_UTF_8 = "; charset=utf-8";
 
     private final String extension;
     private final String contentType;
@@ -27,17 +28,17 @@ public enum ContentType {
         return extension;
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getContentTypeUtf8() {
+        return contentType + CHARSET_UTF_8;
     }
 
-    public static String toContentType(final String extension) {
+    public static ContentType toContentType(final String fileExtension) {
         for (ContentType contentType : values()) {
-            if (contentType.getExtension().equalsIgnoreCase(extension)) {
-                return contentType.getContentType();
+            if (contentType.getExtension().equalsIgnoreCase(fileExtension)) {
+                return contentType;
             }
         }
-        throw new IllegalArgumentException("Unknown content type: " + extension);
+        throw new IllegalArgumentException("Unknown content type: " + fileExtension);
     }
 
     public static boolean isValidType(final String uri) {
@@ -48,5 +49,4 @@ public enum ContentType {
         }
         return false;
     }
-
 }

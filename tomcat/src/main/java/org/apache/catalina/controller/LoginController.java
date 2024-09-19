@@ -33,12 +33,11 @@ public class LoginController extends AbstractController {
     private static final String SESSION_COOKIE_KEY_NAME = "JSESSIONID";
     private static final String NO_CONTENT_LENGTH = "0";
     private static final String ERROR_MESSAGE = "파일을 찾는 과정에서 문제가 발생하였습니다.";
-
-    private final String endPoint = "/login";
+    private static final String END_POINT = "/login";
 
     @Override
     public boolean canHandle(final HttpRequest request) {
-        return matchRequestUriWithBaseUri(request, endPoint);
+        return matchRequestUriWithBaseUri(request, END_POINT);
     }
 
     @Override

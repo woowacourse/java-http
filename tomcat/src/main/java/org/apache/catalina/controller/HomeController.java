@@ -17,11 +17,11 @@ import org.apache.coyote.http11.message.response.HttpStatusLine;
 
 public class HomeController extends AbstractController {
 
-    private final String endPoint = "/";
+    private static final String END_POINT = "/";
 
     @Override
     public boolean canHandle(final HttpRequest request) {
-        return matchRequestUriWithBaseUri(request, endPoint);
+        return matchRequestUriWithBaseUri(request, END_POINT);
     }
 
     @Override

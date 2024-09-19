@@ -30,12 +30,11 @@ import com.techcourse.model.User;
 public class RegisterController extends AbstractController {
 
     private static final String ERROR_MESSAGE = "파일을 찾는 과정에서 문제가 발생하였습니다.";
-
-    private final String endPoint = "/register";
+    private static final String END_POINT = "/register";
 
     @Override
     public boolean canHandle(final HttpRequest request) {
-        return matchRequestUriWithBaseUri(request, endPoint);
+        return matchRequestUriWithBaseUri(request, END_POINT);
     }
 
     @Override

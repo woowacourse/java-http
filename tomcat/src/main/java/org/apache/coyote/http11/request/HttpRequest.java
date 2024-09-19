@@ -29,7 +29,6 @@ public class HttpRequest {
         return requestLine.getLocation().getExtension();
     }
 
-    //TODO: cookies
     public String getCookie() {
         return headers.find("Cookie").split("=")[1];
     }

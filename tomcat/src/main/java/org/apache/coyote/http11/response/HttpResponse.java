@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.response;
 
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.coyote.HttpStatus;
 
 public class HttpResponse {
-    private final Map<String, String> headers = new TreeMap<>();
+    private final Map<String, String> headers = new HashMap<>();
     private HttpStatus status = HttpStatus.OK;
     private String body;
 

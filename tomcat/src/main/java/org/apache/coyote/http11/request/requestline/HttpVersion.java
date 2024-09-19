@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.requestline;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 public enum HttpVersion {
     HTTP09("HTTP/0.9"),
@@ -14,7 +15,8 @@ public enum HttpVersion {
     }
 
     public static HttpVersion from(String data) {
-        return Arrays.stream(values()).filter(value -> value.version.equals(data)).findAny()
-                .orElseThrow(()-> new IllegalArgumentException("http version validation error"));
+        return Arrays.stream(values()).filter(value -> value.version.equals(data))
+                .findAny()
+                .orElseThrow(()-> new NoSuchElementException("no such http version"));
     }
 }

@@ -7,13 +7,15 @@ import java.util.stream.Collectors;
 
 public class HttpLocation {
     public static final String DEFAULT_EXTENSION = "html";
+    private static final Pattern validPattern = Pattern.compile("^[A-Za-z0-9-_~./]+$");
+    private static final char LOCATION_DELIMITER = '.';
+
     private final String fileName;
     private final String extension;
 
-    private static final Pattern validPattern = Pattern.compile("^[A-Za-z0-9-_~./]+$");
 
     public HttpLocation(String data) {
-        if (data == null || data.codePoints().filter(r -> r == '.').count() > 1) {
+        if (data == null || data.codePoints().filter(r -> r == LOCATION_DELIMITER).count() > 1) {
             throw new IllegalArgumentException("location's dot must less than one");
         }
         List<String> split = Arrays.stream(data.split("\\."))

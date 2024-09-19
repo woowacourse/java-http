@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpHeaders {
-    private final Map<String, String> value;
-
     public static final String HEADER_DELIMITER = ": ";
+
+    private final Map<String, String> value;
 
     public HttpHeaders(Map<String, String> value) {
         this.value = value;

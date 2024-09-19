@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request.requestline;
 
+import java.util.NoSuchElementException;
+
 public enum HttpMethod {
     GET,
     POST,
@@ -15,6 +17,6 @@ public enum HttpMethod {
         if ("DELETE".equals(data.toUpperCase().strip())) {
             return DELETE;
         }
-        throw new IllegalArgumentException("%s는 존재하지 않는 HTTP 메서드입니다.");
+        throw new NoSuchElementException("%s는 존재하지 않는 HTTP 메서드입니다.");
     }
 }

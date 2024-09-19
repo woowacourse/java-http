@@ -6,22 +6,23 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpPayload {
-    private final Map<String, String> value;
+    private static final String PAYLOAD_DELIMITER = "=";
 
+    private final Map<String, String> value;
 
     public HttpPayload(Map<String, String> value) {
         this.value = Collections.unmodifiableMap(value);
     }
 
     public static HttpPayload from(List<String> clientData) {
-        if (!clientData.getFirst().contains("POST")) {
+        if (!clientData.getLast().contains("&")) {
             return null;
         }
 
         Map<String, String> result = new HashMap<>();
 
         for (String line : clientData.getLast().split("&")) {
-            String[] split = line.split("=");
+            String[] split = line.split(PAYLOAD_DELIMITER);
             result.put(split[0], split[1]);
         }
 

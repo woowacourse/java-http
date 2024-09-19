@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.startup.WAS;
-import org.apache.coyote.http11.request.HttpReader;
-import org.apache.coyote.http11.response.HttpWriter;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.Socket;
@@ -17,7 +15,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-
     public Http11Processor(Socket connection) {
         this.connection = connection;
     }

@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class HttpRequestLine {
+    public static final String QUERY_DELIMITER = "=";
+    public static final String REQUEST_LINE_DELIMITER = " ";
+    public static final int REQUEST_LINE_ARGUMENT_COUNT = 3;
+
     private final HttpMethod method;
     private final HttpLocation location;
     private final HttpVersion version;
@@ -20,11 +24,12 @@ public class HttpRequestLine {
 
     private void setQueriesIfExist(String location) {
         String[] split = location.split("\\?");
-        if (split.length > 1) {
-            for (int i = 1; i < split.length; i++) {
-                String[] keyValue = split[i].split("=");
-                queries.put(keyValue[0], keyValue[1]);
-            }
+        if (split.length == 1) {
+            return;
+        }
+        for (int i = 1; i < split.length; i++) {
+            String[] keyValue = split[i].split(QUERY_DELIMITER);
+            queries.put(keyValue[0], keyValue[1]);
         }
     }
 
@@ -34,9 +39,9 @@ public class HttpRequestLine {
         }
 
         String requestLine = clientData.getFirst();
-        List<String> split = Arrays.stream(requestLine.split(" ")).toList();
-        if (split.size() != 3) {
-            throw new IllegalArgumentException("request line must have 3 arguments");
+        List<String> split = Arrays.stream(requestLine.split(REQUEST_LINE_DELIMITER)).toList();
+        if (split.size() != REQUEST_LINE_ARGUMENT_COUNT) {
+            throw new IllegalArgumentException("request line must have " + REQUEST_LINE_DELIMITER + "arguments");
         }
 
         return new HttpRequestLine(split.get(0), split.get(1), split.get(2));

@@ -32,10 +32,6 @@ public class HttpRequest {
         return header.existsSession();
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }

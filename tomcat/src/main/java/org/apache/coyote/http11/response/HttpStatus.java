@@ -25,10 +25,6 @@ public enum HttpStatus {
         this.message = message;
     }
 
-    public boolean isRedirection() {
-        return this.code == 302;
-    }
-
     public String getStatus() {
         return this.code + STATUS_DELIMITER + this.message;
     }

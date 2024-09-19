@@ -30,12 +30,4 @@ public class Session {
     public Object getAttribute(final String name) {
         return attributes.get(name);
     }
-
-    public void removeAttribute(final String name) {
-        attributes.remove(name);
-    }
-
-    public void invalidate() {
-        attributes.clear();
-    }
 }

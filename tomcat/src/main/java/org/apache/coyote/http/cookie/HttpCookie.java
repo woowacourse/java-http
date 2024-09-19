@@ -1,6 +1,7 @@
 package org.apache.coyote.http.cookie;
 
 public class HttpCookie {
+
     private final String name;
     private final String value;
 

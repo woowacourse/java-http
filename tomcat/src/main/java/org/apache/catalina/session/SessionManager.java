@@ -1,29 +1,27 @@
 package org.apache.catalina.session;
 
-import com.techcourse.model.domain.User;
 import org.apache.catalina.Manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
+    private SessionManager() {
+    }
+
     public static SessionManager getInstance() {
         return new SessionManager();
     }
 
-    private SessionManager() {
-    }
-
-    public String findSessionId(final User user) {
-        for (String key : SESSIONS.keySet()) {
-            if (SESSIONS.get(key).getAttribute("user") == user) {
-                return key;
-            }
-        }
-        return null;
+    @Override
+    public Session createNewSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+        return session;
     }
 
     @Override

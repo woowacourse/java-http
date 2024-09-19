@@ -1,423 +1,228 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.junit.jupiter.api.Disabled;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.MethodSource;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    // 메인 페이지를 "Hello World!" -> index.html로 변경하면서 테스트 비활성화
-    @Disabled
-    @Test
-    void process() {
-        // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String CONTENT_TYPE_HTML = "Content-Type: text/html;charset=utf-8";
+    private static final String CONTENT_TYPE_CSS = "Content-Type: text/css";
+    private static final String CONTENT_TYPE_JAVASCRIPT = "Content-Type: application/javascript";
+    private static final String CONTENT_TYPE_SVG = "Content-Type: image/svg+xml";
+    private static final String POST = "POST";
+    private static final String GET = "GET";
 
-        // when
-        processor.process(socket);
-
-        // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+    private void processRequest(String httpRequest, String[] expectedResponses) {
+        String response = createResponse(httpRequest);
+        for (String expectedResponse : expectedResponses) {
+            assertThat(response).contains(expectedResponse);
+        }
     }
 
-    @Disabled // 어떻게 해야 성공시킬 수 있을까요...
-    @Test
-    @DisplayName("process 동작 중 IOException이 발생하면 /static/500.html 페이지를 응답힌다.")
-    void process_fail_500() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+    private String createResponse(String httpRequest) {
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(socket);
 
-        final var socket = new StubSocket(httpRequest);
-        socket.setThrowIOException(true);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
         processor.process(socket);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        return socket.output();
+    }
+
+    private String buildHttpRequest(String method, String path, String body) throws IOException {
+        String requestLine = String.join(" ",
+                method,
+                path,
+                "HTTP/1.1");
+
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080",
+                "Content-Length: " + body.length(),
+                "Connection: keep-alive",
+                "",
+                body);
+    }
+
+    private void testResourceResponse(String requestPath, String contentType, String expectedFilePath) throws IOException {
+        // given
+        final String httpRequest = buildHttpRequest(GET, requestPath, "");
+
+        final URL resource = getClass().getClassLoader().getResource(expectedFilePath);
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 500 INTERNAL SERVER ERROR \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+        String contentLength = "Content-Length: " + responseBody.length;
+        String body = new String(responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.OK.getStatus(), contentType, contentLength, body});
+    }
+
+    private static Stream<Arguments> resourceProvider() {
+        return Stream.of(
+                Arguments.of("/", CONTENT_TYPE_HTML, "static/index.html"),
+                Arguments.of("/css/styles.css", CONTENT_TYPE_CSS, "static/css/styles.css"),
+                Arguments.of("/js/scripts.js", CONTENT_TYPE_JAVASCRIPT, "static/js/scripts.js"),
+                Arguments.of("/assets/img/error-404-monochrome.svg", CONTENT_TYPE_SVG, "static/assets/img/error-404-monochrome.svg"),
+                Arguments.of("/index.html", CONTENT_TYPE_HTML, "static/index.html")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("resourceProvider")
+    @DisplayName("정적 자원 요청에 대한 응답을 검증한다.")
+    void resourceResponse(String requestPath, String contentType, String expectedFilePath) throws IOException {
+        testResourceResponse(requestPath, contentType, expectedFilePath);
     }
 
     @Test
-    @DisplayName("/ 주소에 접근하면 /static/index.html 페이지를 응답한다.")
-    void mainPage_Html() throws IOException {
+    @DisplayName("request 처리 중 IllegalArgumentException이 발생하면 /static/400.html 페이지로 리다이렉트한다.")
+    void failProcess400() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
+                "ERROR",
+                "Host: localhost:8080",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /400.html"});
+    }
+
+    @Test
+    @DisplayName("request 처리 중 IOException이 발생하면 /static/500.html 페이지로 리다이렉트한다.")
+    void processRequest_throwsIOException_returns500() {
+        // given
+        StubSocket socket = new StubSocket("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n") {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                throw new IOException("Test IOException");
+            }
+        };
+        Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        String response = socket.output();
+        String status = HttpStatus.FOUND.getStatus();
+        String location = "Location: /500.html";
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).contains(status, CONTENT_TYPE_HTML, location);
     }
 
     @Test
-    @DisplayName("페이지 접근 시 css 파일이 정상적으로 응답한다.")
-    void mainPage_Css() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("페이지 접근 시 js 파일이 정상적으로 응답한다.")
-    void mainPage_Js() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /js/scripts.js HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: application/javascript \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("페이지 접근 시 svg 파일이 정상적으로 응답한다.")
-    void notFoundPage_svg() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static//assets/img/error-404-monochrome.svg");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: image/svg+xml \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-
-    @Test
-    @DisplayName("/index.html 주소에 접근하면 /static/index.html 페이지를 응답한다.")
-    void indexPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("/register 주소에 접근하면 /static/register.html 페이지를 응답한다.")
-    void registerPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("/login 주소에 접근하면 /static/login.html 페이지를 응답한다.")
-    void loginPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 주소에 접근하면 /static/404.html 페이지를 응답한다.")
+    @DisplayName("존재하지 않는 주소에 접근하면 /static/404.html 페이지로 리다이렉트한다.")
     void notFoundPage() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /fake HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = buildHttpRequest(GET, "/fake", "");
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /404.html"});
+    }
 
-        // when
-        processor.process(socket);
+    @Test
+    @DisplayName("존재하지 않는 정적 파일 주소에 접근하면 /static/404.html 페이지로 리다이렉트한다.")
+    void notFoundPage_staticIndex() throws IOException {
+        // given
+        final String httpRequest = buildHttpRequest(GET, "/fake.html", "");
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /404.html"});
+    }
 
-        var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
-                "\r\n" +
-                new String(responseBody);
+    @Test
+    @DisplayName("GET /login을 요청하면 /static/login.html 페이지로 리다이렉트한다.")
+    void login_GET() throws IOException {
+        // given
+        final String httpRequest = buildHttpRequest(GET, "/login", "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /login.html"});
     }
 
     @Test
     @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void login_success() throws IOException {
+    void login_POST_success() throws IOException {
         // given
         String requestBody = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+        final String httpRequest = buildHttpRequest(POST, "/login", requestBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 302 FOUND";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
     }
 
     @Test
     @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공하면 Set-Cookie를 반환한다.")
-    void login_success_returnSetCookie() {
+    void login_POST_success_returnSetCookie() throws IOException {
         // given
         String requestBody = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+        final String httpRequest = buildHttpRequest(POST, "/login", requestBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        String setCookie = "Set-Cookie";
-
-        assertThat(socket.output()).contains(setCookie);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Set-Cookie: JSESSIONID="});
     }
 
     @Test
-    @DisplayName("로그인된 상태에서 /login 주소에 접근하면 /index.html 페이지로 리다이렉트한다.")
-    void login_redirect_when_alreadyLogined() throws IOException, NoSuchFieldException, IllegalAccessException {
+    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공한 뒤 /login 주소로 접근하면 /index.html 페이지로 리다이렉트한다.")
+    void login_POST_success_then_GET_withValidSessionId() throws IOException {
         // given
-        String sessionId = UUID.randomUUID().toString();
-        String cookie = "Cookie: JSESSIONID=" + sessionId;
-        final String httpRequest = String.join("\r\n",
+        String requestBody = "account=gugu&password=password";
+        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
+
+        String response = createResponse(postLoginRequest);
+        String sessionId = extractSessionIdFromResponse(response);
+
+        final String getLoginRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                cookie + " ",
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        //when, then
+        processRequest(getLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
+    }
 
-        SessionManager mockSessionManager = Mockito.mock(SessionManager.class);
-        Session session = new Session(sessionId);
-        Mockito.when(mockSessionManager.findSession(sessionId)).thenReturn(session);
-
-        Field sessionManagerField = Http11Processor.class.getDeclaredField("sessionManager");
-        sessionManagerField.setAccessible(true);
-        sessionManagerField.set(processor, mockSessionManager);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 302 FOUND";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+    private String extractSessionIdFromResponse(String response) {
+        Pattern pattern = Pattern.compile("Set-Cookie: JSESSIONID=([^;]+)");
+        Matcher matcher = pattern.matcher(response);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw new IllegalStateException("JSESSIONID가 올바르게 설정되지 않았습니다.");
     }
 
     @Test
-    @DisplayName("유효하지 않은 JSESSIONID로 /login 주소에 접근하면 /login.html 페이지를 응답한다.")
-    void login_invalidSessionId() throws IOException {
+    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공한 뒤 유효하지 않은 쿠키 정보로 /login 주소에 접근하면 /login.html 페이지를 응답한다.")
+    void login_POST_then_GET_withInvalidSessionId() throws IOException {
         // given
+        String requestBody = "account=gugu&password=password";
+        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
+
+        createResponse(postLoginRequest);
+
         String cookie = "Cookie: JSESSIONID=asdf";
-        final String httpRequest = String.join("\r\n",
+        final String getLoginRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -425,110 +230,63 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 200 OK";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        // when, then
+        processRequest(getLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /login.html"});
     }
 
-    @CsvSource({"account=chorong&password=password", "account=gugu&password=sosad"})
+    @CsvSource({"account=chorong&password=password", "account=gugu&password=sosad", "account= &password=password", "account=gugu", "password=password"})
+    @EmptySource
     @ParameterizedTest
     @DisplayName("/login 주소에서 부정확한 계정명이나 비밀번호로 로그인을 시도하면 /401.html 페이지로 리다이렉트한다.")
-    void login_fail_invalidAccount(String requestBody) throws IOException {
+    void login_POST_fail_invalidAccount(String requestBody) throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        // when, then
+        processRequest(postLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /401.html"});
+    }
 
-        // when
-        processor.process(socket);
+    @Test
+    @DisplayName("GET /register를 요청하면 /static/register.html 페이지로 리다이렉트한다.")
+    void register_GET() throws IOException {
+        // given
+        final String httpRequest = buildHttpRequest(GET, "/register", "");
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 302 FOUND";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
     }
 
     @Test
     @DisplayName("/register 주소에서 정확한 계정명과 이메일, 비밀번호로 회원가입에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void register_success() throws IOException {
+    void register_POST_success() throws IOException {
         // given
         String requestBody = "account=ash&password=ashPassword&email=test@email.com";
-        final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 302 FOUND";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
     }
 
     @Test
     @DisplayName("/register 주소에서 이미 존재하는 계정명으로 회원가입을 시도하면 /register 페이지로 리다이렉트한다.")
-    void register_fail_accountAlreadyExists() throws IOException {
+    void register_POST_fail_accountAlreadyExists() throws IOException {
         // given
         String requestBody = "account=gugu&password=newpassword&email=test@email.com";
-        final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
+    }
 
-        // when
-        processor.process(socket);
+    @CsvSource({"account=chorong&password=password", "account=gugu&email=test@email.com", "account= "})
+    @EmptySource
+    @ParameterizedTest
+    @DisplayName("/register 주소에서 필수 입력값을 누락하고 회원가입을 시도하면 /register 페이지로 리다이렉트한다.")
+    void register_POST_fail_missingEssentialValues(String requestBody) throws IOException {
+        // given
+        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        String responseLine = "HTTP/1.1 400 BAD REQUEST";
-        String contentType = "Content-Type: text/html;charset=utf-8";
-        String contentLength = "Content-Length: " + responseBody.length;
-
-        assertThat(socket.output()).contains(responseLine, contentType, contentLength);
+        // when, then
+        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
     }
 }

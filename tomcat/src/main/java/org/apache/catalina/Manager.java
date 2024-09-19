@@ -24,6 +24,8 @@ import java.io.IOException;
  */
 public interface Manager {
 
+    Session createNewSession();
+
     /**
      * Add this Session to the set of active Sessions for this Manager.
      *

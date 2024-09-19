@@ -32,10 +32,6 @@ public class HttpResponse {
         statusLine.setHttpStatus(httpStatus);
     }
 
-    public void setContentLength(int contentLength) {
-        responseHeader.setContentLength(String.valueOf(contentLength));
-    }
-
     public void setMimeType(MimeType mimeType) {
         responseHeader.setContentType(mimeType);
     }
@@ -51,6 +47,10 @@ public class HttpResponse {
     public void setResponseBody(byte[] values) {
         this.responseBody = new ResponseBody(values);
         setContentLength(responseBody.getLength());
+    }
+
+    private void setContentLength(int contentLength) {
+        responseHeader.setContentLength(String.valueOf(contentLength));
     }
 
     public StatusLine getStatusLine() {

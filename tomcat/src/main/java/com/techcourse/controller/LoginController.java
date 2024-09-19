@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.Status;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +29,10 @@ public class LoginController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String sessionId = request.getCookie(HttpResponse.SESSION_ID_NAME);
         if (sessionManager.hasSession(sessionId)) {
-            response.generate302Response("/index.html");
+            response.generateResponse("/index.html", Status.FOUND);
             return;
         }
-        String responseBody = response.generateResponseBody("static" + request.getPath());
-        response.generate200Response(request.getPath(), responseBody);
+        response.generateResponse("static" + request.getPath(), Status.OK);
     }
 
     @Override
@@ -43,10 +44,10 @@ public class LoginController extends AbstractController {
         login(parsedQueryString, response);
     }
 
-    private void login(Map<String, String> parsedQueryString, HttpResponse response) {
+    private void login(Map<String, String> parsedQueryString, HttpResponse response) throws IOException {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(parsedQueryString.get("account"));
         if (optionalUser.isEmpty()) {
-            response.generate302Response("/401.html");
+            response.generateResponse("/401.html", Status.FOUND);
             return;
         }
         User user = optionalUser.get();
@@ -54,11 +55,10 @@ public class LoginController extends AbstractController {
             log.info("로그인 성공! 아이디 : {}", optionalUser.get().getAccount());
             final var session = getSession();
             session.setAttribute("user", user);
-            response.generate302Response("/index.html");
-            response.appendSetCookieHeader(session.getId());
+            response.generateResponse("/index.html", Status.FOUND, session.getId());
             return;
         }
-        response.generate302Response("/401.html");
+        response.generateResponse("/401.html", Status.FOUND);
     }
 
     public Session getSession() {
@@ -67,5 +67,4 @@ public class LoginController extends AbstractController {
         sessionManager.add(session);
         return session;
     }
-
 }

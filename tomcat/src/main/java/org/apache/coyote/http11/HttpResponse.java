@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.Status.FOUND;
-import static org.apache.coyote.http11.Status.OK;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,49 +15,42 @@ public class HttpResponse {
 
     private String response = "";
     private String body = "";
+    private ResponseHeader responseHeader;
 
     public HttpResponse() {
     }
 
-    public String generateResponseBody(String path) throws IOException {
+    private void generateResponseBody(String path, Status status) throws IOException {
+        if (status == FOUND) {
+            return;
+        }
+        if (path.equals("/")) {
+            body = "Hello world!";
+            return;
+        }
         if (!path.contains(".")) {
             final URL resource = getClass().getClassLoader().getResource(path + ".html");
             body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return body;
+            return;
         }
         final URL resource = getClass().getClassLoader().getResource(path);
         body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return body;
     }
 
-    public void generate200Response(String path, String responseBody) {
-        response = String.join("\r\n",
-                StatusLine.from(OK).getStatusLine(),
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        if (path.startsWith("/css")) {
-            response = response.replace("text/html", "text/css");
-        }
+    public void generateResponse(String path, Status status) throws IOException {
+        generateResponseBody(path, status);
+        responseHeader = new ResponseHeader(path, status, body.getBytes().length);
+        String header = responseHeader.getHeader();
+        StringBuilder stringBuilder = new StringBuilder(header);
+        stringBuilder.append(body);
+        response = stringBuilder.toString();
     }
 
-    public void generate302Response(String location) {
-        response = String.join("\r\n",
-                StatusLine.from(FOUND).getStatusLine(),
-                "Location: " + location + " ",
-                "Content-Type: text/html;charset=utf-8 "
-        );
-    }
-
-    public void appendSetCookieHeader(String sessionId) {
-        if (!body.isEmpty()) {
-            return;
-        }
-        response = String.join("\r\n",
-                response + " ",
-                SET_COOKIE_PREFIX + SESSION_ID_NAME + KEY_VALUE_SEPARATOR + sessionId + " "
-        );
+    public void generateResponse(String path, Status status, String sessionId) throws IOException {
+        generateResponseBody(path, status);
+        responseHeader = new ResponseHeader(path, status, body.getBytes().length);
+        responseHeader.setCookieHeader(sessionId);
+        response = responseHeader.getHeader();
     }
 
     public String getResponse() {

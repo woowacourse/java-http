@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.Status;
 import org.apache.coyote.http11.controller.AbstractController;
 
 public class RegisterController extends AbstractController {
@@ -23,11 +24,10 @@ public class RegisterController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String sessionId = request.getCookie(HttpResponse.SESSION_ID_NAME);
         if (sessionManager.hasSession(sessionId)) {
-            response.generate302Response("/index.html");
+            response.generateResponse("/index.html", Status.FOUND);
             return;
         }
-        String responseBody = response.generateResponseBody("static" + request.getPath());
-        response.generate200Response(request.getPath(), responseBody);
+        response.generateResponse("static" + request.getPath(), Status.OK);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class RegisterController extends AbstractController {
                 () -> new NoSuchElementException("invalid query string")
         );
         register(queryPairs);
-        response.generate302Response("/index.html");
+        response.generateResponse("/index.html", Status.FOUND);
     }
 
     private void register(Map<String, String> parsed) {

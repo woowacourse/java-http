@@ -19,7 +19,7 @@ public enum FileExtensionType {
         return value;
     }
 
-    public static FileExtensionType fromValue(final String input) {
+    public static FileExtensionType getByValue(final String input) {
         return Arrays.stream(FileExtensionType.values())
                 .filter(value -> value.getValue().equals(input))
                 .findAny()

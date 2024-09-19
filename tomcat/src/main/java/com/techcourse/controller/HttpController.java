@@ -1,6 +1,9 @@
 package com.techcourse.controller;
 
 import com.techcourse.exception.UnsupportedHttpMethodException;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,6 +18,12 @@ public abstract class HttpController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
+        if (SessionManager.validate(request.getCookieValue(Session.SESSION_KEY))) {
+            response.setStatus(HttpStatus.FOUND);
+            response.addHeader("Content-Type", "text/html");
+            response.addHeader("Location", "/index.html");
+            return;
+        }
         if (request.getMethod() == HttpMethod.GET) {
             doGet(request, response);
             return;

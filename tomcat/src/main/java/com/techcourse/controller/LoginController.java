@@ -18,12 +18,6 @@ public class LoginController extends HttpController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (SessionManager.validate(request.getCookieValue(Session.SESSION_KEY))) {
-            response.setStatus(HttpStatus.FOUND);
-            response.addHeader("Content-Type", "text/html");
-            response.addHeader("Location", "/index.html");
-            return;
-        }
         String body = new ResourceFinder(request.getLocation(), request.getExtension()).getStaticResource(response);
         response.setBody(body);
     }

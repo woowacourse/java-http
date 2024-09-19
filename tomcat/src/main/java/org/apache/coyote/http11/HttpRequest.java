@@ -9,7 +9,11 @@ import static org.apache.coyote.http11.Method.POST;
 
 public class HttpRequest {
 
-    private static final int FILE_EXTENSION_INDEX = 1;
+    private static final int VALUE_INDEX = 1;
+    private static final String HEADER_DELIMITER = ";";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String REQUEST_BODY_DELIMITER = "&";
+
     private final RequestLine requestLine;
     private final HttpRequestHeaders httpRequestHeaders;
     private String requestBody = "";
@@ -73,11 +77,11 @@ public class HttpRequest {
             return null;
         }
 
-        String[] cookies = parseWithTrim(httpRequestHeaders.findField("Cookie"), ";");
+        String[] cookies = parseWithTrim(httpRequestHeaders.findField("Cookie"), HEADER_DELIMITER);
 
         for (String cookie : cookies) {
             if (cookie.startsWith(key)) {
-                return cookie.split("=")[1];
+                return cookie.split(KEY_VALUE_DELIMITER)[VALUE_INDEX];
             }
         }
 
@@ -88,7 +92,7 @@ public class HttpRequest {
         String[] splitedPath = getPath().split("\\.");
 
         if (splitedPath.length == 2) {
-            return "text/" + splitedPath[FILE_EXTENSION_INDEX];
+            return "text/" + splitedPath[VALUE_INDEX];
         }
 
         return "text/html";
@@ -99,11 +103,11 @@ public class HttpRequest {
     }
 
     public String getRequestBodyValue(String key) {
-        String[] values = requestBody.split("&");
+        String[] values = requestBody.split(REQUEST_BODY_DELIMITER);
 
         for (String value : values) {
             if (value.startsWith(key)) {
-                return value.split("=")[1];
+                return value.split(KEY_VALUE_DELIMITER)[VALUE_INDEX];
             }
         }
 

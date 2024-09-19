@@ -5,7 +5,7 @@ public enum HttpHeaderField {
     LOCATION("Location"),
     CONTENT_LENGTH("Content-Length"),
     SET_COOKIE("Set-Cookie"),
-    CONTENT_TYPE("Content-Type"),
+    CONTENT_TYPE("Content-Type")
     ;
 
     private final String headerField;

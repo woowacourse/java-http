@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.Protocol.*;
 
 public class HttpResponse {
 
+    private static final String KEY_VALUE_DELIMITER = "=";
     private StatusLine statusLine;
     private HttpResponseHeaders httpHeaders;
     private String responseBody;
@@ -35,7 +36,7 @@ public class HttpResponse {
     }
 
     public void setCookie(String key, String value) {
-        httpHeaders.setField(SET_COOKIE, key + "=" + value);
+        httpHeaders.setField(SET_COOKIE, key + KEY_VALUE_DELIMITER + value);
     }
 
     public String getStatusMessage() {

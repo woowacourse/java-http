@@ -7,7 +7,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private final StatusLine statusLine;
-    private final ResponseHeader requestHeader;
+    private final ResponseHeader responseHeader;
     private ResponseBody responseBody;
 
     public HttpResponse() {
@@ -16,7 +16,7 @@ public class HttpResponse {
 
     public HttpResponse(HttpStatus httpStatus, ResponseHeader responseHeader, byte[] contents) {
         this.statusLine = StatusLine.of11(httpStatus);
-        this.requestHeader = responseHeader;
+        this.responseHeader = responseHeader;
         this.responseBody = new ResponseBody(contents);
 
         setContentLength(responseBody.getLength());
@@ -33,19 +33,19 @@ public class HttpResponse {
     }
 
     public void setContentLength(int contentLength) {
-        requestHeader.setContentLength(String.valueOf(contentLength));
+        responseHeader.setContentLength(String.valueOf(contentLength));
     }
 
     public void setMimeType(MimeType mimeType) {
-        requestHeader.setContentType(mimeType);
+        responseHeader.setContentType(mimeType);
     }
 
     public void setCookie(String cookie) {
-        requestHeader.setCookie(cookie);
+        responseHeader.setCookie(cookie);
     }
 
     public void setLocation(String location) {
-        requestHeader.setLocation(location);
+        responseHeader.setLocation(location);
     }
 
     public void setResponseBody(byte[] values) {
@@ -57,8 +57,8 @@ public class HttpResponse {
         return statusLine;
     }
 
-    public Map<String, String> getRequestHeader() {
-        return requestHeader.getFields();
+    public Map<String, String> getResponseHeader() {
+        return responseHeader.getFields();
     }
 
     public ResponseBody getResponseBody() {

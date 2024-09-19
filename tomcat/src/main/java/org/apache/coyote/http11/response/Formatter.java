@@ -17,7 +17,7 @@ public class Formatter {
         StringJoiner stringJoiner = new StringJoiner(CRLF);
 
         stringJoiner.add(toStatusLineFormat(httpResponse.getStatusLine()));
-        stringJoiner.add(toHeaderFormat(httpResponse.getRequestHeader()));
+        stringJoiner.add(toHeaderFormat(httpResponse.getResponseHeader()));
         stringJoiner.add(CRLF);
 
         byte[] headers = stringJoiner.toString().getBytes(StandardCharsets.UTF_8);

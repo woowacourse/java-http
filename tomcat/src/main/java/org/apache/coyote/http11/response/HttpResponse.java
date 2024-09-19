@@ -2,9 +2,12 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.MimeType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class HttpResponse {
+
+    private static final String EMPTY = "";
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
@@ -42,6 +45,10 @@ public class HttpResponse {
 
     public void setLocation(String location) {
         responseHeader.setLocation(location);
+    }
+
+    public void setEmptyResponseBody() {
+        setResponseBody(EMPTY.getBytes(StandardCharsets.UTF_8));
     }
 
     public void setResponseBody(byte[] values) {

@@ -9,7 +9,8 @@ public class Controllers {
     private final List<HttpController> value;
 
     public Controllers(HttpController... controller) {
-        value = Arrays.stream(controller).toList();
+        value = Arrays.stream(controller)
+                .toList();
     }
 
     boolean contains(String path) {

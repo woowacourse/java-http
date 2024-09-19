@@ -8,12 +8,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class WAS {
-    private final Server tomcat;
 
     private static final Controllers controllers = new Controllers(
             new LoginController("/login"),
             new RegisterController("/register")
     );
+
+    private final Server tomcat;
 
     public WAS(Server tomcat) {
         this.tomcat = tomcat;
@@ -34,8 +35,8 @@ public class WAS {
 
         String body = new ResourceFinder(request.getLocation(), request.getExtension())
                 .getStaticResource(response);
-
         response.setBody(body);
+
         return response;
     }
 }

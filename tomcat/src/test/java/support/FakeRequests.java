@@ -17,6 +17,16 @@ public class FakeRequests {
             "Hello world!"
     );
 
+    public static final List<String> validPutRequest = List.of(
+            "PUT / HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 12 ",
+            "",
+            "Hello world!"
+    );
+
     public static final List<String> validGetRequest = List.of(
             "GET / HTTP/1.1 ",
             "Host: localhost:8080 ",

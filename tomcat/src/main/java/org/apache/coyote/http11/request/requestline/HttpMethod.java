@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 public enum HttpMethod {
     GET,
     POST,
+    PUT,
     DELETE;
 
     public static HttpMethod from(String data) {
@@ -14,9 +15,12 @@ public enum HttpMethod {
         if ("POST".equals(data.toUpperCase().strip())) {
             return POST;
         }
+        if ("PUT".equals(data.toUpperCase().strip())) {
+            return PUT;
+        }
         if ("DELETE".equals(data.toUpperCase().strip())) {
             return DELETE;
         }
-        throw new NoSuchElementException("%s는 존재하지 않는 HTTP 메서드입니다.");
+        throw new NoSuchElementException(data + " does not exist");
     }
 }

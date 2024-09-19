@@ -2,6 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnknownAccountException;
+import com.techcourse.model.User;
+import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
 import java.util.Map;
 import org.apache.coyote.HttpStatus;
@@ -15,8 +17,7 @@ public class LoginController extends HttpController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.containsHeader("Cookie")) {
-            System.out.println(request.getCookie());
+        if (request.containsHeader("Cookie") && SessionManager.findSession(request.getCookie()) != null) {
             response.setStatus(HttpStatus.FOUND);
             response.addHeader("Content-Type", "text/html");
             response.addHeader("Location", "/index.html");
@@ -30,14 +31,17 @@ public class LoginController extends HttpController {
     public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> payload = request.getPayload();
         String account = payload.get("account");
-        if (InMemoryUserRepository.findByAccount(account).isEmpty()) {
-            throw new UnknownAccountException(account);
-        }
-        String jSession = SessionManager.findSession(account)
-                .getAttribute("JSESSIONID");
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UnknownAccountException(account));
+
+        Session loginSession = new Session();
+        loginSession.setAttribute("user", user);
+        SessionManager.add(loginSession);
+
         response.setStatus(HttpStatus.FOUND);
         response.addHeader("Content-Type", "text/html");
         response.addHeader("Location", "/index.html");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + jSession + " ");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + loginSession.getId() + " ");
     }
 }

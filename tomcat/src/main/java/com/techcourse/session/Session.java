@@ -24,7 +24,7 @@ public class Session {
         return values.get(name);
     }
 
-    public void setAttribute(String name, String value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 }

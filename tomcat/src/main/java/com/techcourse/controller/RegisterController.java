@@ -4,8 +4,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.DuplicatedAccountException;
 import com.techcourse.model.User;
-import com.techcourse.session.Session;
-import com.techcourse.session.SessionManager;
 import java.util.Map;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;

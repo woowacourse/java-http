@@ -15,12 +15,14 @@ import support.TestHttpUtils;
 import support.TestServer;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ThreadTest {
+    private final int randomPort = new Random().nextInt(3000, 65000);
 
     @Test
     @DisplayName("250개의 요청을 받고, 100개를 대기한다.")
@@ -41,22 +43,22 @@ class ThreadTest {
         final ExecutorService httpExecutorService = Executors.newFixedThreadPool(500);
 
         IntStream.range(0, 500)
-                .forEach(count -> httpExecutorService.submit(() -> TestHttpUtils.sendGet(TestServer.getHost(), "/test")));
+                .forEach(count -> httpExecutorService.submit(() -> TestHttpUtils.sendGet("http://localhost:"+randomPort, "/test")));
 
-        httpExecutorService.awaitTermination(4, TimeUnit.SECONDS);
+        httpExecutorService.awaitTermination(3, TimeUnit.SECONDS);
         assertThat(executorService.getActiveCount()).isEqualTo(250);
         assertThat(executorService.getQueue()).hasSize(100);
     }
 
 
-    private static Tomcat createTomcat(final RequestMapper requestMapper, final ResourceController resourceController, final SessionManager sessionManager,
+    private Tomcat createTomcat(final RequestMapper requestMapper, final ResourceController resourceController, final SessionManager sessionManager,
                                        final ExecutorService executorService) {
 
         final ConnectionListener connectionListener = new CatalinaConnectionListener(
                 new CoyoteAdapter(requestMapper, resourceController, sessionManager),
                 executorService
         );
-        final Connector connector = new Connector(11240, 100, connectionListener);
+        final Connector connector = new Connector(randomPort, 100, connectionListener);
 
         return new Tomcat(connector);
     }

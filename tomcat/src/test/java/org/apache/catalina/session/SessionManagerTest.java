@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SessionManagerTest {
@@ -28,10 +30,10 @@ class SessionManagerTest {
     @DisplayName("사용자의 JSESSIONID가 저장되어 있다면 해당 session를 반환한다")
     void findSessionId() {
         //when
-        Session foundSession = sessionManager.findSession(user);
+        Session foundSession = sessionManager.findSession(sessionId);
 
         //then
-        assertThat(foundSession).isEqualTo(session);
+        assertThat(foundSession.getAttribute("user")).isEqualTo(user);
 
     }
 
@@ -39,12 +41,12 @@ class SessionManagerTest {
     @DisplayName("사용자의 JSESSIONID가 저장되어 있지 않다면 null 값을 반환한다")
     void findSessionId_fail() {
         //given
-        User notLoginedUser = new User("test2", "password2", "test2@email.com");
+        String notSavedSessionId = "test";
 
         //when
-        Session foundSession = sessionManager.findSession(notLoginedUser);
+        Optional<Session> foundSession = Optional.ofNullable(sessionManager.findSession(notSavedSessionId));
 
         //then
-        assertThat(foundSession).isNull();
+        assertThat(foundSession).isEmpty();
     }
 }

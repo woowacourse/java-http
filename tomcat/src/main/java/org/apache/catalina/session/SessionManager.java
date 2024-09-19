@@ -1,6 +1,5 @@
 package org.apache.catalina.session;
 
-import com.techcourse.model.domain.User;
 import org.apache.catalina.Manager;
 
 import java.util.HashMap;
@@ -15,15 +14,6 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         return new SessionManager();
-    }
-
-    public Session findSession(final User user) {
-        for (String key : SESSIONS.keySet()) {
-            if (SESSIONS.get(key).getAttribute("user") == user) {
-                return findSession(key);
-            }
-        }
-        return null;
     }
 
     @Override

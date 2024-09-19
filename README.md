@@ -6,7 +6,8 @@
 
 ### 지난 피드백 반영
 
-1.`HttpCookies`
+1. `HttpCookies`
+
 > 생각할거리: Session과 Cookie는 서로 같은 개념인가요?
 > <br>그렇지 않다면 Cookies가 JSessionID를 알아야 할 필요가 있을까요?
 
@@ -24,6 +25,19 @@
 와 `Session`은 엄연히 다른 개념이며, `Cookies`가 `JSessionID`를 알아야 하는 이유도 없는 것 같습니다.
 
 하여 `Cookie`와 `Session`의 역할을 분리해보았어요!
+
+<br>
+
+2. `SessionManager`
+
+> Session이 User를 알아야 할까요? <br> 추후에 User 정보가 아니라 다른 정보로 Session을 만들게 된다면요? <br> SessionManager는 무엇을 기준으로 자신의 Session을
+> 관리해야 할까요?
+
+이 부분은 아루가 코멘트에서 정리해주신 부분 같아서 따로 첨언할 점이 없네요! 👍
+
+구현하면서는 세션 개수를 톰캣(?)에서 관리해주어야 한다는 생각에 변화할 수 있는 `JSESSIONID`보다는 고정되어 있는 `User`를 사용해 구분해야겠다고 생각했던 것 같아요.
+
+하지만 세션 개수 자체도 톰캣에서 관리하는 부분이 아니라고 하면 더더욱 기존 구조를 유지할 필요가 없는 것 같네요 ~.~
 
 <br>
 

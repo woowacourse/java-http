@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class Cookie {
 
+    public static final String J_SESSION_KEY = "JSESSIONID=";
+
     private final String value;
 
     public Cookie(final String cookie) {
@@ -14,7 +16,7 @@ public class Cookie {
         if (value == null) {
             return false;
         }
-        return value.contains("JSESSIONID=");
+        return value.contains(J_SESSION_KEY);
     }
 
     public String getJSessionId() {

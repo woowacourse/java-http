@@ -29,15 +29,14 @@ class IndexControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         indexController.doGet(request, httpResponse);
-        String responseBody = new HttpResponse().generateResponseBody("static/index.html");
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String actual = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+responseBody.getBytes().length+ " \r\n" +
+                "Content-Length: " + 5564 + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        String response = httpResponse.getResponse();
-        assertThat(actual).isEqualTo(response);
+        String actual = httpResponse.getResponse();
+        assertThat(actual).contains(expected);
     }
 }

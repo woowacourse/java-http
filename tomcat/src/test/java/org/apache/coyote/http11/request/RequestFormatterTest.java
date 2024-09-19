@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class FormatterTest {
+class RequestFormatterTest {
 
     private static final String NEW_LINE = "\r\n";
 
@@ -26,7 +26,7 @@ class FormatterTest {
         String requestLine = "POST /index HTTP/1.1";
 
         //when
-        String[] result = Formatter.toRequestLineFormat(requestLine);
+        String[] result = RequestFormatter.toRequestLineFormat(requestLine);
 
         //then
         assertAll(
@@ -43,7 +43,7 @@ class FormatterTest {
     @DisplayName("올바르지 않은 requestLine 포맷팅 요청이 들어오면 IllegalArgumentException을 반환한다.")
     void toRequestLineFormat_invalidInput(String requestLine) {
         //when, then
-        assertThatThrownBy(() -> Formatter.toRequestLineFormat(requestLine))
+        assertThatThrownBy(() -> RequestFormatter.toRequestLineFormat(requestLine))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -58,7 +58,7 @@ class FormatterTest {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
 
         // when
-        RequestHeader requestHeader = Formatter.toHeader(bufferedReader);
+        RequestHeader requestHeader = RequestFormatter.toHeader(bufferedReader);
 
         // then
         assertThat(requestHeader.getContentLength()).isEqualTo(128);
@@ -73,7 +73,7 @@ class FormatterTest {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
 
         // when
-        RequestHeader requestHeader = Formatter.toHeader(bufferedReader);
+        RequestHeader requestHeader = RequestFormatter.toHeader(bufferedReader);
 
         // then
         assertThat(requestHeader.getContentLength()).isZero();
@@ -91,7 +91,7 @@ class FormatterTest {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
 
         // when
-        RequestHeader requestHeader = Formatter.toHeader(bufferedReader);
+        RequestHeader requestHeader = RequestFormatter.toHeader(bufferedReader);
 
         // then
         assertThat(requestHeader.getContentLength()).isEqualTo(128);
@@ -108,7 +108,7 @@ class FormatterTest {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
 
         //when, then
-        assertThatThrownBy(() -> Formatter.toHeader(bufferedReader))
+        assertThatThrownBy(() -> RequestFormatter.toHeader(bufferedReader))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -122,7 +122,7 @@ class FormatterTest {
         int contentLength = 128;
 
         // when
-        RequestBody result = Formatter.toBody(bufferedReader, isGet, contentLength);
+        RequestBody result = RequestFormatter.toBody(bufferedReader, isGet, contentLength);
 
         // then
         assertThat(result.getPayloads()).isEmpty();
@@ -137,7 +137,7 @@ class FormatterTest {
         boolean isGet = false;
 
         // when
-        RequestBody result = Formatter.toBody(bufferedReader, isGet, input.length());
+        RequestBody result = RequestFormatter.toBody(bufferedReader, isGet, input.length());
 
         // then
         assertAll(
@@ -156,7 +156,7 @@ class FormatterTest {
         int contentLength = 0;
 
         // when
-        RequestBody result = Formatter.toBody(bufferedReader, isGet, contentLength);
+        RequestBody result = RequestFormatter.toBody(bufferedReader, isGet, contentLength);
 
         // then
         assertThat(result.getPayloads()).isEmpty();

@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class FormatterTest {
+class ResponseFormatterTest {
 
     @Test
     @DisplayName("HttpResponse를 바이트 출력 형식에 맞게 포맷팅한다.")
@@ -19,7 +19,7 @@ class FormatterTest {
         HttpResponse response = new HttpResponse(HttpStatus.OK, new ResponseHeader(), contents);
 
         //when
-        byte[] result = Formatter.toResponseFormat(response);
+        byte[] result = ResponseFormatter.toResponseFormat(response);
         byte[] expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Length: 12",
@@ -39,7 +39,7 @@ class FormatterTest {
         response.setStatus(HttpStatus.OK);
 
         //when
-        byte[] result = Formatter.toResponseFormat(response);
+        byte[] result = ResponseFormatter.toResponseFormat(response);
         byte[] expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Length: 0",

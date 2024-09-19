@@ -19,7 +19,7 @@ public class RequestLine {
     }
 
     public static RequestLine from(String requestLine) {
-        String[] line = Formatter.toRequestLineFormat(requestLine);
+        String[] line = RequestFormatter.toRequestLineFormat(requestLine);
 
         HttpMethod httpMethod = HttpMethod.from(line[METHOD_INDEX]);
         String requestURL = line[PATH_INDEX];

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Formatter {
+public class RequestFormatter {
 
     private static final int OFFSET = 0;
     private static final int KEY_INDEX = 0;
@@ -20,6 +20,9 @@ public class Formatter {
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_DELIMITER = "=";
     private static final String SPACE = " ";
+
+    private RequestFormatter() {
+    }
 
     public static String[] toRequestLineFormat(String requestLine) {
         if (requestLine == null) {

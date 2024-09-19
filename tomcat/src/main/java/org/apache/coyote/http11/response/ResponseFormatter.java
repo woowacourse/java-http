@@ -6,12 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class Formatter {
+public class ResponseFormatter {
 
     private static final int INDEX_ZERO = 0;
     private static final String CRLF = "\r\n";
     private static final String KEY_DELIMITER = ":";
     private static final String SPACE_SEPARATOR = " ";
+
+    private ResponseFormatter() {
+    }
 
     public static byte[] toResponseFormat(HttpResponse httpResponse) {
         StringJoiner stringJoiner = new StringJoiner(CRLF);

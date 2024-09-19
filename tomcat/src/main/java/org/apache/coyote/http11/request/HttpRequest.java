@@ -15,7 +15,7 @@ import java.util.UUID;
 public class HttpRequest {
 
     private static final String JSESSIONID = "JSESSIONID";
-    
+
     private final RequestLine requestLine;
     private final RequestHeader header;
     private final RequestBody body;
@@ -25,8 +25,8 @@ public class HttpRequest {
 
         String rawRequestLine = bufferedReader.readLine();
         this.requestLine = RequestLine.from(rawRequestLine);
-        this.header = Formatter.toHeader(bufferedReader);
-        this.body = Formatter.toBody(bufferedReader, requestLine.isGetMethod(), header.getContentLength());
+        this.header = RequestFormatter.toHeader(bufferedReader);
+        this.body = RequestFormatter.toBody(bufferedReader, requestLine.isGetMethod(), header.getContentLength());
     }
 
     public boolean existsSession() {

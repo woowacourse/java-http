@@ -10,7 +10,7 @@ public class RequestBody {
     private final Map<String, String> payloads;
 
     public RequestBody(String payloads) {
-        this.payloads = Formatter.toBodyValueFormat(payloads);
+        this.payloads = RequestFormatter.toBodyValueFormat(payloads);
     }
 
     public static RequestBody empty() {

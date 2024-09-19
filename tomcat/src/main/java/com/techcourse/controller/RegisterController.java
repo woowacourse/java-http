@@ -1,13 +1,14 @@
-package org.apache.catalina.controller;
+package com.techcourse.controller;
 
-import org.apache.catalina.AuthManager;
+import com.techcourse.AuthManager;
 import org.apache.catalina.ResourceManager;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Session;
 import java.io.IOException;
 
-import static org.apache.catalina.AuthManager.AUTHENTICATION_COOKIE_NAME;
+import static com.techcourse.AuthManager.AUTHENTICATION_COOKIE_NAME;
 import static org.apache.coyote.http11.Status.BAD_REQUEST;
 import static org.apache.coyote.http11.Status.FOUND;
 import static org.apache.coyote.http11.Status.INTERNAL_SERVER_ERROR;

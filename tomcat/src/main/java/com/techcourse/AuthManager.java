@@ -1,7 +1,8 @@
-package org.apache.catalina;
+package com.techcourse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.Session;
 import java.util.UUID;

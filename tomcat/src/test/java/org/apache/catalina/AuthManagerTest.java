@@ -1,5 +1,6 @@
 package org.apache.catalina;
 
+import com.techcourse.AuthManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequestHeaders;

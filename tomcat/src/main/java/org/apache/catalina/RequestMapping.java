@@ -1,5 +1,9 @@
-package org.apache.catalina.controller;
+package org.apache.catalina;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.PageController;
 import org.apache.coyote.http11.HttpRequest;
 
 public class RequestMapping {

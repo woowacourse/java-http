@@ -18,12 +18,13 @@ public class HttpRequest {
     private final HttpRequestHeaders httpRequestHeaders;
     private String requestBody;
 
-    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders) {
+
+   public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders) {
         this.requestLine = requestLine;
         this.httpRequestHeaders = httpRequestHeaders;
     }
 
-    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, String requestBody) {
+   public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, String requestBody) {
         this.requestLine = requestLine;
         this.httpRequestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;

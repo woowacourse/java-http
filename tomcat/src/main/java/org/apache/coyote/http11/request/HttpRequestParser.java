@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.cookie.HttpCookieExtractor;
 
 public class HttpRequestParser {
 
@@ -17,9 +19,9 @@ public class HttpRequestParser {
 
     private static final String DELIMITER_PARAMETER_VALUE = "=";
 
-    private static final String EMPTY_LINE = "";
-
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
+
+    private static final int VALID_REQUEST_LINE_COUNT = 3;
 
     private static final HttpRequestParser instance = new HttpRequestParser();
 
@@ -27,21 +29,27 @@ public class HttpRequestParser {
     }
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
-        String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
+        String[] requestLine = parseRequestLines(bufferedReader);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
         HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
-        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
-        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
-        if (httpMethod.equals(HttpMethod.POST)) {
-            httpRequestBody = parseHttpRequestBody(httpRequestHeaders, bufferedReader);
-        }
-        if (!httpRequestHeaders.getCookies().equals(EMPTY_LINE)) {
-            httpCookie = HttpCookieExtractor.extractCookie(httpRequestHeaders);
-        }
+        HttpRequestBody httpRequestBody = setHttpRequestBody(httpMethod, httpRequestHeaders, bufferedReader);
+        HttpCookie httpCookie = setHttpCookie(httpRequestHeaders);
         return new HttpRequest(httpMethod, httpRequestPath, queryString,
                 httpRequestHeaders, httpRequestBody, httpCookie);
+    }
+
+    private String[] parseRequestLines(BufferedReader bufferedReader) throws IOException {
+        String[] requestLines = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
+        validateRequestLine(requestLines);
+        return requestLines;
+    }
+
+    private void validateRequestLine(String[] requestLine) {
+        if (requestLine.length != VALID_REQUEST_LINE_COUNT) {
+            throw new IllegalArgumentException("유효하지 않은 요청입니다.");
+        }
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {
@@ -77,11 +85,28 @@ public class HttpRequestParser {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();
-        while (!EMPTY_LINE.equals(headerLine)) {
+        while (!headerLine.isEmpty()) {
             splitSingleString(headers, headerLine, DELIMITER_HEADER);
             headerLine = bufferedReader.readLine();
         }
         return new HttpRequestHeaders(headers);
+    }
+
+    private HttpRequestBody setHttpRequestBody(HttpMethod method, HttpRequestHeaders headers,
+                                               BufferedReader bufferedReader) throws IOException {
+        HttpRequestBody httpRequestBody = new HttpRequestBody(new HashMap<>());
+        if (method.equals(HttpMethod.POST)) {
+            httpRequestBody = parseHttpRequestBody(headers, bufferedReader);
+        }
+        return httpRequestBody;
+    }
+
+    private HttpCookie setHttpCookie(HttpRequestHeaders headers) {
+        HttpCookie httpCookie = new HttpCookie(new HashMap<>());
+        if (!headers.getCookies().isEmpty()) {
+            httpCookie = HttpCookieExtractor.extractCookie(headers);
+        }
+        return httpCookie;
     }
 
     private HttpRequestBody parseHttpRequestBody(

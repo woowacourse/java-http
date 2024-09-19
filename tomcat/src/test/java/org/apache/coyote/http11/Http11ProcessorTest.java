@@ -1,12 +1,17 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,13 +19,6 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
@@ -47,7 +45,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -65,7 +63,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Length: 5564\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -73,7 +71,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인에 성공하면 /index.html로 redirect한다.")
-    void should_redirect_to_index_when_login_success() throws IOException, URISyntaxException {
+    void should_redirect_to_index_when_login_success() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -87,7 +85,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        loginController.login(parsedRequest, httpResponse);
+        loginController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.FOUND);
@@ -96,7 +94,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("로그인에 실패하면 /401.html로 redirect한다.")
-    void should_redirect_to_401_when_login_fail() throws IOException, URISyntaxException {
+    void should_redirect_to_401_when_login_fail() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -110,7 +108,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        loginController.login(parsedRequest, httpResponse);
+        loginController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(parsedRequest.getHttpRequestPath()).isEqualTo("/401.html");
@@ -119,7 +117,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("회원가입에 성공하면 /index.html로 redirect한다.")
-    void should_redirect_to_index_when_register_success() throws IOException, URISyntaxException {
+    void should_redirect_to_index_when_register_success() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",
@@ -133,7 +131,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        registerController.register(parsedRequest, httpResponse);
+        registerController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.FOUND);
@@ -142,7 +140,7 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("이미 존재하는 계정으로 회원가입을 시도하면 Bad Request를 응답하고 회원가입 페이지로 돌아간다.")
-    void should_redirect_to_register_when_login_fail() throws IOException, URISyntaxException {
+    void should_redirect_to_register_when_login_fail() throws Exception {
         //given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",
@@ -156,7 +154,7 @@ class Http11ProcessorTest {
         HttpResponse httpResponse = new HttpResponse();
 
         //when
-        registerController.register(parsedRequest, httpResponse);
+        registerController.doPost(parsedRequest, httpResponse);
 
         //then
         assertThat(parsedRequest.getHttpRequestPath()).isEqualTo("/register.html");

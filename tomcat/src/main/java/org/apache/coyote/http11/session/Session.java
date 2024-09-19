@@ -2,6 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
 
@@ -11,6 +12,10 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
+    }
+
+    public Session() {
+        this.id = UUID.randomUUID().toString();
     }
 
     public void setAttribute(String name, Object value) {

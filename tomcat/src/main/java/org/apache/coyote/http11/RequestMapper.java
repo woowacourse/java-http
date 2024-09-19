@@ -1,42 +1,31 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticPageController;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import org.apache.coyote.http11.request.HttpMethod;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 
 public class RequestMapper {
 
     private static final RequestMapper instance = new RequestMapper();
 
-    private final LoginController loginController;
-
-    private final RegisterController registerController;
-
-    private final StaticPageController staticPageController;
+    private final Map<String, Controller> controllers = new HashMap<>();
 
     private RequestMapper() {
-        this.loginController = LoginController.getInstance();
-        this.registerController = RegisterController.getInstance();
-        this.staticPageController = StaticPageController.getInstance();
+        initControllers();
     }
 
-    public void mapRequest(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        if (request.getHttpMethod().equals(HttpMethod.POST)) {
-            if (request.getHttpRequestPath().contains("/login")) {
-                loginController.login(request, response);
-            }
-            if (request.getHttpRequestPath().contains("/register")) {
-                registerController.register(request, response);
-            }
-        }
-        if (request.getHttpMethod().equals(HttpMethod.GET)) {
-            staticPageController.getStaticPage(request, response);
-        }
+    private void initControllers() {
+        controllers.put("/login", LoginController.getInstance());
+        controllers.put("/register", RegisterController.getInstance());
+        controllers.put("/", StaticPageController.getInstance());
+    }
+
+    public Controller mapRequest(HttpRequest request) {
+        return controllers.getOrDefault(request.getHttpRequestPath(), StaticPageController.getInstance());
     }
 
     public static RequestMapper getInstance() {

@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.controller.Controller;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -38,20 +36,21 @@ public class Http11Processor implements Runnable, Processor {
             String response = getResponse(inputStream);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static String getResponse(InputStream inputStream) throws IOException, URISyntaxException {
-        RequestMapper requestMapper = RequestMapper.getInstance();
+    private static String getResponse(InputStream inputStream) throws Exception {
         HttpRequestParser httpRequestParser = HttpRequestParser.getInstance();
         HttpResponseParser httpResponseParser = HttpResponseParser.getInstance();
+        RequestMapper requestMapper = RequestMapper.getInstance();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
         HttpResponse httpResponse = new HttpResponse();
-        requestMapper.mapRequest(httpRequest, httpResponse);
+        Controller controller = requestMapper.mapRequest(httpRequest);
+        controller.service(httpRequest, httpResponse);
         return httpResponseParser.parseResponse(httpResponse);
     }
 }

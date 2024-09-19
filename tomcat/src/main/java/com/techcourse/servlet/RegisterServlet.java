@@ -38,25 +38,30 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpRequest req, HttpResponse resp) {
+        if (!validateHasBody(req, ACCOUNT, PASSWORD, EMAIL)) {
+            resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/register.html"));
+            return;
+        }
+
         try {
-            if(!validateHasBody(req, ACCOUNT, PASSWORD, EMAIL)) {
-                resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/register.html"));
-                return;
-            }
-
-            String account = req.getBodyValue(ACCOUNT);
-            String password = req.getBodyValue(PASSWORD);
-            String email = req.getBodyValue(EMAIL);
-
-            User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-
+            User user = registerUser(req);
             resp.setResponse(HttpStatus.FOUND, "/index.html");
-            log.info("회원가입 성공 (account: {})", account);
+            log.info("회원가입 성공 (account: {})", user.getAccount());
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패", e);
             resp.setResponse(HttpStatus.BAD_REQUEST, "/register.html");
         }
+    }
+
+    private User registerUser(HttpRequest req) {
+        String account = req.getBodyValue(ACCOUNT);
+        String password = req.getBodyValue(PASSWORD);
+        String email = req.getBodyValue(EMAIL);
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        return user;
     }
 
     @Override

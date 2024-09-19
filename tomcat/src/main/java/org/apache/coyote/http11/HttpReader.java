@@ -7,14 +7,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Http11Reader extends BufferedReader {
-    public Http11Reader(InputStream inputStream) {
+public class HttpReader extends BufferedReader {
+    public HttpReader(InputStream inputStream) {
         super(new InputStreamReader(inputStream));
     }
 
     public List<String> readLines() throws IOException {
         List<String> result = new ArrayList<>(readLinesWhileBuffered());
-        result.add(readWhileBuffered());
+        if (ready()) {
+            result.add("");
+            result.add(readWhileBuffered());
+        }
         return result;
     }
 

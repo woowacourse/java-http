@@ -2,32 +2,37 @@ package com.techcourse.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
-    private final String id;
-    private final Map<String, String> values = new HashMap<>();
+    public static final String SESSION_KEY = "JSESSIONID";
 
-    public Session(String id) {
-        this.id = id;
+    private final String id;
+    private final Map<String, Object> values = new HashMap<>();
+
+
+    public Session() {
+        this.id = generateRandomId();
+        setAttribute(SESSION_KEY, id);
+    }
+
+    private String generateRandomId() {
+        return UUID.randomUUID().toString();
     }
 
     public String getId() {
         return this.id;
     }
 
-    public String getAttribute(String name) {
+    public Object getAttribute(String name) {
         return values.get(name);
     }
 
-    public void setAttribute(String name, String value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
+    public boolean hasSameIdWith(String otherId) {
+        return this.id.equals(otherId);
     }
 }

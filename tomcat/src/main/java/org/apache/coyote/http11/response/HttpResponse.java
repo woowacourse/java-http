@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.response;
 
 
-import org.apache.coyote.http11.HttpStatus;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Objects;
+import org.apache.coyote.HttpStatus;
 
 public class HttpResponse {
-    private final Map<String, String> headers = new TreeMap<>();
+    private final Map<String, String> headers = new HashMap<>();
     private HttpStatus status = HttpStatus.OK;
     private String body;
 
@@ -16,6 +17,14 @@ public class HttpResponse {
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
+    }
+
+    public void setContentType(String value){
+        headers.put("Content-Type", value);
+    }
+
+    public void setCookie(String key, String value){
+        headers.put("Set-Cookie", String.format("%s=%s;", key, value));
     }
 
     public void setBody(String body) {
@@ -35,11 +44,23 @@ public class HttpResponse {
         return response.toString();
     }
 
+    public void setRedirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        addHeader("Content-Type", "text/html");
+        addHeader("Location", location);
+    }
+
+    public void setHomeRedirection(){
+        setRedirect("/index.html");
+    }
+
     private void addBody(StringBuilder base) {
-        if (body == null) {
+        if (Objects.isNull(body)) {
             return;
         }
-        base.append("Content-Length: ").append(body.getBytes().length).append(" \r\n")
+
+        base.append("Content-Length: ").append(body.getBytes().length)
+                .append(" \r\n")
                 .append("\r\n")
                 .append(body);
     }

@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.resolver.Dispatcher;
+import org.apache.catalina.startup.WAS;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-
     public Http11Processor(Socket connection) {
         this.connection = connection;
     }
@@ -29,17 +27,19 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
-        try (var reader = new Http11Reader(connection.getInputStream());
-             var writer = new Http11Writer(connection.getOutputStream())) {
+        try (var reader = new HttpReader(connection.getInputStream());
+             var writer = new HttpWriter(connection.getOutputStream())) {
 
-            HttpRequest request = new Http11Request(reader.readLines());
-            HttpResponse response = Dispatcher.dispatch(request);
+            HttpRequest request = new HttpRequest(reader.readLines());
+            HttpResponse response = WAS.dispatch(request);
             writer.flushWith(response.normalize());
 
             log.info("request = {}", request);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

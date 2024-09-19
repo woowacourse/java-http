@@ -4,8 +4,8 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.Http11Reader;
-import org.apache.coyote.http11.Http11Writer;
+import org.apache.coyote.http11.HttpReader;
+import org.apache.coyote.http11.HttpWriter;
 
 public class StubProcessor extends Http11Processor {
     public StubProcessor(Socket connection) {
@@ -14,8 +14,8 @@ public class StubProcessor extends Http11Processor {
 
     @Override
     public void process(Socket connection) {
-        try (var reader = new Http11Reader(connection.getInputStream());
-             var writer = new Http11Writer(connection.getOutputStream())) {
+        try (var reader = new HttpReader(connection.getInputStream());
+             var writer = new HttpWriter(connection.getOutputStream())) {
             writer.flushWith(String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",

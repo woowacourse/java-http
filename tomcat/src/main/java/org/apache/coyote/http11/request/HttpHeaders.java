@@ -5,41 +5,54 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpHeaders {
-    private final Map<String, String> value;
-
     public static final String HEADER_DELIMITER = ": ";
+    public static final String COOKIE_KEY = "Cookie";
+    public static final int MINIMUM_LINE_SIZE = 2;
+
+    private final Map<String, String> value;
+    private final HttpCookie cookie;
 
     public HttpHeaders(Map<String, String> value) {
         this.value = value;
+        this.cookie = HttpCookie.from(value.get(COOKIE_KEY));
     }
 
     public static HttpHeaders from(List<String> lines) {
-        if (lines.size() < 2) {
-            throw new IllegalArgumentException("request must be more than two lines");
-        }
-
-        Map<String, String> value = new HashMap<>();
+        validateLineSize(lines);
+        final Map<String, String> buffer = new HashMap<>();
         int startIndex = 1;
         for (int index = startIndex; index < lines.size(); index++) {
             String line = lines.get(index);
             if (line.isEmpty()) {
                 break;
             }
-            String[] split = line.split(HEADER_DELIMITER);
-            validate(split);
-            value.put(split[0], split[1]);
+            String[] keyValue = line.split(HEADER_DELIMITER);
+            validate(keyValue);
+            String headerKey = keyValue[0];
+            String headerValue = keyValue[1];
+            buffer.put(headerKey, headerValue);
         }
 
-        return new HttpHeaders(value);
+        return new HttpHeaders(buffer);
+    }
+
+    private static void validateLineSize(List<String> lines) {
+        if (lines.size() < MINIMUM_LINE_SIZE) {
+            throw new IllegalArgumentException("request must be more than two lines");
+        }
     }
 
     private static void validate(String[] split) {
-        if (split.length < 2) {
+        if (split.length < MINIMUM_LINE_SIZE) {
             throw new IllegalArgumentException("key value not matched");
         }
         if (split[0].isBlank() || split[1].isBlank()) {
-            throw new IllegalArgumentException("key value cant not be blank");
+            throw new IllegalArgumentException("key or value cant not be blank");
         }
+    }
+
+    public String getCookieValue(String key) {
+        return cookie.getValue(key);
     }
 
     public boolean contains(String key) {

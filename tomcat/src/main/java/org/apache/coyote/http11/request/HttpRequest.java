@@ -2,8 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
+import org.apache.coyote.http11.request.requestline.HttpRequestLine;
 
-public abstract class HttpRequest {
+public class HttpRequest {
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpPayload payload;
@@ -27,9 +29,8 @@ public abstract class HttpRequest {
         return requestLine.getLocation().getExtension();
     }
 
-    //TODO: cookies
-    public String getCookie() {
-        return headers.find("Cookie").split("=")[1];
+    public String getCookieValue(String key) {
+        return headers.getCookieValue(key);
     }
 
     public boolean containsHeader(String key) {

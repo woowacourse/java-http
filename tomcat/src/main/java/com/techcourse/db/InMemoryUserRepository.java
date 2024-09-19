@@ -1,5 +1,6 @@
 package com.techcourse.db;
 
+import com.techcourse.exception.IllegalConstructionException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
@@ -12,17 +13,12 @@ public class InMemoryUserRepository {
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
-        User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
-
-        SessionManager sessionManager = new SessionManager();
-        Session newSession = new Session("gugu");
-        newSession.setAttribute("JSESSIONID",UUID.randomUUID().toString());
-        sessionManager.add(newSession);
+        User gugu = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        database.put(gugu.getAccount(), gugu);
     }
 
     private InMemoryUserRepository() {
-
+        throw new IllegalConstructionException(this.getClass());
     }
 
     public static void save(User user) {

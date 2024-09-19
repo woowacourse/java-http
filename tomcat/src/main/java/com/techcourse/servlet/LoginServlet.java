@@ -3,7 +3,9 @@ package com.techcourse.servlet;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -36,7 +38,7 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpRequest req, HttpResponse resp) {
         Session session = req.getSession(true);
         User user = (User) session.getAttribute("user");
-        if(user != null) {
+        if (user != null) {
             log.info("이미 로그인된 유저입니다. (account: {})", user.getAccount());
             resp.setRedirect(HttpStatus.FOUND, "/index.html");
             return;
@@ -48,9 +50,9 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpRequest req, HttpResponse resp) {
-        if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD)) {
-            log.error("요청에 필요한 값이 존재하지 않습니다.");
-            resp.setResponse(HttpStatus.NOT_FOUND, ResourceParser.getRequestFile("/404.html"));
+        if(!validateHasBody(req, ACCOUNT, PASSWORD)) {
+            resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/login.html"));
+            return;
         }
 
         String account = req.getBodyValue(ACCOUNT);

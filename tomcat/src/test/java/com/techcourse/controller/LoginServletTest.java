@@ -44,4 +44,16 @@ class LoginServletTest {
         assertThat(result.statusCode()).isEqualTo(401);
         assertThat(result.body()).isEqualTo(expectBody);
     }
+
+    @Test
+    void 요청_URI가_login이고_POST_메서드일때_로그인에_필요한_파라미터가_없으면_() throws IOException {
+        String body = "account=notExist&password=password";
+        final var result = TestHttpUtils.sendPost("http://127.0.0.1:8080", "/login", body);
+
+        File errorPage = ResourceParser.getRequestFile("/401.html");
+        String expectBody = new String(Files.readAllBytes(errorPage.toPath()));
+
+        assertThat(result.statusCode()).isEqualTo(401);
+        assertThat(result.body()).isEqualTo(expectBody);
+    }
 }

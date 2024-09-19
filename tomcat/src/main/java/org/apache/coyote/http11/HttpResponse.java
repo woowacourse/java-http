@@ -2,9 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.cookie.Cookie;
@@ -50,7 +48,7 @@ public class HttpResponse {
 
     public String toMessage() {
         StringJoiner message = new StringJoiner("\r\n");
-        message.add("HTTP/1.1 %s ".formatted(httpStatus.getStatus())); // TODO: HTTP 버전은 Request 정보 받아오기
+        message.add("HTTP/1.1 %s ".formatted(httpStatus.getMessage())); // TODO: HTTP 버전은 Request 정보 받아오기
         message.add("Content-Type: %s;charset=utf-8 ".formatted(mimeType));
         message.add("Content-Length: " + contentLength + " ");
         if(location != null) {

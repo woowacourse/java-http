@@ -39,9 +39,9 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpRequest req, HttpResponse resp) {
         try {
-            if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD) || req.hasBody(EMAIL)) {
-                log.error("요청에 필요한 값이 존재하지 않습니다.");
-                resp.setResponse(HttpStatus.NOT_FOUND, ResourceParser.getRequestFile("/404.html"));
+            if(!validateHasBody(req, ACCOUNT, PASSWORD, EMAIL)) {
+                resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/register.html"));
+                return;
             }
 
             String account = req.getBodyValue(ACCOUNT);

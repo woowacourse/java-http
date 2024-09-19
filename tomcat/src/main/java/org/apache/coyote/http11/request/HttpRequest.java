@@ -47,6 +47,14 @@ public class HttpRequest {
         return headers;
     }
 
+    public boolean isGet() {
+        return requestLine.method().equals(HttpMethod.GET);
+    }
+
+    public boolean isPost() {
+        return requestLine.method().equals(HttpMethod.POST);
+    }
+
     public Cookie getCookie() {
         final String cookie = headers.get("Cookie");
         if (cookie != null) {

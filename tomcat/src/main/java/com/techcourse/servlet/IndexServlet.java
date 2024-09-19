@@ -3,6 +3,7 @@ package com.techcourse.servlet;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.resource.ResourceParser;
 
 public class IndexServlet extends HttpServlet {
@@ -18,7 +19,7 @@ public class IndexServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpRequest req, HttpResponse resp) {
-        resp.setResponse("200 OK", ResourceParser.getRequestFile("/index.html"));
+        resp.setResponse(HttpStatus.OK, ResourceParser.getRequestFile("/index.html"));
     }
 
     @Override

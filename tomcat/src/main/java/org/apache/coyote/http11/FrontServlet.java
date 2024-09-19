@@ -32,7 +32,7 @@ public class FrontServlet implements Servlet {
     public void service(HttpRequest req, HttpResponse resp) {
         if(isResourceRequest(req.getPath())) {
             File file = ResourceParser.getRequestFile(req.getPath());
-            resp.setResponse("200 OK", file);
+            resp.setResponse(HttpStatus.OK, file);
             return;
         }
         Servlet servlet = controllerMap.get(req.getPath());

@@ -7,6 +7,7 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.resource.ResourceParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpRequest req, HttpResponse resp) {
         File requestFile = ResourceParser.getRequestFile("/register.html");
-        resp.setResponse("200 OK", requestFile);
+        resp.setResponse(HttpStatus.OK, requestFile);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class RegisterServlet extends HttpServlet {
         try {
             if(!req.hasBody(ACCOUNT) || req.hasBody(PASSWORD) || req.hasBody(EMAIL)) {
                 log.error("요청에 필요한 값이 존재하지 않습니다.");
-                resp.setResponse("404 Not Found", ResourceParser.getRequestFile("/404.html"));
+                resp.setResponse(HttpStatus.NOT_FOUND, ResourceParser.getRequestFile("/404.html"));
             }
 
             String account = req.getBodyValue(ACCOUNT);
@@ -50,11 +51,11 @@ public class RegisterServlet extends HttpServlet {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            resp.setRedirect("302 Found", "/index.html");
+            resp.setRedirect(HttpStatus.FOUND, "/index.html");
             log.info("회원가입 성공 (account: {})", account);
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패", e);
-            resp.setResponse("400 Bad Request", ResourceParser.getRequestFile("/register.html"));
+            resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/register.html"));
         }
     }
 

@@ -13,7 +13,7 @@ import org.apache.coyote.http11.cookie.Cookies;
 public class HttpResponse {
     //TODO: http상태코드 관리
     private Map<String, String> headers; //TODO: 헤더로 관리
-    private String httpStatus;
+    private HttpStatus httpStatus;
     private String httpVersion;
     private String location;
     private String mimeType;
@@ -21,12 +21,12 @@ public class HttpResponse {
     private String body;
     private Cookies cookies = new Cookies();
 
-    public void setRedirect(String httpStatus, String location) {
+    public void setRedirect(HttpStatus httpStatus, String location) {
         this.httpStatus = httpStatus;
         this.location = location;
     }
 
-    public void setResponse(String httpStatus, File file) {
+    public void setResponse(HttpStatus httpStatus, File file) {
         try {
             this.httpStatus = httpStatus;
             this.mimeType = Files.probeContentType(file.toPath());
@@ -37,7 +37,7 @@ public class HttpResponse {
         }
     }
 
-    public void setResponse(String httpStatus, String body) {
+    public void setResponse(HttpStatus httpStatus, String body) {
         this.httpStatus = httpStatus;
         this.mimeType = "text/html";
         this.body = body;
@@ -50,7 +50,7 @@ public class HttpResponse {
 
     public String toMessage() {
         StringJoiner message = new StringJoiner("\r\n");
-        message.add("HTTP/1.1 %s ".formatted(httpStatus)); // TODO: HTTP 버전은 Request 정보 받아오기
+        message.add("HTTP/1.1 %s ".formatted(httpStatus.getStatus())); // TODO: HTTP 버전은 Request 정보 받아오기
         message.add("Content-Type: %s;charset=utf-8 ".formatted(mimeType));
         message.add("Content-Length: " + contentLength + " ");
         if(location != null) {

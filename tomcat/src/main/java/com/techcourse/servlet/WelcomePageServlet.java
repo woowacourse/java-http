@@ -3,6 +3,7 @@ package com.techcourse.servlet;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class WelcomePageServlet extends HttpServlet {
 
@@ -17,7 +18,7 @@ public class WelcomePageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpRequest req, HttpResponse resp) {
-        resp.setResponse("200 OK", "Hello world!");
+        resp.setResponse(HttpStatus.OK, "Hello world!");
     }
 
     @Override

@@ -44,6 +44,6 @@ class HttpVersionTest {
         // When & Then
         assertThatThrownBy(() -> HttpVersion.getByValue(input))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 HTTP Version 값 입니다. - " + input);
+                .hasMessage("유효하지 않은 HTTP Version 입니다. - " + input);
     }
 }

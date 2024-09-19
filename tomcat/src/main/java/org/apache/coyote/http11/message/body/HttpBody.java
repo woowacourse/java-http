@@ -12,6 +12,7 @@ public class HttpBody {
     private static final String FORM_DATA_KEY_AND_VALUE_SEPARATOR = "=";
     private static final int FORM_DATA_KEY_INDEX = 0;
     private static final int FORM_DATA_VALUE_INDEX = 1;
+    private static final int KEY_AND_VALUE_SET_SIZE = 2;
 
     private final String value;
 
@@ -42,7 +43,7 @@ public class HttpBody {
 
     private void setKeyAndValue(final Map<String, String> values, final String value) {
         final String[] keyAndValue = value.split(FORM_DATA_KEY_AND_VALUE_SEPARATOR);
-        if (keyAndValue.length != 2) {
+        if (keyAndValue.length != KEY_AND_VALUE_SET_SIZE) {
             return;
         }
 

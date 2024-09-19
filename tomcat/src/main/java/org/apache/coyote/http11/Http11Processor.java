@@ -21,7 +21,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final int MAX_WRITE_LENGTH = 10000;
 
     private final Socket connection;
-    private final RequestMapping requestMapping = AppConfig.initRequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -40,12 +39,14 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final String requestMessage = parseRequestMessage(inputStream);
             final HttpRequest httpRequest = new HttpRequest(requestMessage);
-            final HttpResponse httpResponse = new HttpResponse(null, null, null);
+            final HttpResponse httpResponse = new HttpResponse();
 
-            Controller controller = requestMapping.findController(httpRequest);
+            final RequestMapping requestMapping = AppConfig.initRequestMapping();
+            final Controller controller = requestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
-            outputStream.write(httpResponse.convertHttpResponseMessage().getBytes());
+            final String responseMessage = httpResponse.convertHttpResponseMessage();
+            outputStream.write(responseMessage.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

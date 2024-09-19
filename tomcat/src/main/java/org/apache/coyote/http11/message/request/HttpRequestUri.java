@@ -11,21 +11,21 @@ public class HttpRequestUri {
 
     private final String value;
 
-    public HttpRequestUri(final String value) {
-        validateRequestUriValueIsNullOrBlank(value);
-        validateRequestUriStartWithSlash(value);
-        this.value = value;
+    public HttpRequestUri(final String httpRequestUri) {
+        validateHttpRequestUriIsNullOrBlank(httpRequestUri);
+        validateHttpRequestUriIsStartsWithSlash(httpRequestUri);
+        this.value = httpRequestUri;
     }
 
-    private void validateRequestUriValueIsNullOrBlank(final String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Request URI 값으로 null 혹은 빈 값이 입력될 수 없습니다. - " + value);
+    private void validateHttpRequestUriIsNullOrBlank(final String httpRequestUri) {
+        if (httpRequestUri == null || httpRequestUri.isBlank()) {
+            throw new IllegalArgumentException("HTTP Request URI는 null 혹은 빈 값이 입력될 수 없습니다. - " + httpRequestUri);
         }
     }
 
-    private void validateRequestUriStartWithSlash(final String value) {
-        if (!value.startsWith("/")) {
-            throw new IllegalArgumentException("Request URI 값은 /로 시작해야합니다. - " + value);
+    private void validateHttpRequestUriIsStartsWithSlash(final String httpRequestUri) {
+        if (!httpRequestUri.startsWith("/")) {
+            throw new IllegalArgumentException("HTTP Request URI는 /로 시작해야합니다. - " + httpRequestUri);
         }
     }
 

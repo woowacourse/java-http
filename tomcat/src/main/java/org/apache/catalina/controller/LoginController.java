@@ -1,20 +1,22 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.*;
+import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.HTML;
+import static org.apache.coyote.http11.message.header.HttpHeaderAcceptType.PLAIN;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.CONTENT_TYPE;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.LOCATION;
 import static org.apache.coyote.http11.message.header.HttpHeaderFieldType.SET_COOKIE;
 
-import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.coyote.http11.FileFinder;
+import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.message.CookieParser;
 import org.apache.coyote.http11.message.body.HttpBody;
-import org.apache.coyote.http11.message.header.HttpHeader;
+import org.apache.coyote.http11.message.header.HttpHeaderField;
+import org.apache.coyote.http11.message.header.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -31,15 +33,17 @@ public class LoginController extends AbstractController {
     private static final String SESSION_COOKIE_KEY_NAME = "JSESSIONID";
     private static final String NO_CONTENT_LENGTH = "0";
     private static final String ERROR_MESSAGE = "파일을 찾는 과정에서 문제가 발생하였습니다.";
+    private static final String END_POINT = "/login";
 
-    public LoginController(final String baseUri) {
-        super(baseUri);
+    @Override
+    public boolean canHandle(final HttpRequest request) {
+        return matchRequestUriWithBaseUri(request, END_POINT);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpRequestLine requestLine = request.getRequestLine();
-        final HttpHeader requestHeader = request.getHeader();
+        final HttpHeaders requestHeader = request.getHeaders();
         final CookieParser cookieParser = new CookieParser();
         final Map<String, String> cookies = requestHeader.parseCookie(cookieParser);
 
@@ -48,14 +52,11 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        final FileFinder fileFinder = new FileFinder();
+        final FileReader fileReader = new FileReader();
         try {
-            final Optional<String> fileContent = fileFinder.readFileContent("/login.html");
-            fileContent.ifPresentOrElse(
-                    content -> setHandleGetSuccessResponse(requestLine, response, content),
-                    () -> setServerErrorResponse(requestLine, response)
-            );
-        } catch (URISyntaxException e) {
+            final String fileContent = fileReader.readFileContent("/login.html");
+            setHandleGetSuccessResponse(requestLine, response, fileContent);
+        } catch (IllegalStateException e) {
             setServerErrorResponse(requestLine, response);
         }
     }
@@ -72,10 +73,10 @@ public class LoginController extends AbstractController {
 
     private void setAlreadyLoginResponse(final HttpResponse response, final HttpRequestLine requestLine) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
-                LOCATION.getValue(), "http://localhost:8080/index.html",
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(LOCATION.getValue(), "/index.html"),
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH)
         ));
         final HttpBody httpBody = new HttpBody("");
         response.setStatusLine(httpStatusLine);
@@ -89,9 +90,9 @@ public class LoginController extends AbstractController {
             final String content
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.OK);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(content.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length()))
         ));
         final HttpBody httpBody = new HttpBody(content);
         response.setStatusLine(httpStatusLine);
@@ -102,10 +103,10 @@ public class LoginController extends AbstractController {
     private void setServerErrorResponse(final HttpRequestLine requestLine, final HttpResponse response) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
-                LOCATION.getValue(), ERROR_MESSAGE,
-                CONTENT_TYPE.getValue(), PLAIN.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(LOCATION.getValue(), ERROR_MESSAGE),
+                new HttpHeaderField(CONTENT_TYPE.getValue(), PLAIN.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(ERROR_MESSAGE.length()))
         ));
         final HttpBody httpBody = new HttpBody(ERROR_MESSAGE);
         response.setStatusLine(httpStatusLine);
@@ -116,15 +117,15 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final HttpRequestLine requestLine = request.getRequestLine();
-        final HttpBody body = request.getBody();
+        final HttpBody body = request.getBody().get();
         final Map<String, String> formData = body.parseFormDataKeyAndValue();
         final String account = formData.get("account");
         final String password = formData.get("password");
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        final FileFinder fileFinder = new FileFinder();
+        final FileReader fileReader = new FileReader();
         if (!validateLoginCredential(user, password)) {
-            processNotValidate(requestLine, response, fileFinder);
+            processNotValidate(requestLine, response, fileReader);
             return;
         }
 
@@ -139,14 +140,12 @@ public class LoginController extends AbstractController {
                 .orElse(false);
     }
 
-    private void processNotValidate(final HttpRequestLine requestLine, final HttpResponse response, final FileFinder fileFinder) {
+    private void processNotValidate(final HttpRequestLine requestLine, final HttpResponse response,
+                                    final FileReader fileReader) {
         try {
-            final Optional<String> fileContent = fileFinder.readFileContent("/401.html");
-            fileContent.ifPresentOrElse(
-                    content -> setNotValidateUserResponse(requestLine, response, content),
-                    () -> setServerErrorResponse(requestLine, response)
-            );
-        } catch (URISyntaxException e) {
+            final String fileContent = fileReader.readFileContent("/401.html");
+            setNotValidateUserResponse(requestLine, response, fileContent);
+        } catch (IllegalStateException e) {
             setServerErrorResponse(requestLine, response);
         }
     }
@@ -157,9 +156,9 @@ public class LoginController extends AbstractController {
             final String content
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.UNAUTHORIZED);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), String.valueOf(content.length())
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), String.valueOf(content.length()))
         ));
         final HttpBody httpBody = new HttpBody(content);
         response.setStatusLine(httpStatusLine);
@@ -182,11 +181,11 @@ public class LoginController extends AbstractController {
             final String sessionId
     ) {
         final HttpStatusLine httpStatusLine = new HttpStatusLine(requestLine.getHttpVersion(), HttpStatus.FOUND);
-        final HttpHeader responseHeader = new HttpHeader(Map.of(
-                SET_COOKIE.getValue(), SESSION_COOKIE_KEY_NAME + "=" + sessionId,
-                LOCATION.getValue(), "http://localhost:8080/index.html",
-                CONTENT_TYPE.getValue(), HTML.getValue(),
-                CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH
+        final HttpHeaders responseHeader = new HttpHeaders(List.of(
+                new HttpHeaderField(SET_COOKIE.getValue(), SESSION_COOKIE_KEY_NAME + "=" + sessionId),
+                new HttpHeaderField(LOCATION.getValue(), "/index.html"),
+                new HttpHeaderField(CONTENT_TYPE.getValue(), HTML.getValue()),
+                new HttpHeaderField(CONTENT_LENGTH.getValue(), NO_CONTENT_LENGTH)
         ));
         final HttpBody httpBody = new HttpBody("");
         response.setStatusLine(httpStatusLine);

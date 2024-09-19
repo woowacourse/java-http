@@ -6,6 +6,7 @@ import java.util.Map;
 public class Session {
 
     private static final String JSESSIONID = "JSESSIONID=";
+    private static final String SPACE = " ";
 
     private final String id;
     private final Map<String, Object> attributes = new HashMap<>();
@@ -19,7 +20,7 @@ public class Session {
     }
 
     public String toHeader(String uuid) {
-        return JSESSIONID + uuid + " ";
+        return JSESSIONID + uuid + SPACE;
     }
 
     public void setAttribute(final String name, final Object value) {

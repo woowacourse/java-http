@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.coyote.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
@@ -16,20 +18,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREAD_COUNT = 5;
 
     private final ServerSocket serverSocket;
     private final ServletContainer servletContainer;
+    private final ExecutorService executorService;
 
     private boolean stopped;
 
     public Connector(ServletContainer servletContainer) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, servletContainer);
+        this(servletContainer, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
     }
 
-    public Connector(int port, int acceptCount, ServletContainer servletContainer) {
+    public Connector(ServletContainer servletContainer, int port, int acceptCount, int maxThreads) {
         this.servletContainer = servletContainer;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(int port, int acceptCount) {
@@ -71,7 +76,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(servletContainer, connection);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,11 +24,11 @@ public class SampleController {
         this.helloWorldService = helloWorldService;
     }
 
-    @GetMapping("/test")
+    @GetMapping("/test/{threadNumber}")
     @ResponseBody
-    public String helloWorld() throws InterruptedException {
+    public String helloWorld(@PathVariable int threadNumber) throws InterruptedException {
         Thread.sleep(500);
-        log.info("http call count : {}", count.incrementAndGet());
+        log.info("Thread-[{}] : http call count : {}", threadNumber, count.incrementAndGet());
         return helloWorldService.helloWorld();
     }
 }

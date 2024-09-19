@@ -16,7 +16,7 @@ import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger("ConsoleTraceLogger");
     private final ServletContainer servletContainer;
     private final Socket connection;
 
@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.readFrom(requestBufferedReader);
-            log.info("request : {}", httpRequest);
+            log.trace("request : {}", httpRequest);
             HttpResponse httpResponse = new HttpResponse(httpRequest);
 
             service(httpRequest, httpResponse);

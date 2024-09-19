@@ -2,12 +2,13 @@ package org.apache.coyote.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
     // static!
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static SessionManager instance;
 
     private SessionManager() {}

@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import static org.apache.coyote.http11.httpmessage.HttpHeaders.JSESSIONID;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
@@ -21,7 +22,14 @@ public class LoginController extends AbstractController {
         HttpRequestParameters requestParams = HttpRequestParameters.parseFrom(request.getBody());
         String account = requestParams.getParam("account");
         String password = requestParams.getParam("password");
-        User user = InMemoryUserRepository.fetchByAccount(account);
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if(optionalUser.isEmpty()) {
+            response.setStatusFound("/401.html");
+            return;
+        }
+
+        User user = optionalUser.get();
         if (user.checkPassword(password)) {
             Session session = request.getSession(true);
             session.setAttribute("user", user);
@@ -34,6 +42,7 @@ public class LoginController extends AbstractController {
 
         response.setStatusFound("/401.html");
     }
+
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

@@ -37,7 +37,6 @@ public class LoginController extends AbstractController {
             User loginUser = login(loginUserInfo);
             setSession(request, response, loginUser);
             response.redirectTo(INDEX_PAGE);
-
         } catch (IOException | IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
             response.redirectTo(UNAUTHORIZED_PAGE);
@@ -73,7 +72,10 @@ public class LoginController extends AbstractController {
 
     private Map<String, String> parseUserInfo(Map<String, String> requestBody) {
         Map<String, String> userInfo = new HashMap<>();
-        if (requestBody.get(ACCOUNT_KEY).isEmpty() || requestBody.get(PASSWORD_KEY).isEmpty()) {
+        Optional<String> account = Optional.ofNullable(requestBody.get(ACCOUNT_KEY));
+        Optional<String> password = Optional.ofNullable(requestBody.get(PASSWORD_KEY));
+
+        if (account.isEmpty() || password.isEmpty()) {
             throw new IllegalArgumentException("필수 입력값이 비어 있습니다.");
         }
 

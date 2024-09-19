@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class RegisterController extends AbstractController {
 
@@ -26,7 +27,6 @@ public class RegisterController extends AbstractController {
         try {
             register(request.getRequestBody());
             response.redirectTo(INDEX_PAGE);
-
         } catch (IllegalArgumentException e) {
             log.info("오류 발생: {}", e.getMessage());
             response.redirectTo(REGISTER_PAGE);
@@ -34,15 +34,15 @@ public class RegisterController extends AbstractController {
     }
 
     private void register(Map<String, String> requestBody) {
-        String account = requestBody.get(ACCOUNT_KEY);
-        String password = requestBody.get(PASSWORD_KEY);
-        String email = requestBody.get(EMAIL_KEY);
+        Optional<String> account = Optional.ofNullable(requestBody.get(ACCOUNT_KEY));
+        Optional<String> password = Optional.ofNullable(requestBody.get(PASSWORD_KEY));
+        Optional<String> email = Optional.ofNullable(requestBody.get(EMAIL_KEY));
 
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             throw new IllegalArgumentException("필수 입력값이 부족합니다.");
         }
 
-        validateRegistration(account, password, email);
+        validateRegistration(account.get(), password.get(), email.get());
     }
 
     private void validateRegistration(String account, String password, String email) {

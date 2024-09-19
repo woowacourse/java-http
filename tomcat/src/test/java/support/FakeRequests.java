@@ -32,6 +32,26 @@ public class FakeRequests {
             "Host: localhost:8080 ",
             "Connection: keep-alive "
     );
+    public static List<String> validPostRequest = List.of(
+            "POST / HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 12 ",
+            "",
+            "Hello world!"
+    );
+
+    public static List<String> validRegisterGuguRequest = List.of(
+            "POST / HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 12 ",
+            "",
+            "account=gugu&password=password&email=gugu@gmail.com"
+    );
+
     public static final List<String> invalidGetRequest = List.of(
             "GETO/// HTTP/1.1 ",
             "Host: localhost:8080 ",

@@ -31,15 +31,11 @@ public class RegisterController extends HttpController {
             throw new DuplicatedAccountException(account);
         }
 
-        Session newSession = new Session(account);
-        SessionManager.add(newSession);
-
         InMemoryUserRepository.save(
                 new User(account, payload.get("password"), payload.get("email"))
         );
 
         response.setStatus(HttpStatus.FOUND);
         response.addHeader("Location", "/index.html");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + newSession.getAttribute("JSESSIONID"));
     }
 }

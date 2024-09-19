@@ -15,7 +15,6 @@ public class InMemoryUserRepository {
     static {
         User gugu = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(gugu.getAccount(), gugu);
-        SessionManager.add(new Session(gugu.getAccount()));
     }
 
     private InMemoryUserRepository() {

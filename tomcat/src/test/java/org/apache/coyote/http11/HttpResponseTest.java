@@ -60,7 +60,8 @@ class HttpResponseTest {
     @DisplayName("응답 헤더에 Set-Cookie를 추가한다.")
     void setCookie() throws IOException {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.generateResponse("test.html", Status.FOUND, "abc");
+        httpResponse.generateResponse("test.html", Status.FOUND);
+        httpResponse.addHeader("Set-Cookie", "JSESSIONID=abc");
 
         String actual = " \r\n"
                 + "Set-Cookie: JSESSIONID=abc ";

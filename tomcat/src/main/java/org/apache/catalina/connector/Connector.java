@@ -77,7 +77,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             Socket connection = serverSocket.accept();
-            threadPoolExecutor.submit(() -> process(connection));
+            process(connection);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -88,7 +88,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, container);
-        new Thread(processor).start();
+        threadPoolExecutor.submit(() -> processor.process(connection));
     }
 
     public void stop() {

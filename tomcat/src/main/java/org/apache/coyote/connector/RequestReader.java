@@ -14,19 +14,29 @@ public class RequestReader {
     }
 
     public static HttpRequest readRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         List<String> headerLines = new ArrayList<>();
+
+        String contentLengthHeader = readHeader(bufferedReader, headerLines);
+        String bodyLine = readBody(bufferedReader, contentLengthHeader);
+        return new HttpRequest(headerLines, bodyLine);
+    }
+
+    private static String readHeader(BufferedReader bufferedReader, List<String> headerLines) throws IOException {
         String rawLine;
         String contentLengthHeader = null;
-
         while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
             headerLines.add(rawLine);
             contentLengthHeader = getContentLength(rawLine);
         }
-        String bodyLine = readBody(bufferedReader, contentLengthHeader);
 
-        return new HttpRequest(headerLines, bodyLine);
+        if (contentLengthHeader == null) {
+            return "";
+        }
+        if (!contentLengthHeader.matches("\\d+")) {
+            throw new IllegalArgumentException("Invalid Content-Length header: " + contentLengthHeader);
+        }
+        return contentLengthHeader;
     }
 
     private static String getContentLength(String rawLine) {
@@ -37,14 +47,7 @@ public class RequestReader {
     }
 
     private static String readBody(BufferedReader bufferedReader, String contentLengthHeader) throws IOException {
-        if (contentLengthHeader == null) {
-            return "";
-        }
-        if (!contentLengthHeader.matches("\\d+")) {
-            throw new IllegalArgumentException("Invalid Content-Length header: " + contentLengthHeader);
-        }
         int contentLength = Integer.parseInt(contentLengthHeader);
-
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);

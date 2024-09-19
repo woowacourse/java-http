@@ -15,13 +15,13 @@ class ResponseBodyTest {
     @Test
     void parseRequestBody() throws IOException {
         // given
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        ResponseBody responseBody = new ResponseBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        String body = "hello world!";
+        ResponseBody responseBody = new ResponseBody(new String(body));
 
         // when
         int result = responseBody.getLength();
 
         // then
-        assertThat(result).isEqualTo(5564);
+        assertThat(result).isEqualTo(12);
     }
 }

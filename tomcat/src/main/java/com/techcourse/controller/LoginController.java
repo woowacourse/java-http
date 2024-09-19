@@ -44,9 +44,6 @@ public class LoginController extends AbstractController {
             log.info("User found: {}", user);
 
             Session session = getSession(request, user);
-            if (Objects.isNull(session)) {
-                session = createNewSession(user);
-            }
             response.setCookie(HttpCookie.ofJSessionId(session.getId()));
 
             redirect("index.html", response);
@@ -61,21 +58,9 @@ public class LoginController extends AbstractController {
         Session session = sessionManager.findSession(request)
                 .orElse(sessionManager.getByAttribute(SESSION_ATTRIBUTE, user).orElse(null));
         if (Objects.nonNull(session)) {
-            session = getOrInvalidateSession(user, session);
-        }
-        return session;
-    }
-
-    private static Session getOrInvalidateSession(User user, Session session) {
-        if (isInvalidSession(user, session)) {
             sessionManager.remove(session);
-            return null;
         }
-        return session;
-    }
-
-    private static boolean isInvalidSession(User user, Session session) {
-        return Objects.nonNull(session.getAttribute(SESSION_ATTRIBUTE)) && !Objects.equals(session.getAttribute(SESSION_ATTRIBUTE), user);
+        return createNewSession(user);
     }
 
     private Session createNewSession(User user) {
@@ -84,7 +69,6 @@ public class LoginController extends AbstractController {
         sessionManager.add(newSession);
         return newSession;
     }
-
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {

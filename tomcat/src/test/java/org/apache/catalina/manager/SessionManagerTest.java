@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.catalina.Session;
@@ -21,20 +20,20 @@ class SessionManagerTest {
     private Session session;
 
     @BeforeEach
-    void init(){
+    void init() {
         sessionManager = SessionManager.getInstance();
         session = Session.createRandomSession();
         sessionManager.add(session);
     }
 
     @AfterEach
-    void remove(){
+    void remove() {
         sessionManager.remove(session);
     }
 
     @DisplayName("새로운 세션을 생성하고 저장한다.")
     @Test
-    void addSession() throws IOException {
+    void addSession() {
         // given
         HttpRequest request = mock(HttpRequest.class);
         when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
@@ -50,7 +49,7 @@ class SessionManagerTest {
 
     @DisplayName("존재하는 세션을 조회해온다.")
     @Test
-    void findSessionExists() throws IOException {
+    void findSessionExists() {
         // given
         HttpRequest request = mock(HttpRequest.class);
         HttpCookie cookie = mock(HttpCookie.class);
@@ -68,9 +67,42 @@ class SessionManagerTest {
         );
     }
 
+    @DisplayName("세션을 조회했을 때 존재하지 않는다.")
+    @Test
+    void findSessionNotExists() {
+        // given
+        HttpRequest request = mock(HttpRequest.class);
+        HttpCookie cookie = mock(HttpCookie.class);
+        when(cookie.hasJSessionId()).thenReturn(true);
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=nonExistingSessionId"));
+        when(cookie.getJsessionid()).thenReturn("nonExistingSessionId");
+
+        // when
+        Optional<Session> result = sessionManager.findSession(request);
+
+        // then
+        assertThat(result.isPresent()).isFalse();
+    }
+
+    @DisplayName("세션을 삭제한다.")
+    @Test
+    void removeSession() {
+        // given
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
+
+        // when
+        sessionManager.remove(session);
+
+        // then
+        Optional<Session> result = sessionManager.findSession(request);
+
+        assertThat(result.isPresent()).isFalse();
+    }
+
     @DisplayName("세션 속성으로 존재하는 세션을 조회해온다.")
     @Test
-    void getByAttribute() throws IOException {
+    void getByAttribute() {
         // given
         session.setAttribute("user", "account");
         HttpRequest request = mock(HttpRequest.class);
@@ -88,7 +120,7 @@ class SessionManagerTest {
 
     @DisplayName("주어진 속성을 가진 세션이 없다.")
     @Test
-    void cannotGetByAttribute() throws IOException {
+    void cannotGetByAttribute() {
         // given
         session.setAttribute("user", "account");
         HttpRequest request = mock(HttpRequest.class);
@@ -102,38 +134,5 @@ class SessionManagerTest {
 
         // Then
         assertThat(result).isEmpty();
-    }
-
-    @DisplayName("세션을 조회했을 때 존재하지 않는다.")
-    @Test
-    void findSessionNotExists() throws IOException {
-        // given
-        HttpRequest request = mock(HttpRequest.class);
-        HttpCookie cookie = mock(HttpCookie.class);
-        when(cookie.hasJSessionId()).thenReturn(true);
-        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=nonExistingSessionId"));
-        when(cookie.getJsessionid()).thenReturn("nonExistingSessionId");
-
-        // when
-        Optional<Session> result = sessionManager.findSession(request);
-
-        // then
-        assertThat(result.isPresent()).isFalse();
-    }
-
-    @DisplayName("세션을 삭제한다.")
-    @Test
-    void removeSession() throws IOException {
-        // given
-        HttpRequest request = mock(HttpRequest.class);
-        when(request.getCookie()).thenReturn(new HttpCookie("JSESSIONID=" + session.getId()));
-
-        // when
-        sessionManager.remove(session);
-
-        // then
-        Optional<Session> result = sessionManager.findSession(request);
-
-        assertThat(result.isPresent()).isFalse();
     }
 }

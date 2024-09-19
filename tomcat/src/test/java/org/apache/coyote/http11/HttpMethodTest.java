@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpMethodTest {
-
     @DisplayName("String형 메서드로 HttpMethod를 찾는다.")
     @Test
     void getHttpMethod() {
@@ -21,14 +20,14 @@ class HttpMethodTest {
         assertThat(result).isEqualTo(HttpMethod.POST);
     }
 
-    @DisplayName("지원하지 않는 String형 메서드로 HttpMethod를 찾을 경우, NONE을 반환한다.")
+    @DisplayName("지원하지 않는 String형 메서드로 HttpMethod를 찾을 경우 예외를 발생시킨다.")
     @Test
     void getNoneHttpMethod() {
         // given
         String method = "WRONG";
 
         // when & then
-        assertThatThrownBy(() ->  HttpMethod.of(method))
+        assertThatThrownBy(() -> HttpMethod.of(method))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

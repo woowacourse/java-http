@@ -37,9 +37,9 @@ class Http11ProcessorTest {
                 expectedResponseBody);
     }
 
-    @DisplayName("process 과정에서 처리되지 않은 예외는 500 HTTP 응답을 생성한다.")
+    @DisplayName("유효하지 않은 요청 형식으로 발생하는 예외는 400 HTTP 응답을 생성한다.")
     @Test
-    void failProcess() throws IOException {
+    void failProcess400() {
         // given
         final var socket = new StubSocket("WRONG\r\nHost: localhost:8080\r\n\r\n");
         final var processor = new Http11Processor(socket);
@@ -48,13 +48,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expectedResponse = """
-                    HTTP/1.1 500 Internal Server Error
-                    Content-Type: text/html
-                    Content-Length: 79
-
-                    <html><body><h1>500 Internal Server Error</h1><p>Unexpected error occurred.</p></body></html>
-                """;
+        String expectedResponse = String.join("\r\n",
+                "HTTP/1.1 400 Bad Request",
+                "Content-Type: text/html",
+                "Content-Length: 80",
+                "",
+                "<html><body><h1>400 Bad Request</h1><p>Invalid request format.</p></body></html>");
 
         assertThat(socket.output()).isEqualTo(expectedResponse);
     }

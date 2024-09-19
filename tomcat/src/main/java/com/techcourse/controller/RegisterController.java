@@ -16,6 +16,7 @@ import com.techcourse.service.UserService;
 public class RegisterController extends AbstractController {
     private static final RegisterController instance = new RegisterController();
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
     private final UserService userService = new UserService();
 
     private RegisterController() {

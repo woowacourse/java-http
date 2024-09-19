@@ -21,6 +21,22 @@ class AppTest {
      * - http call count
      * - 테스트 결과값
      */
+    /**
+     *   tomcat:
+     *     threads:
+     *       max: 200 # 생성할 수 있는 thread의 총 개수
+     *       min-spare: 10 # 항상 활성화 되어있는(idle) thread의 개수
+     *     max-connections: 8192 # 수립가능한 connection의 총 개수
+     *     accept-count: 100 # 작업큐의 사이즈
+     *     connection-timeout: 20000 # timeout 판단 기준 시간, 20초
+     *
+     * max-connections != threads.max?
+     * -> NIO connectors
+     *
+     * min-spare만큼의 thread는 항상 활성화되어있다.
+     * 대기 큐(accept-count)가 꽉 찬 상태에서 요청이 더 들어올 때마다 thread를 추가 생성한다.
+     * 이때, 추가 생성 가능한 thread의 수는 threads.max만큼이다.
+     */
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;
@@ -38,7 +54,7 @@ class AppTest {
         for (final var thread : threads) {
             thread.join();
         }
-
+        //max-connections:2 -> 요청을 2개까지만 받을 수 있다. 커넥션 2개가 차지되어있는 동안 들어온 요청은 무시된다.
         assertThat(count.intValue()).isEqualTo(2);
     }
 

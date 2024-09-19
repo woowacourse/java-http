@@ -78,13 +78,21 @@ public class Connector implements Runnable {
     public void stop() {
         stopped = true;
         try {
-            threadPool.shutdown();
-            threadPool.awaitTermination(1, TimeUnit.MINUTES);
+            shutdownThreadPool();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void shutdownThreadPool() throws InterruptedException {
+        threadPool.shutdown();
+        if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+            log.warn("shutdown 요청 후 10초 안에 요청이 처리되지 않았습니다.");
+            threadPool.shutdownNow();
         }
     }
 

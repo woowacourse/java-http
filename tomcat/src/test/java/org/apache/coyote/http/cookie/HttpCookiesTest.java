@@ -20,7 +20,7 @@ class HttpCookiesTest {
         //when, then
         assertAll(
                 () -> assertDoesNotThrow(() -> HttpCookies.from(cookieHeader)),
-                () -> assertThat(HttpCookies.from(cookieHeader).getJsessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
+                () -> assertThat(HttpCookies.from(cookieHeader).getCookieValue("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
         );
     }
 

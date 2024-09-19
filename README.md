@@ -2,6 +2,31 @@
 
 ## 톰캣 구현하기
 
+<br>
+
+### 지난 피드백 반영
+
+1.`HttpCookies`
+> 생각할거리: Session과 Cookie는 서로 같은 개념인가요?
+> <br>그렇지 않다면 Cookies가 JSessionID를 알아야 할 필요가 있을까요?
+
+그동안 쿠키와 세션의 개념을 조금 혼동하고 있었던 것 같아요.🤔
+<br> (물론 지금도 딱히 잘 아는 건 아니지만...)
+
+어느 정도 공부를 마친 지금 간단히 정리해보자면
+
+- 쿠키: 정보를 '클라이언트'에 저장
+- 세션: 정보를 '서버에 저장'
+
+이렇게가 가장 큰 차이점인 것 같은데요.
+
+클라이언트에 쿠키 형식으로 저장된 세션 관련 정보를 `HttpCookie`, `HttpCookies` 객체로 받아와 서버에서 로직을 처리하고자 하는 지금 형태로 보았을 때 제가 구현한 `Cookie`
+와 `Session`은 엄연히 다른 개념이며, `Cookies`가 `JSessionID`를 알아야 하는 이유도 없는 것 같습니다.
+
+하여 `Cookie`와 `Session`의 역할을 분리해보았어요!
+
+<br>
+
 ### 구현하면서 궁금했던 점
 
 1. Http11Processor의 이 부분을
@@ -34,7 +59,8 @@ final URL resource = getClass().getResource("/static/index.html");
 
 
 3. 세션/쿠키의 디렉토리 위치를 현재는 코요테 밑 `http`에 두고 있는데, 맞는 위치인지 잘 모르겠어요...
-   <br><br><br><br><br>
+
+<br><br><br><br><br>
 
 ### 학습목표
 

@@ -5,7 +5,6 @@ import com.techcourse.model.domain.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http.cookie.HttpCookie;
 import org.apache.coyote.http.cookie.HttpCookies;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -22,6 +21,7 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String USER_KEY = "user";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
@@ -67,7 +67,7 @@ public class LoginController extends AbstractController {
         Session session = httpRequest.getSession(sessionManager);
         session.setAttribute(USER_KEY, user);
 
-        httpResponse.setCookie(HttpCookie.setCookieHeader(session.getId()));
+        httpResponse.setCookie(session.toHeader(session.getId()));
     }
 
     private Map<String, String> parseUserInfo(Map<String, String> requestBody) {
@@ -89,7 +89,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
             HttpCookies cookies = HttpCookies.from(request.getRequestHeader().getCookies());
-            String id = cookies.getJsessionId();
+            String id = cookies.getCookieValue(JSESSIONID);
 
             if (request.existsSession() && sessionManager.findSession(id) != null) {
                 response.redirectTo(INDEX_PAGE);

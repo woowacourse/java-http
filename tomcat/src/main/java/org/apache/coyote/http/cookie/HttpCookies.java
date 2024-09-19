@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 public class HttpCookies {
 
-    private static final String KEY = "JSESSIONID";
     private static final String COOKIE_DELIMITER = ";";
     private static final String KEY_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
@@ -35,16 +34,8 @@ public class HttpCookies {
         );
     }
 
-    public void addCookie(HttpCookie httpCookie) {
-        values.put(httpCookie.getName(), httpCookie);
-    }
-
-    public boolean hasJsessionId() {
-        return values.containsKey(KEY);
-    }
-
-    public String getJsessionId() {
-        return values.get(KEY).getValue();
+    public String getCookieValue(String key) {
+        return values.get(key).getValue();
     }
 
     public Map<String, HttpCookie> getCookies() {

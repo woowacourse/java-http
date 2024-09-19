@@ -14,6 +14,8 @@ import java.util.UUID;
 
 public class HttpRequest {
 
+    private static final String JSESSIONID = "JSESSIONID";
+    
     private final RequestLine requestLine;
     private final RequestHeader header;
     private final RequestBody body;
@@ -51,8 +53,8 @@ public class HttpRequest {
         Session session = new Session(UUID.randomUUID().toString());
         HttpCookies cookies = HttpCookies.from(header.getCookies());
 
-        if (existsSession() && manager.findSession(cookies.getJsessionId()) != null) {
-            return manager.findSession(cookies.getJsessionId());
+        if (existsSession() && manager.findSession(cookies.getCookieValue(JSESSIONID)) != null) {
+            return manager.findSession(cookies.getCookieValue(JSESSIONID));
         }
         manager.add(session);
         return session;

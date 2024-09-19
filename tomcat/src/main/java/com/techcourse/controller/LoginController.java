@@ -21,7 +21,6 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String USER_KEY = "user";
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
@@ -89,7 +88,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
             HttpCookies cookies = HttpCookies.from(request.getRequestHeader().getCookies());
-            String id = cookies.getCookieValue(JSESSIONID);
+            String id = cookies.getCookieValue(Session.getSessionKey());
 
             if (request.existsSession() && sessionManager.findSession(id) != null) {
                 response.redirectTo(INDEX_PAGE);

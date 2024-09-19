@@ -13,7 +13,6 @@ public class RequestHeader {
     public static final int NAME_INDEX = 0;
     public static final int VALUE_INDEX = 1;
 
-
     private final Map<String, String> header;
     private final HttpCookie httpCookie;
 

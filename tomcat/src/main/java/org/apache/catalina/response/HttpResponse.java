@@ -38,4 +38,8 @@ public class HttpResponse {
         body.setBody(resource);
         header.addHeader(HeaderName.CONTENT_LENGTH, String.valueOf(body.getLength()));
     }
+
+    public void addSession(String sessionId) {
+        header.addSession(sessionId);
+    }
 }

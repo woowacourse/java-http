@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
 
     private void login(HttpResponse response, User user) {
         String sessionId = sessionManager.generateSession(user);
-        response.addHeader(HeaderName.SET_COOKIE, "JSESSIONID=" + sessionId);
+        response.addSession(sessionId);
     }
 
     @Override

@@ -1,67 +1,76 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import static org.apache.coyote.http11.HttpHeaderField.*;
+import static org.apache.coyote.http11.Protocol.*;
 
 public class HttpResponse {
 
+    private static final String KEY_VALUE_DELIMITER = "=";
     private StatusLine statusLine;
-    private Map<String, String> responseHeaders;
+    private HttpResponseHeaders httpHeaders;
     private String responseBody;
 
     public HttpResponse() {
-        this.responseHeaders = new HashMap<>();
+        this.httpHeaders = new HttpResponseHeaders();
         this.responseBody = "";
     }
 
     public void setStatusLine(Status status) {
-        statusLine = new StatusLine("HTTP/1.1", status);
+        statusLine = new StatusLine(HTTP_1_1, status);
     }
 
     public void setContentType(String contentType) {
-        responseHeaders.put("Content-Type", contentType + ";charset=utf-8 ");
+        httpHeaders.setField(CONTENT_TYPE, contentType + ";charset=utf-8 ");
     }
 
     public void setContentLength(int contentLength) {
-        responseHeaders.put("Content-Length", String.valueOf(contentLength));
+        httpHeaders.setField(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void setLocation(String location) {
-        responseHeaders.put("Location", location);
+        httpHeaders.setField(LOCATION, location);
     }
 
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
 
-    public void setCookie(String sessionId) {
-        responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+    public void setCookie(String key, String value) {
+        httpHeaders.setField(SET_COOKIE, key + KEY_VALUE_DELIMITER + value);
+    }
+
+    public String getStatusMessage() {
+        return this.statusLine.getStatusMessage();
+    }
+
+    public String getContentType() {
+        return this.httpHeaders.findField(CONTENT_TYPE);
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(this.httpHeaders.findField(CONTENT_LENGTH));
     }
 
     public String getResponse() {
         StringBuilder stringBuilder = new StringBuilder();
 
+        getStatusLineToString(stringBuilder);
+        getHeadersToString(stringBuilder);
         stringBuilder.append("\r\n");
-        serializeStatusLine(stringBuilder);
-        serializeResponseHeaders(stringBuilder);
-        stringBuilder.append("").append("\r\n");
-        serializeResponseBody(stringBuilder);
+        getResponseBodyToString(stringBuilder);
 
         return stringBuilder.toString();
     }
 
-    private void serializeStatusLine(StringBuilder stringBuilder) {
-        stringBuilder.append(statusLine.serialize()).append("\r\n");
+    private void getStatusLineToString(StringBuilder stringBuilder) {
+        stringBuilder.append(statusLine.getStatusLineToString()).append("\r\n");
     }
 
-    private void serializeResponseHeaders(StringBuilder stringBuilder) {
-        for (Entry<String, String> responseHeaders : responseHeaders.entrySet()) {
-            stringBuilder.append(responseHeaders.getKey() + ": " + responseHeaders.getValue() + " ").append("\r\n");
-        }
+    private void getHeadersToString(StringBuilder stringBuilder) {
+        httpHeaders.getHeadersToString(stringBuilder);
     }
 
-    private void serializeResponseBody(StringBuilder stringBuilder) {
+    private void getResponseBodyToString(StringBuilder stringBuilder) {
         stringBuilder.append(responseBody);
     }
 }

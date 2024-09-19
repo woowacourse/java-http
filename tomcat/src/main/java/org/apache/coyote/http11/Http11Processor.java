@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.RequestMapping;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.InputStream;
@@ -31,8 +31,9 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
             Controller controller = RequestMapping.getController(httpRequest);
-            HttpResponse httpResponse = controller.service(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();

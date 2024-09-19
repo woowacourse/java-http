@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.requestline;
 
 import org.apache.coyote.http11.request.requestline.HttpLocation;
 import org.assertj.core.api.Assertions;

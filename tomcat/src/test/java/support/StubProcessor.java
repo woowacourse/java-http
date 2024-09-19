@@ -4,8 +4,8 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.request.HttpReader;
-import org.apache.coyote.http11.response.HttpWriter;
+import org.apache.coyote.http11.HttpReader;
+import org.apache.coyote.http11.HttpWriter;
 
 public class StubProcessor extends Http11Processor {
     public StubProcessor(Socket connection) {

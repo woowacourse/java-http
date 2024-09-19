@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request.requestline;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public enum HttpMethod {
@@ -9,18 +10,9 @@ public enum HttpMethod {
     DELETE;
 
     public static HttpMethod from(String data) {
-        if ("GET".equals(data.toUpperCase().strip())) {
-            return GET;
-        }
-        if ("POST".equals(data.toUpperCase().strip())) {
-            return POST;
-        }
-        if ("PUT".equals(data.toUpperCase().strip())) {
-            return PUT;
-        }
-        if ("DELETE".equals(data.toUpperCase().strip())) {
-            return DELETE;
-        }
-        throw new NoSuchElementException(data + " does not exist");
+        return Arrays.stream(values())
+                .filter(httpMethod -> httpMethod.name().equals(data.toUpperCase().strip()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(data + " does not exist"));
     }
 }

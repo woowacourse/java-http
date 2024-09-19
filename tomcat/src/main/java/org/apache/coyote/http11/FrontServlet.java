@@ -31,18 +31,23 @@ public class FrontServlet implements Servlet {
 
     @Override
     public void service(HttpRequest req, HttpResponse resp) {
-        if(isResourceRequest(req.getPath())) {
-            File file = ResourceParser.getRequestFile(req.getPath());
-            resp.setResponse(HttpStatus.OK, file);
-            return;
+        try {
+            if (isResourceRequest(req.getPath())) {
+                File file = ResourceParser.getRequestFile(req.getPath());
+                resp.setResponse(HttpStatus.OK, file);
+                return;
+            }
+
+            Servlet servlet = controllerMap.get(req.getPath());
+            servlet.service(req, resp);
+        } catch (NullPointerException e) {
+            resp.setResponse(HttpStatus.NOT_FOUND, "/404.html");
         }
-        Servlet servlet = controllerMap.get(req.getPath());
-        servlet.service(req, resp);
     }
 
     public boolean isResourceRequest(String path) {
         int extensionIndex = path.lastIndexOf(".");
-        if(extensionIndex == -1) {
+        if (extensionIndex == -1) {
             return false;
         }
         String extension = path.substring(extensionIndex);

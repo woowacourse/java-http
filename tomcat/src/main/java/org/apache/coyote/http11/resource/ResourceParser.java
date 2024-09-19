@@ -6,12 +6,8 @@ import org.apache.coyote.http11.HttpRequest;
 
 public class ResourceParser {
 
-    public static File getRequestFile(String filePath) {
-        try {
-            return getFile(filePath);
-        } catch (NullPointerException exception) {
-            return getFile("/404.html");
-        }
+    public static File getRequestFile(String filePath) throws NullPointerException {
+        return getFile(filePath);
     }
 
     private static File getFile(String filePath) throws NullPointerException {

@@ -63,4 +63,8 @@ public class HttpResponse {
 
         return message.toString();
     }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.NotFoundException;
 import java.util.Arrays;
 
 public enum HttpMethod {
@@ -24,7 +25,7 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(method -> method.value.equals(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HttpMethod 값입니다. (%s) ".formatted(value)));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 HttpMethod 값입니다. (%s) ".formatted(value)));
     }
 
     public String getValue() {

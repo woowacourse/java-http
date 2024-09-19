@@ -11,8 +11,6 @@ public class WelcomePageServlet extends HttpServlet {
     public void service(HttpRequest req, HttpResponse resp) {
         if (req.isMethod(HttpMethod.GET)) {
             doGet(req, resp);
-        } else {
-            sendMethodNotAllowed(req, resp);
         }
     }
 

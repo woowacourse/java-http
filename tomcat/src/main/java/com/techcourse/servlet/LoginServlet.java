@@ -28,8 +28,6 @@ public class LoginServlet extends HttpServlet {
             doGet(req, resp);
         } else if (req.isMethod(HttpMethod.POST)) {
             doPost(req, resp);
-        } else {
-            sendMethodNotAllowed(req, resp);
         }
     }
 

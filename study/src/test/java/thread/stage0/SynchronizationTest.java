@@ -37,6 +37,19 @@ class SynchronizationTest {
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
 
+    @Test
+    void testSynchronized_whenNotSynchronized() throws InterruptedException {
+        var executorService = Executors.newFixedThreadPool(3);
+        var synchronizedMethods = new SynchronizedMethods();
+        Runnable calculate = () -> synchronizedMethods.setSum(synchronizedMethods.getSum() + 1);
+
+        IntStream.range(0, 1000)
+                .forEach(count -> executorService.submit(calculate));
+        executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
+
+        assertThat(synchronizedMethods.getSum()).isLessThanOrEqualTo(1000);
+    }
+
     private static final class SynchronizedMethods {
 
         private int sum = 0;
@@ -45,11 +58,11 @@ class SynchronizationTest {
             setSum(getSum() + 1);
         }
 
-        public int getSum() {
+        private int getSum() {
             return sum;
         }
 
-        public void setSum(int sum) {
+        private void setSum(int sum) {
             this.sum = sum;
         }
     }

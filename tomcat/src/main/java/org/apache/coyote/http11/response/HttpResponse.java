@@ -16,23 +16,18 @@ public class HttpResponse {
 
     public HttpResponse(HttpResponseHeaders headers, HttpStatus status, String body) {
         this.headers = headers;
-        this.status = status;
-        this.body = body;
-        headers.addContentLength(body.getBytes().length);
+        setStatus(status);
+        setBody(body);
     }
 
     public HttpResponse() {
-        this.headers = new HttpResponseHeaders();
-        this.status = HttpStatus.OK;
-        this.body = EMPTY_BODY;
-        headers.addContentLength(body.getBytes().length);
+        this(new HttpResponseHeaders(), HttpStatus.OK, EMPTY_BODY);
     }
 
     public void sendTextFiles(String text) {
-        status = HttpStatus.OK;
-        body = text;
+        setStatus(HttpStatus.OK);
+        setBody(text);
         headers.addContentType("text/html;charset=utf-8");
-        headers.addContentLength(body.getBytes().length);
     }
 
     public void sendStaticResource(String filePath) {
@@ -40,16 +35,23 @@ public class HttpResponse {
     }
 
     public void sendStaticResource(HttpStatus status, String filePath) {
-        this.status = status;
-        body = StaticFileResponseUtils.readStaticFile(filePath);
+        setStatus(status);
+        setBody(StaticFileResponseUtils.readStaticFile(filePath));
         headers.addContentType(StaticFileResponseUtils.getContentType(filePath));
-        headers.addContentLength(body.getBytes().length);
     }
 
     public void sendRedirect(String location) {
-        status = HttpStatus.FOUND;
-        body = EMPTY_BODY;
+        setStatus(HttpStatus.FOUND);
+        setBody(EMPTY_BODY);
         headers.addLocation(location);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
         headers.addContentLength(body.getBytes().length);
     }
 

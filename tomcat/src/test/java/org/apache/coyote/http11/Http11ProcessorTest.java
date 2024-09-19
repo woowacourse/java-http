@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -114,6 +116,33 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void loginPageTest_whenAlreadyLogin() throws IOException {
+        // given
+        SessionManager.getInstance().add(new Session("session-id"));
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expected = List.of(
+                "HTTP/1.1 302 Found",
+                "Content-Length: 0",
+                "Location: /index.html",
+                "");
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
     void loginTest() {
         // given
         String httpRequest = String.join("\r\n",
@@ -139,6 +168,34 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).contains(expected);
     }
+
+    @Test
+    void loginTest_whenNotExistUser_redirect401Page() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
+                "",
+                "account=no-account&password=no-password");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expected = List.of(
+                "HTTP/1.1 302 Found",
+                "Content-Length: 0",
+                "Location: /401.html",
+                "");
+
+        assertThat(socket.output()).contains(expected);
+    }
+
 
     @Test
     void registerPageTest() throws IOException {
@@ -168,7 +225,34 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void registerTest() throws IOException{
+    void registerPageTest_whenAlreadyLogin_redirectIndexPage() throws IOException {
+        // given
+        SessionManager.getInstance().add(new Session("session-id"));
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        List<String> expected = List.of(
+                "HTTP/1.1 302 Found",
+                "Content-Length: 0",
+                "Location: /index.html",
+                "");
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void registerTest() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",

@@ -31,10 +31,6 @@ public class AuthManager {
     }
 
     public static Session authenticate(HttpRequest httpRequest) {
-        if (httpRequest.getRequestBody() == null) {
-            throw new IllegalArgumentException("인증 정보가 존재하지 않습니다.");
-        }
-
         if (!isUserExist(httpRequest)) {
             throw new IllegalArgumentException("회원가입된 유저가 아닙니다.");
         }

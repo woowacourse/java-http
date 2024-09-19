@@ -20,11 +20,6 @@ public class HttpResponse {
     private String body;
     private Cookies cookies = new Cookies();
 
-    public void setRedirect(HttpStatus httpStatus, String location) {
-        this.httpStatus = httpStatus;
-        this.location = location;
-    }
-
     public void setResponse(HttpStatus httpStatus, File file) {
         try {
             this.httpStatus = httpStatus;

@@ -51,11 +51,11 @@ public class RegisterServlet extends HttpServlet {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            resp.setRedirect(HttpStatus.FOUND, "/index.html");
+            resp.setResponse(HttpStatus.FOUND, "/index.html");
             log.info("회원가입 성공 (account: {})", account);
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패", e);
-            resp.setResponse(HttpStatus.BAD_REQUEST, ResourceParser.getRequestFile("/register.html"));
+            resp.setResponse(HttpStatus.BAD_REQUEST, "/register.html");
         }
     }
 

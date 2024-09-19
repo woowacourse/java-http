@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpRequest {
 
@@ -50,14 +49,13 @@ public class HttpRequest {
     }
 
     public Session getSession(Manager manager) throws IOException {
-        Session session = new Session(UUID.randomUUID().toString());
         HttpCookies cookies = HttpCookies.from(header.getCookies());
 
         if (existsSession() && manager.findSession(cookies.getCookieValue(JSESSIONID)) != null) {
             return manager.findSession(cookies.getCookieValue(JSESSIONID));
         }
-        manager.add(session);
-        return session;
+
+        return manager.createNewSession();
     }
 
     public Map<String, String> getRequestBody() {

@@ -29,8 +29,8 @@ public class HttpRequest {
         return requestLine.getLocation().getExtension();
     }
 
-    public String getCookie() {
-        return headers.find("Cookie").split("=")[1];
+    public String getCookieValue(String key) {
+        return headers.getCookieValue(key);
     }
 
     public boolean containsHeader(String key) {

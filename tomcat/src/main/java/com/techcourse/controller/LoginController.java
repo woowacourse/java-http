@@ -18,7 +18,7 @@ public class LoginController extends HttpController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.containsHeader("Cookie") && SessionManager.findSession(request.getCookie()) != null) {
+        if (SessionManager.validate(request.getCookieValue(Session.SESSION_KEY))) {
             response.setStatus(HttpStatus.FOUND);
             response.addHeader("Content-Type", "text/html");
             response.addHeader("Location", "/index.html");

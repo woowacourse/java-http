@@ -6,11 +6,14 @@ import java.util.Map;
 
 public class HttpHeaders {
     public static final String HEADER_DELIMITER = ": ";
+    public static final String COOKIE_KEY = "Cookie";
 
     private final Map<String, String> value;
+    private final HttpCookie cookie;
 
     public HttpHeaders(Map<String, String> value) {
         this.value = value;
+        this.cookie = HttpCookie.from(value.get(COOKIE_KEY));
     }
 
     public static HttpHeaders from(List<String> lines) {
@@ -39,6 +42,10 @@ public class HttpHeaders {
         if (split[0].isBlank() || split[1].isBlank()) {
             throw new IllegalArgumentException("key value cant not be blank");
         }
+    }
+
+    public String getCookieValue(String key){
+        return cookie.getValue(key);
     }
 
     public boolean contains(String key) {

@@ -2,12 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.session.Session;
@@ -158,6 +155,10 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return method;
+    }
+
+    public boolean isMethod(HttpMethod method) {
+        return this.method == method;
     }
 
     public HttpProtocol getProtocol() {

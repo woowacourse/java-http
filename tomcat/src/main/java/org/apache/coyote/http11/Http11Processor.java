@@ -1,20 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.FrontController;
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.cookie.Cookie;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.resource.ResourceParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +34,13 @@ public class Http11Processor implements Runnable, Processor {
             processRequest(request, response);
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();
-        } catch (IOException |
-                 UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private void processRequest(HttpRequest request, HttpResponse response) {
-        FrontController frontController = FrontController.getInstance();
-        Controller controller = frontController.mapController(request.getPath());
-        controller.service(request, response);
+        Servlet frontServlet = FrontServlet.getInstance();
+        frontServlet.service(request, response);
     }
 }

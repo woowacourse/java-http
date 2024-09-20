@@ -1,11 +1,11 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

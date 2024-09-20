@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class Http11RequestHeadersTest {
@@ -29,6 +30,15 @@ public class Http11RequestHeadersTest {
             assertThat(headers.get("date")).isEqualTo("Thu, 12 Sep 2024 07:59:42 GMT");
             assertThat(headers.get("server")).isEqualTo("nginx");
         });
+    }
+
+    @Test
+    @DisplayName("잘못된 header 형식으로 생성할 수 없다.")
+    void from_invalidFormat() {
+        String requestHeaders = "cache-control: ";
+
+        assertThatThrownBy(() -> Http11RequestHeaders.from(requestHeaders))
+                .isInstanceOf(AssertionError.class);
     }
 
     @Test

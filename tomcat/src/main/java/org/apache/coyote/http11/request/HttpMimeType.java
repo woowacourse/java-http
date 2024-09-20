@@ -8,6 +8,7 @@ public enum HttpMimeType {
     TEXT_CSS("text/css", "utf-8"),
     TEXT_JS("text/javascript", "utf-8"),
     IMG_SVG("image/svg+xml", null),
+    OCTET_STREAM("application/octet-stream", null),
     ;
 
     private final String type;
@@ -22,7 +23,7 @@ public enum HttpMimeType {
         return Arrays.stream(values())
                 .filter(http11Accept -> http11Accept.type.contains(fileExtension))
                 .findFirst()
-                .orElse(null);
+                .orElse(OCTET_STREAM);
     }
 
     public String asString() {

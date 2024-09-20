@@ -40,8 +40,9 @@ public class Http11Processor implements Runnable, Processor {
             setBasicHeader(httpResponse, httpRequest);
 
             if (httpRequest.isStaticRequest()) {
+                httpResponse.addHeader(HeaderName.CONTENT_TYPE, httpRequest.getContentType());
                 httpResponse.setStatusCode(StatusCode.OK);
-                httpResponse.setBody(httpRequest.getPath());
+                httpResponse.setBody(httpRequest.getPath(), httpRequest.getContentType());
             }
             if (!httpRequest.isStaticRequest()) {
                 servletContainer.run(httpRequest, httpResponse);
@@ -55,7 +56,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void setBasicHeader(HttpResponse httpResponse, HttpRequest httpRequest) {
-        httpResponse.addHeader(HeaderName.CONTENT_TYPE, httpRequest.getContentType());
         if (httpRequest.hasCookie()) {
             httpResponse.addHeader(HeaderName.SET_COOKIE, httpRequest.getHttpCookie());
         }

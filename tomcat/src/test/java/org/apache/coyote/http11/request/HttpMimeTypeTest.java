@@ -23,11 +23,11 @@ public class HttpMimeTypeTest {
     }
 
     @Test
-    @DisplayName("확장자가 잘못된 경우 null을 반환한다.")
+    @DisplayName("확장자가 잘못된 경우 octet-stream을 반환한다.")
     void from_invalid() {
         String invalid = "feopqfpqenopqn";
 
-        assertThat(HttpMimeType.from(invalid)).isNull();
+        assertThat(HttpMimeType.from(invalid)).isEqualTo(HttpMimeType.OCTET_STREAM);
     }
 
     @Test

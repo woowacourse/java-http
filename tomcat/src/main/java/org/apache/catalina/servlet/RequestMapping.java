@@ -1,8 +1,8 @@
-package org.apache.coyote;
+package org.apache.catalina.servlet;
 
-import com.techcourse.service.SessionService;
+import org.apache.catalina.session.SessionService;
 import com.techcourse.service.UserService;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

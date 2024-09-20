@@ -1,9 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http11.headers.HttpCookies;
+import org.apache.coyote.http11.headers.HttpHeaders;
 
 public class HttpRequest {
 

@@ -1,8 +1,8 @@
-package org.apache.coyote;
+package org.apache.catalina.servlet;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HomeServlet extends HttpServlet {
 

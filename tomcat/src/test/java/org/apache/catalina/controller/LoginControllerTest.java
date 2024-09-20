@@ -47,7 +47,7 @@ class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(response.getReponse()).contains("302 FOUND"),
-                () -> assertThat(response.getReponse()).contains("<title>대시보드</title>")
+                () -> assertThat(response.getReponse()).contains("Location: /index.html")
         );
     }
 
@@ -69,8 +69,8 @@ class LoginControllerTest {
 
         // then
         assertAll(
-                () -> assertThat(response.getReponse()).contains("401 UNAUTHORIZED"),
-                () -> assertThat(response.getReponse()).contains("<title>404 Error - SB Admin</title>")
+                () -> assertThat(response.getReponse()).contains("302 FOUND"),
+                () -> assertThat(response.getReponse()).contains("Location: /401.html")
         );
     }
 

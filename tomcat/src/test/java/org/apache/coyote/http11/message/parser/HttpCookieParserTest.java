@@ -32,7 +32,8 @@ class HttpCookieParserTest {
 
         assertAll(
                 () -> assertThat(httpCookie.hasSessionId()).isTrue(),
-                () -> assertThat(httpCookie.getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
+                () -> assertThat(httpCookie.findSessionId()).isPresent()
+                        .hasValue("656cef62-e3c4-40bc-a8df-94732920ed46")
         );
     }
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -64,9 +65,10 @@ public class HttpRequest {
 
     public Session getSession(boolean enableCreation) {
         HttpCookie httpCookie = HttpCookieParser.parse(headers.getCookies());
-        if (httpCookie.hasSessionId()) {
-            String sessionId = httpCookie.getSessionId();
-            return SessionManager.getInstance().findSession(sessionId);
+
+        Optional<String> sessionId = httpCookie.findSessionId();
+        if (sessionId.isPresent()) {
+            return SessionManager.getInstance().findSession(sessionId.get());
         }
         if (enableCreation) {
             Session session = new Session(UUID.randomUUID().toString());

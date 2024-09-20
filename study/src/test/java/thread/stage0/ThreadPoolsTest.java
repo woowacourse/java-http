@@ -48,10 +48,11 @@ class ThreadPoolsTest {
 
         executor.awaitTermination(1300, TimeUnit.MILLISECONDS);
 
-        // getPoolSize : 스레드 풀에 존재하는 전체 스레드 수
+        // getActiveCount : 현재 실제 작업을 수행중인 스레드 수
         assertThat(executor.getActiveCount()).isEqualTo(2);
 
-        // getActiveCount : 현재 실제 작업을 수행중인 스레드 수
+        // getPoolSize : 스레드 풀에 존재하는 전체 스레드 수
+        // getQueueSize : 스레드 큐에 존재하는 작업의 수
         assertThat(executor.getPoolSize()).isEqualTo(2);
 
         //getCompleteTaskCount : 작업을 완료한 개수
@@ -65,7 +66,13 @@ class ThreadPoolsTest {
         // 짧은 생명주기를 가지는 비동기 작업 많인 실행할때 유용
         // 60초 동안 사용하지 않은 스레드는 종료 후 캐시에서 제거
 
-        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        // corePoolSize : 0 초기 스레드 개수
+        // maximumPoolSize : 최대 늘어나는 스레드 개수
+        // keepAliveTime : 동작하지 않는 스레드들 제거
+
+        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool(
+                Executors.defaultThreadFactory()
+        );
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));

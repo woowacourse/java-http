@@ -35,7 +35,7 @@ class HttpRequestTest {
         assertThat(sut.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(sut.getPath()).isEqualTo("/path");
         assertThat(sut.getHttpVersion()).isEqualTo(HttpVersion.HTTP11);
-        assertThat(sut.getAccept()).isEqualTo("*/* ");
+        assertThat(sut.getAccept()).isEqualTo("*/*");
         assertThat(sut.getBody().asString()).isEqualTo(body);
     }
 }

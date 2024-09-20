@@ -9,9 +9,11 @@ public class SessionManager implements Manager {
 
     private static final SessionManager instance = new SessionManager();
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessions;
 
-    private SessionManager() {}
+    private SessionManager() {
+        this.sessions = new ConcurrentHashMap<>();
+    }
 
     public static SessionManager getInstance() {
         return instance;
@@ -19,16 +21,16 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        sessions.remove(session.getId());
     }
 }

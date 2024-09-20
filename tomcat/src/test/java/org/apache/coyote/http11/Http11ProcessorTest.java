@@ -5,8 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
 import support.StubSocket;
 
@@ -15,39 +13,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static utils.TestFixtures.*;
 
 class Http11ProcessorTest {
 
-    private static final String HTTP_VERSION = "HTTP/1.1";
-    private static final String CONTENT_TYPE_HTML = "Content-Type: text/html;charset=utf-8";
-    private static final String CONTENT_TYPE_CSS = "Content-Type: text/css";
-    private static final String CONTENT_TYPE_JAVASCRIPT = "Content-Type: application/javascript";
-    private static final String CONTENT_TYPE_SVG = "Content-Type: image/svg+xml";
-    private static final String POST = "POST";
-    private static final String GET = "GET";
-
     private void processRequest(String httpRequest, String[] expectedResponses) {
-        String response = createResponse(httpRequest);
-        for (String expectedResponse : expectedResponses) {
-            assertThat(response).contains(expectedResponse);
-        }
-    }
-
-    private String createResponse(String httpRequest) {
         var socket = new StubSocket(httpRequest);
         var processor = new Http11Processor(socket);
 
         processor.process(socket);
 
-        return socket.output();
+        String response = socket.output();
+        for (String expectedResponse : expectedResponses) {
+            assertThat(response).contains(expectedResponse);
+        }
     }
 
-    private String buildHttpRequest(String method, String path, String body) throws IOException {
+    private String buildHttpRequest(String method, String path, String body) {
         String requestLine = String.join(" ",
                 method,
                 path,
@@ -127,166 +112,5 @@ class Http11ProcessorTest {
         String location = "Location: /500.html";
 
         assertThat(response).contains(status, CONTENT_TYPE_HTML, location);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 주소에 접근하면 /static/404.html 페이지로 리다이렉트한다.")
-    void notFoundPage() throws IOException {
-        // given
-        final String httpRequest = buildHttpRequest(GET, "/fake", "");
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /404.html"});
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 정적 파일 주소에 접근하면 /static/404.html 페이지로 리다이렉트한다.")
-    void notFoundPage_staticIndex() throws IOException {
-        // given
-        final String httpRequest = buildHttpRequest(GET, "/fake.html", "");
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /404.html"});
-    }
-
-    @Test
-    @DisplayName("GET /login을 요청하면 /static/login.html 페이지로 리다이렉트한다.")
-    void login_GET() throws IOException {
-        // given
-        final String httpRequest = buildHttpRequest(GET, "/login", "");
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /login.html"});
-    }
-
-    @Test
-    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void login_POST_success() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=password";
-        final String httpRequest = buildHttpRequest(POST, "/login", requestBody);
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
-    }
-
-    @Test
-    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공하면 Set-Cookie를 반환한다.")
-    void login_POST_success_returnSetCookie() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=password";
-        final String httpRequest = buildHttpRequest(POST, "/login", requestBody);
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Set-Cookie: JSESSIONID="});
-    }
-
-    @Test
-    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공한 뒤 /login 주소로 접근하면 /index.html 페이지로 리다이렉트한다.")
-    void login_POST_success_then_GET_withValidSessionId() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=password";
-        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
-
-        String response = createResponse(postLoginRequest);
-        String sessionId = extractSessionIdFromResponse(response);
-
-        final String getLoginRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=" + sessionId,
-                "",
-                "");
-
-        //when, then
-        processRequest(getLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
-    }
-
-    private String extractSessionIdFromResponse(String response) {
-        Pattern pattern = Pattern.compile("Set-Cookie: JSESSIONID=([^;]+)");
-        Matcher matcher = pattern.matcher(response);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        throw new IllegalStateException("JSESSIONID가 올바르게 설정되지 않았습니다.");
-    }
-
-    @Test
-    @DisplayName("/login 주소에서 정확한 계정명과 비밀번호로 로그인에 성공한 뒤 유효하지 않은 쿠키 정보로 /login 주소에 접근하면 /login.html 페이지를 응답한다.")
-    void login_POST_then_GET_withInvalidSessionId() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=password";
-        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
-
-        createResponse(postLoginRequest);
-
-        String cookie = "Cookie: JSESSIONID=asdf";
-        final String getLoginRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                cookie + " ",
-                "",
-                "");
-
-        // when, then
-        processRequest(getLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /login.html"});
-    }
-
-    @CsvSource({"account=chorong&password=password", "account=gugu&password=sosad", "account= &password=password", "account=gugu", "password=password"})
-    @EmptySource
-    @ParameterizedTest
-    @DisplayName("/login 주소에서 부정확한 계정명이나 비밀번호로 로그인을 시도하면 /401.html 페이지로 리다이렉트한다.")
-    void login_POST_fail_invalidAccount(String requestBody) throws IOException {
-        // given
-        final String postLoginRequest = buildHttpRequest(POST, "/login", requestBody);
-
-        // when, then
-        processRequest(postLoginRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /401.html"});
-    }
-
-    @Test
-    @DisplayName("GET /register를 요청하면 /static/register.html 페이지로 리다이렉트한다.")
-    void register_GET() throws IOException {
-        // given
-        final String httpRequest = buildHttpRequest(GET, "/register", "");
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
-    }
-
-    @Test
-    @DisplayName("/register 주소에서 정확한 계정명과 이메일, 비밀번호로 회원가입에 성공하면 /index.html 페이지로 리다이렉트한다.")
-    void register_POST_success() throws IOException {
-        // given
-        String requestBody = "account=ash&password=ashPassword&email=test@email.com";
-        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /index.html"});
-    }
-
-    @Test
-    @DisplayName("/register 주소에서 이미 존재하는 계정명으로 회원가입을 시도하면 /register 페이지로 리다이렉트한다.")
-    void register_POST_fail_accountAlreadyExists() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=newpassword&email=test@email.com";
-        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
-    }
-
-    @CsvSource({"account=chorong&password=password", "account=gugu&email=test@email.com", "account= "})
-    @EmptySource
-    @ParameterizedTest
-    @DisplayName("/register 주소에서 필수 입력값을 누락하고 회원가입을 시도하면 /register 페이지로 리다이렉트한다.")
-    void register_POST_fail_missingEssentialValues(String requestBody) throws IOException {
-        // given
-        final String httpRequest = buildHttpRequest(POST, "/register", requestBody);
-
-        // when, then
-        processRequest(httpRequest, new String[]{HTTP_VERSION + " " + HttpStatus.FOUND.getStatus(), CONTENT_TYPE_HTML, "Location: /register.html"});
     }
 }

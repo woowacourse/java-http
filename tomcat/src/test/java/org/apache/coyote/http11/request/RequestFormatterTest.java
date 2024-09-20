@@ -14,10 +14,9 @@ import java.io.StringReader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static utils.TestFixtures.NEW_LINE;
 
 class RequestFormatterTest {
-
-    private static final String NEW_LINE = "\r\n";
 
     @Test
     @DisplayName("문자열로 입력받은 requestLine을 HttpRequestLine 형식에 맞게 포맷팅한다.")

@@ -1,8 +1,10 @@
 package org.apache.catalina.coockie;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class HttpCookie {
 
@@ -28,15 +30,10 @@ public class HttpCookie {
             return Map.of();
         }
 
-        Map<String, String> cookieGroup = new HashMap<>();
-        String[] cookiesElements = rawCookies.split(COOKIE_DELIMITER);
-        for (String cookiesElement : cookiesElements) {
-            String[] cookiePair = cookiesElement.split(COOKIE_VALUE_DELIMITER);
-            if (cookiePair.length == KEY_VALUE_COUNT) {
-                cookieGroup.put(cookiePair[KEY_INDEX], cookiePair[VALUE_INDEX]);
-            }
-        }
-        return cookieGroup;
+        return Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
+                .map(cookie -> cookie.split(COOKIE_VALUE_DELIMITER))
+                .filter(cookiePair -> cookiePair.length == KEY_VALUE_COUNT)
+                .collect(Collectors.toMap(cookiePair -> cookiePair[KEY_INDEX], cookiePair -> cookiePair[VALUE_INDEX]));
     }
 
     public boolean hasSessionId() {

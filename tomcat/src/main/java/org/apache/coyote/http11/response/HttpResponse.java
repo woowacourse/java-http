@@ -8,6 +8,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private static final String EMPTY = "";
+    private static final String HTML = ".html";
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
@@ -29,6 +30,10 @@ public class HttpResponse {
         setStatus(HttpStatus.FOUND);
         setLocation(location);
         setMimeType(MimeType.from(location));
+    }
+
+    public void handleError() {
+        redirectTo("/" + getHttpStatusCode() + HTML);
     }
 
     public void setStatus(HttpStatus httpStatus) {
@@ -62,6 +67,10 @@ public class HttpResponse {
 
     public StatusLine getStatusLine() {
         return statusLine;
+    }
+
+    public int getHttpStatusCode() {
+        return statusLine.getHttpStatusCode();
     }
 
     public Map<String, String> getResponseHeader() {

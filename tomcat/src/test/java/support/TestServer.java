@@ -10,6 +10,9 @@ import org.apache.coyote.adapter.CoyoteAdapter;
 import org.apache.coyote.http11.request.RequestMapper;
 import org.apache.coyote.http11.session.SessionManager;
 
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,11 +29,15 @@ public class TestServer {
     private static final SessionManager sessionManager = new SessionManager();
 
     public static void serverStart(final Tomcat tomcat) {
-        start(tomcat);
+        try {
+            start(tomcat);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void serverStart() {
-        if (isOpen.get() == true) {
+        if (isOpen.get()) {
             return;
         }
         final Tomcat tomcat = new Tomcat(
@@ -39,16 +46,26 @@ public class TestServer {
                                 Executors.newCachedThreadPool())
                 )
         );
-        start(tomcat);
+        try {
+            start(tomcat);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getHost() {
         return HOST;
     }
 
-    private static void start(final Tomcat tomcat) {
+    private static void start(final Tomcat tomcat) throws IOException {
         isOpen.set(true);
+
+
+        final PipedInputStream pipedIn = new PipedInputStream();
+        final PipedOutputStream pipedOut = new PipedOutputStream(pipedIn);
+        System.setIn(pipedIn);
         final Runnable serverTask = () -> tomcat.start();
+
         final Thread serverThread = new Thread(serverTask);
         serverThread.start();
     }

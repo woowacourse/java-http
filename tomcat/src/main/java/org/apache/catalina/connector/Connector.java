@@ -32,6 +32,9 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
+        if (maxThreads > 5000) {
+            throw new IllegalArgumentException("최대 스레드 개수를 초과했습니다.");
+        }
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = new ThreadPoolExecutor(
                 maxThreads,

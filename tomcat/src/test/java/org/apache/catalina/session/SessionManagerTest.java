@@ -3,6 +3,7 @@ package org.apache.catalina.session;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,9 +14,10 @@ class SessionManagerTest {
 
     @Test
     @DisplayName("동시성 테스트")
-    void concurrencyTest() {
+    void concurrencyTest() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         AtomicInteger successCount = new AtomicInteger(0);
+        CountDownLatch testEndLatch = new CountDownLatch(100);
 
         for (int i = 0; i < 100; i++) {
             String tmp = "test" + i;
@@ -29,9 +31,11 @@ class SessionManagerTest {
                 if (foundSession != null) {
                     successCount.incrementAndGet();
                 }
+                testEndLatch.countDown();
             });
         }
 
+        testEndLatch.await();
         executorService.shutdown();
         assertThat(successCount.get()).isEqualTo(100);
     }

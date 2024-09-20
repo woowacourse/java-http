@@ -23,8 +23,9 @@ public class LoginController extends AbstractController {
         String password = request.getBodyParam("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (!isMember(user, password)) {
-            response.setStatusCode(StatusCode.UNAUTHORIZED);
-            response.setBody("/401.html");
+            response.setStatusCode(StatusCode.FOUND);
+            response.addHeader(HeaderName.LOCATION, "/401.html");
+
         }
         if (isMember(user, password)) {
             response.setStatusCode(StatusCode.FOUND);

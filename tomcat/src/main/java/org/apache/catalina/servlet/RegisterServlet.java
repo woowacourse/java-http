@@ -1,7 +1,7 @@
 package org.apache.catalina.servlet;
 
 import com.techcourse.service.UserService;
-import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;

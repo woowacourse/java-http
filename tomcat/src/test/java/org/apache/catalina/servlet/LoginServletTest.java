@@ -8,7 +8,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
-import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.headers.HeaderName;
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;

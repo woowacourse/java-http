@@ -3,7 +3,7 @@ package org.apache.catalina.servlet;
 import com.techcourse.model.User;
 import org.apache.catalina.session.SessionService;
 import com.techcourse.service.UserService;
-import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.headers.HttpCookies;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

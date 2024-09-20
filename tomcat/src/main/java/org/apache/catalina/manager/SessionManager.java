@@ -1,12 +1,13 @@
 package org.apache.catalina.manager;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager instance = new SessionManager();
 
     public static SessionManager getInstance() {
@@ -31,6 +32,10 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final String id) {
         SESSIONS.remove(id);
+    }
+
+    Collection<Session> findAllSessions() {
+        return SESSIONS.values();
     }
 
     private SessionManager() {

@@ -99,3 +99,10 @@ HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다
 ### 3. Controller 인터페이스 추가하기
 - [x] 컨트롤러 인터페이스를 추가한다.
 - [x] 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만든다.
+
+## 4단계 기능 요구사항 - 동시성 확장하기
+### 1. Executors로 Thread Pool 적용
+- [x] Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체를 만든다.
+
+### 2. 동시성 컬렉션 사용하기
+- [x] ConcurrentHashMap을 사용해서 동시성 문제를 해결한다.

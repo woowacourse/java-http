@@ -56,6 +56,24 @@
 
 ### 4단계 - 동시성 확장하기
 
+1. Executors로 Thread Pool 적용
+
+- [x] Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체(스레드 풀) 만들기
+- [x] 스레드 갯수는 maxThreads 라는 변수로 지정하기
+- [x] Connector 클래스의 void process(final Socket connection) 메서드에서 매 요청마다 스레드 새로 생성하지 말고, 스레드 풀의 스레드 사용하기
+- [x] 생각해보기
+    - acceptCount와 maxThreads는 각각 어떤 설정일까?
+        - acceptCount: 동시에 처리할 수 있는 최대 연결 대기 수 (동시에 처리할 수 있는 연결 다 차면 대기열에 들어감)
+        - maxThreads: 동시에 실행할 수 있는 최대 스레드 수
+    - 최대 ThreadPool의 크기는 250, 모든 Thread가 사용 중인(Busy) 상태이면 100명까지 대기 상태로 만들려면 어떻게 할까?
+        - acceptCount를 100으로 설정
+
+2. 동시성 컬렉션 사용하기
+
+- [x] 동시성 컬렉션(Concurrent Collections)을 적용해서 Session 컬렉션에 스레드 안정성과 원자성을 보장하기
+    - SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시에 접근할 수 있음
+    - Session 컬렉션에 여러 스레드가 동시에 접근하여 읽고 쓰다보면 스레드 안정성을 보장하기 어려움
+
 ## 톰캣 구현하기 가이드
 
 ### 학습목표

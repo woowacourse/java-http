@@ -1,6 +1,7 @@
 package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,10 @@ public class HttpRequestBodyTest {
         HttpRequestBody httpRequestBody = new HttpRequestBody(bodyLine);
 
         // then
-        assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe");
-        assertThat(httpRequestBody.get("password")).isEqualTo("12345");
+        assertAll(
+                () -> assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe"),
+                () -> assertThat(httpRequestBody.get("password")).isEqualTo("12345")
+        );
     }
 
     @Test
@@ -41,8 +44,10 @@ public class HttpRequestBodyTest {
         HttpRequestBody httpRequestBody = new HttpRequestBody(bodyLine);
 
         // then
-        assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe");
-        assertThat(httpRequestBody.get("password")).isNull();
+        assertAll(
+                () -> assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe"),
+                () -> assertThat(httpRequestBody.get("password")).isNull()
+        );
     }
 
     @Test
@@ -55,10 +60,12 @@ public class HttpRequestBodyTest {
 
         // then
         Map<String, String> bodyMap = httpRequestBody.getBody();
-        assertThat(bodyMap.size()).isEqualTo(3);
-        assertThat(bodyMap.get("account")).isEqualTo("JohnDoe");
-        assertThat(bodyMap.get("password")).isEqualTo("12345");
-        assertThat(bodyMap.get("email")).isEqualTo("johndoe@example.com");
+        assertAll(
+                () -> assertThat(bodyMap.size()).isEqualTo(3),
+                () -> assertThat(bodyMap.get("account")).isEqualTo("JohnDoe"),
+                () -> assertThat(bodyMap.get("password")).isEqualTo("12345"),
+                () -> assertThat(bodyMap.get("email")).isEqualTo("johndoe@example.com")
+        );
     }
 
     @Test
@@ -70,8 +77,10 @@ public class HttpRequestBodyTest {
         HttpRequestBody httpRequestBody = new HttpRequestBody(bodyLine);
 
         // then
-        assertThat(httpRequestBody.get("password")).isEmpty();
-        assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe");
-        assertThat(httpRequestBody.get("email")).isEqualTo("johndoe@example.com");
+        assertAll(
+                () -> assertThat(httpRequestBody.get("password")).isEmpty(),
+                () -> assertThat(httpRequestBody.get("account")).isEqualTo("JohnDoe"),
+                () -> assertThat(httpRequestBody.get("email")).isEqualTo("johndoe@example.com")
+        );
     }
 }

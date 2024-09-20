@@ -9,7 +9,6 @@ public class Http11Parser {
     private static final String HEADER_DELIMITER = ": ";
     private static final String BLANK_CRLF = " \r\n";
     private static final String CRLF = "\r\n";
-    private static final int NO_CONTENT_LENGTH = 0;
 
     public static String writeHttpResponse(final HttpResponse response) {
         StringBuilder serializedResponse = new StringBuilder();
@@ -39,7 +38,7 @@ public class Http11Parser {
     }
 
     private static void appendBody(StringBuilder serializedResponse, HttpResponse response) {
-        if (response.getContentLength() != NO_CONTENT_LENGTH) {
+        if (response.hasBody()) {
             serializedResponse.append(CRLF);
             serializedResponse.append(response.getBody());
         }

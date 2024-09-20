@@ -2,16 +2,23 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.clear();
+    }
 
     @Nested
     class Process {

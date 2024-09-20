@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.exception.TechcourseException;
 import com.techcourse.model.User;
 import com.techcourse.model.UserService;
+import java.util.Optional;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http.HttpCookie;
@@ -51,8 +52,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean checkLogin(final HttpRequest request) {
-        Session session = request.getSession();
-        return session != null;
+        Optional<Session> session = request.findSession();
+        return session.isPresent();
     }
 
     private void getLoginPageWithLogin(final HttpResponse response) {

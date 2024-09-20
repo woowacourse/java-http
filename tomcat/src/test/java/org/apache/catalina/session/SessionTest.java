@@ -1,6 +1,7 @@
 package org.apache.catalina.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.model.User;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,10 @@ public class SessionTest {
         Session session = new Session();
 
         // then
-        assertThat(session.getId()).isNotNull();
-        assertThat(session.getId()).hasSize(36);
+        assertAll(
+                () -> assertThat(session.getId()).isNotNull(),
+                () -> assertThat(session.getId()).hasSize(36)
+        );
     }
 
     @Test

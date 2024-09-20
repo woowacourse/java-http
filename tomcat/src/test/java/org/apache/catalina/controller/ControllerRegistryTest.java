@@ -1,7 +1,8 @@
 package org.apache.catalina.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
@@ -25,8 +26,10 @@ public class ControllerRegistryTest {
         Controller controller = ControllerRegistry.getController(request);
 
         // Then
-        assertNotNull(controller);
-        assertTrue(controller instanceof LoginController);
+        assertAll(
+                () -> assertNotNull(controller),
+                () -> assertThat(controller).isInstanceOf(LoginController.class)
+        );
     }
 
     @Test
@@ -40,8 +43,10 @@ public class ControllerRegistryTest {
         Controller controller = ControllerRegistry.getController(request);
 
         // Then
-        assertNotNull(controller);
-        assertTrue(controller instanceof RegisterController);
+        assertAll(
+                () -> assertNotNull(controller),
+                () -> assertThat(controller).isInstanceOf(RegisterController.class)
+        );
     }
 
     @Test
@@ -55,8 +60,10 @@ public class ControllerRegistryTest {
         Controller controller = ControllerRegistry.getController(request);
 
         // Then
-        assertNotNull(controller);
-        assertTrue(controller instanceof RootController);
+        assertAll(
+                () -> assertNotNull(controller),
+                () -> assertThat(controller).isInstanceOf(RootController.class)
+        );
     }
 
     @Test
@@ -70,7 +77,9 @@ public class ControllerRegistryTest {
         Controller controller = ControllerRegistry.getController(request);
 
         // Then
-        assertNotNull(controller);
-        assertTrue(controller instanceof StaticResourceController);
+        assertAll(
+                () -> assertNotNull(controller),
+                () -> assertThat(controller).isInstanceOf(StaticResourceController.class)
+        );
     }
 }

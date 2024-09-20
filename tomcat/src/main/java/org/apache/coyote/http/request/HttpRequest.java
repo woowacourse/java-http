@@ -55,11 +55,10 @@ public class HttpRequest {
         return session;
     }
 
-    public Session getSession() {
-        return Optional.ofNullable(header.getCookie(COOKIE_NAME_SESSION_ID))
+    public Optional<Session> findSession() {
+        return header.findCookie(COOKIE_NAME_SESSION_ID)
                 .map(HttpCookie::getValue)
-                .map(sessionManager::findSession)
-                .orElse(null);
+                .flatMap(sessionManager::findSession);
     }
 
     public HttpMethod getHttpMethod() {

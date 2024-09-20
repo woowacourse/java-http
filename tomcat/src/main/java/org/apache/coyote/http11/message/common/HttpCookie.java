@@ -1,24 +1,31 @@
 package org.apache.coyote.http11.message.common;
 
 import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.Optional;
 
 public class HttpCookie {
 
-    private final HashMap<String, String> cookie = new HashMap<>();
+    private static final String JSESSIONID = "JSESSIONID";
 
-    public HttpCookie(String cookies) {
-        StringTokenizer tokenizer = new StringTokenizer(cookies, ";");
-        while (tokenizer.hasMoreTokens()) {
-            String[] line = tokenizer.nextToken().strip().split("=");
-            if (line.length != 2) {
-                throw new IllegalArgumentException("올바르지 않은 Cookie 형식입니다.");
-            }
-            cookie.put(line[0], line[1]);
-        }
+    private final Map<String, String> cookies = new HashMap<>();
+
+    public HttpCookie(Map<String, String> cookies) {
+        this.cookies.putAll(cookies);
     }
 
-    public boolean hasKey(String key) {
-        return cookie.containsKey(key);
+    public String get(String name) {
+        return cookies.get(name);
+    }
+
+    public boolean hasSessionId() {
+        return cookies.containsKey(JSESSIONID);
+    }
+
+    public Optional<String> findSessionId() {
+        if (cookies.containsKey(JSESSIONID)) {
+            return Optional.of(cookies.get(JSESSIONID));
+        }
+        return Optional.empty();
     }
 }

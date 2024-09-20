@@ -11,25 +11,20 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class RequestMapping {
 
-    private static class RequestMappingHolder {
-        private static final RequestMapping INSTANCE = new RequestMapping();
-    }
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+    private static final StaticController staticController = new StaticController();
 
-    public static RequestMapping getInstance() {
-        return RequestMappingHolder.INSTANCE;
-    }
-
-    private final Map<String, Controller> controllers = new ConcurrentHashMap<>();
-    private final StaticController staticController = new StaticController();
-
-    private RequestMapping() {
+    static {
         controllers.put("/", new IndexController());
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
     }
 
-    public Controller getController(HttpRequest request) {
+    public static Controller getController(HttpRequest request) {
         String path = request.getPath();
         return controllers.getOrDefault(path, staticController);
+    }
+
+    private RequestMapping() {
     }
 }

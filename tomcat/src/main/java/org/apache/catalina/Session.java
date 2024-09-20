@@ -17,7 +17,7 @@ public class Session {
     }
 
     public Object getAttribute(String name) {
-        return values.get(name);
+        return values.getOrDefault(name, null);
     }
 
     public void setAttribute(String name, Object value) {

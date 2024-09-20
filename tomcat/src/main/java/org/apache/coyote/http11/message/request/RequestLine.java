@@ -1,29 +1,26 @@
 package org.apache.coyote.http11.message.request;
 
-import java.util.StringTokenizer;
-
 public class RequestLine {
 
-    private final String method;
+    private static final String QUERY_DELIMITER = "\\?";
+    private static final int PATH_INDEX = 0;
+
+    private final HttpMethod method;
     private final String uri;
     private final String protocolVersion;
 
-    public RequestLine(String line) {
-        StringTokenizer tokenizer = new StringTokenizer(line);
-        if (tokenizer.countTokens() != 3) {
-            throw new IllegalArgumentException("Http Line 형식이 일치하지 않습니다.");
-        }
-        method = tokenizer.nextToken();
-        uri = tokenizer.nextToken();
-        protocolVersion = tokenizer.nextToken();
+    public RequestLine(HttpMethod method, String uri, String protocolVersion) {
+        this.method = method;
+        this.uri = uri;
+        this.protocolVersion = protocolVersion;
     }
 
     public boolean isGet() {
-        return method.equals("GET");
+        return method.isGet();
     }
 
     public boolean isPost() {
-        return method.equals("POST");
+        return method.isPost();
     }
 
     public String getUri() {
@@ -31,7 +28,15 @@ public class RequestLine {
     }
 
     public String getPath() {
-        return uri.split("\\?")[0];
+        return uri.split(QUERY_DELIMITER)[PATH_INDEX];
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
     @Override

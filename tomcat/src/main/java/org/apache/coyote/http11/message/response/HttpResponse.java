@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
+import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeader;
@@ -22,6 +23,7 @@ public class HttpResponse {
     private StatusLine statusLine;
     private HttpHeaders headers;
     private String body = "";
+    private String viewUri = "";
 
     public HttpResponse() {
         headers = new HttpHeaders();
@@ -46,30 +48,36 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setViewUri(String uri){
-        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(uri).getValue());
-        setBody(uri);
+    public void setViewUri(String viewUri) {
+        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(viewUri).getValue());
+        this.viewUri = viewUri;
     }
 
     public void setView(String view) {
         setBody(view);
     }
 
-    public void sendRedirect(HttpRequest httpRequest, String url) {
+    public void sendRedirect(HttpRequest httpRequest, String uri) {
         String host = httpRequest.getHost();
-        addHeader(HttpHeader.LOCATION, HTTP_PROTOCOL + host + url);
-        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(url).getValue());
+        addHeader(HttpHeader.LOCATION, HTTP_PROTOCOL + host + uri);
+        addHeader(HttpHeader.CONTENT_TYPE, ContentType.from(uri).getValue());
         addHeader(HttpHeader.CONTENT_LENGTH, NO_CONTENT_LENGTH);
+        setViewUri(uri);
     }
 
-    public boolean containsViewUri() {
-        return statusLine.isNotRedirect() && containsViewUri(body);
+    public Optional<String> findNotRedirectViewUri() {
+        Optional<String> uri = findViewUri();
+        if (uri.isPresent() && statusLine.isNotRedirect()) {
+            return uri;
+        }
+        return Optional.empty();
     }
 
-    private boolean containsViewUri(String body) {
-        return ContentType.getViewExtension()
-                .stream()
-                .anyMatch(body::endsWith);
+    public Optional<String> findViewUri() {
+        if (viewUri.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(viewUri);
     }
 
     public String convertMessage() {
@@ -82,16 +90,13 @@ public class HttpResponse {
         );
     }
 
-    public String getBody() {
-        return body;
-    }
-
     @Override
     public String toString() {
         return "HttpResponse{" +
                 "statusLine=" + statusLine +
                 ", headers=" + headers +
-                ", bodyLength='" + body.getBytes().length + '\'' +
+                ", bodyLength='" + body.getBytes().length +
+                ", viewUri='" + viewUri + '\'' +
                 '}';
     }
 }

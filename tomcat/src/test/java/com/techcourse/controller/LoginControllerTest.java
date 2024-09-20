@@ -55,7 +55,7 @@ class LoginControllerTest {
             return session.getId();
         }
 
-        @DisplayName("로그인 안 되어있으면 login 페이지 경로를 body에 담는다.")
+        @DisplayName("로그인 안 되어있으면 login 페이지 경로를 viewUri에 담는다.")
         @Test
         void getLoginPageWithNoLogin() throws IOException {
             String request = String.join("\r\n",
@@ -72,11 +72,8 @@ class LoginControllerTest {
             new LoginController().doGet(httpRequest, httpResponse);
 
             // then
-            assertThat(httpResponse.convertMessage()).contains(
-                    "HTTP/1.1 200 OK",
-                    "Content-Type: text/html;charset=utf-8",
-                    "/login.html"
-            );
+            assertThat(httpResponse.findViewUri()).isPresent()
+                    .hasValue("/login.html");
         }
     }
 

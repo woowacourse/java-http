@@ -28,11 +28,8 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.convertMessage()).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "/index.html"
-        );
+        assertThat(httpResponse.findViewUri()).isPresent()
+                .hasValue("/index.html");
     }
 
     @DisplayName("GET /js/scripts.js -> 200 js 페이지")
@@ -54,11 +51,8 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.convertMessage()).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/javascript;charset=utf-8",
-                "/js/scripts.js"
-        );
+        assertThat(httpResponse.findViewUri()).isPresent()
+                .hasValue("/js/scripts.js");
     }
 
     @DisplayName("GET /css/styles.css -> 200 css 페이지")
@@ -80,10 +74,7 @@ class StaticControllerTest {
         new StaticController().doGet(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.convertMessage()).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/css;charset=utf-8",
-                "/css/styles.css"
-        );
+        assertThat(httpResponse.findViewUri()).isPresent()
+                .hasValue("/css/styles.css");
     }
 }

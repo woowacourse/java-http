@@ -32,11 +32,8 @@ class RegisterControllerTest {
         new RegisterController().doGet(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.convertMessage()).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "/register.html"
-        );
+        assertThat(httpResponse.findViewUri()).isPresent()
+                .hasValue("/register.html");
     }
 
     @DisplayName("POST /register")

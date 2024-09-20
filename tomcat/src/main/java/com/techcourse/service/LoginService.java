@@ -23,15 +23,15 @@ public class LoginService {
         return false;
     }
 
-    public User findLoginUser(LoginDto loginDto) {
+    public Optional<User> findLoginUser(LoginDto loginDto) {
         Optional<User> loginUser = InMemoryUserRepository.findByAccount(loginDto.account());
 
         if (loginUser.isPresent()) {
             User user = loginUser.get();
             if (user.checkPassword(loginDto.password())) {
-                return user;
+                return Optional.of(user);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

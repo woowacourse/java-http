@@ -12,7 +12,7 @@ public class IndexController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         response.setStatus(StatusCode.OK);
-        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTTP.getValue());
+        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getValue());
         response.setBody("Hello world!");
     }
 }

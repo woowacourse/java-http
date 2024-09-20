@@ -1,13 +1,11 @@
 package org.apache.coyote.http11.message.common;
 
-import java.util.Arrays;
-import java.util.List;
-
 public enum ContentType {
-    HTTP(".html", "text/html;charset=utf-8"),
+    HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css;charset=utf-8"),
     JS(".js", "text/javascript;charset=utf-8"),
-    SVG(".svg", "image/svg+xml");
+    SVG(".svg", "image/svg+xml"),
+    NONE("", "");
 
     private final String extension;
     private final String value;
@@ -18,6 +16,9 @@ public enum ContentType {
     }
 
     public static ContentType from(String uri) {
+        if (uri.endsWith(HTML.extension)) {
+            return HTML;
+        }
         if (uri.endsWith(CSS.extension)) {
             return CSS;
         }
@@ -25,14 +26,9 @@ public enum ContentType {
             return JS;
         }
         if (uri.endsWith(SVG.extension)) {
-            return JS;
+            return SVG;
         }
-        return HTTP;
-    }
-
-    public static List<String> getViewExtension() {
-        return Arrays.stream(values()).map(type -> type.extension)
-                .toList();
+        return NONE;
     }
 
     public String getValue() {

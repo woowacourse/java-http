@@ -15,7 +15,7 @@ class HttpResponseTest {
     void convertMessageWithBody() {
         HttpResponse response = new HttpResponse();
         response.setStatus(StatusCode.OK);
-        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTTP.getValue());
+        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getValue());
         response.setBody("Hello world!");
 
         String actual = response.convertMessage();
@@ -33,7 +33,7 @@ class HttpResponseTest {
     void convertMessageWithNoBody() {
         HttpResponse response = new HttpResponse();
         response.setStatus(StatusCode.OK);
-        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTTP.getValue());
+        response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getValue());
 
         String actual = response.convertMessage();
 

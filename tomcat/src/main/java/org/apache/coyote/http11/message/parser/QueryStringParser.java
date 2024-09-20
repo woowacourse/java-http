@@ -34,7 +34,6 @@ public class QueryStringParser {
 
     private static void validateQuery(StringTokenizer tokenizer) {
         if (tokenizer.countTokens() != PAIR) {
-            System.out.println(tokenizer.countTokens());
             throw new IllegalArgumentException("쿼리 스트링 형식이 유효하지 않습니다.");
         }
     }

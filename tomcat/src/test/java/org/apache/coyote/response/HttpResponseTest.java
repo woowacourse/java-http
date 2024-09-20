@@ -44,5 +44,6 @@ class HttpResponseTest {
 
         // then
         assertThat(response.getReponse()).contains("<title>대시보드</title>");
+        assertThat(response.getReponse()).contains("Content-Length: 5624");
     }
 }

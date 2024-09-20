@@ -62,10 +62,14 @@ public abstract class HttpController implements Controller {
     }
 
     private boolean isSessionAlive(HttpRequest request) {
-        return SessionManager.validate(request.getCookieValue(Session.SESSION_KEY));
+        return SessionManager.isRegisteredId(request.getCookieValue(Session.SESSION_KEY));
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public boolean hasSamePath(String path) {
-        return this.path.equals(path);
+        return getPath().equals(path);
     }
 }

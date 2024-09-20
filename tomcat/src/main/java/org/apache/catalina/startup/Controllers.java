@@ -2,29 +2,24 @@ package org.apache.catalina.startup;
 
 import com.techcourse.controller.HttpController;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Controllers {
-    private final List<HttpController> value;
+    private final Map<String, HttpController> value;
 
     public Controllers(HttpController... controller) {
-        value = Arrays.stream(controller).toList();
+        value = Arrays.stream(controller)
+                .collect(Collectors.toMap(HttpController::getPath, Function.identity()));
     }
 
     boolean contains(String path) {
-        return value.stream()
-                .anyMatch(controller -> controller.hasSamePath(path));
-    }
-
-    public void service() {
-
+        return value.containsKey(path);
     }
 
     public HttpController get(String path) {
-        return value.stream()
-                .filter(controller -> controller.hasSamePath(path))
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Path incorrect"));
+        return value.get(path);
     }
 }

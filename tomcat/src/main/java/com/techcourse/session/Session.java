@@ -16,7 +16,7 @@ public class Session {
         setAttribute(SESSION_KEY, id);
     }
 
-    private String generateRandomId() {
+    private static String generateRandomId() {
         return UUID.randomUUID().toString();
     }
 

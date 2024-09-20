@@ -2,11 +2,8 @@ package com.techcourse.db;
 
 import com.techcourse.exception.IllegalConstructionException;
 import com.techcourse.model.User;
-import com.techcourse.session.Session;
-import com.techcourse.session.SessionManager;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {

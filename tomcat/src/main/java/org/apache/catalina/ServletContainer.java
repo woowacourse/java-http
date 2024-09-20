@@ -13,7 +13,7 @@ public class ServletContainer {
         this.controllerMapper = controllerMapper;
     }
 
-    public void run(HttpRequest httpRequest, HttpResponse httpResponse) throws NoSuchMethodException {
+    public void run(HttpRequest httpRequest, HttpResponse httpResponse) {
         Controller controller = controllerMapper.getController(httpRequest.getPath());
         controller.service(httpRequest, httpResponse);
     }

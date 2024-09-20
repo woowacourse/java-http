@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.getReponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | NoSuchMethodException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

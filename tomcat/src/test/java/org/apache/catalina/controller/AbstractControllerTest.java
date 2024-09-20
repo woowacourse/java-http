@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class AbstractControllerTest {
 
     @Test
-    void doGet() throws NoSuchMethodException {
+    void doGet() {
         // given
         AbstractController abstractController = new TestController();
         HttpRequest request = new HttpRequest(List.of("GET / HTTP/1.1"), "");
@@ -24,7 +24,7 @@ class AbstractControllerTest {
     }
 
     @Test
-    void doPost() throws NoSuchMethodException {
+    void doPost() {
         // given
         AbstractController abstractController = new TestController();
         HttpRequest request = new HttpRequest(List.of("POST / HTTP/1.1"), "");

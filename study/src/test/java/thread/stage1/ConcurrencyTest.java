@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -35,6 +35,9 @@ class ConcurrencyTest {
 
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
+        // -> 개별 쓰레드가 if 문에 동시에 접근한다면, user 가 가입되지 않은 상태이기 때문에 둘 다 if 문을 통과하게 된다.
+        // -> 그 후, user 가 가입되는 코드를 실행하게 되고, user 가 중복으로 가입되는 상황이 발생한다.
+        // 따라서, if 문을 포괄하는 join 함수에 synchronized 를 붙여서 동시에 if 문에 들어오지 못하도록 해야 한다.
         assertThat(userServlet.getUsers()).hasSize(1);
     }
 }

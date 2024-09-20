@@ -24,7 +24,7 @@ class ConcurrencyTest {
         // 웹서버로 동시에 2명의 유저가 gugu라는 이름으로 가입을 시도했다.
         // UserServlet의 users에 이미 가입된 회원이 있으면 중복 가입할 수 없도록 코드를 작성했다.
         User user1 = new User("gugu");
-        User user2 = new User("gugu");
+        User user2 = new User("gugu");  // 어떤 객체가 저장되는지 확인하기 위한 변수 추출
         final var firstThread = new Thread(new HttpProcessor(user1, userServlet));
         final var secondThread = new Thread(new HttpProcessor(user2, userServlet));
 

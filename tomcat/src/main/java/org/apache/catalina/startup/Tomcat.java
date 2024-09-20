@@ -11,14 +11,18 @@ public class Tomcat {
 
     private final int port;
     private final int acceptAccount;
+    private final int maxThreads;
 
-    public Tomcat(int port, int acceptAccount) {
+
+    public Tomcat(int port, int acceptAccount, int maxThreads) {
         this.port = port;
         this.acceptAccount = acceptAccount;
+        this.maxThreads = maxThreads;
+
     }
 
     public void start() {
-        var connector = new Connector(port, acceptAccount);
+        var connector = new Connector(port, acceptAccount, maxThreads);
         connector.start();
 
         try {

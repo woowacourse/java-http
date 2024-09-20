@@ -42,6 +42,11 @@ public class HttpResponse {
             throw new IllegalArgumentException("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(pagePath));
         }
     }
+
+    public void setRedirect(HttpStatus httpStatus, String location) {
+        this.httpStatus = httpStatus;
+        this.location = location;
+    }
     
     public void setNotFound() {
         setResponse(HttpStatus.NOT_FOUND, "/404.html");

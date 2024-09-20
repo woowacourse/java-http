@@ -43,10 +43,9 @@ public class LoginServlet extends HttpServlet {
         User user = (User) session.getAttribute("user");
         if (user != null) {
             log.info("이미 로그인된 유저입니다. (account: {})", user.getAccount());
-            resp.setResponse(HttpStatus.FOUND, "/index.html");
+            resp.setRedirect(HttpStatus.FOUND, "/index.html");
             return;
         }
-
         resp.setResponse(HttpStatus.OK, LOGIN_PAGE_PATH);
     }
 
@@ -60,7 +59,7 @@ public class LoginServlet extends HttpServlet {
         try {
             User user = findUser(req);
             addUserSession(req, resp, user);
-            resp.setResponse(HttpStatus.FOUND, "/index.html");
+            resp.setRedirect(HttpStatus.FOUND, "/index.html");
         } catch (AuthenticationException e) {
             resp.setResponse(HttpStatus.UNAUTHORIZED, "/401.html");
         }

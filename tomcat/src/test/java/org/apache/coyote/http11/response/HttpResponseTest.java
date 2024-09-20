@@ -20,17 +20,17 @@ class HttpResponseTest {
 
         String expected = """
                 HTTP/1.1 200 OK \r
-                Content-Length: 9 \r
                 Content-Type: text/html; charset=utf-8 \r
+                Content-Length: 9 \r
                 \r
                 test body""";
 
-        Assertions.assertThat(httpResponse.serializeResponse()).isEqualTo(expected.getBytes());
+        Assertions.assertThat(new String(httpResponse.serializeResponse())).isEqualTo(expected);
     }
 
     @DisplayName("바디를 추가할때 헤더에 Content-Length도 넣어준다")
     @Test
-    void ddS () {
+    void insert_content_length_when_exist_body () {
         final HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
         httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setBody("test body");
@@ -41,6 +41,6 @@ class HttpResponseTest {
                 \r
                 test body""";
 
-        Assertions.assertThat(httpResponse.serializeResponse()).isEqualTo(expected.getBytes());
+        Assertions.assertThat(new String(httpResponse.serializeResponse())).isEqualTo(expected);
     }
 }

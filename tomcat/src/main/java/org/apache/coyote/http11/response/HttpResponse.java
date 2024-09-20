@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.coyote.http11.constants.HttpHeader;
@@ -18,7 +19,7 @@ public class HttpResponse {
 
     public HttpResponse(final String version) {
         this.version = version;
-        headers = new HashMap<>();
+        headers = new LinkedHashMap<>();
     }
 
     public void addHeader(final HttpHeader key, final String value) {

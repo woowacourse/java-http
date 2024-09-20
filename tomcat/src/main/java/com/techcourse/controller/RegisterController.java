@@ -19,7 +19,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        RegisterDto registerDto = RegisterDto.from(request.getBody());
+        RegisterDto registerDto = RegisterDto.from(request.getQueries());
 
         registerService.save(registerDto);
         response.setStatus(StatusCode.FOUND);

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.message.request;
 
+import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -7,6 +8,7 @@ import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeader;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.parser.HttpCookieParser;
+import org.apache.coyote.http11.message.parser.QueryStringParser;
 
 public class HttpRequest {
 
@@ -50,6 +52,10 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public Map<String, String> getQueries() {
+        return QueryStringParser.parse(body);
     }
 
     public String getHost() {

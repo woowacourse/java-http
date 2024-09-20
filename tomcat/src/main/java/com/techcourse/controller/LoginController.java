@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        LoginDto loginDto = LoginDto.from(request.getBody());
+        LoginDto loginDto = LoginDto.from(request.getQueries());
         User user = loginService.findLoginUser(loginDto);
         if (user != null) {
             log.info("로그인 성공! 아이디: {}", user.getAccount());

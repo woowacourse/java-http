@@ -1,14 +1,14 @@
 package thread.stage2;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class AppTest {
 
+    // 200 응답을 받은 클라이언트의 수
     private static final AtomicInteger count = new AtomicInteger(0);
 
     /**
@@ -23,6 +23,10 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
+        /**
+         * 이 스레드들은 톰캣이 요청을 처리할 때 사용하는 스레드와 관계가 없다고 이해.
+         * 단순히 각기 다른 클라이언트에서 50ms 간격으로 병렬로 요청을 보내기 위함.
+         */
         final var NUMBER_OF_THREAD = 10;
         var threads = new Thread[NUMBER_OF_THREAD];
 
@@ -30,13 +34,24 @@ class AppTest {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));
         }
 
+        /**
+         * NUMBER_OF_THREAD 개의 클라이언트가 순차적으로 Connection 연결 요청을 보냄.
+         * max-connection 개수 만큼의 클라이언트 요청이 처리되고, accept-count 만큼의 클라이언트 요청은 큐에서 대기함
+         * 이때 나머지 (NUMBER_OF_THREAD - (max-connection + accept-count)) 만큼의 요청은 refuse됨
+         */
         for (final var thread : threads) {
             thread.start();
+            System.out.println(thread.getName() + " started!!!!!");
             Thread.sleep(50);
         }
 
+        /**
+         * 모든 스레드들의 작업이 완료될 때 까지 TestWorker 스레드를 대기시키기 위함
+         * 즉, 아래 assert문이 스레드 작업이 모두 완료된 후에 실행됨을 보장하기 위함
+         */
         for (final var thread : threads) {
             thread.join();
+            System.out.println(thread.getName() + " joined!!!!!");
         }
 
         assertThat(count.intValue()).isEqualTo(2);
@@ -45,6 +60,7 @@ class AppTest {
     private static void incrementIfOk(final HttpResponse<String> response) {
         if (response.statusCode() == 200) {
             count.incrementAndGet();
+            System.out.println(Thread.currentThread().getName() + ": request succeed");
         }
     }
 }

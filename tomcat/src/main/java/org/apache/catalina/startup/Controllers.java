@@ -17,6 +17,10 @@ public class Controllers {
                 .anyMatch(controller -> controller.hasSamePath(path));
     }
 
+    public void service() {
+
+    }
+
     public HttpController get(String path) {
         return value.stream()
                 .filter(controller -> controller.hasSamePath(path))

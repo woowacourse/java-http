@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.requestline.HttpRequestLine;
 
@@ -30,7 +31,11 @@ public class HttpRequest {
     }
 
     public String getCookieValue(String key) {
-        return headers.getCookieValue(key);
+        String value = headers.getCookieValue(key);
+        if (Objects.isNull(value)) {
+            return null;
+        }
+        return value;
     }
 
     public boolean containsHeader(String key) {

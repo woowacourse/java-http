@@ -4,6 +4,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.DuplicatedAccountException;
 import com.techcourse.model.User;
+import com.techcourse.session.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -29,7 +30,5 @@ public class RegisterController extends HttpController {
         });
 
         InMemoryUserRepository.save(new User(account, password, email));
-
-        response.setHomeRedirection();
     }
 }

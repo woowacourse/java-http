@@ -29,10 +29,9 @@ public class LoginController extends HttpController {
 
         validateUserPassword(user, password);
 
-        Session loginSession = createSession(user);
+        Session session = createSession(user);
 
-        response.setCookie(Session.SESSION_KEY, loginSession.getId());
-        response.setHomeRedirection();
+        response.setCookie(Session.SESSION_KEY, session.getId());
     }
 
     private void validateUserPassword(User user, String password) {
@@ -42,9 +41,9 @@ public class LoginController extends HttpController {
     }
 
     private Session createSession(User user) {
-        Session loginSession = new Session();
-        loginSession.setAttribute("user", user);
-        SessionManager.add(loginSession);
-        return loginSession;
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return session;
     }
 }

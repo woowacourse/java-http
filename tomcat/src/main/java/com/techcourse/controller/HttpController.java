@@ -3,8 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.exception.UnsupportedHttpMethodException;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
-import org.apache.coyote.http11.request.requestline.HttpMethod;
+import java.util.stream.Stream;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class HttpController implements Controller {
@@ -17,10 +18,30 @@ public abstract class HttpController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (isSessionAlive(request)) {
-            response.setHomeRedirection();
-            return;
+        doPreIntercept(request, response);
+        doService(request, response);
+        doPostIntercept(request, response);
+    }
+
+    private void doPreIntercept(HttpRequest request, HttpResponse response) {
+        if (request.getMethod() == HttpMethod.GET && isSessionAlive(request)) {
+            Stream.of("/login", "/register")
+                    .filter(this::hasSamePath)
+                    .findAny()
+                    .ifPresent(x -> response.setHomeRedirection());
         }
+    }
+
+    private void doPostIntercept(HttpRequest request, HttpResponse response) {
+        if (request.getMethod() == HttpMethod.POST) {
+            Stream.of("/login", "/register")
+                    .filter(this::hasSamePath)
+                    .findAny()
+                    .ifPresent(x -> response.setRedirect("/greeting"));
+        }
+    }
+
+    private void doService(HttpRequest request, HttpResponse response) throws Exception {
         if (request.getMethod() == HttpMethod.GET) {
             doGet(request, response);
             return;
@@ -32,16 +53,16 @@ public abstract class HttpController implements Controller {
         throw new UnsupportedHttpMethodException(request.getMethod().name());
     }
 
-    private boolean isSessionAlive(HttpRequest request) {
-        return SessionManager.validate(request.getCookieValue(Session.SESSION_KEY));
-    }
-
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         throw new IllegalStateException("implement get method before invoke.");
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new IllegalStateException("implement post method before invoke.");
+    }
+
+    private boolean isSessionAlive(HttpRequest request) {
+        return SessionManager.validate(request.getCookieValue(Session.SESSION_KEY));
     }
 
     public boolean hasSamePath(String path) {

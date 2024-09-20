@@ -49,7 +49,7 @@ public class RegisterServlet extends HttpServlet {
 
         try {
             User user = registerUser(req);
-            resp.setResponse(HttpStatus.FOUND, "/index.html");
+            resp.setRedirect(HttpStatus.FOUND, "/index.html");
             log.info("회원가입 성공 (account: {})", user.getAccount());
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패", e);

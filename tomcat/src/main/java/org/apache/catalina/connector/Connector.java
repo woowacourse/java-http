@@ -86,9 +86,9 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
-            executorService.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

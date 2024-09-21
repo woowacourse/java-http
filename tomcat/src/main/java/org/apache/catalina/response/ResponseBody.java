@@ -1,6 +1,7 @@
 package org.apache.catalina.response;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -32,7 +33,7 @@ public class ResponseBody {
     }
 
     public int getLength() {
-        return content.length();
+        return content.getBytes(StandardCharsets.UTF_8).length;
     }
 
     public String getContent() {

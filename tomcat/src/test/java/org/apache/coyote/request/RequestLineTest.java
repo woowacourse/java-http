@@ -2,7 +2,8 @@ package org.apache.coyote.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http.HttpMethod;
+import org.apache.catalina.http.HttpMethod;
+import org.apache.catalina.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class RequestLineTest {

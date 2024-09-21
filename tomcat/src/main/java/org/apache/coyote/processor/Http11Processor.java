@@ -1,13 +1,14 @@
 package org.apache.coyote.processor;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import org.apache.coyote.Processor;
-import org.apache.coyote.http11.Dispatcher;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.RequestReader;
-import org.apache.coyote.response.HttpResponse;
+import org.apache.catalina.ServletContainer;
+import org.apache.catalina.exception.UncheckedServletException;
+import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.http.StatusCode;
+import org.apache.catalina.request.HttpRequest;
+import org.apache.catalina.response.HttpResponse;
+import org.apache.coyote.connector.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ServletContainer servletContainer;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.servletContainer = new ServletContainer(new ControllerMapper());
     }
 
     @Override
@@ -35,8 +38,14 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = RequestReader.readRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
 
-            Dispatcher dispatcher = new Dispatcher();
-            dispatcher.run(httpRequest, httpResponse);
+            if (httpRequest.isStaticRequest()) {
+                httpResponse.addHeader(HeaderName.CONTENT_TYPE, httpRequest.getContentType());
+                httpResponse.setStatusCode(StatusCode.OK);
+                httpResponse.setBody(httpRequest.getPath(), httpRequest.getContentType());
+            }
+            if (!httpRequest.isStaticRequest()) {
+                servletContainer.run(httpRequest, httpResponse);
+            }
 
             outputStream.write(httpResponse.getReponse().getBytes());
             outputStream.flush();

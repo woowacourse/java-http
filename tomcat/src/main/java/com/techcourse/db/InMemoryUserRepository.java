@@ -10,10 +10,7 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
-    static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
-    }
+    private InMemoryUserRepository() {}
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
@@ -23,5 +20,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static void reset() {
+        database.clear();
+    }
 }

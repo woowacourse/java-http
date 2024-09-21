@@ -2,8 +2,9 @@ package org.apache.coyote.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http.HeaderName;
-import org.apache.coyote.http.StatusCode;
+import org.apache.catalina.http.HeaderName;
+import org.apache.catalina.http.StatusCode;
+import org.apache.catalina.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class HttpResponseTest {
@@ -43,5 +44,6 @@ class HttpResponseTest {
 
         // then
         assertThat(response.getReponse()).contains("<title>대시보드</title>");
+        assertThat(response.getReponse()).contains("Content-Length: 5670");
     }
 }

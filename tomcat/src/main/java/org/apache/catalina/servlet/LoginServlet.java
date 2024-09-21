@@ -1,13 +1,13 @@
-package org.apache.coyote;
+package org.apache.catalina.servlet;
 
 import com.techcourse.model.User;
-import com.techcourse.service.SessionService;
+import org.apache.catalina.session.SessionService;
 import com.techcourse.service.UserService;
-import org.apache.coyote.http.request.RequestBody;
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.headers.HttpCookies;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class LoginServlet extends HttpServlet {
 

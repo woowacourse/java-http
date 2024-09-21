@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina.servlet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -8,10 +8,10 @@ import com.techcourse.service.UserService;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http.request.RequestBody;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.headers.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

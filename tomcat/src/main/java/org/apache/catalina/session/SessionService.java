@@ -1,9 +1,7 @@
-package com.techcourse.service;
+package org.apache.catalina.session;
 
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.headers.HttpCookies;
 
 public class SessionService {
 

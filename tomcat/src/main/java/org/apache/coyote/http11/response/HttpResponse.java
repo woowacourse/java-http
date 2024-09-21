@@ -1,4 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.ResourceReader;
+import org.apache.coyote.http11.headers.HeaderName;
+import org.apache.coyote.http11.headers.HttpHeaders;
 
 public class HttpResponse {
 

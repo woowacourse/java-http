@@ -41,6 +41,7 @@ class ThreadPoolsTest {
     @Test
     void testNewCachedThreadPool() {
         final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));

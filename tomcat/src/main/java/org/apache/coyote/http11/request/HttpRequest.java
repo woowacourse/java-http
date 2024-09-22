@@ -31,11 +31,7 @@ public class HttpRequest {
     }
 
     public String getCookieValue(String key) {
-        String value = headers.getCookieValue(key);
-        if (Objects.isNull(value)) {
-            return null;
-        }
-        return value;
+        return headers.getCookieValue(key);
     }
 
     public boolean containsHeader(String key) {

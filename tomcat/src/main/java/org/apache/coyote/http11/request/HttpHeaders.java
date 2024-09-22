@@ -66,4 +66,12 @@ public class HttpHeaders {
     public void set(String key, String value) {
         this.value.put(key, value);
     }
+
+    @Override
+    public String toString() {
+        return "HttpHeaders{" +
+               "value=" + value +
+               ", cookie=" + cookie +
+               '}';
+    }
 }

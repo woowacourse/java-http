@@ -45,4 +45,13 @@ public class HttpRequest {
     public Map<String, String> getPayload() {
         return payload.getValue();
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+               "requestLine=" + requestLine +
+               ", headers=" + headers +
+               ", payload=" + payload +
+               '}';
+    }
 }

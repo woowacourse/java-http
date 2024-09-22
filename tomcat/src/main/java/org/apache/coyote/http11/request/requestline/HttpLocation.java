@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
 public class HttpLocation {
     public static final String DEFAULT_EXTENSION = "html";
     private static final Pattern validPattern = Pattern.compile("^[A-Za-z0-9-_~./]+$");
@@ -78,5 +79,13 @@ public class HttpLocation {
 
     public String getExtension() {
         return extension;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpLocation{" +
+               "fileName='" + fileName + '\'' +
+               ", extension='" + extension + '\'' +
+               '}';
     }
 }

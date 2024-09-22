@@ -4,9 +4,10 @@ import com.techcourse.exception.IllegalConstructionException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
         throw new IllegalConstructionException(this.getClass());

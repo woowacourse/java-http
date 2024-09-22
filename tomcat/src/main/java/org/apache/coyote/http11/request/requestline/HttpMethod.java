@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request.requestline;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+
 public enum HttpMethod {
     GET,
     POST,

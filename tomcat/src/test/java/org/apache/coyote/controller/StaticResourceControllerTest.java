@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.net.URI;
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequestBody;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +19,10 @@ class StaticResourceControllerTest {
 
     @DisplayName("StaticResourceController는 GET 요청에 대해 올바른 정적 리소스를 반환한다.")
     @Test
-    void doGet() throws Exception {
+    void doGet() {
         // given
         HttpRequest request = new HttpRequest(new HttpRequestLine(HttpMethod.GET, URI.create("/test.html"), "HTTP/1.1"),
-                new HttpHeaders(), new HttpBody(""));
+                new HttpHeaders(), new HttpRequestBody(null));
         HttpResponse response = new HttpResponse();
 
         // when

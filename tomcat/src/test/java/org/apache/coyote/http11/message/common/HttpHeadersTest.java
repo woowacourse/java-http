@@ -4,18 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.HttpCookies;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpHeadersTest {
-
-    private HttpHeaders httpHeaders;
-
-    @BeforeEach
-    void setUp() {
-        httpHeaders = new HttpHeaders();
-    }
 
     @DisplayName("String 형태 header를 통해 HttpHeaders를 생성한다.")
     @Test
@@ -38,7 +30,7 @@ class HttpHeadersTest {
         assertAll(
                 () -> assertThat(parsedHeaders.getContentType().getType()).isEqualTo(type),
                 () -> assertThat(parsedHeaders.getContentLength()).isEqualTo(length),
-                () -> assertThat(parsedHeaders.getCookies().toString()).isEqualTo(cookie)
+                () -> assertThat(parsedHeaders.getCookies().toString()).hasToString(cookie)
         );
     }
 
@@ -65,7 +57,7 @@ class HttpHeadersTest {
         int contentLength = httpHeaders.getContentLength();
 
         // then
-        assertThat(contentLength).isEqualTo(0);
+        assertThat(contentLength).isZero();
     }
 
     @DisplayName("Content-Type이 설정되지 않았을 때 기본값은 text/html이다.")
@@ -93,7 +85,7 @@ class HttpHeadersTest {
         HttpCookies cookies = httpHeaders.getCookies();
 
         // then
-        assertThat(cookies.toString()).isEqualTo(expectedCookie);
+        assertThat(cookies.toString()).hasToString(expectedCookie);
     }
 
     @DisplayName("toString 메서드는 설정된 헤더들을 올바른 형식으로 반환한다.")

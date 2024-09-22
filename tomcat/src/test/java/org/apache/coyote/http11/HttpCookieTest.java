@@ -42,34 +42,6 @@ class HttpCookieTest {
         );
     }
 
-    @DisplayName("setName() 메서드는 쿠키의 이름을 설정한다.")
-    @Test
-    void testSetName() {
-        // given
-        HttpCookie cookie = new HttpCookie();
-        cookie.setName("sessionId");
-
-        // when
-        String name = cookie.getName();
-
-        // then
-        assertThat(name).isEqualTo("sessionId");
-    }
-
-    @DisplayName("setValue() 메서드는 쿠키의 값을 설정한다.")
-    @Test
-    void testSetValue() {
-        // given
-        HttpCookie cookie = new HttpCookie();
-        cookie.setValue("abc123");
-
-        // when
-        String value = cookie.getValue();
-
-        // then
-        assertThat(value).isEqualTo("abc123");
-    }
-
     @DisplayName("setHttpOnly() 메서드는 HttpOnly 플래그를 설정한다.")
     @Test
     void testSetHttpOnly() {

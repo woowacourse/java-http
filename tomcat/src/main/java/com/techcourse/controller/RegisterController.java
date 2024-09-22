@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
-import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -25,7 +24,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         register(request);
 
         String path = DEFAULT_PATH + INDEX_HTML;
@@ -35,17 +34,15 @@ public class RegisterController extends AbstractController {
     }
 
     private void register(HttpRequest request) {
-        Map<String, String> keyValueBodies = request.getKeyValueBodies();
-
-        String account = keyValueBodies.get(ACCOUNT);
-        String password = keyValueBodies.get(PASSWORD);
-        String email = keyValueBodies.get(EMAIL);
+        String account = request.getBodyParameter(ACCOUNT);
+        String password = request.getBodyParameter(PASSWORD);
+        String email = request.getBodyParameter(EMAIL);
 
         userService.registerUser(account, password, email);
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String path = DEFAULT_PATH + REGISTER_HTML;
 
         response.setStatusLine(HttpStatus.OK);

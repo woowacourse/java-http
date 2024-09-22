@@ -13,11 +13,11 @@ public class HttpRequestLine {
     private final URI uri;
     private final String httpVersion;
 
-    public HttpRequestLine(String startLine) {
+    public HttpRequestLine(String requestLine) {
         this(
-                parseMethod(startLine),
-                parsePath(startLine),
-                parseHttpVersion(startLine)
+                parseMethod(requestLine),
+                parsePath(requestLine),
+                parseHttpVersion(requestLine)
         );
     }
 

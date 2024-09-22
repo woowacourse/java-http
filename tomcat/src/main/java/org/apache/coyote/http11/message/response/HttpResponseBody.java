@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.message.common;
+package org.apache.coyote.http11.message.response;
 
-public class HttpBody {
+public class HttpResponseBody {
 
     private String body;
 
-    public HttpBody(String body) {
+    public HttpResponseBody(String body) {
         this.body = body;
     }
 

@@ -3,9 +3,9 @@ package org.apache.coyote.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequestBody;
 import org.apache.coyote.http11.message.request.HttpRequestLine;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +20,7 @@ class HomeControllerTest {
     void doGet() {
         // given
         HttpRequest request = new HttpRequest(new HttpRequestLine("GET / HTTP/1.1"), new HttpHeaders(),
-                new HttpBody(""));
+                new HttpRequestBody(null));
         HttpResponse response = new HttpResponse();
 
         // when

@@ -1,79 +1,39 @@
 package org.apache.coyote.http11.message.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.ContentType;
-import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
-import org.apache.util.parser.BodyParserFactory;
-import org.apache.util.parser.Parser;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 
-    private static final int OFFSET = 0;
-
-    private final HttpRequestLine startLine;
+    private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
-    private final HttpBody body;
+    private final HttpRequestBody requestBody;
 
-    public HttpRequest(HttpRequestLine startLine, HttpHeaders headers, HttpBody body) {
-        this.startLine = startLine;
+    public HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, HttpRequestBody requestBody) {
+        this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(BufferedReader reader) throws IOException {
-        HttpRequestLine httpRequestLine = new HttpRequestLine(parseStartLine(reader));
-        HttpHeaders httpHeaders = new HttpHeaders(parseHeaders(reader));
-        HttpBody httpBody = new HttpBody(parseBody(reader, httpHeaders.getContentLength()));
-
-        return new HttpRequest(httpRequestLine, httpHeaders, httpBody);
-    }
-
-    private static String parseStartLine(BufferedReader reader) throws IOException {
-        return reader.readLine();
-    }
-
-    private static String parseHeaders(BufferedReader reader) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while (StringUtils.isNoneBlank(line = reader.readLine())) {
-            builder.append(line).append(System.lineSeparator());
-        }
-        return builder.toString();
-    }
-
-    private static String parseBody(BufferedReader reader, int countLength) throws IOException {
-        char[] buffer = new char[countLength];
-        reader.read(buffer, OFFSET, countLength);
-        return new String(buffer);
-    }
-
-    public Map<String, String> getKeyValueBodies() {
-        ContentType contentType = this.getContentType();
-        Parser parser = BodyParserFactory.getParser(contentType);
-
-        return parser.parse(this.getBody());
+    public String getBodyParameter(String key) {
+        return requestBody.getBodyParameter(key);
     }
 
     public ContentType getContentType() {
         return headers.getContentType();
     }
 
-    public String getBody() {
-        return body.getBody();
-    }
-
     public URI getUri() {
-        return startLine.getUri();
+        return requestLine.getUri();
     }
 
     public boolean hasPath(String path) {
-        return startLine.hasPath(path);
+        return requestLine.hasPath(path);
     }
 
     public HttpCookies getCookies() {
@@ -81,6 +41,17 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return startLine.getMethod();
+        return requestLine.getMethod();
+    }
+
+    public Session getSession() {
+        HttpCookies cookies = getCookies();
+        HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
+        Session session = SessionManager.getInstance().findSession(cookie.getValue());
+
+        if (session == null) {
+            return new Session();
+        }
+        return session;
     }
 }

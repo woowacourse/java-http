@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.except.InternaServerException;
-import com.techcourse.except.UserNotFoundException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequestReader;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            HttpRequest httpRequest = HttpRequest.from(reader);
+            HttpRequest httpRequest = HttpRequestReader.from(reader);
             HttpResponse httpResponse = new HttpResponse();
 
             AbstractController controller = RequestMapping.getController(httpRequest);
@@ -52,8 +52,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOGGER.error(e.getMessage(), e);
-        } catch (UserNotFoundException e) {
-
         } catch (Exception e) {
             throw new InternaServerException("서버에러가 발생했습니다.");
         }

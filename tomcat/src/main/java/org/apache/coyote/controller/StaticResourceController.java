@@ -20,7 +20,7 @@ public class StaticResourceController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String path = DEFAULT_PATH + request.getUri();
 
         response.setStatusLine(HttpStatus.OK);

@@ -4,12 +4,8 @@ import com.techcourse.except.UnauthorizedException;
 import com.techcourse.except.UserNotFoundException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Map;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.message.common.HttpHeaderField;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -40,10 +36,9 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        Map<String, String> params = request.getKeyValueBodies();
-        String account = params.get(ACCOUNT);
-        String password = params.get(PASSWORD);
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        String account = request.getBodyParameter(ACCOUNT);
+        String password = request.getBodyParameter(PASSWORD);
 
         try {
             User user = userService.findBy(account);
@@ -63,7 +58,7 @@ public class LoginController extends AbstractController {
         LOGGER.info("로그인한 회원: {}", user);
     }
 
-    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
+    private void handleFailedLogin(HttpResponse response) {
         String path = DEFAULT_PATH + UNAUTHORIZED_HTML;
 
         response.setStaticBody(path);
@@ -73,8 +68,7 @@ public class LoginController extends AbstractController {
     private HttpCookie makeUserCookie(User user) {
         Session session = makeUserSession(user);
 
-        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID);
-        httpCookie.setValue(session.getId());
+        HttpCookie httpCookie = new HttpCookie(Session.JSESSIONID, session.getId());
         httpCookie.setHttpOnly(true);
         return httpCookie;
     }
@@ -87,18 +81,17 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatusLine(HttpStatus.OK);
 
-        HttpCookies cookies = request.getCookies();
-        HttpCookie cookie = cookies.getCookie(Session.JSESSIONID);
+        Session session = request.getSession();
 
-        String path = determinePagePath(cookie);
+        String path = determinePagePath(session);
         response.setStaticBody(path);
     }
 
-    private String determinePagePath(HttpCookie sessionCookie) {
-        if (sessionManager.isExistSession(sessionCookie.getValue())) {
+    private String determinePagePath(Session session) {
+        if (sessionManager.isExistSession(session.getId())) {
             return DEFAULT_PATH + INDEX_HTML;
         }
         return DEFAULT_PATH + LOGIN_HTML;

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -24,6 +25,7 @@ public class HttpCookie {
             List<String> cookies = Arrays.stream(data.split(COOKIE_DELIMITER))
                     .map(String::trim)
                     .toList();
+
             return new HttpCookie(cookies
                     .stream()
                     .collect(Collectors.toMap(

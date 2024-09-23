@@ -10,6 +10,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends HttpController {
 
+    private static final Consumer<String> userConsumer = DuplicatedAccountException::new;
+    private static final Consumer<User> emptyAction = InMemoryUserRepository::save;
+
+
     public RegisterController(String path) {
         super(path);
     }
@@ -19,17 +23,17 @@ public class RegisterController extends HttpController {
         ResourceFinder.setStaticResponse(request, response);
     }
 
+
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getPayload().get("account");
         String password = request.getPayload().get("password");
         String email = request.getPayload().get("email");
 
-        Consumer<User> ifPresentAction = x -> {
-            throw new DuplicatedAccountException(account);
-        };
-        Runnable ifEmptyAction = () -> InMemoryUserRepository.save(new User(account, password, email));
-
-        InMemoryUserRepository.findByAccount(account).ifPresentOrElse(ifPresentAction, ifEmptyAction);
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(
+                        user -> userConsumer.accept(account),
+                        () -> emptyAction.accept(new User(account, password, email))
+                );
     }
 }

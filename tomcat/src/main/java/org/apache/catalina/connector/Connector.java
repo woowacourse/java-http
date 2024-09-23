@@ -114,4 +114,12 @@ public class Connector implements Runnable {
     public void submit(Runnable runnable) {
         pool.submit(runnable);
     }
+
+    public void close(){
+        try {
+            this.serverSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

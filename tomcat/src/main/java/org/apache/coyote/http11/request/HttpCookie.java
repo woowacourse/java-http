@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,11 +21,15 @@ public class HttpCookie {
 
     public static HttpCookie from(String data) {
         try {
-            return new HttpCookie(
-                    Arrays.stream(data.split(COOKIE_DELIMITER))
-                            .map(keyValue -> keyValue.split(COOKIE_KEY_VALUE_DELIMITER))
-                            .collect(Collectors.toMap(key -> key[0], value -> value[1]))
-            );
+            List<String> cookies = Arrays.stream(data.split(COOKIE_DELIMITER))
+                    .map(String::trim)
+                    .toList();
+            return new HttpCookie(cookies
+                    .stream()
+                    .collect(Collectors.toMap(
+                            cookie -> cookie.split(COOKIE_KEY_VALUE_DELIMITER)[0],
+                            cookie -> cookie.split(COOKIE_KEY_VALUE_DELIMITER)[1]
+                    )));
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             return EMPTY;
         }

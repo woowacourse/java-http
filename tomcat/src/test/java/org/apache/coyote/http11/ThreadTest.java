@@ -32,8 +32,8 @@ public class ThreadTest {
         connector.submit(() -> sleep(3000));
         connector.submit(() -> sleep(3000));
 
-        connector.submit(System.out::println);
-        connector.submit(System.out::println);
+        connector.submit(() -> sleep(3000));
+        connector.submit(() -> sleep(3000));
 
         Assertions.assertThat(connector.getQueueSize()).isEqualTo(2);
     }

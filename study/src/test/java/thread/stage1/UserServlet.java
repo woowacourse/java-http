@@ -13,6 +13,7 @@ public class UserServlet {
 
     private void join(final User user) {
         if (!users.contains(user)) {
+            // 스레드가 엉키는 구간
             users.add(user);
         }
     }

@@ -18,7 +18,6 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String HTML = ".html";
 
     private final Socket connection;
 
@@ -60,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
     private void sendErrorResponse(HttpStatus httpStatus) {
         try (var outputStream = connection.getOutputStream()) {
             HttpResponse errorResponse = new HttpResponse(httpStatus, new ResponseHeader(), null);
-            errorResponse.redirectTo("/" + httpStatus.getCode() + HTML);
+            errorResponse.handleError();
 
             outputStream.write(ResponseFormatter.toResponseFormat(errorResponse));
             outputStream.flush();

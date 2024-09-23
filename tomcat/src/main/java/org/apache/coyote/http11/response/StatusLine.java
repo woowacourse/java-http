@@ -27,4 +27,8 @@ public class StatusLine {
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
+
+    public int getHttpStatusCode() {
+        return httpStatus.getCode();
+    }
 }

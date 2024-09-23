@@ -4,6 +4,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -31,7 +32,9 @@ public class RequestMapping {
         HttpResponse httpResponse = new HttpResponse();
         String path = httpRequest.getRequestURL();
 
-        handleStaticResource(httpRequest, path, httpResponse);
+        if (httpRequest.getHttpMethod().isMethod(HttpMethod.GET)) {
+            handleStaticResource(httpRequest, path, httpResponse);
+        }
 
         if (httpResponse.getStatusLine().getHttpStatus() == HttpStatus.OK) {
             return httpResponse;
@@ -50,7 +53,7 @@ public class RequestMapping {
         }
     }
 
-    public Controller getHandler(String path) {
+    private Controller getHandler(String path) {
         Controller controller = handlerMappings.get(path);
         if (controller == null) {
             return new NotFoundController();

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang3.ObjectUtils.Null;
 
 public class SessionManager {
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
@@ -23,6 +24,10 @@ public class SessionManager {
     }
 
     public static Session findSession(String sessionId) {
-        return SESSIONS.get(sessionId);
+        try {
+            return SESSIONS.get(sessionId);
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 }

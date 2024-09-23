@@ -2,6 +2,7 @@ package com.techcourse.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,15 +26,32 @@ public class Session {
         return this.id;
     }
 
-    public Object getAttribute(String name) {
+    public synchronized Object getAttribute(String name) {
         return values.get(name);
     }
 
-    public void setAttribute(String name, Object value) {
+    public synchronized void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 
     public boolean hasSameIdWith(String otherId) {
         return this.id.equals(otherId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Session session = (Session) o;
+        return Objects.equals(id, session.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

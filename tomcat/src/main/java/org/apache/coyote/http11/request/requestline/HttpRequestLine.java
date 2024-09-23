@@ -71,4 +71,14 @@ public class HttpRequestLine {
     public Map<String, String> getQueries() {
         return queries;
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequestLine{" +
+               "method=" + method +
+               ", location=" + location +
+               ", version=" + version +
+               ", queries=" + queries +
+               '}';
+    }
 }

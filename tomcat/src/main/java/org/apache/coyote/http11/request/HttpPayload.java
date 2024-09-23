@@ -43,4 +43,11 @@ public class HttpPayload {
     public Map<String, String> getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "HttpPayload{" +
+               "value=" + value +
+               '}';
+    }
 }

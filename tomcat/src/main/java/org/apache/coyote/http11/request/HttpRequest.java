@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.requestline.HttpRequestLine;
 
@@ -39,5 +40,14 @@ public class HttpRequest {
 
     public Map<String, String> getPayload() {
         return payload.getValue();
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+               "requestLine=" + requestLine +
+               ", headers=" + headers +
+               ", payload=" + payload +
+               '}';
     }
 }

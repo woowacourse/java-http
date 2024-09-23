@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.requestline;
 
 
+import java.util.NoSuchElementException;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +14,7 @@ class HttpMethodTest {
     @DisplayName("유효하지 않은 메서드명은 예외가 발생한다")
     void from(String data) {
         Assertions.assertThatThrownBy(() -> HttpMethod.from(data))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @ParameterizedTest

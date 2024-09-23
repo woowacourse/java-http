@@ -11,11 +11,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceFinder {
 
-    public static final String FILE_DELIMITER = ".";
-    public static final String STATIC_RESOURCE_PREFIX = "static";
-    public static final String NOT_FOUND_LOCATION = "/404.html";
-    public static final String HOME_LOCATION = "/index";
-    public static final String FORMATTED_JAVASCRIPT_EXTENSION = "javascript";
+    private static final String FILE_DELIMITER = ".";
+    private static final String STATIC_RESOURCE_PREFIX = "static";
+    private static final String NOT_FOUND_LOCATION = "/404.html";
+    private static final String HOME_LOCATION = "/index";
+    private static final String FORMATTED_JAVASCRIPT_EXTENSION = "javascript";
 
     public static void setStaticResponse(HttpRequest request, HttpResponse response) {
         String fileName = getLocation(request);

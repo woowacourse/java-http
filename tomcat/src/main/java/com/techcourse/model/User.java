@@ -26,6 +26,10 @@ public class User {
         return account;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     @Override
     public String toString() {
         return "User{" +

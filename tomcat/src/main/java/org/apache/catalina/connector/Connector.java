@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,16 +15,21 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor pool;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
     }
 
-    public Connector(int port, int acceptCount) {
+    public Connector(int port, int acceptCount, int threadCount) {
+        int checkedThreadCount = checkThreadCount(threadCount);
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(checkedThreadCount);
+
         this.stopped = false;
     }
 
@@ -34,6 +41,10 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private int checkThreadCount(int threadCount) {
+        return Math.min(threadCount, DEFAULT_THREAD_COUNT);
     }
 
     public void start() {
@@ -64,8 +75,9 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        // 스레드는 자원이고
+        // 작업을 객체화한 게 쓰레드다.
+        pool.execute(new Http11Processor(connection));
     }
 
     public void stop() {
@@ -89,5 +101,25 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    public int getPoolSize() {
+        return pool.getCorePoolSize();
+    }
+
+    public int getQueueSize() {
+        return pool.getQueue().size();
+    }
+
+    public void submit(Runnable runnable) {
+        pool.submit(runnable);
+    }
+
+    public void close(){
+        try {
+            this.serverSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

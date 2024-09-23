@@ -1,5 +1,6 @@
 package org.apache.catalina.startup;
 
+import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.HttpController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
@@ -11,9 +12,11 @@ public class WAS {
 
     private static final LoginController LOGIN_CONTROLLER = new LoginController("/login");
     private static final RegisterController REGISTER_CONTROLLER = new RegisterController("/register");
+    private static final GreetingController GREETING_CONTROLLER = new GreetingController("/greeting");
     private static final Controllers CONTROLLERS = new Controllers(
             LOGIN_CONTROLLER,
-            REGISTER_CONTROLLER
+            REGISTER_CONTROLLER,
+            GREETING_CONTROLLER
     );
 
     private final Server server;
@@ -34,8 +37,8 @@ public class WAS {
             targetController.service(request, response);
             return response;
         }
-        ResourceFinder.setStaticResponse(request, response);
 
+        ResourceFinder.setStaticResponse(request, response);
         return response;
     }
 }

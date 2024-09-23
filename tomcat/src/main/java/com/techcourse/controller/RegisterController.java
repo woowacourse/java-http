@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.util.FileReader;
 import org.apache.coyote.util.HttpResponseBuilder;
 
-public class RegisterController extends AbstractController {
+public final class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse httpResponse) {

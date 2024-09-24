@@ -10,7 +10,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import jakarta.servlet.StaticResourceController;
+import org.apache.catalina.servlets.StaticResourceController;
 import support.HttpRequestFixture;
 
 class StaticResourceControllerTest {
@@ -62,7 +62,7 @@ class StaticResourceControllerTest {
 		// then
 		var expected = String.join("\r\n",
 			"HTTP/1.1 200 OK ",
-			"Content-Type: text/css;charset=utf-8 ",
+			"Content-Type: text/css ",
 			"Content-Length: 211991 ");
 
 		assertThat(response.toString().startsWith(expected)).isTrue();

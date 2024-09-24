@@ -7,7 +7,7 @@ import jakarta.servlet.RequestMapping;
 import com.techcourse.servlet.HomeController;
 import com.techcourse.servlet.LoginController;
 import com.techcourse.servlet.RegisterController;
-import jakarta.servlet.StaticResourceController;
+import org.apache.catalina.servlets.StaticResourceController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

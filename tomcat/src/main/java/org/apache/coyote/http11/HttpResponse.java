@@ -18,17 +18,19 @@ public class HttpResponse {
 		return new HttpResponse();
 	}
 
-	public void ok(String uri, byte[] response) {
+	public void ok(byte[] response) {
 		setStatusLine(StatusLine.from(HttpStatus.OK));
-		setContentType(uri);
 		setResponseBody(response);
 		setContentLength();
 	}
 
-	public void redirect(String uri, String location) {
+	public void redirect(String location) {
 		setStatusLine(StatusLine.from(HttpStatus.FOUND));
-		setContentType(uri);
 		setLocation("/" + location);
+	}
+
+	public void setContentType(String contentType) {
+		headers.add("Content-Type: " + contentType + " ");
 	}
 
 	public void setStatusLine(StatusLine statusLine) {
@@ -52,10 +54,6 @@ public class HttpResponse {
 
 	private static int calculateContentLength(String content) {
 		return content.getBytes(StandardCharsets.UTF_8).length;
-	}
-
-	public void setContentType(String uri) {
-		headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
 	}
 
 	private static String getContentType(String uri) {

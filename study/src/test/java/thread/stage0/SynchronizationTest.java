@@ -24,24 +24,39 @@ class SynchronizationTest {
      *
      * Guide to the Synchronized Keyword in Java
      * https://www.baeldung.com/java-synchronized
+     *
+     * Synchronized 키워드 미사용시 -> Execution time: 7-11 milliseconds
+     * Synchronized 키워드 사용시 -> Execution time: 7-13 milliseconds
+     * 작업이 가벼워서 그런지 별차이 없음
      */
     @Test
     void testSynchronized() throws InterruptedException {
         var executorService = Executors.newFixedThreadPool(3);
         var synchronizedMethods = new SynchronizedMethods();
 
+        // 작업 시작 시간 기록
+        long startTime = System.currentTimeMillis();
+
         IntStream.range(0, 1000)
-                .forEach(count -> executorService.submit(synchronizedMethods::calculate));
+            .forEach(count -> executorService.submit(synchronizedMethods::calculate));
+        executorService.shutdown();  // ExecutorService 종료 명령
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
+
+        // 작업 종료 시간 기록
+        long endTime = System.currentTimeMillis();
+
+        // 동작 시간 출력
+        System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
 
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
+
 
     private static final class SynchronizedMethods {
 
         private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 

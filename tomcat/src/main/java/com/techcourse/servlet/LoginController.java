@@ -44,10 +44,11 @@ public class LoginController extends AbstractController {
 			URL resource = getClass().getClassLoader().getResource("static/" + "login.html");
 			File file = new File(resource.getPath());
 			final Path path = file.toPath();
-			response.ok(request.getUri(), Files.readAllBytes(path));
+			response.setContentType("text/html");
+			response.ok(Files.readAllBytes(path));
 			return;
 		}
-		response.redirect(request.getUri(), "index.html");
+		response.redirect("index.html");
 	}
 
 	@Override
@@ -60,13 +61,12 @@ public class LoginController extends AbstractController {
 			session.setAttribute("user", user);
 			sessionManager.add(session);
 
-			response.redirect(request.getUri(), "index.html");
+			response.redirect("index.html");
 			response.setCookie("JSESSIONID", uuid.toString());
 			return;
 		} catch (RuntimeException exception) {
-			response.redirect(request.getUri(), "401.html");
+			response.redirect("401.html");
 		}
-		super.doPost(request, response);
 	}
 
 	private User login(String account, String password) {

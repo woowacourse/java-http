@@ -5,17 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 public class HttpHeaders {
 
-	public static final String HEADER_DELIMITER = ":";
-	public static final int SPLIT_LIMIT = 2;
-	public static final int HEADER_NAME_INDEX = 0;
-	public static final int HEADER_VALUE_INDEX = 1;
-	public static final String CONTENT_LENGTH = "content-length";
-	public static final String COOKIE = "cookie";
-	public static final int DEFAULT_CONTENT_LENGTH = 0;
+	private static final String HEADER_DELIMITER = ":";
+	private static final int SPLIT_LIMIT = 2;
+	private static final int HEADER_NAME_INDEX = 0;
+	private static final int HEADER_VALUE_INDEX = 1;
+	private static final String CONTENT_LENGTH = "content-length";
+	private static final String COOKIE = "cookie";
+	private static final int DEFAULT_CONTENT_LENGTH = 0;
 
 	private final Map<String, String> headers;
 

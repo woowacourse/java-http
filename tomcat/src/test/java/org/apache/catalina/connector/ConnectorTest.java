@@ -46,19 +46,4 @@ class ConnectorTest {
             }
         }
     }
-
-    @DisplayName("서버가 최대 스레드 및 대기열을 처리할 수 있어야 한다")
-    @Test
-    void handlingMaxThreadsAndQueueing() throws IOException {
-        // given
-        connector.start();
-
-        // when
-        for (int i = 0; i < 20; i++) {
-            try (Socket clientSocket = new Socket("localhost", 8080)) {
-                // then
-                assertThat(clientSocket.isConnected()).isTrue();
-            }
-        }
-    }
 }

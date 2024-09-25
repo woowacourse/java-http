@@ -5,67 +5,48 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
+import java.util.List;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.util.FileReader;
 import org.apache.coyote.util.HttpResponseBuilder;
 
-public final class MemberController extends AbstractController {
+public final class LoginController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
-
-        if (request.getMethod() == HttpMethod.GET) {
-            doGet(request, httpResponse);
+    public void doGet(HttpRequest request, HttpResponse httpResponse) {
+        Cookies cookies = request.getCookies();
+        if (cookies.hasJSESSIONID() && SessionManager.isRegistered(cookies.getJSESSIONID())) {
+            HttpResponseBuilder.buildRedirection(httpResponse, "/");
             return;
         }
-        if (request.getMethod() == HttpMethod.POST) {
-            doPost(request, httpResponse);
-        }
+        String fileName = "login.html";
+        List<String> contentLines = FileReader.readAllLines(fileName);
+        HttpResponseBuilder.buildStaticContent(httpResponse, fileName, contentLines);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse httpResponse) {
-        if (request.getUri().equals("/login")) {
-            login(request, httpResponse);
-            return;
-        }
-        if (request.getUri().equals("/register")) {
-            register(request, httpResponse);
-        }
-    }
-
-    private void login(HttpRequest request, HttpResponse httpResponse) {
         String account = request.getParams("account");
         String password = request.getParams("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UnauthorizedException::new);
         if (user.checkPassword(password)) {
-            HttpResponseBuilder.setRedirection(httpResponse, "/");
+            HttpResponseBuilder.buildRedirection(httpResponse, "/");
             registerLoginSession(request, httpResponse, user);
             return;
         }
-        HttpResponseBuilder.setRedirection(httpResponse, "/401.html");
-    }
-
-    private void register(HttpRequest request, HttpResponse httpResponse) {
-        String account = request.getParams("account");
-        String password = request.getParams("password");
-        String email = request.getParams("email");
-
-        InMemoryUserRepository.save(new User(account, password, email));
-
-        HttpResponseBuilder.setRedirection(httpResponse, "/");
+        HttpResponseBuilder.buildRedirection(httpResponse, "/401.html");
     }
 
     private void registerLoginSession(HttpRequest request, HttpResponse httpResponse, User user) {
         Cookies requestCookies = request.getCookies();
-        if (!requestCookies.hasJSESSIONID() || SessionManager.isRegisitered(requestCookies.getJSESSIONID())) {
+        if (!requestCookies.hasJSESSIONID() || SessionManager.isRegistered(requestCookies.getJSESSIONID())) {
             Session loginSession = new Session();
             loginSession.setAttribute("user", user);
-            SessionManager.add(loginSession);
+            SessionManager.register(loginSession);
             Cookies cookies = new Cookies();
             cookies.setCookie("JSESSIONID", loginSession.getId());
             httpResponse.setCookies(cookies);

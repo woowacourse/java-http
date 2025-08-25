@@ -1,0 +1,117 @@
+name: Step2 Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review:
+    if: |
+      (github.event_name == 'pull_request' && (
+        contains(github.event.pull_request.title, 'step2') ||
+        contains(github.event.pull_request.title, 'Step2') ||
+        contains(github.event.pull_request.title, '2단계') ||
+        contains(github.event.pull_request.labels.*.name, 'step2')
+      )) ||
+      (github.event_name == 'issue_comment' && 
+       github.event.issue.pull_request && 
+       contains(github.event.comment.body, '@claude review'))
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          use_bedrock: true
+          timeout_minutes: '30'
+          model: 'apac.anthropic.claude-sonnet-4-20250514-v1:0'
+
+          # Direct prompt for automated review (no @claude mention needed)
+          direct_prompt: |
+            ## 🎯 Step 2 미션 달성도 중심 리뷰 가이드라인
+            
+            **이 리뷰는 Step 2 미션 요구사항 달성에 집중합니다.**
+            로그인, 회원가입, 쿠키, 세션 기능 구현을 중점적으로 검토하고 **한글로** 피드백을 제공해주세요.
+            
+            ### 📚 학습 원칙
+            - **직접 코드를 제공하지 마세요** (학습자가 명시적으로 요청하는 경우 제외)
+            - **문제 해결 과정을 안내**하되, 정답을 바로 알려주지 마세요
+            - **작은 단계로 문제를 분해**하여 접근하도록 도와주세요
+            
+            ### 💡 피드백 방법
+            - **유도 질문 활용**: "만약 ~라면 어떻게 될까요?", "~를 고려해보셨나요?"
+            - **힌트 제공**: 방향은 제시하되, 구체적인 구현은 학습자가 하도록
+            - **다양한 접근법 제시**: 한 가지 해결책이 아닌 여러 가능성을 제안
+            - **왜?에 집중**: 단순히 무엇이 잘못되었는지보다 왜 그런지 이해하도록
+            
+            ### 🔍 디버깅 독립성 강화
+            - 에러 메시지를 **스스로 읽고 이해**하도록 격려
+            - 로그 활용법 안내 (System.out.println, logger, 디버거 활용)
+            - 문제 패턴 파악을 도와 **디버깅 스킬 향상**
+            - 관련 문서나 JavaDoc 참조 권장
+            
+            ### 📋 미션 달성도 체크리스트
+            
+            #### 1. HTTP Status Code 302 (리다이렉트)
+            - [ ] 로그인 성공/실패에 따른 302 리다이렉트 구현
+            - [ ] Location 헤더로 페이지 이동 처리
+            
+            #### 2. POST 방식으로 회원가입
+            - [ ] POST 메서드로 회원가입 처리
+            - [ ] Request Body 파싱 및 사용자 저장
+            
+            #### 3. Cookie에 JSESSIONID 값 저장하기
+            - [ ] 쿠키 파싱 및 Set-Cookie 헤더 구현
+            - [ ] JSESSIONID로 세션 식별
+            
+            #### 4. Session 구현하기
+            - [ ] Session과 SessionManager 클래스 구현
+            - [ ] 로그인 상태 유지 기능
+            
+            ### 🎓 핵심 학습 포인트
+            - **HTTP 상태 관리**: 무상태 프로토콜에서 상태를 유지하는 방법
+            - **쿠키와 세션**: 각각의 역할과 동작 원리 이해
+            - **HTTP Method**: GET과 POST의 차이와 적절한 사용
+            - **리다이렉트**: 302 상태 코드와 Location 헤더의 관계
+            - **보안**: 세션 ID 생성과 관리의 중요성
+            
+            ### 🌟 학습 완료 후
+            - "이번 구현을 통해 무엇을 배우셨나요?" 같은 **회고 질문**
+            - 비슷한 문제를 만났을 때 적용 가능한 **패턴 인식**
+            - 다음 단계 학습을 위한 **추가 학습 자료** 제안
+            
+            ### ⚠️ 예외 상황
+            - 학습자가 "코드를 보여주세요" 등 **명시적으로 요청**시에만 코드 제공
+            - 개념 설명 요청시 (예: "서블릿이 뭔가요?") **명확하고 직접적인 설명** 제공
+            
+            **리뷰는 건설적이고 격려하는 톤으로 작성하며, 학습자의 성장을 최우선으로 고려해주세요.**

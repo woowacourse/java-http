@@ -1,0 +1,112 @@
+name: Step1 Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review:
+    if: |
+      (github.event_name == 'pull_request' && (
+        contains(github.event.pull_request.title, 'step1') ||
+        contains(github.event.pull_request.title, 'Step1') ||
+        contains(github.event.pull_request.title, '1단계') ||
+        contains(github.event.pull_request.labels.*.name, 'step1')
+      )) ||
+      (github.event_name == 'issue_comment' && 
+       github.event.issue.pull_request && 
+       contains(github.event.comment.body, '@claude review'))
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          use_bedrock: true
+          timeout_minutes: '30'
+          model: 'apac.anthropic.claude-sonnet-4-20250514-v1:0'
+
+          # Direct prompt for automated review (no @claude mention needed)
+          direct_prompt: |
+            ## 🎯 Step 1 미션 달성도 중심 리뷰 가이드라인
+            
+            **이 리뷰는 Step 1 미션 요구사항 달성에 집중합니다.**
+            기능 구현과 미션 완성도를 중점적으로 검토하고 **한글로** 피드백을 제공해주세요.
+            
+            ### 📚 학습 원칙
+            - **직접 코드를 제공하지 마세요** (학습자가 명시적으로 요청하는 경우 제외)
+            - **문제 해결 과정을 안내**하되, 정답을 바로 알려주지 마세요
+            - **작은 단계로 문제를 분해**하여 접근하도록 도와주세요
+            
+            ### 💡 피드백 방법
+            - **유도 질문 활용**: "만약 ~라면 어떻게 될까요?", "~를 고려해보셨나요?"
+            - **힌트 제공**: 방향은 제시하되, 구체적인 구현은 학습자가 하도록
+            - **다양한 접근법 제시**: 한 가지 해결책이 아닌 여러 가능성을 제안
+            - **왜?에 집중**: 단순히 무엇이 잘못되었는지보다 왜 그런지 이해하도록
+            
+            ### 🔍 디버깅 독립성 강화
+            - 에러 메시지를 **스스로 읽고 이해**하도록 격려
+            - 로그 활용법 안내 (System.out.println, logger, 디버거 활용)
+            - 문제 패턴 파악을 도와 **디버깅 스킬 향상**
+            - 관련 문서나 JavaDoc 참조 권장
+            
+            ### 📋 미션 달성도 체크리스트
+            
+            #### 1. GET /index.html 응답하기
+            - [ ] HTTP Request 첫 줄 파싱 후 파일 응답
+            - [ ] Http11ProcessorTest 모든 테스트 통과
+            
+            #### 2. CSS 지원하기
+            - [ ] 파일 확장자별 적절한 Content-Type 설정
+            - [ ] 정적 파일(CSS, JS) 정상 응답
+            
+            #### 3. Query String 파싱
+            - [ ] URI에서 Query String 분리 및 파싱
+            - [ ] 로그인 파라미터로 사용자 검증
+            
+            ### 🎓 핵심 학습 포인트
+            - **HTTP 프로토콜**: Request/Response 구조를 제대로 이해했는가?
+            - **I/O 스트림**: BufferedReader/Writer를 적절히 활용했는가?
+            - **예외 처리**: null 체크, 무한 루프 방지 등을 고려했는가?
+            - **책임 분리**: 각 기능이 적절한 클래스/메서드로 분리되었는가?
+            
+            ### 🌟 학습 완료 후
+            - "이번 구현을 통해 무엇을 배우셨나요?" 같은 **회고 질문**
+            - 비슷한 문제를 만났을 때 적용 가능한 **패턴 인식**
+            - 다음 단계 학습을 위한 **추가 학습 자료** 제안
+            
+            ### ⚠️ 예외 상황
+            - 학습자가 "코드를 보여주세요" 등 **명시적으로 요청**시에만 코드 제공
+            - 개념 설명 요청시 (예: "서블릿이 뭔가요?") **명확하고 직접적인 설명** 제공
+            
+            **리뷰는 건설적이고 격려하는 톤으로 작성하며, 학습자의 성장을 최우선으로 고려해주세요.**

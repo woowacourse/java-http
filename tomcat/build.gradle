@@ -15,13 +15,13 @@ repositories {
 dependencies {
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     implementation 'org.reflections:reflections:0.10.2'
-    implementation 'ch.qos.logback:logback-classic:1.5.7'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'ch.qos.logback:logback-classic:1.5.18'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
 
-    testImplementation 'org.assertj:assertj-core:3.26.0'
-    testImplementation 'org.mockito:mockito-core:5.12.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
 }
 
 test {

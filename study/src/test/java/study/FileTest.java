@@ -1,5 +1,6 @@
 package study;
 
+import java.net.URISyntaxException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,8 +28,7 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        final String actual = ClassLoader.getSystemResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }

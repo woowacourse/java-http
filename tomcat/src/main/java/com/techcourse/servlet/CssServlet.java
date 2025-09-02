@@ -9,20 +9,20 @@ import java.nio.file.Files;
 
 import static org.apache.coyote.HttpRequest.HttpMethod.GET;
 
-public class IndexPageServlet implements Servlet {
+public class CssServlet implements Servlet {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.method() == GET && request.uri().equals("/index.html");
+        return request.method() == GET && request.uri().equals("/css/styles.css");
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        return HttpResponse.ok().html(indexHtml()).build();
+        return HttpResponse.ok().css(cssFile()).build();
     }
 
-    private String indexHtml() {
-        final var resource = getClass().getClassLoader().getResource("static/index.html");
+    private String cssFile() {
+        final var resource = getClass().getClassLoader().getResource("static/css/styles.css");
         try {
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException e) {

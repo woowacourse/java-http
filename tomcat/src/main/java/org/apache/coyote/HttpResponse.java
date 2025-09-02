@@ -27,10 +27,17 @@ public record HttpResponse(
             this.statusCode = StatusCode.parse(statusCode);
         }
 
-        public HttpResponseBuilder html(String pageData) {
+        public HttpResponseBuilder html(String data) {
             this.headers.put("Content-Type", "text/html;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(pageData.getBytes().length));
-            this.responseBody = pageData;
+            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.responseBody = data;
+            return this;
+        }
+
+        public HttpResponseBuilder css(String data) {
+            this.headers.put("Content-Type", "text/css;charset=utf-8");
+            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.responseBody = data;
             return this;
         }
 

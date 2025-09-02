@@ -1,8 +1,10 @@
 package com.techcourse.servlet;
 
+import org.apache.coyote.HttpRequest;
+
 public interface Servlet {
 
-    boolean canHandle(byte[] input);
+    boolean canHandle(HttpRequest request);
 
-    String handle(byte[] input);
+    String handle(HttpRequest request);
 }

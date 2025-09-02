@@ -3,9 +3,9 @@ package com.techcourse.servlet;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.apache.coyote.HttpRequest.HttpMethod.GET;
 
@@ -23,13 +23,10 @@ public class IndexPageServlet implements Servlet {
     }
 
     private String indexHtml() {
-        try (final var inputStream = getClass().getClassLoader().getResourceAsStream("static/index.html")
-        ) {
-            if (inputStream == null) throw new IllegalStateException("파일을 찾을 수 없습니다: index.html");
-
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
-            return reader.lines().collect(Collectors.joining("\r\n"));
-        } catch (Exception e) {
+        final var resource = getClass().getClassLoader().getResource("static/index.html");
+        try {
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }

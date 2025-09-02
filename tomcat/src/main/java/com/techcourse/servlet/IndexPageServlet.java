@@ -28,7 +28,7 @@ public class IndexPageServlet implements Servlet {
             if (inputStream == null) throw new IllegalStateException("파일을 찾을 수 없습니다: index.html");
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream));
-            return reader.lines().collect(Collectors.joining("\n"));
+            return reader.lines().collect(Collectors.joining("\r\n"));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

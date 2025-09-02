@@ -41,6 +41,11 @@ public record HttpResponse(
             return this;
         }
 
+        public HttpResponseBuilder js(String data) {
+            // TODO : 구현
+            throw new UnsupportedOperationException();
+        }
+
         public HttpResponse build() {
             return new HttpResponse(version, statusCode, headers, responseBody);
         }

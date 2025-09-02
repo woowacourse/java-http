@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import com.techcourse.servlet.HelloWorldServlet;
+import com.techcourse.servlet.IndexPageServlet;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class Connector implements Runnable {
             return;
         }
         // TODO : DI를 활용하여 좀 더 유연한 서블릿 삽입
-        var processor = new Http11Processor(connection, List.of(new HelloWorldServlet()));
+        var processor = new Http11Processor(connection, List.of(new HelloWorldServlet(), new IndexPageServlet()));
         new Thread(processor).start();
     }
 

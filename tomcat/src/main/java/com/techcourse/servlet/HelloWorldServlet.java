@@ -1,13 +1,18 @@
 package com.techcourse.servlet;
 
+import org.apache.coyote.HttpRequest;
+
+import static org.apache.coyote.HttpRequest.HttpMethod.GET;
+
 public class HelloWorldServlet implements Servlet {
+
     @Override
-    public boolean canHandle(byte[] input) {
-        return true;
+    public boolean canHandle(HttpRequest request) {
+        return request.method() == GET && request.uri().equals("/");
     }
 
     @Override
-    public String handle(byte[] input) {
+    public String handle(HttpRequest request) {
         final var responseBody = "Hello world!";
 
         return String.join("\r\n",

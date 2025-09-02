@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import com.techcourse.servlet.HelloWorldServlet;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 public class Connector implements Runnable {
 
@@ -66,7 +68,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        // TODO : DI를 활용하여 좀 더 유연한 서블릿 삽입
+        var processor = new Http11Processor(connection, List.of(new HelloWorldServlet()));
         new Thread(processor).start();
     }
 

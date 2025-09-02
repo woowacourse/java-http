@@ -6,7 +6,10 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.List;
 
@@ -33,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            byte[] input = inputStream.readAllBytes();
+            byte[] input = readHttpRequest(inputStream);
             Servlet servlet = findServletFor(input);
             String response = servlet.handle(input);
 
@@ -42,6 +45,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] readHttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder requestBuilder = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            requestBuilder.append(line).append("\r\n");
+            if (line.isEmpty()) {
+                break;
+            }
+        }
+
+        return requestBuilder.toString().getBytes();
     }
 
     private Servlet findServletFor(byte[] input) {

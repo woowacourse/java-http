@@ -42,8 +42,10 @@ public record HttpResponse(
         }
 
         public HttpResponseBuilder js(String data) {
-            // TODO : 구현
-            throw new UnsupportedOperationException();
+            this.headers.put("Content-Type", "application/javascript;charset=utf-8");
+            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.responseBody = data;
+            return this;
         }
 
         public HttpResponse build() {

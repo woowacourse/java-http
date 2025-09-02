@@ -210,13 +210,13 @@ class IOStreamTest {
                     new InputStreamReader(inputStream)
             )
             ){
-                actual = new StringBuilder().append(br.readLine()+"\r\n")
-                        .append(br.readLine()+"\r\n")
-                        .append(br.readLine()+"\r\n");
+                actual = new StringBuilder();
+                for(String line; (line = br.readLine())!= null;){
+                    actual.append(line+"\r\n");
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
             assertThat(actual).hasToString(emoji);
         }
     }

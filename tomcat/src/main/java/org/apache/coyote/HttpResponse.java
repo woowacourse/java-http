@@ -1,11 +1,13 @@
 package org.apache.coyote;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public record HttpResponse(
         String version,
-        int statusCode,
+        StatusCode statusCode,
         Map<String, String> headers,
         String responseBody
 ) {
@@ -16,13 +18,13 @@ public record HttpResponse(
     public static class HttpResponseBuilder {
 
         private final String version = "HTTP/1.1";
-        private final int statusCode;
+        private final StatusCode statusCode;
         private final Map<String, String> headers = new HashMap<>();
 
         private String responseBody;
 
         public HttpResponseBuilder(int statusCode) {
-            this.statusCode = statusCode;
+            this.statusCode = StatusCode.parse(statusCode);
         }
 
         public HttpResponseBuilder html(String pageData) {
@@ -37,21 +39,37 @@ public record HttpResponse(
         }
     }
 
-    /*
-    return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-     */
+    private enum StatusCode {
+        OK(200),
+        ;
+
+        final int codeNumber;
+
+        StatusCode(int codeNumber) {
+            this.codeNumber = codeNumber;
+        }
+
+        public static StatusCode parse(int codeNumber) {
+            return Arrays.stream(StatusCode.values())
+                    .filter(value -> value.codeNumber == codeNumber)
+                    .findFirst()
+                    .orElseThrow();
+            // TODO : 명확한 예외 타입 사용
+        }
+    }
 
     public byte[] toByteArray() {
         return toSimpleString().getBytes();
     }
 
     public String toSimpleString() {
-        // TODO : 구현
-        throw new UnsupportedOperationException();
+        StringJoiner result = new StringJoiner("\r\n");
+
+        result.add("%s %s %s ".formatted(version, statusCode.codeNumber, statusCode.name()));
+        headers.forEach((key, value) -> result.add("%s: %s ".formatted(key, value)));
+        result.add("");
+        result.add(responseBody);
+
+        return result.toString();
     }
 }

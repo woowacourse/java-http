@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.servlet.Servlet;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,9 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest request = HttpRequest.from(inputStream);
             Servlet servlet = findServletFor(request);
-            String response = servlet.handle(request);
+            HttpResponse response = servlet.handle(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

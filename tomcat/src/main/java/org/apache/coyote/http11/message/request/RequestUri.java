@@ -47,4 +47,8 @@ public class RequestUri {
     public String getPath() {
         return path;
     }
+
+    public Map<String, String> getQueryParams() {
+        return new HashMap<>(queryParams);
+    }
 }

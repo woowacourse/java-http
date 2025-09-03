@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import org.apache.coyote.http11.message.request.HttpRequest;
-import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -30,15 +29,11 @@ class StaticFileHandlerTest {
     @Mock
     private HttpRequest request;
 
-    @Mock
-    private RequestUri requestUri;
-
     @ParameterizedTest
     @ValueSource(strings = {"/index.html", "/style.css", "/script.js"})
     void 정적_파일_요청을_처리할_수_있다(String path) {
         // given
-        when(request.getRequestPath()).thenReturn(requestUri);
-        when(requestUri.getPath()).thenReturn(path);
+        when(request.getRequestPath()).thenReturn(path);
 
         // when
         boolean canHandle = staticFileHandler.canHandle(request);
@@ -50,8 +45,7 @@ class StaticFileHandlerTest {
     @Test
     void 정적_파일이_아닌_요청은_처리할_수_없다() {
         // given
-        when(request.getRequestPath()).thenReturn(requestUri);
-        when(requestUri.getPath()).thenReturn("/other");
+        when(request.getRequestPath()).thenReturn("/other");
 
         // when
         boolean canHandle = staticFileHandler.canHandle(request);
@@ -63,8 +57,7 @@ class StaticFileHandlerTest {
     @Test
     void 존재하는_정적_파일_요청을_처리한다() throws IOException {
         // given
-        when(request.getRequestPath()).thenReturn(requestUri);
-        when(requestUri.getPath()).thenReturn("/test.html");
+        when(request.getRequestPath()).thenReturn("/test.html");
 
         // when
         HttpResponse response = staticFileHandler.handle(request);
@@ -80,8 +73,7 @@ class StaticFileHandlerTest {
     @Test
     void 존재하지_않는_정적_파일_요청시_notFoundHandler를_호출한다() throws IOException {
         // given
-        when(request.getRequestPath()).thenReturn(requestUri);
-        when(requestUri.getPath()).thenReturn("/non-existent.html");
+        when(request.getRequestPath()).thenReturn("/non-existent.html");
 
         // when
         staticFileHandler.handle(request);

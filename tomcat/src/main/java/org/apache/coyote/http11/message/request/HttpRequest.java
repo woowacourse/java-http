@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.http11.exception.InvalidRequestLineException;
 import org.apache.coyote.http11.message.HttpHeaders;
 
@@ -45,8 +46,12 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public RequestUri getRequestPath() {
-        return requestUri;
+    public String getRequestPath() {
+        return requestUri.getPath();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return requestUri.getQueryParams();
     }
 
     public String getVersion() {

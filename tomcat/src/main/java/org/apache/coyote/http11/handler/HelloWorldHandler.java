@@ -12,7 +12,7 @@ public class HelloWorldHandler implements HttpRequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return "/".equals(request.getRequestPath().getPath());
+        return "/".equals(request.getRequestPath());
     }
 
     @Override

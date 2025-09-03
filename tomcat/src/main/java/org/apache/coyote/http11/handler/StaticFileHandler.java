@@ -20,13 +20,13 @@ public class StaticFileHandler implements HttpRequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        String path = request.getRequestPath().getPath();
+        String path = request.getRequestPath();
         return path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js");
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        String path = request.getRequestPath().getPath();
+        String path = request.getRequestPath();
         InputStream is = getClass().getClassLoader().getResourceAsStream(STATIC_DIR + path);
         if (is == null) {
             return notFoundHandler.handle(request);

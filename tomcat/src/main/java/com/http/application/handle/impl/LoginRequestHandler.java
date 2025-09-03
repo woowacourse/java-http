@@ -18,6 +18,14 @@ public class LoginRequestHandler implements RequestHandler {
 
         String account = queryStrings.get("account");
         String password = queryStrings.get("password");
+        processLogin(account, password);
+    }
+
+    private void processLogin(String account, String password) {
+        if (account == null || password == null) {
+            throw new IllegalArgumentException("account와 password는 필수입니다.");
+        }
+
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 

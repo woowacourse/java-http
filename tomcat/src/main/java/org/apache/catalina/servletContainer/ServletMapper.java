@@ -2,6 +2,7 @@ package org.apache.catalina.servletContainer;
 
 import java.util.List;
 import org.apache.catalina.servlet.DefaultServlet;
+import org.apache.catalina.servlet.LoginServlet;
 import org.apache.catalina.servlet.StaticResourceServlet;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.request.HttpRequest;
@@ -24,7 +25,8 @@ public class ServletMapper {
     private List<Servlet> initServlets() {
         return List.of(
                 new DefaultServlet(),
-                new StaticResourceServlet()
+                new StaticResourceServlet(),
+                new LoginServlet()
         );
     }
 }

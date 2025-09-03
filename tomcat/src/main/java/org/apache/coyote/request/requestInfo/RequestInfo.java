@@ -49,4 +49,8 @@ public class RequestInfo {
         }
         return requestPath.split("\\.")[1];
     }
+
+    public boolean isStartsWith(final String loginPath) {
+        return requestPath.startsWith(loginPath);
+    }
 }

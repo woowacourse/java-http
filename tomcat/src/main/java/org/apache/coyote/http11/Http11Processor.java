@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -17,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.techcourse.exception.ErrorMessage.ACCOUNT_NOT_FOUND;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,44 +43,57 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String uri = br.readLine().split(" ")[1];
-
             if(uri.startsWith("/login")){
-                int index = uri.indexOf("?");
-                String queryString = uri.substring(index + 1);
-                uri = "/login.html";
-
-                Map<String, String> params = new HashMap<>();
-                String[] pairs = queryString.split("&");
-                for (String pair : pairs) {
-                    String[] parts = pair.split("=");
-                    if (parts.length == 2) {
-                        params.put(parts[0], parts[1]);
-                    }
+                if(uri.contains("?")){
+                    validateLoginInfoWithQueryString(uri);
                 }
-
-                String account = params.get("account");
-                String password = params.get("password");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("그런 계정은 없다."));
-                if(user.checkPassword(password)){
-                    System.out.println(user);
-                }
+                respondStaticResource("/login.html", outputStream);
+                return;
             }
-
-            final var responseBody = new String(Files.readAllBytes(getStaticPath(uri)));
-            String contentType = uri.split("\\.")[1];
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+            respondStaticResource(uri, outputStream);
+        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void validateLoginInfoWithQueryString(String uri) {
+        int index = uri.indexOf("?");
+        String queryString = uri.substring(index + 1);
+        Map<String, String> params = new HashMap<>();
+        parseQueryString(queryString, params);
+
+        String account = params.get("account");
+        String password = params.get("password");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
+        user.logUserInfo(password, log);
+    }
+
+    private static void parseQueryString(String queryString, Map<String, String> params) {
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            String[] parts = pair.split("=");
+            if (parts.length == 2) {
+                params.put(parts[0], parts[1]);
+            }
+        }
+    }
+
+    private void respondStaticResource(String uri, OutputStream outputStream) throws IOException, URISyntaxException {
+        String contentType = uri.split("\\.")[1];
+        final var responseBody = getResponseBodyFromStaticResource(uri);
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private String getResponseBodyFromStaticResource(String uri) throws IOException, URISyntaxException {
+        return new String(Files.readAllBytes(getStaticPath(uri)));
     }
 
     private Path getStaticPath(String uri) throws URISyntaxException {

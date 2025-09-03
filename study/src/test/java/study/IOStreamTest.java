@@ -1,5 +1,7 @@
 package study;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -131,7 +134,9 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            byte[] readAllBytes = inputStream.readAllBytes();
+
+            final String actual = new String(readAllBytes, StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -145,14 +150,15 @@ class IOStreamTest {
         @Test
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final InputStream inputStream = mock(InputStream.class);
-
             /**
              * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-
-            verify(inputStream, atLeastOnce()).close();
+            try (inputStream) {
+            } finally {
+                verify(inputStream, atLeastOnce()).close();
+            }
         }
     }
 
@@ -175,12 +181,14 @@ class IOStreamTest {
         void 필터인_BufferedInputStream를_사용해보자() {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            try {
+                final byte[] actual = bufferedInputStream.readAllBytes();
 
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            } catch (IOException e) {}
         }
     }
 
@@ -207,8 +215,15 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
+            try {
+                String s;
+                while ((s = bufferedReader.readLine()) != null){
+                    actual.append(s).append("\r\n");
+                }
+            } catch (IOException e) {}
 
             assertThat(actual).hasToString(emoji);
         }

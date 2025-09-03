@@ -9,7 +9,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -40,21 +39,41 @@ public class Http11Processor implements Runnable, Processor {
             final String[] split = startLine.split(" ");
             final String requestTarget = split[1];
             String responseBody;
+            String response;
             if (requestTarget.equals("/")) {
                 responseBody = "Hello World!";
-            } else {
-                final URL resource = getClass().getClassLoader().getResource("static/" + requestTarget);
+
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            } else if (requestTarget.startsWith("/css")) {
+                final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
                 final Path path = Paths.get(resource.getPath());
                 final List<String> strings = Files.readAllLines(path);
                 responseBody = String.join("\r\n", strings);
-            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            } else {
+                final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
+                final Path path = Paths.get(resource.getPath());
+                final List<String> strings = Files.readAllLines(path);
+                responseBody = String.join("\r\n", strings);
+
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

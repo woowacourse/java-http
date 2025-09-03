@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.message.response;
+package org.apache.coyote.http11.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.message.HttpBody;
 import org.junit.jupiter.api.Test;
 
 class HttpBodyTest {

@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.message.request;
+package org.apache.coyote.http11.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import org.apache.coyote.http11.message.HttpHeaders;
 import org.junit.jupiter.api.Test;
 
 class HttpHeadersTest {

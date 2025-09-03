@@ -13,4 +13,12 @@ public class HttpRequest {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
     }
+
+    public boolean isDefaultRequestPath() {
+        return requestInfo.isDefaultPath();
+    }
+
+    public RequestInfo getRequestInfo() {
+        return requestInfo;
+    }
 }

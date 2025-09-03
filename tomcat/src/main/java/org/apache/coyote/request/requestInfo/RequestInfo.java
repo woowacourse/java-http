@@ -30,4 +30,12 @@ public class RequestInfo {
             throw new IllegalArgumentException("[ERROR] 요청 형식이 올바르지 않습니다");
         }
     }
+
+    public boolean isSame(final RequestMethod requestMethod) {
+        return this.requestMethod.equals(requestMethod);
+    }
+
+    public boolean isDefaultPath() {
+        return this.requestPath.equals("/");
+    }
 }

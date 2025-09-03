@@ -12,7 +12,7 @@ public enum RequestMethod {
 
     public static RequestMethod from(final String method){
         return Arrays.stream(RequestMethod.values())
-                .filter(requestMethod -> false)
+                .filter(requestMethod -> requestMethod.name().equals(method))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 메서드입니다"));
     }

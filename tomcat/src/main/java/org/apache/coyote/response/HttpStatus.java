@@ -1,0 +1,21 @@
+package org.apache.coyote.response;
+
+public enum HttpStatus {
+
+    OK(200, "OK"),
+    CREATED(201, "Created"),
+    ACCEPTED(202, "Accepted"),
+    NO_CONTENT(204, "No Content");
+
+    private final int statusCode;
+    private final String statusMessage;
+
+    HttpStatus(final int statusCode, final String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+    }
+
+    public String toCombine() {
+        return statusCode + " " + statusMessage;
+    }
+}

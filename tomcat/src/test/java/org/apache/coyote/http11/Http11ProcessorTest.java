@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class Http11ProcessorTest {
 

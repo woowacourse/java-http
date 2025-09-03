@@ -20,8 +20,10 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     public static final String STATIC_RESOURCE_PREFIX = "static";
+    public static final String CSS_RESOURCE_PREFIX = "css";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 
     private final Socket connection;
 
@@ -42,8 +44,12 @@ public class Http11Processor implements Runnable, Processor {
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
             String firstLine = br.readLine();
             String[] splitFirstLine = firstLine.split(" ");
-            String resourceName = STATIC_RESOURCE_PREFIX + splitFirstLine[1];
-            System.out.println(resourceName);
+            String endPoint = splitFirstLine[1];
+            String resourceName = STATIC_RESOURCE_PREFIX + endPoint;
+            String contentType = TEXT_HTML_CHARSET_UTF_8;
+            if (resourceName.contains("css")) {
+                contentType = "text/css";
+            }
             URI resourceUri = getClass().getClassLoader().getResource(resourceName).toURI();
             Path path = Path.of(resourceUri);
             long contentsLength = Files.size(path);
@@ -58,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + contentsLength + " ",
                     "",
                     responseBody);

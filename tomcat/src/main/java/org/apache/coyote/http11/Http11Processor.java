@@ -95,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void respondStaticResource(String uri, OutputStream outputStream) throws IOException, URISyntaxException {
-        String contentType = uri.split("\\.")[1];
+        String contentType = getContentType(uri);
         final var responseBody = getResponseBodyFromStaticResource(uri);
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -105,6 +105,20 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private static String getContentType(String uri) {
+        String[] parts = uri.split("\\.");
+        if (parts.length < 2) {
+            return "html";
+        }
+        String extension = parts[parts.length-1];
+        return switch (extension) {
+            case "css" -> "css";
+            case "js" -> "javascript";
+            case "png", "jpg", "jpeg" -> "image/" + extension;
+            default -> "html";
+        };
     }
 
     private String getResponseBodyFromStaticResource(String uri) throws IOException, URISyntaxException {

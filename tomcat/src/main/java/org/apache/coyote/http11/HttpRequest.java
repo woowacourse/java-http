@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.constant.HttpMethod;
+
 public record HttpRequest(
         HttpMethod method,
         String resourcePath
@@ -18,6 +20,9 @@ public record HttpRequest(
     }
 
     public static HttpRequest from(String request) {
+        /*
+            TODO: request line 추상화하기
+         */
         final String requestLine = extractRequestLine(request);
         final String[] requestLineElements = requestLine.split(" ");
         if (requestLineElements.length != 3) {
@@ -29,7 +34,7 @@ public record HttpRequest(
     }
 
     private static String extractRequestLine(String request) {
-        final String[] split = request.split("\r\n");
+        final String[] split = request.split("\n");
         if (split.length == 0) {
             throw new IllegalArgumentException("요청이 비어있습니다.");
         }

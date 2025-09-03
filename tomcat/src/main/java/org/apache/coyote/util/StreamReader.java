@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class FileReader {
+public class StreamReader {
 
-    private FileReader() {
+    private StreamReader() {
     }
 
-    public static String readFileString(InputStream inputStream) throws IOException {
+    public static String readAllLine(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final StringBuilder content = new StringBuilder();
         while (reader.ready()) {

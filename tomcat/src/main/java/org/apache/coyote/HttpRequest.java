@@ -4,20 +4,32 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public record HttpRequest(
         HttpMethod method,
-        String uri
+        String uri,
+        Map<String, String> queryParameter
 ) {
     public static HttpRequest from(InputStream inputStream) throws IOException {
         List<String> strings = readInputStream(inputStream);
         String[] headers = strings.getFirst().split(" ");
         String method = headers[0];
-        String uri = headers[1];
-        return new HttpRequest(HttpMethod.parse(method), uri);
+        Map<String, String> paramMap = new HashMap<>();
+        String uri;
+        int queryParamIndex = headers[1].indexOf("?");
+        if (queryParamIndex == -1) {
+            uri = headers[1];
+        } else {
+            uri = headers[1].substring(0, queryParamIndex);
+            String[] params = headers[1].substring(queryParamIndex + 1).split("&");
+            Arrays.stream(params).forEach(param -> {
+                String[] data = param.split("=");
+                paramMap.put(data[0], data[1]);
+            });
+        }
+
+        return new HttpRequest(HttpMethod.parse(method), uri, paramMap);
     }
 
     private static List<String> readInputStream(InputStream inputStream) throws IOException {
@@ -33,6 +45,10 @@ public record HttpRequest(
         }
 
         return result;
+    }
+
+    public String param(String key) {
+        return queryParameter.get(key);
     }
 
     public enum HttpMethod {

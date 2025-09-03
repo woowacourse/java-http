@@ -19,9 +19,6 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    // Resource constants
-    public static final String STATIC_RESOURCE_PREFIX = "static";
-
     private static final Map<String, String> CONTENT_TYPE_MAP = Map.ofEntries(
             Map.entry(".html", "text/html; charset=utf-8"),
             Map.entry(".css",  "text/css"),
@@ -54,24 +51,17 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
-
             String firstLine = br.readLine();
-            String[] splitFirstLine = firstLine.split(" ");
-            String requestUri = splitFirstLine[1];
-            String resource = processRequestResource(requestUri);
-            String resourceName = STATIC_RESOURCE_PREFIX + resource;
+            String resourceName = ResourceResolver.resolveResourceName(firstLine);
             String contentType = determineContentType(resourceName);
             
-            URL resourceUrl = loadResource(resourceName);
+            URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
             if (resourceUrl == null) {
                 sendNotFoundResponse(outputStream);
                 return;
             }
             
-            String responseBody = readResourceContent(resourceUrl);
-            long contentLength = calculateContentLength(resourceUrl);
-            String response = buildOkResponse(contentType, contentLength, responseBody);
-
+            String response = buildOkResponse(contentType, resourceUrl);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -79,29 +69,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String processRequestResource(String requestUri) {
-        return QueryStringParser.parseAndProcessQuery(requestUri);
-    }
-
     private String determineContentType(String resourceName) {
-        String fileExtension = getFileExtension(resourceName);
+        int lastDotIndex = resourceName.lastIndexOf('.');
+        String fileExtension = (lastDotIndex > 0) ? resourceName.substring(lastDotIndex) : "";
         return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html; charset=utf-8");
-    }
-
-    private String getFileExtension(String filename) {
-        int lastDotIndex = filename.lastIndexOf('.');
-        if (lastDotIndex > 0) {
-            return filename.substring(lastDotIndex);
-        }
-        return "";
-    }
-
-    private URL loadResource(String resourceName) {
-        URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
-        if (resourceUrl == null) {
-            resourceUrl = Thread.currentThread().getContextClassLoader().getResource(resourceName);
-        }
-        return resourceUrl;
     }
 
     private void sendNotFoundResponse(java.io.OutputStream outputStream) throws IOException {
@@ -115,17 +86,11 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String readResourceContent(URL resourceUrl) throws IOException, URISyntaxException {
+    private String buildOkResponse(String contentType, URL resourceUrl) throws IOException, URISyntaxException {
         Path path = Path.of(resourceUrl.toURI());
-        return Files.readString(path, StandardCharsets.UTF_8);
-    }
+        long contentLength = Files.size(path);
+        String responseBody = Files.readString(path, StandardCharsets.UTF_8);
 
-    private long calculateContentLength(URL resourceUrl) throws IOException, URISyntaxException {
-        Path path = Path.of(resourceUrl.toURI());
-        return Files.size(path);
-    }
-
-    private String buildOkResponse(String contentType, long contentLength, String responseBody) {
         return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_OK,
                 HEADER_CONTENT_TYPE + contentType + " ",

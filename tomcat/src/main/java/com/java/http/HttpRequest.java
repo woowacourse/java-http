@@ -1,4 +1,4 @@
-package com.java.servlet;
+package com.java.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;

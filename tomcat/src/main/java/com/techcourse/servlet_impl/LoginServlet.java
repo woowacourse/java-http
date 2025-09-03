@@ -1,14 +1,14 @@
 package com.techcourse.servlet_impl;
 
-import com.java.servlet.HttpRequest;
-import com.java.servlet.HttpResponse;
+import com.java.http.HttpRequest;
+import com.java.http.HttpResponse;
 import com.java.servlet.Servlet;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.java.servlet.HttpRequest.HttpMethod.GET;
+import static com.java.http.HttpRequest.HttpMethod.GET;
 
 public class LoginServlet implements Servlet {
 

@@ -1,10 +1,13 @@
 package com.java.servlet;
 
+import com.java.http.HttpRequest;
+import com.java.http.HttpResponse;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static com.java.servlet.HttpRequest.HttpMethod.GET;
+import static com.java.http.HttpRequest.HttpMethod.GET;
 
 public abstract class StaticResourceServlet implements Servlet {
 

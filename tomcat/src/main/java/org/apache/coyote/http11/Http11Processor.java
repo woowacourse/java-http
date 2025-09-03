@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.java.servlet.HttpRequest;
-import com.java.servlet.HttpResponse;
+import com.java.http.HttpRequest;
+import com.java.http.HttpResponse;
 import com.java.servlet.Servlet;
 import com.java.servlet.Servlets;
 import com.techcourse.exception.UncheckedServletException;

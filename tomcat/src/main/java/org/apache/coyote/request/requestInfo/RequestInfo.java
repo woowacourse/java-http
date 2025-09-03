@@ -13,7 +13,7 @@ public class RequestInfo {
     private static final String REQUEST_INFO_SEPARATOR = " ";
 
     private final RequestMethod requestMethod;
-    private final String requestPath;
+    private final String requestPath; //todo: requestPath, protocolVersion 객체 만들기
     private final String protocolVersion;
 
     public RequestInfo(final String requestInfo) {
@@ -37,5 +37,16 @@ public class RequestInfo {
 
     public boolean isDefaultPath() {
         return this.requestPath.equals("/");
+    }
+
+    public String getRequestPath() {
+        return requestPath;
+    }
+
+    public String getRequestPathExtension() {
+        if (!requestPath.contains(".")) {
+            throw new IllegalArgumentException("확장자를 찾을 수 없습니다.");
+        }
+        return requestPath.split("\\.")[1];
     }
 }

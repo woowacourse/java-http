@@ -1,5 +1,7 @@
 package org.apache.coyote.response;
 
+import java.util.Arrays;
+
 public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
@@ -18,5 +20,12 @@ public enum ContentType {
 
     public String getContentType() {
         return contentType;
+    }
+
+    public static ContentType findContentType(String extension) {
+        return Arrays.stream(ContentType.values())
+                .filter(bodyType -> bodyType.extension.equals(extension))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 처리할 수 없는 확장자입니다."));
     }
 }

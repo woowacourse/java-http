@@ -21,4 +21,8 @@ public class HttpRequest {
     public RequestInfo getRequestInfo() {
         return requestInfo;
     }
+
+    public String getRequestPath(){
+        return requestInfo.getRequestPath();
+    }
 }

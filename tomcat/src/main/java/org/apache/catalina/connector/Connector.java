@@ -28,16 +28,6 @@ public class Connector implements Runnable {
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
-        try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
@@ -46,11 +36,30 @@ public class Connector implements Runnable {
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
+    public void stop() {
+        stopped = true;
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     @Override
     public void run() {
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
             connect();
+        }
+    }
+
+    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+        try {
+            final int checkedPort = checkPort(port);
+            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            return new ServerSocket(checkedPort, checkedAcceptCount);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -68,15 +77,6 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection);
         new Thread(processor).start();
-    }
-
-    public void stop() {
-        stopped = true;
-        try {
-            serverSocket.close();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     private int checkPort(final int port) {

@@ -8,13 +8,13 @@ import org.apache.coyote.http11.message.HttpHeaders;
 public class HttpRequest {
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
     private final HttpMethod httpMethod;
-    private final RequestPath requestPath;
+    private final RequestUri requestUri;
     private final String version;
     private final HttpHeaders httpHeaders;
 
-    private HttpRequest(HttpMethod httpMethod, RequestPath requestPath, String version, HttpHeaders httpHeaders) {
+    private HttpRequest(HttpMethod httpMethod, RequestUri requestUri, String version, HttpHeaders httpHeaders) {
         this.httpMethod = httpMethod;
-        this.requestPath = requestPath;
+        this.requestUri = requestUri;
         this.version = version;
         this.httpHeaders = httpHeaders;
     }
@@ -25,7 +25,7 @@ public class HttpRequest {
         // 요청 라인 파싱
         String[] requestLineTokens = getRequestLineTokens(lines);
         HttpMethod method = HttpMethod.from(requestLineTokens[0]);
-        RequestPath path = RequestPath.from(requestLineTokens[1]);
+        RequestUri path = RequestUri.from(requestLineTokens[1]);
         String version = requestLineTokens[2];
 
         // 헤더 라인 파싱
@@ -45,8 +45,8 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public RequestPath getRequestPath() {
-        return requestPath;
+    public RequestUri getRequestPath() {
+        return requestUri;
     }
 
     public String getVersion() {

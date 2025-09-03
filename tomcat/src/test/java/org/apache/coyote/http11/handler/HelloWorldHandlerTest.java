@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import org.apache.coyote.http11.message.request.HttpRequest;
-import org.apache.coyote.http11.message.request.RequestPath;
+import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -24,13 +24,13 @@ class HelloWorldHandlerTest {
     private HttpRequest request;
 
     @Mock
-    private RequestPath requestPath;
+    private RequestUri requestUri;
 
     @Test
     void 루트_경로_요청을_처리할_수_있다() {
         // given
-        when(request.getRequestPath()).thenReturn(requestPath);
-        when(requestPath.getPath()).thenReturn("/");
+        when(request.getRequestPath()).thenReturn(requestUri);
+        when(requestUri.getPath()).thenReturn("/");
 
         // when
         boolean canHandle = helloWorldHandler.canHandle(request);
@@ -42,8 +42,8 @@ class HelloWorldHandlerTest {
     @Test
     void 루트_경로가_아닌_요청은_처리할_수_없다() {
         // given
-        when(request.getRequestPath()).thenReturn(requestPath);
-        when(requestPath.getPath()).thenReturn("/other");
+        when(request.getRequestPath()).thenReturn(requestUri);
+        when(requestUri.getPath()).thenReturn("/other");
 
         // when
         boolean canHandle = helloWorldHandler.canHandle(request);

@@ -4,16 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-class RequestPathTest {
+class RequestUriTest {
 
     @Test
     void 이름으로_생성한다() {
         // given
         String path = "/path";
-        RequestPath requestPath = RequestPath.from(path);
+        RequestUri requestUri = RequestUri.from(path);
 
         // when
-        String actual = requestPath.getPath();
+        String actual = requestUri.getPath();
 
         // then
         assertThat(actual).isEqualTo(path);

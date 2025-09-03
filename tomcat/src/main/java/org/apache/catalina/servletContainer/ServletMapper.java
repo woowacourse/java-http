@@ -19,7 +19,7 @@ public class ServletMapper {
         return servlets.stream()
                 .filter(servlet -> servlet.canHandle(httpRequest))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 처리할 수 없는 요청입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 처리할 수 없는 요청입니다"));
     }
 
     private List<Servlet> initServlets() {

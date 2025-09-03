@@ -5,8 +5,13 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,9 +32,26 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+
+            final String[] requestParts = requestLine.split(" ");
+            if (requestParts.length < 2) {
+                return;
+            }
+
+            final String method = requestParts[0];
+            final String url = requestParts[1];
+
+            String responseBody = "Hello world!";
+            if ("GET".equals(method) && "/index.html".equals(url)) {
+                responseBody = readIndexFile();
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -42,6 +64,19 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private String readIndexFile() {
+        try {
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            if (resource == null) {
+                return "Hello world!";
+            }
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            log.error("Failed to read index.html", e);
+            return "Hello world!";
         }
     }
 }

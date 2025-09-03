@@ -1,13 +1,10 @@
-package com.techcourse.servlet;
-
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+package com.java.servlet;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static org.apache.coyote.HttpRequest.HttpMethod.GET;
+import static com.java.servlet.HttpRequest.HttpMethod.GET;
 
 public abstract class StaticResourceServlet implements Servlet {
 

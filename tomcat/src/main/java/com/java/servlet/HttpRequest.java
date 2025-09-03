@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package com.java.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;

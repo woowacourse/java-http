@@ -1,9 +1,10 @@
-package com.techcourse.servlet;
+package com.techcourse.servlet_impl;
 
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import com.java.servlet.HttpRequest;
+import com.java.servlet.HttpResponse;
+import com.java.servlet.Servlet;
 
-import static org.apache.coyote.HttpRequest.HttpMethod.GET;
+import static com.java.servlet.HttpRequest.HttpMethod.GET;
 
 public class HelloWorldServlet implements Servlet {
 

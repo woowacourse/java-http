@@ -1,6 +1,6 @@
-package com.techcourse.servlet.static_resource;
+package com.techcourse.servlet_impl.static_resource;
 
-import com.techcourse.servlet.StaticResourceServlet;
+import com.java.servlet.StaticResourceServlet;
 
 public class CssServlet extends StaticResourceServlet {
 

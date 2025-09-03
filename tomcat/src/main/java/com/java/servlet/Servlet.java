@@ -1,7 +1,4 @@
-package com.techcourse.servlet;
-
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+package com.java.servlet;
 
 public interface Servlet {
 

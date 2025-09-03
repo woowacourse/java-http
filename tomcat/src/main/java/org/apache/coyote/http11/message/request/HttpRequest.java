@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.exception.InvalidRequestLineException;
+import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
@@ -18,7 +19,7 @@ public class HttpRequest {
         this.httpHeaders = httpHeaders;
     }
 
-    public static HttpRequest of(String rawRequest) {
+    public static HttpRequest from(String rawRequest) {
         String[] lines = rawRequest.split("\r\n");
 
         // 요청 라인 파싱

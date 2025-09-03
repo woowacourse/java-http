@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message;
 
 import java.util.ArrayList;
 import java.util.Collections;

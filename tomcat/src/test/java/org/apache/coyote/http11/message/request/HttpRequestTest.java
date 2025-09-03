@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,7 +17,7 @@ class HttpRequestTest {
                 "\r\n";
 
         // when & then
-        assertThatCode(() -> HttpRequest.of(rawRequest))
+        assertThatCode(() -> HttpRequest.from(rawRequest))
                 .doesNotThrowAnyException();
     }
 
@@ -30,7 +30,7 @@ class HttpRequestTest {
                 "\r\n";
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.of(rawRequest))
+        assertThatThrownBy(() -> HttpRequest.from(rawRequest))
                 .isInstanceOf(InvalidRequestLineException.class);
     }
 }

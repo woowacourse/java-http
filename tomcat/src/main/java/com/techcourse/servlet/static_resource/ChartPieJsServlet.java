@@ -1,4 +1,6 @@
-package com.techcourse.servlet;
+package com.techcourse.servlet.static_resource;
+
+import com.techcourse.servlet.StaticResourceServlet;
 
 public class ChartPieJsServlet extends StaticResourceServlet {
 

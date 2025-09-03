@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.servlet.HelloWorldServlet;
-import com.techcourse.servlet.IndexPageServlet;
+import com.techcourse.servlet.static_resource.IndexPageServlet;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

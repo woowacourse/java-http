@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,22 +46,59 @@ public class Http11Processor implements Runnable, Processor {
 
             final var parts = requestLine.split(" ");
             final var method = parts[0];
-            final var path = parts[1];
+            final var uri = parts[1];
+
+            String path = uri;
+            String queryString = null;
+            int index = uri.indexOf("?");
+            if (index != -1) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            }
+
+            Map<String, String> params = new HashMap<>();
+            if (queryString != null) {
+                final var queries = queryString.split("&");
+
+                for (String query : queries) {
+                    final var keyValue = query.split("=");
+                    params.put(keyValue[0], keyValue[1]);
+                }
+            }
 
             final byte[] responseBody;
             final String contentType;
 
-            final var resourcePath = "static" + path;
-            final var resourceUrl = getClass().getClassLoader()
-                    .getResource(resourcePath);
-
-            if (resourceUrl != null) {
+            if ("/login".equals(path)) {
+                final var resourceUrl = getClass().getClassLoader()
+                        .getResource("static/login.html");
                 responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
-                contentType = getContentType(path);
+                contentType = "text/html;charset=utf-8 ";
+
+                final String account = params.get("account");
+                final String password = params.get("password");
+                InMemoryUserRepository.findByAccount(account)
+                        .ifPresent(user -> {
+                                    if (user.checkPassword(password)) {
+                                        log.info("user: {}", user);
+                                    }
+                                }
+                        );
+
             } else {
-                responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-                contentType = "text/plain;charset=utf-8 ";
+                final var resourcePath = "static" + path;
+                final var resourceUrl = getClass().getClassLoader()
+                        .getResource(resourcePath);
+
+                if (resourceUrl != null) {
+                    responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
+                    contentType = getContentType(uri);
+                } else {
+                    responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                    contentType = "text/plain;charset=utf-8 ";
+                }
             }
+
 
             final var responseHeaders = String.join(
                     "\r\n",

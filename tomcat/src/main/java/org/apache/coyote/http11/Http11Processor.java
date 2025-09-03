@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -35,13 +36,20 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final String startLine = bufferedReader.readLine();
+
+            // request 파싱
+            final List<String> request = new ArrayList<>();
+            String line;
+            while (!"".equals(line = bufferedReader.readLine())) {
+                request.add(line);
+            }
+
+            final String startLine = request.getFirst();
             final String[] split = startLine.split(" ");
             final String requestTarget = split[1];
-            String responseBody;
             String response;
             if (requestTarget.equals("/")) {
-                responseBody = "Hello World!";
+                final var responseBody = "Hello World!";
 
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
@@ -53,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
                 final Path path = Paths.get(resource.getPath());
                 final List<String> strings = Files.readAllLines(path);
-                responseBody = String.join("\r\n", strings);
+                final var responseBody = String.join("\r\n", strings);
 
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
@@ -65,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
                 final Path path = Paths.get(resource.getPath());
                 final List<String> strings = Files.readAllLines(path);
-                responseBody = String.join("\r\n", strings);
+                final var responseBody = String.join("\r\n", strings);
 
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",

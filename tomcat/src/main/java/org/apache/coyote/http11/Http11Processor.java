@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.techcourse.exception.ErrorMessage.ACCOUNT_NOT_FOUND;
+import static com.techcourse.exception.ErrorMessage.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String uri = br.readLine().split(" ")[1];
+            String uri = parseUri(br);
             if(uri.startsWith("/login")){
                 if(uri.contains("?")){
                     validateLoginInfoWithQueryString(uri);
@@ -56,7 +56,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void validateLoginInfoWithQueryString(String uri) {
+    private static String parseUri(BufferedReader br) throws IOException {
+        String requestLine = br.readLine();
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new IllegalArgumentException(INVALID_REQUEST_LINE.getMessage());
+        }
+        String[] parts = requestLine.split(" ");
+        if (parts.length < 3) {
+            throw new IllegalArgumentException(INVALID_HTTP_REQUEST_FORMAT.getMessage());
+        }
+        return parts[1];
+    }
+
+    private static void handleLogin(String uri) {
+        if(!uri.contains("?")){
+            return;
+        }
         int index = uri.indexOf("?");
         String queryString = uri.substring(index + 1);
         Map<String, String> params = new HashMap<>();

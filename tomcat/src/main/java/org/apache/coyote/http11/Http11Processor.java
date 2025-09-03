@@ -1,16 +1,14 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -23,27 +21,16 @@ public class Http11Processor implements Runnable, Processor {
 
     // Resource constants
     public static final String STATIC_RESOURCE_PREFIX = "static";
-    
-    // Content type constants
-    public static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
-    public static final String CONTENT_TYPE_TEXT_CSS = "text/css";
-    public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
-    
-    // File extension constants
-    public static final String CSS_EXTENSION = ".css";
-    public static final String JS_EXTENSION = ".js";
-    public static final String HTML_EXTENSION = ".html";
-    
-    // HTTP constants
+
+    private static final Map<String, String> CONTENT_TYPE_MAP = Map.ofEntries(
+            Map.entry(".html", "text/html; charset=utf-8"),
+            Map.entry(".css",  "text/css"),
+            Map.entry(".js",   "application/javascript")
+    );
+
     public static final String HTTP_OK = "HTTP/1.1 200 OK ";
     public static final String HTTP_NOT_FOUND = "HTTP/1.1 404 Not Found";
-    
-    // Query parameter constants
-    public static final String QUERY_SEPARATOR = "?";
-    public static final String PARAM_SEPARATOR = "&";
-    public static final String KEY_VALUE_SEPARATOR = "=";
-    
-    // HTTP headers
+
     public static final String HEADER_CONTENT_TYPE = "Content-Type: ";
     public static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
     public static final String HTTP_LINE_SEPARATOR = "\r\n";
@@ -67,8 +54,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
-            
-            String requestUri = extractRequestUri(br);
+
+            String firstLine = br.readLine();
+            String[] splitFirstLine = firstLine.split(" ");
+            String requestUri = splitFirstLine[1];
             String resource = processRequestResource(requestUri);
             String resourceName = STATIC_RESOURCE_PREFIX + resource;
             String contentType = determineContentType(resourceName);
@@ -82,63 +71,29 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = readResourceContent(resourceUrl);
             long contentLength = calculateContentLength(resourceUrl);
             String response = buildOkResponse(contentType, contentLength, responseBody);
-            
-            sendResponse(outputStream, response);
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static String processQueryParam(int queryParamIndex, String resource, String requestUri) {
-        if (queryParamIndex != -1) {
-            Map<String, String> queryParams = new HashMap<>();
-            resource = requestUri.substring(0, queryParamIndex) + HTML_EXTENSION;
-            String queryString = requestUri.substring(queryParamIndex + 1);
-
-            String[] splitQueryString = queryString.split(PARAM_SEPARATOR);
-            for (String keyValuePair : splitQueryString) {
-                String[] keyValue = keyValuePair.split(KEY_VALUE_SEPARATOR);
-                if (keyValue.length >= 2) {
-                    queryParams.put(keyValue[0], keyValue[1]);
-                } else if (keyValue.length == 1) {
-                    queryParams.put(keyValue[0], "");
-                }
-            }
-
-            String account = queryParams.get("account");
-            String password = queryParams.get("password");
-
-            if (account != null && password != null) {
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저 정보입니다."));
-                if (user.checkPassword(password)) {
-                    log.info(user.toString());
-                }
-            }
-        }
-        return resource;
-    }
-
-    private String extractRequestUri(BufferedReader br) throws IOException {
-        String firstLine = br.readLine();
-        String[] splitFirstLine = firstLine.split(" ");
-        return splitFirstLine[1];
-    }
-
     private String processRequestResource(String requestUri) {
-        String resource = requestUri;
-        int queryParamIndex = requestUri.indexOf(QUERY_SEPARATOR);
-        return processQueryParam(queryParamIndex, resource, requestUri);
+        return QueryStringParser.parseAndProcessQuery(requestUri);
     }
 
     private String determineContentType(String resourceName) {
-        if (resourceName.contains(CSS_EXTENSION)) {
-            return CONTENT_TYPE_TEXT_CSS;
+        String fileExtension = getFileExtension(resourceName);
+        return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html; charset=utf-8");
+    }
+
+    private String getFileExtension(String filename) {
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            return filename.substring(lastDotIndex);
         }
-        if (resourceName.contains(JS_EXTENSION)) {
-            return CONTENT_TYPE_JAVASCRIPT;
-        }
-        return CONTENT_TYPE_TEXT_HTML;
+        return "";
     }
 
     private URL loadResource(String resourceName) {
@@ -152,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
     private void sendNotFoundResponse(java.io.OutputStream outputStream) throws IOException {
         final var notFoundResponse = String.join(HTTP_LINE_SEPARATOR,
                 HTTP_NOT_FOUND,
-                HEADER_CONTENT_TYPE + CONTENT_TYPE_TEXT_HTML,
+                HEADER_CONTENT_TYPE + "text/html; charset=utf-8",
                 HEADER_CONTENT_LENGTH + "0",
                 "",
                 "");
@@ -177,10 +132,5 @@ public class Http11Processor implements Runnable, Processor {
                 HEADER_CONTENT_LENGTH + contentLength + " ",
                 "",
                 responseBody);
-    }
-
-    private void sendResponse(java.io.OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 }

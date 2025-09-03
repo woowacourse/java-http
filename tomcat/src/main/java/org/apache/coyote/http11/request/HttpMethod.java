@@ -13,7 +13,7 @@ public enum HttpMethod {
     OPTIONS,
     ;
 
-    public static HttpMethod of(String name) {
+    public static HttpMethod from(String name) {
         return Arrays.stream(values())
                 .filter(httpMethod -> Objects.equals(httpMethod.name(), name.toUpperCase()))
                 .findAny()

@@ -14,7 +14,7 @@ class HttpMethodTest {
         String name = "GET";
 
         // when
-        HttpMethod actual = HttpMethod.of(name);
+        HttpMethod actual = HttpMethod.from(name);
 
         // then
         assertThat(actual).isEqualTo(HttpMethod.GET);
@@ -26,7 +26,7 @@ class HttpMethodTest {
         String name = "Get";
 
         // when
-        HttpMethod actual = HttpMethod.of(name);
+        HttpMethod actual = HttpMethod.from(name);
 
         // then
         assertThat(actual).isEqualTo(HttpMethod.GET);
@@ -38,7 +38,7 @@ class HttpMethodTest {
         String name = "None";
 
         // when & then
-        assertThatThrownBy(() -> HttpMethod.of(name))
+        assertThatThrownBy(() -> HttpMethod.from(name))
                 .isInstanceOf(UnsupportedHttpMethodException.class);
     }
 }

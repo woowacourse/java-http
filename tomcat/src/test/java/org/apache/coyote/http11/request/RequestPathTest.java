@@ -10,7 +10,7 @@ class RequestPathTest {
     void 이름으로_생성한다() {
         // given
         String path = "/path";
-        RequestPath requestPath = RequestPath.of(path);
+        RequestPath requestPath = RequestPath.from(path);
 
         // when
         String actual = requestPath.getPath();

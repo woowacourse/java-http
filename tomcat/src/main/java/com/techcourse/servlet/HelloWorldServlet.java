@@ -14,7 +14,6 @@ public class HelloWorldServlet implements Servlet {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        final var responseBody = "Hello world!";
-        return HttpResponse.ok().html(responseBody).build();
+        return HttpResponse.ok().html("Hello world!").build();
     }
 }

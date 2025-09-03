@@ -32,6 +32,6 @@ public class LoginServlet implements Servlet {
         }
 
         log.info("로그인 성공, user={}", user);
-        return HttpResponse.ok().build();
+        return HttpResponse.ok().html("로그인 성공!").build();
     }
 }

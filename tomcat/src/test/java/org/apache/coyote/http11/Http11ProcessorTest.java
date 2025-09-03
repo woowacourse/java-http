@@ -1,14 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.servlet.HelloWorldServlet;
-import com.techcourse.servlet.static_resource.IndexPageServlet;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +15,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, List.of(new HelloWorldServlet()));
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -43,7 +40,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, List.of(new IndexPageServlet()));
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);

@@ -37,11 +37,34 @@ public class StaticFileHandler implements HttpRequestHandler {
 
         HttpHeaders headers = HttpHeaders.fromLines(
                 List.of(
-                        "Content-Type: text/html;charset=utf-8",
+                        "Content-Type: " + getContentType(path),
                         "Content-Length: " + content.length
                 )
         );
 
         return new HttpResponse(HttpStatus.OK, headers, HttpBody.from(content));
     }
+
+    private String getContentType(String path) {
+        if (path.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (path.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+        if (path.endsWith(".png")) {
+            return "image/png";
+        }
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+            return "image/jpeg";
+        }
+        if (path.endsWith(".gif")) {
+            return "image/gif";
+        }
+        return "application/octet-stream"; // 기본 바이너리
+    }
+
 }

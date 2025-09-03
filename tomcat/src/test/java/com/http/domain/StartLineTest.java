@@ -113,4 +113,19 @@ class StartLineTest {
         );
         assertEquals("Invalid start line: GET /index.html HTTP/1.1 extra", exception.getMessage());
     }
+
+    @Test
+    void path_값이_없거나_슬래시만_있으면_index_html_로_연결() {
+        // given
+        String startLine1 = "GET / HTTP/1.1";
+        String startLine2 = "GET  HTTP/1.1";
+
+        // when
+        StartLine result1 = StartLine.from(startLine1);
+        StartLine result2 = StartLine.from(startLine2);
+
+        // then
+        assertEquals("/index.html", result1.path());
+        assertEquals("/index.html", result2.path());
+    }
 }

@@ -20,8 +20,8 @@ public record StartLine(String method, String path, String version) {
     }
 
     private static String parsePath(String path) {
-        if (path.isEmpty()) {
-            return "/";
+        if (path.isEmpty() || path.equals("/")) {
+            return "/index.html";
         }
 
         return path.split("\\?")[0];

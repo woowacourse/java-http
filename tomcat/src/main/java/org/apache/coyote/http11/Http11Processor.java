@@ -44,9 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String uri = parseUri(br);
             if(uri.startsWith("/login")){
-                if(uri.contains("?")){
-                    validateLoginInfoWithQueryString(uri);
-                }
+                handleLogin(uri);
                 respondStaticResource("/login.html", outputStream);
                 return;
             }

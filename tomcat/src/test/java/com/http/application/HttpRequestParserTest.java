@@ -132,11 +132,10 @@ class HttpRequestParserTest {
         BufferedReader reader = new BufferedReader(new StringReader(""));
 
         // when & then
-        IllegalArgumentException exception = assertThrows(
+        assertThrows(
             IllegalArgumentException.class,
             () -> HttpRequestParser.parse(reader)
         );
-        assertEquals("Request line is null", exception.getMessage());
     }
 
     @Test

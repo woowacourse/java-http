@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -49,12 +50,16 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+
+        // 윈도우 환경에서 줄 바꿈 형식에 차이가 존재해 테스트 코드를 아래과 같이 변경을 하였음
+
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: " + content.getBytes(StandardCharsets.UTF_8).length +  " \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                content;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

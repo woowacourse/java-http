@@ -15,7 +15,7 @@ class HttpBodyTest {
         String bodyString = "Hello, world!";
 
         // when
-        HttpBody httpBody = HttpBody.fromString(bodyString);
+        HttpBody httpBody = HttpBody.from(bodyString);
 
         // then
         assertAll(
@@ -31,7 +31,7 @@ class HttpBodyTest {
         byte[] bodyBytes = bodyString.getBytes(StandardCharsets.UTF_8);
 
         // when
-        HttpBody httpBody = HttpBody.fromBytes(bodyBytes);
+        HttpBody httpBody = HttpBody.from(bodyBytes);
 
         // then
         assertAll(
@@ -56,7 +56,7 @@ class HttpBodyTest {
     void toText는_바디를_문자열로_변환한다() {
         // given
         String expected = "some content";
-        HttpBody httpBody = HttpBody.fromString(expected);
+        HttpBody httpBody = HttpBody.from(expected);
 
         // when
         String actual = httpBody.toText();
@@ -69,7 +69,7 @@ class HttpBodyTest {
     void length는_바디의_길이를_반환한다() {
         // given
         String content = "some content";
-        HttpBody httpBody = HttpBody.fromString(content);
+        HttpBody httpBody = HttpBody.from(content);
 
         // when
         int length = httpBody.length();

@@ -36,4 +36,14 @@ public class HttpHeaders {
     public List<String> get(String name) {
         return headers.getOrDefault(name, Collections.emptyList());
     }
+
+    public List<String> getLines() {
+        List<String> lines = new ArrayList<>();
+        headers.forEach((name, values) -> {
+            for (String value : values) {
+                lines.add(name + ": " + value);
+            }
+        });
+        return lines;
+    }
 }

@@ -1,18 +1,22 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.HandlerExecutor;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HandlerExecutor handlerExecutor = new HandlerExecutor();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -26,22 +30,27 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             var writer = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String requestLine = reader.readLine();
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest request = HttpRequest.from(requestLine);
+            HttpResponse response = handlerExecutor.execute(request);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            writer.write(response.toText().getBytes());
+            writer.flush();
+        } catch (Exception e) {
+            log.error("Processor 처리 중 예외 발생", e);
+        } finally {
+            try {
+                connection.close();
+            } catch (IOException ignored) {
+            }
         }
+
     }
 }

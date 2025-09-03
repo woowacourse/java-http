@@ -29,4 +29,19 @@ public class HttpResponse {
     public HttpBody getBody() {
         return body;
     }
+
+    public String toText() {
+        StringBuilder responseText = new StringBuilder();
+        responseText.append("HTTP/1.1 ")
+                .append(status.getCode())
+                .append(" ")
+                .append(status.getReasonPhrase())
+                .append("\r\n");
+
+        headers.getLines().forEach(line -> responseText.append(line).append("\r\n"));
+        responseText.append("\r\n");
+
+        responseText.append(body.toText());
+        return responseText.toString();
+    }
 }

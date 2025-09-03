@@ -10,11 +10,11 @@ public class HttpBody {
         this.content = content;
     }
 
-    public static HttpBody fromString(String body) {
+    public static HttpBody from(String body) {
         return new HttpBody(body.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static HttpBody fromBytes(byte[] body) {
+    public static HttpBody from(byte[] body) {
         return new HttpBody(body);
     }
 

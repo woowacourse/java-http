@@ -1,13 +1,15 @@
 package com.http.application;
 
-import com.http.domain.HttpRequest;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.http.domain.HttpRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class HttpRequestParserTest {
 

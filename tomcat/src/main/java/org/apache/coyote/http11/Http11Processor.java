@@ -7,9 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.servletContainer.ServletContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ServletContainer servletContainer;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.servletContainer = new ServletContainer();
     }
 
     @Override
@@ -36,14 +40,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            while(bufferedReader.ready()){
-                System.out.println("bufferedReader.readLine() = " + bufferedReader.readLine());
-            }
-
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
+            final HttpResponse httpResponse = servletContainer.process(httpRequest);
 
-
-//            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.combine());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

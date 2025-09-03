@@ -13,20 +13,24 @@ public abstract class StaticResourceServlet implements Servlet {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.method() == GET && request.uri().equals(uri());
+        return request.method() == GET && request.uri().equals(resourcePath());
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        return switch (type()) {
-            case HTML -> HttpResponse.ok().html(file()).build();
-            case CSS -> HttpResponse.ok().css(file()).build();
-            case JAVASCRIPT -> HttpResponse.ok().js(file()).build();
-        };
+        if (resourcePath().endsWith(".html")) {
+            return HttpResponse.ok().html(file()).build();
+        } else if (resourcePath().endsWith(".css")) {
+            return HttpResponse.ok().css(file()).build();
+        } else if (resourcePath().endsWith(".js")) {
+            return HttpResponse.ok().js(file()).build();
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private String file() {
-        final var resource = getClass().getClassLoader().getResource(resourcePath());
+        final var resource = getClass().getClassLoader().getResource("static" + resourcePath());
         try {
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException e) {
@@ -34,15 +38,5 @@ public abstract class StaticResourceServlet implements Servlet {
         }
     }
 
-    protected enum StaticResourceType {
-        HTML,
-        CSS,
-        JAVASCRIPT,
-    }
-
-    protected abstract String uri();
-
     protected abstract String resourcePath();
-
-    protected abstract StaticResourceType type();
 }

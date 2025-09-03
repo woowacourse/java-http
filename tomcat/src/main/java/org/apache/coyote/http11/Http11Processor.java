@@ -9,10 +9,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,21 +46,24 @@ public class Http11Processor implements Runnable, Processor {
             final var path = parts[1];
 
             final byte[] responseBody;
-            if ("/index.html".equals(path)) {
-                final var resourcePath = Objects.requireNonNull(
-                                getClass().getClassLoader()
-                                        .getResource("static/index.html"))
-                        .getPath();
+            final String contentType;
 
-                responseBody = Files.readAllBytes(Path.of(resourcePath));
+            final var resourcePath = "static" + path;
+            final var resourceUrl = getClass().getClassLoader()
+                    .getResource(resourcePath);
+
+            if (resourceUrl != null) {
+                responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
+                contentType = getContentType(path);
             } else {
                 responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                contentType = "text/plain;charset=utf-8 ";
             }
 
             final var responseHeaders = String.join(
                     "\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.length + " ",
                     ""
             );
@@ -68,8 +71,18 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write((responseHeaders + "\r\n").getBytes());
             outputStream.write(responseBody);
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String path) {
+        if (path.endsWith(".html")) {
+            return "text/html;charset=utf-8 ";
+        }
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8 ";
+        }
+        return "text/plain;charset=utf-8 ";
     }
 }

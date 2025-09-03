@@ -33,7 +33,6 @@ class IOStreamTest {
      */
     @Nested
     class OutputStream_학습_테스트 {
-
         /**
          * OutputStream은 다른 매체에 바이트로 데이터를 쓸 때 사용한다.
          * OutputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 쓰기 위해 write(int b) 메서드를 사용한다.
@@ -53,6 +52,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -78,6 +78,7 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -89,15 +90,17 @@ class IOStreamTest {
          */
         @Test
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
-            final OutputStream outputStream = mock(OutputStream.class);
-
             /**
              * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            final OutputStream outputStream = mock(OutputStream.class);
+            try (outputStream) {
 
-            verify(outputStream, atLeastOnce()).close();
+            } finally {
+                verify(outputStream, atLeastOnce()).close();
+            }
         }
     }
 

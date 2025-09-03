@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +8,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,13 +48,23 @@ public class Http11Processor implements Runnable, Processor {
             final String url = requestParts[1];
 
             String responseBody = "Hello world!";
-            if ("GET".equals(method) && "/index.html".equals(url)) {
+            String contentType = "text/html;charset=utf-8";
+
+            // index.html 처리
+            if ("GET".equals(method) && ("/".equals(url) || "/index.html".equals(url))) {
                 responseBody = readIndexFile();
+                contentType = ContentTypeMapper.get("index.html");
+            }
+
+            // 나머지 GET 요청 정적 리소스 처리
+            if ("GET".equals(method) && !("/".equals(url) || "/index.html".equals(url))) {
+                responseBody = readStaticFile(url);
+                contentType = ContentTypeMapper.get(url);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -77,6 +86,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             log.error("Failed to read index.html", e);
             return "Hello world!";
+        }
+    }
+
+    private String readStaticFile(String url) {
+        try {
+            final URL resource = getClass().getClassLoader().getResource("static" + url);
+            if (resource == null) {
+                return "File not found";
+            }
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            log.error("Failed to read static file: " + url, e);
+            return "File not found";
         }
     }
 }

@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.http.application.HttpRequestParser;
+import com.http.application.RequestHandlerMapper;
+import com.http.domain.HttpRequest;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +12,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,30 +40,18 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            // 먼저 requestLine 줄을 읽어온 후 Headers를 처리할 수 있다.
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-            log.info(requestLine);
+            final HttpRequest httpRequest = HttpRequestParser.parse(reader);
 
-            final Map<String, String> queryStrings = parseQueryStrings(requestLine);
-            log.info("queryStrings: {}", queryStrings);
-            final Map<String, String> headers = parseHeaders(reader);
-            log.info("headers: {}", headers);
-
-            String requestPath = parseRequestPath(requestLine);
-
-            final URL resourceUrl = getFileUrl(requestPath);
+            final URL resourceUrl = getFileUrl(httpRequest);
 
             final byte[] responseBody = parseResponseBody(resourceUrl);
 
             final var responseHeaders = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + parseContentType(headers), "Content-Length: " + responseBody.length + " ",
+                    "Content-Type: " + parseContentType(httpRequest), "Content-Length: " + responseBody.length + " ",
                     "", "");
 
-            handle(requestPath, queryStrings);
+            RequestHandlerMapper.handle(httpRequest);
 
             outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -75,19 +61,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private URL getFileUrl(String requestPath) {
-        if (requestPath == null || requestPath.endsWith("/")) {
-            return null;
+    private URL getFileUrl(HttpRequest httpRequest) {
+        String path = httpRequest.startLine().path();
+
+        if (!path.contains(".")) {
+            path += ".html";
         }
 
-        requestPath = requestPath.trim().split("\\?")[0];
-        String resourcePath = "static" + (requestPath.startsWith("/") ? requestPath : "/" + requestPath);
+        // '/'로 시작하는 경로를 제거하고 static 폴더 내에서 찾기
+        String resourcePath = path.startsWith("/") ? path.substring(1) : path;
+        resourcePath = "static/" + resourcePath;
 
-        if (!resourcePath.contains(".")) {
-            resourcePath += ".html";
-        }
-
-        log.info("패스 확인 : {}", requestPath);
         return getClass().getClassLoader().getResource(resourcePath);
     }
 
@@ -99,70 +83,12 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(new File(resourceUrl.getFile()).toPath());
     }
 
-    private String parseRequestPath(String requestLine) {
-        if (requestLine == null) {
-            return "/";
-        }
-
-        final String[] requestParts = requestLine.split(" ");
-        if (requestParts.length < 2) {
-            throw new IllegalArgumentException("Invalid HTTP request line: " + requestLine);
-        }
-
-        return requestParts[1].split("\\?")[0];
-    }
-
-    private String parseContentType(Map<String, String> headers) {
+    private String parseContentType(HttpRequest httpRequest) {
+        final Map<String, String> headers = httpRequest.headers();
         if (!headers.containsKey("Accept")) {
             return "text/html;charset=utf-8 ";
         }
 
         return headers.get("Accept").split(",")[0];
-    }
-
-    private Map<String, String> parseHeaders(BufferedReader reader) throws IOException {
-        List<String> headerLines = new java.util.ArrayList<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
-
-        return headerLines.stream()
-                .skip(1)
-                .map(headerLine -> headerLine.split(": "))
-                .filter(header -> header.length == 2)
-                .collect(
-                        Collectors.toMap(
-                                header -> header[0],
-                                header -> header[1]
-                        )
-                );
-    }
-
-    private Map<String, String> parseQueryStrings(String requestLine) {
-        if (requestLine == null || !requestLine.contains("?")) {
-            return Map.of();
-        }
-
-        String queryString = requestLine.split(" ")[1].split("\\?")[1];
-        String[] queries = queryString.split("&");
-
-        return Stream.of(queries)
-                .map(query -> query.split("="))
-                .filter(query -> query.length == 2)
-                .collect(Collectors.toMap(query -> query[0], query -> query[1]));
-    }
-
-    private void handle(String requestPath, Map<String, String> queryStrings) {
-        if (requestPath.equals("/login")) {
-            String account = queryStrings.get("account");
-            String password = queryStrings.get("password");
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
-
-            if (user.checkPassword(password)) {
-                log.info("user : {} ", user);
-            }
-        }
     }
 }

@@ -71,12 +71,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private String determineContentType(String resourceName) {
         int lastDotIndex = resourceName.lastIndexOf('.');
-        String fileExtension = (lastDotIndex > 0) ? resourceName.substring(lastDotIndex) : "";
+        String fileExtension = "";
+        if (lastDotIndex > 0) {
+            fileExtension = resourceName.substring(lastDotIndex);
+        }
         return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html; charset=utf-8");
     }
 
     private void sendNotFoundResponse(java.io.OutputStream outputStream) throws IOException {
-        final var notFoundResponse = String.join(HTTP_LINE_SEPARATOR,
+        String notFoundResponse = String.join(HTTP_LINE_SEPARATOR,
                 HTTP_NOT_FOUND,
                 HEADER_CONTENT_TYPE + "text/html; charset=utf-8",
                 HEADER_CONTENT_LENGTH + "0",
@@ -93,8 +96,8 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_OK,
-                HEADER_CONTENT_TYPE + contentType + " ",
-                HEADER_CONTENT_LENGTH + contentLength + " ",
+                HEADER_CONTENT_TYPE + contentType,
+                HEADER_CONTENT_LENGTH + contentLength,
                 "",
                 responseBody);
     }

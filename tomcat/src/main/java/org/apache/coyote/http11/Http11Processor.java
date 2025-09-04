@@ -13,7 +13,10 @@ import org.apache.controller.Controller;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
-import org.apache.exception.HttpMessageParsingException;
+import org.apache.exception.InvalidRequestException;
+import org.apache.exception.ReqeustMessageParsingException;
+import org.apache.exception.RequestProcessingException;
+import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
 import org.slf4j.Logger;
@@ -53,6 +56,10 @@ public class Http11Processor implements Runnable, Processor {
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (ReqeustMessageParsingException | InvalidRequestException e) {
+            //TODO: 400 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
+        } catch (RequestProcessingException | SocketWriteException e) {
+            //TODO: 500 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
         }
     }
 
@@ -64,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
             message.add(bufferedReader.readLine());
             return new HttpRequestMessage(message);
         } catch (IOException | IllegalArgumentException e) {
-            throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
+            throw new ReqeustMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
         }
     }
 
@@ -78,6 +85,6 @@ public class Http11Processor implements Runnable, Processor {
                 return controller;
             }
         }
-        throw new IllegalArgumentException("URI가 올바르지 않습니다.");
+        throw new InvalidRequestException("URI가 올바르지 않습니다.");
     }
 }

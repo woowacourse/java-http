@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.exception.SocketWriteException;
 
 public class HttpResponseMessage {
 
@@ -21,7 +22,6 @@ public class HttpResponseMessage {
     }
 
     public void writeMessage() {
-        //TODO: Response에 넣을 초기값 세팅  (2025-09-4, 목, 18:9)
         String responseMessage = String.join(
                 "\r\n",
                 makeStartLine(),
@@ -34,9 +34,8 @@ public class HttpResponseMessage {
             System.out.println("responseMessage = " + responseMessage);
             outputStream.write(responseMessage.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-
         } catch (IOException e) {
-            //TODO: 소켓 쓰기 오류 발생시 예외응답 처리  (2025-09-4, 목, 17:46)
+            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
         }
     }
 

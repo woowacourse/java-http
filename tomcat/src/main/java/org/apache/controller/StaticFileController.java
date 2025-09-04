@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.exception.ResourceNotFound;
+import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
 import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
@@ -38,7 +38,7 @@ public class StaticFileController implements Controller {
             response.setBody(responseBody);
 
         } catch (IOException | URISyntaxException | IllegalArgumentException exception) {
-            throw new ResourceNotFound("해당하는 리소스를 찾을 수 없습니다.");
+            throw new RequestProcessingException("리소스를 읽는데 오류가 발생했습니다.");
         }
     }
 

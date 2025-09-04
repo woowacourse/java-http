@@ -54,6 +54,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseIndexHtml(outputStream);
             }
 
+            if (httpMethod == HttpMethod.GET && path.equals("/css/styles.css")) {
+                responseIndexCss(outputStream);
+            }
+
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -78,6 +82,27 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
+
+    private void responseIndexCss(final OutputStream outputStream) throws URISyntaxException, IOException {
+        final URI uri = getClass().getClassLoader()
+                .getResource("static/css/styles.css")
+                .toURI();
+        final Path htmlPath = Path.of(uri);
+        final byte[] read = Files.readAllBytes(htmlPath);
+        final String body = new String(read, StandardCharsets.UTF_8);
+
+        final var response = String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body
+        );
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
 
     private HttpHeader readHttpHeader(final BufferedReader bufferReader) throws IOException {
         final String requestLine = bufferReader.readLine();

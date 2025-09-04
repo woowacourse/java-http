@@ -43,23 +43,28 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             Map<String, String> requestValues = readRequest(inputStream);
+            if(!requestValues.containsKey("Uri")){
+                return;
+            }
+
             ClassLoader classLoader = getClass().getClassLoader();
             URL url = classLoader.getResource(requestValues.get("Uri"));
 
             var responseBody = "Hello world!";
+            var contentType = "";
             if(url != null){
                 Path resourcePath = Path.of(url.toURI());
                 if(Files.isRegularFile(resourcePath)){
-                    log.info(resourcePath.toString());
                     List<String> resourceValues = Files.readAllLines(resourcePath);
                     responseBody = resourceValues.stream()
                             .collect(Collectors.joining("\n")) + "\n";
+                    contentType = Files.probeContentType(resourcePath);
                 }
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: "+ contentType +";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -75,15 +80,19 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         Map<String, String> values = new HashMap<>();
 
-        String[] requestLine = bufferedReader.readLine().split(" ");
+        String firstLine = bufferedReader.readLine();
+        if(firstLine == null) return values;
+
+        String[] requestLine = firstLine.split(" ");
         values.put("Method", requestLine[0]);
         values.put("Uri", "static" + requestLine[1]);
         values.put("Version", requestLine[2]);
 
-        String[] header = bufferedReader.readLine().split(": ");
-        while (header.length == 2){
+        String line = bufferedReader.readLine();
+        while (!"".equals(line)){
+            String[] header = line.split(": ");
             values.put(header[0], header[1]);
-            header = bufferedReader.readLine().split(": ");
+            line = bufferedReader.readLine();
         }
 
         return values;

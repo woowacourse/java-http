@@ -57,10 +57,12 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = requestUri;
             if (UriParser.hasQuery(requestUri)) {
+                path = UriParser.extractPath(requestUri);
                 String queryString = UriParser.extractQueryString(requestUri);
                 Map<String, String> queryParams = QueryParamsParser.parse(queryString);
-                path = UriParser.extractPath(requestUri);
-                findUserByAccountParam(queryParams);
+                if (path.equals("/login")) {
+                    findUserByAccountParam(queryParams);
+                }
             }
 
             Path filePath = getFilePath(path, contentType);

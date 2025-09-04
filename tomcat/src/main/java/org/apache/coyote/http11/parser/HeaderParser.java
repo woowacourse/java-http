@@ -13,14 +13,14 @@ public class HeaderParser {
     public static final String TYPE_SUBTYPE_DELIMITER = "/";
 
     public static Map<String, String> parse(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
         String line;
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] split = line.split(HEADER_DELIMITER, 2);
-            header.put(split[0], split[1]);
+            headers.put(split[0], split[1]);
         }
-        return header;
+        return headers;
     }
 
     public static String extractPrimaryContentType(Map<String, String> headers) {

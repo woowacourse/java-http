@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,12 +50,20 @@ public class Http11Processor implements Runnable, Processor {
 
             String resource = requestURL.split("\\?")[0];
 
-            if (resource.startsWith("/login")) {
-                resource = "/login.html";
-                login(requestURL);
+            if (resource.equals("/")) {
+                send200Response("/index.html", outputStream);
+                return;
             }
-
-            sendResponse(resource, outputStream);
+            if (resource.startsWith("/login")) {
+                login(requestURL);
+                send200Response("/login.html", outputStream);
+                return;
+            }
+            if (resource.startsWith("/index.html")) {
+                send200Response("/index.html", outputStream);
+                return;
+            }
+            send200Response(resource, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -95,29 +104,49 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private void sendResponse(final String resource, final OutputStream outputStream) throws IOException {
+    private void send200Response(final String resource, final OutputStream outputStream) throws IOException {
+        validateResource(resource, outputStream);
         final Path resourcePath = getResourcePath(resource);
-        final String response = createHttpResponse(resourcePath);
+        final String response = create200HttpResponse(resourcePath);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
 
-    private Path getResourcePath(final String requestURL) {
-        if (requestURL.equals("/")) {
-            return getResourcePath("/index.html");
-        }
-        final URL resource = getClass().getClassLoader().getResource("static" + requestURL);
-        if (resource == null) {
-            return getResourcePath("/404.html");
-        }
-        return Paths.get(resource.getFile());
+    private void send404Response(final OutputStream outputStream) throws IOException {
+        final String response = create404HttpResponse();
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
-    private String createHttpResponse(final Path resourcePath) throws IOException {
+    private void validateResource(final String resource, final OutputStream outputStream) throws IOException {
+        final URL resourceUrl = getClass().getClassLoader().getResource("static" + resource);
+        if (resourceUrl == null) {
+            send404Response(outputStream);
+            throw new FileNotFoundException("요청한 리소스를 찾을 수 없습니다.");
+        }
+    }
+
+    private Path getResourcePath(final String requestURL) {
+        return Paths.get(getClass().getClassLoader().getResource("static" + requestURL).getFile());
+    }
+
+    private String create200HttpResponse(final Path resourcePath) throws IOException {
         final String responseBody = new String(Files.readAllBytes(resourcePath));
         final String contentType = Files.probeContentType(resourcePath);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String create404HttpResponse() throws IOException {
+        final Path resourcePath = getResourcePath("/404.html");
+        final String responseBody = new String(Files.readAllBytes(resourcePath));
+        final String contentType = Files.probeContentType(resourcePath);
+        return String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

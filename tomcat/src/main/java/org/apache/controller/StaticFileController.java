@@ -8,12 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.exception.ResourceNotFound;
 import org.apache.http.HttpRequestMessage;
+import org.apache.http.HttpResponseMessage;
+import org.apache.http.StatusCode;
 
 public class StaticFileController {
 
-    public String processResourceRequest(HttpRequestMessage request) {
+    public void processResourceRequest(HttpRequestMessage request, HttpResponseMessage response) {
         try {
-            System.out.println("request.getUri() = " + request.getUri());
             ClassLoader classLoader = getClass().getClassLoader();
             URL resource = classLoader.getResource("static" + request.getUri());
             if (resource == null) {
@@ -21,12 +22,10 @@ public class StaticFileController {
             }
             Path path = Paths.get(resource.toURI());
             String responseBody = String.join("\r\n", Files.readAllLines(path));
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            response.setHttpVersion(request.getVersion());
+            response.setStatusCode(StatusCode.OK);
+            response.setHeader("Content-Type", "text/html;charset=utf-8");
+            response.setBody(responseBody);
         } catch (IOException | URISyntaxException | IllegalArgumentException exception) {
             throw new ResourceNotFound("해당하는 리소스를 찾을 수 없습니다.");
         }

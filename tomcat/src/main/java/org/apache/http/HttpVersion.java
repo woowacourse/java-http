@@ -19,7 +19,7 @@ public enum HttpVersion {
         return value;
     }
 
-    public HttpVersion parse(String input) {
+    public static HttpVersion parse(String input) {
         List<HttpVersion> versions = List.of(HttpVersion.values());
         for (HttpVersion version : versions) {
             if (version.value.equals(input)) {

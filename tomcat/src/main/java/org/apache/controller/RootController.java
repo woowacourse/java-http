@@ -1,6 +1,8 @@
 package org.apache.controller;
 
 import org.apache.http.HttpRequestMessage;
+import org.apache.http.HttpResponseMessage;
+import org.apache.http.StatusCode;
 
 public class RootController implements Controller {
 
@@ -12,13 +14,10 @@ public class RootController implements Controller {
     }
 
     @Override
-    public String processRequest(HttpRequestMessage request) {
-        String responseBody = "Hello world!";
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    public void processRequest(HttpRequestMessage request, HttpResponseMessage response) {
+        response.setHttpVersion(request.getVersion());
+        response.setStatusCode(StatusCode.OK);
+        response.setHeader("Content-Type", "text/html;charset=utf-8");
+        response.setBody("Hello world!");
     }
 }

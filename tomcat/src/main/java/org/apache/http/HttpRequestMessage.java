@@ -11,7 +11,7 @@ public class HttpRequestMessage {
 
     private final HttpMethod method;
     private final String uri;
-    private final String version;
+    private final HttpVersion version;
 
     public HttpRequestMessage(InputStream inputStream) throws HttpMessageParsingException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -19,7 +19,7 @@ public class HttpRequestMessage {
             List<String> startLine = List.of(bufferedReader.readLine().split(" "));
             method = HttpMethod.valueOf(startLine.get(0));
             uri = startLine.get(1);
-            version = startLine.get(2);
+            version = HttpVersion.parse(startLine.get(2));
         } catch (IOException | IllegalArgumentException e) {
             throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
         }
@@ -33,7 +33,7 @@ public class HttpRequestMessage {
         return uri;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 }

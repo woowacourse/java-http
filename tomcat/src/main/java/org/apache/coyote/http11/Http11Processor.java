@@ -10,6 +10,7 @@ import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.ResourceNotFound;
 import org.apache.http.HttpRequestMessage;
+import org.apache.http.HttpResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,25 +38,23 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             HttpRequestMessage request = new HttpRequestMessage(inputStream);
-            String response = "";
+            HttpResponseMessage response = new HttpResponseMessage(outputStream);
 
             Controller controller = findControllerByRequest(request);
             if (controller != null) {
-                response = controller.processRequest(request);
-            }
-            //TODO: 요청을 처리 가능한 컨트롤러가 없을 경우 예외 응답 처리  (2025-09-4, 목, 12:55)
-            //TODO: 컨트롤러가 요청을 처리하다가 예외가 발생할 경우 예외 응답 처리  (2025-09-4, 목, 12:56)
-            if (response.isEmpty()) {
-                try {
-                    response = staticFileController.processResourceRequest(request);
-                } catch (ResourceNotFound e) {
-                    //TODO: URL이 올바르지 않는 다는 예외 응답 처리  (2025-09-4, 목, 17:7)
-                    throw new IllegalArgumentException("URI가 올바르지 않습니다.");
-                }
+                //TODO: 요청을 처리 가능한 컨트롤러가 없을 경우 예외 응답 처리  (2025-09-4, 목, 12:55)
+                //TODO: 컨트롤러가 요청을 처리하다가 예외가 발생할 경우 예외 응답 처리  (2025-09-4, 목, 12:56)
+                controller.processRequest(request, response);
+                response.writeMessage();
             }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            try {
+                staticFileController.processResourceRequest(request, response);
+                response.writeMessage();
+            } catch (ResourceNotFound e) {
+                //TODO: URL이 올바르지 않다는 예외 응답 처리  (2025-09-4, 목, 17:7)
+                throw new IllegalArgumentException("URI가 올바르지 않습니다.");
+            }
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

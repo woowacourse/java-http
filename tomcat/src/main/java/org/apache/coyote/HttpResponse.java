@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class HttpResponse {
     }
 
     private String getHeaderLine() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             builder.append(entry.getKey()).append(HEADER_DELIMITER).append(entry.getValue()).append(CRLF);
         }

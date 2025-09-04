@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,9 +8,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,29 +54,105 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String target = tokens[1].trim();
+            String uri = tokens[1].trim();
 
-            if (target.equals("/")) {
+            int index = uri.indexOf("?");
+            String path = (index >= 0) ? uri.substring(0, index) : uri;
+            String rawQuery = (index >= 0) ? uri.substring(index + 1) : "";
+
+            Map<String, List<String>> query = parseQuery(rawQuery);
+
+            if (path.equals("/") || path.isEmpty()) {
                 String responseBody = "Hello world!";
                 writeResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes());
                 return;
             }
 
-            if (target.startsWith("/")) {
-                target = target.substring(1);
+            if (path.equals("/login")) {
+                handleLogin(outputStream, query);
+                return;
             }
-            if (!target.startsWith("static/")) {
-                target = "static/" + target;
+            if (!path.startsWith("static/")) {
+                path = "static/" + path.substring(1);
             }
-            Path absolutePath = Path.of(
-                    Objects.requireNonNull(getClass().getClassLoader().getResource(target)).getPath());
+
+            URL url = getClass().getClassLoader().getResource(path);
+            if (url == null) {
+                writeError(outputStream, 400, "Bad Request", "Invalid request line");
+                return;
+            }
+            Path absolutePath = Path.of(url.toURI());
+            if (!Files.exists(absolutePath)) {
+                writeError(outputStream, 404, "Not Found", "File not found");
+                return;
+            }
+
             byte[] responseBodyBytes = Files.readAllBytes(absolutePath);
-            String contentType = guessContentType(target);
+            String contentType = guessContentType(absolutePath.toString());
 
             writeResponse(outputStream, contentType, responseBodyBytes);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private void handleLogin(
+            final OutputStream outputStream,
+            final Map<String, List<String>> query
+    )
+            throws IOException, URISyntaxException {
+        String account = getFirst(query, "account");
+        String password = getFirst(query, "password");
+
+        if (account != null && password != null) {
+            InMemoryUserRepository.findByAccount(account).ifPresentOrElse(
+                    user -> {
+                        try {
+                            user.checkPassword(password);
+                            log.info("Login OK - account {}", account);
+                        } catch (UncheckedServletException e) {
+                            log.info("Login FAILED - invalid password {}", account);
+                        }
+                    },
+                    () -> log.info("Login FAILED - no sush account {}", account)
+            );
+        }
+        String resourcePath = "static/login.html";
+        URL url = getClass().getClassLoader().getResource(resourcePath);
+        if (url == null) {
+            writeError(outputStream, 400, "Bad Request", "Invalid request line");
+            return;
+        }
+        Path absoluteLogin = Path.of(url.toURI());
+        byte[] loginBytes = Files.readAllBytes(absoluteLogin);
+        writeResponse(outputStream, "text/html;charset=utf-8", loginBytes);
+    }
+
+    private Map<String, List<String>> parseQuery(final String queryString) {
+        Map<String, List<String>> query = new HashMap<>();
+        if (queryString == null || queryString.isEmpty()) {
+            return query;
+        }
+        String[] split = queryString.split("&");
+        for (String pair : split) {
+            int eq = pair.indexOf("=");
+
+            String key = pair.substring(0, eq);
+            String value = pair.substring(eq + 1);
+
+            query.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+        }
+        return query;
+    }
+
+    private String getFirst(final Map<String, List<String>> map, final String key) {
+        List<String> list = map.get(key);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
     }
 
     private String guessContentType(final String target) {

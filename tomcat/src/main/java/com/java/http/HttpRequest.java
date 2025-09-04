@@ -21,7 +21,7 @@ public record HttpRequest(
         if (!requestLine[1].contains("?")) {
             String method = requestLine[0];
             String uri = requestLine[1];
-            return new HttpRequest(HttpMethod.parse(method), uri, new HashMap<>());
+            return new HttpRequest(HttpMethod.parse(method), uri, Collections.emptyMap());
         } else {
             String method = requestLine[0];
             String[] uriAndParams = requestLine[1].split("\\?");
@@ -31,7 +31,7 @@ public record HttpRequest(
             Map<String, String> paramMap = Arrays.stream(params.split("&"))
                     .map(param -> param.split("="))
                     .collect(Collectors.toMap(param -> param[0], param -> param[1]));
-            return new HttpRequest(HttpMethod.parse(method), uri, paramMap);
+            return new HttpRequest(HttpMethod.parse(method), uri, Collections.unmodifiableMap(paramMap));
         }
     }
 

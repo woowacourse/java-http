@@ -1,13 +1,19 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.controller.Controller;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
+import org.apache.exception.HttpMessageParsingException;
 import org.apache.exception.ResourceNotFound;
 import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
@@ -37,12 +43,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()) {
 
-            HttpRequestMessage request = new HttpRequestMessage(inputStream);
-            HttpResponseMessage response = new HttpResponseMessage(outputStream);
+            HttpRequestMessage request = makeRequest(inputStream);
+            HttpResponseMessage response = makeResponse(outputStream);
 
             Controller controller = findControllerByRequest(request);
             if (controller != null) {
-                //TODO: 요청을 처리 가능한 컨트롤러가 없을 경우 예외 응답 처리  (2025-09-4, 목, 12:55)
                 //TODO: 컨트롤러가 요청을 처리하다가 예외가 발생할 경우 예외 응답 처리  (2025-09-4, 목, 12:56)
                 controller.processRequest(request, response);
                 response.writeMessage();
@@ -61,6 +66,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private HttpRequestMessage makeRequest(InputStream inputStream) {
+        try {
+            //TODO: 요청이 연속으로 와서 다음 메세지의 일부까지 읽어버릴 경우 대처  (2025-09-4, 목, 18:21)
+            List<String> message = new ArrayList<>();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                message.add(line);
+            }
+
+            return new HttpRequestMessage(message);
+        } catch (IOException | IllegalArgumentException e) {
+            throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
+        }
+    }
+
+    private HttpResponseMessage makeResponse(OutputStream outputStream) {
+        return new HttpResponseMessage(outputStream);
+    }
+
     private Controller findControllerByRequest(HttpRequestMessage request) {
         for (Controller controller : controllers) {
             if (controller.isProcessableRequest(request)) {
@@ -69,6 +94,4 @@ public class Http11Processor implements Runnable, Processor {
         }
         return null;
     }
-
-
 }

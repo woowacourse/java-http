@@ -1,11 +1,6 @@
 package org.apache.http;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
-import org.apache.exception.HttpMessageParsingException;
 
 public class HttpRequestMessage {
 
@@ -13,16 +8,11 @@ public class HttpRequestMessage {
     private final String uri;
     private final HttpVersion version;
 
-    public HttpRequestMessage(InputStream inputStream) throws HttpMessageParsingException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        try {
-            List<String> startLine = List.of(bufferedReader.readLine().split(" "));
-            method = HttpMethod.valueOf(startLine.get(0));
-            uri = startLine.get(1);
-            version = HttpVersion.parse(startLine.get(2));
-        } catch (IOException | IllegalArgumentException e) {
-            throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
-        }
+    public HttpRequestMessage(List<String> message) {
+        List<String> startLine = List.of(message.getFirst().split(" "));
+        method = HttpMethod.valueOf(startLine.get(0));
+        uri = startLine.get(1);
+        version = HttpVersion.parse(startLine.get(2));
     }
 
     public HttpMethod getMethod() {

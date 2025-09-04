@@ -43,12 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestURI = startLine.split(" ")[1];
 
             String responseBody = loadResource(requestURI);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = createHttpResponse(requestURI, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -81,5 +76,21 @@ public class Http11Processor implements Runnable, Processor {
 
         Path path = new File(resource.getPath()).toPath();
         return Files.readString(path);
+    }
+
+    private String createHttpResponse(String requestURI, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + extractContentType(requestURI) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String extractContentType(String requestURI) {
+        if (requestURI.contains(".css")) {
+            return  "text/css";
+        }
+        return "text/html";
     }
 }

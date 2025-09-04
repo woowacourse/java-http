@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 public class HttpRequestParser {
 
     private static final char REQUEST_URI_DELIMITER = '?';
+    private static final String CHUNK_DELIMITER = " ";
+    private static final int VALID_CHUNK_COUNT = 2;
+    private static final int REQUEST_URI_INDEX = 1;
 
     public static HttpRequest parse(final InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -20,12 +23,12 @@ public class HttpRequestParser {
     }
 
     private static HttpRequest parseRequestLine(final String requestLine) {
-        final var chunks = requestLine.split(" ");
-        if (chunks.length < 2) {
+        final var chunks = requestLine.split(CHUNK_DELIMITER);
+        if (chunks.length < VALID_CHUNK_COUNT) {
             throw new IllegalArgumentException("Invalid request line : " + requestLine);
         }
 
-        final var requestUri = chunks[1];
+        final var requestUri = chunks[REQUEST_URI_INDEX];
         int delimiterIndex = requestUri.indexOf(REQUEST_URI_DELIMITER);
 
         if (delimiterIndex == -1) {

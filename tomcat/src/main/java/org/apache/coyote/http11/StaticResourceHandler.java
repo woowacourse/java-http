@@ -8,6 +8,9 @@ import java.util.Objects;
 public class StaticResourceHandler {
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String PREFIX = "static";
+    private static final String DEFAULT_EXTENSION = ".html";
+    private static final String EXTENSION_DELIMITER = ".";
 
     public static String getResource(String resourcePath) {
         if(Objects.equals(resourcePath, "/")) {
@@ -27,10 +30,10 @@ public class StaticResourceHandler {
     }
 
     private static String getResolvedPath(final String resourcePath) {
-        if (resourcePath.contains(".")) {
-            return "static" + resourcePath;
+        if (resourcePath.contains(EXTENSION_DELIMITER)) {
+            return PREFIX + resourcePath;
         }
-        return "static" + resourcePath + ".html";
+        return PREFIX + resourcePath + DEFAULT_EXTENSION;
     }
 
     public static String getContentType(final String resourcePath) {

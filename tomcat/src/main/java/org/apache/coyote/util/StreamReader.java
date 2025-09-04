@@ -11,6 +11,9 @@ public class StreamReader {
     }
 
     public static String readAllLine(InputStream inputStream) throws IOException {
+        if (inputStream == null) {
+            return null;
+        }
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final StringBuilder content = new StringBuilder();
         while (reader.ready()) {

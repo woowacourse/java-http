@@ -29,12 +29,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest request = HttpRequest.from(StreamReader.readAllLine(inputStream));
-            /*
-             TODO: package HttpResponse
-             */
-            final String response = ResponseGenerator.generateResponse(request);
-            outputStream.write(response.getBytes());
+            final String request = StreamReader.readAllLine(inputStream);
+            if (request == null || request.isEmpty()) {
+                return;
+            }
+            final HttpRequest httpRequest = HttpRequest.from(request);
+            final HttpResponse response = ResponseGenerator.generateResponse(httpRequest);
+            outputStream.write(response.convertByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

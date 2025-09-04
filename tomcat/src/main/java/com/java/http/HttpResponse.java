@@ -1,9 +1,7 @@
 package com.java.http;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public record HttpResponse(
         String version,
@@ -29,27 +27,27 @@ public record HttpResponse(
 
         public HttpResponseBuilder html(String data) {
             this.headers.put("Content-Type", "text/html;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
             this.responseBody = data;
             return this;
         }
 
         public HttpResponseBuilder css(String data) {
             this.headers.put("Content-Type", "text/css;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
             this.responseBody = data;
             return this;
         }
 
         public HttpResponseBuilder js(String data) {
             this.headers.put("Content-Type", "application/javascript;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.getBytes().length));
+            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
             this.responseBody = data;
             return this;
         }
 
         public HttpResponse build() {
-            return new HttpResponse(version, statusCode, headers, responseBody);
+            return new HttpResponse(version, statusCode, Collections.unmodifiableMap(headers), responseBody);
         }
     }
 
@@ -73,7 +71,7 @@ public record HttpResponse(
     }
 
     public byte[] toByteArray() {
-        return toSimpleString().getBytes();
+        return toSimpleString().getBytes(StandardCharsets.UTF_8);
     }
 
     public String toSimpleString() {

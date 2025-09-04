@@ -48,6 +48,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String requestPath = createValidRequestPath(request.path());
+            if (requestPath == null) {
+                statusLine = "HTTP/1.1 200 OK ";
+                contentType = "text/html;charset=utf-8";
+                body = "Hello world!".getBytes();
+                response(statusLine, contentType, body, outputStream);
+                return;
+            }
             body = readPathFile(requestPath);
             if (body == null) {
                 statusLine = "HTTP/1.1 404 Not Found ";
@@ -112,12 +119,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createValidRequestPath(String path) {
-        String resourcePath = "static";
-        if (path.startsWith("/")) {
-            resourcePath += path;
-            return resourcePath;
+        if (path == null || path.isEmpty() || "/".equals(path)) {
+            return null;
         }
-        return resourcePath + "/" + path;
+        String validPath = path;
+        int querySeparator = validPath.indexOf('?');
+        if (querySeparator >= 0) {
+            validPath = validPath.substring(0, querySeparator);
+        }
+        if (!validPath.startsWith("/")) {
+            validPath = "/" + validPath;
+        }
+        return "static" + validPath;
     }
 
     private byte[] readPathFile(String requestPath) {
@@ -156,8 +169,8 @@ public class Http11Processor implements Runnable, Processor {
         String header = String.join("\r\n",
                 statusLine,
                 "Content-Type: " + contentType + " ",
-                "Content-Lenghth: " + body.length + " ",
-                ""
+                "Content-Length: " + body.length + " ",
+                "", ""
         );
         outputStream.write(header.getBytes());
         outputStream.write(body);

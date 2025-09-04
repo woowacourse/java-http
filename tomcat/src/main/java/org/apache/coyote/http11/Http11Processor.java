@@ -43,20 +43,20 @@ public class Http11Processor implements Runnable, Processor {
             final String endPoint = requestHeader[1];
 
             if (httpMethod.equals("GET") && endPoint.equals("/")) {
-                final String response = createResponse("Hello world!");
+                final String response = createHtmlResponse("Hello world!");
                 writeAndFlush(outputStream, response);
             }
 
             if (httpMethod.equals("GET") && endPoint.equals("/css/styles.css")) {
                 final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
                 final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                final String response = createResponseCss(responseBody);
+                final String response = createCssResponse(responseBody);
                 writeAndFlush(outputStream, response);
             }
 
             final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            final var response = createResponse(responseBody);
+            final var response = createHtmlResponse(responseBody);
             writeAndFlush(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponseCss(final String responseBody) {
+    private String createCssResponse(final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css",
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createResponse(final String responseBody) {
+    private String createHtmlResponse(final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",

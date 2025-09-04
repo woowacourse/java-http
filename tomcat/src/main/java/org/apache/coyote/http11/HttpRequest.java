@@ -47,9 +47,9 @@ public class HttpRequest {
         return requestUri.split(QUERY_STRING_SEPARATOR)[0];
     }
 
-    public String getQueryString() {
+    public boolean isQueryStringExists() {
         String requestUri = getRequestUri();
-        return requestUri.split(QUERY_STRING_SEPARATOR)[1];
+        return requestUri.contains(QUERY_STRING_SEPARATOR);
     }
 
     public Map<String, String> getQueryParameters() {

@@ -49,17 +49,19 @@ public class Http11Processor implements Runnable, Processor {
             URL resource = null;
 
             if (requestPath.equals("/login")) {
-                final Map<String, String> parameters = httpRequest.getQueryParameters();
-                final String account = parameters.get("account");
-                final String password = parameters.get("password");
-                InMemoryUserRepository.findByAccount(account)
-                        .ifPresent(user -> {
-                            if (user.checkPassword(password)) {
-                                log.info("user: " + user);
-                            }
-                        });
-
                 resource = getStaticResource("/login.html");
+
+                if (httpRequest.isQueryStringExists()) {
+                    final Map<String, String> parameters = httpRequest.getQueryParameters();
+                    final String account = parameters.get("account");
+                    final String password = parameters.get("password");
+                    InMemoryUserRepository.findByAccount(account)
+                            .ifPresent(user -> {
+                                if (user.checkPassword(password)) {
+                                    log.info("user: " + user);
+                                }
+                            });
+                }
             }
 
             if (!requestPath.equals("/") && !requestPath.equals("/login")) {

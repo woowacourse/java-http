@@ -12,6 +12,9 @@ public abstract class AbstractHandler {
 
     protected String getStaticResponseBody(final String requestTarget) throws IOException {
         try (final InputStream resource = getClass().getClassLoader().getResourceAsStream("static" + requestTarget)) {
+            if (resource == null) {
+                return null;
+            }
             return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
         }
     }

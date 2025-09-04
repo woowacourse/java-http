@@ -7,14 +7,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,84 +43,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            Map<String, String> requestValues = readRequest(inputStream);
-            if(!requestValues.containsKey("Uri")){
+            Map<String, String> httpRequest = readHttpRequest(inputStream);
+            if (httpRequest.isEmpty()) {
                 return;
             }
 
-            String uriAndQueryParameters = requestValues.get("Uri");
-            String uri = uriAndQueryParameters;
-
-            Map<String, String> queryParameters = new HashMap<>();
-            int queryParameterIndex = uriAndQueryParameters.indexOf("?");
-            if (queryParameterIndex != -1) {
-                uri = uriAndQueryParameters.substring(0, queryParameterIndex);
-                String queryParameterTexts = uriAndQueryParameters.substring(queryParameterIndex + 1,
-                        uriAndQueryParameters.length());
-
-                for (String queryParameterText : queryParameterTexts.split("&")){
-                    String[] keyAndValue = queryParameterText.split("=");
-                    queryParameters.put(keyAndValue[0], keyAndValue[1]);
-                }
-            }
-
+            Map<String, String> queryParameters = extractQueryParameters(httpRequest);
+            String uri = httpRequest.get("Uri");
             if("/login".equals(uri) && !queryParameters.isEmpty()){
-                String account = queryParameters.getOrDefault("account", "");
-                String password = queryParameters.getOrDefault("password", "");
-
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-                if(optionalUser.isEmpty()){
-                    outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                User user = optionalUser.get();
-                if(!user.checkPassword(password)){
-                    outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                log.info("user: "+ user);
+                login(queryParameters, outputStream);
                 return;
             }
 
-            ClassLoader classLoader = getClass().getClassLoader();
-            URL url = classLoader.getResource("static" + uri);
-
-            if (url == null) {
-                url = classLoader.getResource("static" + uri + ".html");
+            Path resourcePath = findResourcePath(uri, outputStream);
+            if (resourcePath == null) {
+                return;
             }
 
-            var responseBody = "Hello world!";
-            var contentType = "text/html";
-            if(url != null){
-                Path resourcePath = Path.of(url.toURI());
+            String responseBody = readResponseBody(resourcePath);
+            String contentType = Files.probeContentType(resourcePath);
+            String httpResponse = createHttpResponse(contentType, responseBody);
 
-                if(Files.isRegularFile(resourcePath)){
-                    List<String> resourceValues = Files.readAllLines(resourcePath);
-                    responseBody = resourceValues.stream()
-                            .collect(Collectors.joining("\n")) + "\n";
-                    contentType = Files.probeContentType(resourcePath);
-                }
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: "+ contentType +";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> readRequest(InputStream inputStream) throws IOException {
+    private Map<String, String> readHttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         Map<String, String> values = new HashMap<>();
 
@@ -128,9 +79,18 @@ public class Http11Processor implements Runnable, Processor {
         if(firstLine == null) return values;
 
         String[] requestLine = firstLine.split(" ");
+
+        if(requestLine.length < 3) return values;
         values.put("Method", requestLine[0]);
         values.put("Uri", requestLine[1]);
         values.put("Version", requestLine[2]);
+
+        int queryParameterIndex = requestLine[1].indexOf("?");
+        if(queryParameterIndex != -1){
+            values.put("Uri", requestLine[1].substring(0, queryParameterIndex));
+            values.put("QueryParameters", requestLine[1].substring(queryParameterIndex + 1, requestLine[1].length()));
+        }
+
 
         String line = bufferedReader.readLine();
         while (!"".equals(line)){
@@ -140,5 +100,96 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return values;
+    }
+
+    private Map<String, String> extractQueryParameters(Map<String, String> httpRequest) {
+        if (!httpRequest.containsKey("QueryParameters")) {
+            return Map.of();
+        }
+
+        String queryParameterTexts = httpRequest.get("QueryParameters");
+        return Arrays.stream(queryParameterTexts.split("&"))
+                .map(queryParameterText -> queryParameterText.split("="))
+                .collect(Collectors.toMap(
+                        keyAndValue -> keyAndValue[0],
+                        keyAndValue -> keyAndValue[1]
+                ));
+    }
+
+    private void login(Map<String, String> queryParameters, OutputStream outputStream) throws IOException {
+        String account = queryParameters.getOrDefault("account", "");
+        String password = queryParameters.getOrDefault("password", "");
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if(optionalUser.isEmpty()){
+            outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        User user = optionalUser.get();
+        if(!user.checkPassword(password)){
+            outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        log.info("user: {}", user);
+    }
+
+    private Path findResourcePath(String uri, OutputStream outputStream) throws IOException, URISyntaxException {
+        URL url = findResourceURL(uri);
+        if(url == null){
+            String helloWorldHttpResponse = helloWorldHttpResponse();
+            outputStream.write(helloWorldHttpResponse.getBytes());
+            outputStream.flush();
+            return null;
+        }
+
+        Path resourcePath = Path.of(url.toURI());
+        if(!Files.isRegularFile(resourcePath)){
+            String helloWorldHttpResponse = helloWorldHttpResponse();
+            outputStream.write(helloWorldHttpResponse.getBytes());
+            outputStream.flush();
+            return null;
+        }
+
+        return resourcePath;
+    }
+
+    private URL findResourceURL(String uri) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL url = classLoader.getResource("static" + uri);
+
+        if (url == null) {
+            return classLoader.getResource("static" + uri + ".html");
+        }
+        return url;
+    }
+
+    private String helloWorldHttpResponse() {
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!"
+        );
+    }
+
+    private String readResponseBody(Path resourcePath) throws IOException {
+        return String.join("\n", Files.readAllLines(resourcePath)) + "\n";
+    }
+
+    private String createHttpResponse(String contentType, String responseBody) {
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: "+ contentType +";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
     }
 }

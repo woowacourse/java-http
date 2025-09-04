@@ -11,7 +11,8 @@ public class HttpRequest {
 
     private static final String HEADER_SEPARATOR = ": ";
     private static final String REQUEST_LINE_SEPARATOR = " ";
-    private static final String QUERY_STRING_SEPARATOR = "\\?";
+    private static final String QUERY_STRING_REGEX = "\\?";
+    private static final String QUERY_STRING_SEPARATOR = "?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_KEY_VALUE_SEPARATOR = "=";
 
@@ -44,7 +45,7 @@ public class HttpRequest {
 
     public String getRequestPath() {
         String requestUri = getRequestUri();
-        return requestUri.split(QUERY_STRING_SEPARATOR)[0];
+        return requestUri.split(QUERY_STRING_REGEX)[0];
     }
 
     public boolean isQueryStringExists() {
@@ -65,6 +66,6 @@ public class HttpRequest {
 
     private String getQueryString() {
         String requestUri = getRequestUri();
-        return requestUri.split(QUERY_STRING_SEPARATOR)[1];
+        return requestUri.split(QUERY_STRING_REGEX)[1];
     }
 }

@@ -3,12 +3,14 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_PATH = "static";
 
     private final Socket connection;
 
@@ -33,11 +36,19 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        ) {
+            final var requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+            final var requestLines = requestLine.split(" ");
+            final var resourcePath = requestLines[1];
+            final var headers = getHeaders(bufferedReader);
+            log.info("resourcePath: {}, headers: {}", resourcePath, headers);
 
-            final var response = getResponse(inputStream);
-
-            outputStream.write(response.getBytes());
+            handleRequest(resourcePath, outputStream);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -46,30 +57,59 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(InputStream inputStream) throws IOException, URISyntaxException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final var stringBuilder = new StringBuilder();
+    private Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
+            final String[] header = line.split(":", 2);
+            if (header.length == 2) {
+                headers.put(header[0].trim(), header[1].trim());
+            }
+        }
+        return headers;
+    }
 
-        while (bufferedReader.ready()) {
-            final var readLine = bufferedReader.readLine();
-            stringBuilder.append(readLine).append("\r\n");
+    private void handleRequest(String resourcePath, OutputStream outputStream)
+            throws IOException, URISyntaxException {
+        if (resourcePath.equals("/")) {
+            outputStream.write(buildRootResponse());
+            return;
         }
 
-        final var request = stringBuilder.toString();
-        log.info("request : {}", request);
-        final var requestSplit = request.split(" ");
-        final var resourcePath = requestSplit[1];
-        final var resource = getClass().getClassLoader().getResource("static" + resourcePath);
-        final var path = Paths.get(Objects.requireNonNull(resource).toURI());
+        final var resource = getClass().getClassLoader().getResource(STATIC_PATH + resourcePath);
+        final var filePath = Paths.get(Objects.requireNonNull(resource).toURI());
 
-        final var responseBody = Files.readString(path);
-        log.info("responseBody : {}", responseBody);
+        final var contentType = getContentType(resourcePath);
+        final var responseBody = Files.readAllBytes(filePath);
 
+        outputStream.write(String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                "").getBytes());
+        outputStream.write(responseBody);
+    }
+
+    private byte[] buildRootResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: 12 ",
                 "",
-                responseBody);
+                "Hello world!").getBytes();
+    }
+
+    private String getContentType(final String resourcePath) {
+        if (resourcePath.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (resourcePath.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+        if (resourcePath.endsWith(".ico")) {
+            return "image/x-icon";
+        }
+        return "text/html;charset=utf-8";
     }
 }

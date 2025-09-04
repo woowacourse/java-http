@@ -46,6 +46,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             String request = parseRequest(inputStream);
             String header = request.split("\r\n")[0];
+            validateHeader(header);
             String[] words = header.split(" ");
             String requestPath = words[1].split("\\?")[0];
             HttpMethod httpMethod = HttpMethod.from(words[0]);
@@ -62,6 +63,12 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void validateHeader(String header) {
+        if (header.split(" ").length < 3) {
+            throw new IllegalArgumentException();
         }
     }
 

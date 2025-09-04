@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + staticResource.getMimeType() + " ",
-                "Content-Length: " + staticResource.getContent().length + " ",
+                "Content-Length: " + staticResource.getContentLength() + " ",
                 ""
         );
     }

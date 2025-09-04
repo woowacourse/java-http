@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,8 +30,8 @@ public class StaticResourceProvider {
 
         try {
             final URL url = StaticResourceProvider.class.getClassLoader().getResource(resourcePath);
-            final Path filePath = Paths.get(url.toURI());
-            return Files.readAllBytes(filePath);
+            final File file = new File(url.getFile());
+            return Files.readAllBytes(file.toPath());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;

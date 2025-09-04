@@ -21,6 +21,13 @@ public class StaticResource {
         return content;
     }
 
+    public int getContentLength() {
+        if (isEmpty()) {
+            return "Hello world!".getBytes().length;
+        }
+        return new String(content).replaceAll("\r\n", "\n").getBytes().length;
+    }
+
     private boolean isEmpty() {
         return content == null || content.length == 0;
     }

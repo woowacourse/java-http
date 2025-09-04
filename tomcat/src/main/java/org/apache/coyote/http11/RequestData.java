@@ -16,7 +16,7 @@ public class RequestData {
                         String resource,
                         HttpVersion httpVersion,
                         HttpContentType httpContentType,
-                       Map<String, String> queryParameter) {
+                        Map<String, String> queryParameter) {
         this.httpMethod = httpMethod;
         this.resource = resource;
         this.httpVersion = httpVersion;
@@ -29,7 +29,7 @@ public class RequestData {
         HttpMethod httpMethod = HttpMethod.getHttpMethod(firstLine[0].trim());
         String resource = firstLine[1].trim();
         Map<String, String> queryParameter = new HashMap<>();
-        if(resource.contains("?")) {
+        if (resource.contains("?")) {
             getQueryParameter(resource, queryParameter);
             resource = resource.substring(0, resource.indexOf("?"));
         }
@@ -42,7 +42,7 @@ public class RequestData {
         String queryString = resource.substring(resource.indexOf("?") + 1);
         for (String pair : queryString.split("&")) {
             String[] keyValue = pair.split("=");
-            if(keyValue.length == 2) {
+            if (keyValue.length == 2) {
                 queryParameter.put(keyValue[0], keyValue[1]);
             }
         }
@@ -62,6 +62,14 @@ public class RequestData {
             }
         }
         return HttpContentType.ALL;
+    }
+
+    public String getQueryParameterValue(String key) {
+        String value = queryParameter.get(key);
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        return value;
     }
 
     public HttpMethod getHttpMethod() {

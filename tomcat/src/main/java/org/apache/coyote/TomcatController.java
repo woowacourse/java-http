@@ -31,12 +31,15 @@ public class TomcatController {
     }
 
     private void handleLogin(RequestData requestData) {
-        Map<String, String> queryParameter = requestData.getQueryParameter();
-        User user = InMemoryUserRepository.findByAccount(queryParameter.get("account"))
-                .orElseThrow(() ->
-                        new IllegalArgumentException("회원이 존재하지 않습니다. : " + queryParameter.get("account")));
-        if (!user.checkPassword(queryParameter.get("password"))) {
-            throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + queryParameter.get("account"));
+        String account = requestData.getQueryParameterValue("account");
+        String password = requestData.getQueryParameterValue("password");
+        if (account.isBlank() || password.isBlank()) {
+            return;
+        }
+        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() ->
+                new IllegalArgumentException("회원이 존재하지 않습니다. : " + account));
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + account);
         }
         log.info("회원 조회 성공 : {}", user);
     }

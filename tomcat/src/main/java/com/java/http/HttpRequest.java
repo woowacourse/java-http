@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public record HttpRequest(
         HttpMethod method,
@@ -14,23 +15,24 @@ public record HttpRequest(
 ) {
     public static HttpRequest from(InputStream inputStream) throws IOException {
         List<String> strings = readInputStream(inputStream);
-        String[] headers = strings.getFirst().split(" ");
-        String method = headers[0];
-        Map<String, String> paramMap = new HashMap<>();
-        String uri;
-        int queryParamIndex = headers[1].indexOf("?");
-        if (queryParamIndex == -1) {
-            uri = headers[1];
-        } else {
-            uri = headers[1].substring(0, queryParamIndex);
-            String[] params = headers[1].substring(queryParamIndex + 1).split("&");
-            Arrays.stream(params).forEach(param -> {
-                String[] data = param.split("=");
-                paramMap.put(data[0], data[1]);
-            });
-        }
 
-        return new HttpRequest(HttpMethod.parse(method), uri, paramMap);
+        String[] requestLine = strings.getFirst().split(" ");
+
+        if (!requestLine[1].contains("?")) {
+            String method = requestLine[0];
+            String uri = requestLine[1];
+            return new HttpRequest(HttpMethod.parse(method), uri, new HashMap<>());
+        } else {
+            String method = requestLine[0];
+            String[] uriAndParams = requestLine[1].split("\\?");
+            String uri = uriAndParams[0];
+            String params = uriAndParams[1];
+
+            Map<String, String> paramMap = Arrays.stream(params.split("&"))
+                    .map(param -> param.split("="))
+                    .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+            return new HttpRequest(HttpMethod.parse(method), uri, paramMap);
+        }
     }
 
     private static List<String> readInputStream(InputStream inputStream) throws IOException {

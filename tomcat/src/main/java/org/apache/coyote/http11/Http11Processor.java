@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,9 +31,20 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             var reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final var requestLine = reader.readLine();
+            final var requestUrl = extractRequestUrlFrom(requestLine);
 
-            final var responseBody = "Hello world!";
+            var responseBody = "Hello world!";
+            if (!requestUrl.isBlank()) {
+                var resource = getClass().getClassLoader().getResource("static/" + requestUrl);
+                if (resource != null) {
+                    var path = Paths.get(resource.toURI());
+                    responseBody = Files.readString(path);
+                }
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -40,8 +55,20 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractRequestUrlFrom(final String requestLine) {
+        if (requestLine == null || requestLine.isBlank()) {
+            return "";
+        }
+
+        final String[] parts = requestLine.split(" ");
+        if(parts.length < 2) {
+            return "";
+        }
+        return parts[1].substring(1);
     }
 }

@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (target.equals("/")) {
                 String responseBody = "Hello world!";
-                writeResponse(outputStream, responseBody.getBytes());
+                writeResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes());
                 return;
             }
 
@@ -65,18 +65,34 @@ public class Http11Processor implements Runnable, Processor {
             Path absolutePath = Path.of(
                     Objects.requireNonNull(getClass().getClassLoader().getResource(target)).getPath());
             byte[] responseBodyBytes = Files.readAllBytes(absolutePath);
-            writeResponse(outputStream, responseBodyBytes);
+            String contentType = guessContentType(target);
+
+            writeResponse(outputStream, contentType, responseBodyBytes);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    private String guessContentType(final String target) {
+        if (target.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (target.endsWith(".htm")) {
+            return "text/html;charset=utf-8";
+        }
+        if (target.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return null;
+    }
+
     private void writeResponse(
             final OutputStream outputStream,
+            final String contentType,
             final byte[] bytes
     ) throws IOException {
         String response = "HTTP/1.1 200 OK " + "\r\n"
-                + "Content-Type: text/html;charset=utf-8 " + "\r\n"
+                + "Content-Type: " + contentType + " " + "\r\n"
                 + "Content-Length: " + bytes.length + " " + "\r\n"
                 + "\r\n";
         outputStream.write(response.getBytes());

@@ -53,7 +53,6 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
 
-            // 이러한 동적인 과정을 어떻게 process에서 분리할 수 있을까?
             if (requestPath.equals("/login")) {
                 final Map<String, String> parameters = getQueryParameters(requestUri);
                 final String account = parameters.get("account");

@@ -32,67 +32,103 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // 요청 url 읽어서 어떤 요청인지 확인
             Request request = parseRequest(inputStream);
-            // 요청 url의 자원이 있는지 확인
-            if (!hasResource(request.method())) {
-                // 없으면? 404 응답 반환
-                // 404 페이지 만들어서 가져오기
+            String statusLine = "";
+            String contentType = "";
+            byte[] body;
+            if (request == null) {
+                statusLine = "HTTP/1.1 400 Bad Request ";
+                contentType = "text/html;charset=utf-8";
+                body = readPathFile("static/400.html");
             }
-            // 있으면? 해당 자원 읽어서 문자열로 반환
-
-            //                final var response = String.join("\r\n",
-//                        "HTTP/1.1 404 BAD_REQUEST ",
-//                        "Content-Type: text/html;charset=utf-8 ",
-//                        "Content-Length: " + responseBody.getBytes().length + " ",
-//                        "");
-//
-//                outputStream.write(response.getBytes());
-//                outputStream.flush();
+            String requestPath = createValidRequestPath(request.path());
+            body = readPathFile(requestPath);
+            if (body == null) {
+                statusLine = "HTTP/1.1 404 Not Found ";
+                contentType = "text/html;charset=utf-8";
+                body = readPathFile("static/404.html");
+            }
+            String header = String.join("\r\n",
+                    statusLine,
+                    "Content-Type: " + contentType + " ",
+                    "Content-Lenghth: " + body.length + " ",
+                    ""
+            );
+            outputStream.write(header.getBytes());
+            outputStream.write(body);
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void validateLine(String line) {
+    private Request parseRequest(InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String[] firstLine = readFirstLine(br);
+        if (firstLine == null) {
+            return null;
+        }
+        String method = firstLine[0];
+        String path = firstLine[1];
+        String version = firstLine[2];
+        Map<String, String> headers = readHeaders(br);
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        return new Request(method, path, version, headers);
+    }
+
+    private String[] readFirstLine(BufferedReader br) throws IOException {
+        String line = br.readLine();
         if (line == null || line.isEmpty()) {
-            throw new IllegalArgumentException();
+            return null;
         }
+        String[] firstLine = line.split(" ");
+        if (firstLine.length < 3) {
+            return null;
+        }
+        return firstLine;
     }
 
-    private Request parseRequest(InputStream inputStream) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line = br.readLine();
-            validateLine(line);
-            String[] firstLine = line.split(" ");
-            if (firstLine.length != 3) {
-                throw new IllegalArgumentException();
+    private Map<String, String> readHeaders(BufferedReader br) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.isEmpty()) {
+                return null;
             }
-            String method = firstLine[0];
-            String path = firstLine[1];
-            String version = firstLine[2];
+            String[] splitLine = line.split(":");
+            if (splitLine.length < 2) {
+                return null;
+            }
+            String key = splitLine[0].trim();
+            StringBuilder sb = new StringBuilder();
+            for (int idx = 1; idx < splitLine.length; idx++) {
+                sb.append(splitLine[idx]);
+            }
+            String value = sb.toString().trim();
+            headers.put(key, value);
+        }
+        return headers;
+    }
 
-            Map<String, String> headers = new HashMap<>();
-            while ((line = br.readLine()) != null) {
-                validateLine(line);
-                String[] splitLine = line.split(":");
-                if (splitLine.length >= 2) {
-                    String key = splitLine[0].trim();
-                    StringBuilder sb = new StringBuilder();
-                    for (int idx = 1; idx < splitLine.length; idx++) {
-                        sb.append(splitLine[idx]);
-                    }
-                    String value = sb.toString().trim();
-                    headers.put(key, value);
-                }
+    private String createValidRequestPath(String path) {
+        String resourcePath = "static";
+        if (path.startsWith("/")) {
+            resourcePath += path;
+            return resourcePath;
+        }
+        return resourcePath + "/" + path;
+    }
+
+    private byte[] readPathFile(String requestPath) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(requestPath)) {
+            if (inputStream == null) {
+                return null;
             }
-            return new Request(method, path, version, headers);
+            return inputStream.readAllBytes();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
-    }
-
-    private boolean hasResource(String requestUrl) {
-        return false;
     }
 }

@@ -1,6 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +38,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            List<String> requestHeader = extractHttpRequest(inputStream);
+            String startLine = requestHeader.getFirst();
+            String requestURI = startLine.split(" ")[1];
 
+            String responseBody = loadResource(requestURI);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -43,5 +55,31 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> extractHttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        List<String> requestLines = new ArrayList<>();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.isEmpty()) {
+                break;
+            }
+            requestLines.add(line);
+        }
+        return requestLines;
+    }
+
+    private String loadResource(String requestURI) throws IOException {
+        if (requestURI.equals("/")) {
+            return "Hello world!";
+        }
+
+        URL resource = getClass().getClassLoader()
+                .getResource("static" + requestURI);
+
+        Path path = new File(resource.getPath()).toPath();
+        return Files.readString(path);
     }
 }

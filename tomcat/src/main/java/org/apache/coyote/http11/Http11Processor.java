@@ -12,12 +12,15 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -60,12 +63,29 @@ public class Http11Processor implements Runnable, Processor {
             String[] url = words[1].split("\\?");
             String path = url[0];
             String param = url.length > 1 ? url[1] : null;
+            Map<String, String> params = new HashMap<>();
             if (param != null) {
-                Map<String, String> params = new HashMap<>();
                 for (var p : param.split("&")) {
                     String key = p.split("=")[0];
                     String value = p.split("=")[1];
                     params.put(key, value);
+                }
+            }
+
+            if (path.equals("/login")) {
+                path = "/login.html";
+                String account = params.get("account");
+                String password = params.get("password");
+                if (account == null || password == null) {
+                    log.info("필수 정보가 누락되었습니다.");
+                }
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                if (user.isEmpty()) {
+                    log.info("존재하지 않는 사용자입니다.");
+                } else if (!user.get().checkPassword(password)) {
+                    log.info("비밀번호가 틀렸습니다.");
+                } else {
+                    log.info(user.toString());
                 }
             }
 

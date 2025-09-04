@@ -102,7 +102,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if ("/login".equals(path)) {
             User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
-            log.info("User{}", user);
+            if(user.checkPassword(queryString.get("password"))) {
+                log.info("User{}", user);
+            }
             return getFile("/login.html");
         }
         return getFile(path);

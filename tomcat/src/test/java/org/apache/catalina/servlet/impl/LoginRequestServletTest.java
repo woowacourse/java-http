@@ -4,13 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
-import org.apache.catalina.domain.StartLine;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.catalina.servlet.impl.LoginRequestServlet;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.domain.StartLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

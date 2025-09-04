@@ -3,7 +3,6 @@ package org.apache.catalina.domain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.apache.catalina.domain.StartLine;
 import org.junit.jupiter.api.Test;
 
 class StartLineTest {

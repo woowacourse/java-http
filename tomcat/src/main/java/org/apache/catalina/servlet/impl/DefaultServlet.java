@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet.impl;
 
-import org.apache.catalina.domain.HttpResponse;
 import java.io.IOException;
 import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
 import org.apache.catalina.servlet.RequestServlet;
 import org.apache.catalina.util.FileParser;
 

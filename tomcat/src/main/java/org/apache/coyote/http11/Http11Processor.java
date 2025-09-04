@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.servlet.RequestServletContainer;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.servlet.RequestServletContainer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +40,8 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestServletContainer.handle(request, response);
 
-            final String output = HttpResponseParser.parse(response);
-            outputStream.write(output.getBytes());
+            final byte[] output = HttpResponseParser.parse(response);
+            outputStream.write(output);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

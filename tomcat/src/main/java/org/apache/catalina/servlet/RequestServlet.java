@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet;
 
-import org.apache.catalina.domain.HttpResponse;
 import java.io.IOException;
 import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
 
 public interface RequestServlet {
 

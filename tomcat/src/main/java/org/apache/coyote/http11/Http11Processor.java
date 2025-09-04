@@ -39,22 +39,25 @@ public class Http11Processor implements Runnable, Processor {
             String statusLine;
             String contentType;
             byte[] body;
+
             if (request == null) {
-                statusLine = "HTTP/1.1 400 Bad Request ";
+                statusLine = "HTTP/1.1 200 OK ";
                 contentType = "text/html;charset=utf-8";
-                body = readPathFile("static/400.html");
-            } else {
-                String requestPath = createValidRequestPath(request.path());
-                body = readPathFile(requestPath);
-                if (body == null) {
-                    statusLine = "HTTP/1.1 404 Not Found ";
-                    contentType = "text/html;charset=utf-8";
-                    body = readPathFile("static/404.html");
-                } else {
-                    statusLine = "HTTP/1.1 200 OK ";
-                    contentType = guessContentType(requestPath);
-                }
+                body = "Hello world!".getBytes();
+                response(statusLine, contentType, body, outputStream);
+                return;
             }
+            String requestPath = createValidRequestPath(request.path());
+            body = readPathFile(requestPath);
+            if (body == null) {
+                statusLine = "HTTP/1.1 404 Not Found ";
+                contentType = "text/html;charset=utf-8";
+                body = readPathFile("static/404.html");
+                response(statusLine, contentType, body, outputStream);
+                return;
+            }
+            statusLine = "HTTP/1.1 200 OK ";
+            contentType = guessContentType(requestPath);
             response(statusLine, contentType, body, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -130,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String guessContentType(String path) {
         String lower = path.toLowerCase(Locale.ROOT);
-        if (lower.endsWith(".html") || lower.endsWith(".htm")) {
+        if (lower.endsWith(".html")) {
             return "text/html;charset=utf-8";
         }
         if (lower.endsWith(".css")) {
@@ -145,19 +148,11 @@ public class Http11Processor implements Runnable, Processor {
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
             return "image/jpeg";
         }
-        if (lower.endsWith(".gif")) {
-            return "image/gif";
-        }
         return "application/octet-stream";
     }
 
     private void response(String statusLine, String contentType, byte[] body, OutputStream outputStream)
             throws IOException {
-        if (body == null) {
-            body = "<h1>Internal Server Error</h1>".getBytes();
-            statusLine = "HTTP/1.1 500 Internal Server Error ";
-            contentType = "text/html;charset=utf-8";
-        }
         String header = String.join("\r\n",
                 statusLine,
                 "Content-Type: " + contentType + " ",

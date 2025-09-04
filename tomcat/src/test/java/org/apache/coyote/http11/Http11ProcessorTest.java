@@ -59,9 +59,9 @@ class Http11ProcessorTest {
         // Paths.get()에서 내부적으로 URL 디코딩이 수행되어 올바른 경로 생성.
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         Path path = Paths.get(resource.toURI());
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(path));
 

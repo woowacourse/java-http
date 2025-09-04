@@ -70,9 +70,9 @@ public class Http11Processor implements Runnable, Processor {
     private String buildResponse(String responseBody) {
         int bodyLength = getBodyLength(responseBody);
         final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: " + bodyLength + " ",
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: " + bodyLength,
             "",
             responseBody);
         return response;
@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + normalizedPath)) {
             if (inputStream == null) {
-                    throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
+                throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }

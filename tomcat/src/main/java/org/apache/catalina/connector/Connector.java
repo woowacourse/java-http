@@ -1,13 +1,15 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.techcourse.servlet.LoginServlet;
+import com.techcourse.servlet.StaticResourceServlet;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.catalina.ServletContainer;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -17,6 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final ServletContainer container;
     private boolean stopped;
 
     public Connector() {
@@ -25,7 +28,17 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.container = createServletContainer();
         this.stopped = false;
+    }
+
+    private ServletContainer createServletContainer() {
+        final ServletContainer container = new ServletContainer();
+
+        container.addServlet("/login", new LoginServlet());
+        container.addServlet("/*", new StaticResourceServlet());
+
+        return container;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -33,13 +46,13 @@ public class Connector implements Runnable {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public void start() {
-        var thread = new Thread(this);
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -48,7 +61,6 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
             connect();
         }
@@ -57,7 +69,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -66,15 +78,16 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        final var processor = new Http11Processor(connection, container);
         new Thread(processor).start();
     }
 
     public void stop() {
         stopped = true;
+        container.destroy();
         try {
             serverSocket.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.HttpStatus.*;
+import static org.apache.coyote.http11.HttpStatus.*;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

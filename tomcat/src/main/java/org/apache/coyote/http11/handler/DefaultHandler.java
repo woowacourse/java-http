@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.HttpStatus.NOT_FOUND;
-import static org.apache.coyote.http11.handler.HttpStatus.OK;
+import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.http11.HttpStatus.OK;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.File;

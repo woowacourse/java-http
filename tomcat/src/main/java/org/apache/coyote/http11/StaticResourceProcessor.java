@@ -18,11 +18,11 @@ public class StaticResourceProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(StaticResourceProcessor.class);
 
-    public static String resolveResourceName(String requestLine) {
+    public static String resolveResourcePath(String requestLine) {
         String[] splitRequestLine = requestLine.split(HEADER_DELIMITER);
         String requestUri = splitRequestLine[1];
-        int queryParamIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
 
+        int queryParamIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
         String resource = requestUri;
         if (queryParamIndex != -1) {
             resource = requestUri.substring(0, queryParamIndex) + HTML_EXTENSION;

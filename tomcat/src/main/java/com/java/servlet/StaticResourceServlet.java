@@ -5,6 +5,8 @@ import com.java.http.HttpResponse;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static com.java.http.HttpRequest.HttpMethod.GET;
@@ -32,8 +34,8 @@ public abstract class StaticResourceServlet implements Servlet {
     private String file() {
         final var resource = getClass().getClassLoader().getResource("static" + resourcePath());
         try {
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
+            return Files.readString(new File(resource.toURI()).toPath(), StandardCharsets.UTF_8);
+        } catch (IOException | URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }

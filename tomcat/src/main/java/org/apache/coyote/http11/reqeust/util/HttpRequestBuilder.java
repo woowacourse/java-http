@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.reqeust.util;
 
-import org.apache.coyote.http11.reqeust.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpMethod;
-import org.apache.coyote.http11.reqeust.HttpProtocolVersion;
+import org.apache.coyote.http11.HttpProtocolVersion;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 
 public class HttpRequestBuilder {

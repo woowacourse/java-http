@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.reqeust.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.reqeust.handler.HttpRequestHandler;
 import org.apache.coyote.http11.reqeust.handler.HttpRequestHandlerMapper;
@@ -65,8 +64,8 @@ public class Http11Processor implements Runnable, Processor {
                 .method(parser.parseHttpMethod(startLine))
                 .uri(parser.parseRequestUri(startLine))
                 .protocolVersion(parser.parseHttpVersion(startLine))
-                .headers(parser.parseHeaders(headerLines))
-                .body(getBodyIfExists(inputStream, parser.parseHeaders(headerLines)))
+                .headers(HttpHeaders.parseHeaders(headerLines))
+                .body(getBodyIfExists(inputStream, HttpHeaders.parseHeaders(headerLines)))
                 .build();
     }
 

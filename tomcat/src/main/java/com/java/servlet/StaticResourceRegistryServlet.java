@@ -35,6 +35,7 @@ public class StaticResourceRegistryServlet implements Servlet {
 
     private byte[] file(String resourcePath) {
         try (final var inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) throw new IllegalStateException("존재하지 않는 정적 리소스입니다. path=" + resourcePath);
             return inputStream.readAllBytes();
         } catch (IOException e) {
             throw new IllegalStateException("정적 리소스를 읽는 중 예외가 발생했습니다.", e);

@@ -18,6 +18,8 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.5.18'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 
+    // Gradle 8 이후부터 JUnit 5 테스트 실행 시 런타임에 junit-platform-launcher가 필수
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.3'
     testImplementation 'org.assertj:assertj-core:3.27.3'
     testImplementation 'org.mockito:mockito-core:5.18.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'

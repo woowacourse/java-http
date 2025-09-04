@@ -1,7 +1,7 @@
-package com.http.application;
+package org.apache.coyote.http11;
 
-import com.http.domain.HttpRequest;
-import com.http.domain.StartLine;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.StartLine;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;

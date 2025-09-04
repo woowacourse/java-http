@@ -1,6 +1,8 @@
-package com.http.domain;
+package org.apache.catalina.domain;
 
 public record StartLine(String method, String path, String version) {
+
+    private static final int STARTLINE_SIZE = 3;
 
     public static StartLine from(String startLine) {
         if (startLine == null || startLine.isBlank()) {
@@ -8,7 +10,7 @@ public record StartLine(String method, String path, String version) {
         }
 
         final String[] tokens = startLine.split(" ");
-        if (tokens.length != 3) {
+        if (tokens.length != STARTLINE_SIZE) {
             throw new IllegalArgumentException("Invalid start line: " + startLine);
         }
 

@@ -1,14 +1,16 @@
-package com.http.application.servlet.impl;
+package org.apache.catalina.servlet.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.http.domain.HttpRequest;
-import com.http.domain.StartLine;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.domain.StartLine;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import org.apache.catalina.servlet.impl.LoginRequestServlet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,9 +36,10 @@ class LoginRequestServletTest {
             "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
-        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest));
+        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));
     }
 
     @Test
@@ -48,11 +51,12 @@ class LoginRequestServletTest {
             "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest)
+            () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -66,9 +70,10 @@ class LoginRequestServletTest {
             "password", "wrongpassword"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then - 현재 구현에서는 비밀번호 틀려도 예외가 발생하지 않음
-        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest));
+        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));
     }
 
     @Test
@@ -77,11 +82,12 @@ class LoginRequestServletTest {
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of("password", "password123");
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest)
+            () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -92,11 +98,12 @@ class LoginRequestServletTest {
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of("account", "admin");
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest)
+            () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -106,11 +113,12 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         HttpRequest httpRequest = new HttpRequest(startLine, Map.of(), Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest)
+            () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -124,11 +132,12 @@ class LoginRequestServletTest {
             "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest)
+            () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -142,8 +151,9 @@ class LoginRequestServletTest {
             "password", ""
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpResponse httpResponse = new HttpResponse();
 
         // when & then - 현재 구현에서는 빈 비밀번호도 처리됨
-        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest));
+        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));
     }
 }

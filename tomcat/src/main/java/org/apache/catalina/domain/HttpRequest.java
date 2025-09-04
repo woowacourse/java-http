@@ -1,4 +1,4 @@
-package com.http.domain;
+package org.apache.catalina.domain;
 
 import java.util.Map;
 

@@ -1,11 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.http.application.HttpRequestHandler;
-import com.http.application.HttpRequestParser;
-import com.http.application.HttpResponseParser;
-import com.http.application.RequestServletContainer;
-import com.http.domain.HttpRequest;
-import com.http.domain.HttpResponse;
+import org.apache.catalina.servlet.RequestServletContainer;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,10 +35,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final HttpRequest httpRequest = HttpRequestParser.parse(reader);
-            final HttpResponse response = HttpRequestHandler.handle(httpRequest);
+            final HttpRequest request = HttpRequestParser.parse(reader);
+            final HttpResponse response = new HttpResponse();
 
-            RequestServletContainer.handle(httpRequest);
+            RequestServletContainer.handle(request, response);
 
             final String output = HttpResponseParser.parse(response);
             outputStream.write(output.getBytes());

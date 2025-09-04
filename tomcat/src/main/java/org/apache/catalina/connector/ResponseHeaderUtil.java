@@ -1,15 +1,15 @@
-package com.http.application;
+package org.apache.catalina.connector;
 
-import com.http.domain.HttpRequest;
-import com.http.domain.HttpResponse;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
 import java.util.Map;
 
-public final class HeaderResolver {
+public final class ResponseHeaderUtil {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    private HeaderResolver() {
+    private ResponseHeaderUtil() {
     }
 
     public static void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -24,19 +24,19 @@ public final class HeaderResolver {
     private static void processContentType(HttpRequest httpRequest, HttpResponse httpResponse) {
         final Map<String, String> headers = httpRequest.headers();
         if (!headers.containsKey("Accept")) {
-            httpResponse.headers().put(CONTENT_TYPE, "text/html;charset=utf-8");
+            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
             return;
         }
 
         final String accept = headers.get("Accept").split(",")[0];
-        httpResponse.headers().put(CONTENT_TYPE, accept);
+        httpResponse.addHeader(CONTENT_TYPE, accept);
     }
 
     private static void processContentLength(HttpResponse httpResponse) {
-        if (httpResponse.body() == null) {
+        if (httpResponse.getBody() == null) {
             return;
         }
 
-        httpResponse.headers().put(CONTENT_LENGTH, String.valueOf(httpResponse.body().length));
+        httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getBody().length));
     }
 }

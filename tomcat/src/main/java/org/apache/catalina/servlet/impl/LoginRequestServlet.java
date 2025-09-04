@@ -1,10 +1,13 @@
-package com.http.application.servlet.impl;
+package org.apache.catalina.servlet.impl;
 
-import com.http.application.servlet.RequestServlet;
-import com.http.domain.HttpRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Map;
+import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.servlet.RequestServlet;
+import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +16,16 @@ public class LoginRequestServlet implements RequestServlet {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestServlet.class);
 
     @Override
-    public void handle(HttpRequest httpRequest) {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         final Map<String, String> queryStrings = httpRequest.queryStrings();
 
         String account = queryStrings.get("account");
         String password = queryStrings.get("password");
         processLogin(account, password);
+
+        final String fileName = httpRequest.startLine().path() + ".html";
+        final byte[] loginHtml = FileParser.loadStaticResourceByFileName(fileName);
+        httpResponse.setBody(loginHtml);
     }
 
     private void processLogin(String account, String password) {

@@ -14,10 +14,10 @@ public class UserService {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다"));
 
-        if (user.checkPassword(password)) {
-            logger.info(user.toString());
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("[ERROR] 비밀번호가 일치하지 않습니다");
         }
 
-        throw new IllegalArgumentException("[ERROR] 비밀번호가 일치하지 않습니다");
+        logger.info(user.toString());
     }
 }

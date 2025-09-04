@@ -1,9 +1,9 @@
 package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -60,16 +60,29 @@ public class LoginServlet implements Servlet {
     }
 
     private String readLoginPage() {
-        try {
-            final URL resource = getClass().getClassLoader().getResource("static/login.html");
-            if (resource == null) {
-                return "<html><body><h1>Login page not found</h1></body></html>";
+        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
+            if (inputStream == null) {
+                log.warn("Login page not found: static/login.html");
+                return createErrorPage("Login page not found", 404);
             }
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (final Exception e) {
+            
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (final IOException e) {
             log.error("Failed to read login.html", e);
-            return "<html><body><h1>Error loading login page</h1></body></html>";
+            return createErrorPage("Error loading login page", 500);
         }
+    }
+
+    private String createErrorPage(final String message, final int statusCode) {
+        return String.format("""
+            <html>
+            <head><title>Error %d</title></head>
+            <body>
+                <h1>%s</h1>
+                <p>Status Code: %d</p>
+            </body>
+            </html>
+            """, statusCode, message, statusCode);
     }
 
     @Override

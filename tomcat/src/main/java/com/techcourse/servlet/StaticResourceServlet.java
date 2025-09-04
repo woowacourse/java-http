@@ -1,8 +1,8 @@
 package com.techcourse.servlet;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.ContentTypeMapper;
 import org.apache.coyote.http11.HttpRequest;
@@ -42,16 +42,29 @@ public class StaticResourceServlet implements Servlet {
     }
 
     private String readStaticFile(final String uri) {
-        try {
-            final URL resource = getClass().getClassLoader().getResource("static" + uri);
-            if (resource == null) {
-                return "<html><body><h1>404 File Not Found</h1></body></html>";
+        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + uri)) {
+            if (inputStream == null) {
+                log.warn("Static file not found: {}", uri);
+                return createErrorPage("File Not Found", 404);
             }
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (final Exception e) {
-            log.error("Failed to read static file: " + uri, e);
-            return "<html><body><h1>Error loading file</h1></body></html>";
+            
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (final IOException e) {
+            log.error("Failed to read static file: {}", uri, e);
+            return createErrorPage("Error loading file", 500);
         }
+    }
+
+    private String createErrorPage(final String message, final int statusCode) {
+        return String.format("""
+            <html>
+            <head><title>Error %d</title></head>
+            <body>
+                <h1>%s</h1>
+                <p>Status Code: %d</p>
+            </body>
+            </html>
+            """, statusCode, message, statusCode);
     }
 
     @Override

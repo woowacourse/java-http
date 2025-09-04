@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String FILE_EXTENSION_DELIMITER = ".";
+    private static final String FILE_EXTENSION_DELIMITER = ".";
 
     private final Socket connection;
 

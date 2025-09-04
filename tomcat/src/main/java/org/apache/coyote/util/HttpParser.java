@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 public final class HttpParser {
 
     private static final Logger log = LoggerFactory.getLogger(HttpParser.class);
-    public static final String EMPTY_TEXT = "";
+    private static final String EMPTY_TEXT = "";
+    private static final int EOF = -1;
 
     public static HttpRequest parseToRequest(InputStream inputStream) {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -51,7 +52,7 @@ public final class HttpParser {
         int totalRead = 0;
         while (totalRead < contentLength) {
             int read = bufferedReader.read(bodyBuffers, totalRead, contentLength - totalRead);
-            if (read == -1) {
+            if (read == EOF) {
                 break;
             }
             totalRead += read;

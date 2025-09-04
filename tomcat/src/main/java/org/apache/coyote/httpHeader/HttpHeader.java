@@ -17,8 +17,8 @@ public class HttpHeader {
         return requestLine.getHttpMethod();
     }
 
-    public String getPath() {
-        return requestLine.getPath();
+    public String getPurePath() {
+        return requestLine.getPurePath();
     }
 
     public Map<String, String> getQueries() {

@@ -20,12 +20,12 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public String getProtocol() {
-        return protocol;
+    public String getPurePath() {
+        int index = path.indexOf("?");
+        if (index == -1) {
+            return path;
+        }
+        return path.substring(0, index);
     }
 
     public Map<String, String> getQueryValues() {

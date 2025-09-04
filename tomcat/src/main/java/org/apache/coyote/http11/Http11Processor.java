@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpHeader httpHeader = readHttpHeader(bufferReader);
 
             final HttpMethod httpMethod = httpHeader.getHttpMethod();
-            final String path = httpHeader.getPath();
+            final String path = httpHeader.getPurePath();
 
             if (httpMethod == HttpMethod.GET && path.equals("/")) {
                 responseHome(outputStream);
@@ -90,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream,
             final HttpHeader httpHeader
     ) throws URISyntaxException, IOException {
-        final String body = getStaticResponseBody("static" + httpHeader.getPath());
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -125,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream,
             final HttpHeader httpHeader
     ) throws URISyntaxException, IOException {
-        final String body = getStaticResponseBody("static" + httpHeader.getPath());
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
                 StatusCode.OK,
@@ -143,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream,
             final HttpHeader httpHeader
     ) throws URISyntaxException, IOException {
-        final String body = getStaticResponseBody("static" + httpHeader.getPath());
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",

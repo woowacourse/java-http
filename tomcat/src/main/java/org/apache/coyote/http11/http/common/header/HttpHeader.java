@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
 
 public class HttpHeader {
@@ -109,13 +108,9 @@ public class HttpHeader {
     }
 
     public List<String> getFormat() {
-        List<String> result = new ArrayList<>();
-
-        for (Entry<String, String> stringStringEntry : httpHeaderInfo.entrySet()) {
-            String headerLine = stringStringEntry.getKey() + ":" + stringStringEntry.getValue();
-            result.add(headerLine);
-        }
-
-        return result;
+        return httpHeaderInfo.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                .toList();
     }
 }

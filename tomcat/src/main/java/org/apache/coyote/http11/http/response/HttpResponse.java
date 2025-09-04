@@ -65,7 +65,7 @@ public class HttpResponse {
             return formatLine;
         }
         formatLine.add("");
-        formatLine.add(new String(responseBodyValue.get().getBytes()));
+        formatLine.add(responseBodyValue.get());
         return formatLine;
     }
 }

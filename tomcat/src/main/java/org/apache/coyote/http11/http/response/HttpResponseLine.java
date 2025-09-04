@@ -17,6 +17,6 @@ public class HttpResponseLine {
     }
 
     public String getFormat() {
-        return version.getValue() + " " + status.getFormattedName();
+        return version.getValue() + " " + status.getFormattedName() + " ";
     }
 }

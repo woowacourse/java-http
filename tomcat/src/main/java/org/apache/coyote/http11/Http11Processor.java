@@ -22,6 +22,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String DEFAULT_RESOURCE_PATH = "static";
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -111,13 +113,13 @@ public class Http11Processor implements Runnable, Processor {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(params.get("account"));
         userOrEmpty.ifPresent(user -> log.info("user: {}", user));
 
-        final String filePath = "static" + requestUri.substring(0, index);
+        final String filePath = DEFAULT_RESOURCE_PATH + requestUri.substring(0, index);
 
         return readResourceAsString(requestUri, filePath);
     }
 
     private String getPlainResponseBody(final String requestUri) throws IOException {
-        final String filePath = "static" + requestUri;
+        final String filePath = DEFAULT_RESOURCE_PATH + requestUri;
 
         return readResourceAsString(requestUri, filePath);
     }
@@ -129,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
 
         URL resource  = getClass().getClassLoader().getResource(filePath);
         if (resource == null) {
-            resource = getClass().getClassLoader().getResource("static/404.html");
+            resource = getClass().getClassLoader().getResource(DEFAULT_RESOURCE_PATH + "/404.html");
         }
         final File file = new File(resource.getFile());
         final Path path = file.toPath();

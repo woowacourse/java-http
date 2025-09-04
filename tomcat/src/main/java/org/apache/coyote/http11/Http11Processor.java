@@ -91,11 +91,11 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while ((line = br.readLine()) != null) {
             if (line.isEmpty()) {
-                return null;
+                break;
             }
             String[] splitLine = line.split(":");
             if (splitLine.length < 2) {
-                return null;
+                continue;
             }
             String key = splitLine[0].trim();
             StringBuilder sb = new StringBuilder();

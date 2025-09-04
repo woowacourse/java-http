@@ -42,6 +42,16 @@ public class StaticResourceServlet implements Servlet {
     }
 
     private StaticFileResult readStaticFile(final String uri) {
+        // 경로 탐색 공격 방지
+        if (uri.contains("..") || uri.contains("\\")) {
+            log.warn("Path traversal attempt detected: {}", uri);
+            return new StaticFileResult(
+                    400,
+                    "text/html; charset=utf-8",
+                    createErrorPage("Bad Request", 400)
+            );
+        }
+        
         try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + uri)) {
             if (inputStream == null) {
                 log.warn("Static file not found: {}", uri);

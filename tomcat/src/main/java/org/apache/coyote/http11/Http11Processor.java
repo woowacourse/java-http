@@ -70,6 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             List<String> message = new ArrayList<>();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
             message.add(bufferedReader.readLine());
             return new HttpRequestMessage(message);
         } catch (IOException | IllegalArgumentException e) {

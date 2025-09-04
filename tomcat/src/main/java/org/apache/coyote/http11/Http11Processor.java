@@ -1,16 +1,22 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CRLF = "\r\n";
 
     private final Socket connection;
 
@@ -29,9 +35,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            var requestHeader = findRequestHeader(inputStream);
+            var headers = requestHeader.split(CRLF);
+            var firstHeader = headers[0].split(" ");
+            var method = firstHeader[0];
+            var uri = firstHeader[1];
+            var responseBody = findResponseBody(uri);
 
-            final var response = String.join("\r\n",
+            final var response = String.join(CRLF,
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -43,5 +54,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String findRequestHeader(final InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder requestHeader = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            requestHeader.append(line).append(CRLF);
+        }
+        return requestHeader.append(CRLF).toString();
+    }
+
+    private String findResponseBody(final String uri) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + uri);
+        if (resource == null) {
+            return "Hello world!";
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

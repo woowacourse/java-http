@@ -2,19 +2,13 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,23 +34,19 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            final List<String> requestHeader = new ArrayList<>();
-            while (reader.ready()) {
-                requestHeader.add(reader.readLine());
-            }
-            final String requestLine = requestHeader.getFirst();
-            final String requestUri = requestLine.split(" ")[1];
-            final String requestPath = requestUri.split("\\?")[0];
-            final String requestQueryString = requestUri.split("\\?")[1];
+            final HttpRequest httpRequest = new HttpRequest();
+            String request = new String(inputStream.readAllBytes());
+
+            httpRequest.parseHttpRequest(request);
+            final String requestPath = httpRequest.getRequestPath();
 
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
 
             if (requestPath.equals("/login")) {
-                final Map<String, String> parameters = getQueryParameters(requestQueryString);
+                final Map<String, String> parameters = httpRequest.getQueryParameters();
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
                 InMemoryUserRepository.findByAccount(account)
@@ -66,13 +56,13 @@ public class Http11Processor implements Runnable, Processor {
                             }
                         });
 
-                final URL resource = getResource("static/login.html");
+                final URL resource = getStaticResource("/login.html");
                 responseBody = readFile(resource);
                 contentType = getMimeType(resource);
             }
 
             if (!requestPath.equals("/") && !requestPath.equals("/login")) {
-                final URL resource = getResource("static" + requestUri);
+                final URL resource = getStaticResource(httpRequest.getRequestUri());
                 responseBody = readFile(resource);
                 contentType = getMimeType(resource);
             }
@@ -91,18 +81,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getQueryParameters(final String queryString) {
-        final String[] queryParameters = queryString.split("&");
-        return Arrays.stream(queryParameters)
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(
-                        param -> param[0],
-                        param -> param[1]
-                ));
-    }
-
-    private URL getResource(final String path) throws FileNotFoundException {
-        final URL resource = getClass().getClassLoader().getResource(path);
+    private URL getStaticResource(final String path) throws FileNotFoundException {
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
             throw new FileNotFoundException();
         }

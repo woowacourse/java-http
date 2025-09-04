@@ -37,11 +37,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String[] firstLine = bufferedReader.readLine().split(" ");
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String inputLine = bufferedReader.readLine();
+            if (inputLine == null || inputLine.isEmpty()) {
+                return;
+            }
 
-            String httpMethod = firstLine[0];
-            String httpUri = firstLine[1];
+            String httpMethod = inputLine.split(" ")[0];
+            String httpUri = inputLine.split(" ")[1];
 
             final var response = makeResponse(httpMethod, httpUri);
 

@@ -199,7 +199,7 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
@@ -209,6 +209,12 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
+            String line;
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+                while ((line = bufferedReader.readLine()) != null) {
+                    actual.append(line).append("\r\n");
+                }
+            }
             assertThat(actual).hasToString(emoji);
         }
     }

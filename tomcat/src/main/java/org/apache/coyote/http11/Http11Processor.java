@@ -54,48 +54,74 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String uri = tokens[1].trim();
+            String rawUri = tokens[1].trim();
+            int index = rawUri.indexOf("?");
 
-            int index = uri.indexOf("?");
-            String path = (index >= 0) ? uri.substring(0, index) : uri;
-            String rawQuery = (index >= 0) ? uri.substring(index + 1) : "";
+            String uri = makeUri(rawUri, index);
+            Map<String, List<String>> query = makeQuery(rawUri, index);
 
-            Map<String, List<String>> query = parseQuery(rawQuery);
-
-            if (path.equals("/") || path.isEmpty()) {
+            if (uri.equals("/") || uri.isEmpty()) {
                 String responseBody = "Hello world!";
                 writeResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes());
                 return;
             }
 
-            if (path.equals("/login")) {
+            if (uri.equals("/login")) {
                 handleLogin(outputStream, query);
                 return;
             }
-            if (!path.startsWith("static/")) {
-                path = "static/" + path.substring(1);
-            }
 
-            URL url = getClass().getClassLoader().getResource(path);
-            if (url == null) {
-                writeError(outputStream, 400, "Bad Request", "Invalid request line");
-                return;
+            if (uri.endsWith(".html") || uri.endsWith(".css")) {
+                handleStatic(uri, outputStream);
             }
-            Path absolutePath = Path.of(url.toURI());
-            if (!Files.exists(absolutePath)) {
-                writeError(outputStream, 404, "Not Found", "File not found");
-                return;
-            }
-
-            byte[] responseBodyBytes = Files.readAllBytes(absolutePath);
-            String contentType = guessContentType(absolutePath.toString());
-
-            writeResponse(outputStream, contentType, responseBodyBytes);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String makeUri(final String rawUri, final int index) {
+        return (index >= 0) ? rawUri.substring(0, index) : rawUri;
+    }
+
+    private Map<String, List<String>> makeQuery(final String rawUri, final int index) {
+        String rawQuery = (index >= 0) ? rawUri.substring(index + 1) : "";
+        return parseQuery(rawQuery);
+    }
+
+    private Map<String, List<String>> parseQuery(final String queryString) {
+        Map<String, List<String>> query = new HashMap<>();
+        if (queryString == null || queryString.isEmpty()) {
+            return query;
+        }
+        String[] split = queryString.split("&");
+        for (String pair : split) {
+            int eq = pair.indexOf("=");
+
+            String key = pair.substring(0, eq);
+            String value = pair.substring(eq + 1);
+
+            query.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+        }
+        return query;
+    }
+
+    private void handleStatic(String uri, final OutputStream outputStream) throws IOException, URISyntaxException {
+        uri = "static/" + uri.substring(1);
+        URL url = getClass().getClassLoader().getResource(uri);
+        if (url == null) {
+            writeError(outputStream, 404, "Not Found", "Requested resource was not found on the server.");
+            return;
+        }
+        Path absolutePath = Path.of(url.toURI());
+        if (!Files.exists(absolutePath)) {
+            writeError(outputStream, 500, "Internal Server Error", "File not found");
+            return;
+        }
+        byte[] responseBodyBytes = Files.readAllBytes(absolutePath);
+        String contentType = guessContentType(absolutePath.toString());
+        writeResponse(outputStream, contentType, responseBodyBytes);
     }
 
     private void handleLogin(
@@ -130,56 +156,12 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, "text/html;charset=utf-8", loginBytes);
     }
 
-    private Map<String, List<String>> parseQuery(final String queryString) {
-        Map<String, List<String>> query = new HashMap<>();
-        if (queryString == null || queryString.isEmpty()) {
-            return query;
-        }
-        String[] split = queryString.split("&");
-        for (String pair : split) {
-            int eq = pair.indexOf("=");
-
-            String key = pair.substring(0, eq);
-            String value = pair.substring(eq + 1);
-
-            query.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-        }
-        return query;
-    }
-
     private String getFirst(final Map<String, List<String>> map, final String key) {
         List<String> list = map.get(key);
         if (list == null || list.isEmpty()) {
             return null;
         }
-        return list.get(0);
-    }
-
-    private String guessContentType(final String target) {
-        if (target.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (target.endsWith(".htm")) {
-            return "text/html;charset=utf-8";
-        }
-        if (target.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        return null;
-    }
-
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String contentType,
-            final byte[] bytes
-    ) throws IOException {
-        String response = "HTTP/1.1 200 OK " + "\r\n"
-                + "Content-Type: " + contentType + " " + "\r\n"
-                + "Content-Length: " + bytes.length + " " + "\r\n"
-                + "\r\n";
-        outputStream.write(response.getBytes());
-        outputStream.write(bytes);
-        outputStream.flush();
+        return list.getFirst();
     }
 
     private void writeError(
@@ -196,5 +178,32 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(response.getBytes());
         outputStream.write(message.getBytes());
         outputStream.flush();
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String contentType,
+            final byte[] bytes
+    ) throws IOException {
+        String response = "HTTP/1.1 200 OK " + "\r\n"
+                + "Content-Type: " + contentType + " " + "\r\n"
+                + "Content-Length: " + bytes.length + " " + "\r\n"
+                + "\r\n";
+        outputStream.write(response.getBytes());
+        outputStream.write(bytes);
+        outputStream.flush();
+    }
+
+    private String guessContentType(final String target) {
+        if (target.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (target.endsWith(".htm")) {
+            return "text/html;charset=utf-8";
+        }
+        if (target.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return null;
     }
 }

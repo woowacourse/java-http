@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -56,7 +56,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readMessage(final InputStream inputStream) throws IOException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        final var bufferedReader = new BufferedReader(inputStreamReader);
         final var stringBuilder = new StringBuilder();
 
         while (true) {
@@ -70,32 +71,40 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final String requestMessage) throws IOException {
-        final var requestLine = requestMessage.substring(0, requestMessage.indexOf("HTTP/1.1") - 1);
+        final var requestLine = requestMessage.split("\r\n")[0].trim();
+        if (!requestLine.startsWith("GET") || !requestLine.endsWith("HTTP/1.1")) {
+            return "HTTP/1.1 400 Bad Request \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: 23 \r\n";
+        }
         final var uri = requestLine.split(" ")[1];
 
-        System.out.println("uri = " + uri);
         final var body = createResponseBody(uri);
-        System.out.println("body = " + body);
         final var header = createResponseHeader(uri, body);
         return header + "\r\n\r\n" + body;
     }
 
     private String createResponseBody(final String uri) throws IOException {
         if (uri.startsWith("/login")) {
-            final var loginHtml = getClass().getClassLoader().getResource("static/login.html");
-
             final var queryParams = extractQueryParams(uri);
             if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
                 tryLogin(queryParams);
             }
 
-            return Files.readString(Path.of(loginHtml.getPath()));
+            return getResource("/login.html");
         }
 
+        return getResource(uri);
+    }
+
+    private String getResource(final String uri) throws IOException {
         final var resource = getClass().getClassLoader().getResource("static" + uri);
-        final var file = new File(resource.getFile());
-        if (file.exists() && !file.isDirectory()) {
-            return Files.readString(file.toPath());
+        if (resource != null) {
+            final var file = new File(resource.getFile());
+
+            if (file.exists() && !file.isDirectory()) {
+                return Files.readString(file.toPath());
+            }
         }
 
         return "Hello world!";
@@ -107,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " "
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " "
         );
     }
 

@@ -5,10 +5,10 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
-    JS("js", "text/js"),
-    TEXT("txt", "text"),
-    JSON("json", "text/json"),
-    ICO("ico", "text"),
+    JS("js", "application/javascript"),
+    TEXT("txt", "text/plain"),
+    JSON("json", "application/json"),
+    ICO("ico", "image/x-icon"),
     ;
 
     final String expansion;

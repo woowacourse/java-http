@@ -36,15 +36,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             var requestHeader = findRequestHeader(inputStream);
+            System.out.println("REQUEST HEADER :" + requestHeader);
             var headers = requestHeader.split(CRLF);
             var firstHeader = headers[0].split(" ");
             var method = firstHeader[0];
             var uri = firstHeader[1];
             var responseBody = findResponseBody(uri);
+            var contentType = findContentType(uri);
 
             final var response = String.join(CRLF,
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -72,5 +74,18 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String findContentType(final String uri) {
+        if (uri.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (uri.endsWith(".css")) {
+            return "text/css";
+        }
+        if (uri.endsWith(".js")) {
+            return "application/javascript";
+        }
+        return "";
     }
 }

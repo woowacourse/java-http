@@ -1,4 +1,4 @@
-package org.apache.coyote.httpObject;
+package org.apache.coyote.httpHeader;
 
 import java.util.List;
 import java.util.Map;

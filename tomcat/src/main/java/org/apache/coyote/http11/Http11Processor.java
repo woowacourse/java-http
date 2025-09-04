@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
-import org.apache.coyote.httpObject.HttpHeader;
-import org.apache.coyote.httpObject.HttpMethod;
+import org.apache.coyote.httpHeader.HttpHeader;
+import org.apache.coyote.httpHeader.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +53,12 @@ public class Http11Processor implements Runnable, Processor {
                 responseHome(outputStream);
             }
 
-            if(httpMethod == HttpMethod.GET && path.contains("/login")) {
+            if (httpMethod == HttpMethod.GET && path.contains("/login")) {
                 Map<String, String> queries = httpHeader.getQueries();
                 User user = InMemoryUserRepository.findByAccount(queries.get("account"))
                         .orElse(null);
-                if(user!=null && user.checkPassword(queries.get("password"))) {
-                    log.info("user : {}",user);
+                if (user != null && user.checkPassword(queries.get("password"))) {
+                    log.info("user : {}", user);
                 }
                 responseLoginHtml(outputStream);
             }
@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
-                responseJs(outputStream,path);
+                responseJs(outputStream, path);
             }
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -145,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
             final String path
     ) throws URISyntaxException, IOException {
         final URI uri = getClass().getClassLoader()
-                .getResource("static"+path)
+                .getResource("static" + path)
                 .toURI();
         final Path htmlPath = Path.of(uri);
         final byte[] read = Files.readAllBytes(htmlPath);

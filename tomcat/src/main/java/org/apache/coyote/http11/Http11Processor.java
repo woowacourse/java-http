@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -49,12 +50,13 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = requestHeader.getFirst();
             final String requestUri = requestLine.split(" ")[1];
             final String requestPath = requestUri.split("\\?")[0];
+            final String requestQueryString = requestUri.split("\\?")[1];
 
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
 
             if (requestPath.equals("/login")) {
-                final Map<String, String> parameters = getQueryParameters(requestUri);
+                final Map<String, String> parameters = getQueryParameters(requestQueryString);
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
                 InMemoryUserRepository.findByAccount(account)
@@ -89,8 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getQueryParameters(final String requestUri) {
-        final String queryString = requestUri.split("\\?")[1];
+    private Map<String, String> getQueryParameters(final String queryString) {
         final String[] queryParameters = queryString.split("&");
         return Arrays.stream(queryParameters)
                 .map(param -> param.split("="))
@@ -100,10 +101,10 @@ public class Http11Processor implements Runnable, Processor {
                 ));
     }
 
-    private URL getResource(final String path) throws IOException {
+    private URL getResource(final String path) throws FileNotFoundException {
         final URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
-            throw new IOException();
+            throw new FileNotFoundException();
         }
         return resource;
     }

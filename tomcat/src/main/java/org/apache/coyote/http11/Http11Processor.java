@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -43,55 +45,36 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String line;
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+            // 헤더
             String firstLineOfRequestHeader = br.readLine();
             String requestUri = firstLineOfRequestHeader.split(" ")[1];
-            // 헤더
+            String line;
             while ((line = br.readLine()) != null) {
                 if (line.equals(END_OF_REQUEST_HEADER)) {
                     break;
                 }
             }
 
-            String requestUriPath = requestUri;
             int index = requestUri.lastIndexOf(REQUEST_URI_DELIMITER);
+
+            String requestUriPath = requestUri;
+            Map<String, String> keyValues = new HashMap<>();
             if (index != -1) {
                 requestUriPath = requestUri.substring(0, index);
+                // keyValues 저장;
                 String queryString = requestUri.substring(index + 1);
-                String[] keyValues = queryString.split(QUERY_STRING_DELIMITER);
-                String account = null;
-                String password = null;
-                for (String keyValue : keyValues) {
+                for (String keyValue : queryString.split(QUERY_STRING_DELIMITER)) {
                     String[] split = keyValue.split("=");
-                    String key = split[0];
-                    String value = split[1];
-                    if (key.equals("account")) {
-                        account = value;
-                    }
-                    if (key.equals("password")) {
-                        password = value;
-                    }
+                    keyValues.put(split[0], split[1]);
                 }
-
-                if (account != null && password != null) {
-                    Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-                    boolean isValidAccount = findUser.isPresent();
-                    if (!isValidAccount) {
-                        return;
-                    }
-                    User user = findUser.get();
-                    log.atInfo().log("user: {}", user);
-                }
-            }
-
-            if (requestUriPath.equals("/login")) {
-                requestUriPath+=".html";
             }
 
             // 바디
-            var responseBody = getResponseBody(requestUriPath);
-            var contentType = getContentType(requestUriPath);
+            var staticFileName = getStaticFileName(requestUriPath, keyValues);
+            var responseBody = getResponseBody(staticFileName);
+            var contentType = getContentType(staticFileName);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -106,20 +89,45 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String requestUriPath) throws IOException {
+    private String getStaticFileName(String requestUriPath, Map<String, String> keyValues) throws IOException {
         if (requestUriPath.equals("/")) {
+            return "";
+        }
+        if (requestUriPath.equals("/login")) {
+            return login(keyValues);
+        }
+
+        return requestUriPath;
+    }
+
+    private String getResponseBody(String staticFileName) throws IOException {
+        if (staticFileName.isBlank()) {
             return "Hello world!";
         }
-        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + requestUriPath);
+
+        String staticFilePath = STATIC_RESOURCE_PATH + "/" + staticFileName;
+        URL resource = getClass().getClassLoader().getResource(staticFilePath);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String getContentType(String requestUriPath) {
-        if (requestUriPath.endsWith(".css")) {
-            return "text/css";
+    private String login(Map<String, String> keyValues) {
+        String account = keyValues.get("account");
+        String password = keyValues.get("password");
+        if (account != null && password != null) {
+            Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+            boolean isValidAccount = findUser.isPresent();
+            if (!isValidAccount) {
+                return null;
+            }
+            User user = findUser.get();
+            log.atInfo().log("user: {}", user);
         }
-        if (requestUriPath.endsWith(".html")) {
-            return "text/html";
+        return "login.html";
+    }
+
+    private String getContentType(String staticFileName) {
+        if (staticFileName.endsWith(".css")) {
+            return "text/css";
         }
         return "text/html";
     }

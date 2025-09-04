@@ -65,6 +65,19 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
 
                 outputStream.write(response.getBytes());
+            } else {
+                final var path = Path.of("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/tomcat/src/main/resources/static", requestTarget);
+                final byte[] fileContent = Files.readAllBytes(path);
+                responseBody = new String(fileContent, StandardCharsets.UTF_8);
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + fileContent.length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
             }
 
             outputStream.flush();

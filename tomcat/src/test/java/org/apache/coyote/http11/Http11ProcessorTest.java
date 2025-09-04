@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.container.SimpleContainer;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,16 +16,16 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SimpleContainer());
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 12 \r\n",
+                "HTTP/1.1 200 OK\r\n",
+                "Content-Type: text/html;charset=utf-8\r\n",
+                "Content-Length: 12\r\n",
                 "Hello world!"
         );
     }
@@ -40,7 +41,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SimpleContainer());
 
         // when
         processor.process(socket);
@@ -48,9 +49,9 @@ class Http11ProcessorTest {
         // then
         final var resource = getClass().getClassLoader().getResource("static/index.html");
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 5564 \r\n",
+                "HTTP/1.1 200 OK\r\n",
+                "Content-Type: text/html;charset=utf-8\r\n",
+                "Content-Length: 5564\r\n",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
     }

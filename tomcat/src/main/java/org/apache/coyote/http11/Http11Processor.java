@@ -1,12 +1,20 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+import org.apache.coyote.Processor;
+import org.apache.coyote.util.HttpParser;
+import org.apache.coyote.util.HttpRequest;
+import org.apache.coyote.util.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,7 +35,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+                final var outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = HttpParser.parseToRequest(inputStream);
+            log.info("HTTP 요청객체 생성 완료");
 
             final var responseBody = "Hello world!";
 

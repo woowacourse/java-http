@@ -9,10 +9,11 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.dto.Http11Request;
+import org.apache.coyote.http11.dto.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,16 +40,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            final var requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
+            final var httpRequest = getHttpRequest(bufferedReader);
+            if (httpRequest == null) {
                 return;
             }
-            final var requestLines = requestLine.split(" ");
-            final var resourcePath = requestLines[1];
-            final var headers = getHeaders(bufferedReader);
-            log.info("resourcePath: {}, headers: {}", resourcePath, headers);
 
-            handleRequest(resourcePath, outputStream);
+            final var httpResponse = handleRequest(httpRequest, outputStream);
+            outputStream.write(httpResponse.getRequestLine());
+            outputStream.write(httpResponse.getHeader());
+            outputStream.write(httpResponse.body());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -57,11 +57,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private Http11Request getHttpRequest(BufferedReader bufferedReader) throws IOException {
+        final var requestLine = bufferedReader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
+        final var requestLines = requestLine.split(" ");
+        final var resourcePath = requestLines[1];
+        final var headers = getHeaders(bufferedReader);
+        log.info("resourcePath: {}, header: {}", resourcePath, headers);
+        return new Http11Request(requestLines[0], resourcePath, headers, null);
+    }
+
+    private LinkedHashMap<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
-            final String[] header = line.split(":", 2);
+            final var header = line.split(":", 2);
             if (header.length == 2) {
                 headers.put(header[0].trim(), header[1].trim());
             }
@@ -69,11 +81,11 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private void handleRequest(String resourcePath, OutputStream outputStream)
+    private Http11Response handleRequest(Http11Request http11Request, OutputStream outputStream)
             throws IOException, URISyntaxException {
+        final var resourcePath = http11Request.path();
         if (resourcePath.equals("/")) {
-            outputStream.write(buildRootResponse());
-            return;
+            return buildRootResponse();
         }
 
         final var resource = getClass().getClassLoader().getResource(STATIC_PATH + resourcePath);
@@ -81,23 +93,26 @@ public class Http11Processor implements Runnable, Processor {
 
         final var contentType = getContentType(resourcePath);
         final var responseBody = Files.readAllBytes(filePath);
-
-        outputStream.write(String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "").getBytes());
-        outputStream.write(responseBody);
+        final var httpResponse = new Http11Response(
+                200,
+                new LinkedHashMap<>(),
+                responseBody
+        );
+        httpResponse.addHeader("Content-Type", contentType);
+        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.length));
+        return httpResponse;
     }
 
-    private byte[] buildRootResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!").getBytes();
+    private Http11Response buildRootResponse() {
+        byte[] body = "Hello world!".getBytes();
+        final var httpResponse = new Http11Response(
+                200,
+                new LinkedHashMap<>(),
+                body
+        );
+        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.addHeader("Content-Length", String.valueOf(body.length));
+        return httpResponse;
     }
 
     private String getContentType(final String resourcePath) {

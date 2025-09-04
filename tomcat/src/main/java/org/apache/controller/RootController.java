@@ -6,11 +6,10 @@ import org.apache.http.StatusCode;
 
 public class RootController implements Controller {
 
-    private final String processableUri = "/";
-
     @Override
     public boolean isProcessableRequest(HttpRequestMessage request) {
-        return processableUri.equals(request.getUri());
+        System.out.println("request.getUri() = " + request.getUri());
+        return request.getUri().equals("/");
     }
 
     @Override

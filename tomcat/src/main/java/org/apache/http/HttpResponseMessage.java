@@ -56,12 +56,13 @@ public class HttpResponseMessage {
         return String.join(" ",
                 httpVersion.getValue(),
                 String.valueOf(statusCode.getCode()),
-                statusCode.getMessage());
+                statusCode.getMessage(),
+                "");
     }
 
     private String makeHeaderLines() {
         List<String> headerLines = new ArrayList<>();
-        List<String> keys = header.values().stream().toList();
+        List<String> keys = header.keySet().stream().toList();
         for (String key : keys) {
             String value = header.get(key);
             headerLines.add(key + ": " + value + " ");

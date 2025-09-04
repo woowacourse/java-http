@@ -51,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
                 //TODO: 컨트롤러가 요청을 처리하다가 예외가 발생할 경우 예외 응답 처리  (2025-09-4, 목, 12:56)
                 controller.processRequest(request, response);
                 response.writeMessage();
+                return;
             }
 
             try {
@@ -68,14 +69,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequestMessage makeRequest(InputStream inputStream) {
         try {
-            //TODO: 요청이 연속으로 와서 다음 메세지의 일부까지 읽어버릴 경우 대처  (2025-09-4, 목, 18:21)
             List<String> message = new ArrayList<>();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
+                System.out.println("line = " + line);
                 message.add(line);
             }
-
             return new HttpRequestMessage(message);
         } catch (IOException | IllegalArgumentException e) {
             throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");

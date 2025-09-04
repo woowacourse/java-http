@@ -71,9 +71,6 @@ public class Http11Processor implements Runnable, Processor {
         String path = firstLine[1];
         String version = firstLine[2];
         Map<String, String> headers = readHeaders(br);
-        if (headers == null || headers.isEmpty()) {
-            return null;
-        }
         return new Request(method, path, version, headers);
     }
 

@@ -37,15 +37,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var httpRequest = getHttpRequest(inputStream);
+            final var httpRequest = HttpRequestParser.parse(inputStream);
+            logLoginAccount(httpRequest);
 
-            printLoginAccount(httpRequest);
-
-            final var responseBody = getResponseBody(httpRequest.getResourcePath());
+            final var responseBody = StaticResourceHandler.getResource(httpRequest.getResourcePath());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(httpRequest.getResourcePath()) + " ",
+                    "Content-Type: " + StaticResourceHandler.getContentType(httpRequest.getResourcePath()) + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -57,71 +56,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest getHttpRequest(final InputStream inputStream) {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        try {
-            final var line = bufferedReader.readLine();
-            final var chunks = line.split(" ");
-
-            return new HttpRequest(chunks[1]);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void printLoginAccount(final HttpRequest request) {
-        if(!Objects.equals(request.getResourcePath(), "/login")) {
+    private void logLoginAccount(final HttpRequest request) {
+        if (!Objects.equals(request.getResourcePath(), "/login")) {
             return;
         }
         String account = request.getQueryParameter("account");
 
-        if(account == null) {
-            return;
+        if (account == null || account.isBlank()) {
+            throw new IllegalArgumentException("Missing account parameter");
         }
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("account " + account + " not found"));
 
         log.info("user : {}", user);
-    }
-
-    private String getResponseBody(final String resourcePath) {
-        if (resourcePath.equals("/")) {
-            return "Hello world!";
-        }
-
-        final var resource = ClassLoader.getSystemResource(getResolvedPath(resourcePath));
-
-        if (resource == null) {
-            return "Not found: " + resourcePath;
-        }
-        try {
-            final var path = Paths.get(resource.getPath());
-
-            return Files.readString(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getResolvedPath(final String resourcePath) {
-        if (resourcePath.contains(".")) {
-            return "static" + resourcePath;
-        }
-        return "static" + resourcePath + ".html";
-    }
-
-    private String getContentType(final String resourcePath) {
-        if (resourcePath.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (resourcePath.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (resourcePath.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-        // 이외의 MIME 타입 저장 가능
-        return "text/html;charset=utf-8";
     }
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QueryParameters {
+
     private static final String PAIR_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
@@ -16,10 +17,14 @@ public class QueryParameters {
 
     public QueryParameters(String queryString) {
         this.parameterInfo = new HashMap<>();
-
         String[] pairs = queryString.split(PAIR_DELIMITER);
-        for(String pair : pairs) {
-            String[] keyAndValue = pair.split(KEY_VALUE_DELIMITER);
+
+        for (String pair : pairs) {
+            String[] keyAndValue = pair.split(KEY_VALUE_DELIMITER, 2);
+
+            if (keyAndValue.length != 2) {
+                throw new IllegalArgumentException("Invalid query string: " + queryString);
+            }
             parameterInfo.put(keyAndValue[0], keyAndValue[1]);
         }
     }

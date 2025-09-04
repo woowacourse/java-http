@@ -79,8 +79,8 @@ public class Http11Processor implements Runnable, Processor {
         if (line == null || line.isEmpty()) {
             return null;
         }
-        String[] firstLine = line.split(" ");
-        if (firstLine.length < 3) {
+        String[] firstLine = line.split(" ", 3);
+        if (firstLine.length != 3) {
             return null;
         }
         return firstLine;

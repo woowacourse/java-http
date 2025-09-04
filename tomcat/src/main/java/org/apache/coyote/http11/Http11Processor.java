@@ -2,13 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import org.apache.coyote.Processor;
+import org.apache.coyote.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = bufferedReader.readLine();
 
             final String requestUri = extractRequestUri(requestLine);
-            final var responseBody = getResponseBody(requestUri);
+            final var responseBody = ResourceLoader.get(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -54,20 +52,5 @@ public class Http11Processor implements Runnable, Processor {
 
     private String extractRequestUri(final String header) {
         return header.split(" ")[1];
-    }
-
-    private byte[] getResponseBody(final String requestTarget) throws IOException {
-        if (requestTarget.equals("/")) {
-            return "Hello world!".getBytes();
-        }
-
-        final URL targetUrl = getClass().getClassLoader().getResource("static" + requestTarget);
-
-        if (targetUrl == null) {
-            return new byte[0];
-        }
-
-        final var targetFile = targetUrl.getFile();
-        return Files.readAllBytes(new File(targetFile).toPath());
     }
 }

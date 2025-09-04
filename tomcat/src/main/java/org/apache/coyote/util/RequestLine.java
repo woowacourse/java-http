@@ -19,10 +19,10 @@ public record RequestLine(
         if (!requestUrl.contains("?")) {
             return new RequestLine(method, requestUrl, httpVersion);
         }
+
         String[] pathAndQuery = requestUrl.split("\\?", 2);
         String requestPath = pathAndQuery[0];
         String queryString = pathAndQuery[1];
-
         QueryParameters queryParameters = QueryParameters.parseFrom(queryString);
         return new RequestLine(method, requestPath, queryParameters, httpVersion);
     }

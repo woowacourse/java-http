@@ -9,7 +9,7 @@ public class HelloWorldHandler extends AbstractHandler {
 
     @Override
     public String handle(final String requestTarget) {
-        final var responseBody = "Hello World!";
+        final var responseBody = "Hello world!";
 
         return createResponse(responseBody, "text/html;charset=utf-8");    }
 }

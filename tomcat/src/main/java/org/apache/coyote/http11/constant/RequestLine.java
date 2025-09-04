@@ -13,11 +13,18 @@ public record RequestLine(HttpMethod method, ResourcePath resourcePath, String v
     }
 
     public static String extractRequestLine(String request) {
-        final String[] split = request.split("\n");
+        validateRequestFormat(request);
+        final String[] split = request.split("\r\n");
         if (split.length == 0) {
             throw new IllegalArgumentException("요청이 비어있습니다.");
         }
         return split[0];
+    }
+
+    private static void validateRequestFormat(String request) {
+        if (request == null || request.isBlank()) {
+            throw new IllegalArgumentException("요청이 비어있습니다.");
+        }
     }
 
     private static void validateRequestLineFormat(String[] requestLine) {

@@ -61,4 +61,9 @@ public class HttpRequest {
                         param -> param[1]
                 ));
     }
+
+    private String getQueryString() {
+        String requestUri = getRequestUri();
+        return requestUri.split(QUERY_STRING_SEPARATOR)[1];
+    }
 }

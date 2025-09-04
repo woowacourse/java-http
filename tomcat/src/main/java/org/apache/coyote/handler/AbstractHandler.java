@@ -1,11 +1,8 @@
 package org.apache.coyote.handler;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractHandler {
 
@@ -14,17 +11,12 @@ public abstract class AbstractHandler {
     public abstract String handle(final String requestTarget) throws IOException;
 
     protected String getStaticResponseBody(final String requestTarget) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
-        if (resource == null) {
-            return null;
+        try (final InputStream resource = getClass().getClassLoader().getResourceAsStream("static" + requestTarget)) {
+            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
         }
-        final Path path = Paths.get(resource.getPath());
-        final List<String> contents = Files.readAllLines(path);
-
-        return String.join("\r\n", contents);
     }
 
-    protected static String createResponse(
+    protected static String createOkResponse(
             final String responseBody,
             final String contentType
     ) {
@@ -34,5 +26,9 @@ public abstract class AbstractHandler {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    protected static String createNotFoundResponse() {
+        return "HTTP/1.1 404 NOT FOUND ";
     }
 }

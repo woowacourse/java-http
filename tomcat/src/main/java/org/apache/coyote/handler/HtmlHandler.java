@@ -10,12 +10,12 @@ public class HtmlHandler extends AbstractHandler {
     }
 
     @Override
-    public String handle(final String requestTarget) throws IOException {
-        final var responseBody = getStaticResponseBody(requestTarget);
+    public String handle(final String requestUri) throws IOException {
+        final var responseBody = getStaticResponseBody(requestUri);
         if (responseBody == null) {
-            return "HTTP/1.1 404 NOT FOUND ";
+            return createNotFoundResponse();
         }
 
-        return createResponse(responseBody, "text/html;charset=utf-8");
+        return createOkResponse(responseBody, "text/html;charset=utf-8");
     }
 }

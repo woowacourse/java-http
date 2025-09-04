@@ -10,12 +10,12 @@ public class JsHandler extends AbstractHandler {
     }
 
     @Override
-    public String handle(final String requestTarget) throws IOException {
-        final var responseBody = getStaticResponseBody(requestTarget);
+    public String handle(final String requestUri) throws IOException {
+        final var responseBody = getStaticResponseBody(requestUri);
         if (responseBody == null) {
-            return "HTTP/1.1 404 NOT FOUND ";
+            return createNotFoundResponse();
         }
 
-        return createResponse(responseBody, "text/javascript");
+        return createOkResponse(responseBody, "text/javascript");
     }
 }

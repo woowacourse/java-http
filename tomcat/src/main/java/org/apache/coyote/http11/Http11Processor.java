@@ -36,8 +36,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final List<String> request = getRequest(inputStream);
-            final String requestTarget = getRequestTarget(request);
-            final String response = getResponse(requestTarget);
+            final String requestUri = getRequestUri(request);
+            final String response = getResponse(requestUri);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,23 +53,24 @@ public class Http11Processor implements Runnable, Processor {
         while (!"".equals(line = bufferedReader.readLine())) {
             request.add(line);
         }
+
         return request;
     }
 
-    private String getRequestTarget(final List<String> request) {
+    private String getRequestUri(final List<String> request) {
         final String startLine = request.getFirst();
-        final String[] split = startLine.split(" ");
+        final String[] splitStartLine = startLine.split(" ");
 
-        return split[1];
+        return splitStartLine[1];
     }
 
-    public String getResponse(final String requestTarget) throws IOException {
+    public String getResponse(final String requestUri) throws IOException {
         final HandlerMapper handlerMapper = HandlerMapper.getInstance();
-        final AbstractHandler handler = handlerMapper.getHandler(requestTarget);
+        final AbstractHandler handler = handlerMapper.getHandler(requestUri);
         if (handler == null) {
             return "HTTP/1.1 404 NOT FOUND ";
         }
 
-        return handler.handle(requestTarget);
+        return handler.handle(requestUri);
     }
 }

@@ -47,16 +47,6 @@ public class Http11Processor implements Runnable, Processor {
                 printMemberInfo(queryParameters.get("account"), queryParameters.get("password"));
             }
 
-            final Map<String, String> requestHeaders = new HashMap<>();
-            String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                String[] parts = line.split(": ");
-                if(parts.length >= 2) {
-                    requestHeaders.put(parts[0], parts[1]);
-                }
-            }
-            String mimeType = requestHeaders.getOrDefault("Accept", "text/html").split(",")[0];
-
             var responseBody = "Hello world!";
             if (!requestPath.isBlank()) {
                 var resource = getClass().getClassLoader().getResource("static/" + requestPath);
@@ -67,6 +57,11 @@ public class Http11Processor implements Runnable, Processor {
                     var path = Paths.get(resource.toURI());
                     responseBody = Files.readString(path);
                 }
+            }
+
+            var mimeType = "text/html";
+            if (requestPath.endsWith(".css")) {
+                mimeType = "text/css";
             }
 
             final var response = String.join("\r\n",

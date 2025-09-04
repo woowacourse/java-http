@@ -104,21 +104,24 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(QueryParameters queryParams) {
-        Optional<User> user = Optional.empty();
         String account = queryParams.get("account");
         String password = queryParams.get("password");
+        User user = findUser(account, password);
+        log.info(user.toString());
+    }
+
+    private User findUser(String account, String password) {
         if (account == null || password == null) {
-            log.info("필수 정보가 누락되었습니다.");
-        } else {
-            user = InMemoryUserRepository.findByAccount(account);
+            throw new IllegalArgumentException("필수 정보가 누락되었습니다.");
         }
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            log.info("존재하지 않는 사용자입니다.");
-        } else if (!user.get().checkPassword(password)) {
-            log.info("비밀번호가 틀렸습니다.");
-        } else {
-            log.info(user.toString());
+            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
+        if (!user.get().checkPassword(password)) {
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        }
+        return user.get();
     }
 
     private QueryParameters parseParameters(String url) {

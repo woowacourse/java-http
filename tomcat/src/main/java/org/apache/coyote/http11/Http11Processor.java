@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,6 +22,11 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<String, String> CONTENT_TYPE_MAP = Map.of(
+            ".html", "text/html",
+            ".css", "text/css",
+            ".js", "application/javascript"
+    );
 
     private final Socket connection;
 
@@ -62,70 +69,46 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private String createResponse(final String httpRequestMessage) throws IOException {
-        if (httpRequestMessage.startsWith("GET /index.html HTTP/1.1")) {
-            final var resource = getClass().getClassLoader().getResource("static/index.html");
+    private String createResponse(final String requestMessage) throws IOException {
+        final var requestLine = requestMessage.substring(0, requestMessage.indexOf("HTTP/1.1") - 1);
+        final var uri = requestLine.split(" ")[1];
 
-            final var body = Files.readString(Path.of(resource.getPath()));
-            final var header = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " "
-            );
-            return header + "\r\n\r\n" + body;
-        }
+        System.out.println("uri = " + uri);
+        final var body = createResponseBody(uri);
+        System.out.println("body = " + body);
+        final var header = createResponseHeader(uri, body);
+        return header + "\r\n\r\n" + body;
+    }
 
-        if (httpRequestMessage.startsWith("GET /css/styles.css HTTP/1.1")) {
-            final var resource = getClass().getClassLoader().getResource("static/css/styles.css");
+    private String createResponseBody(final String uri) throws IOException {
+        if (uri.startsWith("/login")) {
+            final var loginHtml = getClass().getClassLoader().getResource("static/login.html");
 
-            final var body = Files.readString(Path.of(resource.getPath()));
-            final var header = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " "
-            );
-            return header + "\r\n\r\n" + body;
-        }
-
-        final var indexOfHttpVersion = httpRequestMessage.indexOf("HTTP/1.1");
-        final var resourcePath = httpRequestMessage.substring(4, indexOfHttpVersion - 1);
-        if (resourcePath.endsWith(".js")) {
-            final var resource = getClass().getClassLoader().getResource("static/" + resourcePath);
-
-            final var body = Files.readString(Path.of(resource.getPath()));
-            final var header = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: application/javascript;charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " "
-            );
-            return header + "\r\n\r\n" + body;
-        }
-
-        if (resourcePath.startsWith("/login")) {
-            final var resource = getClass().getClassLoader().getResource("static/login.html");
-
-            if (resourcePath.charAt(6) == '?') {
-                final var queryParams = extractQueryParams(resourcePath);
-                if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-                    tryLogin(queryParams);
-                }
+            final var queryParams = extractQueryParams(uri);
+            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
+                tryLogin(queryParams);
             }
-            final var body = Files.readString(Path.of(resource.getPath()));
-            final var header = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " "
-            );
-            return header + "\r\n\r\n" + body;
+
+            return Files.readString(Path.of(loginHtml.getPath()));
         }
 
-        final var body = "Hello world!";
-        final var header = String.join("\r\n",
+        final var resource = getClass().getClassLoader().getResource("static" + uri);
+        final var file = new File(resource.getFile());
+        if (file.exists() && !file.isDirectory()) {
+            return Files.readString(file.toPath());
+        }
+
+        return "Hello world!";
+    }
+
+    private String createResponseHeader(final String uri, final String body) {
+        final var extension = uri.lastIndexOf('.') == -1 ? "" : uri.substring(uri.lastIndexOf('.'));
+        final var contentType = CONTENT_TYPE_MAP.getOrDefault(extension, "text/html");
+        return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + body.getBytes().length + " "
         );
-        return header + "\r\n\r\n" + body;
     }
 
     private void tryLogin(final Map<String, String> queryParams) {
@@ -136,8 +119,12 @@ public class Http11Processor implements Runnable, Processor {
                 .ifPresent(u -> log.info("user : {}", u));
     }
 
-    private Map<String, String> extractQueryParams(final String resourcePath) {
-        final var queryParams = resourcePath.substring(7);
+    private Map<String, String> extractQueryParams(final String uri) {
+        if (!uri.contains("?")) {
+            return Collections.emptyMap();
+        }
+
+        final var queryParams = uri.substring(uri.indexOf("?") + 1);
         return Arrays.stream(queryParams.split("&"))
                 .map(param -> param.split("="))
                 .filter(param -> param.length == 2)

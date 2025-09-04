@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.toMap;
+
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +11,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +101,24 @@ public class Http11Processor implements Runnable, Processor {
             return header + "\r\n\r\n" + body;
         }
 
+        if (resourcePath.startsWith("/login")) {
+            final var resource = getClass().getClassLoader().getResource("static/login.html");
+
+            if (resourcePath.charAt(6) == '?') {
+                final var queryParams = extractQueryParams(resourcePath);
+                if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
+                    tryLogin(queryParams);
+                }
+            }
+            final var body = Files.readString(Path.of(resource.getPath()));
+            final var header = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " "
+            );
+            return header + "\r\n\r\n" + body;
+        }
+
         final var body = "Hello world!";
         final var header = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -103,5 +126,24 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + body.getBytes().length + " "
         );
         return header + "\r\n\r\n" + body;
+    }
+
+    private void tryLogin(final Map<String, String> queryParams) {
+        final var account = queryParams.get("account");
+        final var password = queryParams.get("password");
+        InMemoryUserRepository.findByAccount(account)
+                .filter(u -> u.checkPassword(password))
+                .ifPresent(u -> log.info("user : {}", u));
+    }
+
+    private Map<String, String> extractQueryParams(final String resourcePath) {
+        final var queryParams = resourcePath.substring(7);
+        return Arrays.stream(queryParams.split("&"))
+                .map(param -> param.split("="))
+                .filter(param -> param.length == 2)
+                .collect(toMap(
+                        param -> param[0],
+                        param -> param[1])
+                );
     }
 }

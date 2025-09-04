@@ -11,5 +11,6 @@ public class HelloWorldHandler extends AbstractHandler {
     public String handle(final String requestTarget) {
         final var responseBody = "Hello world!";
 
-        return createResponse(responseBody, "text/html;charset=utf-8");    }
+        return createResponse(responseBody, "text/html;charset=utf-8");
+    }
 }

@@ -18,13 +18,14 @@ public class LoginHandler extends AbstractHandler {
     public String handle(final String requestTarget) throws IOException {
         final String[] split = requestTarget.split("\\?");
         final String resource = split[0];
-        final String queryString = split[1];
-        final Map<String, String> params = getParams(queryString);
-
+        if (split.length > 1) {
+            final String queryString = split[1];
+            final Map<String, String> params = getParams(queryString);
+            final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+            user.ifPresent(value -> System.out.println("user: " + value));
+        }
         final String responseBody = getStaticResponseBody(resource + ".html");
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
-        user.ifPresent(value -> System.out.println("user: " + value));
 
         return createResponse(responseBody, "text/html;charset=utf-8");
     }

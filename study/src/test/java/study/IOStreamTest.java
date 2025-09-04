@@ -70,10 +70,10 @@ class IOStreamTest {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();

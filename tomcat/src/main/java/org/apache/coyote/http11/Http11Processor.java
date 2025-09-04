@@ -4,11 +4,8 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +34,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = getResponseBody(inputStream);
+            final var fileName = getFileName(inputStream);
+            final var responseBody = getResponseBody(fileName);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + getContentType(fileName) + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -53,29 +51,48 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(final InputStream inputStream) {
+    private String getFileName(final InputStream inputStream) {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         try {
             final var line = bufferedReader.readLine();
-
             final var chunks = line.split(" ");
-            final var fileName = chunks[1];
 
-            if(fileName.equals("/")) {
-                return "Hello world!";
-            }
+            return chunks[1];
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            final var resource = ClassLoader.getSystemResource("static" + fileName);
-            if(resource == null) {
-                return "Not found: " + fileName;
-            }
+    private String getResponseBody(final String fileName) {
+        if (fileName.equals("/")) {
+            return "Hello world!";
+        }
+        final var resource = ClassLoader.getSystemResource("static" + fileName);
 
+        if (resource == null) {
+            return "Not found: " + fileName;
+        }
+        try {
             final var path = Paths.get(resource.getPath());
 
             return Files.readString(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getContentType(final String fileName) {
+        if (fileName.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (fileName.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (fileName.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+        // 이외의 MIME 타입 저장 가능
+        return "text/html;charset=utf-8";
     }
 }

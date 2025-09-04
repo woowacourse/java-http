@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -67,42 +68,60 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponse(RequestData requestData) {
         try {
+            if (isRootPath(requestData)) {
+                byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                return buildSuccessResponse(requestData.getHttpVersion(), HttpContentType.HTML, body);
+            }
             final String staticFilePath = getStaticFilePath(requestData);
-            final var responseBody = readFile(staticFilePath);
-            return String.join("\r\n",
-                    requestData.getHttpVersion().getResponseHeader() + " " + HttpStatus.OK.getResponseLabel(),
-                    HttpContentType.getByFileName(staticFilePath).getResponseHeader(),
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final byte[] body = readFile(staticFilePath);
+            final var contentType = HttpContentType.getByFileName(staticFilePath);
+            return buildSuccessResponse(requestData.getHttpVersion(), contentType, body);
         } catch (UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
         throw new IllegalArgumentException("응답 생성 중에 오류가 발생했습니다.");
     }
 
+    private boolean isRootPath(RequestData requestData) {
+        return requestData.getResource() == null
+                || requestData.getResource().isBlank()
+                || requestData.getResource().equals("/");
+    }
+
+    private String buildSuccessResponse(HttpVersion httpVersion, HttpContentType contentType, byte[] body) {
+        return buildResponse(httpVersion, HttpStatus.OK, contentType, body);
+    }
+
+    private String buildResponse(HttpVersion httpVersion, HttpStatus httpStatus, HttpContentType contentType,
+                                 byte[] body) {
+        final var headers = String.join("\r\n",
+                httpVersion.getResponseHeader() + " " + httpStatus.getResponseLabel() + " ",
+                contentType.getResponseHeader() + " ",
+                "Content-Length: " + body.length + " ",
+                "");
+        final var bodyString = new String(body, StandardCharsets.UTF_8);
+        return headers + "\r\n" + bodyString;
+    }
+
     private String getStaticFilePath(RequestData requestData) {
         String resource = requestData.getResource();
         String staticFilePath = "static" + resource;
-        if (resource.isBlank() || resource.equals("/")) {
-            staticFilePath = "static/index.html";
-        }
         if (requestData.getHttpContentType() == HttpContentType.HTML && !staticFilePath.endsWith(".html")) {
             staticFilePath += ".html";
         }
         return staticFilePath;
     }
 
-    private String readFile(String staticFilePath) {
+    private byte[] readFile(String staticFilePath) {
         try {
             final URL resourceUrl = getClass().getClassLoader().getResource(staticFilePath);
             if (resourceUrl == null) {
                 throw new IllegalArgumentException("존재하지 않는 리소스입니다.: " + staticFilePath);
             }
             String path = resourceUrl.getPath();
-            return Files.readString(Path.of(path));
+            return Files.readString(Path.of(path)).getBytes(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("파일을 불러오는데 실패했습니다. : {}", e);
+            log.error("파일을 불러오는데 실패했습니다. : {}", e.getMessage(),e);
         }
         throw new IllegalArgumentException("파일을 불러오는데 실패했습니다.: " + staticFilePath);
     }

@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
+//    implementation 'org.reflections:reflections:0.10.2'
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
-    implementation 'org.reflections:reflections:0.10.2'
     implementation 'ch.qos.logback:logback-classic:1.5.18'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 

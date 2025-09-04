@@ -2,9 +2,8 @@ package org.apache.coyote.http11;
 
 import com.java.http.HttpRequest;
 import com.java.http.HttpResponse;
-import com.java.servlet.Servlet;
-import com.java.servlet.Servlets;
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.container.Container;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Container container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, Container container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -34,8 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = HttpRequest.from(inputStream);
-            Servlet servlet = Servlets.findServletFor(request);
-            HttpResponse response = servlet.handle(request);
+            HttpResponse response = container.service(request);
 
             outputStream.write(response.toByteArray());
             outputStream.flush();

@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.container.Container;
+import org.apache.catalina.container.SimpleContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
+    private static final Container CONTAINER = new SimpleContainer();
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
@@ -66,7 +69,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, CONTAINER);
         new Thread(processor).start();
     }
 

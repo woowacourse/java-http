@@ -27,7 +27,7 @@ class FileStepByStepTest {
      */
     @Test
     void step0_테스트_실행_환경_이해하기() {
-        // todo: 현재 작업 디렉토리를 확인해보자
+        // 현재 작업 디렉토리를 확인해보자
         String currentDir = System.getProperty("user.dir");
         assertThat(currentDir).endsWith("study");
     }
@@ -39,7 +39,7 @@ class FileStepByStepTest {
      */
     @Test
     void step1_File_객체_생성과_기본정보_확인() {
-        // todo: 현재 작업 디렉토리를 기준으로 올바른 상대 경로를 사용해보자
+        // 현재 작업 디렉토리를 기준으로 올바른 상대 경로를 사용해보자
         String currentDir = System.getProperty("user.dir");
         System.out.println("currentDir: " + currentDir);
         assertThat(currentDir).endsWith("study");
@@ -52,12 +52,12 @@ class FileStepByStepTest {
         File file2 = new File("../../resources/nextstep.txt");
         assertThat(file2.exists()).isFalse();
 
-        // todo: 파일의 크기를 확인해보자
+        // 파일의 크기를 확인해보자
         long size = file1.length();
         System.out.println("size: " + size);
         assertThat(size).isGreaterThan(0);
 
-        // todo: 절대 경로도 확인해보자
+        // 절대 경로도 확인해보자
         String absolutePath = file1.getAbsolutePath();
         System.out.println("absolutePath: " + absolutePath);
         assertThat(absolutePath).contains("nextstep.txt");
@@ -70,18 +70,18 @@ class FileStepByStepTest {
      */
     @Test
     void step2_Path_객체_사용하기() {
-        // todo: Paths.get()을 사용해서 Path 객체를 생성해보자
+        // Paths.get()을 사용해서 Path 객체를 생성해보자
         Path path = Paths.get("src/test/resources/nextstep.txt");
 
-        // todo: Path의 파일명을 가져와보자
+        // Path의 파일명을 가져와보자
         String fileName = path.getFileName().toString();
         assertThat(fileName).isEqualTo("nextstep.txt");
 
-        // todo: Path의 부모 디렉토리를 가져와보자
+        // Path의 부모 디렉토리를 가져와보자
         Path parent = path.getParent();
         assertThat(parent.getFileName().toString()).isEqualTo("resources");
 
-        // todo: 절대 경로로 변환해보자
+        // 절대 경로로 변환해보자
         Path absolutePath = path.toAbsolutePath();
         assertThat(absolutePath).isAbsolute();
     }
@@ -93,16 +93,16 @@ class FileStepByStepTest {
      */
     @Test
     void step3_클래스패스에서_리소스_찾기() {
-        // todo: ClassLoader를 사용해서 리소스를 찾아보자
+        // ClassLoader를 사용해서 리소스를 찾아보자
         ClassLoader classLoader = getClass().getClassLoader();
         URL resourceUrl = classLoader.getResource("nextstep.txt");
         assertThat(resourceUrl).isNotNull();
 
-        // todo: 리소스 URL에서 파일 경로를 가져와보자
+        // 리소스 URL에서 파일 경로를 가져와보자
         String filePath = resourceUrl.getFile();
         assertThat(filePath).contains("nextstep.txt");
 
-        // todo: URL을 Path 객체로 변환해보자
+        // URL을 Path 객체로 변환해보자
         Path path = Paths.get(filePath);
         assertThat(Files.exists(path)).isTrue();
     }
@@ -114,14 +114,14 @@ class FileStepByStepTest {
      */
     @Test
     void step4_Files_readAllLines_사용하기() throws IOException {
-        // todo: 방법 1: 상대 경로로 Path 객체를 생성해보자
+        // 방법 1: 상대 경로로 Path 객체를 생성해보자
         Path relativePath = Paths.get("src/test/resources/nextstep.txt");
 
-        // todo: 방법 2: ClassLoader로 리소스를 찾아서 Path 생성
+        // 방법 2: ClassLoader로 리소스를 찾아서 Path 생성
         URL resourceUrl = getClass().getClassLoader().getResource("nextstep.txt");
         Path resourcePath = Paths.get(resourceUrl.getFile());
 
-        // todo: 두 방법 모두로 파일 내용을 읽어보자
+        // 두 방법 모두로 파일 내용을 읽어보자
         List<String> relativeLines = Files.readAllLines(relativePath);
         List<String> resourceLines = Files.readAllLines(resourcePath);
 
@@ -138,10 +138,10 @@ class FileStepByStepTest {
      */
     @Test
     void step5_Files_readString_사용하기() throws IOException {
-        // todo: Path 객체를 생성해보자
+        // Path 객체를 생성해보자
         Path path = Paths.get("src/test/resources/nextstep.txt");
 
-        // todo: Files.readString()을 사용해서 파일 내용을 읽어보자
+        // Files.readString()을 사용해서 파일 내용을 읽어보자
         String content = Files.readString(path);
 
         assertThat(content).contains("nextstep");
@@ -155,15 +155,15 @@ class FileStepByStepTest {
      */
     @Test
     void step6_파일_존재여부와_읽기권한_확인() {
-        // todo: 상대 경로로 Path 객체를 생성해보자
+        // 상대 경로로 Path 객체를 생성해보자
         Path relativePath = Paths.get("src/test/resources/nextstep.txt");
 
-        // todo: ClassLoader로 리소스를 찾아서 Path 생성
+        // ClassLoader로 리소스를 찾아서 Path 생성
         URL resourceUrl = getClass().getClassLoader().getResource("nextstep.txt");
         String file = resourceUrl.getFile();
         Path resourcePath = Paths.get(file);
 
-        // todo: 두 방법 모두로 파일 존재 여부와 권한을 확인해보자
+        // 두 방법 모두로 파일 존재 여부와 권한을 확인해보자
         assertThat(Files.exists(relativePath)).isTrue();
         assertThat(Files.isReadable(relativePath)).isTrue();
         assertThat(Files.exists(resourcePath)).isTrue();
@@ -177,7 +177,7 @@ class FileStepByStepTest {
      */
     @Test
     void step7_예외_처리하기() {
-        // todo: try-catch를 사용해서 예외 처리를 해보자
+        // try-catch를 사용해서 예외 처리를 해보자
         boolean exceptionHandled = false;
         try {
             Path path = Paths.get("존재하지_않는_파일.txt");
@@ -186,7 +186,7 @@ class FileStepByStepTest {
             exceptionHandled = true;
         }
 
-        // todo: 존재하지 않는 파일에 대한 안전한 접근을 해보자
+        // 존재하지 않는 파일에 대한 안전한 접근을 해보자
         Path nonExistentPath = Paths.get("존재하지_않는_파일.txt");
         boolean safeExists = Files.exists(nonExistentPath);
 
@@ -202,13 +202,13 @@ class FileStepByStepTest {
      */
     @Test
     void step8_디렉토리_내용_확인하기() throws IOException {
-        // todo: 현재 작업 디렉토리의 Path를 가져와보자
+        // 현재 작업 디렉토리의 Path를 가져와보자
         Path currentDir = Paths.get(".");
 
-        // todo: src/test/resources 디렉토리의 Path를 가져와보자
+        // src/test/resources 디렉토리의 Path를 가져와보자
         Path resourcesDir = Paths.get("src/test/resources");
 
-        // todo: 두 디렉토리 내의 파일들을 확인해보자
+        // 두 디렉토리 내의 파일들을 확인해보자
         List<Path> currentFiles = Files.list(currentDir).toList();
         List<Path> resourceFiles = Files.list(resourcesDir).toList();
 
@@ -225,10 +225,10 @@ class FileStepByStepTest {
      */
     @Test
     void step9_파일_메타데이터_확인하기() throws IOException {
-        // todo: 상대 경로로 Path 객체를 생성해보자
+        // 상대 경로로 Path 객체를 생성해보자
         Path path = Paths.get("src/test/resources/nextstep.txt");
 
-        // todo: 파일의 기본 속성들을 확인해보자
+        // 파일의 기본 속성들을 확인해보자
         BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
         FileTime creationTime = attrs.creationTime();
         FileTime lastModifiedTime = attrs.lastModifiedTime();

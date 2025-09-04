@@ -16,8 +16,11 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, String> mimeTypes = Map.of("html", "text/html", "css", "text/css", "js",
-            "text/javascript");
+    private static final Map<String, String> MIME_TYPES = Map.of(
+            "html", "text/html",
+            "css", "text/css",
+            "js", "text/javascript"
+    );
 
     private final Socket connection;
 
@@ -95,6 +98,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getMimeType(final URL resource) throws IOException {
         final String responseResourceExtension = resource.getPath().split("\\.")[1];
-        return mimeTypes.get(responseResourceExtension);
+        return MIME_TYPES.get(responseResourceExtension);
     }
 }

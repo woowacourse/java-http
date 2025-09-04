@@ -9,6 +9,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] bytes;
             String requestUri = line.split(" ")[1];
+            Map<String, String> queryParams = new HashMap<>();
             if (requestUri.contains("?")) {
                 if (requestUri.contains("/login")) {
                     String queryString = requestUri.substring(requestUri.indexOf("?") + 1);
@@ -52,10 +55,12 @@ public class Http11Processor implements Runnable, Processor {
                      * split[3] = password value
                      */
                     String[] split = queryString.split("[=&]");
+                    queryParams.put(split[0], split[1]);
+                    queryParams.put(split[2], split[3]);
                     try {
-                        final User user = InMemoryUserRepository.findByAccount(split[1])
+                        final User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                                 .orElseThrow(() -> new IllegalArgumentException("이런 유저는 없답니다."));
-                        if (user.checkPassword(split[3])) {
+                        if (user.checkPassword(queryParams.get("password"))) {
                             log.info(user.toString());
                         }
                     } catch (IllegalArgumentException e) {

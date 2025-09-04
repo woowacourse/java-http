@@ -37,4 +37,16 @@ public class HttpController {
 
         return HttpResponse.ok("login.html");
     }
+
+    public HttpResponse getChartArea() {
+        return HttpResponse.ok("assets/chart-area.js");
+    }
+
+    public HttpResponse getChartBar() {
+        return HttpResponse.ok("assets/chart-bar.js");
+    }
+
+    public HttpResponse getChartPie() {
+        return HttpResponse.ok("assets/chart-pie.js");
+    }
 }

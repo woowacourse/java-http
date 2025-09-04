@@ -62,6 +62,15 @@ public class Http11Processor implements Runnable, Processor {
         if (method == HttpMethod.GET && path.equals("/js/scripts.js")) {
             return getJsScripts();
         }
+        if (method == HttpMethod.GET && path.equals("/assets/chart-area.js")) {
+            return getChartArea();
+        }
+        if (method == HttpMethod.GET && path.equals("/assets/chart-bar.js")) {
+            return getChartBar();
+        }
+        if (method == HttpMethod.GET && path.equals("/assets/chart-pie.js")) {
+            return getChartPie();
+        }
         if (method == HttpMethod.GET && path.equals("/login")) {
             return getLoginHtml(httpRequest);
         }
@@ -78,6 +87,21 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getJsScripts() {
         final HttpResponse httpResponse = httpController.getScripts();
+        return httpResponse.getResponseFormat();
+    }
+
+    private String getChartBar() {
+        final HttpResponse httpResponse = httpController.getChartBar();
+        return httpResponse.getResponseFormat();
+    }
+
+    private String getChartPie() {
+        final HttpResponse httpResponse = httpController.getChartPie();
+        return httpResponse.getResponseFormat();
+    }
+
+    private String getChartArea() {
+        final HttpResponse httpResponse = httpController.getChartArea();
         return httpResponse.getResponseFormat();
     }
 

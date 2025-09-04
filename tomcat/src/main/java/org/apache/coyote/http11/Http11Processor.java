@@ -100,10 +100,51 @@ public class Http11Processor implements Runnable, Processor {
             if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/index.html")) {
                 getIndexHtml(outputStream);
             }
+            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/css/styles.css")) {
+                getCssStyles(outputStream);
+            }
+            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/js/scripts.js")) {
+                getJsScripts(outputStream);
+            }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
+
+    private void getJsScripts(final OutputStream outputStream) throws URISyntaxException, IOException {
+        Path path = Paths.get(getClass().getClassLoader().getResource("static/js/scripts.js").toURI());
+
+        final byte[] bytes = Files.readAllBytes(path);
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/js;charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                new String(bytes)
+        );
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void getCssStyles(final OutputStream outputStream) throws URISyntaxException, IOException {
+        Path path = Paths.get(getClass().getClassLoader().getResource("static/css/styles.css").toURI());
+
+        final byte[] bytes = Files.readAllBytes(path);
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                new String(bytes)
+        );
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
     private void getIndexHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
         Path path = Paths.get(getClass().getClassLoader().getResource("static/index.html").toURI());
 

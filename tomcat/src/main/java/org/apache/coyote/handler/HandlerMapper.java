@@ -5,16 +5,13 @@ import java.util.List;
 
 public class HandlerMapper {
 
-    private static HandlerMapper INSTANCE;
-
+    private static class HandlerMapperHolder {
+        private static final HandlerMapper INSTANCE = new HandlerMapper();
+    }
     private final List<AbstractHandler> handlers = new ArrayList<>();
 
     public static HandlerMapper getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new HandlerMapper();
-        }
-
-        return INSTANCE;
+        return HandlerMapperHolder.INSTANCE;
     }
 
     private HandlerMapper() {

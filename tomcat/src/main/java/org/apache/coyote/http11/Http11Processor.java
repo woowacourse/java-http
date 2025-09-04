@@ -2,9 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -37,12 +39,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = new HttpRequest();
-            String request = new String(inputStream.readAllBytes());
-
-            httpRequest.parseHttpRequest(request);
+            final HttpRequest httpRequest = new HttpRequest(reader);
+            httpRequest.parseHttpRequest();
             final String requestPath = httpRequest.getRequestPath();
 
             String responseBody = "Hello world!";

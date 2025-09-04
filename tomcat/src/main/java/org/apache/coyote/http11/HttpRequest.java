@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,13 +17,14 @@ public class HttpRequest {
 
     private String requestLine;
     private final Map<String, String> requestHeaders;
+    private final BufferedReader reader;
 
-    public HttpRequest() {
+    public HttpRequest(final BufferedReader reader) {
         this.requestHeaders = new HashMap<>();
+        this.reader = reader;
     }
 
-    public void parseHttpRequest(String request) throws IOException {
-        final BufferedReader reader = new BufferedReader(new StringReader(request));
+    public void parseHttpRequest() throws IOException {
         requestLine = reader.readLine();
 
         while (reader.ready()) {

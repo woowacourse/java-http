@@ -123,10 +123,11 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
-             * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+
+            byte[] buffer = inputStream.readAllBytes();
+            final String actual = new String(buffer, "UTF-8");
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);

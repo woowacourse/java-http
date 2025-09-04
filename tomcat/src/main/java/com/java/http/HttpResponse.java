@@ -1,11 +1,9 @@
 package com.java.http;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,12 +21,18 @@ public record HttpResponse(
     }
 
     public static HttpResponse notFound(String message) {
-        return new HttpResponseBuilder(404).json(Map.of("error_message", message)).build();
+        return new HttpResponseBuilder(404).plain(message).build();
+    }
+
+    public static HttpResponse internalServerError(Exception exception) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        exception.printStackTrace(printWriter);
+        String stackTrace = stringWriter.toString();
+        return new HttpResponseBuilder(500).plain(stackTrace).build();
     }
 
     public static class HttpResponseBuilder {
-
-        private static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
         private final String version = "HTTP/1.1";
         private final StatusCode statusCode;
@@ -40,17 +44,10 @@ public record HttpResponse(
             this.statusCode = StatusCode.parse(statusCode);
         }
 
-        public HttpResponseBuilder json(Map<String, String> map) {
-            byte[] data;
-            try {
-                data = OBJECT_WRITER.writeValueAsBytes(map);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("JSON 직렬화 중 예외가 발생했습니다.", e);
-            }
-
-            this.headers.put("Content-Type", "application/json;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.length));
-            this.responseBody = data;
+        public HttpResponseBuilder plain(String data) {
+            this.headers.put("Content-Type", "text/plain;charset=utf-8");
+            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
+            this.responseBody = data.getBytes(StandardCharsets.UTF_8);
             return this;
         }
 

@@ -13,7 +13,7 @@ public class StaticResourceProvider {
     private static final Logger log = LoggerFactory.getLogger(StaticResourceProvider.class);
 
     private static final Map<String, String> MIME_TYPES = Map.of(
-            "html", "text/html",
+            "html", "text/html;charset=utf-8",
             "css", "text/css",
             "js", "application/javascript",
             "png", "image/png",
@@ -41,8 +41,8 @@ public class StaticResourceProvider {
         int dotIndex = path.lastIndexOf('.');
         if (dotIndex != -1 && dotIndex < path.length() - 1) {
             String extension = path.substring(dotIndex + 1);
-            return MIME_TYPES.getOrDefault(extension, "text/html");
+            return MIME_TYPES.getOrDefault(extension, "text/html;charset=utf-8");
         }
-        return "text/html";
+        return "text/html;charset=utf-8";
     }
 }

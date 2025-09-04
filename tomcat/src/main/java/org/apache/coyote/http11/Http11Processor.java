@@ -122,14 +122,14 @@ public class Http11Processor implements Runnable, Processor {
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if(optionalUser.isEmpty()){
-            outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
+            outputStream.write("HTTP/1.1 401 UNAUTHORIZED \r\n\r\n".getBytes());
             outputStream.flush();
             return;
         }
 
         User user = optionalUser.get();
         if(!user.checkPassword(password)){
-            outputStream.write("HTTP/1.1 401 UNAUTHORIZED ".getBytes());
+            outputStream.write("HTTP/1.1 401 UNAUTHORIZED \r\n\r\n".getBytes());
             outputStream.flush();
             return;
         }

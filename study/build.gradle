@@ -26,8 +26,24 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core:3.27.3'
     testImplementation 'org.mockito:mockito-core:5.18.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
+
+    /**
+     * Caused by: org.junit.platform.commons.JUnitException: The wrapped NoSuchMethodError is likely caused by the versions of JUnit jars on the classpath/module path not being properly aligned.
+     * Please ensure consistent versions are used (see https://junit.org/junit5/docs/5.12.
+     * 2/user-guide/#dependency-metadata).
+     * The following conflicting versions were detected:
+     * - org.junit.jupiter.api: 5.13.3
+     * - org.junit.jupiter.engine: 5.13.3
+     * - org.junit.platform.commons: 1.12.2
+     * - org.junit.platform.engine: 1.12.2
+     * - org.junit.platform.launcher: 1.12.2
+     *
+     * JUnit 모듈(platform, vintage, jupiter)의 버전 불일치 때문에 위 에러 발생.
+     * -> JUnit bom을 사용해 하위 모듈의 버전을 일관되게 맞춘다.
+     */
+    testImplementation(platform("org.junit:junit-bom:5.13.3"))
+//    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
+//    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
 }
 
 test {

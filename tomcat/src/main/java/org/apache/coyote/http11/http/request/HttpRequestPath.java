@@ -7,15 +7,14 @@ public class HttpRequestPath {
     private final String path;
     private final HttpQueryParameter queryParameter;
 
-    public static HttpRequestPath from(final String path) {
-        validateNull(path);
-        return new HttpRequestPath(path);
-    }
-
-
     private HttpRequestPath(final String path) {
         this.path = removeQueryParameterLine(path);
         this.queryParameter = HttpQueryParameter.from(path);
+    }
+
+    public static HttpRequestPath from(final String path) {
+        validateNull(path);
+        return new HttpRequestPath(path);
     }
 
     private static void validateNull(final String path) {

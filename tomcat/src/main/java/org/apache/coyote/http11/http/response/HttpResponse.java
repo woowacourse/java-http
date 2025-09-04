@@ -16,6 +16,13 @@ public class HttpResponse {
     private final HttpHeader header;
     private final HttpResponseBody responseBody;
 
+    private HttpResponse(final HttpVersion version, final HttpStatus status, final HttpResponseBody responseBody,
+                         final String returnValue) {
+        this.responseLine = HttpResponseLine.of(version, status);
+        this.responseBody = responseBody;
+        this.header = createHeader(responseBody, returnValue);
+    }
+
     public static HttpResponse ok() {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, HttpResponseBody.emptyBody(), "");
     }
@@ -23,13 +30,6 @@ public class HttpResponse {
     public static HttpResponse ok(final String returnValue) {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, HttpResponseBody.withString(returnValue),
                 returnValue);
-    }
-
-    private HttpResponse(final HttpVersion version, final HttpStatus status, final HttpResponseBody responseBody,
-                         final String returnValue) {
-        this.responseLine = HttpResponseLine.of(version, status);
-        this.responseBody = responseBody;
-        this.header = createHeader(responseBody, returnValue);
     }
 
     private HttpHeader createHeader(final HttpResponseBody responseBody, final String returnValue) {
@@ -50,12 +50,12 @@ public class HttpResponse {
     }
 
     public String getResponseFormat() {
-        List<String> responseLines = getResponseLines();
+        final List<String> responseLines = getResponseLines();
         return String.join("\r\n", responseLines.toArray(String[]::new));
     }
 
     private List<String> getResponseLines() {
-        List<String> formatLine = new ArrayList<>();
+        final List<String> formatLine = new ArrayList<>();
         formatLine.add(responseLine.getFormat());
         formatLine.addAll(header.getFormat());
 

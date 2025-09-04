@@ -13,6 +13,14 @@ public class HttpHeader {
 
     private final Map<String, String> httpHeaderInfo;
 
+    private HttpHeader(final BufferedReader bufferedReader) throws IOException {
+        this.httpHeaderInfo = createHeaderInfo(bufferedReader);
+    }
+
+    private HttpHeader(final Map<String, String> httpHeaderInfo) {
+        this.httpHeaderInfo = httpHeaderInfo;
+    }
+
     public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
         validateNull(bufferedReader);
         return new HttpHeader(bufferedReader);
@@ -35,12 +43,12 @@ public class HttpHeader {
         }
     }
 
-    private HttpHeader(final BufferedReader bufferedReader) throws IOException {
-        this.httpHeaderInfo = createHeaderInfo(bufferedReader);
-    }
-
-    private HttpHeader(final Map<String, String> httpHeaderInfo) {
-        this.httpHeaderInfo = httpHeaderInfo;
+    private static void validateSplitFormat(final String requestPayload, final int headerSplitIndex) {
+        if (headerSplitIndex == -1 || headerSplitIndex == requestPayload.length() - 1) {
+            throw new IllegalArgumentException(
+                    "유효하지 읺은 header 형식입니다: requestPayload=%s, headerSplitIndex=%d".formatted(requestPayload,
+                            headerSplitIndex));
+        }
     }
 
     private Map<String, String> createHeaderInfo(final BufferedReader bufferedReader) throws IOException {
@@ -61,7 +69,7 @@ public class HttpHeader {
     }
 
     private Map<String, String> parseHeaderLines(final List<String> httpHeaderLines) {
-        Map<String, String> httpHeaderInfo = new HashMap<>();
+        final Map<String, String> httpHeaderInfo = new HashMap<>();
         for (String requestPayload : httpHeaderLines) {
             int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
             validateSplitFormat(requestPayload, headerSplitIndex);
@@ -73,14 +81,6 @@ public class HttpHeader {
             httpHeaderInfo.put(headerKey, headerValue);
         }
         return httpHeaderInfo;
-    }
-
-    private static void validateSplitFormat(final String requestPayload, final int headerSplitIndex) {
-        if (headerSplitIndex == -1 || headerSplitIndex == requestPayload.length() - 1) {
-            throw new IllegalArgumentException(
-                    "유효하지 읺은 header 형식입니다: requestPayload=%s, headerSplitIndex=%d".formatted(requestPayload,
-                            headerSplitIndex));
-        }
     }
 
     private void validateHeaderFormat(final String headerKey, final String headerValue) {

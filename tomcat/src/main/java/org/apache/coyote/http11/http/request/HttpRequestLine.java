@@ -16,18 +16,24 @@ public class HttpRequestLine {
     private final HttpRequestPath path;
     private final HttpVersion version;
 
+    private HttpRequestLine(final BufferedReader bufferedReader) throws IOException {
+        final String httpRequestLine = bufferedReader.readLine();
+        final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
+        validateFormat(httpRequestElements);
+        this.method = HttpMethod.findMethod(clean(httpRequestElements[0]));
+        this.path = HttpRequestPath.from(clean(httpRequestElements[1]));
+        this.version = HttpVersion.find(clean(httpRequestElements[2]));
+    }
+
     public static HttpRequestLine from(final BufferedReader bufferedReader) throws IOException {
         validateNull(bufferedReader);
         return new HttpRequestLine(bufferedReader);
     }
 
-    private HttpRequestLine(final BufferedReader bufferedReader) throws IOException {
-        String httpRequestLine = bufferedReader.readLine();
-        String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
-        validateFormat(httpRequestElements);
-        this.method = HttpMethod.findMethod(clean(httpRequestElements[0]));
-        this.path = HttpRequestPath.from(clean(httpRequestElements[1]));
-        this.version = HttpVersion.find(clean(httpRequestElements[2]));
+    private static void validateNull(final BufferedReader bufferedReader) {
+        if (bufferedReader == null) {
+            throw new IllegalArgumentException("bufferedReader는 null일 수 없습니다.");
+        }
     }
 
     private void validateFormat(final String[] httpRequestElements) {
@@ -38,12 +44,6 @@ public class HttpRequestLine {
             log.warn("invalid http request elements length {}", httpRequestElements.length);
             throw new IllegalArgumentException(
                     "httpRequestElements는 3개로 구성되어야 합니다: %d".formatted(httpRequestElements.length));
-        }
-    }
-
-    private static void validateNull(final BufferedReader bufferedReader) {
-        if (bufferedReader == null) {
-            throw new IllegalArgumentException("bufferedReader는 null일 수 없습니다.");
         }
     }
 

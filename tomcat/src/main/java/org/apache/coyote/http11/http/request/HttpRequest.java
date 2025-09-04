@@ -13,16 +13,16 @@ public class HttpRequest {
     private final HttpHeader httpHeader;
     private final HttpRequestBody httpRequestBody;
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        validateNull(inputStream);
-        return new HttpRequest(inputStream);
-    }
-
     private HttpRequest(final InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         this.httpRequestLine = HttpRequestLine.from(bufferedReader);
         this.httpHeader = HttpHeader.from(bufferedReader);
         this.httpRequestBody = HttpRequestBody.of(inputStream, this.httpHeader);
+    }
+
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
+        validateNull(inputStream);
+        return new HttpRequest(inputStream);
     }
 
     private static void validateNull(final InputStream inputStream) {

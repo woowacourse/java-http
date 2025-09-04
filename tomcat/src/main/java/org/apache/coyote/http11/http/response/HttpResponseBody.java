@@ -12,16 +12,6 @@ public class HttpResponseBody {
 
     private final String value;
 
-    public static HttpResponseBody emptyBody() {
-        String emptyBody = null;
-        return new HttpResponseBody(emptyBody);
-    }
-
-    public static HttpResponseBody withString(String value) {
-        validateNull(value);
-        return new HttpResponseBody(value);
-    }
-
     private HttpResponseBody(final String value) {
         final URL url = getClass().getClassLoader().getResource("static/" + value);
 
@@ -31,11 +21,21 @@ public class HttpResponseBody {
         }
 
         try {
-            Path path = Paths.get(url.toURI());
+            final Path path = Paths.get(url.toURI());
             this.value = new String(Files.readAllBytes(path));
         } catch (IOException | URISyntaxException e) {
             throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
         }
+    }
+
+    public static HttpResponseBody emptyBody() {
+        final String emptyBody = null;
+        return new HttpResponseBody(emptyBody);
+    }
+
+    public static HttpResponseBody withString(String value) {
+        validateNull(value);
+        return new HttpResponseBody(value);
     }
 
     private static void validateNull(final String value) {

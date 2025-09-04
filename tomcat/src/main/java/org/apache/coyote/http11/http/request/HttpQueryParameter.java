@@ -8,17 +8,14 @@ public class HttpQueryParameter {
 
     private final Map<String, String> queryParameterInfo;
 
-    public static HttpQueryParameter from(final String path) {
-        return new HttpQueryParameter(path);
-    }
-
     private HttpQueryParameter(final String path) {
-        String targetPath = clean(path);
-        int queryParameterStartIndex = targetPath.indexOf(HttpSplitFormat.QUERY_PARAMETER_START.getValue());
+        final String targetPath = clean(path);
+        final int queryParameterStartIndex = targetPath.indexOf(HttpSplitFormat.QUERY_PARAMETER_START.getValue());
         if (queryParameterStartIndex != -1 && queryParameterStartIndex != targetPath.length() - 1) {
 
-            String queryParameterLine = targetPath.substring(queryParameterStartIndex + 1);
-            String[] queryParameterElements = queryParameterLine.split(HttpSplitFormat.QUERY_PARAMETER.getValue());
+            final String queryParameterLine = targetPath.substring(queryParameterStartIndex + 1);
+            final String[] queryParameterElements = queryParameterLine.split(
+                    HttpSplitFormat.QUERY_PARAMETER.getValue());
 
             this.queryParameterInfo = createQueryParameterInfo(queryParameterElements);
             return;
@@ -26,8 +23,12 @@ public class HttpQueryParameter {
         this.queryParameterInfo = new HashMap<>();
     }
 
+    public static HttpQueryParameter from(final String path) {
+        return new HttpQueryParameter(path);
+    }
+
     private Map<String, String> createQueryParameterInfo(final String[] queryParameterElements) {
-        Map<String, String> queryParameterInfo = new HashMap<>();
+        final Map<String, String> queryParameterInfo = new HashMap<>();
         for (String queryParameterElement : queryParameterElements) {
             String[] queryParameter = queryParameterElement.split(
                     HttpSplitFormat.QUERY_PARAMETER_ELEMENT.getValue());

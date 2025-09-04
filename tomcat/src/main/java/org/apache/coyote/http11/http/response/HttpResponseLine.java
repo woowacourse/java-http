@@ -7,13 +7,13 @@ public class HttpResponseLine {
     HttpVersion version;
     HttpStatus status;
 
-    public static HttpResponseLine of(final HttpVersion version, final HttpStatus status) {
-        return new HttpResponseLine(version, status);
-    }
-
     private HttpResponseLine(final HttpVersion version, final HttpStatus status) {
         this.version = version;
         this.status = status;
+    }
+
+    public static HttpResponseLine of(final HttpVersion version, final HttpStatus status) {
+        return new HttpResponseLine(version, status);
     }
 
     public String getFormat() {

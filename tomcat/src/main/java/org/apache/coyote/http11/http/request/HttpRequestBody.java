@@ -9,6 +9,15 @@ public class HttpRequestBody {
 
     private final String value;
 
+    private HttpRequestBody(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
+        if (!httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
+            this.value = null;
+            return;
+        }
+        final int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
+        this.value = new String(inputStream.readNBytes(contentLength));
+    }
+
     public static HttpRequestBody of(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
         validateNull(inputStream, httpHeader);
         return new HttpRequestBody(inputStream, httpHeader);
@@ -21,15 +30,6 @@ public class HttpRequestBody {
         if (httpHeader == null) {
             throw new IllegalArgumentException("httpHeader는 null일 수 없습니다");
         }
-    }
-
-    private HttpRequestBody(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
-        if (!httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
-            this.value = null;
-            return;
-        }
-        int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
-        this.value = new String(inputStream.readNBytes(contentLength));
     }
 
     public String getValue() {

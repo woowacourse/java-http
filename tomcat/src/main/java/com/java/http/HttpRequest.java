@@ -67,8 +67,7 @@ public record HttpRequest(
             return Arrays.stream(HttpMethod.values())
                     .filter(value -> value.name().equalsIgnoreCase(str))
                     .findFirst()
-                    .orElseThrow();
-            // TODO : 명확한 예외 타입 사용
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HTTP 메서드입니다. input=" + str));
         }
     }
 }

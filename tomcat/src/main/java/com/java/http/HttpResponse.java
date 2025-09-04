@@ -84,8 +84,7 @@ public record HttpResponse(
             return Arrays.stream(StatusCode.values())
                     .filter(value -> value.codeNumber == codeNumber)
                     .findFirst()
-                    .orElseThrow();
-            // TODO : 명확한 예외 타입 사용
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상태코드입니다. input=" + codeNumber));
         }
     }
 
@@ -105,7 +104,7 @@ public record HttpResponse(
                 baos.write(responseBody);
                 return baos.toByteArray();
             } catch (IOException e) {
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("HTTP 응답을 구성하는 중에 예외가 발생했습니다.", e);
             }
         } else {
             sb.append(new String(responseBody, StandardCharsets.UTF_8)).append(CRLF);

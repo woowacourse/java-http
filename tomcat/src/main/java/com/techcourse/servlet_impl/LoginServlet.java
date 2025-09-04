@@ -24,12 +24,12 @@ public class LoginServlet implements Servlet {
         String account = request.param("account");
         String password = request.param("password");
         if (account == null || password == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("계정과 비밀번호는 필수입니다.");
         }
 
-        User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
         log.info("로그인 성공, user={}", user);

@@ -20,14 +20,14 @@ public abstract class StaticResourceServlet implements Servlet {
         if (resourcePath().endsWith(".css")) return HttpResponse.ok().css(file()).build();
         if (resourcePath().endsWith(".js")) return HttpResponse.ok().js(file()).build();
         if (resourcePath().endsWith(".ico")) return HttpResponse.ok().icon(file()).build();
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("지원되지 않는 확장자입니다. path=" + resourcePath());
     }
 
     private byte[] file() {
         try (final var inputStream = getClass().getClassLoader().getResourceAsStream("static" + resourcePath())) {
             return inputStream.readAllBytes();
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("정적 리소스를 읽는 중 예외가 발생했습니다.", e);
         }
     }
 

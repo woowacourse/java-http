@@ -21,10 +21,9 @@ public class SimpleContainer implements Container {
     }
 
     private static Servlet findServletFor(HttpRequest request) {
-        // TODO : 명확한 예외 타입 사용
         return servlets.stream()
                 .filter(servlet -> servlet.canHandle(request))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("해당 요청을 처리할 서블릿을 찾지 못했습니다. uri=" + request.uri()));
     }
 }

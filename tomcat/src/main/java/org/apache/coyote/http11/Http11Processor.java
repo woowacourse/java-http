@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.reqeust.HttpRequest;
-import org.apache.coyote.http11.reqeust.handler.HttpRequestHandler;
-import org.apache.coyote.http11.reqeust.handler.HttpRequestHandlerMapper;
+import org.apache.coyote.http11.handler.HttpHandler;
+import org.apache.coyote.http11.handler.HttpHandlerMapper;
 import org.apache.coyote.http11.reqeust.util.HttpRequestBuilder;
 import org.apache.coyote.http11.reqeust.util.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -42,8 +42,8 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = getHttpRequest(inputStream);
-            final HttpRequestHandlerMapper handlerMapper = HttpRequestHandlerMapper.getInstance();
-            final HttpRequestHandler handler = handlerMapper.getHandler(request);
+            final HttpHandlerMapper handlerMapper = HttpHandlerMapper.getInstance();
+            final HttpHandler handler = handlerMapper.getHandler(request);
             final HttpResponse response = handler.handle(request);
 
             outputStream.write(response.getBytes());

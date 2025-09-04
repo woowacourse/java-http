@@ -1,15 +1,15 @@
-package org.apache.coyote.http11.reqeust.handler;
+package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 
-public record HttpRequestHandlerCondition(
+public record HttpHandlerCondition(
         HttpMethod method,
         String uri
 ) {
 
-    public static HttpRequestHandlerCondition from(final HttpRequest request) {
-        return new HttpRequestHandlerCondition(
+    public static HttpHandlerCondition from(final HttpRequest request) {
+        return new HttpHandlerCondition(
                 request.method(),
                 request.uri()
         );

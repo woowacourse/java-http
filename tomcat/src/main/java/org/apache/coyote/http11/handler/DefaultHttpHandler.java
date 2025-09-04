@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.reqeust.handler;
+package org.apache.coyote.http11.handler;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -6,21 +6,21 @@ import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class DefaultHttpRequestHandler implements HttpRequestHandler {
+public class DefaultHttpHandler implements HttpHandler {
 
-    private static final DefaultHttpRequestHandler instance = new DefaultHttpRequestHandler();
+    private static final DefaultHttpHandler instance = new DefaultHttpHandler();
 
-    private final Map<HttpRequestHandlerCondition, Function<HttpRequest, HttpResponse>> handlerMethodMapper = Map.of(
-            new HttpRequestHandlerCondition(HttpMethod.GET, "/"), this::handleGetRoot,
-            new HttpRequestHandlerCondition(HttpMethod.GET, "/index.html"), this::handleGetIndexHtml
+    private final Map<HttpHandlerCondition, Function<HttpRequest, HttpResponse>> handlerMethodMapper = Map.of(
+            new HttpHandlerCondition(HttpMethod.GET, "/"), this::handleGetRoot,
+            new HttpHandlerCondition(HttpMethod.GET, "/index.html"), this::handleGetIndexHtml
     );
 
-    private DefaultHttpRequestHandler() {
+    private DefaultHttpHandler() {
     }
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        final HttpRequestHandlerCondition requestCondition = HttpRequestHandlerCondition.from(request);
+        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
         final Function<HttpRequest, HttpResponse> handlerMethod = handlerMethodMapper.get(requestCondition);
         if (handlerMethod == null) {
             throw new IllegalStateException("해당 요청을 처리할 수 없는 핸들러입니다. " + requestCondition);
@@ -31,7 +31,7 @@ public class DefaultHttpRequestHandler implements HttpRequestHandler {
 
     @Override
     public boolean canHandle(final HttpRequest request) {
-        final HttpRequestHandlerCondition requestCondition = HttpRequestHandlerCondition.from(request);
+        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
 
         return handlerMethodMapper.containsKey(requestCondition);
     }
@@ -44,7 +44,7 @@ public class DefaultHttpRequestHandler implements HttpRequestHandler {
         return new HttpResponse();
     }
 
-    public static DefaultHttpRequestHandler getInstance() {
+    public static DefaultHttpHandler getInstance() {
         return instance;
     }
 }

@@ -56,25 +56,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod == HttpMethod.GET && path.contains("/login")) {
-                Map<String, String> queries = httpHeader.getQueries();
-                User user = InMemoryUserRepository.findByAccount(queries.get("account"))
-                        .orElse(null);
-                if (user != null && user.checkPassword(queries.get("password"))) {
-                    log.info("user : {}", user);
-                }
+                printMemberLog(httpHeader);
                 responseLoginHtml(outputStream);
             }
 
-            if (httpMethod == HttpMethod.GET && path.equals("/index.html")) {
-                responseIndexHtml(outputStream);
+            if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
+                responseHtml(outputStream, httpHeader);
             }
 
-            if (httpMethod == HttpMethod.GET && path.equals("/css/styles.css")) {
-                responseIndexCss(outputStream);
+            if (httpMethod == HttpMethod.GET && path.endsWith(".css")) {
+                responseCss(outputStream, httpHeader);
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
-                responseJs(outputStream, path);
+                responseJs(outputStream, httpHeader);
             }
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -82,13 +77,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void responseIndexHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
-        final URI uri = getClass().getClassLoader()
-                .getResource("static/index.html")
-                .toURI();
-        final Path htmlPath = Path.of(uri);
-        final byte[] read = Files.readAllBytes(htmlPath);
-        final String body = new String(read, StandardCharsets.UTF_8);
+    private void printMemberLog(final HttpHeader httpHeader) {
+        Map<String, String> queries = httpHeader.getQueries();
+        User user = InMemoryUserRepository.findByAccount(queries.get("account"))
+                .orElse(null);
+        if (user != null && user.checkPassword(queries.get("password"))) {
+            log.info("user : {}", user);
+        }
+    }
+
+    private void responseHtml(
+            final OutputStream outputStream,
+            final HttpHeader httpHeader
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static" + httpHeader.getPath());
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -104,12 +106,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void responseLoginHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
-        final URI uri = getClass().getClassLoader()
-                .getResource("static/login.html")
-                .toURI();
-        final Path htmlPath = Path.of(uri);
-        final byte[] read = Files.readAllBytes(htmlPath);
-        final String body = new String(read, StandardCharsets.UTF_8);
+        final String body = getStaticResponseBody("static/login.html");
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -124,13 +121,11 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseIndexCss(final OutputStream outputStream) throws URISyntaxException, IOException {
-        final URI uri = getClass().getClassLoader()
-                .getResource("static/css/styles.css")
-                .toURI();
-        final Path htmlPath = Path.of(uri);
-        final byte[] read = Files.readAllBytes(htmlPath);
-        final String body = new String(read, StandardCharsets.UTF_8);
+    private void responseCss(
+            final OutputStream outputStream,
+            final HttpHeader httpHeader
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static" + httpHeader.getPath());
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
                 StatusCode.OK,
@@ -146,14 +141,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void responseJs(
             final OutputStream outputStream,
-            final String path
+            final HttpHeader httpHeader
     ) throws URISyntaxException, IOException {
-        final URI uri = getClass().getClassLoader()
-                .getResource("static" + path)
-                .toURI();
-        final Path htmlPath = Path.of(uri);
-        final byte[] read = Files.readAllBytes(htmlPath);
-        final String body = new String(read, StandardCharsets.UTF_8);
+        final String body = getStaticResponseBody("static" + httpHeader.getPath());
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -192,5 +182,15 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new HttpHeader(requestLine, headers);
+    }
+
+    private String getStaticResponseBody(final String httpHeader) throws URISyntaxException, IOException {
+        final URI uri = getClass().getClassLoader()
+                .getResource(httpHeader)
+                .toURI();
+        final Path htmlPath = Path.of(uri);
+        final byte[] read = Files.readAllBytes(htmlPath);
+        final String body = new String(read, StandardCharsets.UTF_8);
+        return body;
     }
 }

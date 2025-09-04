@@ -32,7 +32,7 @@ public class HttpHeaderParser {
         return stringTokenizer.nextToken();
     }
 
-    public static Map<String, String> getHeaders(final List<String> headers) {
+    protected static Map<String, String> getHeaders(final List<String> headers) {
         return headers.stream()
                 .map(header -> header.split(": ", 2))
                 .filter(parts -> parts.length == 2)

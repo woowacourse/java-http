@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +10,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -41,11 +45,21 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String url = parseUrl(bufferedReader);
+            String uri = parseUrl(bufferedReader);
             String responseBody = null;
 
-            if (StaticResourceExtension.anyMatch(url)) {
-                responseBody = handleForStaticResource(url);
+            if (StaticResourceExtension.anyMatch(uri)) {
+                responseBody = handleForStaticResource(uri);
+            }
+
+            if (uri.contains("/login")) {
+                responseBody = handleForStaticResource("login.html");
+                Map<String, String> queryStrings = getQueryStrings(uri);
+
+                User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+                log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
             }
 
             if (responseBody == null) {
@@ -54,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     OK_RESPONSE_LINE,
-                    CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(url)
+                    CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(uri)
                             + CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8,
                     CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
                     "",
@@ -66,6 +80,20 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static Map<String, String> getQueryStrings(String uri) {
+        int index = uri.indexOf("?");
+
+        String[] rawQueryStrings = uri.substring(index + 1).split("&");
+
+        Map<String, String> queryString = new HashMap<>();
+        for (String rawQueryString : rawQueryStrings) {
+            String[] splitQueryString = rawQueryString.split("=");
+            queryString.put(splitQueryString[0], splitQueryString[1]);
+        }
+
+        return queryString;
     }
 
     private String parseUrl(BufferedReader bufferedReader) throws IOException {

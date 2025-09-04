@@ -17,15 +17,10 @@ public abstract class StaticResourceServlet implements Servlet {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        if (resourcePath().endsWith(".html")) {
-            return HttpResponse.ok().html(file()).build();
-        } else if (resourcePath().endsWith(".css")) {
-            return HttpResponse.ok().css(file()).build();
-        } else if (resourcePath().endsWith(".js")) {
-            return HttpResponse.ok().js(file()).build();
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        if (resourcePath().endsWith(".html")) return HttpResponse.ok().html(file()).build();
+        if (resourcePath().endsWith(".css")) return HttpResponse.ok().css(file()).build();
+        if (resourcePath().endsWith(".js")) return HttpResponse.ok().js(file()).build();
+        throw new UnsupportedOperationException();
     }
 
     private String file() {

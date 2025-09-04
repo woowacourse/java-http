@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 
-    private String getMimeType(final URL resource) throws IOException {
+    private String getMimeType(final URL resource) {
         final String responseResourceExtension = resource.getPath().split("\\.")[1];
         return MIME_TYPES.get(responseResourceExtension);
     }

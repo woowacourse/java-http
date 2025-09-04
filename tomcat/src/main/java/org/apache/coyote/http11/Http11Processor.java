@@ -61,7 +61,6 @@ public class Http11Processor implements Runnable, Processor {
                 //TODO: URL이 올바르지 않다는 예외 응답 처리  (2025-09-4, 목, 17:7)
                 throw new IllegalArgumentException("URI가 올바르지 않습니다.");
             }
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -71,11 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             List<String> message = new ArrayList<>();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println("line = " + line);
-                message.add(line);
-            }
+            message.add(bufferedReader.readLine());
             return new HttpRequestMessage(message);
         } catch (IOException | IllegalArgumentException e) {
             throw new HttpMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");

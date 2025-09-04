@@ -231,7 +231,7 @@ class IOStreamTest {
 
     /*
     새롭게 학습한 내용
-    - OutputStream의 write(byte[] data)와 write(byte b[], int off, int len)
+    - OutputStream의 write() 정리
         : write(byte[] data)는 바이트 배열 전체를 한번에 쓴다.
         : write(byte b[], int off, int len)은 off 위치부터 len 바이트만큼 한번에 쓴다.
     - 각종 OutputStream 정리
@@ -245,9 +245,11 @@ class IOStreamTest {
             - 데이터를 OutputStream 방식으로 메모리에 쓰고 싶을 때 사용
             - 다른 Stream과 연결하지 않고 메모리에 저장하기 위해서 사용
             - flush()를 따로 사용하지 않음
-    - InputStream의 read()의 리턴값 유의점
-        : read() 리턴값은 바이트값이다.
-        : read(byte[] buffer) 리턴값은 읽어온 바이트의 길이이다. (읽은 데이터는 buffer에 저장된다)
+    - InputStream의 read() 정리
+        : read()은 읽은 데이터를 바이트로 리턴하는 메서드
+        : read(byte[] buffer) 읽은 데이터를 buffer에 저장하는 메서드 (리턴값은 읽은 바이트 개수)
+        : readAllBytes()는 스트림의 모든 데이터를 바이트로 읽는 메서드
+          (유의점 : 소켓을 InputStream에 연결해서 readAllBytes()한다면 연결이 끊길떄가지 무한정 대기해버린다.)
     - 각종 InputStream 정리
         : BufferedInputStream
             - 다른 스트림이나 입력 장치에서 읽은 데이터를 전달하기 위한 중간 버퍼
@@ -262,6 +264,7 @@ class IOStreamTest {
             - InputStream 으로부터 문자 단위로 데이터를 읽을 수 있음
         : BufferedReader
             - InputStreamReader 으로부터 문자열 단위로 데이터를 읽을 수 있음
+              (유의점 : 소켓을 Reader에 연결해서 null이 발생할떄까지 readLine()을 반복한다면 연결이 끊길떄가지 무한정 대기해버린다.)
     - 각종 Writer 정리
         : OutputStreamWriter
             - OutputStream 으로부터 문자 단위로 데이터를 쓸 수 있음

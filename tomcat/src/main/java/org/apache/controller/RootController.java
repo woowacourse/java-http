@@ -8,7 +8,6 @@ public class RootController implements Controller {
 
     @Override
     public boolean isProcessableRequest(HttpRequestMessage request) {
-        System.out.println("request.getUri() = " + request.getUri());
         return request.getUri().equals("/");
     }
 

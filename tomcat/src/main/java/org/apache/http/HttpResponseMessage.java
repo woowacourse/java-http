@@ -2,6 +2,7 @@ package org.apache.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,26 @@ public class HttpResponseMessage {
 
     public HttpResponseMessage(OutputStream outputStream) {
         this.outputStream = outputStream;
+    }
+
+    public void writeMessage() {
+        //TODO: Response에 넣을 초기값 세팅  (2025-09-4, 목, 18:9)
+        String responseMessage = String.join(
+                "\r\n",
+                makeStartLine(),
+                makeHeaderLines(),
+                "",
+                body
+        );
+        try {
+            System.out.println("body.getBytes().length = " + body.getBytes().length);
+            System.out.println("responseMessage = " + responseMessage);
+            outputStream.write(responseMessage.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+        } catch (IOException e) {
+            //TODO: 소켓 쓰기 오류 발생시 예외응답 처리  (2025-09-4, 목, 17:46)
+        }
     }
 
     public void setHttpVersion(HttpVersion httpVersion) {
@@ -35,21 +56,20 @@ public class HttpResponseMessage {
         this.body = body;
     }
 
-    public void writeMessage() {
-        //TODO: Response에 넣을 초기값 세팅  (2025-09-4, 목, 18:9)
-        String responseMessage = String.join(
-                "\r\n",
-                makeStartLine(),
-                makeHeaderLines(),
-                "",
-                body
-        );
-        try {
-            outputStream.write(responseMessage.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            //TODO: 소켓 쓰기 오류 발생시 예외응답 처리  (2025-09-4, 목, 17:46)
-        }
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
+    }
+
+    public StatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public Map<String, String> getHeader() {
+        return header;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     private String makeStartLine() {

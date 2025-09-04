@@ -21,7 +21,7 @@ public class StaticFileController {
                 throw new IllegalArgumentException("URI가 올바르지 않습니다.");
             }
             Path path = Paths.get(resource.toURI());
-            String responseBody = String.join("\r\n", Files.readAllLines(path));
+            String responseBody = Files.readString(path);
             response.setHttpVersion(request.getVersion());
             response.setStatusCode(StatusCode.OK);
             response.setHeader("Content-Type", "text/html;charset=utf-8");

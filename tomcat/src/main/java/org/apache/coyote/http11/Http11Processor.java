@@ -1,17 +1,12 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +14,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private List<HttpRequestHandler> httpRequestHandlers = List.of(
+            new HomeHttpRequestHandler(),
+            new IndexHtmlRequestHandler(),
+            new CssRequestHandler(),
+            new LoginRequestHandler()
+    );
 
     private final Socket connection;
 
@@ -38,81 +40,35 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String startLine = bufferedReader.readLine();
-            String[] startLines = startLine.split(" ");
-            String requestMethod = startLines[0];
-            String requestUrl = startLines[1];
-            String requestHttpVersion = startLines[2];
+            RequestStartLine requestStartLine = createRequestStartLine(bufferedReader.readLine());
 
-            String response = null;
-            if (requestMethod.equals("GET") && requestUrl.equals("/")) {
-                final var responseBody = "Hello world!";
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
-            if (requestMethod.equals("GET") && requestUrl.equals("/index.html")) {
-                URL resource = getClass().getClassLoader().getResource("static/index.html");
-                Path resourcePath = Path.of(resource.getPath());
-                byte[] bytes = Files.readAllBytes(resourcePath);
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + bytes.length + " ",
-                        "",
-                        new String(bytes));
-            }
-            if (requestMethod.equals("GET") && requestUrl.equals("/css/styles.css")) {
-                URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-                Path resourcePath = Path.of(resource.getPath());
-                byte[] bytes = Files.readAllBytes(resourcePath);
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + bytes.length + " ",
-                        "",
-                        new String(bytes));
-            }
-            if (requestMethod.equals("GET") && requestUrl.equals("/login?account=gugu&password=password")) {
-                String uri = "/login?account=gugu&password=password";
-                int index = uri.indexOf("?");
-                String path = uri.substring(0, index);
-                String queryStrings = uri.substring(index + 1);
-                Map<String, String> queryStringMap = new HashMap<>();
-                for (String queryString : queryStrings.split("&")) {
-                    String[] strings = queryString.split("=");
-                    String key = strings[0];
-                    String value = strings[1];
-                    queryStringMap.put(key, value);
-                }
-                User user = InMemoryUserRepository.findByAccount(queryStringMap.get("account")).get();
-                if (user.checkPassword(queryStringMap.get("password"))) {
-                    log.info("user = {}", user);
-                }
-                URL resource = getClass().getClassLoader().getResource("static/login.html");
-                Path resourcePath = Path.of(resource.getPath());
-                byte[] bytes = Files.readAllBytes(resourcePath);
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + bytes.length + " ",
-                        "",
-                        new String(bytes));
-            }
-
-            if (response != null) {
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            }
+            handle(requestStartLine, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handle(final RequestStartLine requestStartLine, final OutputStream outputStream) throws IOException {
+        for (HttpRequestHandler handler : httpRequestHandlers) {
+            if (handler.support(requestStartLine)) {
+                String response = handler.response(requestStartLine);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+        }
+    }
+
+    private RequestStartLine createRequestStartLine(final String startLine) {
+        String[] startLines = startLine.split(" ");
+        String requestMethod = startLines[0];
+        String requestUrl = startLines[1];
+        String requestHttpVersion = startLines[2];
+        
+        return new RequestStartLine(
+                RequestMethod.valueOf(requestMethod),
+                requestUrl,
+                requestHttpVersion
+        );
     }
 }

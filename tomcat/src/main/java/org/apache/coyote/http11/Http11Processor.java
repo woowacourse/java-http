@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,11 +47,30 @@ public class Http11Processor implements Runnable, Processor {
                 requestHeader.add(reader.readLine());
             }
             final String requestLine = requestHeader.getFirst();
-            final String requestUri = requestLine.split(" ")[1];
+            String requestUri = requestLine.split(" ")[1];
+            String requestPath = requestUri.split("\\?")[0];
 
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
-            if (!requestUri.equals("/")) {
+
+            // 이러한 동적인 과정을 어떻게 process에서 분리할 수 있을까?
+            if (requestPath.equals("/login")) {
+                Map<String, String> parameters = getQueryParameters(requestUri);
+                String account = parameters.get("account");
+                String password = parameters.get("password");
+                InMemoryUserRepository.findByAccount(account)
+                        .ifPresent(user -> {
+                            if (user.checkPassword(password)) {
+                                log.info("user: " + user);
+                            }
+                        });
+
+                final URL resource = getClass().getClassLoader().getResource("static/login.html");
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                contentType = mimeTypes.get("html");
+            }
+
+            if (!requestPath.equals("/") && !requestPath.equals("/login")) {
                 final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
                 if (resource == null) {
                     return;

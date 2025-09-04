@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +41,6 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequestParser.parse(reader);
             final HttpResponse response = HttpRequestHandler.handle(httpRequest);
 
-
-
             RequestServletContainer.handle(httpRequest);
 
             final String output = HttpResponseParser.parse(response);
@@ -52,14 +49,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String parseContentType(HttpRequest httpRequest) {
-        final Map<String, String> headers = httpRequest.headers();
-        if (!headers.containsKey("Accept")) {
-            return "text/html;charset=utf-8 ";
-        }
-
-        return headers.get("Accept").split(",")[0];
     }
 }

@@ -1,6 +1,8 @@
 package org.apache.catalina.servlet;
 
+import com.http.enums.HttpStatus;
 import com.http.servlet.LoginRequestServlet;
+import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +24,16 @@ public final class RequestServletContainer {
     }
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {
-        final String path = request.startLine().path();
+        final String path = request.requestStartLine().path();
+        HttpStatus status = HttpStatus.OK;
+        try{
+            handlers.getOrDefault(path, defaultServlet).handle(request, response);
+        }catch (IOException | UncheckedServletException e){
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }catch (IllegalArgumentException e){
+            status = HttpStatus.BAD_REQUEST;
+        }
 
-        handlers.getOrDefault(path, defaultServlet).handle(request, response);
-
-        ResponseProcessor.handle(request, response);
+        ResponseProcessor.handle(request, response, status);
     }
 }

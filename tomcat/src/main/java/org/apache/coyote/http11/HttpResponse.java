@@ -20,7 +20,8 @@ public record HttpResponse(
     private String convertNonContainsBody() {
         return String.join("\r\n",
                 String.format("HTTP/1.1 %s %s", statusCode.getCode(), statusCode.getMessage()),
-                String.format("Content-Type: %s;charset=utf-8", contentType.getResponseContentType())
+                String.format("Content-Type: %s;charset=utf-8", contentType.getResponseContentType()),
+                ""
         );
     }
 

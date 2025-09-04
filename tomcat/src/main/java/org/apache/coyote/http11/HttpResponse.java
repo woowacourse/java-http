@@ -34,8 +34,9 @@ public class HttpResponse {
         }
         
         try {
+            final String reasonPhrase = getReasonPhrase(status);
             final String response = String.join("\r\n",
-                    "HTTP/1.1 " + status + " OK",
+                    "HTTP/1.1 " + status + " " + reasonPhrase,
                     "Content-Type: " + contentType,
                     "Content-Length: " + content.getBytes().length,
                     "",
@@ -47,6 +48,17 @@ public class HttpResponse {
         } catch (final IOException e) {
             throw new RuntimeException("Failed to write response", e);
         }
+    }
+    
+    private String getReasonPhrase(final int status) {
+        return switch (status) {
+            case 200 -> "OK";
+            case 400 -> "Bad Request";
+            case 404 -> "Not Found";
+            case 405 -> "Method Not Allowed";
+            case 500 -> "Internal Server Error";
+            default -> "Unknown";
+        };
     }
     
     public boolean isCommitted() {

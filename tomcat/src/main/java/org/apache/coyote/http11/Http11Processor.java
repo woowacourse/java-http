@@ -23,7 +23,7 @@ public class Http11Processor implements Runnable, Processor {
             Map.entry(".js",   "application/javascript")
     );
 
-    public static final String HTTP_OK = "HTTP/1.1 200 OK ";
+    public static final String HTTP_OK = "HTTP/1.1 200 OK";
     public static final String HTTP_NOT_FOUND = "HTTP/1.1 404 Not Found";
 
     public static final String HEADER_CONTENT_TYPE = "Content-Type: ";
@@ -50,12 +50,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
             String requestLine = br.readLine();
-            String resourceName = ResourceResolver.resolveResourceName(requestLine);
+            String resourceName = StaticResourceProcessor.resolveResourceName(requestLine);
             String contentType = determineContentType(resourceName);
             
             URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
             if (resourceUrl == null) {
-                sendNotFoundResponse(outputStream);
+                String notFoundResponse = buildNotFoundResponse();
+                outputStream.write(notFoundResponse.getBytes());
+                outputStream.flush();
                 return;
             }
             
@@ -73,30 +75,25 @@ public class Http11Processor implements Runnable, Processor {
         if (lastDotIndex > 0) {
             fileExtension = resourceName.substring(lastDotIndex);
         }
-        return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html; charset=utf-8");
+        return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html;charset=utf-8");
     }
 
-    private void sendNotFoundResponse(java.io.OutputStream outputStream) throws IOException {
-        String notFoundResponse = String.join(HTTP_LINE_SEPARATOR,
+    private String buildNotFoundResponse() {
+        return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_NOT_FOUND,
-                HEADER_CONTENT_TYPE + "text/html; charset=utf-8" ,
+                HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
                 HEADER_CONTENT_LENGTH + "0",
                 "",
                 "");
-        outputStream.write(notFoundResponse.getBytes());
-        outputStream.flush();
     }
 
     private String buildOkResponse(String contentType, URL resourceUrl) throws IOException, URISyntaxException {
         Path path = Path.of(resourceUrl.toURI());
-        long contentLength = Files.size(path);
-        String responseBody = Files.readString(path, StandardCharsets.UTF_8);
-
         return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_OK,
-                HEADER_CONTENT_TYPE + contentType + " ",
-                HEADER_CONTENT_LENGTH + contentLength + " ",
+                HEADER_CONTENT_TYPE + contentType,
+                HEADER_CONTENT_LENGTH + Files.size(path),
                 "",
-                responseBody);
+                Files.readString(path, StandardCharsets.UTF_8));
     }
 }

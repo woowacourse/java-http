@@ -58,7 +58,8 @@ public class HttpRequest {
                 .map(param -> param.split(QUERY_PARAMETER_KEY_VALUE_SEPARATOR))
                 .collect(Collectors.toMap(
                         param -> param[0],
-                        param -> param[1]
+                        param -> param[1],
+                        (oldValue, newValue) -> newValue
                 ));
     }
 

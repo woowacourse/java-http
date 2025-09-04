@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -42,12 +44,12 @@ class FileTest {
 
         final String filePath = getClass().getClassLoader().getResource(fileName).getPath();
         final File file = new File(filePath);
-        final FileReader fileReader = new FileReader(file);
-        final BufferedReader bufferedReader = new BufferedReader(fileReader);
+        try(final FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
+            final BufferedReader bufferedReader = new BufferedReader(fileReader)){
+            final List<String> actual = new ArrayList();
+            actual.add(bufferedReader.readLine());
 
-        final List<String> actual = new ArrayList();
-        actual.add(bufferedReader.readLine());
-
-        assertThat(actual).containsOnly("nextstep");
+            assertThat(actual).containsOnly("nextstep");
+        }
     }
 }

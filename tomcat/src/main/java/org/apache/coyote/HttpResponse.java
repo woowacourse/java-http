@@ -1,5 +1,7 @@
 package org.apache.coyote;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -9,18 +11,24 @@ public class HttpResponse {
     private static final String HEADER_DELIMITER = ": ";
 
     private HttpStatus status;
-    private String protocol;
+    private final String protocol;
     private String body;
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
+    private Charset charset;
 
     public HttpResponse(String protocol) {
         this.headers = new LinkedHashMap<>();
         this.protocol = protocol;
     }
 
-    public void setBody(String body) {
+    public void setBody(String body, Charset charsets) {
         this.body = body;
+        this.charset = charsets;
         setContentLength();
+    }
+
+    public void setBody(String body) {
+        setBody(body, StandardCharsets.UTF_8);
     }
 
     public void setHeader(String name, String value) {
@@ -57,6 +65,6 @@ public class HttpResponse {
     }
 
     private void setContentLength() {
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put("Content-Length", String.valueOf(body.getBytes(charset).length));
     }
 }

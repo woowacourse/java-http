@@ -4,10 +4,11 @@ import static org.apache.coyote.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.HttpStatus.OK;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
 import org.apache.coyote.HttpResponse;
@@ -15,29 +16,43 @@ import org.apache.coyote.HttpResponse;
 public class DefaultHandler implements HttpRequestHandler {
 
     private static final String STATIC_FILE_PATH_PREFIX = "static";
+    private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
     @Override
     public void handleGet(HttpRequest request, HttpResponse response) {
-        final URL resource = getClass().getClassLoader().getResource(STATIC_FILE_PATH_PREFIX + request.getPath());
-        if (resource == null) {
+        final Optional<String> contentOpt = getResourceContent(STATIC_FILE_PATH_PREFIX + request.getPath());
+        if (contentOpt.isEmpty()) {
             response.setStatus(NOT_FOUND);
             response.setBody("파일이 존재하지 않습니다.");
             response.setContentType("text/plain;charset=utf-8");
             return;
         }
-        final File indexFile = new File(resource.getPath());
 
-        try {
-            final String contentType = Files.probeContentType(indexFile.toPath());
-            final String responseBody = Files.readString(indexFile.toPath());
+        final String mimeType = getMimeTypeOrDefault(request.getPath());
+        final String content = contentOpt.get();
+        response.setStatus(OK);
+        response.setContentType(mimeType + ";charset=utf-8");
+        response.setBody(content);
+    }
 
-            response.setContentType(contentType + ";charset=utf-8");
-            response.setBody(responseBody);
+    private String getMimeTypeOrDefault(String path) {
+        String mimeType = URLConnection.guessContentTypeFromName(path);
+        if (mimeType == null) {
+            mimeType = DEFAULT_CONTENT_TYPE;
+        }
+        return mimeType;
+    }
 
+    private Optional<String> getResourceContent(String resourcePath) {
+        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+
+            if (inputStream == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new UncheckedServletException(e);
         }
-
-        response.setStatus(OK);
     }
 }

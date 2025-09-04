@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
@@ -15,8 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -172,15 +170,16 @@ class IOStreamTest {
         @Test
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
 
             // 기본 버퍼 사이즈는 8192
-            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            try (final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+                 final InputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 
-            final byte[] actual = bufferedInputStream.readAllBytes();
+                final byte[] actual = bufferedInputStream.readAllBytes();
 
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            }
         }
     }
 
@@ -204,13 +203,11 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     ""
             );
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String actual = bufferedReader.lines().collect(Collectors.joining("\r\n"));
-
-            assertThat(actual).hasToString(emoji);
+            try (final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes())) {
+                String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                assertThat(actual).hasToString(emoji);
+            }
         }
     }
 }

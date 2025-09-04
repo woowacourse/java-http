@@ -1,6 +1,6 @@
 package com.techcourse.handler;
 
-import static org.apache.coyote.HttpStatus.*;
+import static org.apache.coyote.HttpStatus.OK;
 
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
@@ -11,7 +11,7 @@ public class RootHandler implements HttpRequestHandler {
     @Override
     public void handleGet(HttpRequest request, HttpResponse response) {
         response.setStatus(OK);
-        response.setBody("Hello World");
-        response.setContentType("text/plain;charset=utf-8");
+        response.setContentType("text/html;charset=utf-8");
+        response.setBody("Hello world!");
     }
 }

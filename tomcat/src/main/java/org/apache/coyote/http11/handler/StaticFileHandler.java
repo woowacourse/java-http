@@ -27,13 +27,13 @@ public class StaticFileHandler implements HttpRequestHandler {
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         String path = request.getRequestPath();
-        InputStream is = getClass().getClassLoader().getResourceAsStream(STATIC_DIR + path);
-        if (is == null) {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(STATIC_DIR + path);
+        if (inputStream == null) {
             return notFoundHandler.handle(request);
         }
 
-        byte[] content = is.readAllBytes();
-        is.close();
+        byte[] content = inputStream.readAllBytes();
+        inputStream.close();
 
         HttpHeaders headers = HttpHeaders.fromLines(
                 List.of(
@@ -45,6 +45,7 @@ public class StaticFileHandler implements HttpRequestHandler {
         return new HttpResponse(HttpStatus.OK, headers, HttpBody.from(content));
     }
 
+    //TODO: enum으로 분리  (2025-09-4, 목, 7:1)
     private String getContentType(String path) {
         if (path.endsWith(".html")) {
             return "text/html;charset=utf-8";

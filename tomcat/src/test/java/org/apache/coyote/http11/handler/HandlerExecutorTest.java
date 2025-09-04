@@ -52,6 +52,21 @@ class HandlerExecutorTest {
     }
 
     @Test
+    void 로그인_요청시_LoginHandler가_처리한다() throws IOException {
+        // given
+        when(request.getRequestPath()).thenReturn("/login");
+
+        // when
+        HttpResponse response = handlerExecutor.execute(request);
+
+        // then
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.getCode()),
+                () -> assertThat(response.getBody().toText()).contains("Login Page")
+        );
+    }
+
+    @Test
     void 처리할_수_없는_요청시_NotFoundHandler가_처리한다() throws IOException {
         // given
         when(request.getRequestPath()).thenReturn("/non-existent");

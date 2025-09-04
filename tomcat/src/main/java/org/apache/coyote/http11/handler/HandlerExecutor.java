@@ -10,7 +10,8 @@ public class HandlerExecutor {
     private final HttpRequestHandler notFoundHandler = new NotFoundHandler();
     private final List<HttpRequestHandler> handlers = List.of(
             new HelloWorldHandler(),
-            new StaticFileHandler(notFoundHandler)
+            new StaticFileHandler(notFoundHandler),
+            new LoginHandler()
     );
 
     public HttpResponse execute(HttpRequest request) throws IOException {

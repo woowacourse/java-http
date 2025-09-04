@@ -10,9 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
@@ -50,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             String[] words = header.split(" ");
             String requestPath = words[1].split("\\?")[0];
             HttpMethod httpMethod = HttpMethod.from(words[0]);
-            Map<String, String> params = parseParameters(words[1]);
+            QueryParameters params = parseParameters(words[1]);
 
             if (requestPath.equals("/login")) {
                 requestPath = "/login.html";
@@ -98,10 +96,10 @@ public class Http11Processor implements Runnable, Processor {
         return sb.toString();
     }
 
-    private void login(Map<String, String> params) {
+    private void login(QueryParameters queryParams) {
         Optional<User> user = Optional.empty();
-        String account = params.get("account");
-        String password = params.get("password");
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
         if (account == null || password == null) {
             log.info("필수 정보가 누락되었습니다.");
         } else {
@@ -116,17 +114,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseParameters(String url) {
-        HashMap<String, String> parameters = new HashMap<>();
+    private QueryParameters parseParameters(String url) {
+        QueryParameters queryParameters = new QueryParameters();
         String[] words = url.split("\\?");
         if (words.length > 1) {
             for (var p : words[1].split("&")) {
-                String key = p.split("=")[0];
-                String value = p.split("=")[1];
-                parameters.put(key, value);
+                queryParameters.put(p);
             }
         }
-        return parameters;
+        return queryParameters;
     }
 
     private String parseRequest(InputStream inputStream) throws IOException {

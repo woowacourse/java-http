@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class StaticResourceProcessor {
     
     public static final String STATIC_RESOURCE_PATH = "static";
-    public static final String HEADER_DELIMITER = " ";
+    public static final String HEADER_DELIMITER = "\\s+";
     public static final String QUERY_PARAM_STARTER = "?";
     private static final String HTML_EXTENSION = ".html";
     private static final String PARAM_SEPARATOR = "&";

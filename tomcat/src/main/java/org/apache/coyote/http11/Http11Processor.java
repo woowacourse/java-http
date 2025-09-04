@@ -90,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> getQueryString(final String querystring) {
-        return Arrays.stream(querystring.split("&", 1))
+        return Arrays.stream(querystring.split("&"))
                 .map(param -> param.split("=", 2))
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));

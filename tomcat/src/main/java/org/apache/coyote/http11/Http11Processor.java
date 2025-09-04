@@ -12,17 +12,20 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.parser.HeaderParser;
+import org.apache.coyote.http11.parser.QueryParamsParser;
+import org.apache.coyote.http11.parser.UriParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    public static final String RESOURCE_DIRECTORY = "static";
+    public static final String EXTENSION_SEPARATOR = ".";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -41,75 +44,77 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String startLine = bufferedReader.readLine();
-            String rawPath = startLine.split(" ")[1];
-            String responseBody;
 
-            if (rawPath.equals("/")) {
-                responseBody = "Hello world!";
-                writeResponse(responseBody, "html", outputStream);
+            String requestUri = getRequestUri(bufferedReader);
+            Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
+            String contentType = resolveContentType(requestUri, requestHeaders);
+
+            if (UriParser.isRootPath(requestUri)) {
+                String response = buildResponse("Hello world!", contentType);
+                sendResponse(outputStream, response);
+                return;
             }
 
-            if (rawPath.contains("?")) {
-                int index = rawPath.indexOf("?");
-                Map<String, String> queryParams = parseQueryParams(rawPath, index);
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-                System.out.println("user = " + user);
-
-                rawPath = rawPath.substring(0, index) + ".html";
+            String path = requestUri;
+            if (UriParser.hasQuery(requestUri)) {
+                String queryString = UriParser.extractQueryString(requestUri);
+                Map<String, String> queryParams = QueryParamsParser.parse(queryString);
+                path = UriParser.extractPath(requestUri);
+                findUserByAccountParam(queryParams);
             }
 
-            String contentType = getContentType(rawPath);
-            Path filePath = getFilePath(rawPath);
-            String header = getHeader(bufferedReader);
-
-            responseBody = new String(Files.readAllBytes(filePath));
-            writeResponse(responseBody, contentType, outputStream);
+            Path filePath = getFilePath(path, contentType);
+            String responseBody = new String(Files.readAllBytes(filePath));
+            String response = buildResponse(responseBody, contentType);
+            sendResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> parseQueryParams(String path, int index) {
-        String queryString = path.substring(index + 1);
-        String[] queries = queryString.split("&");
+    private String getRequestUri(BufferedReader bufferedReader) throws IOException {
+        String startLine = bufferedReader.readLine();
+        return startLine.split(" ")[1];
+    }
 
-        Map<String, String> queryParams = new HashMap<>();
-        for (String query : queries) {
-            String[] paramPair = query.split("=");
-            queryParams.put(paramPair[0], paramPair[1]);
+    private String resolveContentType(String requestUri, Map<String, String> requestHeaders) {
+        String contentType = HeaderParser.extractPrimaryContentType(requestHeaders);
+        if (!contentType.isEmpty()) {
+            return contentType;
         }
-        return queryParams;
+
+        String extension = UriParser.extractExtension(requestUri);
+        if (!extension.isEmpty()) {
+            return extension;
+        }
+
+        return "html";
     }
 
-    private String getContentType(String path) {
-        String[] split = path.split("\\.");
-        return split[split.length - 1];
-    }
-
-    private Path getFilePath(String path) {
-        URL resource = getClass().getClassLoader().getResource("static" + path);
+    private Path getFilePath(String path, String contentType) {
+        if (UriParser.extractExtension(path).isEmpty()) {
+            path += EXTENSION_SEPARATOR + contentType;
+        }
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
         return new File(resource.getFile()).toPath();
     }
 
-    private String getHeader(BufferedReader bufferedReader) throws IOException {
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            sb.append(line).append("\r\n");
-        }
-        return sb.toString();
+    private void findUserByAccountParam(Map<String, String> queryParams) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+        System.out.println("user = " + user);
     }
 
-    private void writeResponse(String responseBody, String contentType, OutputStream outputStream) throws IOException {
-        String response = String.join("\r\n",
+    private String buildResponse(String responseBody, String contentType) {
+        return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + "text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
 
+    private void sendResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }

@@ -58,6 +58,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseIndexCss(outputStream);
             }
 
+            if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
+                responseJs(outputStream,path);
+            }
+
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -103,6 +107,28 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private void responseJs(
+            final OutputStream outputStream,
+            final String path
+    ) throws URISyntaxException, IOException {
+        final URI uri = getClass().getClassLoader()
+                .getResource("static"+path)
+                .toURI();
+        final Path htmlPath = Path.of(uri);
+        final byte[] read = Files.readAllBytes(htmlPath);
+        final String body = new String(read, StandardCharsets.UTF_8);
+
+        final var response = String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: application/javascript;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body
+        );
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
 
     private HttpHeader readHttpHeader(final BufferedReader bufferReader) throws IOException {
         final String requestLine = bufferReader.readLine();

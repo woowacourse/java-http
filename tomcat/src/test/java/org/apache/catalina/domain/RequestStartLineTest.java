@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-class StartLineTest {
+class RequestStartLineTest {
 
     @Test
     void 정상적인_스타트라인_파싱() {
@@ -13,7 +13,7 @@ class StartLineTest {
         String startLine = "GET /index.html HTTP/1.1";
 
         // when
-        StartLine result = StartLine.from(startLine);
+        RequestStartLine result = RequestStartLine.from(startLine);
 
         // then
         assertEquals("GET", result.method());
@@ -27,7 +27,7 @@ class StartLineTest {
         String startLine = "GET /login?account=admin&password=123 HTTP/1.1";
 
         // when
-        StartLine result = StartLine.from(startLine);
+        RequestStartLine result = RequestStartLine.from(startLine);
 
         // then
         assertEquals("GET", result.method());
@@ -41,7 +41,7 @@ class StartLineTest {
         String startLine = "POST /api/users HTTP/1.1";
 
         // when
-        StartLine result = StartLine.from(startLine);
+        RequestStartLine result = RequestStartLine.from(startLine);
 
         // then
         assertEquals("POST", result.method());
@@ -57,7 +57,7 @@ class StartLineTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> StartLine.from(startLine)
+            () -> RequestStartLine.from(startLine)
         );
         assertEquals("Start line is null or empty", exception.getMessage());
     }
@@ -70,7 +70,7 @@ class StartLineTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> StartLine.from(startLine)
+            () -> RequestStartLine.from(startLine)
         );
         assertEquals("Start line is null or empty", exception.getMessage());
     }
@@ -83,7 +83,7 @@ class StartLineTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> StartLine.from(startLine)
+            () -> RequestStartLine.from(startLine)
         );
         assertEquals("Start line is null or empty", exception.getMessage());
     }
@@ -96,7 +96,7 @@ class StartLineTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> StartLine.from(startLine)
+            () -> RequestStartLine.from(startLine)
         );
         assertEquals("Invalid start line: GET /index.html", exception.getMessage());
     }
@@ -109,7 +109,7 @@ class StartLineTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> StartLine.from(startLine)
+            () -> RequestStartLine.from(startLine)
         );
         assertEquals("Invalid start line: GET /index.html HTTP/1.1 extra", exception.getMessage());
     }
@@ -121,8 +121,8 @@ class StartLineTest {
         String startLine2 = "GET  HTTP/1.1";
 
         // when
-        StartLine result1 = StartLine.from(startLine1);
-        StartLine result2 = StartLine.from(startLine2);
+        RequestStartLine result1 = RequestStartLine.from(startLine1);
+        RequestStartLine result2 = RequestStartLine.from(startLine2);
 
         // then
         assertEquals("/index.html", result1.path());

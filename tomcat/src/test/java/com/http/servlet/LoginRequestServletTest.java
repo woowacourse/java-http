@@ -9,7 +9,7 @@ import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.catalina.domain.HttpRequest;
 import org.apache.catalina.domain.HttpResponse;
-import org.apache.catalina.domain.StartLine;
+import org.apache.catalina.domain.RequestStartLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +29,12 @@ class LoginRequestServletTest {
     @Test
     void 올바른_계정정보로_로그인_성공() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
                 "account", "admin",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -44,12 +44,12 @@ class LoginRequestServletTest {
     @Test
     void 잘못된_계정으로_로그인_실패() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
                 "account", "wronguser",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -63,12 +63,12 @@ class LoginRequestServletTest {
     @Test
     void 잘못된_비밀번호로_로그인_시도() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
                 "account", "admin",
                 "password", "wrongpassword"
         );
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then - 현재 구현에서는 비밀번호 틀려도 예외가 발생하지 않음
@@ -78,9 +78,9 @@ class LoginRequestServletTest {
     @Test
     void account_파라미터가_없으면_예외_발생() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of("password", "password123");
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -94,9 +94,9 @@ class LoginRequestServletTest {
     @Test
     void password_파라미터가_없으면_예외_발생() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of("account", "admin");
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -110,8 +110,8 @@ class LoginRequestServletTest {
     @Test
     void 쿼리_파라미터가_모두_없으면_예외_발생() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
-        HttpRequest httpRequest = new HttpRequest(startLine, Map.of(), Map.of());
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, Map.of(), Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -125,12 +125,12 @@ class LoginRequestServletTest {
     @Test
     void 빈_문자열_account로_로그인_시도() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
                 "account", "",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
@@ -144,12 +144,12 @@ class LoginRequestServletTest {
     @Test
     void 빈_문자열_password로_로그인_시도() {
         // given
-        StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
                 "account", "admin",
                 "password", ""
         );
-        HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then - 현재 구현에서는 빈 비밀번호도 처리됨

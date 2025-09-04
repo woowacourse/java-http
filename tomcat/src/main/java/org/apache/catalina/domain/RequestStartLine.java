@@ -1,10 +1,10 @@
 package org.apache.catalina.domain;
 
-public record StartLine(String method, String path, String version) {
+public record RequestStartLine(String method, String path, String version) {
 
     private static final int STARTLINE_SIZE = 3;
 
-    public static StartLine from(String startLine) {
+    public static RequestStartLine from(String startLine) {
         if (startLine == null || startLine.isBlank()) {
             throw new IllegalArgumentException("Start line is null or empty");
         }
@@ -18,7 +18,7 @@ public record StartLine(String method, String path, String version) {
         final String path = parsePath(tokens[1]);
         final String version = tokens[2];
 
-        return new StartLine(method, path, version);
+        return new RequestStartLine(method, path, version);
     }
 
     private static String parsePath(String path) {

@@ -5,11 +5,11 @@ import java.util.Map;
 
 public final class HttpResponse {
 
-    private String startLine;
+    private ResponseStartLine startLine;
     private final Map<String, String> headers;
     private byte[] body;
 
-    public HttpResponse(String startLine, Map<String, String> headers, byte[] body) {
+    public HttpResponse(ResponseStartLine startLine, Map<String, String> headers, byte[] body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -19,11 +19,11 @@ public final class HttpResponse {
         this(null, new LinkedHashMap<>(), null);
     }
 
-    public String getStartLine() {
+    public ResponseStartLine getStartLine() {
         return startLine;
     }
 
-    public void setStartLine(String startLine) {
+    public void setStartLine(ResponseStartLine startLine) {
         this.startLine = startLine;
     }
 

@@ -28,9 +28,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.startLine().method());
-        assertEquals("/index.html", result.startLine().path());
-        assertEquals("HTTP/1.1", result.startLine().version());
+        assertEquals("GET", result.requestStartLine().method());
+        assertEquals("/index.html", result.requestStartLine().path());
+        assertEquals("HTTP/1.1", result.requestStartLine().version());
         assertEquals("localhost:8080", result.headers().get("Host"));
         assertEquals("Mozilla/5.0", result.headers().get("User-Agent"));
         assertTrue(result.queryStrings().isEmpty());
@@ -51,9 +51,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.startLine().method());
-        assertEquals("/login", result.startLine().path());
-        assertEquals("HTTP/1.1", result.startLine().version());
+        assertEquals("GET", result.requestStartLine().method());
+        assertEquals("/login", result.requestStartLine().path());
+        assertEquals("HTTP/1.1", result.requestStartLine().version());
         assertEquals("admin", result.queryStrings().get("account"));
         assertEquals("123", result.queryStrings().get("password"));
         assertEquals("localhost:8080", result.headers().get("Host"));
@@ -76,9 +76,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("POST", result.startLine().method());
-        assertEquals("/api/users", result.startLine().path());
-        assertEquals("HTTP/1.1", result.startLine().version());
+        assertEquals("POST", result.requestStartLine().method());
+        assertEquals("/api/users", result.requestStartLine().path());
+        assertEquals("HTTP/1.1", result.requestStartLine().version());
         assertEquals("localhost:8080", result.headers().get("Host"));
         assertEquals("application/json", result.headers().get("Content-Type"));
         assertEquals("25", result.headers().get("Content-Length"));
@@ -98,9 +98,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.startLine().method());
-        assertEquals("/simple", result.startLine().path());
-        assertEquals("HTTP/1.1", result.startLine().version());
+        assertEquals("GET", result.requestStartLine().method());
+        assertEquals("/simple", result.requestStartLine().path());
+        assertEquals("HTTP/1.1", result.requestStartLine().version());
         assertTrue(result.headers().isEmpty());
         assertTrue(result.queryStrings().isEmpty());
     }
@@ -119,8 +119,8 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.startLine().method());
-        assertEquals("/search", result.startLine().path());
+        assertEquals("GET", result.requestStartLine().method());
+        assertEquals("/search", result.requestStartLine().path());
         assertEquals("java", result.queryStrings().get("q"));
         assertEquals("1", result.queryStrings().get("page"));
         assertEquals("10", result.queryStrings().get("size"));
@@ -153,7 +153,7 @@ class HttpRequestParserTest {
 
         // then
         assertTrue(result.queryStrings().isEmpty());
-        assertEquals("/home", result.startLine().path());
+        assertEquals("/home", result.requestStartLine().path());
     }
 
     @Test

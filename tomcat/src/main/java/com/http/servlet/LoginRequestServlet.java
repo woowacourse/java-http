@@ -23,7 +23,7 @@ public class LoginRequestServlet implements RequestServlet {
         String password = queryStrings.get("password");
         processLogin(account, password);
 
-        final String fileName = httpRequest.startLine().path() + ".html";
+        final String fileName = httpRequest.requestStartLine().path() + ".html";
         final byte[] loginHtml = FileParser.loadStaticResourceByFileName(fileName);
         httpResponse.setBody(loginHtml);
     }

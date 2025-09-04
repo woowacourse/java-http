@@ -5,14 +5,14 @@ import org.apache.catalina.domain.HttpResponse;
 
 public final class HttpResponseParser {
 
-    private static final String CRLF = "\r\n";
+    private static final String CRLF = System.lineSeparator();
 
     private HttpResponseParser() {
     }
 
     public static byte[] parse(HttpResponse httpResponse) {
         StringJoiner joiner = new StringJoiner(CRLF);
-        joiner.add(httpResponse.getStartLine());
+        joiner.add(httpResponse.getStartLine() + " ");
         joiner.add(parseHeader(httpResponse));
         final byte[] bytes = (joiner + CRLF).getBytes();
 
@@ -26,7 +26,7 @@ public final class HttpResponseParser {
     private static String parseHeader(HttpResponse httpResponse) {
         StringBuilder builder = new StringBuilder();
         httpResponse.getHeaders()
-                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" " + CRLF));
+                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" ").append(CRLF));
         return builder.toString();
     }
 

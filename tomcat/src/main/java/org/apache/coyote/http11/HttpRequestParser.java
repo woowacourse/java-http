@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.StartLine;
+import org.apache.catalina.domain.RequestStartLine;
 
 public final class HttpRequestParser {
 
@@ -17,10 +17,10 @@ public final class HttpRequestParser {
         final String requestLine = parseRequestLine(reader);
         final Map<String, String> headers = parseHeaders(reader);
 
-        final StartLine startLine = StartLine.from(requestLine);
+        final RequestStartLine requestStartLine = RequestStartLine.from(requestLine);
         final Map<String, String> queryStrings = parseQueryStrings(requestLine);
 
-        return new HttpRequest(startLine, queryStrings, headers);
+        return new HttpRequest(requestStartLine, queryStrings, headers);
     }
 
 

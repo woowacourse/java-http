@@ -40,21 +40,22 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] bytes;
             final String requestUri = line.split(" ")[1];
+
             if (requestUri.equals("/")) {
                 bytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
             } else {
-
-                final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+                final URL resource = getClass().getClassLoader()
+                        .getResource("static" + requestUri);
                 final Path path = Path.of(resource.getFile());
                 bytes = Files.readAllBytes(path);
             }
 
-            final var responseHeader = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + bytes.length + " ",
-                    ""
-            ) + "\r\n";
+            String responseHeader;
+            if (requestUri.contains("css")) {
+                responseHeader = getHeader(bytes, "css");
+            } else {
+                responseHeader = getHeader(bytes, "html");
+            }
 
             outputStream.write(responseHeader.getBytes());
             outputStream.write(bytes);
@@ -63,5 +64,14 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String getHeader(final byte[] bytes, String type) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + type + ";charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                ""
+        ) + "\r\n";
     }
 }

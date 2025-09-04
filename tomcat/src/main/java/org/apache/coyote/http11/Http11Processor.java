@@ -5,8 +5,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -32,31 +34,28 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+
             Request request = parseRequest(inputStream);
-            String statusLine = "";
-            String contentType = "";
+            String statusLine;
+            String contentType;
             byte[] body;
             if (request == null) {
                 statusLine = "HTTP/1.1 400 Bad Request ";
                 contentType = "text/html;charset=utf-8";
                 body = readPathFile("static/400.html");
+            } else {
+                String requestPath = createValidRequestPath(request.path());
+                body = readPathFile(requestPath);
+                if (body == null) {
+                    statusLine = "HTTP/1.1 404 Not Found ";
+                    contentType = "text/html;charset=utf-8";
+                    body = readPathFile("static/404.html");
+                } else {
+                    statusLine = "HTTP/1.1 200 OK ";
+                    contentType = guessContentType(requestPath);
+                }
             }
-            String requestPath = createValidRequestPath(request.path());
-            body = readPathFile(requestPath);
-            if (body == null) {
-                statusLine = "HTTP/1.1 404 Not Found ";
-                contentType = "text/html;charset=utf-8";
-                body = readPathFile("static/404.html");
-            }
-            String header = String.join("\r\n",
-                    statusLine,
-                    "Content-Type: " + contentType + " ",
-                    "Content-Lenghth: " + body.length + " ",
-                    ""
-            );
-            outputStream.write(header.getBytes());
-            outputStream.write(body);
-            outputStream.flush();
+            response(statusLine, contentType, body, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

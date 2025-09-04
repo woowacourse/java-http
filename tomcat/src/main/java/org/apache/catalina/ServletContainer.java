@@ -26,9 +26,10 @@ public class ServletContainer {
 
         if (servlet != null) {
             servlet.service(request, response);
-        } else {
-            handleNotFound(response);
+            return;
         }
+        
+        handleNotFound(response);
     }
 
     private Servlet findServlet(final String uri) {

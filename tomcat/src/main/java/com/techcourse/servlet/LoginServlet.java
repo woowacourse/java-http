@@ -23,10 +23,11 @@ public class LoginServlet implements Servlet {
     public void service(final HttpRequest request, final HttpResponse response) {
         if ("GET".equals(request.getMethod())) {
             handleGet(request, response);
-        } else {
-            response.setStatus(405);
-            response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
+            return;
         }
+        
+        response.setStatus(405);
+        response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
     }
 
     private void handleGet(final HttpRequest request, final HttpResponse response) {
@@ -44,16 +45,18 @@ public class LoginServlet implements Servlet {
     private void processLogin(final String account, final String password) {
         final var userOptional = InMemoryUserRepository.findByAccount(account);
 
-        if (userOptional.isPresent()) {
-            final var user = userOptional.get();
-            if (user.checkPassword(password)) {
-                log.info("로그인 성공: 회원 조회 결과 - {}", user);
-            } else {
-                log.info("로그인 실패: 비밀번호 불일치 - account: {}", account);
-            }
-        } else {
+        if (userOptional.isEmpty()) {
             log.info("로그인 실패: 존재하지 않는 계정 - account: {}", account);
+            return;
         }
+        
+        final var user = userOptional.get();
+        if (user.checkPassword(password)) {
+            log.info("로그인 성공: 회원 조회 결과 - {}", user);
+            return;
+        }
+        
+        log.info("로그인 실패: 비밀번호 불일치 - account: {}", account);
     }
 
     private String readLoginPage() {

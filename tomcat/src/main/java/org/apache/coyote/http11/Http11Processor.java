@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String staticUrl = "static/" + url;
 
-            if (url.contains("login")) {
+            if (url.contains("?") && url.contains("login")) {
                 int index = url.indexOf("?");
                 staticUrl = "static/" + url.substring(0, index) + ".html";
                 authenticateUser(url, index);
@@ -60,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedServletException(e);
         }
     }
 
@@ -99,26 +100,32 @@ public class Http11Processor implements Runnable, Processor {
     private void sendStaticResource(String staticUrl, OutputStream outputStream) throws URISyntaxException, IOException {
         final URI uri = findUri(staticUrl);
         final Path path = Paths.get(uri);
-        final var response = getResponse(path);
+        String statusCode = "200 OK";
+        if (uri.toString().contains("404.html")) {
+            statusCode = "404 Not Found";
+        }
+        final var response = getResponse(path, statusCode);
         sendResponse(outputStream, response);
     }
 
     private URI findUri(String staticUrl) throws URISyntaxException {
-        try{
-            return getClass().getClassLoader().getResource(staticUrl).toURI();
-        } catch (NullPointerException e) {
-            return getClass().getClassLoader().getResource("static/404.html").toURI();
+        final var resource = getClass().getClassLoader().getResource(staticUrl);
+
+        if (resource == null) {
+            return Objects.requireNonNull(getClass().getClassLoader().getResource("static/404.html")).toURI();
         }
+        return resource.toURI();
     }
 
-    private String getResponse(Path path) throws IOException {
+    private String getResponse(Path path, String statusCode) throws IOException {
         final var contentType = Files.probeContentType(path);
+        final byte[] responseBodyBytes = Files.readAllBytes(path);
         final String responseBody = Files.readString(path);
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: " + responseBodyBytes.length + " ",
                 "",
                 responseBody);
     }

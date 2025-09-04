@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
             String requestLine = br.readLine();
-            String resourceName = StaticResourceProcessor.resolveResourceName(requestLine);
+            String resourceName = StaticResourceProcessor.resolveResourcePath(requestLine);
             String contentType = determineContentType(resourceName);
             
             URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
@@ -62,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             
             String response = buildOkResponse(contentType, resourceUrl);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -89,10 +89,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String buildOkResponse(String contentType, URL resourceUrl) throws IOException, URISyntaxException {
         Path path = Path.of(resourceUrl.toURI());
+        byte[] bodyBytes = Files.readAllBytes(path);
+
         return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_OK,
                 HEADER_CONTENT_TYPE + contentType,
-                HEADER_CONTENT_LENGTH + Files.size(path),
+                HEADER_CONTENT_LENGTH + bodyBytes.length,
                 "",
                 Files.readString(path, StandardCharsets.UTF_8));
     }

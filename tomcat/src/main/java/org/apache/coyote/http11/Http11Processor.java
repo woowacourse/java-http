@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void validateHeader(String header) {
         if (header.split(" ").length < 3) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("유효하지 않은 요청 포맷입니다.");
         }
     }
 
@@ -91,8 +91,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getStaticPage(String requestPath) throws IOException, URISyntaxException {
         URL resource = getClass().getClassLoader().getResource("static" + requestPath);
         if (resource == null) {
-            log.info("Resource not found!");
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
         }
         List<String> strings = Files.readAllLines(Paths.get(resource.toURI()));
 
@@ -148,7 +147,7 @@ public class Http11Processor implements Runnable, Processor {
             sb.append(line).append("\r\n");
             byteSum += line.length() + 2;
             if (byteSum > MAX_REQUEST_SIZE) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("최대 크기를 초과한 요청입니다.");
             }
         }
 

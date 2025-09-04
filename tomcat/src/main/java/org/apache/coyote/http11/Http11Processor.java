@@ -46,8 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             httpRequest.parseHttpRequest();
             final String requestPath = httpRequest.getRequestPath();
 
-            String responseBody = "Hello world!";
-            String contentType = "text/html;charset=utf-8";
+            URL resource = null;
 
             if (requestPath.equals("/login")) {
                 final Map<String, String> parameters = httpRequest.getQueryParameters();
@@ -60,25 +59,27 @@ public class Http11Processor implements Runnable, Processor {
                             }
                         });
 
-                final URL resource = getStaticResource("/login.html");
-                responseBody = readFile(resource);
-                contentType = getMimeType(resource);
+                resource = getStaticResource("/login.html");
             }
 
             if (!requestPath.equals("/") && !requestPath.equals("/login")) {
-                final URL resource = getStaticResource(httpRequest.getRequestUri());
-                responseBody = readFile(resource);
-                contentType = getMimeType(resource);
+                resource = getStaticResource(httpRequest.getRequestUri());
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse response = HttpResponse.createWelcomeHttpResponse();
+            if (resource != null) {
+                final String responseLine = "HTTP/1.1 200 OK";
+                final String responseBody = readFile(resource);
+                final Map<String, String> responseHeaders = Map.of(
+                        "Content-Type", getMimeType(resource),
+                        "Content-Length", String.valueOf(responseBody.length())
+                );
 
-            outputStream.write(response.getBytes());
+                response = new HttpResponse(responseLine, responseHeaders, responseBody);
+            }
+
+            String parsedResponse = response.parseHttpResponse();
+            outputStream.write(parsedResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

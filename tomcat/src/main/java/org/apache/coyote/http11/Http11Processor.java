@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Map<String, String> CONTENT_TYPE_MAP = Map.ofEntries(
-            Map.entry(".html", "text/html; charset=utf-8"),
+            Map.entry(".html", "text/html;charset=utf-8"),
             Map.entry(".css",  "text/css"),
             Map.entry(".js",   "application/javascript")
     );
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
     private void sendNotFoundResponse(java.io.OutputStream outputStream) throws IOException {
         String notFoundResponse = String.join(HTTP_LINE_SEPARATOR,
                 HTTP_NOT_FOUND,
-                HEADER_CONTENT_TYPE + "text/html; charset=utf-8",
+                HEADER_CONTENT_TYPE + "text/html; charset=utf-8" ,
                 HEADER_CONTENT_LENGTH + "0",
                 "",
                 "");
@@ -94,8 +94,8 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join(HTTP_LINE_SEPARATOR,
                 HTTP_OK,
-                HEADER_CONTENT_TYPE + contentType,
-                HEADER_CONTENT_LENGTH + contentLength,
+                HEADER_CONTENT_TYPE + contentType + " ",
+                HEADER_CONTENT_LENGTH + contentLength + " ",
                 "",
                 responseBody);
     }

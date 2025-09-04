@@ -32,6 +32,7 @@ public class Connector implements Runnable {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
+
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -39,7 +40,7 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        Thread thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -66,6 +67,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
+
         var processor = new Http11Processor(connection);
         new Thread(processor).start();
     }
@@ -86,6 +88,7 @@ public class Connector implements Runnable {
         if (port < MIN_PORT || MAX_PORT < port) {
             return DEFAULT_PORT;
         }
+
         return port;
     }
 

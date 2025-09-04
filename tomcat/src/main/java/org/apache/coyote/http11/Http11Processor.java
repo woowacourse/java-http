@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (!requestPath.equals("/") && !requestPath.equals("/login")) {
-                resource = getStaticResource(httpRequest.getRequestUri());
+                resource = getStaticResource(httpRequest.getRequestPath());
             }
 
             HttpResponse response = HttpResponse.createWelcomeHttpResponse();

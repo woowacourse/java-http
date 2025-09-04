@@ -17,6 +17,6 @@ public class UserService implements HttpService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         log.info(user.toString());
-        return null;
+        return new ContentParseResult("user exist".getBytes(), "");
     }
 }

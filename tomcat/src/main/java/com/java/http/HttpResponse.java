@@ -107,7 +107,7 @@ public record HttpResponse(
                 throw new IllegalStateException("HTTP 응답을 구성하는 중에 예외가 발생했습니다.", e);
             }
         } else {
-            sb.append(new String(responseBody, StandardCharsets.UTF_8)).append(CRLF);
+            sb.append(new String(responseBody, StandardCharsets.UTF_8));
             return sb.toString().getBytes(StandardCharsets.UTF_8);
         }
     }

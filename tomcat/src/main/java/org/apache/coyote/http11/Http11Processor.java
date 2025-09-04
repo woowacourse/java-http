@@ -90,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> getQueryString(final String querystring) {
-        return Arrays.stream(querystring.split("&"))
+        return Arrays.stream(querystring.split("&", 1))
                 .map(param -> param.split("=", 2))
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
@@ -102,9 +102,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         if ("/login".equals(path)) {
             User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
-            if(user.checkPassword(queryString.get("password"))) {
-                log.info("User{}", user);
-            }
+            log.info("User{}", user);
             return getFile("/login.html");
         }
         return getFile(path);

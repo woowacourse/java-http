@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.constant.ContentType;
 import org.apache.coyote.http11.constant.HttpStatus;
 
@@ -9,7 +10,7 @@ public record HttpResponse(
         String body
 ) {
     public byte[] convertByteArray() {
-        return convertString().getBytes();
+        return convertString().getBytes(StandardCharsets.UTF_8);
     }
 
     private String convertString() {

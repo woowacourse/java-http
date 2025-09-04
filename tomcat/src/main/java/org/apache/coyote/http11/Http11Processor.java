@@ -127,4 +127,45 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
     }
+
+    private String guessContentType(String path) {
+        String lower = path.toLowerCase(Locale.ROOT);
+        if (lower.endsWith(".html") || lower.endsWith(".htm")) {
+            return "text/html;charset=utf-8";
+        }
+        if (lower.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (lower.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+        if (lower.endsWith(".png")) {
+            return "image/png";
+        }
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+            return "image/jpeg";
+        }
+        if (lower.endsWith(".gif")) {
+            return "image/gif";
+        }
+        return "application/octet-stream";
+    }
+
+    private void response(String statusLine, String contentType, byte[] body, OutputStream outputStream)
+            throws IOException {
+        if (body == null) {
+            body = "<h1>Internal Server Error</h1>".getBytes();
+            statusLine = "HTTP/1.1 500 Internal Server Error ";
+            contentType = "text/html;charset=utf-8";
+        }
+        String header = String.join("\r\n",
+                statusLine,
+                "Content-Type: " + contentType + " ",
+                "Content-Lenghth: " + body.length + " ",
+                ""
+        );
+        outputStream.write(header.getBytes());
+        outputStream.write(body);
+        outputStream.flush();
+    }
 }

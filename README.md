@@ -20,7 +20,7 @@
 3. [Thread](study/src/test/java/thread)
 
 ## STEP 1
-- [ ] GET /index.html 응답
+- [x] GET /index.html 응답
   - 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있도록 만든다
   - 브라우저에서 요청한 HTTP Request Header는 다음과 같다
 ```http request

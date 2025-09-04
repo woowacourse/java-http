@@ -5,7 +5,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,10 +34,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            byte[] requestBytes = inputStream.readAllBytes();
-            String[] request = new String(requestBytes, StandardCharsets.UTF_8).split("\\n");
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String[] requestStartLine = bufferedReader.readLine().split(" ");
 
-            String[] requestStartLine = request[0].split(" ");
             final String requestTarget = requestStartLine[1];
 
             String responseBody = "";

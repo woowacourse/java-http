@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String buildResponse(String responseBody) {
-        int bodyLength = responseBody == null ? 0 : responseBody.getBytes().length;
+        int bodyLength = getBodyLength(responseBody);
         final var response = String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Type: text/html;charset=utf-8 ",
@@ -79,6 +79,13 @@ public class Http11Processor implements Runnable, Processor {
             "",
             responseBody);
         return response;
+    }
+
+    private int getBodyLength(String responseBody) {
+        if (responseBody == null) {
+            return 0;
+        }
+        return responseBody.getBytes().length;
     }
 
     private String getStaticPage(String requestPath) throws IOException, URISyntaxException {

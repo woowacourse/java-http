@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = line.split(" ")[1];
             if (requestUri.contains("?")) {
                 if (requestUri.contains("/login")) {
-                    String queryString =requestUri.substring(requestUri.indexOf("?") + 1);
+                    String queryString = requestUri.substring(requestUri.indexOf("?") + 1);
                     /**
                      * split[0] = account
                      * split[1] = accountId
@@ -52,15 +52,19 @@ public class Http11Processor implements Runnable, Processor {
                      * split[3] = password value
                      */
                     String[] split = queryString.split("[=&]");
-                    final User user = InMemoryUserRepository.findByAccount(split[1])
-                            .orElseThrow(() -> new IllegalArgumentException("이런 유저는 없답니다."));
-                    if (user.checkPassword(split[3])) {
-                        log.info(user.toString());
-                    };
+                    try {
+                        final User user = InMemoryUserRepository.findByAccount(split[1])
+                                .orElseThrow(() -> new IllegalArgumentException("이런 유저는 없답니다."));
+                        if (user.checkPassword(split[3])) {
+                            log.info(user.toString());
+                        }
+                    } catch (IllegalArgumentException e) {
+                        log.info(e.getMessage());
+                    }
 
                 }
                 int index = requestUri.indexOf("?");
-                requestUri = requestUri.substring(0, index);
+                requestUri = requestUri.substring(0, index) + ".html";
             }
 
             if (requestUri.equals("/")) {

@@ -28,9 +28,10 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        final String actual = new File(fileName).getName();
+        URL resource = getClass().getClassLoader().getResource(fileName);
+        String pathName = resource.getFile();
 
-        assertThat(actual).endsWith(fileName);
+        assertThat(pathName).endsWith(fileName);
     }
 
     /**

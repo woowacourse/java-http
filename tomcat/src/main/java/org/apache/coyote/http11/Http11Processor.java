@@ -41,25 +41,30 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "";
             if (requestTarget.equals("/")) {
                 responseBody = "Hello world!";
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.length() + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
             } else if (requestTarget.equals("/index.html")) {
                 final var path = Path.of("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/tomcat/src/main/resources/static", "index.html");
-                final var fileContent = Files.readAllLines(path);
+                final byte[] fileContent = Files.readAllBytes(path);
+                responseBody = new String(fileContent, StandardCharsets.UTF_8);
 
-                final StringBuilder responseBodyBuilder = new StringBuilder();
-                for (final String content : fileContent) {
-                    responseBodyBuilder.append(content + "\n");
-                }
-                responseBody = responseBodyBuilder.toString();
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + fileContent.length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.length() + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

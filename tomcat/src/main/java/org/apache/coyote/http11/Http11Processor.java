@@ -47,14 +47,30 @@ public class Http11Processor implements Runnable, Processor {
                 writeAndFlush(outputStream, response);
             }
 
+            if (httpMethod.equals("GET") && endPoint.equals("/css/styles.css")) {
+                final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
+                final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                final String response = createResponseCss(responseBody);
+                writeAndFlush(outputStream, response);
+            }
+
             final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
             final var response = createResponse(responseBody);
             writeAndFlush(outputStream, response);
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponseCss(final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String createResponse(final String responseBody) {

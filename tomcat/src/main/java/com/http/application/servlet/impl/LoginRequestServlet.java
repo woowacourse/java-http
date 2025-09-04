@@ -1,6 +1,6 @@
-package com.http.application.handle.impl;
+package com.http.application.servlet.impl;
 
-import com.http.application.handle.RequestHandler;
+import com.http.application.servlet.RequestServlet;
 import com.http.domain.HttpRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,9 +8,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginRequestHandler implements RequestHandler {
+public class LoginRequestServlet implements RequestServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginRequestServlet.class);
 
     @Override
     public void handle(HttpRequest httpRequest) {

@@ -28,7 +28,6 @@ public final class StaticResourceHandler {
             path += ".html";
         }
 
-        // '/'로 시작하는 경로를 제거하고 static 폴더 내에서 찾기
         String resourcePath = path.startsWith("/") ? path.substring(1) : path;
         resourcePath = "static/" + resourcePath;
 

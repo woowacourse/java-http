@@ -1,9 +1,11 @@
 package org.apache.coyote.http11;
 
+import com.http.application.HttpRequestHandler;
 import com.http.application.HttpRequestParser;
-import com.http.application.RequestHandlerMapper;
-import com.http.application.StaticResourceHandler;
+import com.http.application.HttpResponseParser;
+import com.http.application.RequestServletContainer;
 import com.http.domain.HttpRequest;
+import com.http.domain.HttpResponse;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,17 +40,14 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             final HttpRequest httpRequest = HttpRequestParser.parse(reader);
-            final byte[] responseBody = StaticResourceHandler.getResponseBody(httpRequest);
+            final HttpResponse response = HttpRequestHandler.handle(httpRequest);
 
-            final var responseHeaders = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + parseContentType(httpRequest), "Content-Length: " + responseBody.length + " ",
-                    "", "");
 
-            RequestHandlerMapper.handle(httpRequest);
 
-            outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
+            RequestServletContainer.handle(httpRequest);
+
+            final String output = HttpResponseParser.parse(response);
+            outputStream.write(output.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

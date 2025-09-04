@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,25 +17,26 @@ class Http11ProcessorTest {
      * path 없이 접근을 할 때는 index.html로 접근하도록 LMS에 적혀있어서 테스트 주석 처리
      */
 
-//    @Test
-//    void process() {
-//        // given
-//        final var socket = new StubSocket();
-//        final var processor = new Http11Processor(socket);
-//
-//        // when
-//        processor.process(socket);
-//
-//        // then
-//        var expected = String.join("\r\n",
-//                "HTTP/1.1 200 OK ",
-//                "Content-Type: text/html;charset=utf-8 ",
-//                "Content-Length: 12 ",
-//                "",
-//                "Hello world!");
-//
-//        assertThat(socket.output()).isEqualTo(expected);
-//    }
+    @Disabled
+    @Test
+    void process() {
+        // given
+        final var socket = new StubSocket();
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 
     @Test
     void index() throws IOException {

@@ -1,8 +1,8 @@
-package com.http.application.handle;
+package com.http.application.servlet;
 
 import com.http.domain.HttpRequest;
 
-public interface RequestHandler {
+public interface RequestServlet {
 
     void handle(HttpRequest httpRequest);
 }

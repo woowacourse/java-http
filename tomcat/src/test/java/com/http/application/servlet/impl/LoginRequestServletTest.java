@@ -1,4 +1,4 @@
-package com.http.application.handle.impl;
+package com.http.application.servlet.impl;
 
 import com.http.domain.HttpRequest;
 import com.http.domain.StartLine;
@@ -11,13 +11,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LoginRequestHandlerTest {
+class LoginRequestServletTest {
 
-    private LoginRequestHandler loginRequestHandler;
+    private LoginRequestServlet loginRequestHandler;
 
     @BeforeEach
     void setUp() {
-        loginRequestHandler = new LoginRequestHandler();
+        loginRequestHandler = new LoginRequestServlet();
         
         // 테스트용 사용자 데이터 초기화
         User testUser = new User(1L, "admin", "password123", "admin@test.com");

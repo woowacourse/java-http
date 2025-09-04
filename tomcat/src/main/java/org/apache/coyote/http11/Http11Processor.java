@@ -9,8 +9,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,5 +73,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> getQueryParameters(String requestUri) {
+        String queryString = requestUri.split("\\?")[1];
+        String[] queryParameters = queryString.split("&");
+        return Arrays.stream(queryParameters)
+                .map(param -> param.split("="))
+                .collect(Collectors.toMap(
+                        param -> param[0],
+                        param -> param[1]
+                ));
     }
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 import java.io.File;
@@ -78,13 +80,48 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final var cssResource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final var cssContent = Files.readString(Path.of(cssResource.getPath()));
+        final var resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final var content = Files.readString(Path.of(resource.getPath()));
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: " + cssContent.getBytes().length + " \r\n" +
+                "Content-Length: " + content.getBytes().length + " \r\n" +
                 "\r\n"+
-                cssContent;
+                content;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/js/scripts.js",
+            "/assets/chart-area.js",
+            "/assets/chart-bar.js",
+            "/assets/chart-pie.js",
+    })
+    void js(final String path) throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: application/javascript,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final var resource = getClass().getClassLoader().getResource("static" + path);
+        final var content = Files.readString(Path.of(resource.getPath()));
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: application/javascript;charset=utf-8 \r\n" +
+                "Content-Length: " + content.getBytes().length + " \r\n" +
+                "\r\n"+
+                content;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

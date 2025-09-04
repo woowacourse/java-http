@@ -82,6 +82,20 @@ public class Http11Processor implements Runnable, Processor {
             return header + "\r\n\r\n" + body;
         }
 
+        final var indexOfHttpVersion = httpRequestMessage.indexOf("HTTP/1.1");
+        final var resourcePath = httpRequestMessage.substring(4, indexOfHttpVersion - 1);
+        if (resourcePath.endsWith(".js")) {
+            final var resource = getClass().getClassLoader().getResource("static/" + resourcePath);
+
+            final var body = Files.readString(Path.of(resource.getPath()));
+            final var header = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: application/javascript;charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " "
+            );
+            return header + "\r\n\r\n" + body;
+        }
+
         final var body = "Hello world!";
         final var header = String.join("\r\n",
                 "HTTP/1.1 200 OK ",

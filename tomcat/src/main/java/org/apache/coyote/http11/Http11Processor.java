@@ -37,31 +37,23 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final Http11Request request = Http11RequestParser.parse(reader);
 
-            final var responseBody = getResourceData(request.getPath());
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            final StaticResource staticResource = StaticResourceProvider.getStaticResource(request.getPath());
+            final String responseHeader = getResponseHeader(staticResource);
+            outputStream.write(responseHeader.getBytes());
+            outputStream.write("\r\n".getBytes());
+            outputStream.write(staticResource.getContent());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getResourceData(final String path) {
-        final String resourcePath = "static" + path;
-
-        try {
-            final URL url = getClass().getClassLoader().getResource(resourcePath);
-            final Path filePath = Paths.get(url.toURI());
-            return Files.readString(filePath);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Hello world!";
-        }
+    private String getResponseHeader(final StaticResource staticResource) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + staticResource.getMimeType() + " ",
+                "Content-Length: " + staticResource.getContent().length + " ",
+                ""
+        );
     }
 }

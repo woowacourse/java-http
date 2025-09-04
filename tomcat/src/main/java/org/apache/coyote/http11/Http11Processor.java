@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+        final Map<String, String> mimeTypes = Map.of("html", "text/html", "css", "text/css", "js", "text/javascript");
+
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -44,14 +47,21 @@ public class Http11Processor implements Runnable, Processor {
             final String requestUri = requestLine.split(" ")[1];
 
             String responseBody = "Hello world!";
+            String contentType = "text/html;charset=utf-8";
             if (!requestUri.equals("/")) {
                 final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+                if (resource == null) {
+                    return;
+                }
+
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                String responseResourceExtension = resource.getPath().split("\\.")[1];
+                contentType = mimeTypes.get(responseResourceExtension);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

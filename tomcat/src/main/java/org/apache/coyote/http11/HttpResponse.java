@@ -9,12 +9,12 @@ public class HttpResponse {
 
     private String responseLine;
     private final Map<String, String> responseHeaders;
-    private String responseBody;
+    private byte[] responseBody;
 
     public HttpResponse(
             final String responseLine,
             final Map<String, String> responseHeaders,
-            final String responseBody
+            final byte[] responseBody
     ) {
         this.responseLine = responseLine;
         this.responseHeaders = responseHeaders;
@@ -22,13 +22,12 @@ public class HttpResponse {
     }
 
     public static HttpResponse createWelcomeHttpResponse() {
-        final String welcomeResponseBody = "Hello world!";
+        final byte[] bodyBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
         final Map<String, String> responseHeaders = new LinkedHashMap<>();
         responseHeaders.put("Content-Type", "text/html;charset=utf-8");
-        byte[] bodyBytes = welcomeResponseBody.getBytes(StandardCharsets.UTF_8);
         responseHeaders.put("Content-Length", String.valueOf(bodyBytes.length));
 
-        return new HttpResponse("HTTP/1.1 200 OK", responseHeaders, welcomeResponseBody);
+        return new HttpResponse("HTTP/1.1 200 OK", responseHeaders, bodyBytes);
     }
 
     public String parseHttpResponse() {
@@ -40,6 +39,6 @@ public class HttpResponse {
                 responseLine + " ",
                 parsedHeaders,
                 "",
-                responseBody);
+                new String(responseBody, StandardCharsets.UTF_8));
     }
 }

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -73,11 +72,10 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = HttpResponse.createWelcomeHttpResponse();
             if (resource != null) {
                 final String responseLine = "HTTP/1.1 200 OK";
-                final String responseBody = readFile(resource);
+                final byte[] responseBody = readFile(resource);
                 final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
                 responseHeaders.put("Content-Type", getMimeType(resource));
-                byte[] bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-                responseHeaders.put("Content-Length", String.valueOf(bodyBytes.length));
+                responseHeaders.put("Content-Length", String.valueOf(responseBody.length));
 
                 response = new HttpResponse(responseLine, responseHeaders, responseBody);
             }
@@ -98,8 +96,8 @@ public class Http11Processor implements Runnable, Processor {
         return resource;
     }
 
-    private String readFile(final URL resource) throws IOException {
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    private byte[] readFile(final URL resource) throws IOException {
+        return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 
     private String getMimeType(final URL resource) throws IOException {

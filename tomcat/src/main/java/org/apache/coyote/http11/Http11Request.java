@@ -52,4 +52,8 @@ public class Http11Request {
     public String getProtocol() {
         return protocol;
     }
+
+    public String getHeader(final String headerName) {
+        return headers.get(headerName);
+    }
 }

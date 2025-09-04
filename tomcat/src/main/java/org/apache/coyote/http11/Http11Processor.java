@@ -34,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String resourcePath = http11Request.getUri().substring(1);
             byte[] body = readFromResourcePath(resourcePath);
-            byte[] responseHeader = createResponseHeader(body.length);
+            byte[] responseHeader = createResponseHeader(http11Request, body.length);
 
             outputStream.write(responseHeader);
             outputStream.write(body);
@@ -44,9 +44,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private byte[] createResponseHeader(final int length) {
+    private byte[] createResponseHeader(final Http11Request http11Request, final int length) {
+        String accept = http11Request.getHeader("Accept");
+
+        if(accept.contains("text/html")) {
+            accept = "text/html";
+        }
+        if (accept.contains("text/css")) {
+            accept = "text/css";
+        }
+
         String header = "HTTP/1.1 200 OK" + " \r\n" +
-        "Content-Type: text/html;charset=utf-8" + " \r\n" +
+        "Content-Type: " + accept + ";charset=utf-8" + " \r\n" +
         "Content-Length: " + length + " \r\n" +
         "\r\n";
 

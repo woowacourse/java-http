@@ -1,7 +1,12 @@
 package com.java.http;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public record HttpResponse(
         String version,
@@ -84,23 +89,27 @@ public record HttpResponse(
         }
     }
 
+    private static final String CRLF = "\r\n";
+
     public byte[] toByteArray() {
-        return toSimpleString().getBytes(StandardCharsets.UTF_8);
-    }
+        StringBuilder sb = new StringBuilder();
 
-    public String toSimpleString() {
-        StringJoiner result = new StringJoiner("\r\n");
+        sb.append("%s %s %s".formatted(version, statusCode.codeNumber, statusCode.name())).append(CRLF);
+        headers.forEach((key, value) -> sb.append("%s: %s".formatted(key, value)).append(CRLF));
+        sb.append(CRLF);
 
-        result.add("%s %s %s ".formatted(version, statusCode.codeNumber, statusCode.name()));
-        headers.forEach((key, value) -> result.add("%s: %s ".formatted(key, value)));
-        result.add("");
-        result.add(new String(responseBody, StandardCharsets.UTF_8));
-
-        return result.toString();
-    }
-
-    @Override
-    public String toString() {
-        return toSimpleString();
+        String contentType = headers.get("Content-Type");
+        if (contentType != null && contentType.equals("image/x-icon")) {
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                baos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+                baos.write(responseBody);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            sb.append(new String(responseBody, StandardCharsets.UTF_8)).append(CRLF);
+            return sb.toString().getBytes(StandardCharsets.UTF_8);
+        }
     }
 }

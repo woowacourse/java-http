@@ -10,7 +10,7 @@ import java.util.Optional;
 public class LoginHandler extends AbstractHandler {
 
     @Override
-    public boolean canHandler(final String requestTarget) {
+    public boolean canHandle(final String requestTarget) {
         return requestTarget.startsWith("/login");
     }
 
@@ -21,7 +21,7 @@ public class LoginHandler extends AbstractHandler {
         final String queryString = split[1];
         final Map<String, String> params = getParams(queryString);
 
-        final String responseBody = getResponseBody(resource + ".html");
+        final String responseBody = getStaticResponseBody(resource + ".html");
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
         user.ifPresent(value -> System.out.println("user: " + value));

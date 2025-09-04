@@ -1,14 +1,23 @@
 package org.apache.coyote.handler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HandlerMapper {
 
-    final List<AbstractHandler> handlers = new ArrayList<>();
+    private static HandlerMapper INSTANCE;
 
-    public HandlerMapper() {
+    private final List<AbstractHandler> handlers = new ArrayList<>();
+
+    public static HandlerMapper getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new HandlerMapper();
+        }
+
+        return INSTANCE;
+    }
+
+    private HandlerMapper() {
         handlers.add(new HelloWorldHandler());
         handlers.add(new LoginHandler());
         handlers.add(new HtmlHandler());
@@ -16,18 +25,9 @@ public class HandlerMapper {
         handlers.add(new CssHandler());
     }
 
-    public String getHandleResponse(final String requestTarget) throws IOException {
-        final AbstractHandler handler = getHandler(requestTarget);
-        if (handler == null) {
-            return "HTTP/1.1 404 NOT FOUND ";
-        }
-
-        return handler.handle(requestTarget);
-    }
-
     public AbstractHandler getHandler(final String requestTarget) {
         for (AbstractHandler handler : handlers) {
-            if (handler.canHandler(requestTarget)) {
+            if (handler.canHandle(requestTarget)) {
                 return handler;
             }
         }

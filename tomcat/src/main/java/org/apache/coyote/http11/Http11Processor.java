@@ -3,11 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.AbstractHandler;
 import org.apache.coyote.handler.HandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +34,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final HandlerMapper handlerMapper = new HandlerMapper();
 
-            final List<String> request = getRequest(bufferedReader);
-
-            final String startLine = request.getFirst();
-            final String[] split = startLine.split(" ");
-            final String requestTarget = split[1];
-            final String response = handlerMapper.getHandleResponse(requestTarget);
+            final List<String> request = getRequest(inputStream);
+            final String requestTarget = getRequestTarget(request);
+            final String response = getResponse(requestTarget);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,12 +46,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static List<String> getRequest(final BufferedReader bufferedReader) throws IOException {
+    private List<String> getRequest(final InputStream inputStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final List<String> request = new ArrayList<>();
         String line;
         while (!"".equals(line = bufferedReader.readLine())) {
             request.add(line);
         }
         return request;
+    }
+
+    private String getRequestTarget(final List<String> request) {
+        final String startLine = request.getFirst();
+        final String[] split = startLine.split(" ");
+
+        return split[1];
+    }
+
+    public String getResponse(final String requestTarget) throws IOException {
+        final HandlerMapper handlerMapper = HandlerMapper.getInstance();
+        final AbstractHandler handler = handlerMapper.getHandler(requestTarget);
+        if (handler == null) {
+            return "HTTP/1.1 404 NOT FOUND ";
+        }
+
+        return handler.handle(requestTarget);
     }
 }

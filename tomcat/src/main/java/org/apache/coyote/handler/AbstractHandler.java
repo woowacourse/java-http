@@ -9,11 +9,11 @@ import java.util.List;
 
 public abstract class AbstractHandler {
 
-    public abstract boolean canHandler(final String requestTarget);
+    public abstract boolean canHandle(final String requestTarget);
 
     public abstract String handle(final String requestTarget) throws IOException;
 
-    protected String getResponseBody(final String requestTarget) throws IOException {
+    protected String getStaticResponseBody(final String requestTarget) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + requestTarget);
         if (resource == null) {
             return null;

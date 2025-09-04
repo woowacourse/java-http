@@ -34,37 +34,52 @@ public class StaticResourceServlet implements Servlet {
             uri = "/index.html";
         }
 
-        final String content = readStaticFile(uri);
-        final String contentType = ContentTypeMapper.get(uri);
+        final StaticFileResult result = readStaticFile(uri);
 
-        response.setContentType(contentType);
-        response.write(content);
+        response.setStatus(result.statusCode);
+        response.setContentType(result.contentType);
+        response.write(result.content);
     }
 
-    private String readStaticFile(final String uri) {
+    private StaticFileResult readStaticFile(final String uri) {
         try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + uri)) {
             if (inputStream == null) {
                 log.warn("Static file not found: {}", uri);
-                return createErrorPage("File Not Found", 404);
+                return new StaticFileResult(
+                        404,
+                        "text/html; charset=utf-8",
+                        createErrorPage("File Not Found", 404)
+                );
             }
-            
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            final String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            final String contentType = ContentTypeMapper.get(uri);
+
+            return new StaticFileResult(200, contentType, content);
+
         } catch (final IOException e) {
             log.error("Failed to read static file: {}", uri, e);
-            return createErrorPage("Error loading file", 500);
+            return new StaticFileResult(
+                    500,
+                    "text/html; charset=utf-8",
+                    createErrorPage("Error loading file", 500)
+            );
         }
+    }
+
+    private record StaticFileResult(int statusCode, String contentType, String content) {
     }
 
     private String createErrorPage(final String message, final int statusCode) {
         return String.format("""
-            <html>
-            <head><title>Error %d</title></head>
-            <body>
-                <h1>%s</h1>
-                <p>Status Code: %d</p>
-            </body>
-            </html>
-            """, statusCode, message, statusCode);
+                <html>
+                <head><title>Error %d</title></head>
+                <body>
+                    <h1>%s</h1>
+                    <p>Status Code: %d</p>
+                </body>
+                </html>
+                """, statusCode, message, statusCode);
     }
 
     @Override

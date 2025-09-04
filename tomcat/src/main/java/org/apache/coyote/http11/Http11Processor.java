@@ -21,11 +21,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, String> MIME_TYPES = Map.of(
-            "html", "text/html;charset=utf-8",
-            "css", "text/css",
-            "js", "text/javascript"
-    );
+    private static final String RESOURCE_EXTENSION_SEPARATOR = "\\.";
 
     private final Socket connection;
 
@@ -98,16 +94,11 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 
-    private String getMimeType(final URL resource) {
-        final String responseResourceExtension = resource.getPath().split("\\.")[1];
-        return MIME_TYPES.get(responseResourceExtension);
-    }
-
     private HttpResponse getHttpResponse(final URL resource) throws IOException {
         final String responseLine = "HTTP/1.1 200 OK";
         final byte[] responseBody = readFile(resource);
         final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Content-Type", getMimeType(resource));
+        responseHeaders.put("Content-Type", getContentType(resource));
         responseHeaders.put("Content-Length", String.valueOf(responseBody.length));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
@@ -117,5 +108,10 @@ public class Http11Processor implements Runnable, Processor {
         final String parsedResponse = response.parseHttpResponse();
         outputStream.write(parsedResponse.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private String getContentType(final URL resource) {
+        final String responseResourceExtension = resource.getPath().split(RESOURCE_EXTENSION_SEPARATOR)[1];
+        return HttpResponse.getContentType(responseResourceExtension);
     }
 }

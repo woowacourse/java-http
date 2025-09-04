@@ -7,6 +7,12 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
 
+    private static final Map<String, String> MIME_TYPES = Map.of(
+            "html", "text/html",
+            "css", "text/css",
+            "js", "text/javascript"
+    );
+
     private String responseLine;
     private final Map<String, String> responseHeaders;
     private byte[] responseBody;
@@ -24,10 +30,18 @@ public class HttpResponse {
     public static HttpResponse createWelcomeHttpResponse() {
         final byte[] bodyBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
         final Map<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Content-Type", "text/html;charset=utf-8");
+        responseHeaders.put("Content-Type", getContentType("html"));
         responseHeaders.put("Content-Length", String.valueOf(bodyBytes.length));
 
         return new HttpResponse("HTTP/1.1 200 OK", responseHeaders, bodyBytes);
+    }
+
+    public static String getContentType(final String resourceExtension) {
+        final String mimeType = MIME_TYPES.get(resourceExtension);
+        if (mimeType.equals("text/html")) {
+            return mimeType + ";charset=utf-8";
+        }
+        return mimeType;
     }
 
     public String parseHttpResponse() {

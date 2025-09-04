@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.impl;
+package com.http.servlet;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +20,7 @@ class LoginRequestServletTest {
     @BeforeEach
     void setUp() {
         loginRequestHandler = new LoginRequestServlet();
-        
+
         // 테스트용 사용자 데이터 초기화
         User testUser = new User(1L, "admin", "password123", "admin@test.com");
         InMemoryUserRepository.save(testUser);
@@ -31,8 +31,8 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
-            "account", "admin",
-            "password", "password123"
+                "account", "admin",
+                "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
@@ -46,16 +46,16 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
-            "account", "wronguser",
-            "password", "password123"
+                "account", "wronguser",
+                "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest, httpResponse)
+                IllegalArgumentException.class,
+                () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -65,8 +65,8 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
-            "account", "admin",
-            "password", "wrongpassword"
+                "account", "admin",
+                "password", "wrongpassword"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
@@ -85,8 +85,8 @@ class LoginRequestServletTest {
 
         // when & then
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest, httpResponse)
+                IllegalArgumentException.class,
+                () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -101,8 +101,8 @@ class LoginRequestServletTest {
 
         // when & then
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest, httpResponse)
+                IllegalArgumentException.class,
+                () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -116,8 +116,8 @@ class LoginRequestServletTest {
 
         // when & then
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest, httpResponse)
+                IllegalArgumentException.class,
+                () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("account와 password는 필수입니다.", exception.getMessage());
     }
@@ -127,16 +127,16 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
-            "account", "",
-            "password", "password123"
+                "account", "",
+                "password", "password123"
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> loginRequestHandler.handle(httpRequest, httpResponse)
+                IllegalArgumentException.class,
+                () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -146,8 +146,8 @@ class LoginRequestServletTest {
         // given
         StartLine startLine = new StartLine("GET", "/login", "HTTP/1.1");
         Map<String, String> queryStrings = Map.of(
-            "account", "admin",
-            "password", ""
+                "account", "admin",
+                "password", ""
         );
         HttpRequest httpRequest = new HttpRequest(startLine, queryStrings, Map.of());
         HttpResponse httpResponse = new HttpResponse();

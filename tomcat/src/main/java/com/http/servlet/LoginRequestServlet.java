@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.impl;
+package com.http.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

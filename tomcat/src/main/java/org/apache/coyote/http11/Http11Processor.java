@@ -5,8 +5,6 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +13,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.util.HttpParser;
 import org.apache.coyote.util.HttpRequest;
 import org.apache.coyote.util.HttpResponse;
+import org.apache.coyote.util.ResourceDecodedUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,17 +73,12 @@ public class Http11Processor implements Runnable, Processor {
             log.info(user.toString());
         }
 
-        URL resourceUrl = getClass().getClassLoader().getResource(getResourcePath(requestPath));
-        if (resourceUrl == null) {
-            log.info("요청할 수 없는 자원 = {}", getResourcePath(requestPath));
-            throw new IllegalArgumentException("요청한 자원을 찾을 수 없습니다.");
-        }
-
-        String decodedUrl = URLDecoder.decode(resourceUrl.getPath(), StandardCharsets.UTF_8);
+        String resourcePath = getResourcePath(requestPath);
+        ResourceDecodedUrl resourceDecodedUrl = ResourceDecodedUrl.from(resourcePath);
 
         try {
-            String responseBody = new String(Files.readAllBytes(Path.of(decodedUrl)));
-            httpResponse.putHeader("Content-Type", getContentType(getResourcePath(requestPath)));
+            String responseBody = new String(Files.readAllBytes(Path.of(resourceDecodedUrl.value())));
+            httpResponse.putHeader("Content-Type", getContentType(resourcePath));
             httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
             return responseBody;
         } catch (IOException e) {

@@ -105,11 +105,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void send200Response(final String resource, final OutputStream outputStream) throws IOException {
-        validateResource(resource, outputStream);
-        final Path resourcePath = getResourcePath(resource);
-        final String response = create200HttpResponse(resourcePath);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        try {
+            final URL resourceUrl = validateResource(resource);
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
+            final String response = create200HttpResponse(resourcePath);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final FileNotFoundException e) {
+            send404Response(outputStream);
+            throw e;
+        }
     }
 
     private void send404Response(final OutputStream outputStream) throws IOException {
@@ -118,16 +123,12 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void validateResource(final String resource, final OutputStream outputStream) throws IOException {
+    private URL validateResource(final String resource) throws FileNotFoundException {
         final URL resourceUrl = getClass().getClassLoader().getResource("static" + resource);
         if (resourceUrl == null) {
-            send404Response(outputStream);
             throw new FileNotFoundException("요청한 리소스를 찾을 수 없습니다.");
         }
-    }
-
-    private Path getResourcePath(final String requestURL) {
-        return Paths.get(getClass().getClassLoader().getResource("static" + requestURL).getFile());
+        return resourceUrl;
     }
 
     private String create200HttpResponse(final Path resourcePath) throws IOException {
@@ -142,9 +143,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String create404HttpResponse() throws IOException {
-        final Path resourcePath = getResourcePath("/404.html");
-        final String responseBody = new String(Files.readAllBytes(resourcePath));
-        final String contentType = Files.probeContentType(resourcePath);
+        String responseBody;
+        String contentType;
+
+        try {
+            final URL resourceUrl = validateResource("/404.html");
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
+            responseBody = new String(Files.readAllBytes(resourcePath));
+            contentType = Files.probeContentType(resourcePath);
+        } catch (final FileNotFoundException e) {
+            responseBody = "<html><body><h1>404 Not Found</h1><p>요청하신 페이지를 찾을 수 없습니다.</p></body></html>";
+            contentType = "text/html";
+        }
+
         return String.join("\r\n",
                 "HTTP/1.1 404 Not Found ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",

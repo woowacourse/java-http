@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +11,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +71,12 @@ public class Http11Processor implements Runnable, Processor {
         if (requestUri.endsWith(".css")) {
             return "css";
         }
+        if (requestUri.equals("js")) {
+            return "js";
+        }
+        if (requestUri.equals("svg")) {
+            return "svg+xml";
+        }
         return "html";
     }
 
@@ -74,8 +85,52 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        final String fileName = "static" + requestUri;
-        final URL resource  = getClass().getClassLoader().getResource(fileName);
+        if (hasQueryString(requestUri)) {
+            return getResponseBodyIfHasQueryString(requestUri);
+        }
+
+        return getPlainResponseBody(requestUri);
+    }
+
+    private boolean hasQueryString(final String requestUri) {
+        return requestUri.contains("?");
+    }
+
+    private String getResponseBodyIfHasQueryString(final String requestUri) throws IOException {
+        int index = requestUri.indexOf("?");
+
+        final String queryString = requestUri.substring(index + 1);
+        final String[] queryStrings = queryString.split("&");
+
+        final Map<String, String> params = new HashMap<>();
+        for (String param : queryStrings) {
+            final String name = param.split("=")[0];
+            final String value = param.split("=")[1];
+            params.put(name, value);
+        }
+        final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(params.get("account"));
+        userOrEmpty.ifPresent(user -> log.info("user: {}", user));
+
+        final String filePath = "static" + requestUri.substring(0, index);
+
+        return readResourceAsString(requestUri, filePath);
+    }
+
+    private String getPlainResponseBody(final String requestUri) throws IOException {
+        final String filePath = "static" + requestUri;
+
+        return readResourceAsString(requestUri, filePath);
+    }
+
+    private String readResourceAsString(final String requestUri, String filePath) throws IOException {
+        if (!requestUri.contains(".")) {
+            filePath += ".html";
+        }
+
+        URL resource  = getClass().getClassLoader().getResource(filePath);
+        if (resource == null) {
+            resource = getClass().getClassLoader().getResource("static/404.html");
+        }
         final File file = new File(resource.getFile());
         final Path path = file.toPath();
         return new String(Files.readAllBytes(path));

@@ -7,7 +7,7 @@ public record HttpResponse(
         String version,
         StatusCode statusCode,
         Map<String, String> headers,
-        String responseBody
+        byte[] responseBody
 ) {
     public static HttpResponseBuilder ok() {
         return new HttpResponseBuilder(200);
@@ -19,7 +19,7 @@ public record HttpResponse(
         private final StatusCode statusCode;
         private final Map<String, String> headers = new HashMap<>();
 
-        private String responseBody;
+        private byte[] responseBody;
 
         public HttpResponseBuilder(int statusCode) {
             this.statusCode = StatusCode.parse(statusCode);
@@ -28,20 +28,34 @@ public record HttpResponse(
         public HttpResponseBuilder html(String data) {
             this.headers.put("Content-Type", "text/html;charset=utf-8");
             this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
+            this.responseBody = data.getBytes(StandardCharsets.UTF_8);
+            return this;
+        }
+
+        public HttpResponseBuilder html(byte[] data) {
+            this.headers.put("Content-Type", "text/html;charset=utf-8");
+            this.headers.put("Content-Length", String.valueOf(data.length));
             this.responseBody = data;
             return this;
         }
 
-        public HttpResponseBuilder css(String data) {
+        public HttpResponseBuilder css(byte[] data) {
             this.headers.put("Content-Type", "text/css;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
+            this.headers.put("Content-Length", String.valueOf(data.length));
             this.responseBody = data;
             return this;
         }
 
-        public HttpResponseBuilder js(String data) {
+        public HttpResponseBuilder js(byte[] data) {
             this.headers.put("Content-Type", "application/javascript;charset=utf-8");
-            this.headers.put("Content-Length", String.valueOf(data.getBytes(StandardCharsets.UTF_8).length));
+            this.headers.put("Content-Length", String.valueOf(data.length));
+            this.responseBody = data;
+            return this;
+        }
+
+        public HttpResponseBuilder icon(byte[] data) {
+            this.headers.put("Content-Type", "image/x-icon");
+            this.headers.put("Content-Length", String.valueOf(data.length));
             this.responseBody = data;
             return this;
         }
@@ -80,8 +94,13 @@ public record HttpResponse(
         result.add("%s %s %s ".formatted(version, statusCode.codeNumber, statusCode.name()));
         headers.forEach((key, value) -> result.add("%s: %s ".formatted(key, value)));
         result.add("");
-        result.add(responseBody);
+        result.add(new String(responseBody, StandardCharsets.UTF_8));
 
         return result.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toSimpleString();
     }
 }

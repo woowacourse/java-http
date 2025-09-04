@@ -10,6 +10,7 @@ public class HandlerMapper {
 
     public HandlerMapper() {
         handlers.add(new HelloWorldHandler());
+        handlers.add(new LoginHandler());
         handlers.add(new HtmlHandler());
         handlers.add(new JsHandler());
         handlers.add(new CssHandler());

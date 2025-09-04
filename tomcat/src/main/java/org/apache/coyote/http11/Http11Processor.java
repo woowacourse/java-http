@@ -93,16 +93,23 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> extractQueryParameters(String requestLine) {
         Map<String, String> queryParameters = new HashMap<>();
-        String requestUri = requestLine.split(" ")[1];
-        String[] parts = requestUri.split("\\?");
-        if(parts.length <2) {
+        String[] requestLineParts = requestLine.split(" ");
+        if(requestLineParts.length <2) {
+            return queryParameters;
+        }
+        String requestUri = requestLineParts[1];
+
+        String[] requestUriParts = requestUri.split("\\?");
+        if(requestUriParts.length <2) {
             return queryParameters;
         }
 
-        String queryString = parts[1];
+        String queryString = requestUriParts[1];
         for (String rawParam : queryString.split("&")) {
             String[] rawParamParts = rawParam.split("=");
-            queryParameters.put(rawParamParts[0], rawParamParts[1]);
+            if(rawParamParts.length>=2) {
+                queryParameters.put(rawParamParts[0], rawParamParts[1]);
+            }
         }
         return queryParameters;
     }

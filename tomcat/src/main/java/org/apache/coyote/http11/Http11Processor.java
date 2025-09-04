@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,6 +52,9 @@ public class Http11Processor implements Runnable, Processor {
 
             // 요청 헤더
             String requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
+                throw new IllegalArgumentException("invalid http request");
+            }
 
             // 요청 헤더 파싱
             String requestUri = requestLine.split(" ")[1];
@@ -62,10 +67,10 @@ public class Http11Processor implements Runnable, Processor {
             final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: %s;charset=utf-8 ".formatted(contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: " + responseBody.getBytes(UTF_8).length + " ",
                 "",
                 responseBody);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -119,6 +124,9 @@ public class Http11Processor implements Runnable, Processor {
     private String readStaticFile(String filePath) throws IOException {
         String staticFilePath = STATIC_RESOURCE_PATH + filePath;
         URL resource = getClass().getClassLoader().getResource(staticFilePath);
+        if (resource == null) {
+            throw new IllegalArgumentException("리소스가 존재하지 않습니다. " + staticFilePath);
+        }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 

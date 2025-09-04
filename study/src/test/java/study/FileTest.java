@@ -1,13 +1,22 @@
 package study;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import study.IOStreamTest.InputStream_학습_테스트;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.INPUT_STREAM;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -24,12 +33,22 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        // class.getResource의 경우 아래처럼 동작
+        // "/자원" -> 절대 경로
+        // "자원" -> 상대 경로
+        // https://recordsoflife.tistory.com/1155
 
+        // ClassLoader.getResource -> 항상 절대 경로로만 탐색 가능
+        // https://codinglog.tistory.com/162ㄷ
+//        getClass().getClassLoader()
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final String actual = classLoader.getResource(fileName).getPath();
+
+        System.out.println(actual);
         assertThat(actual).endsWith(fileName);
     }
 
@@ -40,14 +59,16 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(classLoader.getResource(fileName).toURI());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path);
+        System.out.println(actual);
 
         assertThat(actual).containsOnly("nextstep");
     }

@@ -147,14 +147,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         Path resourcePath = Path.of(url.toURI());
-        if(!Files.isRegularFile(resourcePath)){
+        Path normalizedResourcePath = resourcePath.normalize();
+        if(!normalizedResourcePath.startsWith("/")){
+            outputStream.write("HTTP/1.1 401 UNAUTHORIZED \r\n\r\n".getBytes());
+            outputStream.flush();
+            return null;
+        }
+
+        if(!Files.isRegularFile(normalizedResourcePath)){
             String helloWorldHttpResponse = helloWorldHttpResponse();
             outputStream.write(helloWorldHttpResponse.getBytes());
             outputStream.flush();
             return null;
         }
 
-        return resourcePath;
+
+        return normalizedResourcePath;
     }
 
     private URL findResourceURL(String uri) {

@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,12 +32,30 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            byte[] requestBytes = inputStream.readAllBytes();
+            String[] request = new String(requestBytes, StandardCharsets.UTF_8).split("\\n");
+
+            String[] requestStartLine = request[0].split(" ");
+            final String requestTarget = requestStartLine[1];
+
+            String responseBody = "";
+            if (requestTarget.equals("/")) {
+                responseBody = "Hello world!";
+            } else if (requestTarget.equals("/index.html")) {
+                final var path = Path.of("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/tomcat/src/main/resources/static", "index.html");
+                final var fileContent = Files.readAllLines(path);
+
+                final StringBuilder responseBodyBuilder = new StringBuilder();
+                for (final String content : fileContent) {
+                    responseBodyBuilder.append(content + "\n");
+                }
+                responseBody = responseBodyBuilder.toString();
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length() + " ",
                     "",
                     responseBody);
 

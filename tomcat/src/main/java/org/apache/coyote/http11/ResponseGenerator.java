@@ -12,8 +12,12 @@ import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.constant.RequestLine;
 import org.apache.coyote.http11.constant.ResourcePath;
 import org.apache.coyote.util.StreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResponseGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(ResponseGenerator.class);
 
     private ResponseGenerator() {
 
@@ -57,7 +61,7 @@ public class ResponseGenerator {
             if (!user.checkPassword(queryStrings.get("password"))) {
                 throw new IllegalArgumentException("올바르지 않은 패스워드입니다.");
             }
-            System.out.println(String.format("user : %s", user));
+            log.info(String.format("user: %s", user));
         }
     }
 
@@ -75,9 +79,8 @@ public class ResponseGenerator {
 
     private static String readFile(String path) {
         final String resourcePath = String.format("static/%s", path);
-        final StreamReader reader = new StreamReader("\n");
         try (InputStream resourceAsStream = Application.class.getClassLoader().getResourceAsStream(resourcePath)) {
-            return reader.readAllLine(resourceAsStream);
+            return StreamReader.readFile(resourceAsStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

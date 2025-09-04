@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -22,14 +23,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        if (resource == null) {
-            throw new RuntimeException("Could not find static/index.html resource");
-        }
-        final String fileContent;
-        try (var inputStream = resource.openStream()) {
-            fileContent = new String(inputStream.readAllBytes());
-        }
+        final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("static/index.html");
+        final String fileContent = new String(resourceStream.readAllBytes()).strip();
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
@@ -57,14 +52,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        if (resource == null) {
-            throw new RuntimeException("Could not find static/index.html resource");
-        }
-        final String fileContent;
-        try (var inputStream = resource.openStream()) {
-            fileContent = new String(inputStream.readAllBytes());
-        }
+        final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("static/index.html");
+        final String fileContent = new String(resourceStream.readAllBytes()).strip();
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
                 "Content-Length: " + fileContent.length() + "\r\n" +

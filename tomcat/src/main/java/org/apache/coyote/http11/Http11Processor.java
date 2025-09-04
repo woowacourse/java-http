@@ -78,8 +78,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void printMemberLog(final HttpHeader httpHeader) {
-        Map<String, String> queries = httpHeader.getQueries();
-        User user = InMemoryUserRepository.findByAccount(queries.get("account"))
+        final Map<String, String> queries = httpHeader.getQueries();
+        final User user = InMemoryUserRepository.findByAccount(queries.get("account"))
                 .orElse(null);
         if (user != null && user.checkPassword(queries.get("password"))) {
             log.info("user : {}", user);

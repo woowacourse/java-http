@@ -43,7 +43,7 @@ public class HttpHeaderParser {
     }
 
     private static void validateRequestLine(final String requestLine) {
-        Matcher matcher = REQUEST_LINE_PATTERN.matcher(requestLine);
+        final Matcher matcher = REQUEST_LINE_PATTERN.matcher(requestLine);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("requestLine의 형식이 잘못되었습니다.");
         }

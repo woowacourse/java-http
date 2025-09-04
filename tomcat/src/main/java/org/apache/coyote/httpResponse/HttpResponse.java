@@ -11,13 +11,13 @@ public class HttpResponse {
             final String contentType,
             final String body
     ) {
-        StatusLine statusLine = new StatusLine(protocol, statusCode);
+        final StatusLine statusLine = new StatusLine(protocol, statusCode);
         this.responseHeader = new HttpResponseHeader(statusLine, contentType);
         this.body = body;
     }
 
     public String getResponse() {
-        String headers = responseHeader.getHeaders();
+        final String headers = responseHeader.getHeaders();
         return String.join(
                 "\r\n",
                 headers,

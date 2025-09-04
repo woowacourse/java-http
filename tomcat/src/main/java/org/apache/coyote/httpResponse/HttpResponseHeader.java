@@ -26,10 +26,10 @@ public class HttpResponseHeader {
     }
 
     public String getHeaders() {
-        List<String> allHeaders = headers.entrySet().stream()
+        final List<String> allHeaders = headers.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .toList();
-        List<String> result = new ArrayList<>(List.of(statusLine.getStatusLine()));
+        final List<String> result = new ArrayList<>(List.of(statusLine.getStatusLine()));
         result.addAll(allHeaders);
 
         return String.join(

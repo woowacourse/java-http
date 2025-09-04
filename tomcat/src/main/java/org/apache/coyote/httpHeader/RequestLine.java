@@ -21,7 +21,7 @@ public class RequestLine {
     }
 
     public String getPurePath() {
-        int index = path.indexOf("?");
+        final int index = path.indexOf("?");
         if (index == -1) {
             return path;
         }
@@ -29,12 +29,12 @@ public class RequestLine {
     }
 
     public Map<String, String> getQueryValues() {
-        Map<String, String> values = new TreeMap<>();
+        final Map<String, String> values = new TreeMap<>();
         int index = path.indexOf("?");
-        String queryPath = path.substring(index + 1);
-        String[] queries = queryPath.split("&");
-        for (String query : queries) {
-            String[] split = query.split("=");
+        final String queryPath = path.substring(index + 1);
+        final String[] queries = queryPath.split("&");
+        for (final String query : queries) {
+            final String[] split = query.split("=");
             values.put(split[0], split[1]);
         }
         return values;

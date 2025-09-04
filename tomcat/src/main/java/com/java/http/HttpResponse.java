@@ -1,5 +1,9 @@
 package com.java.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +22,13 @@ public record HttpResponse(
         return new HttpResponseBuilder(200);
     }
 
+    public static HttpResponse notFound(String message) {
+        return new HttpResponseBuilder(404).json(Map.of("error_message", message)).build();
+    }
+
     public static class HttpResponseBuilder {
+
+        private static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
         private final String version = "HTTP/1.1";
         private final StatusCode statusCode;
@@ -28,6 +38,20 @@ public record HttpResponse(
 
         public HttpResponseBuilder(int statusCode) {
             this.statusCode = StatusCode.parse(statusCode);
+        }
+
+        public HttpResponseBuilder json(Map<String, String> map) {
+            byte[] data;
+            try {
+                data = OBJECT_WRITER.writeValueAsBytes(map);
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("JSON 직렬화 중 예외가 발생했습니다.", e);
+            }
+
+            this.headers.put("Content-Type", "application/json;charset=utf-8");
+            this.headers.put("Content-Length", String.valueOf(data.length));
+            this.responseBody = data;
+            return this;
         }
 
         public HttpResponseBuilder html(String data) {
@@ -71,12 +95,16 @@ public record HttpResponse(
     }
 
     private enum StatusCode {
-        OK(200),
+        OK("OK", 200),
+        NOT_FOUND("Not Found", 404),
+        INTERNAL_SERVER_ERROR("Internal Server Error", 500),
         ;
 
+        final String codeName;
         final int codeNumber;
 
-        StatusCode(int codeNumber) {
+        StatusCode(String codeName, int codeNumber) {
+            this.codeName = codeName;
             this.codeNumber = codeNumber;
         }
 
@@ -93,7 +121,7 @@ public record HttpResponse(
     public byte[] toByteArray() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("%s %s %s".formatted(version, statusCode.codeNumber, statusCode.name())).append(CRLF);
+        sb.append("%s %s %s".formatted(version, statusCode.codeNumber, statusCode.codeName)).append(CRLF);
         headers.forEach((key, value) -> sb.append("%s: %s".formatted(key, value)).append(CRLF));
         sb.append(CRLF);
 

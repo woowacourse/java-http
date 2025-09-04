@@ -9,6 +9,7 @@ import com.techcourse.servlet_impl.LoginServlet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SimpleContainer implements Container {
 
@@ -32,14 +33,17 @@ public class SimpleContainer implements Container {
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        Servlet servlet = findServletFor(request);
-        return servlet.handle(request);
+        Optional<Servlet> servlet = findServletFor(request);
+        if (servlet.isPresent()) {
+            return servlet.get().handle(request);
+        } else {
+            return HttpResponse.notFound("해당 요청을 처리할 서블릿을 찾지 못했습니다. uri=" + request.uri());
+        }
     }
 
-    private static Servlet findServletFor(HttpRequest request) {
+    private static Optional<Servlet> findServletFor(HttpRequest request) {
         return servlets.stream()
                 .filter(servlet -> servlet.canHandle(request))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 요청을 처리할 서블릿을 찾지 못했습니다. uri=" + request.uri()));
+                .findFirst();
     }
 }

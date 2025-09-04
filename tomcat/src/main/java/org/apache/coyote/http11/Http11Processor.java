@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,17 +40,24 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String[] requestHeaderInfo = br.readLine().split(" ");
-            String url = requestHeaderInfo[1].substring(1);
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String requestLine = br.readLine();
+            if (requestLine == null) {
+                return;
+            }
 
+            String[] requestHeaderInfo = requestLine.split(" ");
+            if (requestHeaderInfo.length < 2) {
+                return;
+            }
+
+            String url = requestHeaderInfo[1].substring(1);
             if (url.isEmpty()) {
                 sendDefaultResource(outputStream);
                 return;
             }
 
             String staticUrl = "static/" + url;
-
             if (url.contains("?") && url.contains("login")) {
                 int index = url.indexOf("?");
                 staticUrl = "static/" + url.substring(0, index) + ".html";

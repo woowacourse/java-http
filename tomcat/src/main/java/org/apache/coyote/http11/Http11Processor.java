@@ -26,6 +26,7 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int MAX_REQUEST_SIZE = 104_857_600; // 10MB
 
     private final Socket connection;
 
@@ -79,7 +80,7 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource("static" + requestPath);
         if (resource == null) {
             log.info("Resource not found!");
-            return null;
+            throw new IllegalArgumentException();
         }
         List<String> strings = Files.readAllLines(Paths.get(resource.toURI()));
 
@@ -122,17 +123,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseRequest(InputStream inputStream) throws IOException {
-        StringBuilder requestBuilder = new StringBuilder();
-        String line;
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
+        int byteSum = 0;
+        String line;
+        StringBuilder sb = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
                 break;
             }
-            requestBuilder.append(line).append("\r\n");
+            sb.append(line).append("\r\n");
+            byteSum += line.length() + 2;
+            if (byteSum > MAX_REQUEST_SIZE) {
+                throw new IllegalArgumentException();
+            }
         }
 
-        return requestBuilder.toString();
+        return sb.toString();
     }
 }

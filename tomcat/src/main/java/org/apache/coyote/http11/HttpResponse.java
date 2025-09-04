@@ -24,9 +24,9 @@ public class HttpResponse {
 
     public void send() throws IOException {
         final String responseHeaders = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: " + contentType,
-                "Content-Length: " + body.length,
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + body.length + " ",
                 "",
                 "");
 

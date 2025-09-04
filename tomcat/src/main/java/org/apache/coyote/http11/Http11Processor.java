@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,6 +42,13 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse(outputStream);
             final String path = request.getPath();
+
+            if ("/".equals(path)) {
+                final byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                response.setBody(body);
+                response.send();
+                return;
+            }
 
             if ("/login".equals(path)) {
                 handleLogin(request, response);

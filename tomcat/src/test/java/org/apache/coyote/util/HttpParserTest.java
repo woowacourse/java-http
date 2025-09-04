@@ -28,9 +28,9 @@ class HttpParserTest {
         HttpRequest request = HttpParser.parseToRequest(inputStream);
 
         assertAll(() -> {
-            assertThat(request.requestPath()).isEqualTo("/index.html");
-            assertThat(request.method()).isEqualTo("GET");
-            assertThat(request.httpVersion()).isEqualTo("HTTP/1.1");
+            assertThat(request.getRequestPath()).isEqualTo("/index.html");
+            assertThat(request.getRequestMethod()).isEqualTo("GET");
+            assertThat(request.getHttpVersion()).isEqualTo("HTTP/1.1");
             assertThat(request.getHeaderValue("Host")).isEqualTo("localhost:8080");
             assertThat(request.getHeaderValue("Connection")).isEqualTo("keep-alive");
             assertThat(request.getHeaderValue("Accept")).isEqualTo("*/*");

@@ -20,7 +20,7 @@ public final class HttpParser {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         try {
-            RequestLine requestLine = parseRequestLine(bufferedReader.readLine());
+            RequestLine requestLine = RequestLine.parseFrom(bufferedReader.readLine());
             log.info("요청 라인 = {} 파싱 성공", requestLine);
 
             String header;
@@ -58,31 +58,5 @@ public final class HttpParser {
             totalRead += read;
         }
         return new String(bodyBuffers, 0, totalRead);
-    }
-
-    private static RequestLine parseRequestLine(final String rawRequestLine) {
-        String[] requestLineParts = rawRequestLine.split(" ");
-        String method = requestLineParts[0];
-        String requestUrl = requestLineParts[1];
-        String httpVersion = requestLineParts[2];
-        if (!requestUrl.contains("?")) {
-            return new RequestLine(method, requestUrl, httpVersion);
-        }
-        String[] pathAndQuery = requestUrl.split("\\?", 2);
-        String requestPath = pathAndQuery[0];
-        String queryString = pathAndQuery[1];
-
-        Map<String, String> queryParameters = parseQueryString(queryString);
-        return new RequestLine(method, requestPath, queryParameters, httpVersion);
-    }
-
-    private static Map<String, String> parseQueryString(final String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
-        String[] parameterPairs = queryString.split("&");
-        for (String parameterPair : parameterPairs) {
-            String[] keyValue = parameterPair.split("=");
-            queryParameters.put(keyValue[0], keyValue[1]);
-        }
-        return queryParameters;
     }
 }

@@ -3,10 +3,7 @@ package org.apache.coyote.util;
 import java.util.Map;
 
 public record HttpRequest(
-        String method,
-        String requestPath,
-        Map<String, String> queryParameters,
-        String httpVersion,
+        RequestLine requestLine,
         Map<String, String> requestHeaders,
         String requestBody
 ) {
@@ -17,13 +14,22 @@ public record HttpRequest(
             final String requestBody
     ) {
         return new HttpRequest(
-                requestLine.method(),
-                requestLine.path(),
-                requestLine.queryParameters(),
-                requestLine.httpVersion(),
+                requestLine,
                 requestHeaders,
                 requestBody
         );
+    }
+
+    public String getHttpVersion() {
+        return requestLine.httpVersion();
+    }
+
+    public String getRequestPath() {
+        return requestLine.path();
+    }
+
+    public String getRequestMethod() {
+        return requestLine.method();
     }
 
     public String getHeaderValue(String header) {
@@ -34,9 +40,9 @@ public record HttpRequest(
     }
 
     public String getParameterValue(String parameterKey) {
-        if (queryParameters.get(parameterKey) == null) {
+        if (requestLine.queryParameters().getValue(parameterKey) == null) {
             throw new IllegalArgumentException("요청한 파라미터의 값이 존재하지 않습니다.");
         }
-        return queryParameters.get(parameterKey);
+        return requestLine.queryParameters().getValue(parameterKey);
     }
 }

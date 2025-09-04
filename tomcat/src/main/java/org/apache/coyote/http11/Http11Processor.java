@@ -52,18 +52,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void fillHttpResponse(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String httpVersion = httpRequest.httpVersion();
+        String httpVersion = httpRequest.getHttpVersion();
         String responseBody = createResponseBody(httpRequest, httpResponse);
         int statusCode = 200;
         String statusMessage = "OK";
 
-        httpResponse.putHeader("Content-Type", getContentType(httpRequest.requestPath()) + ";charset=utf-8");
-        httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+        httpResponse.putHeader("Content-Type", getContentType(httpRequest.getRequestPath()) + ";charset=utf-8");
+        httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         httpResponse.update(httpVersion, statusCode, statusMessage, responseBody);
     }
 
     private String createResponseBody(final HttpRequest httpRequest, final HttpResponse httpResponse){
-        String requestPath = httpRequest.requestPath();
+        String requestPath = httpRequest.getRequestPath();
 
         if (Objects.equals(requestPath, "/")) {
             return "Hello world!";

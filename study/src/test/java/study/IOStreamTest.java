@@ -53,8 +53,9 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
-
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
+            System.out.println(actual);
 
             assertThat(actual).isEqualTo("nextstep");
             outputStream.close();
@@ -78,6 +79,7 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -96,6 +98,7 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            outputStream.close();
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -128,7 +131,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            final String actual = new String(inputStream.readAllBytes());
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -148,6 +151,7 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            inputStream.close();
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -166,13 +170,19 @@ class IOStreamTest {
         /**
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.
          * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.
-         * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+         * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까? -> 8192 byte
          */
         @Test
         void 필터인_BufferedInputStream를_사용해보자() {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+
+            // buffer는 느린 저장 장치와 빠른 속도의 처리 장치 사이의 속도 간극을 줄여주는 역할을 수행
+            // BufferedInputStream은 데이터를 한 번에 가져와서 버퍼에 저장해두고, 사용하기 때문에 속도가 향상된 것처럼 보인다.
+            // 그럼 첫 번째 조회는 느리니까 조삼모사 아닌가?
+            // -> 아니다. I/O를 처리하기 위해 디스크까지 다녀오는 시간이 오래걸리지, 조회해오는 시간은 오래 걸리지 않기 때문이다.
+            // 즉, 속도가 다음처럼 나타난다. 1000번의 I/O 1 byte read > 1번의 I/O와 1000 byte read
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
             final byte[] actual = new byte[0];
 
@@ -197,15 +207,20 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
+            while (br.ready()){
+                // \n으로는 통과가 안되서 \r\n으로 하니 통과 -> \r\n은 윈도우에서 사용
+                actual.append(br.readLine()).append("\r\n");
+            }
 
             assertThat(actual).hasToString(emoji);
         }

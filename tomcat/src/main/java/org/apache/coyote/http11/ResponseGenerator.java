@@ -47,7 +47,7 @@ public class ResponseGenerator {
                 TODO: 정적파일이 아닌 경우 로직을 실행시키고 응답을 반환한다.
              */
         }
-        return null;
+        return new HttpResponse(HttpStatus.BAD_REQUEST, ContentType.TEXT, null);
     }
 
     private static void processQueryString(String path, Map<String, String> queryStrings) {

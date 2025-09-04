@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.constant;
 
+import java.util.regex.Pattern;
+
 public record ResourcePath(String value) {
 
     public ContentType extractContentType() {
@@ -11,11 +13,21 @@ public record ResourcePath(String value) {
     }
 
     public boolean isQueryString() {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
         long count = value.chars().filter(ch -> ch == '?').count();
-        return value.contains("?") && count == 1;
+        return count == 1;
     }
 
     public boolean isStaticResource() {
-        return value.contains(".");
+        if (isQueryString() || value == null) {
+            return false;
+        }
+        final Pattern staticResourcePattern = Pattern.compile(
+                ".*\\.(html|css|js|png|jpg|jpeg|gif|ico|json)$",
+                Pattern.CASE_INSENSITIVE
+        );
+        return staticResourcePattern.matcher(value).matches();
     }
 }

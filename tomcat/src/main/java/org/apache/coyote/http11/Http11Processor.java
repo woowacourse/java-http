@@ -47,15 +47,27 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             String uri = parseUrl(bufferedReader);
+            String path = uri;
+
+            Map<String, String> queryStrings = null;
+            if (uri.contains("?")) {
+                int index = uri.indexOf("?");
+                path = uri.substring(0, index);
+                String rawQueryString = uri.substring(index + 1);
+                queryStrings = getQueryStrings(rawQueryString);
+            }
+
             String responseBody = null;
 
-            if (StaticResourceExtension.anyMatch(uri)) {
-                responseBody = handleForStaticResource(uri);
+            if (StaticResourceExtension.anyMatch(path)) {
+                responseBody = handleForStaticResource(path);
             }
 
             if (uri.contains("/login")) {
                 responseBody = handleForStaticResource("login.html");
-                handleForLogin(uri);
+                if (queryStrings != null) {
+                    handleForLogin(queryStrings);
+                }
             }
 
             if (responseBody == null) {
@@ -105,26 +117,25 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private void handleForLogin(String uri) {
-        Map<String, String> queryStrings = getQueryStrings(uri);
-
+    private void handleForLogin(Map<String, String> queryStrings) {
         User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
     }
 
-    private Map<String, String> getQueryStrings(String uri) {
-        int index = uri.indexOf("?");
+    private Map<String, String> getQueryStrings(String rawQuery) {
+        String[] pairs = rawQuery.split("&");
 
-        String[] rawQueryStrings = uri.substring(index + 1).split("&");
+        Map<String, String> queryParams = new HashMap<>();
 
-        Map<String, String> queryString = new HashMap<>();
-        for (String rawQueryString : rawQueryStrings) {
-            String[] splitQueryString = rawQueryString.split("=");
-            queryString.put(splitQueryString[0], splitQueryString[1]);
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+            queryParams.put(key, value);
         }
 
-        return queryString;
+        return queryParams;
     }
 }

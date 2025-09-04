@@ -5,6 +5,7 @@ import com.techcourse.controller.LoginController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -33,10 +34,17 @@ public class LoginHandler implements HttpRequestHandler {
                 )
         );
 
+        login(request);
+
+        return new HttpResponse(HttpStatus.OK, headers, HttpBody.from(content));
+    }
+
+    private void login(HttpRequest request) {
         String account = request.getQueryParams().get("account");
         String password = request.getQueryParams().get("password");
+        if (Objects.isNull(account) || Objects.isNull(password)) {
+            return;
+        }
         loginController.login(new LoginRequest(account, password));
-        
-        return new HttpResponse(HttpStatus.OK, headers, HttpBody.from(content));
     }
 }

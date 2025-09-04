@@ -67,5 +67,4 @@ public class StaticFileHandler implements HttpRequestHandler {
         }
         return "application/octet-stream"; // 기본 바이너리
     }
-
 }

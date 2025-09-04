@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<String, String> mimeTypes = Map.of("html", "text/html", "css", "text/css", "js",
+            "text/javascript");
 
     private final Socket connection;
 
@@ -36,8 +38,6 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        final Map<String, String> mimeTypes = Map.of("html", "text/html", "css", "text/css", "js", "text/javascript");
-
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -64,20 +64,15 @@ public class Http11Processor implements Runnable, Processor {
                             }
                         });
 
-                final URL resource = getClass().getClassLoader().getResource("static/login.html");
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                contentType = mimeTypes.get("html");
+                final URL resource = getResource("static/login.html");
+                responseBody = readFile(resource);
+                contentType = getMimeType(resource);
             }
 
             if (!requestPath.equals("/") && !requestPath.equals("/login")) {
-                final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                if (resource == null) {
-                    return;
-                }
-
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                final String responseResourceExtension = resource.getPath().split("\\.")[1];
-                contentType = mimeTypes.get(responseResourceExtension);
+                final URL resource = getResource("static" + requestUri);
+                responseBody = readFile(resource);
+                contentType = getMimeType(resource);
             }
 
             final var response = String.join("\r\n",
@@ -103,5 +98,22 @@ public class Http11Processor implements Runnable, Processor {
                         param -> param[0],
                         param -> param[1]
                 ));
+    }
+
+    private URL getResource(final String path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            throw new IOException();
+        }
+        return resource;
+    }
+
+    private String readFile(final URL resource) throws IOException {
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String getMimeType(final URL resource) throws IOException {
+        final String responseResourceExtension = resource.getPath().split("\\.")[1];
+        return mimeTypes.get(responseResourceExtension);
     }
 }

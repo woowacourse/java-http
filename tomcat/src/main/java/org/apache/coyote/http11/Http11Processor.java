@@ -1,19 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,34 +50,27 @@ public class Http11Processor implements Runnable, Processor {
             String protocol = request[2];
 
             final var contentType = parseContentType(uri);
-
+            String body;
             if (httpMethod.equals("GET") && uri.startsWith("/login")) {
-
                 int index = uri.indexOf("?");
                 String path = uri.substring(0, index);
                 Map<String, String> queryString = parseQueryString(uri.substring(index + 1));
+                UserService.checkUser(queryString.get("account"), queryString.get("password"));
 
-                final var body = getResponseBody(path);
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryString.get("account"));
-                if (user.isPresent() && user.get().checkPassword(queryString.get("password"))) {
-                    log.info("user: {}", user.get());
-                }
-
-                final var response = createHttpResponse(body, contentType);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } else if (httpMethod.equals("GET")) {
-                final var body = getResponseBody(uri);
-
-                final var response = createHttpResponse(body, contentType);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                body = getResponseBody(path);
+            } else {
+                body = getResponseBody(uri);
             }
-
+            response(body, contentType, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void response(String body, String contentType, OutputStream outputStream) throws IOException {
+        final var response = createHttpResponse(body, contentType);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private Map<String, String> parseQueryString(String queryString) {

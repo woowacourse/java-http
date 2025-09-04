@@ -26,7 +26,7 @@ public final class HttpResponseParser {
     private static String parseHeader(HttpResponse httpResponse) {
         StringBuilder builder = new StringBuilder();
         httpResponse.getHeaders()
-                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" \r\n"));
+                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" " + CRLF));
         return builder.toString();
     }
 

@@ -44,10 +44,9 @@ public class Http11Processor implements Runnable, Processor {
 
             if(httpMethod.equals("GET")){
                 final var contentType = parseContentType(uri);
-                final var resource = getClass().getResource("/static"+uri);
+                final var body = getResponseBody(uri);
 
-                final var response = createHttpResponse(resource, contentType);
-
+                final var response = createHttpResponse(body, contentType);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             }
@@ -56,21 +55,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String getResponseBody(String uri) throws IOException {
+        URL resource = getResource(uri);
+        if(resource == null){
+            return "Hello world!";
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private URL getResource(final String uri) {
+        if(uri.equals("/")) {
+            return null;
+        }
+        return getClass().getClassLoader().getResource("static" + uri);
+    }
+
     private String parseContentType(String uri) {
-        if(uri.endsWith(".html")){
-            return "text/html";
-        }
-        else if(uri.endsWith(".css")){
-            return "text/css";
-        }
-        else{
-            return "text/plain";
+        if(uri.endsWith(".css")){
+            return "text/css;charset=utf-8";
+        } else{
+            return "text/html;charset=utf-8";
         }
     }
 
-    private String createHttpResponse(URL resource, String contentType) throws IOException {
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
+    private String createHttpResponse(String body, String contentType) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + " ",

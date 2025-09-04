@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,16 @@ public class Http11Processor implements Runnable, Processor {
             final var requestLine = reader.readLine();
             final var requestUrl = extractRequestUrlFrom(requestLine);
 
+            final Map<String, String> requestHeaders = new HashMap<>();
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                String[] parts = line.split(": ");
+                if(parts.length >= 2) {
+                    requestHeaders.put(parts[0], parts[1]);
+                }
+            }
+            String mimeType = requestHeaders.getOrDefault("Accept", "text/html").split(",")[0];
+
             var responseBody = "Hello world!";
             if (!requestUrl.isBlank()) {
                 var resource = getClass().getClassLoader().getResource("static/" + requestUrl);
@@ -48,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + mimeType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

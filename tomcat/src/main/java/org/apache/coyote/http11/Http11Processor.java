@@ -34,14 +34,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var httpRequestMessage = readMessage(inputStream);
-            final var responseBody = createResponseBody(httpRequestMessage);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(httpRequestMessage);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -64,12 +57,37 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private String createResponseBody(final String httpRequestMessage) throws IOException {
+    private String createResponse(final String httpRequestMessage) throws IOException {
         if (httpRequestMessage.startsWith("GET /index.html HTTP/1.1")) {
-            final var indexUrl = getClass().getClassLoader().getResource("static/index.html");
-            return Files.readString(Path.of(indexUrl.getPath()));
+            final var resource = getClass().getClassLoader().getResource("static/index.html");
+
+            final var body = Files.readString(Path.of(resource.getPath()));
+            final var header = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " "
+            );
+            return header + "\r\n\r\n" + body;
         }
 
-        return "Hello world!";
+        if (httpRequestMessage.startsWith("GET /css/styles.css HTTP/1.1")) {
+            final var resource = getClass().getClassLoader().getResource("static/css/styles.css");
+
+            final var body = Files.readString(Path.of(resource.getPath()));
+            final var header = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " "
+            );
+            return header + "\r\n\r\n" + body;
+        }
+
+        final var body = "Hello world!";
+        final var header = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " "
+        );
+        return header + "\r\n\r\n" + body;
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -55,6 +56,35 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final var cssResource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final var cssContent = Files.readString(Path.of(cssResource.getPath()));
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Length: " + cssContent.getBytes().length + " \r\n" +
+                "\r\n"+
+                cssContent;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

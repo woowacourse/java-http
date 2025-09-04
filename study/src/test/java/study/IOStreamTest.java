@@ -1,5 +1,7 @@
 package study;
 
+import java.util.Arrays;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -44,18 +47,27 @@ class IOStreamTest {
          * <code>write(byte[] data)</code>와 <code>write(byte b[], int off, int len)</code> 메서드는
          * 1바이트 이상을 한 번에 전송 할 수 있어 훨씬 효율적이다.
          */
+        //근데, write(bytes[])도 내부적으로는 write(int b)를 호출하는데, 성능상 차이는 없는 것 아닌가?
+        //뭔가, ByteArrayOutputStream과 같이 서브클래스들이 버퍼에서 처리를 하는 것이니까 효율적이라고 하는건가?
         @Test
         void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
+            //내부 버퍼의 길이를 지정했음.
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
-
             /**
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
-
+            //ByteArrayOutputSteam에 write(byte[] bytes)를 받는 메서드가 없음,
+            //그래서 OutputStream(부모)에 있는 write(byte[] b) 메서드를 사용하게 됨.
+            //그러면, 부모의 write(byte[] b)에서 사용하는 write(byte[] b, int off, int len)을 ByteArrayOutputStream에서 재구현함
+            //그래서 결국 최적화된 write를 사용하게 됨.
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
+//            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(bytes.length);
+//            byteArrayOutputStream.writeBytes(bytes);
+//            final String actual = byteArrayOutputStream.toString();
             assertThat(actual).isEqualTo("nextstep");
             outputStream.close();
         }
@@ -69,6 +81,13 @@ class IOStreamTest {
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
          * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
          */
+        //버퍼링: 데이터를 임시로 버퍼에 모아두었다가 한 번에 전송하는 것
+        //시스템 호출 횟수가 감소해서 성능이 향상됨.
+        //BufferedOutputStream은 write를 할 때 버퍼가 꽉 차면 flush를 날리네,
+        //근데, buffer를 growIfNeeded를 수행하고 있는데,
+        //그러면, buffer가 늘어날대로 늘어나다가(인트 사이즈) 꽉차면 flush를 수행하는 것
+        //BufferedOutputStream에서 flush 메서드가 오버라이딩 되어있는데, 이것은
+        //버퍼가 꽉차지 않아도 flush할 수 있는 방법임.
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
@@ -78,6 +97,11 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            //버퍼에서 flush를 하면 하위 스트림에서 flush가 발생하도로 됨.
+            //그래서 다른 스레드는 하위 스트림으로 버퍼를 보내는 동안 접근하지 못함
+            //ByteArrayOutputStream → 사실상 아무 일도 안 함
+            //BufferedOutputStream → 버퍼 내용을 하위 스트림으로 강제로 내보냄, 동시에 동기화까지 적용
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -96,6 +120,7 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            outputStream.close();
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -119,6 +144,7 @@ class IOStreamTest {
          * int 값을 byte 타입으로 변환하면 -128부터 127 사이의 값으로 변환된다.
          * 그리고 Stream 끝에 도달하면 -1을 반환한다.
          */
+        //inputStream은 기본적으로 데이터를 바이트 단위로 읽을 수 있도록 추상화됨.
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
@@ -128,11 +154,15 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
-
-            assertThat(actual).isEqualTo("🤩");
-            assertThat(inputStream.read()).isEqualTo(-1);
+            final String actual = new String(inputStream.readAllBytes());
+            int eof = inputStream.read();
             inputStream.close();
+
+            SoftAssertions.assertSoftly(softAssertions -> {
+                softAssertions.assertThat(actual).isEqualTo("🤩");
+                softAssertions.assertThat(eof).isEqualTo(-1);
+            });
+
         }
 
         /**
@@ -148,6 +178,7 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            inputStream.close();
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -168,13 +199,18 @@ class IOStreamTest {
          * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
-        @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
-            final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+        //버퍼 크기를 지정하지 않으면 8192의 기본 버퍼 사이즈를 가진다. -> 8KB
+        //아, 그래서 8KB 단위로 데이터를 미리 읽어와서 메모리에 담아두니까, 필요할 때 조금씩 꺼내 쓰니까
+        //그래서 I/O 성능이 올라가는거구나
 
-            final byte[] actual = new byte[0];
+        @Test
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
+            final String text = "필터에 연결해보자.";
+            //필터에 연결해보자.의 데이터를 바이트로 읽기 위함
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -197,15 +233,28 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
+            //제공이 되어 있네, 그러면 일단 inputStream은 바이트 단위로 해당 emoji를 읽어왔고.
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            //바이트 단위를 char로 읽어와서
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
             final StringBuilder actual = new StringBuilder();
+            int code;
+            while ((code = inputStreamReader.read()) != -1) {
+                actual.append((char)code);
+            }
+//            라인별로 읽기 위해, inputstreamReader는 하나씩밖에 못 읽으니까
+//            final BufferedReader br = new BufferedReader(inputStreamReader);
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                actual.append(line).append("\r\n");
+//            }
 
             assertThat(actual).hasToString(emoji);
         }

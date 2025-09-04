@@ -71,12 +71,19 @@ public class Http11Processor implements Runnable, Processor {
                     outputStream.write(response.getBytes());
                     outputStream.write(bodyBytes);
                 } else {
+                    String contentType = "text/html;charset=utf-8"; // 기본값은 html
+                    if (uri.endsWith(".css")) {
+                        contentType = "text/css";
+                    }
+                    if (uri.endsWith(".js")) {
+                        contentType = "text/javascript";
+                    }
 
                     byte[] bodyBytes = fileInputStream.readAllBytes();
 
                     final var response = String.join("\r\n",
                             "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Type: " + contentType + " ",
                             "Content-Length: " + bodyBytes.length + " ",
                             "",
                             "");

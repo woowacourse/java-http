@@ -3,11 +3,12 @@ package org.apache.coyote.http11.constant;
 public record RequestLine(HttpMethod method, ResourcePath resourcePath, String version) {
 
     public static RequestLine from(String requestLine) {
-        validateRequestLineFormat(requestLine);
-        final String[] requestLineElements = requestLine.split(" ");
-        final HttpMethod method = HttpMethod.from(requestLineElements[0]);
-        final ResourcePath resourcePath = new ResourcePath(requestLineElements[1]);
-        final String version = requestLineElements[2];
+        final String stripRequestLine = requestLine.strip();
+        final String[] parts = stripRequestLine.split("\\s+");
+        validateRequestLineFormat(parts);
+        final HttpMethod method = HttpMethod.from(parts[0]);
+        final ResourcePath resourcePath = new ResourcePath(parts[1]);
+        final String version = parts[2];
         return new RequestLine(method, resourcePath, version);
     }
 
@@ -19,9 +20,8 @@ public record RequestLine(HttpMethod method, ResourcePath resourcePath, String v
         return split[0];
     }
 
-    private static void validateRequestLineFormat(String requestLine) {
-        long delimiterCount = requestLine.chars().filter(ch -> ch == ' ').count();
-        if (delimiterCount != 2) {
+    private static void validateRequestLineFormat(String[] requestLine) {
+        if (requestLine.length != 3) {
             throw new IllegalArgumentException("욜바르지 않은 request line 입니다.");
         }
     }

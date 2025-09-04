@@ -1,21 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.HttpController;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.http.common.startline.HttpMethod;
+import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpController httpController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.httpController = new HttpController();
     }
 
     @Override
@@ -39,161 +34,65 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = HttpRequest.from(inputStream);
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String response = findTargetMethod(httpRequest);
 
-            List<String> httpRequestHeader = new ArrayList<>();
-
-            // 첫 라인 가져오기 (ex. GET /index.html HTTP/1.1)
-            String httpFirstLine = bufferedReader.readLine();
-
-            String headerLine = null;
-            while ((headerLine = bufferedReader.readLine()) != null) {
-                if ("".equals(headerLine)) {
-                    break;
-                }
-                httpRequestHeader.add(headerLine);
-            }
-
-            // 읽어온 헤더 파싱 및 저장
-            Map<String, String> headerInfo = new HashMap<>();
-            for (String requestPayload : httpRequestHeader) {
-                String[] requestHeader = requestPayload.split(":");
-                String headerKey = requestHeader[0].trim().toLowerCase();
-                String headerValue = requestHeader[1].trim().toLowerCase();
-                headerInfo.put(headerKey, headerValue);
-            }
-
-            // header에 content-length가 존재하면 body 저장
-            String requestBody = null;
-
-            if (headerInfo.containsKey("content-length")) {
-                int contentLength = Integer.parseInt(headerInfo.get("content-length"));
-                requestBody = new String(inputStream.readNBytes(contentLength));
-            }
-
-            // 첫 라인 공백 기준으로 split
-            List<String> HttpFirstLineElements = Arrays.stream(httpFirstLine.split(" ")).toList();
-
-            String httpMethod = HttpFirstLineElements.getFirst();
-            String httpRequestPath = HttpFirstLineElements.get(1);
-            int queryParameterStartIndex = httpRequestPath.indexOf('?');
-            Map<String, String> queryParameter = new HashMap<>();
-
-            if (queryParameterStartIndex != -1) {
-                String queryParameterPayloadLine = httpRequestPath.substring(queryParameterStartIndex + 1);
-                httpRequestPath = httpRequestPath.substring(0, queryParameterStartIndex);
-
-                String[] queryParameterPayloads = queryParameterPayloadLine.split("&");
-                for (String queryParameterPayload : queryParameterPayloads) {
-                    String[] queryParameterKeyValue = queryParameterPayload.split("=");
-                    String queryParameterKey = queryParameterKeyValue[0].trim();
-                    String queryParameterValue = queryParameterKeyValue[1].trim();
-                    queryParameter.put(queryParameterKey, queryParameterValue);
-                }
-            }
-
-            // 특정 요청 구조인지 확인하고 실행
-            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/")) {
-                helloWorld(outputStream);
-            }
-            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/index.html")) {
-                getIndexHtml(outputStream);
-            }
-            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/css/styles.css")) {
-                getCssStyles(outputStream);
-            }
-            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/js/scripts.js")) {
-                getJsScripts(outputStream);
-            }
-            if (HttpFirstLineElements.get(0).equals("GET") && HttpFirstLineElements.get(1).equals("/login")) {
-                getLoginHtml(outputStream);
-            }
+            outputStream.write(response.getBytes());
+            outputStream.flush();
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void getLoginHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
-        Path path = Paths.get(getClass().getClassLoader().getResource("static/login.html").toURI());
+    private String findTargetMethod(final HttpRequest httpRequest) throws IOException, URISyntaxException {
+        HttpMethod method = httpRequest.getMethod();
+        String path = httpRequest.getPath();
 
-        final byte[] bytes = Files.readAllBytes(path);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                new String(bytes)
-        );
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        if (method == HttpMethod.GET && path.equals("/")) {
+            return helloWorld();
+        }
+        if (method == HttpMethod.GET && path.equals("/index.html")) {
+            return getIndexHtml();
+        }
+        if (method == HttpMethod.GET && path.equals("/css/styles.css")) {
+            return getCssStyles();
+        }
+        if (method == HttpMethod.GET && path.equals("/js/scripts.js")) {
+            return getJsScripts();
+        }
+        if (method == HttpMethod.GET && path.equals("/login")) {
+            return getLoginHtml(httpRequest);
+        }
+        throw new IllegalArgumentException("대상 경로 메서드가 존재하지 않습니다: %s".formatted(method + " " + path));
     }
 
-    private void getJsScripts(final OutputStream outputStream) throws URISyntaxException, IOException {
-        Path path = Paths.get(getClass().getClassLoader().getResource("static/js/scripts.js").toURI());
+    private String getLoginHtml(final HttpRequest httpRequest) {
+        final String account = httpRequest.getTargetQueryParameter("account");
+        final String password = httpRequest.getTargetQueryParameter("password");
 
-        final byte[] bytes = Files.readAllBytes(path);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/js;charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                new String(bytes)
-        );
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        final HttpResponse httpResponse = httpController.login(account, password);
+        return httpResponse.getResponseFormat();
     }
 
-    private void getCssStyles(final OutputStream outputStream) throws URISyntaxException, IOException {
-        Path path = Paths.get(getClass().getClassLoader().getResource("static/css/styles.css").toURI());
-
-        final byte[] bytes = Files.readAllBytes(path);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                new String(bytes)
-        );
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private String getJsScripts() {
+        final HttpResponse httpResponse = httpController.getScripts();
+        return httpResponse.getResponseFormat();
     }
 
-    private void getIndexHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
-        Path path = Paths.get(getClass().getClassLoader().getResource("static/index.html").toURI());
-
-        final byte[] bytes = Files.readAllBytes(path);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                new String(bytes)
-        );
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private String getCssStyles() {
+        final HttpResponse httpResponse = httpController.getCssStyles();
+        return httpResponse.getResponseFormat();
     }
 
-    private void helloWorld(final OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
+    private String getIndexHtml() {
+        final HttpResponse httpResponse = httpController.getIndex();
+        return httpResponse.getResponseFormat();
+    }
 
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private String helloWorld() {
+        final HttpResponse httpResponse = httpController.helloWorld();
+        return httpResponse.getResponseFormat();
     }
 }

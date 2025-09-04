@@ -47,17 +47,17 @@ public class Http11Processor implements Runnable, Processor {
                 requestHeader.add(reader.readLine());
             }
             final String requestLine = requestHeader.getFirst();
-            String requestUri = requestLine.split(" ")[1];
-            String requestPath = requestUri.split("\\?")[0];
+            final String requestUri = requestLine.split(" ")[1];
+            final String requestPath = requestUri.split("\\?")[0];
 
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
 
             // 이러한 동적인 과정을 어떻게 process에서 분리할 수 있을까?
             if (requestPath.equals("/login")) {
-                Map<String, String> parameters = getQueryParameters(requestUri);
-                String account = parameters.get("account");
-                String password = parameters.get("password");
+                final Map<String, String> parameters = getQueryParameters(requestUri);
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
                 InMemoryUserRepository.findByAccount(account)
                         .ifPresent(user -> {
                             if (user.checkPassword(password)) {
@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                String responseResourceExtension = resource.getPath().split("\\.")[1];
+                final String responseResourceExtension = resource.getPath().split("\\.")[1];
                 contentType = mimeTypes.get(responseResourceExtension);
             }
 
@@ -95,9 +95,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getQueryParameters(String requestUri) {
-        String queryString = requestUri.split("\\?")[1];
-        String[] queryParameters = queryString.split("&");
+    private Map<String, String> getQueryParameters(final String requestUri) {
+        final String queryString = requestUri.split("\\?")[1];
+        final String[] queryParameters = queryString.split("&");
         return Arrays.stream(queryParameters)
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(

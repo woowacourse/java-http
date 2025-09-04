@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -44,8 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()
         ) {
-            final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-            final String requestURL = parseRequestURL(httpRequestReader.readLine());
+            final String requestURL = parseRequestURL(inputStream);
 
             String resource = requestURL.split("\\?")[0];
 
@@ -60,8 +60,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestURL(final String requestLine) throws IOException {
-        return requestLine.split(" ")[REQUEST_URL_INDEX];
+    private String parseRequestURL(final InputStream inputStream) throws IOException {
+        final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
+        try {
+            final String requestLine = httpRequestReader.readLine();
+            return requestLine.split(" ")[REQUEST_URL_INDEX];
+        } catch (final NullPointerException | ArrayIndexOutOfBoundsException exception) {
+            throw new IOException("Request Line을 읽어올 수 없습니다.");
+        }
     }
 
     private void login(final String requestURL) {

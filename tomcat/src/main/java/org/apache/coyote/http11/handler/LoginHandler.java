@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.handler;
 
+import com.techcourse.application.dto.LoginRequest;
+import com.techcourse.controller.LoginController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class LoginHandler implements HttpRequestHandler {
+    private final LoginController loginController = new LoginController();
 
     @Override
     public boolean canHandle(HttpRequest request) {
@@ -30,6 +33,10 @@ public class LoginHandler implements HttpRequestHandler {
                 )
         );
 
+        String account = request.getQueryParams().get("account");
+        String password = request.getQueryParams().get("password");
+        loginController.login(new LoginRequest(account, password));
+        
         return new HttpResponse(HttpStatus.OK, headers, HttpBody.from(content));
     }
 }

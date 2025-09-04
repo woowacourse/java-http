@@ -19,6 +19,8 @@ import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.httpHeader.HttpHeader;
 import org.apache.coyote.httpHeader.HttpMethod;
+import org.apache.coyote.httpResponse.HttpResponse;
+import org.apache.coyote.httpResponse.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,14 +90,15 @@ public class Http11Processor implements Runnable, Processor {
         final byte[] read = Files.readAllBytes(htmlPath);
         final String body = new String(read, StandardCharsets.UTF_8);
 
-        final var response = String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
                 body
         );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        final String response = httpResponse.getResponse();
+
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -108,14 +111,15 @@ public class Http11Processor implements Runnable, Processor {
         final byte[] read = Files.readAllBytes(htmlPath);
         final String body = new String(read, StandardCharsets.UTF_8);
 
-        final var response = String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
                 body
         );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        final String response = httpResponse.getResponse();
+
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -127,15 +131,15 @@ public class Http11Processor implements Runnable, Processor {
         final Path htmlPath = Path.of(uri);
         final byte[] read = Files.readAllBytes(htmlPath);
         final String body = new String(read, StandardCharsets.UTF_8);
-
-        final var response = String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/css;charset=utf-8",
                 body
         );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        final String response = httpResponse.getResponse();
+
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -151,14 +155,30 @@ public class Http11Processor implements Runnable, Processor {
         final byte[] read = Files.readAllBytes(htmlPath);
         final String body = new String(read, StandardCharsets.UTF_8);
 
-        final var response = String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: application/javascript;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "application/javascript;charset=utf-8",
                 body
         );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseHome(final OutputStream outputStream) throws IOException {
+        final var responseBody = "Hello world!";
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
+                responseBody
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+        final String response = httpResponse.getResponse();
+
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -172,21 +192,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new HttpHeader(requestLine, headers);
-    }
-
-    private void responseHome(final OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
-
-        final var response = String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 }

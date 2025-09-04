@@ -1,5 +1,6 @@
 package study;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -154,7 +155,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            inputStream.close();
+            try (inputStream) {
+
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -211,7 +214,8 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final StringBuilder actual = new StringBuilder();
             actual.append(bufferedReader.readLine());

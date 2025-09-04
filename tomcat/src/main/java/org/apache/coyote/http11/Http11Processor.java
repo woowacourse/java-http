@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String FILE_EXTENSION_DELIMITER = ".";
 
     private final Socket connection;
 
@@ -51,44 +54,55 @@ public class Http11Processor implements Runnable, Processor {
 
     private void fillHttpResponse(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         String httpVersion = httpRequest.httpVersion();
-        String responseBody = createResponseBody(httpRequest);
-
-        httpResponse.putHeader("Content-Type", getContentType(httpRequest.requestUrl()));
-        httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
-
+        String responseBody = createResponseBody(httpRequest, httpResponse);
         int statusCode = 200;
         String statusMessage = "OK";
 
         httpResponse.update(httpVersion, statusCode, statusMessage, responseBody);
     }
 
-    private String createResponseBody(final HttpRequest httpRequest){
-        String requestUrl = httpRequest.requestUrl();
+    private String createResponseBody(final HttpRequest httpRequest, final HttpResponse httpResponse){
+        String requestPath = httpRequest.requestPath();
 
-        if (Objects.equals(requestUrl, "/")) {
-            return "Hello world!";
+        if (Objects.equals(requestPath, "/")) {
+            requestPath = "/index.html";
         }
 
-        String resourcePath = "static" + requestUrl;
-        URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+        if (Objects.equals(requestPath, "/login")) {
+            User user = InMemoryUserRepository.getByAccountAndPassword(httpRequest.getParameterValue("account"),
+                    httpRequest.getParameterValue("password"));
+            log.info(user.toString());
+        }
+
+        URL resourceUrl = getClass().getClassLoader().getResource(getResourcePath(requestPath));
         if (resourceUrl == null) {
+            log.info("요청할 수 없는 자원 = {}", getResourcePath(requestPath));
             throw new IllegalArgumentException("요청한 자원을 찾을 수 없습니다.");
         }
 
         String decodedUrl = URLDecoder.decode(resourceUrl.getPath(), StandardCharsets.UTF_8);
 
         try {
-            return new String(Files.readAllBytes(Path.of(decodedUrl)));
+            String responseBody = new String(Files.readAllBytes(Path.of(decodedUrl)));
+            httpResponse.putHeader("Content-Type", getContentType(getResourcePath(requestPath)));
+            httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+            return responseBody;
         } catch (IOException e) {
             throw new RuntimeException("파일 -> 텍스트 변환 과정 실패");
         }
     }
 
-    private String getContentType(final String requestUrl) {
-        if (Objects.equals(requestUrl, "/")) {
-            return "text/html";
+    private String getResourcePath(final String requestPath) {
+        String prefixPath = "static";
+        if (requestPath.contains(FILE_EXTENSION_DELIMITER)) {
+            return prefixPath + requestPath;
         }
-        String extension = requestUrl.substring(requestUrl.lastIndexOf(".") + 1).toLowerCase();
+        return prefixPath + requestPath + ".html";
+    }
+
+    private String getContentType(final String resourcePath) {
+        String extension = resourcePath.substring(resourcePath.lastIndexOf(FILE_EXTENSION_DELIMITER) + 1)
+                .toLowerCase();
 
         return switch (extension) {
             case "css" -> "text/css";

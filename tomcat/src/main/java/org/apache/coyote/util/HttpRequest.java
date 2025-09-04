@@ -4,7 +4,8 @@ import java.util.Map;
 
 public record HttpRequest(
         String method,
-        String requestUrl,
+        String requestPath,
+        Map<String, String> queryParameters,
         String httpVersion,
         Map<String, String> requestHeaders,
         String requestBody
@@ -17,7 +18,8 @@ public record HttpRequest(
     ) {
         return new HttpRequest(
                 requestLine.method(),
-                requestLine.requestUrl(),
+                requestLine.path(),
+                requestLine.queryParameters(),
                 requestLine.httpVersion(),
                 requestHeaders,
                 requestBody
@@ -29,5 +31,12 @@ public record HttpRequest(
             throw new IllegalArgumentException("요청한 헤더가 존재하지 않습니다.");
         }
         return requestHeaders.get(header);
+    }
+
+    public String getParameterValue(String parameterKey) {
+        if (queryParameters.get(parameterKey) == null) {
+            throw new IllegalArgumentException("요청한 파라미터의 값이 존재하지 않습니다.");
+        }
+        return queryParameters.get(parameterKey);
     }
 }

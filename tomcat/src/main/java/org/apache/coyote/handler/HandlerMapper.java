@@ -15,11 +15,14 @@ public class HandlerMapper {
     }
 
     private HandlerMapper() {
-        handlers.add(new HelloWorldHandler());
-        handlers.add(new LoginHandler());
+        // static resource 우선 매핑
         handlers.add(new HtmlHandler());
         handlers.add(new JsHandler());
         handlers.add(new CssHandler());
+
+        // 이외 endpoint 매핑
+        handlers.add(new HelloWorldHandler());
+        handlers.add(new LoginHandler());
     }
 
     public AbstractHandler getHandler(final String requestTarget) {

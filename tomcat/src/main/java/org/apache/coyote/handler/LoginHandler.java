@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class LoginHandler extends AbstractHandler {
 
@@ -17,14 +16,21 @@ public class LoginHandler extends AbstractHandler {
     @Override
     public String handle(final String requestUri) throws IOException {
         final String[] splitRequestUri = requestUri.split("\\?");
-        final String resource = splitRequestUri[0];
+        final String resource = getResource(splitRequestUri[0]);
         if (existsQueryString(splitRequestUri)) {
             findMemberByQuery(splitRequestUri[1]);
         }
-        final String responseBody = getStaticResponseBody(resource + ".html");
-
+        final String responseBody = getStaticResponseBody(resource);
 
         return createOkResponse(responseBody, "text/html;charset=utf-8");
+    }
+
+    private String getResource(final String resource) {
+        if (!resource.endsWith(".html")) {
+            return resource + ".html";
+        }
+
+        return resource;
     }
 
     private boolean existsQueryString(final String[] splitRequestUri) {
@@ -33,8 +39,10 @@ public class LoginHandler extends AbstractHandler {
 
     private void findMemberByQuery(final String queryString) {
         final Map<String, String> params = getParams(queryString);
-        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
-        user.ifPresent(value -> System.out.println("user: " + value));
+        final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        validateLogin(user, params.get("password"));
+        System.out.println("user: " + user);
     }
 
     private Map<String, String> getParams(final String queryString) {
@@ -46,5 +54,14 @@ public class LoginHandler extends AbstractHandler {
         }
 
         return params;
+    }
+
+    private  void validateLogin(
+            final User user,
+            final String password
+    ) {
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
     }
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +55,7 @@ class FileTest {
         final URI uri = url.toURI();
         final Path path = Paths.get(uri);
         // Files를 통하여 모든 라인을 읽는다.
-        final List<String> actual = Files.readAllLines(path);
+        final List<String> actual = Files.readAllLines(path, StandardCharsets.UTF_8);
 
         assertThat(actual).containsOnly("nextstep");
     }

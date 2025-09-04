@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private static final String OK_RESPONSE_LINE = "HTTP/1.1 200 OK ";
     private static final String CONTENT_TYPE_RESPONSE_HEADER_KEY = "Content-Type: ";
     private static final String CONTENT_LENGTH_RESPONSE_HEADER_KEY = "Content-Length: ";
@@ -54,12 +55,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (uri.contains("/login")) {
                 responseBody = handleForStaticResource("login.html");
-                Map<String, String> queryStrings = getQueryStrings(uri);
-
-                User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-                log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
+                handleForLogin(uri);
             }
 
             if (responseBody == null) {
@@ -80,20 +76,6 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private static Map<String, String> getQueryStrings(String uri) {
-        int index = uri.indexOf("?");
-
-        String[] rawQueryStrings = uri.substring(index + 1).split("&");
-
-        Map<String, String> queryString = new HashMap<>();
-        for (String rawQueryString : rawQueryStrings) {
-            String[] splitQueryString = rawQueryString.split("=");
-            queryString.put(splitQueryString[0], splitQueryString[1]);
-        }
-
-        return queryString;
     }
 
     private String parseUrl(BufferedReader bufferedReader) throws IOException {
@@ -121,5 +103,28 @@ public class Http11Processor implements Runnable, Processor {
     private static String readFile(URL resource) throws IOException {
         File file = new File(resource.getFile());
         return Files.readString(file.toPath());
+    }
+
+    private void handleForLogin(String uri) {
+        Map<String, String> queryStrings = getQueryStrings(uri);
+
+        User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
+    }
+
+    private Map<String, String> getQueryStrings(String uri) {
+        int index = uri.indexOf("?");
+
+        String[] rawQueryStrings = uri.substring(index + 1).split("&");
+
+        Map<String, String> queryString = new HashMap<>();
+        for (String rawQueryString : rawQueryStrings) {
+            String[] splitQueryString = rawQueryString.split("=");
+            queryString.put(splitQueryString[0], splitQueryString[1]);
+        }
+
+        return queryString;
     }
 }

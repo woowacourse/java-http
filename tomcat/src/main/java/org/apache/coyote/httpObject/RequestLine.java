@@ -1,5 +1,8 @@
 package org.apache.coyote.httpObject;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class RequestLine {
 
     private final HttpMethod httpMethod;
@@ -23,5 +26,17 @@ public class RequestLine {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public Map<String, String> getQueryValues() {
+        Map<String, String> values = new TreeMap<>();
+        int index = path.indexOf("?");
+        String queryPath = path.substring(index + 1);
+        String[] queries = queryPath.split("&");
+        for (String query : queries) {
+            String[] split = query.split("=");
+            values.put(split[0], split[1]);
+        }
+        return values;
     }
 }

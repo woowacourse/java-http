@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.httpObject.HttpHeader;
 import org.apache.coyote.httpObject.HttpMethod;
@@ -50,6 +53,16 @@ public class Http11Processor implements Runnable, Processor {
                 responseHome(outputStream);
             }
 
+            if(httpMethod == HttpMethod.GET && path.contains("/login")) {
+                Map<String, String> queries = httpHeader.getQueries();
+                User user = InMemoryUserRepository.findByAccount(queries.get("account"))
+                        .orElse(null);
+                if(user!=null && user.checkPassword(queries.get("password"))) {
+                    log.info("user : {}",user);
+                }
+                responseLoginHtml(outputStream);
+            }
+
             if (httpMethod == HttpMethod.GET && path.equals("/index.html")) {
                 responseIndexHtml(outputStream);
             }
@@ -70,6 +83,26 @@ public class Http11Processor implements Runnable, Processor {
     private void responseIndexHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
         final URI uri = getClass().getClassLoader()
                 .getResource("static/index.html")
+                .toURI();
+        final Path htmlPath = Path.of(uri);
+        final byte[] read = Files.readAllBytes(htmlPath);
+        final String body = new String(read, StandardCharsets.UTF_8);
+
+        final var response = String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body
+        );
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseLoginHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
+        final URI uri = getClass().getClassLoader()
+                .getResource("static/login.html")
                 .toURI();
         final Path htmlPath = Path.of(uri);
         final byte[] read = Files.readAllBytes(htmlPath);

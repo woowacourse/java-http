@@ -20,4 +20,8 @@ public class HttpHeader {
     public String getPath() {
         return requestLine.getPath();
     }
+
+    public Map<String,String> getQueries(){
+        return requestLine.getQueryValues();
+    }
 }

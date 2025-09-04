@@ -7,6 +7,11 @@ import java.io.IOException;
 
 import static com.java.http.HttpRequest.HttpMethod.GET;
 
+@Deprecated
+/**
+ * 각 정적리소스에 대하여 각각 서블릿을 구현하지 말고,
+ * registry를 통해서 쉽게 등록하는 StaticResourceRegistryServlet을 사용하세요.
+ */
 public abstract class StaticResourceServlet implements Servlet {
 
     @Override

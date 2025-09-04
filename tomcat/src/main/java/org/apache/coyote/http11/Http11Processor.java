@@ -6,11 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
@@ -89,17 +86,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getStaticPage(String requestPath) throws IOException, URISyntaxException {
-        URL resource = getClass().getClassLoader().getResource("static" + requestPath);
-        if (resource == null) {
+        String normalizedPath = Paths.get(requestPath).normalize().toString();
+        if (normalizedPath.contains("..")) {
             throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
         }
-        List<String> strings = Files.readAllLines(Paths.get(resource.toURI()));
-
-        StringBuilder sb = new StringBuilder();
-        for (var str : strings) {
-            sb.append(str).append("\n");
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + normalizedPath)) {
+            if (inputStream == null) {
+                    throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
-        return sb.toString();
     }
 
     private void login(QueryParameters queryParams) {

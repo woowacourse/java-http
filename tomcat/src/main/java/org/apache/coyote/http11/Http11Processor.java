@@ -19,8 +19,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static final int REQUEST_URL_INDEX = 1;
-    public static final String DEFAULT_REQUEST_URL = "/";
-    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -41,42 +39,36 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             final String requestURL = parseRequestURL(inputStream);
-
-            if (requestURL.endsWith(".html")) {
-                final URL resource = getStaticResource(requestURL);
-                final String responseBody = new String(Files.readAllBytes(Paths.get(resource.getFile())));
-                sendResponse(responseBody, outputStream);
-                return;
-            }
-            sendResponse(DEFAULT_RESPONSE_BODY, outputStream);
+            sendResponse(requestURL, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String parseRequestURL(final InputStream inputStream) {
+    private String parseRequestURL(final InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        try {
-            String requestLine = reader.readLine();
-            return requestLine.split(" ")[REQUEST_URL_INDEX];
-        } catch (final IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return DEFAULT_REQUEST_URL;
+        String requestLine = reader.readLine();
+        return requestLine.split(" ")[REQUEST_URL_INDEX];
+    }
+
+    private void sendResponse(final String requestURL, final OutputStream outputStream) throws IOException {
+        final URL resource = getStaticResource(requestURL);
+        final String responseBody = new String(Files.readAllBytes(Paths.get(resource.getFile())));
+        final String response = createHttpResponse(responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private URL getStaticResource(final String requestURL) {
+        if (requestURL.equals("/")) {
+            return getStaticResource("static/index.html");
+        }
+
         URL resource = getClass().getClassLoader().getResource(String.format("static%s", requestURL));
         if (resource == null) {
             return getClass().getClassLoader().getResource("static/404.html");
         }
         return resource;
-    }
-
-    private void sendResponse(final String responseBody, final OutputStream outputStream) throws IOException {
-        final String response = createHttpResponse(responseBody);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 
     private static String createHttpResponse(String responseBody) {

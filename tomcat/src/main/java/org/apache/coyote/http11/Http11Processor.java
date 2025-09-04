@@ -76,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
         return resource;
     }
 
-    private void logUserInformationIfExists(HttpRequest httpRequest) {
+    private void logUserInformationIfExists(final HttpRequest httpRequest) {
         if (httpRequest.isQueryStringExists()) {
             final Map<String, String> parameters = httpRequest.getQueryParameters();
             final String account = parameters.get("account");

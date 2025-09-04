@@ -44,12 +44,12 @@ public class HttpRequest {
     }
 
     public String getRequestPath() {
-        String requestUri = getRequestUri();
+        final String requestUri = getRequestUri();
         return requestUri.split(QUERY_STRING_REGEX)[0];
     }
 
     public boolean isQueryStringExists() {
-        String requestUri = getRequestUri();
+        final String requestUri = getRequestUri();
         return requestUri.contains(QUERY_STRING_SEPARATOR);
     }
 
@@ -65,7 +65,7 @@ public class HttpRequest {
     }
 
     private String getQueryString() {
-        String requestUri = getRequestUri();
+        final String requestUri = getRequestUri();
         return requestUri.split(QUERY_STRING_REGEX)[1];
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
     
@@ -35,14 +36,16 @@ public class HttpResponse {
         
         try {
             final String reasonPhrase = getReasonPhrase(status);
+            final byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
+            
             final String response = String.join("\r\n",
                     "HTTP/1.1 " + status + " " + reasonPhrase,
                     "Content-Type: " + contentType,
-                    "Content-Length: " + content.getBytes().length,
+                    "Content-Length: " + contentBytes.length,
                     "",
                     content);
                     
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
             committed = true;
         } catch (final IOException e) {

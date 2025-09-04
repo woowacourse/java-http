@@ -19,6 +19,6 @@ public class StreamReader {
     public static String readRequest(InputStream inputStream) throws IOException {
         Objects.requireNonNull(inputStream);
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        return reader.lines().collect(Collectors.joining("\r\n"));
+        return reader.lines().takeWhile(line -> !line.isEmpty()).collect(Collectors.joining("\r\n"));
     }
 }

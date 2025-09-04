@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -39,13 +41,35 @@ public class Http11Processor implements Runnable, Processor {
             String line = br.readLine();
 
             byte[] bytes;
-            final String requestUri = line.split(" ")[1];
+            String requestUri = line.split(" ")[1];
+            if (requestUri.contains("?")) {
+                if (requestUri.contains("/login")) {
+                    String queryString =requestUri.substring(requestUri.indexOf("?") + 1);
+                    /**
+                     * split[0] = account
+                     * split[1] = accountId
+                     * split[2] = password
+                     * split[3] = password value
+                     */
+                    String[] split = queryString.split("[=&]");
+                    final User user = InMemoryUserRepository.findByAccount(split[1])
+                            .orElseThrow(() -> new IllegalArgumentException("이런 유저는 없답니다."));
+                    if (user.checkPassword(split[3])) {
+                        log.info(user.toString());
+                    };
+
+                }
+                int index = requestUri.indexOf("?");
+                requestUri = requestUri.substring(0, index);
+            }
 
             if (requestUri.equals("/")) {
                 bytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
             } else {
-                final URL resource = getClass().getClassLoader()
-                        .getResource("static" + requestUri);
+                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+                if (resource == null) {
+                    resource = getClass().getClassLoader().getResource("static/404.html");
+                }
                 final Path path = Path.of(resource.getFile());
                 bytes = Files.readAllBytes(path);
             }

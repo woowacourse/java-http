@@ -31,7 +31,7 @@ Accept: */*
 
 ```
 
-- [ ] CSS 지원하기
+- [x] CSS 지원하기
   - 사용자가 페이지를 열었을 때 CSS 파일도 호출하도록 추가한다
 ```http request
 GET /css/styles.css HTTP/1.1

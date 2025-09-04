@@ -39,6 +39,9 @@ public class Http11Processor implements Runnable, Processor {
             String response;
             if ("/".equals(url)) {
                 response = createHtmlResponse("Hello world!");
+            } else if (url.endsWith(".css")) {
+                Path staticResource = getStaticResource(url);
+                response = createCssResponse(Files.readString(staticResource));
             } else {
                 Path staticResource = getStaticResource(url);
                 response = createHtmlResponse(Files.readString(staticResource));
@@ -63,6 +66,15 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
+    }
+
+    private String createCssResponse(String body) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
                 "Content-Length: " + body.getBytes().length + " ",
                 "",
                 body);

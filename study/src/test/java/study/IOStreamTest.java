@@ -1,6 +1,7 @@
 package study;
 
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -191,11 +192,9 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
             final StringBuilder actual = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                actual.append(line).append("\r\n");
+            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String content = reader.lines().collect(Collectors.joining("\r\n"));
+                actual.append(content).append("\r\n");
             }
 
             assertThat(actual).hasToString(emoji);

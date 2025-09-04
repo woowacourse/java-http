@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 
 public class StreamReader {
 
-    private StreamReader() {
+    private final String lineSeparator;
+
+    public StreamReader(String lineSeparator) {
+        this.lineSeparator = lineSeparator;
     }
 
-    public static String readAllLine(InputStream inputStream) throws IOException {
+    public String readAllLine(InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return null;
         }
@@ -18,7 +21,7 @@ public class StreamReader {
         final StringBuilder content = new StringBuilder();
         while (reader.ready()) {
             content.append(reader.readLine());
-            content.append('\n');
+            content.append(lineSeparator);
         }
         return content.toString();
     }

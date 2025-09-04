@@ -75,8 +75,9 @@ public class ResponseGenerator {
 
     private static String readFile(String path) {
         final String resourcePath = String.format("static/%s", path);
+        final StreamReader reader = new StreamReader("\n");
         try (InputStream resourceAsStream = Application.class.getClassLoader().getResourceAsStream(resourcePath)) {
-            return StreamReader.readAllLine(resourceAsStream);
+            return reader.readAllLine(resourceAsStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

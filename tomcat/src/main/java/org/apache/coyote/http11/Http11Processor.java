@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final Map<String, String> MIME_TYPES = Map.of(
-            "html", "text/html",
+            "html", "text/html;charset=utf-8",
             "css", "text/css",
             "js", "text/javascript"
     );
@@ -72,10 +74,10 @@ public class Http11Processor implements Runnable, Processor {
             if (resource != null) {
                 final String responseLine = "HTTP/1.1 200 OK";
                 final String responseBody = readFile(resource);
-                final Map<String, String> responseHeaders = Map.of(
-                        "Content-Type", getMimeType(resource),
-                        "Content-Length", String.valueOf(responseBody.length())
-                );
+                final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
+                responseHeaders.put("Content-Type", getMimeType(resource));
+                byte[] bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+                responseHeaders.put("Content-Length", String.valueOf(bodyBytes.length));
 
                 response = new HttpResponse(responseLine, responseHeaders, responseBody);
             }

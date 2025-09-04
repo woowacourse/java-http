@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -20,15 +22,13 @@ public class HttpResponse {
     }
 
     public static HttpResponse createWelcomeHttpResponse() {
-        String welcomeResponseBody = "Hello world!";
-        return new HttpResponse(
-                "HTTP/1.1 200 OK",
-                Map.of(
-                        "Content-Type", "text/html",
-                        "Content-Length", String.valueOf(welcomeResponseBody.length())
-                ),
-                welcomeResponseBody
-        );
+        final String welcomeResponseBody = "Hello world!";
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", "text/html;charset=utf-8");
+        byte[] bodyBytes = welcomeResponseBody.getBytes(StandardCharsets.UTF_8);
+        responseHeaders.put("Content-Length", String.valueOf(bodyBytes.length));
+
+        return new HttpResponse("HTTP/1.1 200 OK", responseHeaders, welcomeResponseBody);
     }
 
     public String parseHttpResponse() {

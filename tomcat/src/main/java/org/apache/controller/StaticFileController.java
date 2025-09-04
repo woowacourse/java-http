@@ -13,24 +13,38 @@ import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
 import org.apache.http.StatusCode;
 
-public class StaticFileController {
+public class StaticFileController implements Controller {
 
-    public void processResourceRequest(HttpRequestMessage request, HttpResponseMessage response) {
+    @Override
+    public boolean isProcessableRequest(HttpRequestMessage request) {
+        URL resource = findResourceUrl(request.getUri());
+        return resource != null;
+    }
+
+    @Override
+    public void processRequest(HttpRequestMessage request, HttpResponseMessage response) {
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            URL resource = classLoader.getResource("static" + request.getUri());
+            URL resource = findResourceUrl(request.getUri());
             if (resource == null) {
                 throw new IllegalArgumentException("URI가 올바르지 않습니다.");
             }
+
             Path path = Paths.get(resource.toURI());
             String responseBody = Files.readString(path);
+
             response.setHttpVersion(request.getVersion());
             response.setStatusCode(StatusCode.OK);
             response.setHeader("Content-Type", getFileExtension(path).getValue());
             response.setBody(responseBody);
+
         } catch (IOException | URISyntaxException | IllegalArgumentException exception) {
             throw new ResourceNotFound("해당하는 리소스를 찾을 수 없습니다.");
         }
+    }
+
+    private URL findResourceUrl(String uri) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        return classLoader.getResource("static" + uri);
     }
 
     private ContentType getFileExtension(Path path) {

@@ -7,5 +7,5 @@ public interface Controller {
 
     boolean isProcessableRequest(HttpRequestMessage request);
 
-    void processRequest(HttpRequestMessage request, HttpResponseMessage responseMessage);
+    void processRequest(HttpRequestMessage request, HttpResponseMessage response);
 }

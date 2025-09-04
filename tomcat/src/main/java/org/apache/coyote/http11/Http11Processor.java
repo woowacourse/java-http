@@ -14,7 +14,6 @@ import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.HttpMessageParsingException;
-import org.apache.exception.ResourceNotFound;
 import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
 import org.slf4j.Logger;
@@ -23,8 +22,10 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final List<Controller> controllers = List.of(new RootController());
-    private static final StaticFileController staticFileController = new StaticFileController();
+    private static final List<Controller> controllers = List.of(
+            new RootController(),
+            new StaticFileController()
+    );
 
     private final Socket connection;
 
@@ -47,20 +48,9 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponseMessage response = makeResponse(outputStream);
 
             Controller controller = findControllerByRequest(request);
-            if (controller != null) {
-                //TODO: 컨트롤러가 요청을 처리하다가 예외가 발생할 경우 예외 응답 처리  (2025-09-4, 목, 12:56)
-                controller.processRequest(request, response);
-                response.writeMessage();
-                return;
-            }
+            controller.processRequest(request, response);
+            response.writeMessage();
 
-            try {
-                staticFileController.processResourceRequest(request, response);
-                response.writeMessage();
-            } catch (ResourceNotFound e) {
-                //TODO: URL이 올바르지 않다는 예외 응답 처리  (2025-09-4, 목, 17:7)
-                throw new IllegalArgumentException("URI가 올바르지 않습니다.");
-            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -88,6 +78,6 @@ public class Http11Processor implements Runnable, Processor {
                 return controller;
             }
         }
-        return null;
+        throw new IllegalArgumentException("URI가 올바르지 않습니다.");
     }
 }

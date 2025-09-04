@@ -7,7 +7,8 @@ public enum StaticResourceExtension {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),
-    SVG("svg", "image/svg+xml");
+    SVG("svg", "image/svg+xml"),
+    ;
 
     private final String extension;
     private final String mimeType;
@@ -28,7 +29,7 @@ public enum StaticResourceExtension {
                 .filter(staticResourceExtension -> url.contains(staticResourceExtension.getExtension()))
                 .findFirst()
                 .map(StaticResourceExtension::getMimeType)
-                .orElseThrow(() -> new IllegalArgumentException("일치하는 MIME TYPE 이 존재하지 않는 확장명입니다."));
+                .orElse("text/html");
     }
 
     public String getExtension() {

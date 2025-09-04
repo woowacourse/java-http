@@ -13,8 +13,11 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.reqeust.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpRequest;
+import org.apache.coyote.http11.reqeust.handler.HttpRequestHandler;
+import org.apache.coyote.http11.reqeust.handler.HttpRequestHandlerMapper;
 import org.apache.coyote.http11.reqeust.util.HttpRequestBuilder;
 import org.apache.coyote.http11.reqeust.util.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,15 +43,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = getHttpRequest(inputStream);
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequestHandlerMapper handlerMapper = HttpRequestHandlerMapper.getInstance();
+            final HttpRequestHandler handler = handlerMapper.getHandler(request);
+            final HttpResponse response = handler.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -58,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest getHttpRequest(final InputStream inputStream) throws IOException {
-        final HttpRequestParser parser = HttpRequestParser.get();
+        final HttpRequestParser parser = HttpRequestParser.getInstance();
 
         final List<String> requestLines = getRequestLines(inputStream);
         final String startLine = requestLines.getFirst();
@@ -78,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         final List<String> requestLines = new ArrayList<>();
         while (true) {
             final String line = bufferedReader.readLine();
-            if (line != null && !line.isEmpty()) {
+            if (line == null || line.isEmpty()) {
                 break;
             }
             requestLines.add(line);

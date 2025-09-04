@@ -12,10 +12,6 @@ public class HttpRequestParser {
     private HttpRequestParser() {
     }
 
-    public static HttpRequestParser get() {
-        return instance;
-    }
-
     public HttpMethod parseHttpMethod(final String startLine) {
         final String method = startLine.split(" ")[0];
 
@@ -29,7 +25,7 @@ public class HttpRequestParser {
     public HttpProtocolVersion parseHttpVersion(final String startLine) {
         final String httpVersion = startLine.split(" ")[2];
 
-        return HttpProtocolVersion.valueOf(httpVersion);
+        return HttpProtocolVersion.valueOfVersion(httpVersion);
     }
 
     public HttpHeaders parseHeaders(final List<String> headerLines) {
@@ -40,5 +36,9 @@ public class HttpRequestParser {
         }
 
         return headers;
+    }
+
+    public static HttpRequestParser getInstance() {
+        return instance;
     }
 }

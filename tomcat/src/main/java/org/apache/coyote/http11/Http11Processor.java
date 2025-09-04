@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +11,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +93,28 @@ public class Http11Processor implements Runnable, Processor {
                     final var path = Paths.get(resource.toURI());
                     responseBody = Files.readString(path);
                     contentType = "text/javascript;charset=utf-8";
+                }
+            }
+
+            if (firstLine.contains("/login")) {
+                final var resource = getClass().getClassLoader().getResource("static/login.html");
+                if (resource != null) {
+                    final var path = Paths.get(resource.toURI());
+                    responseBody = Files.readString(path);
+                    contentType = "text/html;charset=utf-8";
+                }
+
+                String[] httpHeaderFirstLine = firstLine.split(" ");
+                String uri = httpHeaderFirstLine[1];
+                String queryString = uri.split("\\?")[1];
+                String account = queryString.split("&")[0].split("=")[1];
+                String password = queryString.split("&")[1].split("=")[1];
+                Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
+                if (byAccount.isPresent()) {
+                    User user = byAccount.get();
+                    if (user.checkPassword(password)) {
+                        System.out.println("user: " + user);
+                    }
                 }
             }
 

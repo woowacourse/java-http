@@ -50,15 +50,23 @@ public class Http11Processor implements Runnable, Processor {
                 final File indexFile = new File(filePath);
                 contentType = Files.probeContentType(Path.of(filePath));
 
-                try {
-                    responseBody = new String(Files.readAllBytes(indexFile.toPath()), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                responseBody = new String(Files.readAllBytes(indexFile.toPath()), StandardCharsets.UTF_8);
+            } else if (method.equals("GET") && uri.getPath().equals("/css/styles.css")) {
+                final String filePath = getClass().getClassLoader().getResource("static/css/styles.css").getPath();
+                final File cssFile = new File(filePath);
+                contentType = Files.probeContentType(Path.of(filePath));
+
+                responseBody = new String(Files.readAllBytes(cssFile.toPath()), StandardCharsets.UTF_8);
+            } else if (method.equals("GET") && uri.getPath().equals("/assets/chart-area.js")) {
+                final String filePath = getClass().getClassLoader().getResource("static/assets/chart-area.js").getPath();
+                final File chartFile = new File(filePath);
+                contentType = Files.probeContentType(Path.of(filePath));
+
+                responseBody = new String(Files.readAllBytes(chartFile.toPath()), StandardCharsets.UTF_8);
             } else if (method.equals("GET") && uri.getPath().equals("/")) {
                 responseBody = "Hello world!";
             } else {
-                throw new UncheckedServletException(new UnsupportedOperationException("지원하지 않는 요청입니다."));
+                throw new IllegalArgumentException("지원하지 않는 요청 경로입니다: " + uri.getPath());
             }
 
             final var response = String.join(

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.constant;
 
-public record RequestLine(HttpMethod method, ResourcePath resourcePath, HttpVersion version) {
+public record RequestLine(HttpMethod method, ResourcePath resourcePath, String version) {
 
     public static RequestLine from(String requestLine) {
         validateRequestLineFormat(requestLine);
         final String[] requestLineElements = requestLine.split(" ");
         final HttpMethod method = HttpMethod.from(requestLineElements[0]);
         final ResourcePath resourcePath = new ResourcePath(requestLineElements[1]);
-        final HttpVersion version = HttpVersion.from(requestLineElements[2]);
+        final String version = requestLineElements[2];
         return new RequestLine(method, resourcePath, version);
     }
 

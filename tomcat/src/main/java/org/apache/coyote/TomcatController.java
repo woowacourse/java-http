@@ -1,0 +1,54 @@
+package org.apache.coyote;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.RequestData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TomcatController {
+
+    private static final Logger log = LoggerFactory.getLogger(TomcatController.class);
+
+    private final Map<RequestMapping, Consumer<RequestData>> requestMappings;
+
+    public TomcatController() {
+        this.requestMappings = new HashMap<>();
+        requestMappings.put(new RequestMapping("/login", HttpMethod.GET), this::handleLogin);
+    }
+
+    public void handleRequest(RequestData requestData) {
+        for (Map.Entry<RequestMapping, Consumer<RequestData>> entry : requestMappings.entrySet()) {
+            if (entry.getKey().isSupported(requestData)) {
+                entry.getValue().accept(requestData);
+                return;
+            }
+        }
+    }
+
+    private void handleLogin(RequestData requestData) {
+        Map<String, String> queryParameter = requestData.getQueryParameter();
+        User user = InMemoryUserRepository.findByAccount(queryParameter.get("account"))
+                .orElseThrow(() ->
+                        new IllegalArgumentException("회원이 존재하지 않습니다. : " + queryParameter.get("account")));
+        if (!user.checkPassword(queryParameter.get("password"))) {
+            throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + queryParameter.get("account"));
+        }
+        log.info("회원 조회 성공 : {}", user);
+    }
+
+    record RequestMapping(
+            String resource,
+            HttpMethod httpMethod
+    ) {
+
+        public boolean isSupported(RequestData requestData) {
+            return requestData.getResource().equals(resource)
+                    && requestData.getHttpMethod() == httpMethod;
+        }
+    }
+}

@@ -97,18 +97,12 @@ public record HttpResponse(
         headers.forEach((key, value) -> sb.append("%s: %s".formatted(key, value)).append(CRLF));
         sb.append(CRLF);
 
-        String contentType = headers.get("Content-Type");
-        if (contentType != null && contentType.equals("image/x-icon")) {
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                baos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
-                baos.write(responseBody);
-                return baos.toByteArray();
-            } catch (IOException e) {
-                throw new IllegalStateException("HTTP 응답을 구성하는 중에 예외가 발생했습니다.", e);
-            }
-        } else {
-            sb.append(new String(responseBody, StandardCharsets.UTF_8));
-            return sb.toString().getBytes(StandardCharsets.UTF_8);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            baos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+            baos.write(responseBody);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalStateException("HTTP 응답을 구성하는 중에 예외가 발생했습니다.", e);
         }
     }
 }

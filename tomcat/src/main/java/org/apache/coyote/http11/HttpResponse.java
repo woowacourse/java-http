@@ -14,6 +14,10 @@ public class HttpResponse {
     public static HttpResponse ok(String body) {
         return new HttpResponse("HTTP/1.1 200 OK", "text/html;charset=utf-8", body);
     }
+    
+    public static HttpResponse ok(String body, String contentType) {
+        return new HttpResponse("HTTP/1.1 200 OK", contentType, body);
+    }
 
     public static HttpResponse notFound() {
         return new HttpResponse("HTTP/1.1 404 Not Found", "text/html;charset=utf-8", "404 Not Found");

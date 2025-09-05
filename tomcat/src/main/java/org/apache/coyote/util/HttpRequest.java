@@ -6,6 +6,6 @@ public record HttpRequest(
         String method,
         String path,
         String version,
-        Map<String, String> headers
+        Map<String, String> queries
 ) {
 }

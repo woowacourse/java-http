@@ -79,10 +79,10 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         String method = firstLine[0];
-        String path = firstLine[1];
+        String path = parsePath(firstLine[1]);
+        Map<String, String> queries = parseQueries(firstLine[1]);
         String version = firstLine[2];
-        Map<String, String> headers = readHeaders(br);
-        return new HttpRequest(method, path, version, headers);
+        return new HttpRequest(method, path, version, queries);
     }
 
     private String[] readFirstLine(BufferedReader br) throws IOException {
@@ -97,26 +97,35 @@ public class Http11Processor implements Runnable, Processor {
         return firstLine;
     }
 
-    private Map<String, String> readHeaders(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            String[] splitLine = line.split(":");
-            if (splitLine.length < 2) {
+    private String parsePath(String path) {
+        String[] splitPath = path.split("[?]");
+        return splitPath[0];
+    }
+
+    private Map<String, String> parseQueries(String path) throws IOException {
+        String[] splitPath = path.split("[?]");
+        if (splitPath.length != 2) {
+            return null;
+        }
+        String query = splitPath[1];
+        Map<String, String> queries = new HashMap<>();
+        for (String pair : query.split("&")) {
+            if (pair.isEmpty()) {
                 continue;
             }
-            String key = splitLine[0].trim();
-            StringBuilder sb = new StringBuilder();
-            for (int idx = 1; idx < splitLine.length; idx++) {
-                sb.append(splitLine[idx]);
+            String key;
+            String value;
+            int separatorIdx = pair.indexOf('=');
+            if (separatorIdx >= 0) {
+                key = pair.substring(0, separatorIdx);
+                value = pair.substring(separatorIdx + 1);
+            } else {
+                key = pair;
+                value = "";
             }
-            String value = sb.toString().trim();
-            headers.put(key, value);
+            queries.put(key, value);
         }
-        return headers;
+        return queries;
     }
 
     private String createValidRequestPath(String path) {

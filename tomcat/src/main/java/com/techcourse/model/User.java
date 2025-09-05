@@ -1,7 +1,11 @@
 package com.techcourse.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class User {
 
+    private static final Logger log = LoggerFactory.getLogger(User.class);
     private final Long id;
     private final String account;
     private final String password;
@@ -16,6 +20,15 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public void logCheckPassword(String password) {
+        if (checkPassword(password)) {
+            log.info(this.toString());
+            return;
+        }
+
+        throw new IllegalArgumentException("[ERROR] No Such User" + password);
     }
 
     public boolean checkPassword(String password) {

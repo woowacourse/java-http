@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +60,12 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
+                if (requestPath.startsWith("/login")) {
+                    authenticateUserFromRequestPath(requestPath);
+
+                    serveStaticFile(requestPath, outputStream);
+                }
+
                 serveStaticFile(requestPath, outputStream);
             }
         } catch (IOException | UncheckedServletException e) {
@@ -73,6 +82,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Path getPath(String requestPath) {
+        if (requestPath.startsWith("/login")) {
+            return Path.of(
+                    Objects.requireNonNull(
+                            getClass().getClassLoader().getResource("static/login.html")).getPath()
+            );
+        }
+
         var resource = getClass().getClassLoader().getResource("static/" + requestPath);
         return Path.of(Objects.requireNonNullElseGet(
                 resource, () -> Objects.requireNonNull(
@@ -106,6 +122,32 @@ public class Http11Processor implements Runnable, Processor {
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private void authenticateUserFromRequestPath(String requestPath) {
+        int index = requestPath.indexOf("?");
+        String queryString = requestPath.substring(index + 1);
+
+        Map<String, String> accountAndPassword = queryParser(queryString);
+
+        String account = accountAndPassword.get("account");
+        String password = accountAndPassword.get("password");
+
+        InMemoryUserRepository.findByAccount(account, password);
+    }
+
+    private Map<String, String> queryParser(String queryString) {
+        String[] accountAndPassword = queryString.split("&");
+        String[] accountInfo = accountAndPassword[0].split("=");
+        String[] passwordInfo = accountAndPassword[1].split("=");
+
+        String account = accountInfo[1];
+        String password = passwordInfo[1];
+
+        return Map.of(
+                "account", account,
+                "password", password
+        );
     }
 
     private boolean isGetMethod(String method) {

@@ -19,8 +19,14 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public static User findByAccount(String account, String password) {
+        if (!database.containsKey(account)) {
+            throw new IllegalArgumentException("[ERROR] No Such User" + account);
+        }
+
+        User user = database.get(account);
+        user.logCheckPassword(password);
+        return user;
     }
 
     private InMemoryUserRepository() {}

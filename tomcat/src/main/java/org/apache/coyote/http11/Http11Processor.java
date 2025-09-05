@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
                     String responseBody = String.join("\n", contents);
                     responseBody += "\n";
                     Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "text/html;charset=utf-8");
+                    headers.put("Content-Type", getContentType(filePath));
 
                     response = responseBuilder("200", "OK", headers, responseBody);
                 }
@@ -114,5 +114,12 @@ public class Http11Processor implements Runnable, Processor {
         response.append(responseBody);
 
         return response.toString();
+    }
+
+    private String getContentType(String filePath) {
+        if (filePath.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

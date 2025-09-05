@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.controller.Controller;
@@ -50,11 +51,12 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             HttpRequestMessage request = makeRequest(inputStream);
-            HttpResponseMessage response = makeResponse(outputStream);
+            HttpResponseMessage response = makeResponse();
 
             Controller controller = findControllerByRequest(request);
             controller.processRequest(request, response);
-            response.writeMessage();
+
+            writeResponseMessage(response, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -77,8 +79,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponseMessage makeResponse(OutputStream outputStream) {
-        return new HttpResponseMessage(outputStream);
+    private HttpResponseMessage makeResponse() {
+        return new HttpResponseMessage();
+    }
+
+    private void writeResponseMessage(HttpResponseMessage response, OutputStream outputStream) {
+        String message = response.getMessage();
+        try {
+            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
+        }
     }
 
     private Controller findControllerByRequest(HttpRequestMessage request) {

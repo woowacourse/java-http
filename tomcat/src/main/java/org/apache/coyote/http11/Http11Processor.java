@@ -1,7 +1,12 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +34,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             Http11Request http11Request = new Http11Request(inputStream);
 
             String resourcePath = http11Request.getUri().substring(1);
+
+            if(resourcePath.contains("login")) {
+                Map<String, String> stringStringMap = parseQuery(resourcePath);
+
+                String account = stringStringMap.get("account");
+
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                log.info("user: {}", user.get());
+            }
+
             byte[] body = readFromResourcePath(resourcePath);
             byte[] responseHeader = createResponseHeader(http11Request, body.length);
 
@@ -42,6 +57,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseQuery(final String uri) {
+        HashMap<String, String> queryMap = new HashMap<>();
+        String queryString = uri.substring(uri.indexOf('?') + 1);
+
+        if(uri.contains("?")) {
+            String[] split = queryString.split("&");
+            for (String query : split) {
+                String[] splitQuery = query.split("=");
+                queryMap.put(splitQuery[0], splitQuery[1]);
+            }
+        }
+
+        return queryMap;
     }
 
     private byte[] createResponseHeader(final Http11Request http11Request, final int length) {
@@ -74,8 +104,19 @@ public class Http11Processor implements Runnable, Processor {
             return response.getBytes();
         }
 
-        String classPath = "static/" + resourcePath;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("static/");
 
+        if(resourcePath.contains("?")) {
+            stringBuilder.append(resourcePath, 0, resourcePath.indexOf("?"));
+            stringBuilder.append(".html");
+        }
+
+        if(!resourcePath.contains("?")) {
+            stringBuilder.append(resourcePath);
+        }
+
+        String classPath = stringBuilder.toString();
         try (InputStream resourceAsStream = getClass().
                 getClassLoader().
                 getResourceAsStream(classPath)) {

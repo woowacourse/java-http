@@ -12,7 +12,8 @@ public class HttpResponse {
     private Map<String, String> header = new HashMap<>();
     private String body;
 
-    public HttpResponse() {
+    public HttpResponse(HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
     }
 
     public String getMessage() {

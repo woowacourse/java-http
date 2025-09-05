@@ -13,7 +13,6 @@ public class RootController implements Controller {
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
-        response.setHttpVersion(request.getVersion());
         response.setStatusCode(StatusCode.OK);
         response.setHeader("Content-Type", "text/html;charset=utf-8");
         response.setBody("Hello world!");

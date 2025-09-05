@@ -20,6 +20,7 @@ import org.apache.exception.SockerReadException;
 import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = makeRequest(inputStream);
-            HttpResponse response = makeResponse();
+            HttpResponse response = makeResponse(request.getVersion());
 
             Controller controller = findControllerByRequest(request);
             controller.processRequest(request, response);
@@ -74,8 +75,8 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(message);
     }
 
-    private HttpResponse makeResponse() {
-        return new HttpResponse();
+    private HttpResponse makeResponse(HttpVersion httpVersion) {
+        return new HttpResponse(httpVersion);
     }
 
     private List<String> readRequestMessage(InputStream inputStream) {

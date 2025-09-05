@@ -32,7 +32,6 @@ public class StaticFileController implements Controller {
             Path path = Paths.get(resource.toURI());
             String responseBody = Files.readString(path);
 
-            response.setHttpVersion(request.getVersion());
             response.setStatusCode(StatusCode.OK);
             response.setHeader("Content-Type", getFileExtension(path).getValue());
             response.setBody(responseBody);

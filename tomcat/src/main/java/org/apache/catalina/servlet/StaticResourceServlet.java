@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.response.responseHeader.ContentType;
@@ -26,9 +27,10 @@ public class StaticResourceServlet extends HttpServlet{
     @Override
     public HttpResponse doGet(final HttpRequest httpRequest) {
         String resource = findResource(httpRequest.getRequestPath());
-        ContentType contentType = findResourceExtension(httpRequest.getRequestLine());
+        Optional<ContentType> contentType = findResourceExtension(httpRequest.getRequestLine());
 
-        return HttpResponseGenerator.generate(resource, contentType, HttpStatus.OK);
+        return contentType.map(type -> HttpResponseGenerator.generate(resource, type, HttpStatus.OK))
+                .orElseGet(() -> HttpResponseGenerator.generate(resource, null, HttpStatus.UNSUPPORTED_MEDIA_TYPE));
     }
 
     @Override
@@ -36,7 +38,7 @@ public class StaticResourceServlet extends HttpServlet{
         return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    private ContentType findResourceExtension(final RequestLine requestLine) {
+    private Optional<ContentType> findResourceExtension(final RequestLine requestLine) {
         String extension = requestLine.getRequestPathExtension();
         return ContentType.findContentType(extension);
     }

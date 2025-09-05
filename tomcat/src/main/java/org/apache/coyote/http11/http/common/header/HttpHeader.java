@@ -107,7 +107,7 @@ public class HttpHeader {
     public List<String> getFormat() {
         return httpHeaderInfo.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .toList();
     }
 }

@@ -30,8 +30,7 @@ public class HttpResponseBody {
     }
 
     public static HttpResponseBody emptyBody() {
-        final String emptyBody = null;
-        return new HttpResponseBody(emptyBody);
+        return new HttpResponseBody(null);
     }
 
     public static HttpResponseBody withString(String value) {
@@ -46,7 +45,7 @@ public class HttpResponseBody {
     }
 
     public Optional<String> getValue() {
-        return Optional.of(value);
+        return Optional.ofNullable(value);
     }
 
     public int getByteLength() {

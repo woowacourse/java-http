@@ -4,16 +4,18 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Objects;
+import org.apache.catalina.connector.CoyoteAdepter;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.dto.Http11Request;
-import org.apache.coyote.http11.dto.Http11Response;
+import org.apache.coyote.http11.domain.ContentType;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +25,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_PATH = "static";
 
     private final Socket connection;
+    private final Adapter adapter;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.adapter = new CoyoteAdepter();
     }
 
     @Override
@@ -44,11 +48,15 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest == null) {
                 return;
             }
+            String resourcePath = httpRequest.parseResourcePath();
+            final var httpResponse = new Http11Response();
+            httpResponse.setResourcePath(resourcePath);
+            adapter.service(httpRequest, httpResponse);
 
-            final var httpResponse = handleRequest(httpRequest, outputStream);
-            outputStream.write(httpResponse.getRequestLine());
+            handleRequest(httpResponse);
+            outputStream.write(httpResponse.getResponseLine());
             outputStream.write(httpResponse.getHeader());
-            outputStream.write(httpResponse.body());
+            outputStream.write(httpResponse.getBody());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -57,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Request getHttpRequest(BufferedReader bufferedReader) throws IOException {
+    private Http11Request getHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final var requestLine = bufferedReader.readLine();
         if (requestLine == null) {
             return null;
@@ -81,50 +89,28 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private Http11Response handleRequest(Http11Request http11Request, OutputStream outputStream)
+    private void handleRequest(final Http11Response httpResponse)
             throws IOException, URISyntaxException {
-        final var resourcePath = http11Request.path();
+        String resourcePath = httpResponse.getResourcePath();
         if (resourcePath.equals("/")) {
-            return buildRootResponse();
+            buildRootResponse(httpResponse);
+            return;
         }
-
         final var resource = getClass().getClassLoader().getResource(STATIC_PATH + resourcePath);
         final var filePath = Paths.get(Objects.requireNonNull(resource).toURI());
 
-        final var contentType = getContentType(resourcePath);
+        final var contentType = ContentType.fromPath(resourcePath);
+        httpResponse.addHeader("Content-Type", contentType.getValue());
+
         final var responseBody = Files.readAllBytes(filePath);
-        final var httpResponse = new Http11Response(
-                200,
-                new LinkedHashMap<>(),
-                responseBody
-        );
-        httpResponse.addHeader("Content-Type", contentType);
         httpResponse.addHeader("Content-Length", String.valueOf(responseBody.length));
-        return httpResponse;
+        httpResponse.setBody(responseBody);
     }
 
-    private Http11Response buildRootResponse() {
+    private void buildRootResponse(final Http11Response httpResponse) {
         byte[] body = "Hello world!".getBytes();
-        final var httpResponse = new Http11Response(
-                200,
-                new LinkedHashMap<>(),
-                body
-        );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.length));
-        return httpResponse;
-    }
-
-    private String getContentType(final String resourcePath) {
-        if (resourcePath.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (resourcePath.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-        if (resourcePath.endsWith(".ico")) {
-            return "image/x-icon";
-        }
-        return "text/html;charset=utf-8";
+        httpResponse.setBody(body);
     }
 }

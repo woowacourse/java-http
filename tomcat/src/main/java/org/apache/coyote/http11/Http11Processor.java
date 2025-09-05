@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +12,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.util.HttpRequest;
 import org.slf4j.Logger;
@@ -66,9 +69,28 @@ public class Http11Processor implements Runnable, Processor {
             }
             statusLine = "HTTP/1.1 200 OK ";
             contentType = guessContentType(requestPath);
+            if ("/login".equals(httpRequest.path())) {
+                processLoginMemberInfo(httpRequest);
+            }
             response(statusLine, contentType, body, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void processLoginMemberInfo(HttpRequest httpRequest) {
+        Map<String, String> queries = httpRequest.queries();
+        String account = queries.get("account");
+        String password = queries.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            return;
+        }
+        if (user.get().checkPassword(password)) {
+            log.info("User: {}", user.get());
         }
     }
 
@@ -110,21 +132,25 @@ public class Http11Processor implements Runnable, Processor {
         String query = splitPath[1];
         Map<String, String> queries = new HashMap<>();
         for (String pair : query.split("&")) {
-            if (pair.isEmpty()) {
-                continue;
-            }
-            String key;
-            String value = "";
-            int separatorIdx = pair.indexOf('=');
-            if (separatorIdx >= 0) {
-                key = pair.substring(0, separatorIdx);
-                value = pair.substring(separatorIdx + 1);
-            } else {
-                key = pair;
-            }
-            queries.put(key, value);
+            parseKeyValue(pair, queries);
         }
         return queries;
+    }
+
+    private void parseKeyValue(String pair, Map<String, String> queries) {
+        if (pair.isEmpty()) {
+            return;
+        }
+        String key;
+        String value = "";
+        int separatorIdx = pair.indexOf('=');
+        if (separatorIdx >= 0) {
+            key = pair.substring(0, separatorIdx);
+            value = pair.substring(separatorIdx + 1);
+        } else {
+            key = pair;
+        }
+        queries.put(key, value);
     }
 
     private String createValidRequestPath(String path) {

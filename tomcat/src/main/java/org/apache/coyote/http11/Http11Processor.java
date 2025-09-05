@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.coyote.Processor;
+import org.apache.coyote.util.StreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,18 +27,15 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+             final var outputStream = connection.getOutputStream()
+        ) {
+            final String request = StreamReader.readRequest(inputStream);
+            if (request == null || request.isEmpty()) {
+                return;
+            }
+            final HttpRequest httpRequest = HttpRequest.from(request);
+            final HttpResponse response = ResponseGenerator.generateResponse(httpRequest);
+            outputStream.write(response.convertByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

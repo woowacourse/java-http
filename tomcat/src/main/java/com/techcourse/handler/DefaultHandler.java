@@ -20,13 +20,15 @@ public class DefaultHandler implements HttpRequestHandler {
 
     @Override
     public void handleGet(HttpRequest request, HttpResponse response) {
-        final Optional<String> contentOpt = getResourceContent(STATIC_FILE_PATH_PREFIX + request.getPath());
-        if (contentOpt.isEmpty()) {
-            throw new NoSuchElementException("해당 경로에 파일이 존재하지 않습니다: " + request.getPath());
-        }
+        final String content = getResourceContent(STATIC_FILE_PATH_PREFIX + request.getPath())
+                .orElseThrow(() -> new NoSuchElementException("해당 경로에 파일이 존재하지 않습니다: " + request.getPath()));
 
         final String mimeType = getMimeTypeOrDefault(request.getPath());
-        final String content = contentOpt.get();
+
+        buildSuccessResponse(response, mimeType, content);
+    }
+
+    private static void buildSuccessResponse(HttpResponse response, String mimeType, String content) {
         response.setStatus(OK);
         response.setContentType(mimeType + ";charset=utf-8");
         response.setBody(content);

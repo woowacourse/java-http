@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse buildResponse(final HttpRequest request) {
         final String contentType = getContentType(request.getPath());
         return new HttpResponse(
-                request.getHeader("version"),
+                request.getVersion(),
                 200,
                 contentType,
                 buildResponseBody(request));

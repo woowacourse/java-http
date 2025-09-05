@@ -13,10 +13,9 @@ public class HttpRequest {
     private static final int HTTP_PATH_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
     private static final int MIN_REQUEST_LINE_PARTS = 3;
-    private static final String VERSION_KEY = "version";
-
     private final String method;
     private final String path;
+    private final String version;
     private final Map<String, String> headers;
     private final Map<String, String> queryParams;
 
@@ -41,9 +40,9 @@ public class HttpRequest {
 
         final String path = extractPath(fullPath);
         final Map<String, String> queryParams = extractQueryParams(fullPath);
-        final Map<String, String> headers = parseHeaders(lines, version);
+        final Map<String, String> headers = parseHeaders(lines);
 
-        return new HttpRequest(method, path, headers, queryParams);
+        return new HttpRequest(method, path, version, headers, queryParams);
     }
 
     private static String[] parseRequestLine(final String requestLine) {
@@ -88,9 +87,8 @@ public class HttpRequest {
         }
     }
 
-    private static Map<String, String> parseHeaders(final String[] lines, final String version) {
+    private static Map<String, String> parseHeaders(final String[] lines) {
         final Map<String, String> headers = new HashMap<>();
-        headers.put(VERSION_KEY, version);
 
         for (int i = 1; i < lines.length; i++) {
             final String line = lines[i].trim();
@@ -131,16 +129,12 @@ public class HttpRequest {
     }
 
     private void appendRequestLine(final StringBuilder sb) {
-        sb.append(String.format("%s %s HTTP/%s\r\n", method, path, getHeader(VERSION_KEY)));
+        sb.append(String.format("%s %s HTTP/%s\r\n", method, path, version));
     }
 
     private void appendHeaders(final StringBuilder sb) {
-        headers.forEach((key, value) -> {
-            if (VERSION_KEY.equals(key)) {
-                return;
-            }
-            sb.append(String.format("%s: %s\r\n", capitalizeFirstLetter(key), value));
-        });
+        headers.forEach((key, value) -> 
+            sb.append(String.format("%s: %s\r\n", capitalizeFirstLetter(key), value)));
     }
 
     private String capitalizeFirstLetter(final String str) {

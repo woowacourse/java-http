@@ -36,9 +36,9 @@ public final class Responses {
 
     private static void writeHead(OutputStream out, String version, int code, String reason, String contentType, long len) throws IOException {
         String head =
-                version + SP + code + SP + reason + SP + CRLF +
-                        CONTENT_TYPE + SP + contentType + SP + CRLF +
-                        CONTENT_LENGTH + SP + len + SP + CRLF +
+                version + SP + code + SP + reason + CRLF +
+                        CONTENT_TYPE + SP + contentType + CRLF +
+                        CONTENT_LENGTH + SP + len + CRLF +
                         CRLF;
         out.write(head.getBytes(StandardCharsets.UTF_8));
     }

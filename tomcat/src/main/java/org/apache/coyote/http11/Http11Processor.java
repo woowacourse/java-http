@@ -36,6 +36,26 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    static class HttpResponse {
+
+        private final String contentType;
+        private final String responseBody;
+
+        public HttpResponse(String contentType, String responseBody) {
+            this.contentType = contentType;
+            this.responseBody = responseBody;
+        }
+
+        public String serveResponse() {
+            return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
+        }
+    }
+
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
@@ -44,45 +64,37 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String inputLine = bufferedReader.readLine();
 
-            HttpRequest httpRequest = new HttpRequest(inputLine.split(" ")[0], inputLine.split(" ")[1]);
+            HttpResponse response = handle(new HttpRequest(inputLine.split(" ")[0], inputLine.split(" ")[1]));
 
-            String response = null;
-            if (httpRequest.getUri().startsWith("/login")) {
-                Map<String, String> queryStrings = httpRequest.getQueryStrings();
-                String account = queryStrings.get("account");
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                log.info("{}", user.orElse(null));
-
-                response = getHttpResponse(
-                    "html",
-                    Arrays.toString(staticFileLoader.readAllFileWithUri(httpRequest.getUri())) + "html"
-                );
-            } else if (httpRequest.getUri().contains(".")) {
-                int extensionIndex = httpRequest.getUri().lastIndexOf(".");
-                String extension = httpRequest.getUri().substring(extensionIndex + 1);
-
-                if (extension.equals("html") || extension.equals("css") || extension.equals("js")) {
-                    String staticFile = new String(staticFileLoader.readAllFileWithUri(httpRequest.getUri()));
-                    response = getHttpResponse(extension, staticFile);
-                }
-            } else {
-                response = getHttpResponse("html", "Hello world!");
-            }
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.serveResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getHttpResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/" + contentType + ";charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-            "",
-            responseBody);
+    private HttpResponse handle(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getUri().equals("/")) {
+            return new HttpResponse("html", "Hello world!");
+        }
+
+        if (httpRequest.getUri().startsWith("/login")) {
+            Map<String, String> queryStrings = httpRequest.getQueryStrings();
+            String account = queryStrings.get("account");
+
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            log.info("{}", user.orElse(null));
+
+            return new HttpResponse(
+                "html",
+                Arrays.toString(staticFileLoader.readAllFileWithUri(httpRequest.getUri())) + "html"
+            );
+        }
+
+        int extensionIndex = httpRequest.getUri().lastIndexOf(".");
+        String extension = httpRequest.getUri().substring(extensionIndex + 1);
+
+        String staticFile = new String(staticFileLoader.readAllFileWithUri(httpRequest.getUri()));
+        return new HttpResponse(extension, staticFile);
     }
 }

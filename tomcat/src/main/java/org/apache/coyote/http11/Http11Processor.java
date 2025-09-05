@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,29 +42,45 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream)))
         {
             final String line = br.readLine(); //GET /index.html HTTP/1.1
-            final String[] requestValues = line.split(" "); //[GET, /index.html, HTTP/1.1]
+            String uri = parseUri(line); //index.html, /login?...
 
-            String requestPath = requestValues[1]; // /index.html
-            final URL url = getClass().getClassLoader().getResource("static" + requestPath); // static/index.html
+            String path = extractPath(uri); //index.html, /login
+            String query = extractQuery(uri);
+            String resourcePath;
 
-            String responseBody;
-            if (requestPath.equals("/")) {
-                responseBody = "Hello world!";
-            }
-            else if (url != null ) {
-                Path path = Paths.get(url.toURI());
-                responseBody = Files.readString(path);
+            if (path.equals("/login")) {
+                resourcePath = "static/login.html"; // 항상 .html 붙이기
             }
             else {
-                //파일을 못찾은거니까 404 줘야징
-                URL notFoundUrl = getClass().getClassLoader().getResource("static/404.html");
-                Path path = Paths.get(notFoundUrl.toURI());
-                responseBody = Files.readString(path);
+                resourcePath = "static" + path; // 그 외 정적 파일
+            }
+
+            URL url = getClass().getClassLoader().getResource(resourcePath);
+            if (url == null) {
+                url = getClass().getClassLoader().getResource("static/404.html");
+            }
+
+            String responseBody;
+            if (uri.equals("/")) {
+                responseBody = "Hello world!";
+            }
+            else if (path.equals("/login") && url != null) {
+                Path loginPath = Paths.get(url.toURI());
+                responseBody = Files.readString(loginPath);
+                parseQueryString(query);
+            }
+            else if (path.equals("/index.html") && url != null) {
+                Path rootPath = Paths.get(url.toURI());
+                responseBody = Files.readString(rootPath);
+            }
+            else {
+                Path notFoundPath = Paths.get(url.toURI());
+                responseBody = Files.readString(notFoundPath);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(requestPath),
+                    "Content-Type: " + getContentType(path),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -71,6 +90,55 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void parseQueryString(final String query) {
+        //user : USER{id=1, account='gugu', email='dfad@gmail.com', password='password'}
+        if (query == null) {
+            return;
+        }
+
+        Map<String, String> params = new HashMap<>();
+        String[] pairs = query.split("&");
+
+        for(String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        String account = params.get("account");
+
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(
+                        user -> log.info("user : {}", user),
+                        () -> log.warn("account에 일치하는 user가 존재하지 않습니다.")
+                );
+    }
+
+    private String parseUri(final String requestLine) {
+        String[] requestValues = requestLine.split(" ");
+
+        return requestValues[1]; // /index.html or /login?account=...
+    }
+
+    private String extractPath(final String uri) {
+        int index = uri.indexOf("?");
+        if (index == -1) {
+            return uri;
+        }
+
+        return uri.substring(0, index);
+    }
+
+    private String extractQuery(final String uri) {
+        int index = uri.indexOf("?");
+        if (index == -1) {
+            return null;
+        }
+
+        return uri.substring(index + 1);
     }
 
     private String getContentType(final String requestPath) {

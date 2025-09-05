@@ -14,11 +14,11 @@ public class Headers {
     private void parseHeader(final String headerLine) {
         final String[] parts = headerLine.split(": ", 2);
         if (parts.length == 2) {
-            headers.put(parts[0], parts[1]);
+            headers.put(parts[0].toLowerCase(), parts[1]);
         }
     }
 
     public String getHeader(final String headerName) {
-        return headers.get(headerName);
+        return headers.get(headerName.toLowerCase());
     }
 }

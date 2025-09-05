@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
             String response = null;
             if (httpRequest.getUri().startsWith("/login")) {
                 int index = httpRequest.getUri().indexOf("?");
-                String uri = httpRequest.getUri().substring(0, index);
+                String path = httpRequest.getUri().substring(0, index);
                 String query = httpRequest.getUri().substring(index + 1);
 
                 Map<String, String> tmp = new HashMap<>();
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 response = getHttpResponse(
                     "html",
-                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + uri + ".html").getFile()).toPath()))
+                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + path + ".html").getFile()).toPath()))
                 );
             } else if (httpRequest.getUri().contains(".")) {
                 String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getUri()).getFile()).toPath()));

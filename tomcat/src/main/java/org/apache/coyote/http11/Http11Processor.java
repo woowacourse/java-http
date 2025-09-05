@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestUrl = parsedLine[1];
 
             URL resource;
-            if (requestUrl.endsWith(".html")) {
+            if (requestUrl.endsWith(".html") || requestUrl.endsWith(".css")) {
                 resource = getClass().getClassLoader().getResource("static" + requestUrl);
             } else {
                 resource = getClass().getClassLoader().getResource(requestUrl);
@@ -51,6 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/plain;charset=utf-8";
             if (requestUrl.endsWith(".html")) {
                 contentType = "text/html;charset=utf-8";
+            } else if (requestUrl.endsWith(".css")) {
+                contentType = "text/css;charset=utf-8";
             }
 
             final var response = String.join("\r\n",

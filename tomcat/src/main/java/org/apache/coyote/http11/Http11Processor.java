@@ -33,6 +33,24 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    static class HttpRequest {
+        private final String method;
+        private final String uri;
+
+        public HttpRequest(String method, String uri) {
+            this.method = method;
+            this.uri = uri;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+    }
+
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
@@ -44,14 +62,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String httpMethod = inputLine.split(" ")[0];
-            String httpUri = inputLine.split(" ")[1];
+            HttpRequest httpRequest = new HttpRequest(inputLine.split(" ")[0], inputLine.split(" ")[1]);
 
             String response = null;
-            if (httpUri.startsWith("/login")) {
-                int index = httpUri.indexOf("?");
-                String uri = httpUri.substring(0, index);
-                String query = httpUri.substring(index + 1);
+            if (httpRequest.getUri().startsWith("/login")) {
+                int index = httpRequest.getUri().indexOf("?");
+                String uri = httpRequest.getUri().substring(0, index);
+                String query = httpRequest.getUri().substring(index + 1);
 
                 Map<String, String> tmp = new HashMap<>();
 
@@ -69,9 +86,9 @@ public class Http11Processor implements Runnable, Processor {
                     "html",
                     new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + uri + ".html").getFile()).toPath()))
                 );
-            } else if (httpUri.contains(".")) {
-                String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpUri).getFile()).toPath()));
-                response = getHttpResponse(httpUri.substring(httpUri.indexOf(".") + 1), staticFile);
+            } else if (httpRequest.getUri().contains(".")) {
+                String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getUri()).getFile()).toPath()));
+                response = getHttpResponse(httpRequest.getUri().substring(httpRequest.getUri().indexOf(".") + 1), staticFile);
             } else {
                 response = getHttpResponse("html", "Hello world!");
             }

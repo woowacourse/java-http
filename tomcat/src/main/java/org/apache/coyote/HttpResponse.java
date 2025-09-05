@@ -19,16 +19,18 @@ public class HttpResponse {
     public HttpResponse(String protocol) {
         this.headers = new LinkedHashMap<>();
         this.protocol = protocol;
+        this.body = "";
+        this.charset = StandardCharsets.UTF_8;
     }
 
-    public void setBody(String body, Charset charsets) {
-        this.body = body;
-        this.charset = charsets;
-        setContentLength();
+    public void setBody(String body, Charset charset) {
+        this.charset = charset;
+        setBody(body);
     }
 
     public void setBody(String body) {
-        setBody(body, StandardCharsets.UTF_8);
+        this.body = body;
+        setContentLength();
     }
 
     public void setHeader(String name, String value) {

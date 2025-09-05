@@ -26,7 +26,7 @@ public class HttpRequestBody {
 
     private static void validateNull(final InputStream inputStream, final HttpHeader httpHeader) {
         if (inputStream == null) {
-            throw new IllegalArgumentException("inputStraem은 null일 수 없습니다");
+            throw new IllegalArgumentException("inputStream은 null일 수 없습니다");
         }
         if (httpHeader == null) {
             throw new IllegalArgumentException("httpHeader는 null일 수 없습니다");

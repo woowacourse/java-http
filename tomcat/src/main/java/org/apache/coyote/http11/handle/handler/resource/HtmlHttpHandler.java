@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handle.handler;
+package org.apache.coyote.http11.handle.handler.resource;
 
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpRequest;

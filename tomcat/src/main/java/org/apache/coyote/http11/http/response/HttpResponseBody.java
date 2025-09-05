@@ -3,6 +3,7 @@ package org.apache.coyote.http11.http.response;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +23,7 @@ public class HttpResponseBody {
 
         try {
             final Path path = Paths.get(url.toURI());
-            this.value = new String(Files.readAllBytes(path));
+            this.value = Files.readString(path, StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
             throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
         }
@@ -52,6 +53,6 @@ public class HttpResponseBody {
         if (value == null) {
             throw new IllegalArgumentException("body 내용물이 존재하지 않습니다");
         }
-        return value.getBytes().length;
+        return value.getBytes(StandardCharsets.UTF_8).length;
     }
 }

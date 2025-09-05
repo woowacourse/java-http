@@ -5,6 +5,7 @@ public enum HttpStatus {
 
     OK(200, "OK"),
     NOT_FOUND(404, "Not Found"),
+    NO_CONTENT(204, "No Content"),
     ;
 
     private final int code;

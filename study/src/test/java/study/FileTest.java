@@ -1,5 +1,15 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +38,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = getClass().getClassLoader().getResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,15 +50,22 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(getClass().getClassLoader().getResource(fileName).getPath());
+        final List<String> actual1 = Files.readAllLines(path);
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual2 = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                actual2.add(line);
+            }
+        }
 
-        assertThat(actual).containsOnly("nextstep");
+        assertThat(actual1).containsOnly("nextstep");
+        assertThat(actual2).containsOnly("nextstep");
     }
 }

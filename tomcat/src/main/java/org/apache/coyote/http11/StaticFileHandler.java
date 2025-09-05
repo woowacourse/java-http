@@ -24,4 +24,17 @@ public class StaticFileHandler {
     public boolean exists(String filePath) {
         return getClass().getResource("/static" + filePath) != null;
     }
+    
+    public String getContentType(String filePath) {
+        if (filePath.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        } else if (filePath.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        } else if (filePath.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        } else if (filePath.endsWith(".json")) {
+            return "application/json;charset=utf-8";
+        }
+        return "text/plain;charset=utf-8";
+    }
 }

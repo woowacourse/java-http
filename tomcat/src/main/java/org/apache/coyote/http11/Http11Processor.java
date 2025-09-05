@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.TomcatController;
@@ -53,13 +54,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestData getRequestData(InputStream inputStream) throws IOException {
-        try (var inputReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            final List<String> rawHttpRequest = inputReader.lines().toList();
-            if (rawHttpRequest.isEmpty()) {
-                throw new IllegalArgumentException("잘못된 요청입니다.");
-            }
-            return RequestData.of(rawHttpRequest);
+        var inputReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        final List<String> rawHttpRequest = inputReader.lines()
+                .takeWhile(line -> !line.isBlank())
+                .toList();
+        if (rawHttpRequest.isEmpty()) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
         }
+        return RequestData.of(rawHttpRequest);
     }
 
     private String getResponse(RequestData requestData) {

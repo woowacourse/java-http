@@ -1,0 +1,108 @@
+package com.techcourse.servlet;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+import org.apache.catalina.Servlet;
+import org.apache.coyote.http11.ContentTypeMapper;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class StaticResourceServlet implements Servlet {
+
+    private static final Logger log = LoggerFactory.getLogger(StaticResourceServlet.class);
+
+    @Override
+    public void init() {
+        log.info("StaticResourceServlet initialized");
+    }
+
+    @Override
+    public void service(final HttpRequest request, final HttpResponse response) {
+        if (!"GET".equals(request.getMethod())) {
+            response.setStatus(405);
+            response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
+            return;
+        }
+
+        String uri = request.getUri();
+
+        // 루트 경로면 index.html로
+        if ("/".equals(uri)) {
+            uri = "/index.html";
+        }
+
+        final StaticFileResult result = readStaticFile(uri);
+
+        response.setStatus(result.statusCode);
+        response.setContentType(result.contentType);
+        response.write(result.content);
+    }
+
+    private StaticFileResult readStaticFile(final String uri) {
+        // 경로 탐색 공격 방지
+        if (uri.contains("..") || uri.contains("\\")) {
+            log.warn("Path traversal attempt detected: {}", uri);
+            return new StaticFileResult(
+                    400,
+                    "text/html; charset=utf-8",
+                    createErrorPage("Bad Request", 400)
+            );
+        }
+
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + uri);
+
+        if (inputStream == null) {
+            log.warn("Static file not found: {}", uri);
+            return new StaticFileResult(
+                    404,
+                    "text/html; charset=utf-8",
+                    createErrorPage("File Not Found", 404)
+            );
+        }
+
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            final String content = reader.lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+
+            final String contentType = ContentTypeMapper.get(uri);
+
+            return new StaticFileResult(200, contentType, content);
+
+        } catch (final IOException e) {
+            log.error("Failed to read static file: {}", uri, e);
+            return new StaticFileResult(
+                    500,
+                    "text/html; charset=utf-8",
+                    createErrorPage("Error loading file", 500)
+            );
+        }
+    }
+
+    private record StaticFileResult(int statusCode, String contentType, String content) {
+    }
+
+    private String createErrorPage(final String message, final int statusCode) {
+        return String.format("""
+                <html>
+                <head><title>Error %d</title></head>
+                <body>
+                    <h1>%s</h1>
+                    <p>Status Code: %d</p>
+                </body>
+                </html>
+                """, statusCode, message, statusCode);
+    }
+
+    @Override
+    public void destroy() {
+        log.info("StaticResourceServlet destroyed");
+    }
+}

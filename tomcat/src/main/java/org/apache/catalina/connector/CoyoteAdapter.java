@@ -15,10 +15,7 @@ public class CoyoteAdapter implements Adapter {
 
     @Override
     public void service(Http11Request request, Http11Response response) {
-        try {
-            final var controller = requestMapper.findController(request);
-            controller.service(request, response);
-        } catch (Exception ignored) {
-        }
+        final var controller = requestMapper.findController(request);
+        controller.service(request, response);
     }
 }

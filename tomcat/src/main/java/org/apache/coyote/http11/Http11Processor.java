@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = readStaticFileByName(target);
 
             // 파일 내용을 바이트로 변환하여 응답
-            final var response = getHttp200Response(responseBody);
+            final var response = getHttp200Response(target, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -125,12 +125,36 @@ public class Http11Processor implements Runnable, Processor {
      * @param responseBody response body
      * @return 200 response body text
      */
-    private String getHttp200Response(String responseBody) {
+    private String getHttp200Response(final String target, final String responseBody) {
+        final var fileExtension = getFileExtension(target);
+        final var contentTypeHeader = String.format("Content-Type: text/%s;charset=utf-8 ", fileExtension);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                contentTypeHeader,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    /**
+     * get file extension from url / path / name
+     * @param target target resource path or name
+     * @return file extension
+     */
+    private String getFileExtension(String target) {
+        // TODO: 확장자별 content type 매핑
+        String fileExtension = "html";
+
+        final var slashIndex = target.lastIndexOf("/");
+        String fileName = target;
+        if (slashIndex >= 0) {
+            fileName = target.substring(slashIndex + 1);
+        }
+
+        final var dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
+        }
+        return fileExtension;
     }
 }

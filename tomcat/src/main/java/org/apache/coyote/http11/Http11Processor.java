@@ -2,15 +2,10 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -19,7 +14,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -37,58 +31,38 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final String requestLine = reader.readLine();
-
-            if (requestLine == null) {
-                return;
-            }
-
-            String[] tokens = requestLine.split(" ");
-            String uri = tokens[1];
-
-            String path = uri;
-            String queryString = null;
-
-            if (uri.contains("?")) {
-                int queryIndex = uri.indexOf("?");
-                path = uri.substring(0, queryIndex);
-                queryString = uri.substring(queryIndex + 1);
-            }
+            HttpRequest request = new HttpRequest(inputStream);
+            HttpResponse response = new HttpResponse(outputStream);
+            String path = request.getPath();
 
             if ("/".equals(path)) {
-                handleRoot(outputStream);
+                handleRoot(response);
                 return;
             }
 
             if ("/login".equals(path)) {
-                handleLogin(outputStream, queryString);
+                handleLogin(request, response);
                 return;
             }
-
-            handleStaticResource(outputStream, path);
+            handleStaticResource(response, path);
 
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-
-    private void handleRoot(OutputStream outputStream) throws IOException {
+    private void handleRoot(HttpResponse response) throws IOException {
         final var responseBody = "Hello world!";
-        sendOkResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
+        response.ok("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
 
-    private void handleLogin(OutputStream outputStream, String queryString) throws IOException {
-        if (queryString != null) {
-            Map<String, String> params = parseQueryString(queryString);
-            String account = params.get("account");
-            String password = params.get("password");
+    private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
+        String account = request.getQueryParam("account");
+        String password = request.getQueryParam("password");
 
-            log.info("로그인 시도: account={}, password={}", account, password);
+        if (account != null && password != null) {
             Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-
             if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
                 log.info("로그인 성공: {}", userOptional.get());
             } else {
@@ -96,35 +70,24 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        loadStaticResource(outputStream, "/login.html");
+        loadStaticResource(response, "/login.html");
     }
 
-    private void handleStaticResource(OutputStream outputStream, String path) throws IOException {
-        loadStaticResource(outputStream, path);
+    private void handleStaticResource(HttpResponse response, String path) throws IOException {
+        loadStaticResource(response, path);
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> params = new HashMap<>();
-        for (String pair : queryString.split("&")) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-        return params;
-    }
-
-    private void loadStaticResource(OutputStream outputStream, String path) throws IOException {
+    private void loadStaticResource(HttpResponse response, String path) throws IOException {
         String resourcePath = "static" + path;
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (fileInputStream == null) {
-                sendNotFoundResponse(outputStream);
+                response.notFound();
                 return;
             }
 
             String contentType = determineContentType(path);
             byte[] bodyBytes = fileInputStream.readAllBytes();
-            sendOkResponse(outputStream, contentType, bodyBytes);
+            response.ok(contentType, bodyBytes);
         }
     }
 
@@ -136,33 +99,5 @@ public class Http11Processor implements Runnable, Processor {
             return "application/javascript";
         }
         return "text/html;charset=utf-8";
-    }
-
-    private void sendOkResponse(OutputStream outputStream, String contentType, byte[] body) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType,
-                "Content-Length: " + body.length + " ",
-                "",
-                "");
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
-        outputStream.flush();
-    }
-
-    private void sendNotFoundResponse(OutputStream outputStream) throws IOException {
-        final var responseBody = "404 Not Found";
-        final var bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
-                "Content-Type: text/plain;charset=utf-8 ",
-                "Content-Length: " + bodyBytes.length,
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
     }
 }

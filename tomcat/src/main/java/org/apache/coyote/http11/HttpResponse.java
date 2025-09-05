@@ -25,9 +25,9 @@ public class HttpResponse {
 
     private void sendResponse(String statusLine, String contentType, byte[] body) throws IOException {
         final var response = String.join("\r\n",
-                "HTTP/1.1 " + statusLine,
-                "Content-Type: " + contentType,
-                "Content-Length: " + body.length,
+                "HTTP/1.1 " + statusLine + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + body.length + " ",
                 "",
                 "");
 

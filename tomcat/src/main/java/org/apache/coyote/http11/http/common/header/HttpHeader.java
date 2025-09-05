@@ -73,8 +73,8 @@ public class HttpHeader {
             final int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
             validateSplitFormat(requestPayload, headerSplitIndex);
 
-            final String headerKey = clean(requestPayload.substring(0, headerSplitIndex));
-            final String headerValue = requestPayload.substring(headerSplitIndex + 1);
+            final String headerKey = requestPayload.substring(0, headerSplitIndex).trim().toLowerCase();
+            final String headerValue = requestPayload.substring(headerSplitIndex + 1).trim();
 
             validateHeaderFormat(headerKey, headerValue);
             httpHeaderInfo.put(headerKey, headerValue);
@@ -90,10 +90,6 @@ public class HttpHeader {
         if (headerKey.isBlank()) {
             throw new IllegalArgumentException("header의 key값은 빈 값일 수 없습니다");
         }
-    }
-
-    private String clean(String target) {
-        return target.trim().toLowerCase();
     }
 
     public boolean containsKey(String target) {

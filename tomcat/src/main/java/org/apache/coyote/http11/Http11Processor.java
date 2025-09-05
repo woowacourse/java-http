@@ -77,10 +77,11 @@ public class Http11Processor implements Runnable, Processor {
         httpHeader.put("method", method);
 
         String uri = requestLineSplit[1];
+        System.out.println(uri);
         if (uri.contains("?")) {
             int index = uri.indexOf("?");
-            uri = uri.substring(0, index + 1);
-            httpHeader.put("request-uri", uri);
+            String endpoint = uri.substring(0, index);
+            httpHeader.put("request-uri", endpoint);
         } else {
             httpHeader.put("request-uri", uri);
         }
@@ -138,14 +139,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private QueryParameter parseQueryParameter(String uri) {
         if (uri.contains("?")) {
+            System.out.println(uri);
             int index = uri.indexOf("?");
             String queryString = uri.substring(index + 1);
 
             Map<String, String> queryParameters = new HashMap<>();
             String[] parameters = queryString.split("&");
             for (String parameter : parameters) {
-                String key = parameter.split("=")[0];
-                String value = parameter.split("=")[1];
+                String[] split = parameter.split("=");
+                String key = split[0];
+                String value = split[1];
                 queryParameters.put(key, value);
             }
         return new QueryParameter(queryParameters);

@@ -13,6 +13,9 @@ public class HttpRequest {
     private final HttpVersion version;
 
     public HttpRequest(List<String> message) {
+        if (message.size() <= 0) {
+            throw new InvalidRequestException("요청 메세지가 비어있습니다.");
+        }
         List<String> startLine = List.of(message.getFirst().split(" "));
         if (startLine.size() < 3) {
             throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");

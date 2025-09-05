@@ -107,6 +107,6 @@ public class Http11Processor implements Runnable, Processor {
                 return controller;
             }
         }
-        throw new InvalidRequestException("URI가 올바르지 않습니다.");
+        throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
     }
 }

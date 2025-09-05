@@ -1,9 +1,12 @@
 package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -25,7 +28,7 @@ public class LoginServlet implements Servlet {
             handleGet(request, response);
             return;
         }
-        
+
         response.setStatus(405);
         response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
     }
@@ -49,24 +52,29 @@ public class LoginServlet implements Servlet {
             log.info("로그인 실패: 존재하지 않는 계정 - account: {}", account);
             return;
         }
-        
+
         final var user = userOptional.get();
         if (user.checkPassword(password)) {
             log.info("로그인 성공: 회원 조회 결과 - {}", user);
             return;
         }
-        
+
         log.info("로그인 실패: 비밀번호 불일치 - account: {}", account);
     }
 
     private String readLoginPage() {
-        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
+        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static/login.html");
+             final BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
             if (inputStream == null) {
                 log.warn("Login page not found: static/login.html");
                 return createErrorPage("Login page not found", 404);
             }
-            
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            return reader.lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+
         } catch (final IOException e) {
             log.error("Failed to read login.html", e);
             return createErrorPage("Error loading login page", 500);
@@ -75,14 +83,14 @@ public class LoginServlet implements Servlet {
 
     private String createErrorPage(final String message, final int statusCode) {
         return String.format("""
-            <html>
-            <head><title>Error %d</title></head>
-            <body>
-                <h1>%s</h1>
-                <p>Status Code: %d</p>
-            </body>
-            </html>
-            """, statusCode, message, statusCode);
+                <html>
+                <head><title>Error %d</title></head>
+                <body>
+                    <h1>%s</h1>
+                    <p>Status Code: %d</p>
+                </body>
+                </html>
+                """, statusCode, message, statusCode);
     }
 
     @Override

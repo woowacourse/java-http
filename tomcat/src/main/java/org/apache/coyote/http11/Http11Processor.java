@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
+import static org.apache.coyote.HttpStatus.NOT_FOUND;
+
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
@@ -10,10 +14,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
 import org.apache.coyote.HttpRequestParser;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,34 +55,43 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
             final HttpResponse response = new HttpResponse(PROTOCOL);
 
-            if (handlerMap.containsKey(request.getPath())) {
-                handleRequest(request, response);
-                writeResponse(response, outputStream);
-                return;
-            }
+            handleRequest(request, response);
 
-            defaultHandler.handleGet(request, response);
             writeResponse(response, outputStream);
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeResponse(final HttpResponse response, OutputStream outputStream) {
-        try {
-            outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {
-        final HttpRequestHandler handler = handlerMap.get(request.getPath());
+        final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
+
+        try {
+            executeMethodHandler(request, response, handler);
+        } catch (NoSuchElementException e) {
+            setErrorResponse(NOT_FOUND, response, e);
+        } catch (UnsupportedOperationException e) {
+            setErrorResponse(METHOD_NOT_ALLOWED, response, e);
+        } catch (UncheckedServletException e) {
+            setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
+        }
+    }
+
+    private void executeMethodHandler(HttpRequest request, HttpResponse response, HttpRequestHandler handler) {
         switch (request.getMethod()) {
             case "GET" -> handler.handleGet(request, response);
-            default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다.");
+            default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
         }
+    }
+
+    private void setErrorResponse(HttpStatus status, HttpResponse response, Exception e) {
+        response.setStatus(status);
+        response.setBody(e.getMessage());
+        response.setContentType("text/plain;charset=utf-8");
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.catalina.servletContainer;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.catalina.servlet.DefaultServlet;
 import org.apache.catalina.servlet.LoginServlet;
 import org.apache.catalina.servlet.StaticResourceServlet;
@@ -15,11 +16,10 @@ public class ServletMapper {
         this.servlets = initServlets();
     }
 
-    public Servlet findServlet(final HttpRequest httpRequest) {
+    public Optional<Servlet> findServlet(final HttpRequest httpRequest) {
         return servlets.stream()
                 .filter(servlet -> servlet.canHandle(httpRequest))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 처리할 수 없는 요청입니다"));
+                .findFirst();
     }
 
     private List<Servlet> initServlets() {

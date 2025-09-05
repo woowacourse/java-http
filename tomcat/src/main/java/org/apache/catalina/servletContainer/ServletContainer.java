@@ -1,8 +1,12 @@
 package org.apache.catalina.servletContainer;
 
+import java.util.Optional;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.coyote.response.HttpStatus;
 
 public class ServletContainer {
 
@@ -13,7 +17,11 @@ public class ServletContainer {
     }
 
     public HttpResponse process(final HttpRequest httpRequest) {
-        Servlet servlet = servletMapper.findServlet(httpRequest);
-        return servlet.service(httpRequest);
+        Optional<Servlet> servlet = servletMapper.findServlet(httpRequest);
+        if(servlet.isEmpty()){
+            return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.NOT_FOUND);
+        }
+
+        return servlet.get().service(httpRequest);
     }
 }

@@ -11,8 +11,13 @@ import lombok.ToString;
 public class User {
 
     private final Long id;
+
     private final String account;
+
+    @Getter(AccessLevel.NONE)
+    @ToString.Exclude
     private final String password;
+
     private final String email;
 
     public static User withId(final Long id, final String account, final String password, final String email) {

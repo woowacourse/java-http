@@ -24,7 +24,7 @@ public class StatusLine {
         if (parsed.length != 3) {
             throw new IllegalArgumentException("length of status line is not 3");
         }
-        
+
         String protocol = parsed[0];
         String statusCode = parsed[1];
         String reasonPhrase = parsed[2];
@@ -57,5 +57,14 @@ public class StatusLine {
 
     public String getReasonPhrase() {
         return status.getReasonPhrase();
+    }
+
+    @Override
+    public String toString() {
+        return String.join(" ",
+                protocol,
+                String.valueOf(status.getHttpStatusCode()),
+                status.getReasonPhrase()
+        );
     }
 }

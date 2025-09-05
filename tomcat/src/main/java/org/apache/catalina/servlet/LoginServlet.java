@@ -31,9 +31,9 @@ public class LoginServlet extends HttpServlet {
 
         String resource = findResource(LOGIN_PATH + "." + ContentType.HTML);
 
-        String[] querys = requestPath.split("\\?")[1].split("&"); //TODO: ArgumentResolver 구현 부분
+        String[] queries = requestPath.split("\\?")[1].split("&"); //TODO: ArgumentResolver 구현 부분
         String[] requestParams = new String[2];
-        for (String query : querys) {
+        for (String query : queries) {
             final String[] split = query.split("=");
 
             if (split[0].equals("account")) {

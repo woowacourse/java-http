@@ -21,8 +21,10 @@ public class HttpRequest {
         if (requestLine == null) {
             throw new IOException("잘못된 요청 라인입니다.");
         }
-
         String[] tokens = requestLine.split(" ");
+        if (tokens.length != 3) {
+            throw new IOException("잘못된 요청 라인입니다.");
+        }
         String uri = tokens[1];
 
         if (uri.contains("?")) {

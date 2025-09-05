@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.dto.ResourceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,15 +58,21 @@ public class Http11Processor implements Runnable, Processor {
                 UserService.login(account, password);
             }
 
+            var status = 200;
+            var reason = "OK";
             var responseBody = findResponseBody(uriExceptQuery);
+            if (!responseBody.found()) {
+                status = 404;
+                reason = "NOT FOUND";
+            }
             var contentType = findContentType(uriExceptQuery);
 
             final var response = String.join(CRLF,
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "HTTP/1.1 " + status + " " + reason,
+                    "Content-Type: " + contentType,
+                    "Content-Length: " + responseBody.body().getBytes().length,
                     "",
-                    responseBody);
+                    responseBody.body());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -87,15 +94,19 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String findResponseBody(String uri) throws IOException {
+    private ResourceResult findResponseBody(String uri) throws IOException {
+        if (uri.equals("/")) {
+            return ResourceResult.found("Hello world!");
+        }
         if (!uri.contains(".")) {
             uri += ".html";
         }
         final URL resource = getClass().getClassLoader().getResource("static/" + uri);
         if (resource == null) {
-            return "Hello world!";
+            return ResourceResult.notFound();
         }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return ResourceResult.found(content);
     }
 
     private String findContentType(final String uri) {

@@ -51,7 +51,7 @@ public class HttpResponse {
     }
 
     private String getStatusLine() {
-        return String.join(" ", protocol, String.valueOf(status.getValue()), status.name());
+        return String.join(" ", protocol, String.valueOf(status.getValue()), status.getReason());
     }
 
     private String getHeaderLine() {

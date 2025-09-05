@@ -11,7 +11,7 @@ public enum HttpStatus {
         this.statusCode = statusCode;
     }
 
-    public String getResponseLabel() {
+    public String getResponseHeader() {
         return statusCode + " " + this.name();
     }
 }

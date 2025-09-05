@@ -19,29 +19,33 @@ public enum HttpContentType {
         this.extension = extension;
     }
 
-    public static HttpContentType getHttpContentType(String requestContentType) {
+    public static HttpContentType fromHeaderValue(String headerValue) {
         for (HttpContentType httpContentType : HttpContentType.values()) {
-            if (httpContentType.headerLabels.contains(requestContentType)) {
+            if (httpContentType.headerLabels.contains(headerValue)) {
                 return httpContentType;
             }
         }
-        throw new IllegalArgumentException("잘못된 Content Type입니다. : " + requestContentType);
+        throw new IllegalArgumentException("잘못된 Content Type입니다. : " + headerValue);
     }
 
-    public static HttpContentType getByFileName(String fileName) {
+    public static HttpContentType fromFileName(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             throw new IllegalArgumentException("잘못된 파일명입니다.: " + fileName);
         }
-        String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+        final var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
         for (HttpContentType httpContentType : HttpContentType.values()) {
-            if (httpContentType.extension.equalsIgnoreCase(ext)) {
+            if (httpContentType.extension.equalsIgnoreCase(fileExtension)) {
                 return httpContentType;
             }
         }
-        throw new IllegalArgumentException("알 수 없는 파일 확장자입니다: " + ext);
+        throw new IllegalArgumentException("알 수 없는 파일 확장자입니다: " + fileExtension);
     }
 
     public String getResponseHeader() {
-        return "Content-Type: " + headerLabels.get(0) + ";charset=utf-8";
+        return "Content-Type: " + headerLabels.getFirst() + ";charset=utf-8";
+    }
+
+    public String getExtension() {
+        return extension;
     }
 }

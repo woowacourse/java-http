@@ -22,7 +22,7 @@ public class TomcatController {
     }
 
     public void handleRequest(RequestData requestData) {
-        for (Map.Entry<RequestMapping, Consumer<RequestData>> entry : requestMappings.entrySet()) {
+        for (var entry : requestMappings.entrySet()) {
             if (entry.getKey().isSupported(requestData)) {
                 entry.getValue().accept(requestData);
                 return;
@@ -31,12 +31,12 @@ public class TomcatController {
     }
 
     private void handleLogin(RequestData requestData) {
-        String account = requestData.getQueryParameterValue("account");
-        String password = requestData.getQueryParameterValue("password");
+        final String account = requestData.getQueryParameterValue("account");
+        final String password = requestData.getQueryParameterValue("password");
         if (account.isBlank() || password.isBlank()) {
             return;
         }
-        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() ->
+        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() ->
                 new IllegalArgumentException("회원이 존재하지 않습니다. : " + account));
         if (!user.checkPassword(password)) {
             throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + account);

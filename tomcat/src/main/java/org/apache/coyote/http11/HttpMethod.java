@@ -12,12 +12,12 @@ public enum HttpMethod {
     PATCH,
     ;
 
-    public static HttpMethod getHttpMethod(String requestMethod) {
+    public static HttpMethod fromHeaderValue(String headerValue) {
         for (HttpMethod value : HttpMethod.values()) {
-            if (value.name().equals(requestMethod)) {
+            if (value.name().equals(headerValue)) {
                 return value;
             }
         }
-        throw new IllegalArgumentException("잘못된 요청입니다.");
+        throw new IllegalArgumentException("잘못된 http Method 입니다. :" + headerValue);
     }
 }

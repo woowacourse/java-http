@@ -26,14 +26,14 @@ public class RequestData {
 
     public static RequestData of(List<String> rawHttpRequest) {
         String[] firstLine = rawHttpRequest.get(0).split(" ");
-        HttpMethod httpMethod = HttpMethod.getHttpMethod(firstLine[0].trim());
+        HttpMethod httpMethod = HttpMethod.fromHeaderValue(firstLine[0].trim());
         String resource = firstLine[1].trim();
         Map<String, String> queryParameter = new HashMap<>();
         if (resource.contains("?")) {
             getQueryParameter(resource, queryParameter);
             resource = resource.substring(0, resource.indexOf("?"));
         }
-        HttpVersion httpVersion = HttpVersion.getHttpVersion(firstLine[2].trim());
+        HttpVersion httpVersion = HttpVersion.fromHeaderValue(firstLine[2].trim());
         HttpContentType httpContentType = getHttpContentType(rawHttpRequest);
         return new RequestData(httpMethod, resource, httpVersion, httpContentType, queryParameter);
     }
@@ -58,7 +58,7 @@ public class RequestData {
                     acceptValue = acceptValue.substring(0, semicolonIndex).trim();
                 }
 
-                return HttpContentType.getHttpContentType(acceptValue.trim());
+                return HttpContentType.fromHeaderValue(acceptValue.trim());
             }
         }
         return HttpContentType.ALL;

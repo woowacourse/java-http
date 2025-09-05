@@ -12,13 +12,13 @@ public enum HttpVersion {
         this.versionLabel = versionLabel;
     }
 
-    public static HttpVersion getHttpVersion(String requestVersion) {
+    public static HttpVersion fromHeaderValue(String headerValue) {
         for (HttpVersion httpVersion : HttpVersion.values()) {
-            if (httpVersion.versionLabel.equals(requestVersion)) {
+            if (httpVersion.versionLabel.equals(headerValue)) {
                 return httpVersion;
             }
         }
-        throw new IllegalArgumentException("잘못된 요청입니다.");
+        throw new IllegalArgumentException("잘못된 Http version 입니다. : " + headerValue);
     }
 
     public String getResponseHeader() {

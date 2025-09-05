@@ -1,21 +1,44 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
+import static org.apache.coyote.HttpStatus.NOT_FOUND;
+
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.handler.DefaultHandler;
+import com.techcourse.handler.LoginHandler;
+import com.techcourse.handler.RootHandler;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpRequestHandler;
+import org.apache.coyote.HttpRequestParser;
+import org.apache.coyote.HttpResponse;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String PROTOCOL = "HTTP/1.1";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Map<String, HttpRequestHandler> handlerMap;
+    private final HttpRequestHandler defaultHandler;
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.handlerMap = new HashMap<>();
+        handlerMap.put("/", new RootHandler());
+        handlerMap.put("/login", new LoginHandler());
+        this.defaultHandler = new DefaultHandler();
     }
 
     @Override
@@ -29,19 +52,46 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
+            final HttpResponse response = new HttpResponse(PROTOCOL);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            handleRequest(request, response);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeResponse(response, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private void handleRequest(HttpRequest request, HttpResponse response) {
+        final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
+
+        try {
+            executeMethodHandler(request, response, handler);
+        } catch (NoSuchElementException e) {
+            setErrorResponse(NOT_FOUND, response, e);
+        } catch (UnsupportedOperationException e) {
+            setErrorResponse(METHOD_NOT_ALLOWED, response, e);
+        } catch (UncheckedServletException e) {
+            setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
+        }
+    }
+
+    private void executeMethodHandler(HttpRequest request, HttpResponse response, HttpRequestHandler handler) {
+        switch (request.getMethod()) {
+            case "GET" -> handler.handleGet(request, response);
+            default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
+        }
+    }
+
+    private void setErrorResponse(HttpStatus status, HttpResponse response, Exception e) {
+        response.setStatus(status);
+        response.setBody(e.getMessage());
+        response.setContentType("text/plain;charset=utf-8");
     }
 }

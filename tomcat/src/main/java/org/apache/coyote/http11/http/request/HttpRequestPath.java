@@ -31,11 +31,19 @@ public class HttpRequestPath {
         return path.substring(0, queryParameterStartIndex);
     }
 
+    private void validateNullTargetQueryParameter(final String target) {
+        if (target == null) {
+            throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
+        }
+    }
+
     public String getPath() {
         return path;
     }
 
     public String getTargetQueryParameter(final String target) {
-        return queryParameter.getValue(target);
+        validateNullTargetQueryParameter(target);
+        final String targetQueryParameterKey = target.trim();
+        return queryParameter.getValue(targetQueryParameterKey);
     }
 }

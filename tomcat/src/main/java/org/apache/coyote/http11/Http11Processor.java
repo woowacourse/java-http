@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,34 @@ public class Http11Processor implements Runnable, Processor {
             String httpMethod = inputLine.split(" ")[0];
             String httpUri = inputLine.split(" ")[1];
 
-            final var response = makeResponse(httpMethod, httpUri);
+            String response = null;
+            if (httpUri.startsWith("/login")) {
+                int index = httpUri.indexOf("?");
+                String uri = httpUri.substring(0, index);
+                String query = httpUri.substring(index + 1);
+
+                Map<String, String> tmp = new HashMap<>();
+
+                String[] queryStrings = query.split("&");
+                for (String keyValue : queryStrings) {
+                    String[] keyValues = keyValue.split("=");
+                    tmp.put(keyValues[0], keyValues[1]);
+                }
+                String account = tmp.get("account");
+
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                log.info("{}", user.orElse(null));
+
+                response = getHttpResponse(
+                    "html",
+                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + uri + ".html").getFile()).toPath()))
+                );
+            } else if (httpUri.contains(".")) {
+                String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpUri).getFile()).toPath()));
+                response = getHttpResponse(httpUri.substring(httpUri.indexOf(".") + 1), staticFile);
+            } else {
+                response = getHttpResponse("html", "Hello world!");
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -55,33 +83,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(final String httpMethod, final String httpUri) throws IOException {
-        if (RequestMethod.valueOf(httpMethod) == RequestMethod.GET) {
-            if (httpUri.contains("?")) {
-                int index = httpUri.indexOf("?");
-                String uri = httpUri.substring(0, index);
-                String query = httpUri.substring(index + 1);
-
-                String[] queryStrings = query.split("&");
-                String account = queryStrings[0].split("=")[1];
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                log.info("{}", user.orElse(null));
-
-                return getHttpResponse(
-                    "html",
-                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + uri + ".html").getFile()).toPath()))
-                );
-            } else if (httpUri.contains(".")) {
-                String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpUri).getFile()).toPath()));
-                return getHttpResponse(httpUri.substring(httpUri.indexOf(".") + 1), staticFile);
-            }
-        }
-
-        return getHttpResponse("html", "Hello world!");
-    }
-
-    private static String getHttpResponse(final String contentType, final String responseBody) {
+    private String getHttpResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Type: text/" + contentType + ";charset=utf-8 ",

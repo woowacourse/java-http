@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             if ("/login".equals(path)) {
                 final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
                         .getResource("static/login.html"));
-                responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
+                responseBody = readResourceFile(resourceUrl);
                 contentType = "text/html;charset=utf-8 ";
 
                 final var account = params.get("account");
@@ -75,8 +76,8 @@ public class Http11Processor implements Runnable, Processor {
                         .getResource(resourcePath);
 
                 if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
-                    responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
                     contentType = getContentType(path);
+                    responseBody = readResourceFile(resourceUrl);
                 } else {
                     responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
                     contentType = "text/html;charset=utf-8 ";
@@ -135,6 +136,11 @@ public class Http11Processor implements Runnable, Processor {
         if (path.endsWith(".css")) {
             return "text/css;charset=utf-8 ";
         }
+    private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
+        final var path = Path.of(resourceUrl.toURI());
+
+        return Files.readAllBytes(path);
+    }
 
         return "text/plain;charset=utf-8 ";
     }

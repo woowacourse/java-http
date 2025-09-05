@@ -22,10 +22,15 @@ public class Http11Request {
 
         final String[] firstLine = requestMessage.get(pointer++).split(" ");
         final String method = firstLine[0];
-        final String target = firstLine[1];
+        String target = firstLine[1];
         final String httpVersion = firstLine[2];
 
         final Map<String, String> queryParams = getQueryParams(target);
+        if (!queryParams.isEmpty()) {
+            final int queryParamStartIndex = target.indexOf(QUERY_PARAM_START_SYMBOL);
+            target = target.substring(0, queryParamStartIndex);
+        }
+
         final Map<String, String> headers = getHeaders(requestMessage, pointer);
 
         return new Http11Request(method, target, queryParams, httpVersion, headers, null);
@@ -60,7 +65,7 @@ public class Http11Request {
 
             final String[] headerLine = line.split(HEADER_DELIMITER);
             if (headerLine.length != 2) {
-                throw new IllegalArgumentException("Wrong Http Request Header");
+                throw new IllegalArgumentException(String.format("Wrong Http Request Header : %s", line));
             }
 
             headers.put(headerLine[0], headerLine[1]);

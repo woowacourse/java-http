@@ -46,8 +46,6 @@ public class Http11Processor implements Runnable, Processor {
             log.warn(String.format("bad request : %s", e.getMessage()));
         } catch (final NoSuchFileException e) {
             log.warn(String.format("file not found : %s", e.getMessage()));
-        } catch (final NoSuchElementException e) {
-            log.warn(String.format("not found : %s", e.getMessage()));
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
         } finally {
@@ -72,14 +70,13 @@ public class Http11Processor implements Runnable, Processor {
 
             return createHtmlResponse(fileContent);
         }
-        if (requestTarget.equals("/login")) {
+        if (requestTarget.contains("/login")) {
             final byte[] fileContent = readFile("login.html");
 
             final String account = request.findQueryParam("account");
             final String password = request.findQueryParam("password");
 
-            final User user = findUserByAccount(account, password);
-            log.info(String.format("user found : %s", user));
+            validateUserByAccount(account, password);
 
             return createHtmlResponse(fileContent);
         }
@@ -106,15 +103,21 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(path);
     }
 
-    private User findUserByAccount(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException(String.format("회원 정보가 일치하지 않습니다. : account = %s", account)));
+    private void validateUserByAccount(final String account, final String password) {
+        final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException(String.format("비밀번호가 일치하지 않습니다 : account = %s", account));
+        if (userOrEmpty.isEmpty()) {
+            log.warn(String.format("User not found : account = %s", account));
+            return;
         }
 
-        return user;
+        final User user = userOrEmpty.get();
+        if (!user.checkPassword(password)) {
+            log.warn(String.format("Wrong password : account = %s", account));
+            return;
+        }
+
+        log.info(String.format("User found : %s", user));
     }
 
     private static Http11Response createHtmlResponse(final byte[] body) {

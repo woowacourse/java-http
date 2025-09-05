@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Http11Response {
+
     private final String httpVersion;
     private final int httpStatusCode;
     private final String httpStatusMessage;
@@ -33,7 +34,7 @@ public class Http11Response {
         }
         final String headerString = String.join("\r\n", headerStrings);
         return String.join("\r\n",
-                httpVersion + " " + httpStatusCode + " " + httpStatusMessage + " ",
+                String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
                 headerString,
                 "",
                 body

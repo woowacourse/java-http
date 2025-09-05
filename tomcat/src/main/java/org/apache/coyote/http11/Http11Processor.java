@@ -2,6 +2,10 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.dto.HttpRequest;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.util.HttpRequestParser;
+import org.apache.coyote.http11.helper.Responses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Handler dispatcher;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, Handler dispatcher) {
         this.connection = connection;
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -25,23 +31,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
+    public void process(Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
+            dispatcher.handle(httpRequest, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+            try {
+                Responses.serverError(connection.getOutputStream(), "HTTP/1.1");
+            } catch (IOException ioException) {
+                log.error("서버 에러 응답 전송 실패: {}", ioException.getMessage(), ioException);
+            }
         }
     }
 }

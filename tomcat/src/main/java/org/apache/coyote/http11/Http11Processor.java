@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -80,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             final String password = request.findQueryParam("password");
 
             final User user = findUserByAccount(account, password);
-            log.info(String.format("user found : %s", user.toString()));
+            log.info(String.format("user found : %s", user));
 
             return createHtmlResponse(fileContent);
         }
@@ -119,27 +118,29 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static Http11Response createHtmlResponse(final byte[] body) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.length));
+
         return new Http11Response(
                 "HTTP/1.1",
                 200,
                 "OK",
-                Map.of(
-                        "Content-Type", "text/html;charset=utf-8",
-                        "Content-Length", String.valueOf(body.length)
-                ),
+                headers,
                 new String(body, StandardCharsets.UTF_8)
         );
     }
 
     private static Http11Response createCssResponse(final byte[] body) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "text/css;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.length));
+
         return new Http11Response(
                 "HTTP/1.1",
                 200,
                 "OK",
-                Map.of(
-                        "Content-Type", "text/css;charset=utf-8",
-                        "Content-Length", String.valueOf(body.length)
-                ),
+                headers,
                 new String(body, StandardCharsets.UTF_8)
         );
     }

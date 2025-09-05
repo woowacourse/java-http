@@ -11,6 +11,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private record HttpRequest(String method, String endpoint, String[] queryStrings) {}
+    private record HttpRequest(String method, String endpoint, Map<String, String> queryStrings) {}
 
     private record HttpResponse(String status, String contentType, String responseBody) {
         public String toString() {
@@ -66,14 +69,16 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = methodAndUriAndProtocol[1];
             String endpoint = uri;
-            String[] queryStrings = null;
+            Map<String, String> queryStrings = null;
             int index = uri.indexOf("?");
             if (index != -1) {
                 endpoint = uri.substring(0, index);
-                queryStrings = uri.substring(index + 1).split("&");
+                queryStrings = Arrays.stream(uri.substring(index + 1).split("&"))
+                    .map(queryString -> queryString.split("="))
+                    .collect(Collectors.toUnmodifiableMap(strings -> strings[0], strings -> strings[1]));
             }
             return new HttpRequest(method, endpoint, queryStrings);
-        } catch (IOException exception) {
+        } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             log.error(exception.getMessage(), exception);
             return null;
         }
@@ -110,8 +115,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogin(HttpRequest httpRequest) {
-        String account = httpRequest.queryStrings[0].split("=")[1];
-        String password = httpRequest.queryStrings[1].split("=")[1];
+        String account = httpRequest.queryStrings.get("account");
+        String password = httpRequest.queryStrings.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 혹은 비밀번호입니다." + " " + account));
         if (user.isPasswordSameWith(password)) {

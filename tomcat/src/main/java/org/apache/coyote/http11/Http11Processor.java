@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpServletContainer.handle(request, response);
 
             return response;
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | IllegalArgumentException e) {
             ResponseProcessor.handleBadRequest(response);
             return response;
         }

@@ -16,6 +16,11 @@ public record HttpRequest(String method, String uri) {
 
         for (String keyValue : queryString.get().split("&")) {
             String[] keyValues = keyValue.split("=");
+            if (keyValues.length == 1) {
+                queryStrings.put(keyValues[0], "");
+                continue;
+            }
+
             queryStrings.put(keyValues[0], keyValues[1]);
         }
 

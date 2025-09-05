@@ -38,20 +38,29 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             String responseBody = "Hello world!";
+            String contentType = "";
 
             // 여기서 inputStream 을 body 로 만든다
             final String requestBody = parseRequestHeader(inputStream);
 
             // responseBody 에서 파일 이름 파싱
             final String fileName = parseFileName(requestBody);
+            System.out.println(fileName);
 
             if (!fileName.isEmpty()) {
                 responseBody = readFile(fileName);
             }
 
+            if (fileName.endsWith(".css")) {
+                contentType = "text/css;charset=utf-8 ";
+            }
+            if (fileName.endsWith(".html")) {
+                contentType = "text/html;charset=utf-8 ";
+            }
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

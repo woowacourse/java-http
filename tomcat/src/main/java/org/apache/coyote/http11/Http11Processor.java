@@ -102,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
                 "text/html;charset=utf-8",
                 body
         );
-        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         final String response = httpResponse.getResponse();
 
         outputStream.write(response.getBytes());
@@ -118,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
                 "text/html;charset=utf-8",
                 body
         );
-        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         final String response = httpResponse.getResponse();
 
         outputStream.write(response.getBytes());
@@ -136,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
                 "text/css;charset=utf-8",
                 body
         );
-        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         final String response = httpResponse.getResponse();
 
         outputStream.write(response.getBytes());
@@ -155,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
                 "application/javascript;charset=utf-8",
                 body
         );
-        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         final String response = httpResponse.getResponse();
 
         outputStream.write(response.getBytes());
@@ -170,7 +170,7 @@ public class Http11Processor implements Runnable, Processor {
                 "text/html;charset=utf-8",
                 responseBody
         );
-        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         final String response = httpResponse.getResponse();
 
         outputStream.write(response.getBytes());

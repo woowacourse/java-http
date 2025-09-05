@@ -8,8 +8,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -21,6 +23,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_FILE_PREFIX = "static";
 
+    private static final StaticFileLoader staticFileLoader = new StaticFileLoader();
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -31,6 +35,23 @@ public class Http11Processor implements Runnable, Processor {
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
+    }
+
+    static class StaticFileLoader {
+        private static final String PREFIX = "static";
+
+        public File findFileWithUri(final String fileUri) {
+            URL systemResource = ClassLoader.getSystemResource(PREFIX + fileUri);
+            if (systemResource == null) {
+                throw new IllegalArgumentException();
+            }
+
+            return new File(systemResource.getFile());
+        }
+
+        public byte[] readAllFileWithUri(final String fileUri) throws IOException {
+            return Files.readAllBytes(staticFileLoader.findFileWithUri(fileUri).toPath());
+        }
     }
 
     @Override
@@ -53,16 +74,15 @@ public class Http11Processor implements Runnable, Processor {
 
                 response = getHttpResponse(
                     "html",
-                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getPath() + ".html").getFile()).toPath()))
+                    Arrays.toString(staticFileLoader.readAllFileWithUri(httpRequest.getUri())) + "html"
                 );
             } else if (httpRequest.getUri().contains(".")) {
                 int extensionIndex = httpRequest.getUri().lastIndexOf(".");
                 String extension = httpRequest.getUri().substring(extensionIndex + 1);
 
-                // TODO: getSystemResource(...).getFile()은 리소스 미존재 시 NPE, 경로 인코딩/패키징(JAR 내부) 이슈가 있습니다. 미존재(404)와 I/O 예외를 구분해 응답하세요.
                 if (extension.equals("html") || extension.equals("css") || extension.equals("js")) {
-                    String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getUri()).getFile()).toPath()));
-                    response = getHttpResponse(httpRequest.getUri().substring(httpRequest.getUri().indexOf(".") + 1), staticFile);
+                    String staticFile = new String(staticFileLoader.readAllFileWithUri(httpRequest.getUri()));
+                    response = getHttpResponse(extension, staticFile);
                 }
             } else {
                 response = getHttpResponse("html", "Hello world!");

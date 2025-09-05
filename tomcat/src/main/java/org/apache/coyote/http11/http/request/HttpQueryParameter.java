@@ -58,9 +58,12 @@ public class HttpQueryParameter {
         if (target == null) {
             throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
         }
-        if (!queryParameterInfo.containsKey(target)) {
-            throw new IllegalArgumentException("존재하지 않는 query parameter 입니다: %s".formatted(target));
+
+        final String targetKey = clean(target);
+
+        if (!queryParameterInfo.containsKey(targetKey)) {
+            throw new IllegalArgumentException("존재하지 않는 query parameter key 입니다: %s".formatted(target));
         }
-        return queryParameterInfo.get(target);
+        return queryParameterInfo.get(targetKey);
     }
 }

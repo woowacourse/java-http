@@ -46,6 +46,18 @@ public class Http11Processor implements Runnable, Processor {
                 resource = getClass().getClassLoader().getResource(requestUrl);
             }
 
+            if (resource == null) {
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 404 Not Found",
+                        "Content-Length: 0",
+                        "",
+                        ""
+                );
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             String contentType = "text/plain;charset=utf-8";

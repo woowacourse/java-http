@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.Processor;
@@ -34,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             HttpRequest httpRequest = parseHttpRequest(bufferedReader);
             HttpResponse httpResponse = handleHttpRequest(httpRequest);
@@ -47,10 +48,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private record HttpRequest(String method, String endpoint, String[] queryStrings) {}
 
-    private record HttpResponse(String contentType, String responseBody) {
+    private record HttpResponse(String status, String contentType, String responseBody) {
         public String toString() {
             return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status,
                 "Content-Type: " + contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -79,12 +80,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleHttpRequest(HttpRequest httpRequest) {
+        if (httpRequest == null) {
+            return new HttpResponse("500 Internal Server Error ", "text/html;charset=utf-8 ", null);
+        }
+
         if (httpRequest.endpoint.startsWith("/login")) {
             handleLogin(httpRequest);
         }
 
         if (httpRequest.endpoint.equals("/")) {
-            return new HttpResponse("text/html;charset=utf-8 ", "Hello world!");
+            return new HttpResponse("200 OK ", "text/html;charset=utf-8 ", "Hello world!");
         } else {
             try {
                 URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint);
@@ -94,12 +99,12 @@ public class Http11Processor implements Runnable, Processor {
                 Path path = Path.of(resourceUrl.toURI());
                 String responseBody = Files.readString(path);
                 if (httpRequest.endpoint.endsWith(".css")) {
-                    return new HttpResponse("text/css;charset=utf-8 ", responseBody);
+                    return new HttpResponse("200 OK ", "text/css;charset=utf-8 ", responseBody);
                 }
-                return new HttpResponse("text/html;charset=utf-8 ", responseBody);
+                return new HttpResponse("200 OK ", "text/html;charset=utf-8 ", responseBody);
             } catch (IOException | URISyntaxException exception) {
                 log.error(exception.getMessage(), exception);
-                return null;
+                return new HttpResponse("500 Internal Server Error ", "text/html;charset=utf-8 ", null);
             }
         }
     }

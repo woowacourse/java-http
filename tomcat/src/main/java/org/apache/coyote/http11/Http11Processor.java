@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                 int extensionIndex = httpRequest.getUri().lastIndexOf(".");
                 String extension = httpRequest.getUri().substring(extensionIndex + 1);
 
+                // TODO: getSystemResource(...).getFile()은 리소스 미존재 시 NPE, 경로 인코딩/패키징(JAR 내부) 이슈가 있습니다. 미존재(404)와 I/O 예외를 구분해 응답하세요.
                 if (extension.equals("html") || extension.equals("css") || extension.equals("js")) {
                     String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getUri()).getFile()).toPath()));
                     response = getHttpResponse(httpRequest.getUri().substring(httpRequest.getUri().indexOf(".") + 1), staticFile);
@@ -77,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Type: text/" + contentType + ";charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
+            "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
             "",
             responseBody);
     }

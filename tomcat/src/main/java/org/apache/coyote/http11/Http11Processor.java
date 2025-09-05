@@ -21,37 +21,19 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_FILE_PREFIX = "static";
-
-    private static final StaticFileLoader staticFileLoader = new StaticFileLoader();
 
     private final Socket connection;
+    private final StaticFileLoader staticFileLoader;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final StaticFileLoader staticFileLoader) {
         this.connection = connection;
+        this.staticFileLoader = staticFileLoader;
     }
 
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
-    }
-
-    static class StaticFileLoader {
-        private static final String PREFIX = "static";
-
-        public File findFileWithUri(final String fileUri) {
-            URL systemResource = ClassLoader.getSystemResource(PREFIX + fileUri);
-            if (systemResource == null) {
-                throw new IllegalArgumentException();
-            }
-
-            return new File(systemResource.getFile());
-        }
-
-        public byte[] readAllFileWithUri(final String fileUri) throws IOException {
-            return Files.readAllBytes(staticFileLoader.findFileWithUri(fileUri).toPath());
-        }
     }
 
     @Override

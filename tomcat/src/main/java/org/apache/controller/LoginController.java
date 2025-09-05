@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.exception.DataNotFoundException;
+import org.apache.exception.InvalidRequestException;
 import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
 import org.apache.http.HttpRequest;
@@ -59,6 +60,11 @@ public class LoginController implements Controller {
     }
 
     private URL findResourceUrl(String uri) {
+        List<String> uriPart = List.of(uri.split("/"));
+        if (uriPart.contains(".") || uriPart.contains("..")) {
+            throw new InvalidRequestException("올바르지 않은 리소스 주소입니다.");
+        }
+
         ClassLoader classLoader = getClass().getClassLoader();
         return classLoader.getResource("static" + uri);
     }

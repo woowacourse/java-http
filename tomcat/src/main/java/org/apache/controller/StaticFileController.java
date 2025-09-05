@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import org.apache.exception.InvalidRequestException;
 import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
 import org.apache.http.HttpRequest;
@@ -42,6 +43,11 @@ public class StaticFileController implements Controller {
     }
 
     private URL findResourceUrl(String uri) {
+        List<String> uriPart = List.of(uri.split("/"));
+        if (uriPart.contains(".") || uriPart.contains("..")) {
+            throw new InvalidRequestException("올바르지 않은 리소스 주소입니다.");
+        }
+
         ClassLoader classLoader = getClass().getClassLoader();
         return classLoader.getResource("static" + uri);
     }

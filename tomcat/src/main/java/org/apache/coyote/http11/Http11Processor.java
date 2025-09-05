@@ -41,11 +41,11 @@ public class Http11Processor implements Runnable, Processor {
             final String line = br.readLine(); //GET /index.html HTTP/1.1
             final String[] requestValues = line.split(" "); //[GET, /index.html, HTTP/1.1]
 
-            String filePath = requestValues[1]; // /index.html
-            final URL url = getClass().getClassLoader().getResource("static" + filePath); // static/index.html
+            String requestPath = requestValues[1]; // /index.html
+            final URL url = getClass().getClassLoader().getResource("static" + requestPath); // static/index.html
 
             String responseBody;
-            if (filePath.equals("/")) {
+            if (requestPath.equals("/")) {
                 responseBody = "Hello world!";
             }
             else if (url != null ) {
@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + getContentType(requestPath),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -71,5 +71,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String requestPath) {
+        if (requestPath.endsWith(".css")) {
+            return "text/css;charset=utf-8 ";
+        }
+
+        return "text/html;charset=utf-8 ";
     }
 }

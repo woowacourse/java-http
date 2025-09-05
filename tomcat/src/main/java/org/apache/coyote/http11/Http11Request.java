@@ -5,7 +5,7 @@ public class Http11Request {
     private RequestLine requestLine;
     private Headers headers;
 
-    public Http11Request(RequestLine requestLine, Headers headers) {
+    public Http11Request(final RequestLine requestLine, final Headers headers) {
         this.requestLine = requestLine;
         this.headers = headers;
     }

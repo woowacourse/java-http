@@ -37,10 +37,10 @@ public class StaticResourceProvider {
         }
     }
 
-    private static String getMimeType(String path) {
-        int dotIndex = path.lastIndexOf('.');
+    private static String getMimeType(final String path) {
+        final int dotIndex = path.lastIndexOf('.');
         if (dotIndex != -1 && dotIndex < path.length() - 1) {
-            String extension = path.substring(dotIndex + 1);
+            final String extension = path.substring(dotIndex + 1);
             return MIME_TYPES.getOrDefault(extension, "text/html;charset=utf-8");
         }
         return "text/html;charset=utf-8";

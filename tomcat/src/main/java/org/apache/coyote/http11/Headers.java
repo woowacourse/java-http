@@ -7,18 +7,18 @@ public class Headers {
 
     private final Map<String, String> headers = new HashMap<>();
 
-    public void addHeader(String headerLine) {
+    public void addHeader(final String headerLine) {
         parseHeader(headerLine);
     }
 
-    private void parseHeader(String headerLine) {
-        String[] parts = headerLine.split(": ", 2);
+    private void parseHeader(final String headerLine) {
+        final String[] parts = headerLine.split(": ", 2);
         if (parts.length == 2) {
             headers.put(parts[0], parts[1]);
         }
     }
 
-    public String getHeader(String headerName) {
+    public String getHeader(final String headerName) {
         return headers.get(headerName);
     }
 }

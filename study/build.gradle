@@ -23,11 +23,14 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
     implementation 'com.github.jknack:handlebars-springmvc:4.4.0'
 
+    testImplementation(platform("org.junit:junit-bom:5.10.3"))
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core:3.27.3'
     testImplementation 'org.mockito:mockito-core:5.18.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+
+
 }
 
 test {

@@ -35,6 +35,7 @@ public class StubSocket extends Socket {
         return 8080;
     }
 
+    // 여기서 requestbody가 inputStream이 된다.
     public InputStream getInputStream() {
         return new ByteArrayInputStream(request.getBytes());
     }

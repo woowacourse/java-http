@@ -46,7 +46,15 @@ public class HttpResponse {
         return responseBuilder.toString().getBytes();
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

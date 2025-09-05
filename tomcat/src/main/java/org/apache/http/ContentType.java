@@ -5,7 +5,7 @@ import java.util.List;
 public enum ContentType {
     TEXT_HTML("text/html;charset=utf-8", "html"),
     TEXT_CSS("text/css;charset=utf-8", "css"),
-    ALL_ALL("*/*", "");
+    ALL_ALL("application/octet-stream", "");
 
     private final String value;
     private final String extension;

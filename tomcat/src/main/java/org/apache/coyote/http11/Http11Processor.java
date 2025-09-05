@@ -63,13 +63,16 @@ public class Http11Processor implements Runnable, Processor {
 
                 final var account = params.get("account");
                 final var password = params.get("password");
+                if (account == null || password == null) {
+                    writeResponse(outputStream, responseBody, contentType);
+                    return;
+                }
                 InMemoryUserRepository.findByAccount(account)
                         .ifPresent(user -> {
                             if (user.checkPassword(password)) {
                                 log.info("user: {}", user);
                             }
                         });
-
             } else {
                 final var resourcePath = "static" + path;
                 final var resourceUrl = getClass().getClassLoader()

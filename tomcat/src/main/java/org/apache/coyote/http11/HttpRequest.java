@@ -4,14 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class HttpRequest {
-    private final String method;
-    private final String uri;
-
-    public HttpRequest(String method, String uri) {
-        this.method = method;
-        this.uri = uri;
-    }
+public record HttpRequest(String method, String uri) {
 
     public Map<String, String> getQueryStrings() {
         Map<String, String> queryStrings = new HashMap<>();
@@ -45,13 +38,5 @@ public class HttpRequest {
         }
 
         return uri.substring(0, index);
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public String getUri() {
-        return uri;
     }
 }

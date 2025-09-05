@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.util;
 
 import java.util.Map;
 
-public record Request(
+public record HttpRequest(
         String method,
         String path,
         String version,

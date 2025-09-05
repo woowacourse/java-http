@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +36,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            Request request = parseRequest(inputStream);
+            HttpRequest httpRequest = parseRequest(inputStream);
             String statusLine;
             String contentType;
             byte[] body;
 
-            if (request == null) {
+            if (httpRequest == null) {
                 statusLine = "HTTP/1.1 200 OK ";
                 contentType = "text/html;charset=utf-8";
                 body = "Hello world!".getBytes();
                 response(statusLine, contentType, body, outputStream);
                 return;
             }
-            String requestPath = createValidRequestPath(request.path());
+            String requestPath = createValidRequestPath(httpRequest.path());
             if (requestPath == null) {
                 statusLine = "HTTP/1.1 200 OK ";
                 contentType = "text/html;charset=utf-8";
@@ -71,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Request parseRequest(InputStream inputStream) throws IOException {
+    private HttpRequest parseRequest(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String[] firstLine = readFirstLine(br);
         if (firstLine == null) {
@@ -81,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = firstLine[1];
         String version = firstLine[2];
         Map<String, String> headers = readHeaders(br);
-        return new Request(method, path, version, headers);
+        return new HttpRequest(method, path, version, headers);
     }
 
     private String[] readFirstLine(BufferedReader br) throws IOException {
@@ -122,15 +123,21 @@ public class Http11Processor implements Runnable, Processor {
         if (path == null || path.isEmpty() || "/".equals(path)) {
             return null;
         }
-        String validPath = path;
-        int querySeparator = validPath.indexOf('?');
-        if (querySeparator >= 0) {
-            validPath = validPath.substring(0, querySeparator);
+        int q = path.indexOf('?');
+        if (q >= 0) {
+            path = path.substring(0, q);
         }
-        if (!validPath.startsWith("/")) {
-            validPath = "/" + validPath;
+        if (!path.startsWith("/")) {
+            path = "/" + path;
         }
-        return "static" + validPath;
+        if (path.endsWith("/")) {
+            path += "index.html";
+        }
+        String last = path.substring(path.lastIndexOf('/') + 1);
+        if (!last.contains(".")) {
+            path += ".html";
+        }
+        return "static" + path;
     }
 
     private byte[] readPathFile(String requestPath) {

@@ -1,18 +1,29 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Map<String, String> contentType = Map.of(
+            "css", "Content-Type: text/css;charset=utf-8 ",
+            "html", "Content-Type: text/html;charset=utf-8 ",
+            "js", "Content-Type: "
+    );
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -27,21 +38,84 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
 
-            final var responseBody = "Hello world!";
+            final var request = reader.readLine().trim();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String[] requestLineParts = request.split(" ");
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            String method = requestLineParts[0];
+            String requestPath = requestLineParts[1];
+
+            if (isGetMethod(method)) {
+                if (requestPath.equals("/")) {
+                    final var response = getResponse();
+
+                    sendResponse(outputStream, response);
+                    return;
+                }
+
+                serveStaticFile(requestPath, outputStream);
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void serveStaticFile(String requestPath, OutputStream outputStream) throws IOException {
+        final var path = getPath(requestPath);
+        final var responseBody = Files.readString(path);
+        final var response = getResponse(responseBody, requestPath, path);
+
+        sendResponse(outputStream, response);
+    }
+
+    private Path getPath(String requestPath) {
+        return Path.of(
+                Objects.requireNonNull(
+                        getClass().getClassLoader().getResource("static/" + requestPath)).getPath()
+        );
+    }
+
+    private String getResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!"
+        );
+    }
+
+    private String getResponse(String responseBody, String requestPath, Path path) throws IOException {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private void sendResponse(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private boolean isCss(String requestPath) {
+        return requestPath.endsWith("css");
+    }
+
+    private boolean isHtml(String requestPath) {
+        return requestPath.endsWith("html") || requestPath.endsWith("/");
+    }
+
+    private boolean isJs(String requestPath) {
+        return requestPath.endsWith("js");
+    }
+
+    private boolean isGetMethod(String method) {
+        return method.equals("GET");
     }
 }

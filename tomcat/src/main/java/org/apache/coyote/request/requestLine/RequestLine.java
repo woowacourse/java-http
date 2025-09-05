@@ -38,6 +38,10 @@ public class RequestLine {
         return this.requestPath.equals("/");
     }
 
+    public boolean isStartsWith(final String loginPath) {
+        return requestPath.startsWith(loginPath);
+    }
+
     public String getRequestPath() {
         return requestPath;
     }
@@ -47,9 +51,5 @@ public class RequestLine {
             throw new IllegalArgumentException("확장자를 찾을 수 없습니다.");
         }
         return requestPath.split("\\.")[1];
-    }
-
-    public boolean isStartsWith(final String loginPath) {
-        return requestPath.startsWith(loginPath);
     }
 }

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import org.apache.catalina.connector.CoyoteAdepter;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.ContentType;
@@ -24,9 +23,9 @@ public class Http11Processor implements Runnable, Processor {
     private final StaticResourceHandler staticResourceHandler;
     private final HttpRequestParser httpRequestParser;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
-        this.adapter = new CoyoteAdepter();
+        this.adapter = adapter;
         this.staticResourceHandler = new StaticResourceHandler();
         this.httpRequestParser = new HttpRequestParser();
     }

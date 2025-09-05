@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.connector.CoyoteAdapter;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,7 +16,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var adapter = new CoyoteAdapter();
+        final var processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);
@@ -42,7 +44,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var adapter = new CoyoteAdapter();
+        final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);

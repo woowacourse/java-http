@@ -5,11 +5,11 @@ import org.apache.coyote.Adapter;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 
-public class CoyoteAdepter implements Adapter {
+public class CoyoteAdapter implements Adapter {
 
     private final RequestMapper requestMapper;
 
-    public CoyoteAdepter() {
+    public CoyoteAdapter() {
         this.requestMapper = new RequestMapper();
     }
 

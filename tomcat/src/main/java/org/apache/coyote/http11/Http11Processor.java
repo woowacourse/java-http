@@ -41,6 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
+
             final HttpResponse httpResponse = servletContainer.process(httpRequest);
 
             outputStream.write(httpResponse.combine());

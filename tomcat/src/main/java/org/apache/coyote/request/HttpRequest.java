@@ -1,6 +1,7 @@
 package org.apache.coyote.request;
 
 import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestPath;
 
 public class HttpRequest {
 
@@ -23,7 +24,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getRequestPath() {
+    public RequestPath getRequestPath() {
         return requestLine.getRequestPath();
     }
 }

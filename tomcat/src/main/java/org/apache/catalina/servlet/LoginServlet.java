@@ -7,8 +7,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestPath;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
 import org.apache.coyote.response.responseHeader.ContentType;
@@ -22,30 +24,22 @@ public class LoginServlet extends HttpServlet {
     public boolean canHandle(final HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return requestLine.isStartsWith(LOGIN_PATH);
+        return requestLine.isSame(LOGIN_PATH);
     }
 
     @Override
     public HttpResponse doGet(final HttpRequest httpRequest) {
-        String requestPath = httpRequest.getRequestPath();
+        RequestPath requestPath = httpRequest.getRequestPath();
 
         String resource = findResource(LOGIN_PATH + "." + ContentType.HTML);
 
-        String[] queries = requestPath.split("\\?")[1].split("&"); //TODO: ArgumentResolver 구현 부분
-        String[] requestParams = new String[2];
-        for (String query : queries) {
-            final String[] split = query.split("=");
-
-            if (split[0].equals("account")) {
-                requestParams[0] = split[1];
-            }
-            if (split[0].equals("password")) {
-                requestParams[1] = split[1];
-            }
+        Map<String, String> requestQueryParams = requestPath.getQueryParams();
+        if(requestQueryParams.isEmpty()){
+            return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
         }
 
         final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
-        loginController.login(requestParams[0], requestParams[1]);
+        loginController.login(requestQueryParams.get("account"), requestQueryParams.get("password"));
 
         return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
     }

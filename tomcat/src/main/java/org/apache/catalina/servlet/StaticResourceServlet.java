@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestPath;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
 import org.apache.coyote.response.responseHeader.ContentType;
@@ -19,16 +20,16 @@ public class StaticResourceServlet extends HttpServlet {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        String requestPath = httpRequest.getRequestPath();
+        RequestPath requestPath = httpRequest.getRequestPath();
 
         URL resourceUrl = StaticResourceServlet.class.getClassLoader()
-                .getResource(STATIC_RECOURSE_PATH + requestPath);
+                .getResource(STATIC_RECOURSE_PATH + requestPath.getRequestPath());
         return resourceUrl != null;
     }
 
     @Override
     public HttpResponse doGet(final HttpRequest httpRequest) {
-        String resource = findResource(httpRequest.getRequestPath());
+        String resource = findResource(httpRequest.getRequestPath().getRequestPath()); //TODO: get열차 칙칙폭폭..
         Optional<ContentType> contentType = findResourceExtension(httpRequest.getRequestLine());
 
         return contentType.map(type -> HttpResponseGenerator.generate(resource, type, HttpStatus.OK))

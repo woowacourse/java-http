@@ -12,7 +12,7 @@ public class RequestLine {
     private static final String REQUEST_LINE_SEPARATOR = " ";
 
     private final RequestMethod requestMethod;
-    private final String requestPath; //todo: requestPath, protocolVersion 객체 만들기
+    private final RequestPath requestPath; //todo: requestPath, protocolVersion 객체 만들기
     private final String protocolVersion;
 
     public RequestLine(final String requestLine) {
@@ -20,7 +20,8 @@ public class RequestLine {
         validateRequestLines(requestLines);
 
         this.requestMethod = RequestMethod.from(requestLines.get(REQUEST_METHOD_INDEX));
-        this.requestPath = requestLines.get(REQUEST_PATH_INDEX);
+
+        this.requestPath = RequestPath.from(requestLines.get(REQUEST_PATH_INDEX));
         this.protocolVersion = requestLines.get(PROTOCOL_VERSION_INDEX);
     }
 
@@ -34,22 +35,19 @@ public class RequestLine {
         return this.requestMethod.equals(requestMethod);
     }
 
+    public boolean isSame(final String requestPath) {
+        return this.requestPath.isSame(requestPath);
+    }
+
     public boolean isDefaultPath() {
         return this.requestPath.equals("/");
     }
 
-    public boolean isStartsWith(final String loginPath) {
-        return requestPath.startsWith(loginPath);
-    }
-
-    public String getRequestPath() {
+    public RequestPath getRequestPath() {
         return requestPath;
     }
 
     public String getRequestPathExtension() {
-        if (!requestPath.contains(".")) {
-            throw new IllegalArgumentException("확장자를 찾을 수 없습니다.");
-        }
-        return requestPath.split("\\.")[1];
+        return this.requestPath.getRequestPathExtension();
     }
 }

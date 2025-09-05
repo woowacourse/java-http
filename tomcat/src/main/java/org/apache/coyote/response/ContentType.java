@@ -6,9 +6,8 @@ public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
     JS("text/javascript", "js"),
-    PLAIN("text/plain", "txt"),
-    FORM_DATA("multipart/formed-data", "svg"),
-    ICO("multipart/formed-data", "ico");
+    PLAIN("text/plain", "txt")
+    ;
 
     private final String contentType;
     private final String extension;

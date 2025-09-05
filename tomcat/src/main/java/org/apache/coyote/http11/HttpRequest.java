@@ -18,7 +18,7 @@ public class HttpRequest {
         method = split[0];
         protocol = split[2];
         parseUri(split[1]);
-        parseHeaders(request.subList(1, request.size() - 1));
+        parseHeaders(request.subList(1, request.size()));
     }
 
     private void parseUri(String uri) {

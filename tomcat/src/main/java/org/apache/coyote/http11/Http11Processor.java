@@ -1,12 +1,30 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpStatus;
+import com.techcourse.http.request.HttpRequest;
+import com.techcourse.http.response.HttpResponse;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +44,75 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+             final OutputStream outputStream = connection.getOutputStream()
+        ) {
+            String line = bufferedReader.readLine();
+            HttpRequest httpRequest = HttpRequest.from(line);
 
-            final var responseBody = "Hello world!";
+            printLoginUser(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse response = createResponseBody(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void printLoginUser(final HttpRequest httpRequest) {
+        if (httpRequest.getFilePath().equals("/login.html")) {
+            Map<String, String> queryParams = httpRequest.getRequestParams();
+
+            String account = queryParams.get("account");
+            String password = queryParams.get("password");
+
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+
+            if (user.checkPassword(password)) {
+                log.info("user : {}", user);
+            }
+        }
+    }
+
+    private HttpResponse createResponseBody(final HttpRequest httpRequest) {
+        if (httpRequest.isRootPath()) {
+            return new HttpResponse("1.1", HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
+        }
+
+        String fileName = createFileName(httpRequest.getFilePath());
+        if ("/static/favicon.ico".equals(fileName)) {
+            return new HttpResponse("1.1", HttpStatus.NO_CONTENT, ContentType.IMAGE_X_ICON, "");
+        }
+
+        String responseBody = readResource(fileName);
+        return new HttpResponse("1.1", HttpStatus.OK, httpRequest.getContentType(), responseBody);
+    }
+    
+    private String readResource(final String fileName) {
+        try {
+            URL url = getClass().getResource(fileName);
+            Objects.requireNonNull(url, fileName + "에 파일이 없습니다.");
+
+            Path filePath = Paths.get(url.toURI());
+            return Files.readString(filePath);
+        } catch (URISyntaxException | IOException | NullPointerException e) {
+            throw new NotFoundException("존재하지 않는 파일입니다. :" + e.getMessage());
+        }
+    }
+
+    private String createFileName(String path) {
+        return String.format("/static/%s", toNormalizedPath(path));
+    }
+
+    private String toNormalizedPath(String path) {
+        if (path.startsWith("/")) {
+            return path.substring(1);
+        }
+        return path;
     }
 }

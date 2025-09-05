@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -31,7 +29,7 @@ public final class HttpRequestParser {
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.ISO_8859_1));
         HttpRequestUrl httpRequestUrl = readUri(reader);
         HttpHeaders headers = readHeaders(reader);
         Map<String, String> queryParams = parseQueryString(httpRequestUrl.queryString());

@@ -4,11 +4,13 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.HttpProtocolVersion;
 import org.apache.coyote.http11.reqeust.HttpRequest;
+import org.apache.coyote.http11.reqeust.QueryParameters;
 
 public class HttpRequestBuilder {
 
     private HttpMethod method;
     private String uri;
+    private QueryParameters queryParameters;
     private HttpProtocolVersion protocolVersion;
     private HttpHeaders headers;
     private String body;
@@ -20,6 +22,11 @@ public class HttpRequestBuilder {
 
     public HttpRequestBuilder uri(final String uri) {
         this.uri = uri;
+        return this;
+    }
+
+    public HttpRequestBuilder queryParameters(final QueryParameters queryParameters) {
+        this.queryParameters = queryParameters;
         return this;
     }
 
@@ -42,6 +49,7 @@ public class HttpRequestBuilder {
         return new HttpRequest(
                 method,
                 uri,
+                queryParameters,
                 protocolVersion,
                 headers,
                 body

@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpProtocolVersion;
 import org.apache.coyote.http11.reqeust.HttpMethod;
+import org.apache.coyote.http11.reqeust.QueryParameters;
 
 public class HttpRequestParser {
 
@@ -19,7 +20,30 @@ public class HttpRequestParser {
     }
 
     public String parseRequestUri(final String startLine) {
-        return startLine.split(" ")[1];
+        final String uriWithParams = startLine.split(" ")[1];
+        final int queryParamStartIndex = uriWithParams.indexOf("?");
+        if (queryParamStartIndex == -1) {
+            return uriWithParams;
+        }
+
+        return uriWithParams.substring(0, queryParamStartIndex);
+    }
+
+    public QueryParameters parseQueryParameters(final String startLine) {
+        final QueryParameters queryParameters = new QueryParameters();
+        final String uriWithParams = startLine.split(" ")[1];
+        final int queryParamStartIndex = uriWithParams.indexOf("?");
+        if (queryParamStartIndex == -1) {
+            return queryParameters;
+        }
+        final String queryParamStrings = uriWithParams.substring(queryParamStartIndex + 1);
+        final String[] queryParams = queryParamStrings.split("&");
+        for (String queryParam : queryParams) {
+            final String[] keyValue = queryParam.split("=");
+            queryParameters.addParameter(keyValue[0], keyValue[1]);
+        }
+
+        return queryParameters;
     }
 
     public HttpProtocolVersion parseHttpVersion(final String startLine) {

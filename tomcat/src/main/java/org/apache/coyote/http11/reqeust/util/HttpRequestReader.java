@@ -27,6 +27,7 @@ public class HttpRequestReader {
         return new HttpRequestBuilder()
                 .method(parser.parseHttpMethod(startLine))
                 .uri(parser.parseRequestUri(startLine))
+                .queryParameters(parser.parseQueryParameters(startLine))
                 .protocolVersion(parser.parseHttpVersion(startLine))
                 .headers(parser.parseHeaders(headerLines))
                 .body(getBodyIfExists(parser.parseHeaders(headerLines)))

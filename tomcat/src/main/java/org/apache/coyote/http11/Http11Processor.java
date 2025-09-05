@@ -42,6 +42,40 @@ public class Http11Processor implements Runnable, Processor {
             this.uri = uri;
         }
 
+        private Optional<String> getQueryString() {
+            int index = uri.indexOf("?");
+            if (index == -1) {
+                return Optional.empty();
+            }
+
+            return Optional.of(uri.substring(index + 1));
+        }
+
+        public Map<String, String> getQueryStrings() {
+            Map<String, String> queryStrings = new HashMap<>();
+
+            Optional<String> queryString = getQueryString();
+            if (queryString.isEmpty()) {
+                return new HashMap<>();
+            }
+
+            for (String keyValue : queryString.get().split("&")) {
+                String[] keyValues = keyValue.split("=");
+                queryStrings.put(keyValues[0], keyValues[1]);
+            }
+
+            return queryStrings;
+        }
+
+        public String getPath() {
+            int index = uri.indexOf("?");
+            if (index == -1) {
+                return uri;
+            }
+
+            return uri.substring(0, index);
+        }
+
         public String getMethod() {
             return method;
         }
@@ -63,25 +97,15 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = null;
             if (httpRequest.getUri().startsWith("/login")) {
-                int index = httpRequest.getUri().indexOf("?");
-                String path = httpRequest.getUri().substring(0, index);
-                String query = httpRequest.getUri().substring(index + 1);
-
-                Map<String, String> tmp = new HashMap<>();
-
-                String[] queryStrings = query.split("&");
-                for (String keyValue : queryStrings) {
-                    String[] keyValues = keyValue.split("=");
-                    tmp.put(keyValues[0], keyValues[1]);
-                }
-                String account = tmp.get("account");
+                Map<String, String> queryStrings = httpRequest.getQueryStrings();
+                String account = queryStrings.get("account");
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
                 log.info("{}", user.orElse(null));
 
                 response = getHttpResponse(
                     "html",
-                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + path + ".html").getFile()).toPath()))
+                    new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getPath() + ".html").getFile()).toPath()))
                 );
             } else if (httpRequest.getUri().contains(".")) {
                 String staticFile = new String(Files.readAllBytes(new File(ClassLoader.getSystemResource(STATIC_FILE_PREFIX + httpRequest.getUri()).getFile()).toPath()));

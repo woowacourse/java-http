@@ -5,22 +5,20 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,73 +41,53 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            List<String> requestHeader = extractHttpRequest(inputStream);
-            String startLine = requestHeader.getFirst();
-            String requestURI = startLine.split(" ")[1];
+            HttpRequest request = HttpRequest.from(extractRequestHeader(inputStream));
+            String requestURI = request.getURI();
+            HttpResponse response = createHttpResponse(requestURI);
 
-            String responseBody = loadResource(requestURI);
-            String response = createHttpResponse(requestURI, responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private List<String> extractHttpRequest(InputStream inputStream) throws IOException {
+    private List<String> extractRequestHeader(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> requestLines = new ArrayList<>();
+        List<String> headers = new ArrayList<>();
 
         String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            requestLines.add(line);
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            headers.add(line);
         }
-        return requestLines;
+        return headers;
     }
 
-    private String loadResource(String requestURI) throws IOException {
+    private HttpResponse createHttpResponse(String requestURI) throws IOException {
         if (requestURI.equals("/")) {
-            return "Hello world!";
+            return HttpResponse.from(requestURI, "Hello world!");
         }
 
         int queryIndex = requestURI.indexOf("?");
 
         if (queryIndex == -1) {
-            URL resource = getClass().getClassLoader()
-                    .getResource("static" + requestURI);
-
-            Path path = new File(resource.getPath()).toPath();
-            return Files.readString(path);
+            return HttpResponse.from(requestURI, readResourceFile("static" + requestURI));
         }
-
-        String filePath = requestURI.substring(0, queryIndex);
+        String path = requestURI.substring(0, queryIndex);
         Map<String, String> queryStrings = parseQueryStrings(requestURI, queryIndex);
         checkUser(queryStrings);
 
-        URL resource = getClass().getClassLoader()
-                .getResource("static" + filePath + ".html");
-
-        Path path = new File(resource.getPath()).toPath();
-        return Files.readString(path);
+        return HttpResponse.from(requestURI, readResourceFile("static" + path + ".html"));
     }
 
-    private void checkUser(Map<String, String> queryStrings) {
-        User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                .orElseThrow(IllegalArgumentException::new);
-
-        if (!user.checkPassword(queryStrings.get("password"))) {
-            throw new IllegalArgumentException();
-        }
-
-        log.info(user.toString());
+    private String readResourceFile(String path) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(path);
+        Path filePath = new File(resource.getPath()).toPath();
+        return Files.readString(filePath);
     }
 
     private Map<String, String> parseQueryStrings(String requestURI, int queryIndex) {
-        String query = requestURI.substring(queryIndex + 1);;
+        String query = requestURI.substring(queryIndex + 1);
         Map<String, String> result = new HashMap<>();
 
         for (String param : query.split("&")) {
@@ -119,19 +97,13 @@ public class Http11Processor implements Runnable, Processor {
         return result;
     }
 
-    private String createHttpResponse(String requestURI, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + extractContentType(requestURI) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
+    private void checkUser(Map<String, String> queryStrings) {
+        User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                .orElseThrow(IllegalArgumentException::new);
 
-    private String extractContentType(String requestURI) {
-        if (requestURI.contains(".css")) {
-            return "text/css";
+        if (!user.checkPassword(queryStrings.get("password"))) {
+            throw new IllegalArgumentException();
         }
-        return "text/html";
+        log.info(user.toString());
     }
 }

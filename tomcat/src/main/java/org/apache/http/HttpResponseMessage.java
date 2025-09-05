@@ -30,8 +30,6 @@ public class HttpResponseMessage {
                 body
         );
         try {
-            System.out.println("body.getBytes().length = " + body.getBytes().length);
-            System.out.println("responseMessage = " + responseMessage);
             outputStream.write(responseMessage.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {

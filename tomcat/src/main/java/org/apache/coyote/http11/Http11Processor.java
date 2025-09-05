@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.controller.Controller;
+import org.apache.controller.LoginController;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
@@ -26,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<Controller> controllers = List.of(
+            new LoginController(),
             new RootController(),
             new StaticFileController()
     );

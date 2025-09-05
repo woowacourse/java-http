@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             if (uri.contains("?")) {
                 int index = uri.indexOf("?");
                 path = uri.substring(0, index);
-                parseQueryStrings(uri, index);
+                queryStrings = parseQueryStrings(uri, index);
             }
 
             String responseBody = null;
@@ -62,7 +62,11 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = handleForStaticResource(path);
             }
 
-            if (uri.contains("/login")) {
+            if (uri.contains("/login") && !uri.contains("?")) {
+                responseBody = handleForStaticResource("login.html");
+            }
+
+            if (uri.contains("/login") && uri.contains("?")) {
                 responseBody = handleForStaticResource("login.html");
                 handleForLogin(queryStrings);
             }

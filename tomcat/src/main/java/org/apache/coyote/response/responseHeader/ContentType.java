@@ -7,7 +7,9 @@ public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
     JS("text/javascript", "js"),
-    PLAIN("text/plain", "txt");
+    PLAIN("text/plain", "txt"),
+    IMAGE("image/png", "png")
+    ;
 
     private final String contentType;
     private final String extension;
@@ -19,6 +21,10 @@ public enum ContentType {
 
     public String getContentType() {
         return contentType;
+    }
+
+    public boolean isImage(){
+        return extension.equals(IMAGE.extension);
     }
 
     public static Optional<ContentType> findContentType(String extension) {

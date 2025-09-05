@@ -19,7 +19,13 @@ public class ResponseHeader {
     private Map<String, String> initHeaders(final int bodyLength, final ContentType contentType) {
         Map<String, String> headers = new LinkedHashMap<>();
 
-        headers.put("Content-Type", contentType.getContentType() + ENCODING_TYPE);
+        headers.put(
+                "Content-Type",
+                contentType.isImage()
+                        ? contentType.getContentType()
+                        : contentType.getContentType() + ENCODING_TYPE
+        );
+
         headers.put("Content-Length", String.valueOf(bodyLength));
 
         return headers;

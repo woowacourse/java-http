@@ -12,8 +12,9 @@ public class StreamReader {
 
     public static String readFile(InputStream inputStream) throws IOException {
         Objects.requireNonNull(inputStream);
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        return reader.lines().collect(Collectors.joining("\n"));
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
 
     public static String readRequest(InputStream inputStream) throws IOException {

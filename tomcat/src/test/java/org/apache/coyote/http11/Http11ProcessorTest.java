@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -28,7 +29,7 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
-                "Content-Length: " + fileContent.length(),
+                "Content-Length: " + fileContent.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 fileContent);
 
@@ -56,7 +57,7 @@ class Http11ProcessorTest {
         final String fileContent = new String(resourceStream.readAllBytes()).strip();
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: " + fileContent.length() + "\r\n" +
+                "Content-Length: " + fileContent.getBytes(StandardCharsets.UTF_8).length + "\r\n" +
                 "\r\n" +
                 fileContent;
 

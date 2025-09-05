@@ -36,7 +36,7 @@ public class ResponseGenerator {
             final String path = resourcePathValue.substring(0, startIndex);
             final String queryString = resourcePathValue.substring(startIndex + 1);
             final Map<String, String> parsedQueryString = parseQueryString(queryString);
-            processQueryString(path, parsedQueryString);
+            processRequestByQueryString(path, parsedQueryString);
             final HttpStatus statusCode = HttpStatus.OK;
             final ContentType contentType = ContentType.HTML;
             final String body = readFile(path + ".html");
@@ -54,7 +54,7 @@ public class ResponseGenerator {
         return new HttpResponse(HttpStatus.BAD_REQUEST, ContentType.TEXT, null);
     }
 
-    private static void processQueryString(String path, Map<String, String> queryStrings) {
+    private static void processRequestByQueryString(String path, Map<String, String> queryStrings) {
         if (path.equals("/login")) {
             final User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));

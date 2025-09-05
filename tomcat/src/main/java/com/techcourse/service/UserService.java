@@ -9,7 +9,6 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-
     public void login(final String account, final String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다"));

@@ -10,7 +10,7 @@ public enum RequestMethod {
     PATCH,
     DELETE;
 
-    public static RequestMethod from(final String method){
+    public static RequestMethod from(final String method) {
         return Arrays.stream(RequestMethod.values())
                 .filter(requestMethod -> requestMethod.name().equals(method))
                 .findFirst()

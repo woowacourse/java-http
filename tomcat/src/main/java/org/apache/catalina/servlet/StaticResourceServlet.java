@@ -8,12 +8,12 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
-import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class StaticResourceServlet extends HttpServlet{
+public class StaticResourceServlet extends HttpServlet {
 
     private static final String STATIC_RECOURSE_PATH = "static";
 
@@ -22,7 +22,7 @@ public class StaticResourceServlet extends HttpServlet{
         String requestPath = httpRequest.getRequestPath();
 
         URL resourceUrl = StaticResourceServlet.class.getClassLoader()
-                .getResource(STATIC_RECOURSE_PATH +requestPath);
+                .getResource(STATIC_RECOURSE_PATH + requestPath);
         return resourceUrl != null;
     }
 
@@ -45,8 +45,8 @@ public class StaticResourceServlet extends HttpServlet{
         return ContentType.findContentType(extension);
     }
 
-    private String findResource(final String requestPath){
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH+requestPath);
+    private String findResource(final String requestPath) {
+        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

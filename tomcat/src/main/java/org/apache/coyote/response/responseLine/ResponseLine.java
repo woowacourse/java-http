@@ -9,8 +9,7 @@ public class ResponseLine {
         this.httpStatus = httpStatus;
     }
 
-    public String toCombine(){
+    public String toCombine() {
         return "HTTP/1.1" + " " + httpStatus.toCombine();
     }
-
 }

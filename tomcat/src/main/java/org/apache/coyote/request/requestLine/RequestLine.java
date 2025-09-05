@@ -1,6 +1,5 @@
 package org.apache.coyote.request.requestLine;
 
-
 import java.util.List;
 
 public class RequestLine {
@@ -8,7 +7,7 @@ public class RequestLine {
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_PATH_INDEX = 1;
     private static final int PROTOCOL_VERSION_INDEX = 2;
-    
+
     private static final int REQUEST_LINE_SIZE = 3;
     private static final String REQUEST_LINE_SEPARATOR = " ";
 
@@ -26,7 +25,7 @@ public class RequestLine {
     }
 
     private void validateRequestLines(final List<String> requestLines) {
-        if(requestLines.size() != REQUEST_LINE_SIZE){
+        if (requestLines.size() != REQUEST_LINE_SIZE) {
             throw new IllegalArgumentException("[ERROR] 요청 형식이 올바르지 않습니다");
         }
     }

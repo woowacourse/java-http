@@ -1,12 +1,12 @@
 package org.apache.catalina.servlet;
 
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class DefaultServlet extends HttpServlet{
+public class DefaultServlet extends HttpServlet {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {

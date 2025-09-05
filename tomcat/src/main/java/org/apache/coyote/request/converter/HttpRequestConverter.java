@@ -26,9 +26,11 @@ public class HttpRequestConverter {
         final List<String> headerLines = new ArrayList<>();
 
         String headerLine;
-        while(bufferedReader.ready()){
+        while (bufferedReader.ready()) {
             headerLine = bufferedReader.readLine();
-            if(headerLine.isBlank())break;
+            if (headerLine.isBlank()) {
+                break;
+            }
             headerLines.add(headerLine);
         }
 
@@ -38,7 +40,7 @@ public class HttpRequestConverter {
     private static RequestBody toRequestBody(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
 
-        while(bufferedReader.ready()){
+        while (bufferedReader.ready()) {
             stringBuilder.append(bufferedReader.readLine());
         }
 

@@ -9,8 +9,7 @@ public enum HttpStatus {
 
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
-    UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type")
-    ;
+    UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type");
 
     private final int statusCode;
     private final String statusMessage;

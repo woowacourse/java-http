@@ -11,7 +11,7 @@ public class LoginController {
     }
 
     // @RequestMapping(/login?account=gugu&password=password)
-    public void login(final String account, final String password){
+    public void login(final String account, final String password) {
         userService.login(account, password);
     }
 }

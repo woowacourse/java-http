@@ -9,7 +9,8 @@ public class HttpResponse {
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
-    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader, final ResponseBody responseBody) {
+    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader,
+                        final ResponseBody responseBody) {
         this.responseLine = responseLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;

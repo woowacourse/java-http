@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.ContentTypeMapper;
@@ -57,16 +58,7 @@ public class StaticResourceServlet implements Servlet {
 
         try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + uri);
              final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-
-            if (inputStream == null) {
-                log.warn("Static file not found: {}", uri);
-                return new StaticFileResult(
-                        404,
-                        "text/html; charset=utf-8",
-                        createErrorPage("File Not Found", 404)
-                );
-            }
+                     new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8))) {
 
             final String content = reader.lines()
                     .collect(Collectors.joining(System.lineSeparator()));

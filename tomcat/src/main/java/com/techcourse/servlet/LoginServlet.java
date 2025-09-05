@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.HttpRequest;
@@ -65,12 +66,7 @@ public class LoginServlet implements Servlet {
     private String readLoginPage() {
         try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static/login.html");
              final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-
-            if (inputStream == null) {
-                log.warn("Login page not found: static/login.html");
-                return createErrorPage("Login page not found", 404);
-            }
+                     new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8))) {
 
             return reader.lines()
                     .collect(Collectors.joining(System.lineSeparator()));

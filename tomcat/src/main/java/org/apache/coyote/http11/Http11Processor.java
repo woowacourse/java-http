@@ -114,14 +114,13 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
             String key;
-            String value;
+            String value = "";
             int separatorIdx = pair.indexOf('=');
             if (separatorIdx >= 0) {
                 key = pair.substring(0, separatorIdx);
                 value = pair.substring(separatorIdx + 1);
             } else {
                 key = pair;
-                value = "";
             }
             queries.put(key, value);
         }
@@ -170,12 +169,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (lower.endsWith(".js")) {
             return "application/javascript;charset=utf-8";
-        }
-        if (lower.endsWith(".png")) {
-            return "image/png";
-        }
-        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-            return "image/jpeg";
         }
         return "application/octet-stream";
     }

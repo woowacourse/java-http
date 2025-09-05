@@ -1,16 +1,40 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<Integer, String> HTTP_STATUS_CODES = Map.ofEntries(
+            Map.entry(200, "200 OK"),
+            Map.entry(400, "400 Bad Request"),
+            Map.entry(404, "404 Not Found")
+    );
+    private static final Map<String, String> MIME_TYPES = Map.ofEntries(
+            Map.entry("html", "text/html; charset=UTF-8"),
+            Map.entry("css", "text/css; charset=UTF-8"),
+            Map.entry("js", "application/javascript; charset=UTF-8"),
+            Map.entry("ico", "image/x-icon")
+    );
 
     private final Socket connection;
 
@@ -26,22 +50,94 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            final String[] request = bufferedReader.readLine().split(" ");
+            final String requestUri = request[1];
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Map<String, String> queryMap = new HashMap<>();
+
+            String requestResourceName = requestUri;
+            if (requestResourceName.contains("?")) {
+                final String[] split = requestResourceName.split("\\?");
+                requestResourceName = split[0];
+                String queryString = split[1];
+                queryMap = parseQueryString(queryString);
+            }
+            if (!requestUri.contains(".")) {
+                requestResourceName = requestResourceName + ".html";
+            }
+            log.debug("resource : {}", requestResourceName);
+
+            final URL resource = getClass().getClassLoader().getResource("static" + requestResourceName);
+            if (resource == null) {
+                final URL notFoundPage = getClass().getClassLoader().getResource("static/404.html");
+                final String response = parseResponse(404, notFoundPage);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            final String response = parseResponse(200, resource);
+
+            if ("/login.html".equals(requestResourceName) && !queryMap.isEmpty()) {
+                login(queryMap);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseResponse(final int httpStatusCode, final URL resource) throws IOException {
+        final String resourceName = resource.getFile();
+        final String extension = resourceName.substring(resourceName.lastIndexOf(".") + 1);
+        final String responseBody = Files.readString(new File(resourceName).toPath());
+
+        return generateResponse(HTTP_STATUS_CODES.get(httpStatusCode), MIME_TYPES.get(extension), responseBody);
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> queryMap = new HashMap<>();
+        if (queryString == null || queryString.isBlank()) {
+            return queryMap;
+        }
+
+        final String[] pairs = queryString.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=");
+            final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+            String value = "";
+            if (keyValue.length > 1) {
+                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            }
+            queryMap.put(key, value);
+        }
+        return queryMap;
+    }
+
+    private void login(final Map<String, String> queryMap) {
+        final String account = queryMap.get("account");
+        final String password = queryMap.get("password");
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("user : {}", user.get());
+        }
+    }
+
+    private String generateResponse(final String status, final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

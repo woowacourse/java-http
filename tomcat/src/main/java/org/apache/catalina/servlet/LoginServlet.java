@@ -19,6 +19,7 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 public class LoginServlet extends HttpServlet {
 
     private static final String LOGIN_PATH = "/login";
+    private static final String STATIC_RECOURSE_PATH = "static";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
@@ -39,9 +40,14 @@ public class LoginServlet extends HttpServlet {
         }
 
         final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
-        loginController.login(requestQueryParams.get("account"), requestQueryParams.get("password"));
 
-        return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
+        try {
+            loginController.login(requestQueryParams.get("account"), requestQueryParams.get("password"));
+        } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
+            return HttpResponseGenerator.generate(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
+        }
+
+        return HttpResponseGenerator.generate(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
     }
 
     @Override
@@ -50,7 +56,7 @@ public class LoginServlet extends HttpServlet {
     }
 
     private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource("static" + requestPath);
+        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

@@ -30,7 +30,8 @@ public class InMemoryUserRepository {
                 user.getAccount(),
                 user.getPassword(),
                 user.getEmail());
-        return DATABASE.put(persisted.getAccount(), persisted);
+        DATABASE.put(persisted.getAccount(), persisted);
+        return persisted;
     }
 
     public static Optional<User> findByAccount(final String account) {

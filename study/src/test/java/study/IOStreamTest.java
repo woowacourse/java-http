@@ -204,7 +204,7 @@ class IOStreamTest {
                     ""
             );
 
-            try (final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes())) {
+            try (final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes(StandardCharsets.UTF_8))) {
                 String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 assertThat(actual).hasToString(emoji);
             }

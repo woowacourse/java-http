@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,7 @@ public final class HttpRequestParser {
     private static final String QUERY_STRING_START_DELIMITER = "?";
     private static final String QUERY_KEY_VALUE_DELIMITER = "=";
     private static final int KEY_VALUE_PAIR_LENGTH = 2;
+    private static final int QUERY_KEY_VALUE_LIMIT = 2;
 
     private HttpRequestParser() {
     }
@@ -76,8 +79,20 @@ public final class HttpRequestParser {
             return Map.of();
         }
         return Arrays.stream(queryString.split(QUERY_STRING_DELIMITER))
-                .map(s -> s.split(QUERY_KEY_VALUE_DELIMITER))
+                .map(s -> s.split(QUERY_KEY_VALUE_DELIMITER, QUERY_KEY_VALUE_LIMIT))
                 .filter(arr -> arr.length == KEY_VALUE_PAIR_LENGTH)
-                .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
+                .collect(Collectors.toMap(
+                        arr -> decode(arr[0]),
+                        arr -> decode(arr[1]),
+                        (oldVal, newVal) -> newVal
+                ));
+    }
+
+    private static String decode(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return value;
+        }
     }
 }

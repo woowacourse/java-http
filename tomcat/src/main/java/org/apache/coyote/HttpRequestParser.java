@@ -49,7 +49,12 @@ public class HttpRequestParser {
     }
 
     private static void validateRequestLine(String requestLine) {
-        if (requestLine == null || requestLine.isBlank() || requestLine.split(" ").length != REQUEST_LINE_TOKENS) {
+        if (requestLine == null || requestLine.isBlank()) {
+            throw new IllegalArgumentException("요청 형식이 올바르지 않습니다.");
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(requestLine);
+        if(tokenizer.countTokens() != REQUEST_LINE_TOKENS) {
             throw new IllegalArgumentException("요청 형식이 올바르지 않습니다.");
         }
     }

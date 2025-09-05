@@ -1,8 +1,6 @@
 package org.apache.coyote.util;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,8 +21,8 @@ public class ResourceUtil {
             Path filePath = Paths.get(uri);
 
             return Files.isRegularFile(filePath);
-        } catch (URISyntaxException e) {
-            throw new StaticResourceNotFoundException(path + ": file doesn't exist");
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -39,7 +37,7 @@ public class ResourceUtil {
             Path filePath = Paths.get(uri);
 
             return Files.readString(filePath);
-        } catch (URISyntaxException | IOException e) {
+        } catch (Exception e) {
             throw new StaticResourceNotFoundException(path + ": file doesn't exist");
         }
     }

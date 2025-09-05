@@ -14,23 +14,7 @@ public class ResponseEntity {
     }
 
     public static HttpResponse ok(String body, String contentType) {
-        byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
-
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", String.valueOf(bodyBytes.length));
-
-        return new HttpResponse(
-                new StatusLine(
-                        String.join(" ",
-                                "HTTP/1.1",
-                                String.valueOf(HttpStatus.OK.getHttpStatusCode()),
-                                HttpStatus.OK.getReasonPhrase()
-                        )
-                ),
-                headers,
-                body
-        );
+        return buildHttpResponse(body, contentType, HttpStatus.OK);
     }
 
     public static HttpResponse notFound(String body) {
@@ -38,6 +22,26 @@ public class ResponseEntity {
     }
 
     public static HttpResponse notFound(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.NOT_FOUND);
+    }
+
+    public static HttpResponse badRequest(String body) {
+        return badRequest(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse badRequest(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.BAD_REQUEST);
+    }
+
+    public static HttpResponse unauthorized(String body) {
+        return badRequest(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse unauthorized(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.UNAUTHORIZED);
+    }
+
+    private static HttpResponse buildHttpResponse(String body, String contentType, HttpStatus status) {
         byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 
         Map<String, String> headers = new LinkedHashMap<>();
@@ -48,8 +52,8 @@ public class ResponseEntity {
                 new StatusLine(
                         String.join(" ",
                                 "HTTP/1.1",
-                                String.valueOf(HttpStatus.NOT_FOUND.getHttpStatusCode()),
-                                HttpStatus.NOT_FOUND.getReasonPhrase()
+                                String.valueOf(status.getHttpStatusCode()),
+                                status.getReasonPhrase()
                         )
                 ),
                 headers,

@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages#http_requests">...</a>
@@ -53,6 +56,37 @@ public class RequestLine {
         if (!List.of("HTTP/1.0", "HTTP/1.1").contains(version)) {
             throw new IllegalArgumentException(version + ": invalid protocol");
         }
+    }
+
+    public String getPath() {
+        int idx = requestTarget.indexOf('?');
+        if (idx == -1) {
+            return requestTarget;
+        }
+
+        return requestTarget.substring(0, idx);
+    }
+
+    public Map<String, String> getQueryParams() {
+        int idx = requestTarget.indexOf('?');
+        if (idx == -1 || idx == requestTarget.length() - 1) {
+            return Collections.emptyMap();
+        }
+
+        String queryString = requestTarget.substring(idx + 1);
+
+        Map<String, String> params = new HashMap<>();
+        Arrays.stream(queryString.split("&"))
+                .map(query -> query.split("=", 2))
+                .forEach(query -> {
+                    if (query.length == 2) {
+                        params.put(query[0], query[1]);
+                    } else if (query.length == 1) {
+                        params.put(query[0], ""); // value 없이 key만 존재하는 경우
+                    }
+                });
+
+        return params;
     }
 
     public HttpMethod getMethod() {

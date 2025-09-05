@@ -12,9 +12,10 @@ import java.util.Map;
  */
 public class HttpRequest {
 
-    private RequestLine requestLine;
-    private Map<String, String> headers;
-    private String body;
+    private final RequestLine requestLine;
+    private final Map<String, String> headers;
+    private final String body;
+    private final Map<String, String> queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -47,6 +48,7 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.queryParams = requestLine.getQueryParams();
     }
 
     public RequestLine getRequestLine() {
@@ -58,11 +60,19 @@ public class HttpRequest {
     }
 
     public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getRequestTarget() {
         return requestLine.getRequestTarget();
     }
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return queryParams;
     }
 
     public String getBody() {

@@ -33,7 +33,7 @@ public class StaticResourceServlet extends HttpServlet{
 
     @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
-        throw new IllegalArgumentException("[ERROR] 해당 요청을 찾지 못했습니다");
+        return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     private ContentType findResourceExtension(final RequestInfo requestInfo) {

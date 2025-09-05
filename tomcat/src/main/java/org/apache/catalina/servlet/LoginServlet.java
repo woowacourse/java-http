@@ -11,6 +11,8 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestInfo.RequestInfo;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.coyote.response.HttpStatus;
 
 public class LoginServlet extends HttpServlet{
 
@@ -40,12 +42,12 @@ public class LoginServlet extends HttpServlet{
         final LoginController loginController = new LoginController(new UserService()); //todo: bean...
         loginController.login(requestParams[0], requestParams[1]);
 
-        return null;
+        return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
     }
 
     @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
-        throw new IllegalArgumentException("[ERROR] 해당 요청을 찾지 못했습니다");
+        return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     private String findResource(final String requestPath){

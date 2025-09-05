@@ -5,7 +5,10 @@ public enum HttpStatus {
     OK(200, "OK"),
     CREATED(201, "Created"),
     ACCEPTED(202, "Accepted"),
-    NO_CONTENT(204, "No Content");
+    NO_CONTENT(204, "No Content"),
+
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed")
+    ;
 
     private final int statusCode;
     private final String statusMessage;

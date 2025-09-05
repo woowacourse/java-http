@@ -3,7 +3,10 @@ package org.apache.catalina.servlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestInfo.RequestInfo;
 import org.apache.coyote.request.requestInfo.RequestMethod;
+import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.coyote.response.HttpStatus;
 
 public abstract class HttpServlet implements Servlet {
 
@@ -18,6 +21,6 @@ public abstract class HttpServlet implements Servlet {
             return doPost(httpRequest);
         }
 
-        throw new IllegalArgumentException("[ERROR] 지원하지 않는 메서드입니다");
+        return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

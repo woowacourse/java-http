@@ -14,7 +14,7 @@ public class Http11RequestServiceProcessor implements HttpParser {
 
     @Override
     public ContentParseResult parseContent(String contentPath, Map<String, String> query) {
-        return httpServices.proceesServiceRequest(contentPath, query);
+        return httpServices.processServiceRequest(contentPath, query);
     }
 
     @Override

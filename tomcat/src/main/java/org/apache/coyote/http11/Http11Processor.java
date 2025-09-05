@@ -11,8 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,8 +60,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readGetFromReader(final BufferedReader bufferedReader) throws IOException {
-        List<String> lines = new ArrayList<>();
-
         String buffer = "";
         while (!(buffer = bufferedReader.readLine()).isEmpty()) {
             String[] lineSplit = buffer.split(" ");

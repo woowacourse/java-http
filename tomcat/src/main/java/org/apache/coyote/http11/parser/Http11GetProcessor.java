@@ -16,7 +16,7 @@ public class Http11GetProcessor {
     }
 
     public ContentParseResult parse(String httpRequest) throws IOException {
-        Map<String, String> queryFinder = parseQuerys(httpRequest);
+        Map<String, String> queryFinder = parseQueries(httpRequest);
         String contentPath = parseContentPath(httpRequest);
         return getContentParseResult(contentPath, queryFinder);
     }
@@ -25,7 +25,7 @@ public class Http11GetProcessor {
         return httpRequest.split("\\?")[0];
     }
 
-    private Map<String, String> parseQuerys(String httpReqeust) {
+    private Map<String, String> parseQueries(String httpReqeust) {
         String[] requestSplit = httpReqeust.split("\\?");
 
         if (!isQueryProcessable(requestSplit)) {

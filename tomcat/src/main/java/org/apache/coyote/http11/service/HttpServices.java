@@ -10,10 +10,11 @@ public class HttpServices {
     static Map<String, HttpService> serviceMap = new HashMap<>();
 
     static {
+        serviceMap.put("/", new HelloService());
         serviceMap.put("/login", new UserService());
     }
 
-    public ContentParseResult proceesServiceRequest(String contentPath, Map<String, String> query) {
+    public ContentParseResult processServiceRequest(String contentPath, Map<String, String> query) {
         validateExistHttpService(contentPath);
 
         HttpService httpService = serviceMap.get(contentPath);

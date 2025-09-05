@@ -1,11 +1,16 @@
 package org.apache.catalina.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FileParser {
+
+    private static final Logger log = LoggerFactory.getLogger(FileParser.class);
 
     private FileParser() {
     }
@@ -23,7 +28,8 @@ public final class FileParser {
 
     public static byte[] loadStaticResourceByFileName(String fileName) throws IOException {
         if (!fileName.contains(".")) {
-            throw new IllegalArgumentException("잘못된 파일 명입니다. fileName : " + fileName);
+            log.error("잘못된 파일명입니다. fileName : {}", fileName);
+            throw new FileNotFoundException("잘못된 파일 명입니다. fileName : " + fileName);
         }
 
         validatePath(fileName);
@@ -34,7 +40,8 @@ public final class FileParser {
         final URL url = FileParser.class.getClassLoader().getResource(resourcePath);
 
         if (url == null) {
-            return "File not found".getBytes();
+            log.error("파일이 존재하지 않습니다. fileName : {}", fileName);
+            throw new FileNotFoundException("파일이 존재하지 않습니다. fileName : " + fileName);
         }
 
         return Files.readAllBytes(new File(url.getFile()).toPath());

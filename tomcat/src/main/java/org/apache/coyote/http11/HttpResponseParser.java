@@ -17,7 +17,7 @@ public final class HttpResponseParser {
         final byte[] bytes = (joiner + CRLF).getBytes();
 
         if (httpResponse.getBody() != null) {
-            return concat(bytes, httpResponse.getBody());
+            return concatBytes(bytes, httpResponse.getBody());
         }
 
         return bytes;
@@ -30,7 +30,7 @@ public final class HttpResponseParser {
         return builder.toString();
     }
 
-    public static byte[] concat(byte[] a, byte[] b) {
+    private static byte[] concatBytes(byte[] a, byte[] b) {
         byte[] result = new byte[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);

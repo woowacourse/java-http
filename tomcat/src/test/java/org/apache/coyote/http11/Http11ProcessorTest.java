@@ -67,4 +67,28 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void invalidRequestStartLine_ShouldReturn400BadRequest() {
+        // given
+        final String invalidHttpRequest = String.join("\r\n",
+                "", // 빈 시작줄
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(invalidHttpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        final String[] lines = output.split("\r\n");
+        final String responseStartLine = lines[0];
+        
+        assertThat(responseStartLine).isEqualTo("HTTP/1.1 400 Bad Request ");
+    }
 }

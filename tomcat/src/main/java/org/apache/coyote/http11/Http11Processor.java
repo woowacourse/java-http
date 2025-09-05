@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.BadRequestException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,16 +36,26 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final HttpRequest request = HttpRequestParser.parse(reader);
-            final HttpResponse response = new HttpResponse();
-
-            HttpServletContainer.handle(request, response);
+            final HttpResponse response = processResponse(reader);
 
             final byte[] output = HttpResponseParser.parse(response);
             outputStream.write(output);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse processResponse(BufferedReader reader) throws IOException {
+        final HttpResponse response = new HttpResponse();
+        try {
+            final HttpRequest request = HttpRequestParser.parse(reader);
+            HttpServletContainer.handle(request, response);
+
+            return response;
+        } catch (BadRequestException e) {
+            ResponseProcessor.handleBadRequest(response);
+            return response;
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
@@ -42,7 +43,7 @@ public final class HttpRequestParser {
     private static String parseRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         if (requestLine == null || requestLine.trim().isEmpty()) {
-            throw new IllegalArgumentException("Request line is null or empty");
+            throw new BadRequestException("Request line is null or empty");
         }
         return requestLine;
     }

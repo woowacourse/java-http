@@ -1,17 +1,19 @@
 package org.apache.catalina.domain;
 
+import com.techcourse.exception.BadRequestException;
+
 public record RequestStartLine(String method, String path, String version) {
 
     private static final int STARTLINE_SIZE = 3;
 
     public static RequestStartLine from(String startLine) {
         if (startLine == null || startLine.isBlank()) {
-            throw new IllegalArgumentException("Start line is null or empty");
+            throw new BadRequestException("Start line is null or empty");
         }
 
         final String[] tokens = startLine.split(" ");
         if (tokens.length != STARTLINE_SIZE) {
-            throw new IllegalArgumentException("Invalid start line: " + startLine);
+            throw new BadRequestException("Invalid start line: " + startLine);
         }
 
         final String method = tokens[0];

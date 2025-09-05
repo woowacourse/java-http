@@ -1,7 +1,5 @@
 package org.apache.catalina.connector;
 
-import com.techcourse.servlet.LoginServlet;
-import com.techcourse.servlet.StaticResourceServlet;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -22,23 +20,14 @@ public class Connector implements Runnable {
     private final ServletContainer container;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final ServletContainer container) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, container);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final ServletContainer container) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.container = createServletContainer();
+        this.container = container;
         this.stopped = false;
-    }
-
-    private ServletContainer createServletContainer() {
-        final ServletContainer container = new ServletContainer();
-
-        container.addServlet("/login", new LoginServlet());
-        container.addServlet("/*", new StaticResourceServlet());
-
-        return container;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -84,7 +73,6 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
-        container.destroy();
         try {
             serverSocket.close();
         } catch (final IOException e) {

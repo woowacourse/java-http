@@ -16,7 +16,7 @@ import org.apache.coyote.HttpResponse;
 public class DefaultHandler implements HttpRequestHandler {
 
     private static final String STATIC_FILE_PATH_PREFIX = "static";
-    private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+    private static final String DEFAULT_CONTENT_TYPE = "text/plain";
 
     @Override
     public void handleGet(HttpRequest request, HttpResponse response) {

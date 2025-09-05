@@ -20,4 +20,8 @@ public enum HttpProtocolVersion {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 버전입니다. " + target));
     }
+
+    public String getVersion() {
+        return version;
+    }
 }

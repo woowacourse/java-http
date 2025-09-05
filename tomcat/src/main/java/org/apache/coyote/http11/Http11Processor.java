@@ -64,8 +64,8 @@ public class Http11Processor implements Runnable, Processor {
                 .method(parser.parseHttpMethod(startLine))
                 .uri(parser.parseRequestUri(startLine))
                 .protocolVersion(parser.parseHttpVersion(startLine))
-                .headers(HttpHeaders.parseHeaders(headerLines))
-                .body(getBodyIfExists(inputStream, HttpHeaders.parseHeaders(headerLines)))
+                .headers(parser.parseHeaders(headerLines))
+                .body(getBodyIfExists(inputStream, parser.parseHeaders(headerLines)))
                 .build();
     }
 

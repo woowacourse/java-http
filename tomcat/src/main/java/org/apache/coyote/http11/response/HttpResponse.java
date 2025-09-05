@@ -1,17 +1,27 @@
 package org.apache.coyote.http11.response;
 
-public record HttpResponse() {
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpProtocolVersion;
+import org.apache.coyote.http11.response.util.HttpResponseFormatter;
+
+public record HttpResponse(
+        HttpProtocolVersion protocolVersion,
+        HttpStatus status,
+        HttpHeaders headers,
+        String body
+) {
+
+    HttpResponse(
+            HttpProtocolVersion protocolVersion,
+            HttpStatus status,
+            HttpHeaders headers
+    ) {
+        this(protocolVersion, status, headers, null);
+    }
 
     public byte[] getBytes() {
-        final String responseBody = "Hello world!";
+        final HttpResponseFormatter formatter = HttpResponseFormatter.getInstance();
 
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
-        return response.getBytes();
+        return formatter.format(this).getBytes();
     }
 }

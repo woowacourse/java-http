@@ -1,10 +1,18 @@
 package org.apache.coyote.http11.handler;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Function;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class DefaultHttpHandler implements HttpHandler {
 
@@ -37,11 +45,46 @@ public class DefaultHttpHandler implements HttpHandler {
     }
 
     private HttpResponse handleGetRoot(final HttpRequest request) {
-        return new HttpResponse();
+        final String body = "Hello world!";
+        final HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Type", "text/html;charset=utf-8 ");
+        headers.addHeader("Content-Length", body.getBytes().length + " ");
+
+        return new HttpResponse(
+                request.protocolVersion(),
+                HttpStatus.OK,
+                headers,
+                body
+        );
     }
 
     private HttpResponse handleGetIndexHtml(final HttpRequest request) {
-        return new HttpResponse();
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        if (resource == null) {
+            throw new IllegalStateException("index.html 파일을 찾을 수 없습니다.");
+        }
+        final Path path = new File(resource.getFile()).toPath();
+        String body = "";
+        try {
+            body = Files.readString(path, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return new HttpResponse(
+                    request.protocolVersion(),
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    new HttpHeaders(),
+                    "500 Internal Server Error"
+            );
+        }
+        final HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Type", "text/html;charset=utf-8 ");
+        headers.addHeader("Content-Length", body.getBytes().length + " ");
+
+        return new HttpResponse(
+                request.protocolVersion(),
+                HttpStatus.OK,
+                headers,
+                body
+        );
     }
 
     public static DefaultHttpHandler getInstance() {

@@ -48,6 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             if (httpMethod.equals("GET") && endPoint.equals("/")) {
                 final String response = createHtmlResponse("Hello world!");
                 writeAndFlush(outputStream, response);
+                return;
             }
 
             if (httpMethod.equals("GET") && endPoint.equals("/css/styles.css")) {

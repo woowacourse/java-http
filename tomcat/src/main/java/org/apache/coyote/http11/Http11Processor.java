@@ -67,16 +67,18 @@ public class Http11Processor implements Runnable, Processor {
     private void serveStaticFile(String requestPath, OutputStream outputStream) throws IOException {
         final var path = getPath(requestPath);
         final var responseBody = Files.readString(path);
-        final var response = getResponse(responseBody, requestPath, path);
+        final var response = getResponse(responseBody, path);
 
         sendResponse(outputStream, response);
     }
 
     private Path getPath(String requestPath) {
-        return Path.of(
-                Objects.requireNonNull(
-                        getClass().getClassLoader().getResource("static/" + requestPath)).getPath()
-        );
+        var resource = getClass().getClassLoader().getResource("static/" + requestPath);
+        return Path.of(Objects.requireNonNullElseGet(
+                resource, () -> Objects.requireNonNull(
+                        getClass().getClassLoader().getResource("static/404.html")
+                )
+        ).getPath());
     }
 
     private String getResponse() {
@@ -89,7 +91,10 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String getResponse(String responseBody, String requestPath, Path path) throws IOException {
+    private String getResponse(String responseBody, Path path) throws IOException {
+        if (path.toAbsolutePath().endsWith("404.html")) {
+            responseBody = "404 NOT FOUND";
+        }
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
@@ -101,18 +106,6 @@ public class Http11Processor implements Runnable, Processor {
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
-    }
-
-    private boolean isCss(String requestPath) {
-        return requestPath.endsWith("css");
-    }
-
-    private boolean isHtml(String requestPath) {
-        return requestPath.endsWith("html") || requestPath.endsWith("/");
-    }
-
-    private boolean isJs(String requestPath) {
-        return requestPath.endsWith("js");
     }
 
     private boolean isGetMethod(String method) {

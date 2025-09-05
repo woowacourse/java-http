@@ -7,6 +7,7 @@ import java.util.Map;
 public record Http11Request(
         String method,
         String path,
+        //Todo: header 일급객체 분리 [2025-09-05 17:22:13]
         LinkedHashMap<String, String> headers,
         byte[] body
 ) {

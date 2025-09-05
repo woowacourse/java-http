@@ -11,7 +11,7 @@ public class Http11Response {
     private byte[] body;
 
     public Http11Response(String resourcePath) {
-        this.statusCode = 200; // 기본값
+        this.statusCode = 200;
         this.headers = new LinkedHashMap<>();
         this.body = new byte[0];
         this.resourcePath = resourcePath;

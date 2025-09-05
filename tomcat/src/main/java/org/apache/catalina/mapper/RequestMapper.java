@@ -27,6 +27,7 @@ public class RequestMapper {
     }
 
     private void initializeControllers() {
+        //Todo: application 의존성 분리하기 [2025-09-05 17:17:18]
         controllerMap.put("/login", new UserController());
     }
 }

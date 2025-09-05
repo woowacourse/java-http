@@ -1,11 +1,10 @@
 package org.apache.coyote.http11;
 
-import ch.qos.logback.core.joran.spi.NoAutoStartUtil;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,79 +39,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            Map<String, String> header = getHeader(inputStream);
 
-            String header = reader.readLine();
+            String requestResource = header.get("resource");
 
-            if (header == null || header.isBlank()) { return; }
-
-            String[] split = header.split(" ");
-
-            String requestResource = split[1];
-
-            String body = null;
-
-            String response = null;
-
-            System.out.println(header);
-
-            if (requestResource.endsWith(".css")) {
-                String resourcePath = "./static" + requestResource;
-                URL systemResource = ClassLoader.getSystemResource(resourcePath);
-                Path path = Path.of(systemResource.getPath());
-                final var responseBody = Files.readAllBytes(path);
-                body = new String(responseBody);
-
-                String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
-                String contentType = String.join("/","text",extension);
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + body.getBytes().length + " ",
-                        "",
-                        body);
-            }
-
-            if (requestResource.endsWith(".html")) {
-                String resourcePath = "./static" + requestResource;
-                URL systemResource = ClassLoader.getSystemResource(resourcePath);
-                Path path = Path.of(systemResource.getPath());
-                final var responseBody = Files.readAllBytes(path);
-                body = new String(responseBody);
-
-                String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
-
-                String contentType = String.join("/","text",extension);
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + body.getBytes().length + " ",
-                        "",
-                        body);
-            }
-
-            if (requestResource.endsWith(".js")) {
-                String resourcePath = "./static" + requestResource;
-                URL systemResource = ClassLoader.getSystemResource(resourcePath);
-                Path path = Path.of(systemResource.getPath());
-                final var responseBody = Files.readAllBytes(path);
-                body = new String(responseBody);
-
-                String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
-                String contentType = String.join("/","text",extension);
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + body.getBytes().length + " ",
-                        "",
-                        body);
-            }
+            String response;
 
             if (requestResource.startsWith("/login")) {
-
                 int index = requestResource.indexOf("?");
-                String resource = requestResource.substring(0, index);
+                String matchedResource = requestResource.substring(0, index) + ".html";
                 String queryString = requestResource.substring(index + 1);
 
                 Map<String, String> queryParameters = new HashMap<>();
@@ -122,40 +57,14 @@ public class Http11Processor implements Runnable, Processor {
                     String value = parameter.split("=")[1];
                     queryParameters.put(key, value);
                 }
-
-
-                String resourcePath = "./static" + resource + ".html";
-                URL systemResource = ClassLoader.getSystemResource(resourcePath);
-                Path path = Path.of(systemResource.getPath());
-                final var responseBody = Files.readAllBytes(path);
-                body = new String(responseBody);
-
-                String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
-                String contentType = String.join("/","text",extension);
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + body.getBytes().length + " ",
-                        "",
-                        body);
+                response = getResponse(matchedResource);
 
                 User user = InMemoryUserRepository.findByAccount(queryParameters.get("account")).orElse(null);
                 if (user != null) {
                     System.out.println(user);
                 }
-            }
-
-
-
-            if ("/".equals(requestResource)) {
-                body = "Hello world!";
-
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + body.getBytes().length + " ",
-                        "",
-                        body);
+            } else {
+                response = getResponse(requestResource);
             }
 
             outputStream.write(response.getBytes());
@@ -163,5 +72,66 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> getHeader(InputStream inputStream) throws IOException {
+
+        Map<String, String> httpHeader = new HashMap<>();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String requestLine = reader.readLine();
+
+        if (requestLine == null || requestLine.isBlank()) {
+            throw new IOException("request is empty");
+        }
+
+        String[] requestLineSplit = requestLine.split(" ");
+        String method = requestLineSplit[0];
+        httpHeader.put("method", method);
+        String resource = requestLineSplit[1];
+        httpHeader.put("resource", resource);
+        String version = requestLineSplit[2];
+        httpHeader.put("version", version);
+
+        String line;
+        while(!"".equals((line = reader.readLine()))) {
+            String[] split = line.split(":");
+            String fieldName = split[0];
+            String value = split[1];
+            httpHeader.put(fieldName, value);
+        }
+
+        return httpHeader;
+    }
+
+    private String getResponse(String uri) throws IOException {
+        if ("/".equals(uri)) {
+            String body = null;
+            body = "Hello world!";
+            String contentType = "text/html";
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " ",
+                    "",
+                    body);
+        }
+
+        String resourcePath = "./static" + uri;
+        URL systemResource = ClassLoader.getSystemResource(resourcePath);
+        Path path = Path.of(systemResource.getPath());
+        final var responseBody = Files.readAllBytes(path);
+
+        String body = new String(responseBody);
+        String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
+        String contentType = String.join("/","text",extension);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
     }
 }

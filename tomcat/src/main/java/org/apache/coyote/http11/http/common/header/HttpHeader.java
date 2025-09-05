@@ -17,7 +17,7 @@ public class HttpHeader {
     }
 
     private HttpHeader(final Map<String, String> httpHeaderInfo) {
-        this.httpHeaderInfo = httpHeaderInfo;
+        this.httpHeaderInfo = Map.copyOf(httpHeaderInfo);
     }
 
     public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
@@ -51,12 +51,12 @@ public class HttpHeader {
     }
 
     private Map<String, String> createHeaderInfo(final BufferedReader bufferedReader) throws IOException {
-        List<String> headerLines = readHeaderLines(bufferedReader);
+        final List<String> headerLines = readHeaderLines(bufferedReader);
         return parseHeaderLines(headerLines);
     }
 
     private List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
+        final List<String> headerLines = new ArrayList<>();
         String headerLine = null;
         while ((headerLine = bufferedReader.readLine()) != null) {
             if ("".equals(headerLine)) {
@@ -69,12 +69,12 @@ public class HttpHeader {
 
     private Map<String, String> parseHeaderLines(final List<String> httpHeaderLines) {
         final Map<String, String> httpHeaderInfo = new HashMap<>();
-        for (String requestPayload : httpHeaderLines) {
-            int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
+        for (final String requestPayload : httpHeaderLines) {
+            final int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
             validateSplitFormat(requestPayload, headerSplitIndex);
 
-            String headerKey = clean(requestPayload.substring(0, headerSplitIndex));
-            String headerValue = clean(requestPayload.substring(headerSplitIndex + 1));
+            final String headerKey = clean(requestPayload.substring(0, headerSplitIndex));
+            final String headerValue = requestPayload.substring(headerSplitIndex + 1);
 
             validateHeaderFormat(headerKey, headerValue);
             httpHeaderInfo.put(headerKey, headerValue);

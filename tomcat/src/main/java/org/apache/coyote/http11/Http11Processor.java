@@ -3,14 +3,16 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String RESOURCE_PATH = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -38,62 +41,53 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream)))
+             final var outputStream = connection.getOutputStream())
         {
-            final String line = br.readLine(); //GET /index.html HTTP/1.1
-            String uri = parseUri(line); //index.html, /login?...
+            final Http11Request http11Request = new Http11Request(extractRequestHeaders(inputStream));
+            final Http11Response http11Response = handleRequest(http11Request);
 
-            String path = extractPath(uri); //index.html, /login
-            String query = extractQuery(uri);
-            String resourcePath;
-
-            if (path.equals("/login")) {
-                resourcePath = "static/login.html"; // 항상 .html 붙이기
-            }
-            else {
-                resourcePath = "static" + path; // 그 외 정적 파일
-            }
-
-            URL url = getClass().getClassLoader().getResource(resourcePath);
-            if (url == null) {
-                url = getClass().getClassLoader().getResource("static/404.html");
-            }
-
-            String responseBody;
-            if (uri.equals("/")) {
-                responseBody = "Hello world!";
-            }
-            else if (path.equals("/login") && url != null) {
-                Path loginPath = Paths.get(url.toURI());
-                responseBody = Files.readString(loginPath);
-                parseQueryString(query);
-            }
-            else if (path.equals("/index.html") && url != null) {
-                Path rootPath = Paths.get(url.toURI());
-                responseBody = Files.readString(rootPath);
-            }
-            else {
-                Path notFoundPath = Paths.get(url.toURI());
-                responseBody = Files.readString(notFoundPath);
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(path),
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(http11Response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void parseQueryString(final String query) {
-        //user : USER{id=1, account='gugu', email='dfad@gmail.com', password='password'}
+    private Http11Response handleRequest(final Http11Request request) throws URISyntaxException, IOException {
+        final String uri = request.getUri();
+        final String path = extractPath(uri);
+        final URL url = getURL(path);
+        final String contentType = extractContentType(path);
+        final String responseBody;
+
+        if (uri.equals("/")) {
+            responseBody = "Hello world!";
+            return Http11Response.ok(contentType, responseBody);
+        }
+
+        if (url == null) {
+            responseBody = Files.readString(Paths.get(getClass().getClassLoader().getResource("static/404.html").toURI()));
+            return Http11Response.notFound(contentType, responseBody);
+        }
+
+        responseBody = Files.readString(Paths.get(url.toURI()));
+        return Http11Response.ok(contentType, responseBody);
+    }
+
+    private List<String> extractRequestHeaders(final InputStream inputStream) throws IOException{
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        List<String> requestHeaders = new ArrayList<>();
+        String requestLine;
+        while ((requestLine = bufferedReader.readLine()) != null && !requestLine.isEmpty()) {
+            requestHeaders.add(requestLine);
+        }
+
+        return requestHeaders;
+    }
+
+    private void parseQueryString(final String uri) {
+        final String query = extractQuery(uri);
         if (query == null) {
             return;
         }
@@ -109,27 +103,28 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String account = params.get("account");
+        String password = params.get("password");
 
         InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
                 .ifPresentOrElse(
                         user -> log.info("user : {}", user),
-                        () -> log.warn("account에 일치하는 user가 존재하지 않습니다.")
+                        () -> log.warn("계정과 비밀번호에 해당하는 user가 존재하지 않습니다.")
                 );
     }
 
-    private String parseUri(final String requestLine) {
-        String[] requestValues = requestLine.split(" ");
-
-        return requestValues[1]; // /index.html or /login?account=...
+    private URL getURL(final String path) {
+        return getClass().getClassLoader().getResource(path);
     }
 
     private String extractPath(final String uri) {
         int index = uri.indexOf("?");
         if (index == -1) {
-            return uri;
+            return RESOURCE_PATH + uri;
         }
 
-        return uri.substring(0, index);
+        parseQueryString(uri);
+        return RESOURCE_PATH + uri.substring(0, index) + ".html";
     }
 
     private String extractQuery(final String uri) {
@@ -141,11 +136,11 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(index + 1);
     }
 
-    private String getContentType(final String requestPath) {
+    private String extractContentType(final String requestPath) {
         if (requestPath.endsWith(".css")) {
-            return "text/css;charset=utf-8 ";
+            return "text/css;charset=utf-8";
         }
 
-        return "text/html;charset=utf-8 ";
+        return "text/html;charset=utf-8";
     }
 }

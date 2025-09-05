@@ -1,9 +1,11 @@
 package org.apache.http;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.exception.RequestProcessingException;
 
 public class HttpResponse {
 
@@ -17,13 +19,11 @@ public class HttpResponse {
     }
 
     public String getMessage() {
-        return String.join(
-                "\r\n",
-                makeStartLine(),
-                makeHeaderLines(),
-                "",
-                body
-        );
+        validateCanMakeMessage();
+        if (body == null || body.isEmpty()) {
+            return String.join("\r\n", makeStartLine(), makeHeaderLines(), "", body);
+        }
+        return String.join("\r\n", makeStartLine(), makeHeaderLines(), "", body);
     }
 
     public void setHttpVersion(HttpVersion httpVersion) {
@@ -73,7 +73,13 @@ public class HttpResponse {
             String value = header.get(key);
             headerLines.add(key + ": " + value + " ");
         }
-        headerLines.add("Content-Length: " + body.getBytes().length + " ");
+        headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
         return String.join("\r\n", headerLines);
+    }
+
+    private void validateCanMakeMessage() {
+        if (httpVersion == null || statusCode == null) {
+            throw new RequestProcessingException("주요 응답 필드가 비어있어 응답 메세지를 생성할 수 없습니다.");
+        }
     }
 }

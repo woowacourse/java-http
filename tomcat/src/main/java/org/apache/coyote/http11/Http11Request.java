@@ -53,9 +53,17 @@ public class Http11Request {
             requestHeader.append(line).append("\r\n");
         }
         header = requestHeader.toString();
-        String[] requestConditions = requestHeader.toString().split("\r\n");
+
+        String[] requestConditions = header.split("\r\n");
+        if (requestConditions.length < 1) {
+            throw new IOException("Invalid HTTP request: empty header");
+        }
+
         firstLine = requestConditions[0];
         firstLineConditions = firstLine.split(" ");
+        if (firstLineConditions.length < 3) {
+            throw new IOException("Invalid HTTP request line: " + firstLine);
+        }
 
         extractUri();
     }

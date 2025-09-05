@@ -2,6 +2,7 @@ package org.apache.coyote.http11.parser;
 
 import org.apache.coyote.http11.service.HttpServices;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class Http11RequestServiceProcessor implements HttpParser {
@@ -13,7 +14,7 @@ public class Http11RequestServiceProcessor implements HttpParser {
     }
 
     @Override
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) {
+    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
         return httpServices.processServiceRequest(contentPath, query);
     }
 

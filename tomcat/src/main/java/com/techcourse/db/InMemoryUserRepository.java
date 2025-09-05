@@ -19,8 +19,14 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public static User findByAccountAndPassword(String account, String password) {
+        Optional<User> user = Optional.ofNullable(database.get(account));
+
+        User findUser = user.orElseThrow(() -> new IllegalArgumentException("인증에 실패하였습니다."));
+        if (findUser.checkPassword(password)) {
+            return findUser;
+        }
+        throw new IllegalArgumentException("인증에 실패하였습니다.");
     }
 
     private InMemoryUserRepository() {

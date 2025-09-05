@@ -115,7 +115,6 @@ class IOStreamTest {
             try (outputStream) {
 
             }
-            outputStream.close();
 
             verify(outputStream, atLeastOnce()).close();
         }

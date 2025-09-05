@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.apache.coyote.ContentTypeSearcher;
 import org.apache.coyote.FileManager;
 import org.apache.coyote.http11.Http11Request;
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginHandler {
 
-    private final static String STATIC_ROOT = "static";
+    private static final String STATIC_ROOT = "static";
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
 
@@ -33,8 +34,9 @@ public class LoginHandler {
 
             if (reader.getQueryParams().size() > 0) {
                 String account = reader.getQueryParamValue("account");
-
-                log.info("User:{}", InMemoryUserRepository.findByAccount(account).orElse(null).toString());
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("user not exist"));
+                log.info("User:{}", user.toString());
             }
 
             String contentType = ContentTypeSearcher.getContentTypeBy("/login.html");

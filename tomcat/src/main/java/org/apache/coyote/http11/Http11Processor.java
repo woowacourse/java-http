@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final var requestLine = reader.readLine();
-            final var requestPath = extractRequestPathFrom(requestLine);
+            final var requestPath = extractRequestPath(requestLine);
             final Map<String, String> queryParameters = extractQueryParameters(requestLine);
 
             if(requestPath.equals("login")) {
@@ -49,10 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "Hello world!";
             if (!requestPath.isBlank()) {
-                var resource = getClass().getClassLoader().getResource("static/" + requestPath);
-                if(resource == null) {
-                    resource = getClass().getClassLoader().getResource("static/" + requestPath + ".html");
-                }
+                var resource = getResourceFrom(requestPath);
                 if (resource != null) {
                     var path = Paths.get(resource.toURI());
                     responseBody = Files.readString(path);
@@ -64,12 +62,7 @@ public class Http11Processor implements Runnable, Processor {
                 mimeType = "text/css";
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + mimeType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = buildHttpResponse(mimeType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -78,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestPathFrom(final String requestLine) {
+    private String extractRequestPath(final String requestLine) {
         if (requestLine == null || requestLine.isBlank()) {
             return "";
         }
@@ -123,5 +116,22 @@ public class Http11Processor implements Runnable, Processor {
         if(user.checkPassword(password)) {
             System.out.println("user: " + user);
         }
+    }
+
+    private URL getResourceFrom(String requestPath) {
+        var resource = getClass().getClassLoader().getResource("static/" + requestPath);
+        if(resource == null) {
+            resource = getClass().getClassLoader().getResource("static/" + requestPath + ".html");
+        }
+        return resource;
+    }
+
+    private String buildHttpResponse(String mimeType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + mimeType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

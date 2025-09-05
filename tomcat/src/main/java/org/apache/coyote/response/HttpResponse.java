@@ -1,5 +1,8 @@
 package org.apache.coyote.response;
 
+import org.apache.coyote.response.responseHeader.ResponseHeader;
+import org.apache.coyote.response.responseLine.ResponseLine;
+
 public class HttpResponse {
 
     private final ResponseLine responseLine;

@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.response.responseLine;
 
 public class ResponseLine {
 

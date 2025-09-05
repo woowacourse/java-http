@@ -3,10 +3,10 @@ package org.apache.catalina.servletContainer;
 import java.util.Optional;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.response.ContentType;
+import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
-import org.apache.coyote.response.HttpStatus;
+import org.apache.coyote.response.responseLine.HttpStatus;
 
 public class ServletContainer {
 

@@ -9,10 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
-import org.apache.coyote.response.ContentType;
+import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
-import org.apache.coyote.response.HttpStatus;
+import org.apache.coyote.response.responseLine.HttpStatus;
 
 public class LoginServlet extends HttpServlet{
 

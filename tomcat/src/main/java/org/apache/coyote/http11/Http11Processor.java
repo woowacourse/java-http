@@ -5,19 +5,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.ResourceLoader;
+import org.apache.coyote.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String HEADER_DELIMITER = ": ";
 
     private final Socket connection;
+    private final ResponseBuilder responseBuilder;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.responseBuilder = new ResponseBuilder();
     }
 
     @Override
@@ -31,17 +37,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final String requestLine = bufferedReader.readLine();
 
+            final String requestLine = bufferedReader.readLine();
             final String requestUri = extractRequestUri(requestLine);
             final var responseBody = ResourceLoader.get(requestUri);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    new String(responseBody));
+            final Map<String, String> headers = new HashMap<>();
+            while (bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                if (line.contains(HEADER_DELIMITER)) {
+                    String[] headerParts = line.split(HEADER_DELIMITER);
+                    headers.put(headerParts[0], headerParts[1]);
+                }
+            }
+
+            final var response = responseBuilder.build(requestUri, headers, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

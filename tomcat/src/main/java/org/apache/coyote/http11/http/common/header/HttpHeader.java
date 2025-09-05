@@ -96,8 +96,9 @@ public class HttpHeader {
         return httpHeaderInfo.containsKey(target);
     }
 
-    public String getValue(String target) {
-        if (!httpHeaderInfo.containsKey(target)) {
+    public String getValue(final String target) {
+        final String cleanTarget = target.trim().toLowerCase();
+        if (!httpHeaderInfo.containsKey(cleanTarget)) {
             throw new IllegalArgumentException("존재하지 않는 header입니다: %s".formatted(target));
         }
         return httpHeaderInfo.get(target);

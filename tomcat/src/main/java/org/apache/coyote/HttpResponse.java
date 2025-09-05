@@ -23,18 +23,9 @@ public class HttpResponse {
         this.charset = StandardCharsets.UTF_8;
     }
 
-    public void setBody(String body, Charset charset) {
-        this.charset = charset;
-        setBody(body);
-    }
-
     public void setBody(String body) {
         this.body = body;
         setContentLength();
-    }
-
-    public void setHeader(String name, String value) {
-        this.headers.put(name, value);
     }
 
     public void setStatus(HttpStatus status) {

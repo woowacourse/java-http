@@ -5,6 +5,7 @@ import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
+import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
 import com.techcourse.model.User;
@@ -81,18 +82,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResponseBody(final HttpRequest httpRequest) {
         if (httpRequest.isRootPath()) {
-            return new HttpResponse("1.1", HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
+            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
         }
 
         String fileName = createFileName(httpRequest.getFilePath());
         if ("/static/favicon.ico".equals(fileName)) {
-            return new HttpResponse("1.1", HttpStatus.NO_CONTENT, ContentType.IMAGE_X_ICON, "");
+            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NO_CONTENT, ContentType.IMAGE_X_ICON, "");
         }
 
         String responseBody = readResource(fileName);
-        return new HttpResponse("1.1", HttpStatus.OK, httpRequest.getContentType(), responseBody);
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, httpRequest.getContentType(), responseBody);
     }
-    
+
     private String readResource(final String fileName) {
         try {
             URL url = getClass().getResource(fileName);

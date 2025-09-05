@@ -4,8 +4,10 @@ package com.techcourse.http.common;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    NOT_FOUND(404, "Not Found"),
+   
     NO_CONTENT(204, "No Content"),
+
+    NOT_FOUND(404, "Not Found"),
     ;
 
     private final int code;
@@ -16,7 +18,7 @@ public enum HttpStatus {
         this.reasonPhrase = reasonPhrase;
     }
 
-    public String getStatusLine() {
+    public String toStatusLine() {
         return String.format("%d %s", code, reasonPhrase);
     }
 }

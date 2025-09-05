@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import lombok.RequiredArgsConstructor;
+import java.nio.charset.StandardCharsets;
 
 @RequiredArgsConstructor
 public class HttpResponse {
@@ -20,7 +21,7 @@ public class HttpResponse {
                 %s""".formatted(
                 version, statusCode, statusCode == 200 ? "OK" : "TODO",
                 contentType,
-                body.getBytes().length,
+                body.getBytes(StandardCharsets.UTF_8).length,
                 body);
     }
 }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -127,7 +128,7 @@ class IOStreamTest {
          */
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
-            byte[] bytes = {-16, -97, -92, -87};
+            final byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
@@ -178,13 +179,16 @@ class IOStreamTest {
         @Test
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);;
-
-            final byte[] actual = bufferedInputStream.readAllBytes();
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            
+            final byte[] actual;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            try (bufferedInputStream) {
+                actual = bufferedInputStream.readAllBytes();
+            }
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -206,15 +210,14 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes(StandardCharsets.UTF_8));
 
             final StringBuilder actual = new StringBuilder();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                actual.append(line).append("\r\n"); // readLine()은 개행 문자를 제거하므로 직접 다시 붙여줌
+            try (final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    actual.append(line).append("\r\n"); // readLine()은 개행 문자를 제거하므로 직접 다시 붙여줌
+                }
             }
 
             assertThat(actual).hasToString(emoji);

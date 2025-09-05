@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpResponse response = buildResponse(request);
 
-            outputStream.write(response.toString().getBytes());
+            outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
@@ -49,13 +50,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
         final StringBuilder requestBuilder = new StringBuilder();
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            requestBuilder.append(line).append("\r\n");
-            if (line.isEmpty()) {
-                break;
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                requestBuilder.append(line).append("\r\n");
+                if (line.isEmpty()) {
+                    break;
+                }
             }
         }
 

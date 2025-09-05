@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,22 +16,34 @@ public final class HttpRequestParser {
     }
 
     public static HttpRequest parse(BufferedReader reader) throws IOException {
-        final String requestLine = parseRequestLine(reader);
-        final Map<String, String> headers = parseHeaders(reader);
+        final List<String> requestLines = parseRequestLines(reader);
+        final Map<String, String> headers = parseHeaders(requestLines);
 
-        final RequestStartLine requestStartLine = RequestStartLine.from(requestLine);
-        final Map<String, String> queryStrings = parseQueryStrings(requestLine);
+        final RequestStartLine requestStartLine = RequestStartLine.from(requestLines);
+        final Map<String, String> queryStrings = parseQueryStrings(requestLines);
 
         return new HttpRequest(requestStartLine, queryStrings, headers);
     }
 
+    private static List<String> parseRequestLines(BufferedReader reader) throws IOException {
+        List<String> requestLines = new ArrayList<>();
+        String line;
 
-    private static Map<String, String> parseQueryStrings(String requestLine) {
-        if (requestLine == null || !requestLine.contains("?")) {
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            requestLines.add(line);
+        }
+
+        return requestLines;
+    }
+
+    private static Map<String, String> parseQueryStrings(List<String> requestLines) {
+        final String startLine = requestLines.getFirst();
+
+        if (startLine == null || !startLine.contains("?")) {
             return Map.of();
         }
 
-        String queryString = requestLine.split(" ")[1].split("\\?")[1];
+        String queryString = startLine.split(" ")[1].split("\\?")[1];
         String[] queries = queryString.split("&");
 
         return Stream.of(queries)
@@ -39,26 +52,11 @@ public final class HttpRequestParser {
                 .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
 
-
-    private static String parseRequestLine(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-        if (requestLine == null || requestLine.trim().isEmpty()) {
-            throw new BadRequestException("Request line is null or empty");
-        }
-        return requestLine;
-    }
-
-    private static Map<String, String> parseHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new java.util.HashMap<>();
-        String line;
-        
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] header = line.split(": ");
-            if (header.length == 2) {
-                headers.put(header[0], header[1]);
-            }
-        }
-        
-        return headers;
+    private static Map<String, String> parseHeaders(List<String> requestLines) {
+        return requestLines.stream()
+                .skip(1)
+                .map(line -> line.split(": ", 2))
+                .filter(header -> header.length == 2)
+                .collect(Collectors.toMap(header -> header[0], header -> header[1]));
     }
 }

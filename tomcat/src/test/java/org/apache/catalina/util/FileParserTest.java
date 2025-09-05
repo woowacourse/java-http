@@ -1,9 +1,10 @@
 package org.apache.catalina.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.FileNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class FileParserTest {
@@ -29,10 +30,11 @@ class FileParserTest {
                 .hasMessageContaining("Invalid path format");
     }
 
+    @DisplayName("파일이 존재하지 않으면 예외를 반환한다.")
     @Test
-    void shouldReturnFileNotFoundForNonExistentFile() throws Exception {
-        byte[] result = FileParser.loadStaticResourceByFileName("nonexistent.txt");
-        assertThat(new String(result)).isEqualTo("File not found");
+    void fileNotFoundTest1() {
+        assertThatThrownBy(() -> FileParser.loadStaticResourceByFileName("nonexistent.txt"))
+                .isInstanceOf(FileNotFoundException.class);
     }
 
     @Test

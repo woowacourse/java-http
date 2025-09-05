@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -133,7 +134,7 @@ class HttpRequestParserTest {
 
         // when & then
         assertThrows(
-                IllegalArgumentException.class,
+                BadRequestException.class,
                 () -> HttpRequestParser.parse(reader)
         );
     }

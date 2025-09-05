@@ -56,14 +56,14 @@ public class Http11Processor implements Runnable, Processor {
 
         if (httpRequest.uri().startsWith("/login")) {
             Map<String, String> queryStrings = httpRequest.getQueryStrings();
-            String account = queryStrings.get("account");
+            String account = queryStrings.getOrDefault("account", "");
 
             Optional<User> user = InMemoryUserRepository.findByAccount(account);
             log.info("{}", user.orElse(null));
 
             return new HttpResponse(
                 "html",
-                Arrays.toString(staticFileLoader.readAllFileWithUri(httpRequest.uri())) + "html"
+                new String(staticFileLoader.readAllFileWithUri(httpRequest.getPath() + ".html"))
             );
         }
 

@@ -1,11 +1,12 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 import org.apache.catalina.domain.HttpResponse;
 
 public final class HttpResponseParser {
 
-    private static final String CRLF = System.lineSeparator();
+    private static final String CRLF = "\r\n";
 
     private HttpResponseParser() {
     }
@@ -14,7 +15,7 @@ public final class HttpResponseParser {
         StringJoiner joiner = new StringJoiner(CRLF);
         joiner.add(httpResponse.getStartLine() + " ");
         joiner.add(parseHeader(httpResponse));
-        final byte[] bytes = (joiner + CRLF).getBytes();
+        final byte[] bytes = (joiner + CRLF).getBytes(StandardCharsets.US_ASCII);
 
         if (httpResponse.getBody() != null) {
             return concatBytes(bytes, httpResponse.getBody());

@@ -2,7 +2,6 @@ package org.apache.catalina.servlet;
 
 import com.http.enums.HttpStatus;
 import com.http.servlet.LoginServlet;
-import com.techcourse.exception.UncheckedServletException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,14 +30,25 @@ public final class HttpServletContainer {
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {
         final String path = request.requestStartLine().path();
         HttpStatus status = HttpStatus.OK;
-        try{
+
+        try {
             handlers.getOrDefault(path, defaultServlet).handle(request, response);
         } catch (FileNotFoundException e) {
             status = HttpStatus.NOT_FOUND;
-        } catch (IOException | UncheckedServletException e) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             status = HttpStatus.BAD_REQUEST;
+        } catch (Exception e) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        processResponse(request, response, status);
+    }
+
+    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatus status)
+            throws IOException {
+        if (status != HttpStatus.OK) {
+            ResponseProcessor.handleErrorPage(response, status);
+            return;
         }
 
         ResponseProcessor.handle(request, response, status);

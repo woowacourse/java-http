@@ -1,5 +1,6 @@
 package org.apache.catalina.util;
 
+import com.http.enums.HttpStatus;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -68,5 +69,26 @@ public final class FileParser {
         if (path.contains("..")) {
             throw new IllegalArgumentException("Invalid path format: " + path);
         }
+    }
+
+    public static byte[] loadErrorPage(HttpStatus httpStatus) throws IOException {
+        String errorPagePath = "error/" + httpStatus.getCode() + ".html";
+        
+        final URL url = FileParser.class.getClassLoader().getResource(errorPagePath);
+        
+        if (url == null) {
+            log.warn("에러 페이지를 찾을 수 없습니다. 기본 메시지를 반환합니다. errorPagePath: {}", errorPagePath);
+            return getDefaultErrorMessage(httpStatus).getBytes();
+        }
+        
+        return Files.readAllBytes(new File(url.getFile()).toPath());
+    }
+    
+    private static String getDefaultErrorMessage(HttpStatus httpStatus) {
+        return String.format(
+            "<html><body><h1>%d %s</h1></body></html>",
+            httpStatus.getCode(),
+            httpStatus.getReasonPhrase()
+        );
     }
 }

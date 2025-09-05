@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.requestInfo.RequestInfo;
+import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
@@ -20,9 +20,9 @@ public class LoginServlet extends HttpServlet{
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        RequestInfo requestInfo = httpRequest.getRequestInfo();
+        RequestLine requestLine = httpRequest.getRequestLine();
 
-        return requestInfo.isStartsWith(LOGIN_PATH);
+        return requestLine.isStartsWith(LOGIN_PATH);
     }
 
     @Override

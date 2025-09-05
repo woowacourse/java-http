@@ -1,11 +1,11 @@
 package org.apache.coyote.response;
 
-public class ResponseInfo {
+public class ResponseLine {
 
     //TODO: protocol version field 추가
     private final HttpStatus httpStatus;
 
-    public ResponseInfo(final HttpStatus httpStatus) {
+    public ResponseLine(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 

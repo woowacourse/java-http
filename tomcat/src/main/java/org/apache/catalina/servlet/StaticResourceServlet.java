@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.requestInfo.RequestInfo;
+import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
@@ -26,7 +26,7 @@ public class StaticResourceServlet extends HttpServlet{
     @Override
     public HttpResponse doGet(final HttpRequest httpRequest) {
         String resource = findResource(httpRequest.getRequestPath());
-        ContentType contentType = findResourceExtension(httpRequest.getRequestInfo());
+        ContentType contentType = findResourceExtension(httpRequest.getRequestLine());
 
         return HttpResponseGenerator.generate(resource, contentType, HttpStatus.OK);
     }
@@ -36,8 +36,8 @@ public class StaticResourceServlet extends HttpServlet{
         return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    private ContentType findResourceExtension(final RequestInfo requestInfo) {
-        String extension = requestInfo.getRequestPathExtension();
+    private ContentType findResourceExtension(final RequestLine requestLine) {
+        String extension = requestLine.getRequestPathExtension();
         return ContentType.findContentType(extension);
     }
 

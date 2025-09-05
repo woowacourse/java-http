@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet;
 
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.requestInfo.RequestInfo;
-import org.apache.coyote.request.requestInfo.RequestMethod;
+import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestMethod;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseGenerator;
@@ -12,12 +12,12 @@ public abstract class HttpServlet implements Servlet {
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest) {
-        final RequestInfo requestInfo = httpRequest.getRequestInfo();
+        final RequestLine requestLine = httpRequest.getRequestLine();
 
-        if(requestInfo.isSame(RequestMethod.GET)){
+        if(requestLine.isSame(RequestMethod.GET)){
             return doGet(httpRequest);
         }
-        if(requestInfo.isSame(RequestMethod.POST)){
+        if(requestLine.isSame(RequestMethod.POST)){
             return doPost(httpRequest);
         }
 

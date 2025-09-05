@@ -2,19 +2,19 @@ package org.apache.coyote.response;
 
 public class HttpResponse {
 
-    private final ResponseInfo responseInfo;
+    private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
-    public HttpResponse(final ResponseInfo responseInfo, final ResponseHeader responseHeader, final ResponseBody responseBody) {
-        this.responseInfo = responseInfo;
+    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader, final ResponseBody responseBody) {
+        this.responseLine = responseLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
     public byte[] combine() {
         String response = String.join("\r\n",
-                responseInfo.toCombine() + " ",
+                responseLine.toCombine() + " ",
                 responseHeader.toCombine(),
                 "",
                 responseBody.getBody());

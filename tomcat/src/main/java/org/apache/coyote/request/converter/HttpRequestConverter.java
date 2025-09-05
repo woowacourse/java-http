@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestHeader;
-import org.apache.coyote.request.requestInfo.RequestInfo;
+import org.apache.coyote.request.requestLine.RequestLine;
 
 public class HttpRequestConverter {
 
@@ -15,11 +15,11 @@ public class HttpRequestConverter {
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        final RequestInfo requestInfo = new RequestInfo(bufferedReader.readLine());
+        final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
         final RequestHeader requestHeader = toRequestHeader(bufferedReader);
         final RequestBody requestBody = toRequestBody(bufferedReader);
 
-        return new HttpRequest(requestInfo, requestHeader, requestBody);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     private static RequestHeader toRequestHeader(final BufferedReader bufferedReader) throws IOException {

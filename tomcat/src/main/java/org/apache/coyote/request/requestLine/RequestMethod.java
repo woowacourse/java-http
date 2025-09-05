@@ -1,4 +1,4 @@
-package org.apache.coyote.request.requestInfo;
+package org.apache.coyote.request.requestLine;
 
 import java.util.Arrays;
 

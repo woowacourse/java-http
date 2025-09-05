@@ -1,32 +1,32 @@
-package org.apache.coyote.request.requestInfo;
+package org.apache.coyote.request.requestLine;
 
 
 import java.util.List;
 
-public class RequestInfo {
+public class RequestLine {
 
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_PATH_INDEX = 1;
     private static final int PROTOCOL_VERSION_INDEX = 2;
     
-    private static final int REQUEST_INFO_SIZE = 3;
-    private static final String REQUEST_INFO_SEPARATOR = " ";
+    private static final int REQUEST_LINE_SIZE = 3;
+    private static final String REQUEST_LINE_SEPARATOR = " ";
 
     private final RequestMethod requestMethod;
     private final String requestPath; //todo: requestPath, protocolVersion 객체 만들기
     private final String protocolVersion;
 
-    public RequestInfo(final String requestInfo) {
-        final List<String> requestInfos = List.of(requestInfo.split(REQUEST_INFO_SEPARATOR));
-        validateRequestInfos(requestInfos);
+    public RequestLine(final String requestLine) {
+        final List<String> requestLines = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
+        validateRequestLines(requestLines);
 
-        this.requestMethod = RequestMethod.from(requestInfos.get(REQUEST_METHOD_INDEX));
-        this.requestPath = requestInfos.get(REQUEST_PATH_INDEX);
-        this.protocolVersion = requestInfos.get(PROTOCOL_VERSION_INDEX);
+        this.requestMethod = RequestMethod.from(requestLines.get(REQUEST_METHOD_INDEX));
+        this.requestPath = requestLines.get(REQUEST_PATH_INDEX);
+        this.protocolVersion = requestLines.get(PROTOCOL_VERSION_INDEX);
     }
 
-    private void validateRequestInfos(final List<String> requestInfos) {
-        if(requestInfos.size() != REQUEST_INFO_SIZE){
+    private void validateRequestLines(final List<String> requestLines) {
+        if(requestLines.size() != REQUEST_LINE_SIZE){
             throw new IllegalArgumentException("[ERROR] 요청 형식이 올바르지 않습니다");
         }
     }

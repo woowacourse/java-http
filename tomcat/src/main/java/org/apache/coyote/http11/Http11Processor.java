@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,32 +40,32 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = reader.readLine();
-            if (line == null) {
-                return;
+            List<String> lines = getInput(reader);
+
+            HttpRequest request = new HttpRequest(lines);
+
+            if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
+                UserService.checkUser(
+                        request.getQueryParameter("account"),
+                        request.getQueryParameter("password")
+                );
             }
 
-            String[] request = line.split(" ");
-            String httpMethod = request[0];
-            String uri = request[1];
-            String protocol = request[2];
-
-            final var contentType = parseContentType(uri);
-            String body;
-            if (httpMethod.equals("GET") && uri.startsWith("/login")) {
-                int index = uri.indexOf("?");
-                String path = uri.substring(0, index);
-                Map<String, String> queryString = parseQueryString(uri.substring(index + 1));
-                UserService.checkUser(queryString.get("account"), queryString.get("password"));
-
-                body = getResponseBody(path);
-            } else {
-                body = getResponseBody(uri);
-            }
+            String contentType = parseContentType(request.getPath());
+            String body = getResponseBody(request.getPath());
             response(body, contentType, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> getInput(BufferedReader reader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     private void response(String body, String contentType, OutputStream outputStream) throws IOException {
@@ -73,40 +74,26 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        String[] parameters = queryString.split("&");
-        Map<String, String> queryParameters = new HashMap<>();
-
-        Arrays.stream(parameters)
-                .forEach(parameter -> {
-                            String[] split = parameter.split("=");
-                            queryParameters.put(split[0], split[1]);
-                        }
-                );
-
-        return queryParameters;
-    }
-
-    private String getResponseBody(String path) throws IOException {
+    private String getResponseBody(String path) throws IOException, URISyntaxException {
         URL resource = getResource(path);
-        if (resource == null) {
+        if (resource == null || Files.isDirectory(Path.of(resource.toURI()))) {
             return "Hello world!";
         }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
     private URL getResource(String path) {
-        String targetPath;
+        StringBuilder targetPath = new StringBuilder("static");
 
-        if (path.equals("/")) {
-            targetPath = "/index.html";
-        } else if (path.equals("/login")) {
-            targetPath = "/login.html";
+        if (path.equals("/login")) {
+            targetPath.append("/login.html");
         } else {
-            targetPath = path;
+            targetPath.append(path);
         }
 
-        return getClass().getClassLoader().getResource("static" + targetPath);
+        return getClass()
+                .getClassLoader()
+                .getResource(targetPath.toString());
     }
 
     private String parseContentType(String uri) {

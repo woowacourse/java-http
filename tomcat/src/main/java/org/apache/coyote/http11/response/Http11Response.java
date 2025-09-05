@@ -73,6 +73,7 @@ public class Http11Response {
             case 200 -> "OK";
             case 401 -> "Unauthorized";
             case 404 -> "Not Found";
+            case 405 -> "Method Not Allowed";
             case 500 -> "Internal Server Error";
             default -> "Unknown Status";
         };

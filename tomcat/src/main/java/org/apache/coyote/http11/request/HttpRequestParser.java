@@ -10,7 +10,7 @@ public class HttpRequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
-    public Http11Request getHttpRequest(BufferedReader bufferedReader) throws IOException {
+    public Http11Request getHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final var requestLine = bufferedReader.readLine();
         if (requestLine == null) {
             return null;
@@ -18,11 +18,12 @@ public class HttpRequestParser {
         final var requestLines = requestLine.split(" ");
         final var resourcePath = requestLines[1];
         final var headers = getHeaders(bufferedReader);
+
         log.info("resourcePath: {}, header: {}", resourcePath, headers);
         return new Http11Request(requestLines[0], resourcePath, headers, null);
     }
 
-    private LinkedHashMap<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+    private LinkedHashMap<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {

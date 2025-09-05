@@ -21,7 +21,7 @@ public class RequestMapper {
         initializeControllers();
     }
 
-    public Controller findController(Http11Request request) {
+    public Controller findController(final Http11Request request) {
         log.debug("요청된 Resource Path: {}", request.parseResourcePath());
         return controllerMap.getOrDefault(request.parseResourcePath(), defaultController);
     }

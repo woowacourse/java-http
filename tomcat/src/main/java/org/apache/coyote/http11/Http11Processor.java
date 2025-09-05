@@ -17,16 +17,16 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
 
     private final Socket connection;
     private final Adapter adapter;
-    private final StaticResourceHandler staticResourceHandler;
     private final HttpRequestParser httpRequestParser;
 
     public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
         this.adapter = adapter;
-        this.staticResourceHandler = new StaticResourceHandler();
         this.httpRequestParser = new HttpRequestParser();
     }
 
@@ -40,36 +40,34 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+
             final var httpRequest = httpRequestParser.getHttpRequest(bufferedReader);
             if (httpRequest == null) {
                 return;
             }
-            final String resourcePath = httpRequest.parseResourcePath();
+            final var resourcePath = httpRequest.parseResourcePath();
             final var httpResponse = new Http11Response(resourcePath);
+            setContentType(httpResponse.getResourcePath(), httpResponse);
 
             adapter.service(httpRequest, httpResponse);
-
+            httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getBody().length));
             writeResponse(httpResponse);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void writeResponse(Http11Response httpResponse) throws IOException, URISyntaxException {
+    private static void setContentType(final String resourcePath, final Http11Response httpResponse) {
+        final var contentType = ContentType.fromPath(resourcePath);
+        httpResponse.addHeader(CONTENT_TYPE, contentType.getValue());
+    }
+
+    private void writeResponse(final Http11Response httpResponse) throws IOException, URISyntaxException {
         try (final var outputStream = connection.getOutputStream()) {
-            setContentType(httpResponse.getResourcePath(), httpResponse);
-            staticResourceHandler.handleStaticResource(httpResponse);
             outputStream.write(httpResponse.getResponseLine());
             outputStream.write(httpResponse.getHeader());
             outputStream.write(httpResponse.getBody());
             outputStream.flush();
         }
-    }
-
-    private static void setContentType(String resourcePath, Http11Response httpResponse) {
-        final var contentType = ContentType.fromPath(resourcePath);
-        httpResponse.addHeader("Content-Type", contentType.getValue());
     }
 }

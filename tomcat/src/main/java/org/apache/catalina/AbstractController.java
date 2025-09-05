@@ -10,7 +10,7 @@ public abstract class AbstractController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
-    public void service(Http11Request request, Http11Response response) {
+    public void service(final Http11Request request, final Http11Response response) {
         //Todo: HTTP 매서드 매핑 방식 수정 필요 [2025-09-05 17:18:12]
         switch (request.method()) {
             case "GET" -> toGet(request, response);
@@ -19,9 +19,11 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    public void handlingUnsupportedMethod(Http11Request request, Http11Response response) {
+    public void handlingUnsupportedMethod(final Http11Request request,
+                                          final Http11Response response
+    ) {
         log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.method(), request.path());
         response.setStatusCode(405);
-        response.setResourcePath("/405.html");
+        response.setResourcePath("/4xx.html");
     }
 }

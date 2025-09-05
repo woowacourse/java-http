@@ -13,9 +13,7 @@ public class DefaultController extends AbstractController {
 
     @Override
     public void service(Http11Request request, Http11Response response) {
-        log.warn("Path:{} 페이지를 찾을 수 없습니다", request.path());
-        response.setStatusCode(404);
-        response.setResourcePath("/404.html");
+        log.info("Path:{}", request.path());
     }
 
     @Override

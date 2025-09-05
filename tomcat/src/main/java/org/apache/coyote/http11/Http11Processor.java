@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,21 +37,101 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             var reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final var requestLine = reader.readLine();
+            final var requestPath = extractRequestPath(requestLine);
+            final Map<String, String> queryParameters = extractQueryParameters(requestLine);
 
-            final var responseBody = "Hello world!";
+            if(requestPath.equals("login")) {
+                printMemberInfo(queryParameters.get("account"), queryParameters.get("password"));
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            var responseBody = "Hello world!";
+            if (!requestPath.isBlank()) {
+                var resource = getResourceFrom(requestPath);
+                if (resource != null) {
+                    var path = Paths.get(resource.toURI());
+                    responseBody = Files.readString(path);
+                }
+            }
+
+            var mimeType = "text/html";
+            if (requestPath.endsWith(".css")) {
+                mimeType = "text/css";
+            }
+
+            final var response = buildHttpResponse(mimeType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractRequestPath(final String requestLine) {
+        if (requestLine == null || requestLine.isBlank()) {
+            return "";
+        }
+
+        final String[] parts = requestLine.split(" ");
+        if(parts.length < 2) {
+            return "";
+        }
+        String requestUri = parts[1].substring(1);
+        return requestUri.split("\\?")[0];
+    }
+
+    private Map<String, String> extractQueryParameters(String requestLine) {
+        Map<String, String> queryParameters = new HashMap<>();
+        String[] requestLineParts = requestLine.split(" ");
+        if(requestLineParts.length <2) {
+            return queryParameters;
+        }
+        String requestUri = requestLineParts[1];
+
+        String[] requestUriParts = requestUri.split("\\?");
+        if(requestUriParts.length <2) {
+            return queryParameters;
+        }
+
+        String queryString = requestUriParts[1];
+        for (String rawParam : queryString.split("&")) {
+            String[] rawParamParts = rawParam.split("=");
+            if(rawParamParts.length>=2) {
+                queryParameters.put(rawParamParts[0], rawParamParts[1]);
+            }
+        }
+        return queryParameters;
+    }
+
+    public void printMemberInfo(String account, String password) {
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if(optionalUser.isEmpty()) {
+            return;
+        }
+        User user = optionalUser.get();
+        if(user.checkPassword(password)) {
+            System.out.println("user: " + user);
+        }
+    }
+
+    private URL getResourceFrom(String requestPath) {
+        var resource = getClass().getClassLoader().getResource("static/" + requestPath);
+        if(resource == null) {
+            resource = getClass().getClassLoader().getResource("static/" + requestPath + ".html");
+        }
+        return resource;
+    }
+
+    private String buildHttpResponse(String mimeType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + mimeType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

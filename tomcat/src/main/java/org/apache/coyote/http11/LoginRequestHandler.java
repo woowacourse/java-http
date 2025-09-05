@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -18,13 +17,17 @@ public class LoginRequestHandler implements HttpRequestHandler {
 
     @Override
     public boolean support(final RequestStartLine requestStartLine) {
+        Map<String, String> queryParameters = requestStartLine.queryParameters();
+
         return requestStartLine.requestMethod() == RequestMethod.GET &&
-                requestStartLine.requestUrl().startsWith("/login");
+                requestStartLine.requestUrl().startsWith("/login") &&
+                queryParameters.containsKey("account") &&
+                queryParameters.containsKey("password");
     }
 
     @Override
     public String response(final RequestStartLine requestStartLine) {
-        Map<String, String> getQueryParameters = getQueryParameters(requestStartLine);
+        Map<String, String> getQueryParameters = requestStartLine.queryParameters();
         URL resource = getClass().getClassLoader().getResource("static/login.html");
         Path resourcePath = Path.of(resource.getPath());
         byte[] bytes = readAllBytes(resourcePath);
@@ -49,22 +52,6 @@ public class LoginRequestHandler implements HttpRequestHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Map<String, String> getQueryParameters(final RequestStartLine requestStartLine) {
-        String requestUrl = requestStartLine.requestUrl();
-        int index = requestUrl.indexOf("?");
-        String queryStrings = requestUrl.substring(index + 1);
-
-        Map<String, String> queryStringMap = new HashMap<>();
-        for (String queryString : queryStrings.split("&")) {
-            String[] strings = queryString.split("=");
-            String key = strings[0];
-            String value = strings[1];
-            queryStringMap.put(key, value);
-        }
-
-        return queryStringMap;
     }
 
     private String createHttpResponse(final byte[] bytes) {

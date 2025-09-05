@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.catalina.domain.HttpRequest;
 import org.apache.catalina.domain.HttpResponse;
-import org.apache.catalina.servlet.RequestServlet;
+import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginRequestServlet implements RequestServlet {
+public class LoginServlet implements HttpServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginRequestServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

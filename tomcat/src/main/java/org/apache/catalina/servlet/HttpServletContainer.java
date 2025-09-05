@@ -1,7 +1,7 @@
 package org.apache.catalina.servlet;
 
 import com.http.enums.HttpStatus;
-import com.http.servlet.LoginRequestServlet;
+import com.http.servlet.LoginServlet;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,16 +11,16 @@ import org.apache.catalina.domain.HttpResponse;
 import org.apache.catalina.servlet.impl.DefaultServlet;
 import org.apache.coyote.http11.ResponseProcessor;
 
-public final class RequestServletContainer {
+public final class HttpServletContainer {
 
-    private static final Map<String, RequestServlet> handlers = new HashMap<>();
-    private static final RequestServlet defaultServlet = new DefaultServlet();
+    private static final Map<String, HttpServlet> handlers = new HashMap<>();
+    private static final HttpServlet defaultServlet = new DefaultServlet();
 
-    private RequestServletContainer() {
+    private HttpServletContainer() {
     }
 
     static {
-        handlers.put("/login", new LoginRequestServlet());
+        handlers.put("/login", new LoginServlet());
     }
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {

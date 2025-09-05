@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.domain.HttpRequest;
 import org.apache.catalina.domain.HttpResponse;
-import org.apache.catalina.servlet.RequestServletContainer;
+import org.apache.catalina.servlet.HttpServletContainer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequestParser.parse(reader);
             final HttpResponse response = new HttpResponse();
 
-            RequestServletContainer.handle(request, response);
+            HttpServletContainer.handle(request, response);
 
             final byte[] output = HttpResponseParser.parse(response);
             outputStream.write(output);

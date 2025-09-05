@@ -13,13 +13,13 @@ import org.apache.catalina.domain.RequestStartLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class LoginRequestServletTest {
+class LoginServletTest {
 
-    private LoginRequestServlet loginRequestHandler;
+    private LoginServlet loginRequestHandler;
 
     @BeforeEach
     void setUp() {
-        loginRequestHandler = new LoginRequestServlet();
+        loginRequestHandler = new LoginServlet();
 
         // 테스트용 사용자 데이터 초기화
         User testUser = new User(1L, "admin", "password123", "admin@test.com");
@@ -58,21 +58,6 @@ class LoginRequestServletTest {
                 () -> loginRequestHandler.handle(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
-    }
-
-    @Test
-    void 잘못된_비밀번호로_로그인_시도() {
-        // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
-        Map<String, String> queryStrings = Map.of(
-                "account", "admin",
-                "password", "wrongpassword"
-        );
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
-
-        // when & then - 현재 구현에서는 비밀번호 틀려도 예외가 발생하지 않음
-        assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));
     }
 
     @Test

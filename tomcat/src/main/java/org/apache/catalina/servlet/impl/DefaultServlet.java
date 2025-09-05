@@ -5,10 +5,10 @@ import java.io.IOException;
 import org.apache.catalina.domain.HttpRequest;
 import org.apache.catalina.domain.HttpResponse;
 import org.apache.catalina.domain.ResponseStartLine;
-import org.apache.catalina.servlet.RequestServlet;
+import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.util.FileParser;
 
-public class DefaultServlet implements RequestServlet {
+public class DefaultServlet implements HttpServlet {
 
     @Override
     public void handle(HttpRequest request, HttpResponse response) throws IOException {

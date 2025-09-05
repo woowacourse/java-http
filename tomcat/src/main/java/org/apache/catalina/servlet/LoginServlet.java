@@ -31,7 +31,7 @@ public class LoginServlet extends HttpServlet{
 
         String resource = findResource(LOGIN_PATH + "." + ContentType.HTML);
 
-        String[] querys = requestPath.split("\\?")[1].split("&");
+        String[] querys = requestPath.split("\\?")[1].split("&"); //TODO: ArgumentResolver 구현 부분
         String[] requestParams = new String[2];
         for (String query : querys) {
             final String[] split = query.split("=");
@@ -39,7 +39,7 @@ public class LoginServlet extends HttpServlet{
             if(split[0].equals("password"))requestParams[1] = split[1];
         }
 
-        final LoginController loginController = new LoginController(new UserService()); //todo: bean...
+        final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
         loginController.login(requestParams[0], requestParams[1]);
 
         return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);

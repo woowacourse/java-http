@@ -37,7 +37,7 @@
 - ServerSocket의 동작 방식
     - serverSocket.accept()
         - 현재 연결 요청이 있으면 연결 객체인 Socket을 생성해서 리턴
-        - 현재 연결 요청이 없으면 null 리턴
+        - 현재 연결 요청이 없으면 연결이 도착할 때까지 대기
 
 ### Socket
 

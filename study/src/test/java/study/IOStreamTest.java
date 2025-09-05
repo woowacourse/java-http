@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -139,8 +140,8 @@ class IOStreamTest {
             // final String actual = new String(inputStream.readAllBytes());
             // ** 1바이트씩 읽어서 변환
             ByteArrayOutputStream result = new ByteArrayOutputStream();
-            byte data;
-            while ((data = (byte) inputStream.read()) != -1) {
+            int data;
+            while ((data = inputStream.read()) != -1) {
                 result.write(data);
             }
             final String actual = result.toString();
@@ -217,7 +218,8 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             final StringBuilder actual = new StringBuilder();
             String line;

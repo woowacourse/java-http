@@ -66,6 +66,12 @@ public class Http11Processor implements Runnable, Processor {
         if (requestTarget.endsWith(".css")) {
             return "text/css;charset=utf-8 ";
         }
+        if (requestTarget.endsWith(".js")) {
+            return "application/javascript ";
+        }
+        if (requestTarget.endsWith(".ico")) {
+            return "image/x-icon ";
+        }
         return "text/html;charset=utf-8 ";
     }
 

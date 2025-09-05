@@ -1,12 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.coyote.Processor;
+import org.apache.coyote.controller.LoginHandler;
+import org.apache.coyote.controller.StaticFileHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,16 +30,17 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final Http11Request request = new Http11Request(inputStream);
+            String path = request.getPath();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Http11Response response;
+            if (path.startsWith("/login")) {
+                response = LoginHandler.getResponse(request);
+            } else {
+                response = StaticFileHandler.getResponse(request);
+            }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

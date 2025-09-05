@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Service;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,10 +21,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final ResponseBuilder responseBuilder;
+    private final Service service;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.responseBuilder = new ResponseBuilder();
+        this.service = new Service();
     }
 
     @Override
@@ -40,7 +43,13 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestLine = bufferedReader.readLine();
             final String requestUri = extractRequestUri(requestLine);
-            final var responseBody = ResourceLoader.get(requestUri);
+
+            byte[] responseBody;
+            if (requestUri.contains("?")) {
+                final Map<String, String> queryParams = extractQueryParams(requestUri);
+                responseBody = service.findUser(queryParams);
+            }
+            responseBody = ResourceLoader.get(requestUri);
 
             final Map<String, String> headers = new HashMap<>();
             while (bufferedReader.ready()) {
@@ -62,5 +71,22 @@ public class Http11Processor implements Runnable, Processor {
 
     private String extractRequestUri(final String header) {
         return header.split(" ")[1];
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        Map<String, String> queryParams = new HashMap<>();
+
+        int index = uri.indexOf("?");
+        String queryString = uri.substring(index + 1);
+        String[] queries = queryString.split("&");
+
+        for (String query : queries) {
+            String[] keyValues = query.split("=");
+            String key = keyValues[0];
+            String value = keyValues[1];
+            queryParams.put(key, value);
+        }
+
+        return queryParams;
     }
 }

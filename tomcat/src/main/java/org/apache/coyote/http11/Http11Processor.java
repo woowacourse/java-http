@@ -114,13 +114,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponseHeader(final String uri, final String body) {
-        final var extension = uri.lastIndexOf('.') == -1 ? "" : uri.substring(uri.lastIndexOf('.'));
+        final var extension = getExtension(uri);
         final var contentType = CONTENT_TYPE_MAP.getOrDefault(extension, "text/html");
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " "
         );
+    }
+
+    private String getExtension(final String uri) {
+        if (uri.lastIndexOf('.') == -1) {
+            return "";
+        }
+        return uri.substring(uri.lastIndexOf('.'));
     }
 
     private void tryLogin(final Map<String, String> queryParams) {

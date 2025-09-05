@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String buildResponseBody(final HttpRequest request) {
-        final String path = request.getPath();
+        String path = request.getPath();
 
         if ("/".equals(path)) {
             return "Hello world!"; // 1-2 미션 요구사항은 index.html 이지만, 1-1 테스트 요구사항에 맞춤.
@@ -93,14 +93,13 @@ public class Http11Processor implements Runnable, Processor {
             handleLogin(request);
         }
 
-        String actualPath = path;
-        if (actualPath == null || actualPath.isEmpty()) {
-            actualPath = "/index";
+        if (path == null || path.isEmpty()) {
+            path = "/index";
         }
 
-        String fileName = "static" + actualPath;
+        String fileName = "static" + path;
 
-        if (!actualPath.contains(".")) {
+        if (!path.contains(".")) {
             fileName += ".html";
         }
 
@@ -122,7 +121,7 @@ public class Http11Processor implements Runnable, Processor {
         final String password = request.getQueryParam("password");
 
         if (account.isEmpty() || password.isEmpty()) {
-            log.info("로그인 실패: 계정 정보가 없습니다.");
+            log.debug("로그인 실패: 계정 정보가 없습니다.");
             return;
         }
 
@@ -131,6 +130,7 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
 
             if (user.checkPassword(password)) {
+                log.debug("로그인 성공: {}", account);
                 return;
             }
             throw new RuntimeException("비밀번호가 틀렸습니다");

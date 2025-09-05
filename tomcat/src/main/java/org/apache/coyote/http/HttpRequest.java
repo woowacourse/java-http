@@ -9,6 +9,12 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class HttpRequest {
 
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int HTTP_PATH_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final int MIN_REQUEST_LINE_PARTS = 3;
+    private static final String VERSION_KEY = "version";
+
     private final String method;
     private final String path;
     private final Map<String, String> headers;
@@ -24,54 +30,53 @@ public class HttpRequest {
             return null;
         }
 
-        final String requestLine = lines[0];
+        final String[] requestLineParts = parseRequestLine(lines[0]);
+        if (requestLineParts == null) {
+            return null;
+        }
+
+        final String method = requestLineParts[HTTP_METHOD_INDEX];
+        final String fullPath = requestLineParts[HTTP_PATH_INDEX];
+        final String version = requestLineParts[HTTP_VERSION_INDEX].replace("HTTP/", "");
+
+        final String path = extractPath(fullPath);
+        final Map<String, String> queryParams = extractQueryParams(fullPath);
+        final Map<String, String> headers = parseHeaders(lines, version);
+
+        return new HttpRequest(method, path, headers, queryParams);
+    }
+
+    private static String[] parseRequestLine(final String requestLine) {
         if (!requestLine.contains("HTTP/")) {
             return null;
         }
 
         final String[] parts = requestLine.split(" ");
-        if (parts.length < 3) {
-            return null;
-        }
+        return parts.length < MIN_REQUEST_LINE_PARTS ? null : parts;
+    }
 
-        final String method = parts[0];
-        final String fullPath = parts[1];
-        final String version = parts[2].replace("HTTP/", "");
-
-        String path = fullPath;
-        final Map<String, String> queryParams = new HashMap<>();
-        
+    private static String extractPath(final String fullPath) {
         final int queryIndex = fullPath.indexOf('?');
+        return queryIndex != -1 ? fullPath.substring(0, queryIndex) : fullPath;
+    }
+
+    private static Map<String, String> extractQueryParams(final String fullPath) {
+        final Map<String, String> queryParams = new HashMap<>();
+        final int queryIndex = fullPath.indexOf('?');
+
         if (queryIndex != -1) {
-            path = fullPath.substring(0, queryIndex);
             final String queryString = fullPath.substring(queryIndex + 1);
             parseQueryString(queryString, queryParams);
         }
 
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("version", version);
-
-        for (int i = 1; i < lines.length; i++) {
-            final String line = lines[i].trim();
-            if (line.isEmpty()) {
-                break;
-            }
-            final int colonIndex = line.indexOf(':');
-            if (colonIndex > 0) {
-                final String headerName = line.substring(0, colonIndex).trim().toLowerCase();
-                final String headerValue = line.substring(colonIndex + 1).trim();
-                headers.put(headerName, headerValue);
-            }
-        }
-
-        return new HttpRequest(method, path, headers, queryParams);
+        return queryParams;
     }
 
     private static void parseQueryString(final String queryString, final Map<String, String> queryParams) {
         if (queryString == null || queryString.isEmpty()) {
             return;
         }
-        
+
         final String[] pairs = queryString.split("&");
         for (final String pair : pairs) {
             final int equalIndex = pair.indexOf('=');
@@ -81,6 +86,31 @@ public class HttpRequest {
                 queryParams.put(key, value);
             }
         }
+    }
+
+    private static Map<String, String> parseHeaders(final String[] lines, final String version) {
+        final Map<String, String> headers = new HashMap<>();
+        headers.put(VERSION_KEY, version);
+
+        for (int i = 1; i < lines.length; i++) {
+            final String line = lines[i].trim();
+            if (line.isEmpty()) {
+                break;
+            }
+            parseHeaderLine(line, headers);
+        }
+
+        return headers;
+    }
+
+    private static void parseHeaderLine(final String line, final Map<String, String> headers) {
+        final int colonIndex = line.indexOf(':');
+        if (colonIndex <= 0) {
+            return;
+        }
+        final String headerName = line.substring(0, colonIndex).trim().toLowerCase();
+        final String headerValue = line.substring(colonIndex + 1).trim();
+        headers.put(headerName, headerValue);
     }
 
     public String getQueryParam(final String name) {
@@ -94,17 +124,26 @@ public class HttpRequest {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s %s HTTP/%s\r\n", method, path, getHeader("version")));
-
-        headers.forEach((key, value) -> {
-            if ("version".equals(key)) {
-                return;
-            }
-            sb.append(String.format("%s: %s\r\n",
-                    key.substring(0, 1).toUpperCase() + key.substring(1), value));
-        });
-
+        appendRequestLine(sb);
+        appendHeaders(sb);
         sb.append("\r\n");
         return sb.toString();
+    }
+
+    private void appendRequestLine(final StringBuilder sb) {
+        sb.append(String.format("%s %s HTTP/%s\r\n", method, path, getHeader(VERSION_KEY)));
+    }
+
+    private void appendHeaders(final StringBuilder sb) {
+        headers.forEach((key, value) -> {
+            if (VERSION_KEY.equals(key)) {
+                return;
+            }
+            sb.append(String.format("%s: %s\r\n", capitalizeFirstLetter(key), value));
+        });
+    }
+
+    private String capitalizeFirstLetter(final String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

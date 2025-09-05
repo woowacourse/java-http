@@ -10,7 +10,7 @@ public record Http11Response(int status, String contentType, int contentLength, 
     public String getResponse() {
         return String.join(
                 DELIMITER,
-                HTTP_VERSION + status + " " + StatusCode.getStatusCode(status) + " ",
+                HTTP_VERSION + status + " " + HttpStatusCode.getStatusCode(status) + " ",
                 CONTENT_TYPE + contentType,
                 CONTENT_LENGTH + contentLength + " ",
                 "",

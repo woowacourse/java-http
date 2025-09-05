@@ -48,8 +48,9 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.contains("?")) {
                 final Map<String, String> queryParams = extractQueryParams(requestUri);
                 responseBody = service.findUser(queryParams);
+            } else {
+                responseBody = ResourceLoader.get(requestUri);
             }
-            responseBody = ResourceLoader.get(requestUri);
 
             final Map<String, String> headers = new HashMap<>();
             while (bufferedReader.ready()) {
@@ -60,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var response = responseBuilder.build(requestUri, headers, responseBody);
+            final var response = responseBuilder.build(requestUri, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

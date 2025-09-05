@@ -66,7 +66,7 @@ public class RequestLine {
         final String[] params = queryString.split("&");
         final Map<String, String> queryParams = new HashMap<>();
         java.util.Arrays.stream(params)
-                .map(param -> param.split("="))
+                .map(param -> param.split("=", 2))
                 .filter(pairs -> pairs.length == 2)
                 .forEach(pairs -> queryParams.put(pairs[0], pairs[1]));
         return queryParams;

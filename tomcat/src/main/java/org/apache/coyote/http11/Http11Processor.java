@@ -47,9 +47,10 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String contentType = getContentType(requestLine);
+            String requestTarget = requestLine.split(" ")[1];
+            final ContentType contentType = ContentType.getByRequestTarget(requestTarget);
             final byte[] responseBody = getResponseBody(requestLine);
-            final String responseHeader = getResponseHeader(contentType, responseBody.length);
+            final String responseHeader = getResponseHeader(contentType.getMimeType(), responseBody.length);
 
             final var response = String.join("\r\n",
                 responseHeader, new String(responseBody, StandardCharsets.UTF_8)
@@ -60,23 +61,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getContentType(final String requestLine) {
-        String requestTarget = requestLine.split(" ")[1];
-        if (requestTarget.endsWith(".html")) {
-            return "text/html;charset=utf-8 ";
-        }
-        if (requestTarget.endsWith(".css")) {
-            return "text/css;charset=utf-8 ";
-        }
-        if (requestTarget.endsWith(".js")) {
-            return "application/javascript ";
-        }
-        if (requestTarget.endsWith(".ico")) {
-            return "image/x-icon ";
-        }
-        return "text/html;charset=utf-8 ";
     }
 
     private String getResponseHeader(final String contentType, final int contentLength) {

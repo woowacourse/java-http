@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public final class HttpRequestParser {
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequestUrl httpRequestUrl = readUri(reader);
-        Map<String, String> headers = readHeaders(reader);
+        HttpHeaders headers = readHeaders(reader);
         Map<String, String> queryParams = parseQueryString(httpRequestUrl.queryString());
         return new HttpRequest(httpRequestUrl.method(), httpRequestUrl.path(), httpRequestUrl.version(), headers, queryParams);
     }
@@ -52,11 +53,11 @@ public final class HttpRequestParser {
         return new HttpRequestUrl(method, path, version, queryString);
     }
 
-    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private static HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
         String line;
         while (hasMoreHeader(line = reader.readLine())) {
-            parseHeaderLine(line).ifPresent(e -> headers.put(e.getKey(), e.getValue()));
+            parseHeaderLine(line).ifPresent(e -> headers.add(e.getKey(), e.getValue()));
         }
         return headers;
     }

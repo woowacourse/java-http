@@ -10,12 +10,12 @@ public class ContentTypeMapper {
             "js", "application/javascript"
     );
 
-    public static String get(String path) {
-        int dotIndex = path.lastIndexOf('.');
+    public static String get(String extension) {
+        int dotIndex = extension.lastIndexOf('.');
         if (dotIndex == -1) {
             return "application/octet-stream";
         }
-        String ext = path.substring(dotIndex + 1);
+        String ext = extension.substring(dotIndex + 1);
         return TYPES.getOrDefault(ext, "application/octet-stream");
     }
 }

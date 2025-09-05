@@ -19,13 +19,18 @@ public enum ContentTypeValue {
         this.format = format;
     }
 
-    public static String findFormatByPattern(String target) {
-        String test = Arrays.stream(ContentTypeValue.values())
+    public static String findFormatByPattern(final String target) {
+        validateNull(target);
+        return Arrays.stream(ContentTypeValue.values())
                 .filter(contentTypeValue -> target.matches(contentTypeValue.pattern))
                 .findAny()
                 .orElse(HTML)
                 .format;
-        log.info("test: {}, target: {}", test, target);
-        return test;
+    }
+
+    private static void validateNull(final String targetContentTypeValue) {
+        if (targetContentTypeValue == null) {
+            throw new IllegalArgumentException("targetContentType은 null일 수 없습니다");
+        }
     }
 }

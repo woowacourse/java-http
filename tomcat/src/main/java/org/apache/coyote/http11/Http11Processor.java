@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +31,39 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            final Http11Request request = Http11RequestParser.parse(reader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            StaticResource staticResource = null;
+            if (request.getPath().startsWith("/index.html")) {
+                staticResource = StaticResourceProvider.getStaticResource("/index.html");
+            } else if (request.getPath().startsWith("/login")) {
+                staticResource = StaticResourceProvider.getStaticResource("/login.html");
+                InMemoryUserRepository.findByAccount(request.getQueryParam("account"))
+                        .ifPresent(user -> {
+                            if (user.checkPassword(request.getQueryParam("password"))) {
+                                log.debug("user: {}", user);
+                            }
+                        });
+            } else {
+                staticResource = StaticResourceProvider.getStaticResource(request.getPath());
+            }
+            final String responseHeader = getResponseHeader(staticResource);
+            outputStream.write(responseHeader.getBytes());
+            outputStream.write("\r\n".getBytes());
+            outputStream.write(staticResource.getContent());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseHeader(final StaticResource staticResource) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + staticResource.getMimeType() + " ",
+                "Content-Length: " + staticResource.getContentLength() + " ",
+                ""
+        );
     }
 }

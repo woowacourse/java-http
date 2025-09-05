@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 public class Http11Request {
 
-    private RequestLine requestLine;
-    private Headers headers;
+    private final RequestLine requestLine;
+    private final Headers headers;
 
     public Http11Request(final RequestLine requestLine, final Headers headers) {
         this.requestLine = requestLine;

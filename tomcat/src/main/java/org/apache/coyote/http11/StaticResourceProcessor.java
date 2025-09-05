@@ -25,7 +25,10 @@ public class StaticResourceProcessor {
         int queryParamIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
         String resource = requestUri;
         if (queryParamIndex != -1) {
-            resource = requestUri.substring(0, queryParamIndex) + HTML_EXTENSION;
+            resource = requestUri.substring(0, queryParamIndex);
+            if (hasNoExtension(resource) && !resource.endsWith(".html")) {
+                resource += HTML_EXTENSION;
+            }
             String queryString = requestUri.substring(queryParamIndex + 1);
             Map<String, String> queryParams = parseQueryString(queryString);
 
@@ -34,6 +37,14 @@ public class StaticResourceProcessor {
             }
         }
         return STATIC_RESOURCE_PATH + resource;
+    }
+
+    private static boolean hasNoExtension(String resource) {
+        int lastDotIndex = resource.lastIndexOf(".");
+        if (lastDotIndex == -1 || lastDotIndex == 0 || lastDotIndex == resource.length() - 1) {
+            return true;
+        }
+        return false;
     }
 
     private static Map<String, String> parseQueryString(String queryString) {

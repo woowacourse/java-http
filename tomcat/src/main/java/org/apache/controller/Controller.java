@@ -1,11 +1,11 @@
 package org.apache.controller;
 
-import org.apache.http.HttpRequestMessage;
-import org.apache.http.HttpResponseMessage;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 
 public interface Controller {
 
-    boolean isProcessableRequest(HttpRequestMessage request);
+    boolean isProcessableRequest(HttpRequest request);
 
-    void processRequest(HttpRequestMessage request, HttpResponseMessage response);
+    void processRequest(HttpRequest request, HttpResponse response);
 }

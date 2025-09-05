@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HttpResponseMessage {
+public class HttpResponse {
 
     private HttpVersion httpVersion;
     private StatusCode statusCode;
     private Map<String, String> header = new HashMap<>();
     private String body;
 
-    public HttpResponseMessage() {
+    public HttpResponse() {
     }
 
     public String getMessage() {

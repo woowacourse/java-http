@@ -13,8 +13,8 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
-import org.apache.http.HttpRequestMessage;
-import org.apache.http.HttpResponseMessage;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +24,14 @@ public class LoginController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
-    public boolean isProcessableRequest(HttpRequestMessage request) {
+    public boolean isProcessableRequest(HttpRequest request) {
         return request.getUri().equals("/login")
                 && request.checkQueryStringExistence("account")
                 && request.checkQueryStringExistence("password");
     }
 
     @Override
-    public void processRequest(HttpRequestMessage request, HttpResponseMessage response) {
+    public void processRequest(HttpRequest request, HttpResponse response) {
         try {
             URL resource = findResourceUrl("/login.html");
             if (resource == null) {

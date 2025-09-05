@@ -18,8 +18,8 @@ import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
 import org.apache.exception.SockerReadException;
 import org.apache.exception.SocketWriteException;
-import org.apache.http.HttpRequestMessage;
-import org.apache.http.HttpResponseMessage;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +49,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()) {
 
-            HttpRequestMessage request = makeRequest(inputStream);
-            HttpResponseMessage response = makeResponse();
+            HttpRequest request = makeRequest(inputStream);
+            HttpResponse response = makeResponse();
 
             Controller controller = findControllerByRequest(request);
             controller.processRequest(request, response);
@@ -58,8 +58,10 @@ public class Http11Processor implements Runnable, Processor {
             writeResponseMessage(response, outputStream);
 
         } catch (InvalidRequestException e) {
+            log.info(e.getMessage(), e);
             //TODO: 400 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
-        } catch (DataNotFoundException exception) {
+        } catch (DataNotFoundException e) {
+            log.info(e.getMessage(), e);
             //TODO: 404 예외응답을 구성해보자.  (2025-09-5, 금, 16:34)
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -67,13 +69,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestMessage makeRequest(InputStream inputStream) {
+    private HttpRequest makeRequest(InputStream inputStream) {
         List<String> message = readRequestMessage(inputStream);
-        return new HttpRequestMessage(message);
+        return new HttpRequest(message);
     }
 
-    private HttpResponseMessage makeResponse() {
-        return new HttpResponseMessage();
+    private HttpResponse makeResponse() {
+        return new HttpResponse();
     }
 
     private List<String> readRequestMessage(InputStream inputStream) {
@@ -88,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponseMessage(HttpResponseMessage response, OutputStream outputStream) {
+    private void writeResponseMessage(HttpResponse response, OutputStream outputStream) {
         String message = response.getMessage();
         try {
             outputStream.write(message.getBytes(StandardCharsets.UTF_8));
@@ -98,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Controller findControllerByRequest(HttpRequestMessage request) {
+    private Controller findControllerByRequest(HttpRequest request) {
         for (Controller controller : controllers) {
             if (controller.isProcessableRequest(request)) {
                 return controller;

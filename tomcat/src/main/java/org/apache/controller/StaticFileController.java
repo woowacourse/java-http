@@ -9,20 +9,20 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
-import org.apache.http.HttpRequestMessage;
-import org.apache.http.HttpResponseMessage;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
 
 public class StaticFileController implements Controller {
 
     @Override
-    public boolean isProcessableRequest(HttpRequestMessage request) {
+    public boolean isProcessableRequest(HttpRequest request) {
         URL resource = findResourceUrl(request.getUri());
         return resource != null;
     }
 
     @Override
-    public void processRequest(HttpRequestMessage request, HttpResponseMessage response) {
+    public void processRequest(HttpRequest request, HttpResponse response) {
         try {
             URL resource = findResourceUrl(request.getUri());
             if (resource == null) {

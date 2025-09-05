@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.exception.InvalidRequestException;
 
-public class HttpRequestMessage {
+public class HttpRequest {
 
     private final HttpMethod method;
     private final String uri;
     private final Map<String, String> queryString;
     private final HttpVersion version;
 
-    public HttpRequestMessage(List<String> message) {
+    public HttpRequest(List<String> message) {
         List<String> startLine = List.of(message.getFirst().split(" "));
         if (startLine.size() < 3) {
             throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");

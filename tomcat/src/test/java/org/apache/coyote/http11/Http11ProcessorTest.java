@@ -1,6 +1,10 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.handler.HttpRequestHandler;
+import java.util.List;
+import org.apache.coyote.http11.handler.DispatcherHandler;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -44,7 +48,11 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new HttpRequestHandler());
+        List<Handler> handlers = List.of(
+                new StaticResourceHandler("static", "index.html"),
+                new LoginHandler()
+        );
+        final Http11Processor processor = new Http11Processor(socket, new DispatcherHandler(handlers));
 
         // when
         processor.process(socket);

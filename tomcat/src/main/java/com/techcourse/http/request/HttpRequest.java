@@ -2,6 +2,7 @@ package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpVersion;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,14 +24,17 @@ public class HttpRequest {
     private final String path;
     private final RequestParams requestParams;
     private final ContentType contentType;
+    private final HttpVersion httpVersion;
 
     public HttpRequest(final String path,
                        final RequestParams requestParams,
-                       final ContentType contentType
+                       final ContentType contentType,
+                       final HttpVersion httpVersion
     ) {
         this.path = path;
         this.requestParams = requestParams;
         this.contentType = contentType;
+        this.httpVersion = httpVersion;
     }
 
     public static HttpRequest from(final String requestHeaderFirstLine) {
@@ -38,13 +42,14 @@ public class HttpRequest {
 
         String requestMethod = requestLineValues[METHOD_INDEX];
         String requestUri = requestLineValues[URI_INDEX];
-        String requestVersion = requestLineValues[VERSION_INDEX];
+        String requestProtocolVersion = requestLineValues[VERSION_INDEX];
 
         String path = extractPath(requestUri);
         RequestParams requestParams = RequestParams.from(extractQueryString(requestUri));
         ContentType contentType = extractContentType(path);
+        HttpVersion httpVersion = HttpVersion.from(requestProtocolVersion);
 
-        return new HttpRequest(path, requestParams, contentType);
+        return new HttpRequest(path, requestParams, contentType, httpVersion);
     }
 
     private static String[] splitRequestLine(final String requestLine) {

@@ -45,8 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("request headers: {}", request.getHeaders());
             log.debug("request body: {}", request.getBody());
 
-            final HandlerDispatcher handlerDispatcher
-                    = new HandlerDispatcher(List.of(
+            final HandlerDispatcher handlerDispatcher = new HandlerDispatcher(List.of(
                     new StaticResourceHandler(),
                     new ControllerHandler(new HandlerMapping())
             ));

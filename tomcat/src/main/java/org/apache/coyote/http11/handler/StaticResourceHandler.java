@@ -68,7 +68,7 @@ public class StaticResourceHandler implements Handler {
 
             final String contentType = resolveContentType(resourcePath);
             Responses.binary(outputStream, request.version(),
-                    HttpStatus.OK.code, HttpStatus.OK.reason,
+                    HttpStatus.OK.getCode(), HttpStatus.OK.getReason(),
                     contentType, bytes);
 
         } catch (IOException e) {

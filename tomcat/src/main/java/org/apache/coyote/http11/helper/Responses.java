@@ -44,10 +44,10 @@ public final class Responses {
     }
 
     public static void notFound(OutputStream out, String version) throws IOException {
-        text(out, version, HttpStatus.NOT_FOUND.code, HttpStatus.NOT_FOUND.reason, HttpStatus.NOT_FOUND.reason);
+        text(out, version, HttpStatus.NOT_FOUND.getCode(), HttpStatus.NOT_FOUND.getReason(), HttpStatus.NOT_FOUND.getReason());
     }
 
     public static void serverError(OutputStream out, String version) throws IOException {
-        text(out, version, HttpStatus.INTERNAL_SERVER_ERROR.code, HttpStatus.INTERNAL_SERVER_ERROR.reason, HttpStatus.INTERNAL_SERVER_ERROR.reason);
+        text(out, version, HttpStatus.INTERNAL_SERVER_ERROR.getCode(), HttpStatus.INTERNAL_SERVER_ERROR.getReason(), HttpStatus.INTERNAL_SERVER_ERROR.getReason());
     }
 }

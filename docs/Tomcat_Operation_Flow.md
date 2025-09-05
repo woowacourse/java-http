@@ -1,3 +1,5 @@
+## 현재 미션 톰캣의 작동 방식 정리
+
 ### 톰캣 서버 시작
 
 - Application.main()으로 톰캣 서버 프로그램 시작
@@ -26,8 +28,6 @@
     - InputStream을 통해 클라이언트의 요청 메세지를 읽고, OutputStream으로 클라이언트에게 보낼 응답 메세지를 보낸다.
     - Http11Processor 스레드가 종료되면서 요청 처리가 완료되고, tomcat.run()으로 되돌아간다.
 
----
-
 ### ServerSocket
 
 - ServerSocket 이란?
@@ -48,12 +48,5 @@
         - 클라이언트가 보낸 요청메세지를 읽는 InputStream을 불러온다.
     - socket.getOutputStream()
         - 클라이언트에게 보낼 응답메세지를 읽는 OutputStream을 불러온다.
-
----
-
-### 미션 1단계를 구현하는 방안
-
-- 간단한 if문으로 Uri마다의 동작을 수행하는 방식
-- 
 
 

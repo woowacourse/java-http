@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,13 +34,26 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final Http11Request request = Http11RequestParser.parse(reader);
 
-            final StaticResource staticResource = StaticResourceProvider.getStaticResource(request.getPath());
+            StaticResource staticResource = null;
+            if (request.getPath().startsWith("/index.html")) {
+                staticResource = StaticResourceProvider.getStaticResource("/index.html");
+            } else if (request.getPath().startsWith("/login")) {
+                staticResource = StaticResourceProvider.getStaticResource("/login.html");
+                InMemoryUserRepository.findByAccount(request.getQueryParam("account"))
+                        .ifPresent(user -> {
+                            if (user.checkPassword(request.getQueryParam("password"))) {
+                                log.debug("user: {}", user);
+                            }
+                        });
+            } else {
+                staticResource = StaticResourceProvider.getStaticResource(request.getPath());
+            }
             final String responseHeader = getResponseHeader(staticResource);
             outputStream.write(responseHeader.getBytes());
             outputStream.write("\r\n".getBytes());
             outputStream.write(staticResource.getContent());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -3,8 +3,6 @@ package org.apache.coyote.http11;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +25,7 @@ public class StaticResourceProvider {
 
     private static byte[] loadResourceContent(final String path) {
         final String resourcePath = "static" + path;
+        log.debug("resourcePath: {}", resourcePath);
 
         try {
             final URL url = StaticResourceProvider.class.getClassLoader().getResource(resourcePath);

@@ -18,6 +18,10 @@ public class Http11Request {
         return requestLine.getPath();
     }
 
+    public String getQueryParam(final String queryParamName) {
+        return requestLine.getQueryParam(queryParamName);
+    }
+
     public String getProtocol() {
         return requestLine.getProtocol();
     }

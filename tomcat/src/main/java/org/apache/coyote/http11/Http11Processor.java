@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String QUERY_STRING = "?";
     private static final String AND = "&";
     private static final String EQUAL = "=";
+    private static final String REQUEST_LINE = "requestLine";
 
     private final Socket connection;
 
@@ -41,12 +42,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            var requestHeader = findRequestHeader(inputStream);
-            System.out.println("REQUEST HEADER :" + requestHeader);
-            var headers = requestHeader.split(CRLF);
-            var firstHeader = headers[0].split(" ");
-            var method = firstHeader[0];
-            var uri = firstHeader[1];
+            var requestHeaders = findRequestHeaders(inputStream);
+            var requestLine = requestHeaders.get(REQUEST_LINE);
+            var parts = requestLine.split(" ");
+            var method = parts[0];
+            var uri = parts[1];
             int queryStartIndex = uri.indexOf(QUERY_STRING);
             String uriExceptQuery = findUriExceptQuery(queryStartIndex, uri);
             Map<String, String> queries = parseQueryString(queryStartIndex, uri);
@@ -74,14 +74,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String findRequestHeader(final InputStream inputStream) throws IOException {
+    private Map<String, String> findRequestHeaders(final InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder requestHeader = new StringBuilder();
+        Map<String, String> headers = new HashMap<>();
+        String requestLine = br.readLine();
+        headers.put(REQUEST_LINE, requestLine);
         String line;
         while ((line = br.readLine()) != null && !line.isEmpty()) {
-            requestHeader.append(line).append(CRLF);
+            String[] split = line.split(":");
+            headers.put(split[0], split[1]);
         }
-        return requestHeader.append(CRLF).toString();
+        return headers;
     }
 
     private String findResponseBody(String uri) throws IOException {

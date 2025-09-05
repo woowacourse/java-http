@@ -40,9 +40,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> lines = getInput(reader);
+            List<String> requestLines = getInput(reader);
 
-            HttpRequest request = new HttpRequest(lines);
+            HttpRequest request = new HttpRequest(requestLines);
 
             if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
                 UserService.checkUser(
@@ -68,10 +68,14 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private void response(String body, String contentType, OutputStream outputStream) throws IOException {
-        final var response = createHttpResponse(body, contentType);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private String parseContentType(String uri) {
+        if (uri.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        } else if (uri.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        } else {
+            return "text/html;charset=utf-8";
+        }
     }
 
     private String getResponseBody(String path) throws IOException, URISyntaxException {
@@ -96,14 +100,10 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource(targetPath.toString());
     }
 
-    private String parseContentType(String uri) {
-        if (uri.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        } else if (uri.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        } else {
-            return "text/html;charset=utf-8";
-        }
+    private void response(String body, String contentType, OutputStream outputStream) throws IOException {
+        final var response = createHttpResponse(body, contentType);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private String createHttpResponse(String body, String contentType) throws IOException {

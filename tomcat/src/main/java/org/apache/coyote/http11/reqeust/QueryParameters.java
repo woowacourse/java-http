@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.reqeust;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +18,8 @@ public class QueryParameters {
         return parameters.get(name);
     }
 
-    public Map<String, String> getParameters() {
-        return Collections.unmodifiableMap(parameters);
+    public boolean containsParam(final String name) {
+        return parameters.containsKey(name);
     }
 
     @Override

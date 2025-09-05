@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handle.handler.resource;
 
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpProtocolVersion;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -23,6 +24,23 @@ public class HtmlHttpHandler extends StaticResourceHandler {
 
         return new HttpResponse(
                 request.protocolVersion(),
+                HttpStatus.OK,
+                headers,
+                body
+        );
+    }
+
+    public HttpResponse handle(
+            final String uri,
+            final HttpProtocolVersion protocolVersion
+    ) {
+        final String body = readFile(uri);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Type", HTML_CONTENT_TYPE_HEADER_VALUE);
+        headers.addHeader("Content-Length", body.getBytes().length + " ");
+
+        return new HttpResponse(
+                protocolVersion,
                 HttpStatus.OK,
                 headers,
                 body

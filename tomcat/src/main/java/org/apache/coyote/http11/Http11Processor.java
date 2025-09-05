@@ -1,17 +1,20 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final List<String> ALLOWED_EXTENSIONS = List.of(".css", ".html", ".js");
 
     private final Socket connection;
 
@@ -38,25 +42,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             String responseBody = "Hello world!";
-            String contentType = "";
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final Map<String, String> requests = parseRequest(bufferedReader);
 
-            // 여기서 inputStream 을 body 로 만든다
-            final String requestBody = parseRequestHeader(inputStream);
+            final String path = requests.get("Path");
 
-            // responseBody 에서 파일 이름 파싱
-            final String fileName = parseFileName(requestBody);
-            System.out.println(fileName);
-
-            if (!fileName.isEmpty()) {
-                responseBody = readFile(fileName);
+            if (!path.equals("/")) {
+                responseBody = makeResponseBody(path);
             }
 
-            if (fileName.endsWith(".css")) {
-                contentType = "text/css;charset=utf-8 ";
-            }
-            if (fileName.endsWith(".html")) {
-                contentType = "text/html;charset=utf-8 ";
-            }
+            final String contentType = parseContentType(requests.get("Accept"));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -72,51 +67,80 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestHeader(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        StringBuilder headers = new StringBuilder();
-        String line;
+    private Map<String, String> parseRequest(BufferedReader reader) throws IOException {
+        Map<String, String> request = new HashMap<>();
 
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headers.append(line).append("\r\n");
+        String requestLine = reader.readLine();
+        if (requestLine == null) {
+            return request;
+        }
+        parseRequestLine(requestLine, request);
+
+        String headerLine;
+        while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+            parseHeader(headerLine, request);
         }
 
-        return headers.toString();
+        return request;
     }
 
-    private String parseFileName(String responseBody) {
-        String GET = "GET /";
-        String HTTP_PROTOCOL = "HTTP/1.1";
-
-        if (!responseBody.contains(GET)) {
-            return "";
+    private void parseRequestLine(String requestLine, Map<String, String> request) {
+        String[] parts = requestLine.split(" ");
+        if (parts.length >= 2) {
+            request.put("Method", parts[0]);
+            request.put("Path", parts[1]);
+            if (parts.length >= 3) {
+                request.put("Protocol", parts[2]);
+            }
         }
-
-        return Objects.requireNonNull(extractSubstring(responseBody, GET, HTTP_PROTOCOL)).trim();
     }
 
-    private String extractSubstring(String source, String wordA, String wordB) {
-        int startIndex = source.indexOf(wordA);
-        if (startIndex == -1) {
-            throw new IllegalArgumentException("파일이 없습니다.");
+    private void parseHeader(String headerLine, Map<String, String> request) {
+        final int separatorIndex = headerLine.indexOf(":");
+        if (separatorIndex != -1) {
+            String key = headerLine.substring(0, separatorIndex).trim();
+            String value = headerLine.substring(separatorIndex + 1).trim();
+            request.put(key, value);
         }
-        startIndex += wordA.length();
-
-        int endIndex = source.indexOf(wordB, startIndex);
-        if (endIndex == -1) {
-            throw new IllegalArgumentException("파일이 없습니다.");
-        }
-
-        return source.substring(startIndex, endIndex);
     }
 
-    private String readFile(String fileName) throws URISyntaxException, IOException {
+    private String makeResponseBody(String resource) throws URISyntaxException, IOException {
         final ClassLoader classLoader = getClass().getClassLoader();
-        final URL resource = classLoader.getResource("static/" + fileName);
+        String filePath = "";
 
-        final File resourceFile = new File(Objects.requireNonNull(resource).toURI());
+        if (resource.contains("?")) {
+            int questionIndex = resource.indexOf("?");
+            filePath = resource.substring(0, questionIndex) + ".html";
+
+            int startIndex = resource.indexOf("?");
+            String queryString = resource.substring(startIndex + 1);
+            String[] queryStrings = queryString.split("&");
+            Map<String, String> queryKeyAndValues = new HashMap<>();
+
+            for (String query : queryStrings) {
+                String[] queries = query.split("=");
+                queryKeyAndValues.put(queries[0], queries[1]);
+            }
+
+            String account = queryKeyAndValues.get("account");
+
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+            log.info(user.toString());
+        }
+
+        if (ALLOWED_EXTENSIONS.stream().anyMatch(resource::endsWith)) {
+            filePath = resource;
+        }
+
+        final URL url = classLoader.getResource("static" + filePath);
+        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
         final Path path = resourceFile.toPath();
 
         return new String(Files.readAllBytes(path));
+    }
+
+    private String parseContentType(String headerAccept) {
+
+        return headerAccept.split(",")[0];
     }
 }

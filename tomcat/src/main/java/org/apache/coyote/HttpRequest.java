@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class HttpRequest {
@@ -11,7 +12,7 @@ public class HttpRequest {
     public HttpRequest(String method, String path, Map<String, String> param, String protocol) {
         this.method = method;
         this.path = path;
-        this.param = param;
+        this.param = Collections.unmodifiableMap(param);
         this.protocol = protocol;
     }
 

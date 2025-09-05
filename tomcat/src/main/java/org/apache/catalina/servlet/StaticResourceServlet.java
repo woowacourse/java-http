@@ -15,12 +15,14 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 
 public class StaticResourceServlet extends HttpServlet{
 
+    private static final String STATIC_RECOURSE_PATH = "static";
+
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         String requestPath = httpRequest.getRequestPath();
 
         URL resourceUrl = StaticResourceServlet.class.getClassLoader()
-                .getResource("static"+requestPath);
+                .getResource(STATIC_RECOURSE_PATH +requestPath);
         return resourceUrl != null;
     }
 
@@ -44,7 +46,7 @@ public class StaticResourceServlet extends HttpServlet{
     }
 
     private String findResource(final String requestPath){
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource("static"+requestPath);
+        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH+requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

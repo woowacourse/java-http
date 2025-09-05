@@ -50,7 +50,7 @@ public class HttpRequest {
             return null;
         }
 
-        final String[] parts = requestLine.split(" ");
+        final String[] parts = requestLine.trim().split("\\s+");
         return parts.length < MIN_REQUEST_LINE_PARTS ? null : parts;
     }
 

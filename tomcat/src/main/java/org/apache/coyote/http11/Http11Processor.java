@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -61,6 +63,9 @@ public class Http11Processor implements Runnable, Processor {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "text/html;charset=utf-8");
                 response = responseBuilder("200", "OK", headers, responseBody);
+            } else if (httpPath.startsWith("/login")) {
+                // 로그인 요청 처리
+                response = handleLoginRequest(httpPath);
             } else {
                 // 3. 해당 경로에 파일이 있는지 검사한다
                 String filePath = httpPath.startsWith("/") ? httpPath.substring(1) : httpPath;
@@ -98,6 +103,56 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String handleLoginRequest(String httpPath) throws IOException {
+        if (httpPath.contains("?")) {
+            Map<String, String> queryParams = parseQueryString(httpPath);
+            String account = queryParams.get("account");
+            String password = queryParams.get("password");
+
+            if (account != null && password != null) {
+                User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+                if (user.checkPassword(password)) {
+                    log.info("로그인 성공: {}", user);
+                }
+            }
+        }
+
+        URL loginResource = getClass().getClassLoader().getResource("static/login.html");
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "text/html;charset=utf-8");
+
+        if (loginResource == null) {
+            String responseBody = "<html><body><h1>Login Page Not Found</h1></body></html>";
+            return responseBuilder("404", "Not Found", headers, responseBody);
+        } else {
+            Path path = new File(loginResource.getPath()).toPath();
+            List<String> contents = Files.readAllLines(path);
+            String responseBody = String.join("\n", contents);
+            return responseBuilder("200", "OK", headers, responseBody);
+        }
+    }
+
+    private Map<String, String> parseQueryString(String httpPath) {
+        Map<String, String> params = new HashMap<>();
+
+        int queryStart = httpPath.indexOf("?");
+        if (queryStart == -1) {
+            return params;
+        }
+
+        String queryString = httpPath.substring(queryStart + 1);
+        String[] pairs = queryString.split("&");
+
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return params;
     }
 
     private String responseBuilder(String httpStatusCode, String httpStatusMessage, Map<String, String> headers, String responseBody) {

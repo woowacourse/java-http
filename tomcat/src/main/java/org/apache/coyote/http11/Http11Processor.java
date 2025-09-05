@@ -76,8 +76,8 @@ public class Http11Processor implements Runnable, Processor {
                         .getResource(resourcePath);
 
                 if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
-                    contentType = getContentType(path);
                     responseBody = readResourceFile(resourceUrl);
+                    contentType = detectContentType(resourceUrl);
                 } else {
                     responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
                     contentType = "text/html;charset=utf-8 ";
@@ -129,20 +129,17 @@ public class Http11Processor implements Runnable, Processor {
         return paramMap;
     }
 
-    private String getContentType(final String path) {
-        if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8 ";
-        }
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8 ";
-        }
     private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
 
         return Files.readAllBytes(path);
     }
 
-        return "text/plain;charset=utf-8 ";
+    private String detectContentType(final URL resourceUrl) throws IOException, URISyntaxException {
+        final var path = Path.of(resourceUrl.toURI());
+        final var contentType = Files.probeContentType(path);
+
+        return contentType != null ? contentType : "text/plain;charset=utf-8 ";
     }
 
     private void writeResponse(

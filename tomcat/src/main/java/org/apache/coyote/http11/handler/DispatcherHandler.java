@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import org.apache.coyote.http11.dto.HttpRequest;
+import org.apache.coyote.http11.helper.Responses;
 
-public class HttpResponseDispatcher implements Handler {
+public class DispatcherHandler implements Handler {
 
     private final List<Handler> chain;
 
-    public HttpResponseDispatcher(List<Handler> chain) {
+    public DispatcherHandler(List<Handler> chain) {
         this.chain = chain;
     }
 
@@ -26,7 +27,6 @@ public class HttpResponseDispatcher implements Handler {
                 return;
             }
         }
-
         Responses.notFound(outputStream, request.version());
     }
 }

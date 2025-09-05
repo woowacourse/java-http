@@ -53,19 +53,23 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpMethod == HttpMethod.GET && path.equals("/")) {
                 responseHome(outputStream);
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.contains("/login")) {
                 printMemberLog(httpHeader);
                 responseLoginHtml(outputStream);
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
                 responseHtml(outputStream, httpHeader);
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".css")) {
                 responseCss(outputStream, httpHeader);
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {

@@ -8,7 +8,8 @@ public class HttpHandlerMapper {
     private static final HttpHandlerMapper instance = new HttpHandlerMapper();
 
     private final Set<HttpHandler> handlers = Set.of(
-            DefaultHttpHandler.getInstance()
+            DefaultHttpHandler.getInstance(),
+            HtmlHttpHandler.getInstance()
     );
 
     private HttpHandlerMapper() {

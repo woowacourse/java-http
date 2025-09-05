@@ -1,11 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Function;
 import org.apache.coyote.http11.HttpHeaders;
@@ -13,18 +7,13 @@ import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultHttpHandler implements HttpHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(DefaultHttpHandler.class);
 
     private static final DefaultHttpHandler instance = new DefaultHttpHandler();
 
     private final Map<HttpHandlerCondition, Function<HttpRequest, HttpResponse>> handlerMethodMapper = Map.of(
-            new HttpHandlerCondition(HttpMethod.GET, "/"), this::handleGetRoot,
-            new HttpHandlerCondition(HttpMethod.GET, "/index.html"), this::handleGetIndexHtml
+            new HttpHandlerCondition(HttpMethod.GET, "/"), this::handleGetRoot
     );
 
     private DefaultHttpHandler() {
@@ -50,30 +39,6 @@ public class DefaultHttpHandler implements HttpHandler {
 
     private HttpResponse handleGetRoot(final HttpRequest request) {
         final String body = "Hello world!";
-        final HttpHeaders headers = new HttpHeaders();
-        headers.addHeader("Content-Type", "text/html;charset=utf-8 ");
-        headers.addHeader("Content-Length", body.getBytes().length + " ");
-
-        return new HttpResponse(
-                request.protocolVersion(),
-                HttpStatus.OK,
-                headers,
-                body
-        );
-    }
-
-    private HttpResponse handleGetIndexHtml(final HttpRequest request) {
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        if (resource == null) {
-            throw new IllegalStateException("index.html 파일을 찾을 수 없습니다.");
-        }
-        final Path path = new File(resource.getFile()).toPath();
-        String body = "";
-        try {
-            body = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
         final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", "text/html;charset=utf-8 ");
         headers.addHeader("Content-Length", body.getBytes().length + " ");

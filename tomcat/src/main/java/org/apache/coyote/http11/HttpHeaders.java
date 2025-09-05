@@ -22,4 +22,17 @@ public class HttpHeaders {
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (final Map.Entry<String, String> entry : headers.entrySet()) {
+            sb.append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append(", ");
+        }
+
+        return sb.toString();
+    }
 }

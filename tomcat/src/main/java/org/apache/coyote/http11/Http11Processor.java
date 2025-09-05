@@ -16,7 +16,7 @@ import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.exception.SockerReadException;
+import org.apache.exception.SocketReadException;
 import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
             message.add(bufferedReader.readLine());
             return message;
         } catch (IOException e) {
-            throw new SockerReadException("HTTP 요청 메세지가 올바르지 않습니다.");
+            throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
         }
     }
 

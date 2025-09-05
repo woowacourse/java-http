@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.HttpStatus.NOT_FOUND;
@@ -9,6 +10,7 @@ import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
 import com.techcourse.handler.RootHandler;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -51,16 +53,30 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
-            final HttpResponse response = new HttpResponse(PROTOCOL);
-
-            handleRequest(request, response);
+            HttpResponse response = processRequest(inputStream);
 
             writeResponse(response, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse processRequest(InputStream inputStream) {
+        final HttpResponse response = new HttpResponse(PROTOCOL);
+
+        try {
+            final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
+            handleRequest(request, response);
+        } catch (IllegalArgumentException e){
+            setErrorResponse(BAD_REQUEST, response, e);
+        } catch (NoSuchElementException e) {
+            setErrorResponse(NOT_FOUND, response, e);
+        } catch (UnsupportedOperationException e) {
+            setErrorResponse(METHOD_NOT_ALLOWED, response, e);
+        } catch (UncheckedServletException e) {
+            setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
+        }
+        return response;
     }
 
     private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
@@ -71,18 +87,6 @@ public class Http11Processor implements Runnable, Processor {
     private void handleRequest(HttpRequest request, HttpResponse response) {
         final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
 
-        try {
-            executeMethodHandler(request, response, handler);
-        } catch (NoSuchElementException e) {
-            setErrorResponse(NOT_FOUND, response, e);
-        } catch (UnsupportedOperationException e) {
-            setErrorResponse(METHOD_NOT_ALLOWED, response, e);
-        } catch (UncheckedServletException e) {
-            setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
-        }
-    }
-
-    private void executeMethodHandler(HttpRequest request, HttpResponse response, HttpRequestHandler handler) {
         switch (request.getMethod()) {
             case "GET" -> handler.handleGet(request, response);
             default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());

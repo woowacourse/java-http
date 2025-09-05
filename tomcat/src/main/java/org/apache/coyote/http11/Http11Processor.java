@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String parseUrl(BufferedReader bufferedReader) throws IOException {
         String firstLine = bufferedReader.readLine();
-        if (firstLine.isBlank()) {
+        if (firstLine == null || firstLine.isBlank()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
         }
         return firstLine.split(" ")[1];

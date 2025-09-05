@@ -9,7 +9,9 @@ public class HttpHandlerMapper {
 
     private final Set<HttpHandler> handlers = Set.of(
             DefaultHttpHandler.getInstance(),
-            HtmlHttpHandler.getInstance()
+            HtmlHttpHandler.getInstance(),
+            CssHttpHandler.getInstance(),
+            JsHttpHandler.getInstance()
     );
 
     private HttpHandlerMapper() {

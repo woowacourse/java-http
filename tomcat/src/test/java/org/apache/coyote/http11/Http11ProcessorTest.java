@@ -23,12 +23,14 @@ class Http11ProcessorTest {
 
         // then
         String actual = socket.output();
-        assertThat(actual).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!"
+        assertThat(actual).isEqualTo(
+                String.join(System.lineSeparator(),
+                        "HTTP/1.1 200 OK",
+                        "Content-Type: text/html;charset=utf-8",
+                        "Content-Length: 12",
+                        "",
+                        "Hello world!"
+                )
         );
     }
 
@@ -56,11 +58,14 @@ class Http11ProcessorTest {
         );
 
         String actual = socket.output();
-        assertThat(actual).contains(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: " + fileBytes.length,
-                new String(fileBytes)
+        assertThat(actual).isEqualTo(
+                String.join(System.lineSeparator(),
+                        "HTTP/1.1 200 OK",
+                        "Content-Type: text/html;charset=utf-8",
+                        "Content-Length: " + fileBytes.length,
+                        "",
+                        new String(fileBytes)
+                )
         );
     }
 }

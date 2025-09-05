@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseEntity {
@@ -16,7 +16,7 @@ public class ResponseEntity {
     public static HttpResponse ok(String body, String contentType) {
         byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(bodyBytes.length));
 
@@ -40,7 +40,7 @@ public class ResponseEntity {
     public static HttpResponse notFound(String body, String contentType) {
         byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(bodyBytes.length));
 

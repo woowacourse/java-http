@@ -18,6 +18,7 @@ public class HttpRequestLine {
 
     private HttpRequestLine(final BufferedReader bufferedReader) throws IOException {
         final String httpRequestLine = bufferedReader.readLine();
+        validateNull(httpRequestLine);
         final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
         validateFormat(httpRequestElements);
         this.method = HttpMethod.findMethod(clean(httpRequestElements[0]));
@@ -33,6 +34,12 @@ public class HttpRequestLine {
     private static void validateNull(final BufferedReader bufferedReader) {
         if (bufferedReader == null) {
             throw new IllegalArgumentException("bufferedReader는 null일 수 없습니다.");
+        }
+    }
+
+    private void validateNull(final String httpRequestLine) {
+        if (httpRequestLine == null) {
+            throw new IllegalArgumentException("유효하지 않은 Http request line 형식입니다");
         }
     }
 

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.LoginService;
+import com.techcourse.model.RegisterService;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final LoginService loginService = new LoginService();
+    private final RegisterService registerService = new RegisterService();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -43,21 +44,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestLine = reader.readLine();
-            if (requestLine == null || requestLine.isBlank()) {
+            final var request = parseRequest(reader);
+            if (request == null) {
                 return;
             }
 
-            final var uri = parseRequestUri(requestLine);
-            final var pathAndQuery = extractPathAndQuery(uri);
-            final var path = pathAndQuery.get("path");
-            final var params = parseQueryString(pathAndQuery.get("query"));
+            final var method = request.get("method");
+            final var path = request.get("path");
+            final var params = parseQueryString(request.get("params"));
 
             if ("/login".equals(path)) {
-                final var account = params.get("account");
-                final var password = params.get("password");
-
-                if (account == null || password == null) {
+                if ("GET".equalsIgnoreCase(method)) {
                     final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
                             .getResource("static/login.html"));
                     final var body = readResourceFile(resourceUrl);
@@ -73,16 +70,22 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                if (loginService.login(account, password)) {
-                    writeResponse(
-                            outputStream,
-                            302,
-                            "Found",
-                            Map.of("Location", "/index.html"),
-                            null,
-                            "text/html;charset=utf-8"
-                    );
-                } else {
+                if ("POST".equalsIgnoreCase(method)) {
+                    final var account = params.get("account");
+                    final var password = params.get("password");
+
+                    if (loginService.login(account, password)) {
+                        writeResponse(
+                                outputStream,
+                                302,
+                                "Found",
+                                Map.of("Location", "/index.html"),
+                                null,
+                                "text/html;charset=utf-8"
+                        );
+                        return;
+                    }
+
                     writeResponse(
                             outputStream,
                             302,
@@ -91,59 +94,128 @@ public class Http11Processor implements Runnable, Processor {
                             null,
                             "text/html;charset=utf-8"
                     );
+                    return;
                 }
-                return;
             }
 
-            final var resourcePath = "static" + path;
-            final var resourceUrl = getClass().getClassLoader()
-                    .getResource(resourcePath);
+            if ("/register".equals(path)) {
+                if ("GET".equalsIgnoreCase(method)) {
+                    final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
+                            .getResource("static/register.html"));
+                    final var body = readResourceFile(resourceUrl);
 
-            if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
-                final var body = readResourceFile(resourceUrl);
-                final var contentType = detectContentType(resourceUrl);
+                    writeResponse(outputStream, 200, "OK", null, body, "text/html;charset=utf-8");
+                    return;
+                }
 
-                writeResponse(outputStream, 200, "OK", null, body, contentType);
-                return;
-            } else {
-                final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                if ("POST".equalsIgnoreCase(method)) {
+                    final var account = params.get("account");
+                    final var password = params.get("password");
+                    final var email = params.get("email");
 
-                writeResponse(outputStream, 200, "OK", null, body, "text/html;charset=utf-8");
-                return;
+                    registerService.register(account, password, email);
+
+                    writeResponse(
+                            outputStream,
+                            302,
+                            "Found",
+                            Map.of("Location", "/index.html"),
+                            null,
+                            "text/html;charset=utf-8"
+                    );
+                    return;
+                }
             }
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
-            log.error("Internal Server Error: {}", e.getMessage(), e);
-            try {
-                final var resourceUrl = getClass().getClassLoader()
-                        .getResource("static/500.html");
-                final byte[] body = (resourceUrl != null)
-                        ? readResourceFile(resourceUrl)
-                        : "Internal Server Error".getBytes(StandardCharsets.UTF_8);
+
+            final var staticResourcePath = "static" + path;
+            final var staticResourceUrl = getClass().getClassLoader()
+                    .getResource(staticResourcePath);
+
+            if (staticResourceUrl != null && !Files.isDirectory(Path.of(staticResourceUrl.toURI()))) {
+                final var body = readResourceFile(staticResourceUrl);
+                final var contentType = detectContentType(staticResourceUrl);
 
                 writeResponse(
-                        connection.getOutputStream(),
-                        500,
-                        "Internal Server Error",
+                        outputStream,
+                        200,
+                        "OK",
                         null,
                         body,
-                        "text/html;charset=utf-8"
+                        contentType
                 );
-            } catch (IOException | URISyntaxException ex) {
-                log.error("Failed to send 500 response: {}", ex.getMessage(), ex);
+                return;
             }
+
+            final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+            writeResponse(
+                    outputStream,
+                    200,
+                    "OK",
+                    null,
+                    body,
+                    "text/html;charset=utf-8"
+            );
+        } catch (Exception e) {
+            log.error("Internal Server Error: {}", e.getMessage(), e);
+            sendInternalServerErrorResponse(connection);
         }
     }
 
-    private String parseRequestUri(final String requestLine) {
-        final var parts = requestLine.split(" ");
+    // TODO. 추후 HttpRequest로 분리
+    private Map<String, String> parseRequest(final BufferedReader reader) throws IOException {
+        final var requestLine = reader.readLine();
+        if (requestLine == null || requestLine.isBlank()) {
+            return null;
+        }
 
-        return parts[1];
+        final var methodAndUri = extractMethodAndUri(requestLine);
+        final var method = methodAndUri.get("method");
+        final var path = methodAndUri.get("path");
+        final var query = methodAndUri.get("query");
+
+        final var headers = new HashMap<String, String>();
+        String line;
+        while (!(line = reader.readLine()).isBlank()) {
+            final var headerParts = line.split(":", 2);
+            if (headerParts.length == 2) {
+                headers.put(headerParts[0].trim(), headerParts[1].trim());
+            }
+        }
+
+        final var allParams = new StringBuilder();
+        if (query != null) {
+            allParams.append(query);
+        }
+
+        if ("POST".equalsIgnoreCase(method)) {
+            final var contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+            if (contentLength > 0) {
+                final var bodyChars = new char[contentLength];
+                reader.read(bodyChars, 0, contentLength);
+                if (!allParams.isEmpty()) {
+                    allParams.append("&");
+                }
+                allParams.append(new String(bodyChars));
+            }
+        }
+
+        final var result = new HashMap<String, String>();
+        result.put("method", method);
+        result.put("path", path);
+        result.put("params", allParams.toString());
+
+        return result;
     }
 
-    private Map<String, String> extractPathAndQuery(final String uri) {
+    private Map<String, String> extractMethodAndUri(final String requestLine) {
         final var result = new HashMap<String, String>();
-        final var index = uri.indexOf("?");
+        final var parts = requestLine.split(" ");
+        final var method = parts[0];
+        final var uri = parts[1];
 
+        result.put("method", method);
+
+        final var index = uri.indexOf("?");
         if (index != -1) {
             result.put("path", uri.substring(0, index));
             result.put("query", uri.substring(index + 1));
@@ -158,7 +230,7 @@ public class Http11Processor implements Runnable, Processor {
     private Map<String, String> parseQueryString(final String queryString) {
         final var paramMap = new HashMap<String, String>();
 
-        if (queryString == null) {
+        if (queryString == null || queryString.isBlank()) {
             return paramMap;
         }
 
@@ -175,17 +247,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
-
         return Files.readAllBytes(path);
     }
 
     private String detectContentType(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
         final var contentType = Files.probeContentType(path);
-
         return contentType != null ? contentType : "text/plain;charset=utf-8";
     }
 
+    // TODO. 추후 HttpResponse 분리
     private void writeResponse(
             final OutputStream outputStream,
             final int statusCode,
@@ -193,7 +264,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> extraHeaders,
             final byte[] body,
             final String contentType
-    ) throws IOException { // TODO. IOException을 RuntimeException 전환 고려
+    ) throws IOException {
         final var headers = new StringBuilder()
                 .append("HTTP/1.1 ")
                 .append(statusCode)
@@ -203,6 +274,12 @@ public class Http11Processor implements Runnable, Processor {
                 .append("Content-Type: ")
                 .append(contentType)
                 .append("\r\n");
+
+        if (body != null) {
+            headers.append("Content-Length: ")
+                    .append(body.length)
+                    .append("\r\n");
+        }
 
         if (extraHeaders != null) {
             extraHeaders.forEach((k, v) -> headers.append(k)
@@ -220,5 +297,26 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         outputStream.flush();
+    }
+
+    private void sendInternalServerErrorResponse(final Socket connection) {
+        try {
+            var resourceUrl = getClass().getClassLoader()
+                    .getResource("static/500.html");
+            byte[] body = (resourceUrl != null)
+                    ? readResourceFile(resourceUrl)
+                    : "Internal Server Error".getBytes(StandardCharsets.UTF_8);
+
+            writeResponse(
+                    connection.getOutputStream(),
+                    500,
+                    "Internal Server Error",
+                    null,
+                    body,
+                    "text/html;charset=utf-8"
+            );
+        } catch (Exception ex) {
+            log.error("Failed to send {} response: {}", 500, ex.getMessage(), ex);
+        }
     }
 }

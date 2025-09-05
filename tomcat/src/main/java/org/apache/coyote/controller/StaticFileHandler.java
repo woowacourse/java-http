@@ -23,7 +23,7 @@ public class StaticFileHandler {
                     statusCode,
                     "text/html; charset=utf-8",
                     body.getBytes().length,
-                    body
+                    body.getBytes()
             );
 
             return response;
@@ -34,7 +34,7 @@ public class StaticFileHandler {
                     statusCode,
                     "text/html; charset=utf-8",
                     body.getBytes().length,
-                    body
+                    body.getBytes()
             );
 
             return response;
@@ -42,8 +42,10 @@ public class StaticFileHandler {
 
         String contentType = ContentTypeSearcher.getContentTypeBy(path);
         statusCode=200;
-        Http11Response response = new Http11Response(statusCode, contentType, fileManager.getContentLength(),
-                fileManager.getContentString());
+        Http11Response response = new Http11Response(statusCode,
+                contentType,
+                fileManager.getContentLength(),
+                fileManager.getContent());
 
         return response;
     }

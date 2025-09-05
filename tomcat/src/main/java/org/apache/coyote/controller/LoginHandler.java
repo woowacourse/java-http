@@ -27,7 +27,7 @@ public class LoginHandler {
                 statusCode = 500;
                 String body = "500 Internal Server Error";
                 Http11Response response = new Http11Response(statusCode, "text/html; charset=utf-8",
-                        body.getBytes().length, body);
+                        body.getBytes().length, body.getBytes());
 
                 return response;
             }
@@ -42,7 +42,7 @@ public class LoginHandler {
             String contentType = ContentTypeSearcher.getContentTypeBy("/login.html");
             statusCode = 200;
             Http11Response response = new Http11Response(statusCode, contentType, fileManager.getContentLength(),
-                    fileManager.getContentString());
+                    fileManager.getContent());
 
             return response;
 
@@ -50,7 +50,7 @@ public class LoginHandler {
         statusCode = 404;
         String body = "404 Not Found";
         Http11Response response = new Http11Response(statusCode, "text/html; charset=utf-8", body.getBytes().length,
-                body);
+                body.getBytes());
 
         return response;
     }

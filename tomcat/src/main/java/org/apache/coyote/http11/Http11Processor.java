@@ -40,7 +40,8 @@ public class Http11Processor implements Runnable, Processor {
                 response = StaticFileHandler.getResponse(request);
             }
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.getResponseHeader().getBytes());
+            outputStream.write(response.getResponseBody());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

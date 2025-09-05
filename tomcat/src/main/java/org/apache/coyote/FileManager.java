@@ -16,8 +16,8 @@ public class FileManager {
         contents = findContents();
     }
 
-    public String getContentString() {
-        return new String(contents, StandardCharsets.UTF_8);
+    public byte[] getContent() {
+        return contents;
     }
 
     public int getContentLength() {

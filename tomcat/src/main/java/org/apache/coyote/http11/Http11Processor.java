@@ -39,7 +39,6 @@ public class Http11Processor implements Runnable, Processor {
                 handleRoot(response);
                 return;
             }
-
             if ("/login".equals(path)) {
                 handleLogin(request, response);
                 return;

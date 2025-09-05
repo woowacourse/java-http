@@ -39,32 +39,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            Map<String, String> header = getHeader(inputStream);
+            HttpRequest request = getRequest(inputStream);
 
-            String requestResource = header.get("resource");
+            String requestUri = request.getUri();
+            String body = getBody(requestUri);
 
-            String response;
+            HttpResponse response = getResponse(requestUri, body);
 
-            if (requestResource.startsWith("/login")) {
-                int index = requestResource.indexOf("?");
-                String matchedResource = requestResource.substring(0, index) + ".html";
-                String queryString = requestResource.substring(index + 1);
-
-                Map<String, String> queryParameters = new HashMap<>();
-                String[] parameters = queryString.split("&");
-                for (String parameter : parameters) {
-                    String key = parameter.split("=")[0];
-                    String value = parameter.split("=")[1];
-                    queryParameters.put(key, value);
-                }
-                response = getResponse(matchedResource);
-
-                User user = InMemoryUserRepository.findByAccount(queryParameters.get("account")).orElse(null);
+            if (requestUri.startsWith("/login")) {
+                String account = request.getQueryParameter("account");
+                User user = InMemoryUserRepository.findByAccount(account).orElse(null);
                 if (user != null) {
-                    System.out.println(user);
+                    log.info("user: {}", user);
                 }
-            } else {
-                response = getResponse(requestResource);
             }
 
             outputStream.write(response.getBytes());
@@ -74,25 +61,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getHeader(InputStream inputStream) throws IOException {
+    private HttpRequest getRequest(InputStream inputStream) throws IOException {
 
         Map<String, String> httpHeader = new HashMap<>();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
         String requestLine = reader.readLine();
-
         if (requestLine == null || requestLine.isBlank()) {
             throw new IOException("request is empty");
         }
 
         String[] requestLineSplit = requestLine.split(" ");
+
         String method = requestLineSplit[0];
         httpHeader.put("method", method);
-        String resource = requestLineSplit[1];
-        httpHeader.put("resource", resource);
+
+        String uri = requestLineSplit[1];
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            uri = uri.substring(0, index + 1);
+            httpHeader.put("request-uri", uri);
+        } else {
+            httpHeader.put("request-uri", uri);
+        }
+
         String version = requestLineSplit[2];
-        httpHeader.put("version", version);
+        httpHeader.put("http-version", version);
 
         String line;
         while(!"".equals((line = reader.readLine()))) {
@@ -102,36 +96,61 @@ public class Http11Processor implements Runnable, Processor {
             httpHeader.put(fieldName, value);
         }
 
-        return httpHeader;
+        QueryParameter queryParameter = parseQueryParameter(uri);
+
+        return new HttpRequest(httpHeader, queryParameter);
     }
 
-    private String getResponse(String uri) throws IOException {
+    private String getBody(String uri) throws IOException {
         if ("/".equals(uri)) {
-            String body = null;
-            body = "Hello world!";
-            String contentType = "text/html";
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
-                    body);
+            return "Hello world!";
         }
 
-        String resourcePath = "./static" + uri;
+        String resourcePath;
+        if (uri.contains(".")) {
+            resourcePath = "./static" + uri;
+        } else {
+            resourcePath = "./static" + uri + ".html";
+        }
+
         URL systemResource = ClassLoader.getSystemResource(resourcePath);
         Path path = Path.of(systemResource.getPath());
         final var responseBody = Files.readAllBytes(path);
 
-        String body = new String(responseBody);
-        String extension = resourcePath.substring(resourcePath.lastIndexOf('.') + 1);
+        return new String(responseBody);
+    }
+
+    private HttpResponse getResponse(String uri, String body) throws IOException {
+        String extension = "html";
         String contentType = String.join("/","text",extension);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+        if (uri.endsWith(".css") || uri.endsWith(".html")) {
+             extension = uri.substring(uri.lastIndexOf('.') + 1);
+             contentType = String.join("/","text",extension);
+        }
+
+        if (uri.endsWith(".js")) {
+             contentType = String.join("/","application","javascript");
+        }
+
+        return new HttpResponse("200 OK",  contentType, body);
+    }
+
+    private QueryParameter parseQueryParameter(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            String queryString = uri.substring(index + 1);
+
+            Map<String, String> queryParameters = new HashMap<>();
+            String[] parameters = queryString.split("&");
+            for (String parameter : parameters) {
+                String key = parameter.split("=")[0];
+                String value = parameter.split("=")[1];
+                queryParameters.put(key, value);
+            }
+        return new QueryParameter(queryParameters);
+        }
+
+        return new QueryParameter();
     }
 }

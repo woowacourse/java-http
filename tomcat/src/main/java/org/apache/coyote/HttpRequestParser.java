@@ -12,6 +12,8 @@ import java.util.StringTokenizer;
 
 public class HttpRequestParser {
 
+    private static final int REQUEST_LINE_TOKENS = 3;
+
     private HttpRequestParser() {
     }
 
@@ -47,7 +49,7 @@ public class HttpRequestParser {
     }
 
     private static void validateRequestLine(String requestLine) {
-        if (requestLine == null || requestLine.isBlank()) {
+        if (requestLine == null || requestLine.isBlank() || requestLine.split(" ").length != REQUEST_LINE_TOKENS) {
             throw new IllegalArgumentException("요청 형식이 올바르지 않습니다.");
         }
     }

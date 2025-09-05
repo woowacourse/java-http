@@ -63,14 +63,17 @@ public class HttpRequestParser {
         Map<String, String> params = new HashMap<>();
 
         for (String pair : queryString.split("&")) {
-            int equalIndex = pair.indexOf('=');
-            if (equalIndex == -1) {
-                params.put(pair, "");
-                continue;
-            }
-            params.put(pair.substring(0, equalIndex), pair.substring(equalIndex + 1));
+            addQueryParameter(pair, params);
         }
 
         return params;
+    }
+
+    private static void addQueryParameter(String pair, Map<String, String> params){
+        int equalIndex = pair.indexOf('=');
+        if (equalIndex == -1) {
+            return;
+        }
+        params.put(pair.substring(0, equalIndex), pair.substring(equalIndex + 1));
     }
 }

@@ -74,18 +74,16 @@ public class Http11Processor implements Runnable, Processor {
             final URL resource = getClass().getClassLoader().getResource("static" + requestResourceName);
             if (resource == null) {
                 final URL notFoundPage = getClass().getClassLoader().getResource("static/404.html");
-                final String response = parseResponse(404, notFoundPage);
+                final String response = generateResponse(404, notFoundPage);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
-            final String response = parseResponse(200, resource);
-
+            final String response = generateResponse(200, resource);
             if ("/login.html".equals(requestResourceName) && !queryMap.isEmpty()) {
                 login(queryMap);
             }
-
             outputStream.write(response.getBytes());
             outputStream.flush();
 
@@ -94,12 +92,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseResponse(final int httpStatusCode, final URL resource) throws IOException {
+    private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
         final String resourceName = resource.getFile();
         final String extension = resourceName.substring(resourceName.lastIndexOf(".") + 1);
         final String responseBody = Files.readString(new File(resourceName).toPath());
 
-        return generateResponse(HTTP_STATUS_CODES.get(httpStatusCode), MIME_TYPES.get(extension), responseBody);
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Content-Type: " + MIME_TYPES.get(extension) + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {
@@ -130,14 +133,5 @@ public class Http11Processor implements Runnable, Processor {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
         }
-    }
-
-    private String generateResponse(final String status, final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

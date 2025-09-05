@@ -46,7 +46,7 @@ public class HttpQueryParameter {
             throw new IllegalArgumentException("query parameter는 2개의 원소로 구성되어야 합니다");
         }
         if (queryParameter[0].isBlank()) {
-            throw new IllegalArgumentException("query paramenter의 key는 빈 값일 수 없습니다");
+            throw new IllegalArgumentException("query parameter의 key는 빈 값일 수 없습니다");
         }
     }
 

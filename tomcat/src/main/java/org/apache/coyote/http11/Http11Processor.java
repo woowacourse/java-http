@@ -15,7 +15,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private List<HttpRequestHandler> httpRequestHandlers = List.of(
+    private final List<HttpRequestHandler> httpRequestHandlers = List.of(
             new HomeHttpRequestHandler(),
             new IndexHtmlRequestHandler(),
             new CssRequestHandler(),
@@ -43,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             RequestStartLine requestStartLine = createRequestStartLine(bufferedReader.readLine());
 
             handle(requestStartLine, outputStream);
+            bufferedReader.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestMethod = startLines[0];
         String requestUrl = startLines[1];
         String requestHttpVersion = startLines[2];
-        
+
         return new RequestStartLine(
                 RequestMethod.valueOf(requestMethod),
                 requestUrl,

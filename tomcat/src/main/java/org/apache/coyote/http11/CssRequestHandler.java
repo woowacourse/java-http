@@ -15,12 +15,8 @@ public class CssRequestHandler implements HttpRequestHandler {
     public String response(final RequestStartLine requestStartLine) {
         URL resource = getClass().getClassLoader().getResource("static" + requestStartLine.requestUrl());
         Path resourcePath = Path.of(resource.getPath());
-        byte[] bytes = null;
-        try {
-            bytes = Files.readAllBytes(resourcePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        
+        byte[] bytes = readAllBytes(resourcePath);
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -28,5 +24,13 @@ public class CssRequestHandler implements HttpRequestHandler {
                 "Content-Length: " + bytes.length + " ",
                 "",
                 new String(bytes));
+    }
+
+    private byte[] readAllBytes(final Path resourcePath) {
+        try {
+            return Files.readAllBytes(resourcePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

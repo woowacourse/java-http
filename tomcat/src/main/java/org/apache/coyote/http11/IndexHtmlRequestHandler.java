@@ -17,12 +17,7 @@ public class IndexHtmlRequestHandler implements HttpRequestHandler {
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         Path resourcePath = Path.of(resource.getPath());
 
-        byte[] bytes = null;
-        try {
-            bytes = Files.readAllBytes(resourcePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        byte[] bytes = readAllBytes(resourcePath);
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -30,5 +25,13 @@ public class IndexHtmlRequestHandler implements HttpRequestHandler {
                 "Content-Length: " + bytes.length + " ",
                 "",
                 new String(bytes));
+    }
+
+    private byte[] readAllBytes(final Path resourcePath) {
+        try {
+            return Files.readAllBytes(resourcePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

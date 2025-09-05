@@ -7,6 +7,19 @@ import java.util.Objects;
 
 public class HttpRequest {
 
+    private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String EXTENSION_DELIMITER = ".";
+    private static final String ROOT_PATH = "/";
+    private static final String EMPTY = "";
+    private static final String DEFAULT_EXTENSION = ".html";
+
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
+    private static final int REQUEST_LINE_PARTS = 3;
+    private static final int NOT_FOUND_INDEX = -1;
+
     private final String path;
     private final RequestParams requestParams;
     private final ContentType contentType;
@@ -23,7 +36,9 @@ public class HttpRequest {
     public static HttpRequest from(final String requestHeaderFirstLine) {
         String[] requestLineValues = splitRequestLine(requestHeaderFirstLine);
 
-        String requestUri = requestLineValues[1];
+        String requestMethod = requestLineValues[METHOD_INDEX];
+        String requestUri = requestLineValues[URI_INDEX];
+        String requestVersion = requestLineValues[VERSION_INDEX];
 
         String path = extractPath(requestUri);
         RequestParams requestParams = RequestParams.from(extractQueryString(requestUri));
@@ -34,7 +49,7 @@ public class HttpRequest {
 
     private static String[] splitRequestLine(final String requestLine) {
         validateNullRequestLine(requestLine);
-        String[] requestLineValues = requestLine.split(" ");
+        String[] requestLineValues = requestLine.split(REQUEST_LINE_DELIMITER);
         validateRequestLineFormat(requestLineValues);
         return requestLineValues;
     }
@@ -46,15 +61,15 @@ public class HttpRequest {
     }
 
     private static void validateRequestLineFormat(final String[] requestLineValues) {
-        if (requestLineValues.length != 3) {
+        if (requestLineValues.length != REQUEST_LINE_PARTS) {
             throw new UncheckedServletException("올바르지 않은 요청 형식입니다.");
         }
     }
 
     private static String extractPath(final String requestUri) {
-        int queryStringStartIndex = findSingleDelimiterIndex(requestUri, "?");
+        int queryStringStartIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringStartIndex != -1) {
+        if (queryStringStartIndex != NOT_FOUND_INDEX) {
             return requestUri.substring(0, queryStringStartIndex);
         }
 
@@ -62,50 +77,46 @@ public class HttpRequest {
     }
 
     private static String extractQueryString(final String requestUri) {
-        int queryStringStartIndex = findSingleDelimiterIndex(requestUri, "?");
+        int queryStringStartIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringStartIndex != -1) {
+        if (queryStringStartIndex != NOT_FOUND_INDEX) {
             return requestUri.substring(queryStringStartIndex + 1);
         }
 
-        return "";
+        return EMPTY;
     }
 
-    private static ContentType extractContentType(final String path) {
-        Objects.requireNonNull(path);
-        int delimiterIndex = findSingleDelimiterIndex(path, ".");
+    private static int findQueryStringDelimiterIndex(String uri) {
+        int firstIndex = uri.indexOf(QUERY_STRING_DELIMITER);
+        int lastIndex = uri.lastIndexOf(QUERY_STRING_DELIMITER);
 
-        if (delimiterIndex != -1) {
-            String extension = path.substring(delimiterIndex + 1);
-            return ContentType.from(extension);
-        }
-        return ContentType.TEXT_HTML;
-    }
-
-    private static int findSingleDelimiterIndex(String uri, String delimiter) {
-        int firstIndex = uri.indexOf(delimiter);
-        int lastIndex = uri.lastIndexOf(delimiter);
-
-        if (firstIndex != -1 && firstIndex != lastIndex) {
-            throw new UncheckedServletException("잘못된 URI 형식: " + delimiter + " 가 여러 번 포함되었습니다 → " + uri);
+        if (firstIndex != NOT_FOUND_INDEX && firstIndex != lastIndex) {
+            throw new UncheckedServletException("잘못된 URI 형식: ?가 여러 번 포함되었습니다 → " + uri);
         }
 
         return firstIndex;
     }
 
+    private static ContentType extractContentType(final String path) {
+        Objects.requireNonNull(path);
+        int extensionDelimiterIndex = path.lastIndexOf(EXTENSION_DELIMITER);
+
+        if (extensionDelimiterIndex != NOT_FOUND_INDEX) {
+            String extension = path.substring(extensionDelimiterIndex + 1);
+            return ContentType.from(extension);
+        }
+        return ContentType.TEXT_HTML;
+    }
+
     public String getFilePath() {
-        if (path.contains(".")) {
+        if (path.contains(EXTENSION_DELIMITER)) {
             return path;
         }
-        return path + ".html";
+        return path + DEFAULT_EXTENSION;
     }
 
     public boolean isRootPath() {
-        return path.equals("/");
-    }
-
-    public String getPath() {
-        return path;
+        return path.equals(ROOT_PATH);
     }
 
     public Map<String, String> getRequestParams() {

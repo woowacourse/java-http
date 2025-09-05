@@ -29,17 +29,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = HttpRequest.from(inputStream);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            StaticFileHandler fileHandler = new StaticFileHandler();
+            HttpResponse response;
+            
+            if (fileHandler.exists(request.getPath())) {
+                String fileContent = fileHandler.readFile(request.getPath());
+                response = HttpResponse.ok(fileContent);
+            } else {
+                response = HttpResponse.notFound();
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+            
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

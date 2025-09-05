@@ -73,9 +73,12 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(final String requestMessage) throws IOException {
         final var requestLine = requestMessage.split("\r\n")[0].trim();
         if (!requestLine.startsWith("GET") || !requestLine.endsWith("HTTP/1.1")) {
+            final var errorMessage = "잘못된 요청입니다.";
             return "HTTP/1.1 400 Bad Request \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 23 \r\n";
+                    "Content-Type: text/plain;charset=utf-8 \r\n" +
+                    "Content-Length: " + errorMessage.getBytes().length +  " \r\n" +
+                    "\r\n" +
+                    errorMessage;
         }
         final var uri = requestLine.split(" ")[1];
 

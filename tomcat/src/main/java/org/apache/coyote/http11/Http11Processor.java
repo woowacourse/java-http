@@ -69,12 +69,16 @@ public class Http11Processor implements Runnable, Processor {
             handleRequest(request, response);
         } catch (IllegalArgumentException e){
             setErrorResponse(BAD_REQUEST, response, e);
+            log.warn("잘못된 요청 형식: {}", e.getMessage());
         } catch (NoSuchElementException e) {
             setErrorResponse(NOT_FOUND, response, e);
+            log.warn("존재하지 않는 리소스: {}", e.getMessage());
         } catch (UnsupportedOperationException e) {
             setErrorResponse(METHOD_NOT_ALLOWED, response, e);
+            log.warn("지원하지 않는 HTTP 메서드: {}", e.getMessage());
         } catch (UncheckedServletException e) {
             setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
+            log.error("예상치 못한 서버 오류 발생", e);
         }
         return response;
     }

@@ -1,6 +1,5 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.Controller;
 import org.apache.catalina.mapper.RequestMapper;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.http11.request.Http11Request;
@@ -17,10 +16,9 @@ public class CoyoteAdepter implements Adapter {
     @Override
     public void service(Http11Request request, Http11Response response) {
         try {
-            Controller controller = requestMapper.findController(request);
+            final var controller = requestMapper.findController(request);
             controller.service(request, response);
-        } catch (Exception e) {
-            return;
+        } catch (Exception ignored) {
         }
     }
 }

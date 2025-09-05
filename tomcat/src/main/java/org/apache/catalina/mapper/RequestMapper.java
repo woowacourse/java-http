@@ -19,6 +19,7 @@ public class RequestMapper {
     }
 
     public Controller findController(Http11Request request) {
+        log.debug("Requested Resource Path: {}", request.parseResourcePath());
         return controllerMap.get(request.parseResourcePath());
     }
 

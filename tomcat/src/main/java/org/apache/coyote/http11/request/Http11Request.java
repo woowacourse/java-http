@@ -12,7 +12,7 @@ public record Http11Request(
 ) {
 
     public String parseResourcePath() {
-        int queryIndex = path.indexOf("?");
+        final int queryIndex = path.indexOf("?");
         String resourcePath = path;
         if (queryIndex != -1) {
             resourcePath = path.substring(0, queryIndex);
@@ -21,14 +21,14 @@ public record Http11Request(
     }
 
     public Map<String, String> parseQuery() {
-        int queryIndex = path.indexOf("?");
+        final int queryIndex = path.indexOf("?");
         if (queryIndex == -1) {
             return new HashMap<>();
         }
 
-        String pathQuery = path.substring(queryIndex + 1);
-        String[] splitPathQuery = pathQuery.split("&");
-        Map<String, String> queries = new HashMap<>();
+        final String pathQuery = path.substring(queryIndex + 1);
+        final String[] splitPathQuery = pathQuery.split("&");
+        final Map<String, String> queries = new HashMap<>();
         for (String query : splitPathQuery) {
             String[] keyValue = query.split("=");
             if (keyValue.length != 2) {

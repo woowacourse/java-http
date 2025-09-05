@@ -10,11 +10,11 @@ public class Http11Response {
     private LinkedHashMap<String, String> headers;
     private byte[] body;
 
-    public Http11Response() {
+    public Http11Response(String resourcePath) {
         this.statusCode = 200; // 기본값
         this.headers = new LinkedHashMap<>();
         this.body = new byte[0];
-        this.resourcePath = "/";
+        this.resourcePath = resourcePath;
     }
 
     public int getStatusCode() {

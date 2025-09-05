@@ -1,9 +1,6 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import java.lang.ModuleLayer.Controller;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +8,6 @@ import org.slf4j.LoggerFactory;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
-
-    private final Map<String, Controller> servletMap;
-
-    public Tomcat() {
-        this.servletMap = new HashMap<>();
-    }
 
     public void start() {
         var connector = new Connector();

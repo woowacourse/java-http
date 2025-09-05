@@ -18,12 +18,12 @@ public enum ContentType {
     }
 
     public static ContentType fromPath(String resourcePath) {
-        int lastDotIndex = resourcePath.lastIndexOf('.');
+        final int lastDotIndex = resourcePath.lastIndexOf('.');
         if (lastDotIndex == -1) {
             return DEFAULT;
         }
 
-        String extension = resourcePath.substring(lastDotIndex).toLowerCase();
+        final String extension = resourcePath.substring(lastDotIndex).toLowerCase();
 
         for (ContentType type : values()) {
             if (type.extension.equals(extension)) {

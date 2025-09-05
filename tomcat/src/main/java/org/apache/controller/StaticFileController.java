@@ -26,7 +26,7 @@ public class StaticFileController implements Controller {
         try {
             URL resource = findResourceUrl(request.getUri());
             if (resource == null) {
-                throw new IllegalArgumentException("URI가 올바르지 않습니다.");
+                throw new RequestProcessingException("URI가 올바르지 않습니다.");
             }
 
             Path path = Paths.get(resource.toURI());

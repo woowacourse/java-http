@@ -35,7 +35,7 @@ public class LoginController implements Controller {
         try {
             URL resource = findResourceUrl("/login.html");
             if (resource == null) {
-                throw new IllegalArgumentException("URI가 올바르지 않습니다.");
+                throw new RequestProcessingException("URI가 올바르지 않습니다.");
             }
 
             User user = findUser(request.getQueryString("account"));

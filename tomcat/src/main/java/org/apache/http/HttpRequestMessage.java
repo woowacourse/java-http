@@ -3,6 +3,7 @@ package org.apache.http;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.exception.InvalidRequestException;
 
 public class HttpRequestMessage {
 
@@ -13,6 +14,9 @@ public class HttpRequestMessage {
 
     public HttpRequestMessage(List<String> message) {
         List<String> startLine = List.of(message.getFirst().split(" "));
+        if (startLine.size() < 3) {
+            throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");
+        }
         method = HttpMethod.valueOf(startLine.get(0));
         uri = parseUri(startLine.get(1));
         queryString = parseQueryParam(startLine.get(1));

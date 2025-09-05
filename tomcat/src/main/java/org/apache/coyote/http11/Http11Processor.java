@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,9 +14,9 @@ import org.apache.controller.LoginController;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
+import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.exception.ReqeustMessageParsingException;
-import org.apache.exception.RequestProcessingException;
+import org.apache.exception.SockerReadException;
 import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequestMessage;
 import org.apache.http.HttpResponseMessage;
@@ -58,29 +57,35 @@ public class Http11Processor implements Runnable, Processor {
 
             writeResponseMessage(response, outputStream);
 
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (ReqeustMessageParsingException | InvalidRequestException e) {
+        } catch (InvalidRequestException e) {
             //TODO: 400 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
-        } catch (RequestProcessingException | SocketWriteException e) {
+        } catch (DataNotFoundException exception) {
+            //TODO: 404 예외응답을 구성해보자.  (2025-09-5, 금, 16:34)
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             //TODO: 500 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
         }
     }
 
     private HttpRequestMessage makeRequest(InputStream inputStream) {
-        try {
-            List<String> message = new ArrayList<>();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
-            message.add(bufferedReader.readLine());
-            return new HttpRequestMessage(message);
-        } catch (IOException | IllegalArgumentException e) {
-            throw new ReqeustMessageParsingException("HTTP 요청 메세지가 올바르지 않습니다.");
-        }
+        List<String> message = readRequestMessage(inputStream);
+        return new HttpRequestMessage(message);
     }
 
     private HttpResponseMessage makeResponse() {
         return new HttpResponseMessage();
+    }
+
+    private List<String> readRequestMessage(InputStream inputStream) {
+        try {
+            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
+            List<String> message = new ArrayList<>();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            message.add(bufferedReader.readLine());
+            return message;
+        } catch (IOException e) {
+            throw new SockerReadException("HTTP 요청 메세지가 올바르지 않습니다.");
+        }
     }
 
     private void writeResponseMessage(HttpResponseMessage response, OutputStream outputStream) {

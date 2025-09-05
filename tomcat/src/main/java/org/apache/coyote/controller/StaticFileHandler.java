@@ -1,5 +1,6 @@
 package org.apache.coyote.controller;
 
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.ContentTypeSearcher;
 import org.apache.coyote.FileManager;
 import org.apache.coyote.http11.Http11Request;
@@ -22,8 +23,8 @@ public class StaticFileHandler {
             Http11Response response = new Http11Response(
                     statusCode,
                     "text/html; charset=utf-8",
-                    body.getBytes().length,
-                    body.getBytes()
+                    body.getBytes(StandardCharsets.UTF_8).length,
+                    body.getBytes(StandardCharsets.UTF_8)
             );
 
             return response;
@@ -33,8 +34,8 @@ public class StaticFileHandler {
             Http11Response response = new Http11Response(
                     statusCode,
                     "text/html; charset=utf-8",
-                    body.getBytes().length,
-                    body.getBytes()
+                    body.getBytes(StandardCharsets.UTF_8).length,
+                    body.getBytes(StandardCharsets.UTF_8)
             );
 
             return response;

@@ -27,7 +27,7 @@ public class FileManager {
     private byte[] findContents() {
 
         if (path.equals("/")) {
-            return "Hello world!".getBytes();
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
         try {

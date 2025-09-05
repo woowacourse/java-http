@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.ContentTypeSearcher;
 import org.apache.coyote.FileManager;
 import org.apache.coyote.http11.Http11Request;
@@ -26,8 +27,10 @@ public class LoginHandler {
             } catch (Exception e) {
                 statusCode = 500;
                 String body = "500 Internal Server Error";
-                Http11Response response = new Http11Response(statusCode, "text/html; charset=utf-8",
-                        body.getBytes().length, body.getBytes());
+                Http11Response response = new Http11Response(statusCode,
+                        "text/html; charset=utf-8",
+                        body.getBytes(StandardCharsets.UTF_8).length,
+                        body.getBytes(StandardCharsets.UTF_8));
 
                 return response;
             }
@@ -41,7 +44,9 @@ public class LoginHandler {
 
             String contentType = ContentTypeSearcher.getContentTypeBy("/login.html");
             statusCode = 200;
-            Http11Response response = new Http11Response(statusCode, contentType, fileManager.getContentLength(),
+            Http11Response response = new Http11Response(statusCode,
+                    contentType,
+                    fileManager.getContentLength(),
                     fileManager.getContent());
 
             return response;
@@ -49,8 +54,10 @@ public class LoginHandler {
         }
         statusCode = 404;
         String body = "404 Not Found";
-        Http11Response response = new Http11Response(statusCode, "text/html; charset=utf-8", body.getBytes().length,
-                body.getBytes());
+        Http11Response response = new Http11Response(statusCode,
+                "text/html; charset=utf-8",
+                body.getBytes(StandardCharsets.UTF_8).length,
+                body.getBytes(StandardCharsets.UTF_8));
 
         return response;
     }

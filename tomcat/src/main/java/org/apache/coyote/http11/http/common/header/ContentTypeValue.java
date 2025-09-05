@@ -8,6 +8,7 @@ public enum ContentTypeValue {
     HTML(".*\\.html(\\?.*)?$", "text/html"),
     CSS(".*\\.css(\\?.*)?$", "text/css"),
     JAVASCRIPT(".*\\.js(\\?.*)?$", "text/javascript"),
+    OCTET_STREAM(".*", "application/octet-stream"),
     ;
 
     private static final Logger log = LoggerFactory.getLogger(ContentTypeValue.class);
@@ -23,8 +24,8 @@ public enum ContentTypeValue {
         validateNull(target);
         return Arrays.stream(ContentTypeValue.values())
                 .filter(contentTypeValue -> target.matches(contentTypeValue.pattern))
-                .findAny()
-                .orElse(HTML)
+                .findFirst()
+                .orElse(OCTET_STREAM)
                 .format;
     }
 

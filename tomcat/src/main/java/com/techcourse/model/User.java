@@ -14,7 +14,6 @@ public class User {
 
     private final String account;
 
-    @Getter(AccessLevel.NONE)
     @ToString.Exclude
     private final String password;
 

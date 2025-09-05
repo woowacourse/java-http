@@ -7,18 +7,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.dto.HttpRequest;
+import org.apache.coyote.http11.helper.Responses;
 import org.apache.coyote.http11.util.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticFileHandler implements Handler {
+public class StaticResourceHandler implements Handler {
 
     private static final String SUFFIX = "/";
     private static final char DOT = '.';
     private static final String STATIC_REGEX = "^/static/?";
     private static final String INVALID_PATH_SEQUENCE = "..";
     private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
-    private static final Logger log = LoggerFactory.getLogger(StaticFileHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(StaticResourceHandler.class);
 
     private final String base;
     private final String defaultDocument;
@@ -30,7 +31,7 @@ public class StaticFileHandler implements Handler {
             Map.entry("json", "application/json;charset=utf-8")
     );
 
-    public StaticFileHandler(String base, String defaultDocument) {
+    public StaticResourceHandler(String base, String defaultDocument) {
         this.base = base.endsWith(SUFFIX) ? base.substring(0, base.length()-1) : base;
         this.defaultDocument = defaultDocument;
     }
@@ -89,8 +90,8 @@ public class StaticFileHandler implements Handler {
     }
 
     private String resolveContentType(String resourcePath) {
-        final String ext = extractExtension(resourcePath);
-        return MIME_TYPES.getOrDefault(ext, DEFAULT_CONTENT_TYPE);
+        final String extension = extractExtension(resourcePath);
+        return MIME_TYPES.getOrDefault(extension, DEFAULT_CONTENT_TYPE);
     }
 
     private String extractExtension(String name) {

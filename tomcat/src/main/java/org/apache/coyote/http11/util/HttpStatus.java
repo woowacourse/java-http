@@ -9,7 +9,7 @@ public enum HttpStatus {
     public final String reason;
 
     HttpStatus(int code, String reason) {
-        this.code=code;
-        this.reason=reason;
+        this.code = code;
+        this.reason = reason;
     }
 }

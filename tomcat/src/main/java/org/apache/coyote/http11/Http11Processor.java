@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,8 +43,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = parseHttpRequest(bufferedReader);
             HttpResponse httpResponse = handleHttpRequest(httpRequest);
-            outputStream.write(httpResponse.toString().getBytes());
-            outputStream.flush();
+            writeResponseToOutputStream(httpResponse, outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             return String.join("\r\n",
                 "HTTP/1.1 " + status,
                 "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: " + responseBody.getBytes().length,
                 "",
                 responseBody);
         }
@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleHttpRequest(HttpRequest httpRequest) {
         if (httpRequest == null) {
-            return new HttpResponse("500 Internal Server Error ", "text/html;charset=utf-8 ", null);
+            return new HttpResponse("500 Internal Server Error", "text/html;charset=utf-8", null);
         }
 
         if (httpRequest.endpoint.startsWith("/login")) {
@@ -94,23 +94,23 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpRequest.endpoint.equals("/")) {
-            return new HttpResponse("200 OK ", "text/html;charset=utf-8 ", "Hello world!");
-        } else {
-            try {
-                URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint);
-                if (httpRequest.endpoint.lastIndexOf(".") == -1) {
-                    resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint + ".html");
-                }
-                Path path = Path.of(resourceUrl.toURI());
-                String responseBody = Files.readString(path);
-                if (httpRequest.endpoint.endsWith(".css")) {
-                    return new HttpResponse("200 OK ", "text/css;charset=utf-8 ", responseBody);
-                }
-                return new HttpResponse("200 OK ", "text/html;charset=utf-8 ", responseBody);
-            } catch (IOException | URISyntaxException exception) {
-                log.error(exception.getMessage(), exception);
-                return new HttpResponse("500 Internal Server Error ", "text/html;charset=utf-8 ", null);
+            return new HttpResponse("200 OK", "text/html;charset=utf-8", "Hello world!");
+        }
+
+        try {
+            URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint);
+            if (httpRequest.endpoint.lastIndexOf(".") == -1) {
+                resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint + ".html");
             }
+            Path path = Path.of(resourceUrl.toURI());
+            String responseBody = Files.readString(path);
+            if (httpRequest.endpoint.endsWith(".css")) {
+                return new HttpResponse("200 OK", "text/css;charset=utf-8", responseBody);
+            }
+            return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
+        } catch (IOException | URISyntaxException exception) {
+            log.error(exception.getMessage(), exception);
+            return new HttpResponse("404 Not Found", "text/html;charset=utf-8", null);
         }
     }
 
@@ -124,5 +124,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         throw new IllegalArgumentException("존재하지 않는 아이디 혹은 비밀번호입니다." + " " + account);
+    }
+
+    private void writeResponseToOutputStream(HttpResponse httpResponse, OutputStream outputStream) throws IOException {
+        outputStream.write(httpResponse.toString().getBytes());
+        outputStream.flush();
     }
 }

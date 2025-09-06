@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Cookie;
+import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
@@ -35,9 +35,9 @@ public class Http11InputBuffer {
             requestBody = new String(bodyChars);
         }
 
-        Cookie cookie = null;
+        RequestCookie requestCookie = null;
         if (!rawCookie.isEmpty()) {
-            cookie = parseToCookie(rawCookie);
+            requestCookie = parseToCookie(rawCookie);
         }
 
         return new HttpRequest(
@@ -48,7 +48,7 @@ public class Http11InputBuffer {
                 host,
                 contentType,
                 requestBody,
-                cookie
+                requestCookie
         );
     }
 
@@ -66,7 +66,7 @@ public class Http11InputBuffer {
         return headers;
     }
 
-    private static Cookie parseToCookie(String rawCookies) {
+    private static RequestCookie parseToCookie(String rawCookies) {
         Map<String, String> cookieValues = new HashMap<>();
 
         String[] pairs = rawCookies.split("; ");
@@ -77,6 +77,6 @@ public class Http11InputBuffer {
             cookieValues.put(key, value);
         }
 
-        return new Cookie(cookieValues);
+        return new RequestCookie(cookieValues);
     }
 }

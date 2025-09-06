@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.Cookie;
+import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
@@ -16,10 +16,10 @@ public class HttpRequest {
     private final String contentType;
     private final int contentLength;
     private final String requestBody;
-    private final Cookie cookie;
+    private final RequestCookie requestCookie;
 
     public HttpRequest(SessionManager sessionManager, String httpMethod, String url, double httpVersion, String host,
-                       String contentType, String requestBody, Cookie cookie) {
+                       String contentType, String requestBody, RequestCookie requestCookie) {
         this.sessionManager = sessionManager;
         this.httpMethod = httpMethod;
         this.url = url;
@@ -28,15 +28,15 @@ public class HttpRequest {
         this.contentType = contentType;
         this.contentLength = requestBody == null ? 0 : requestBody.length();
         this.requestBody = requestBody;
-        this.cookie = cookie;
+        this.requestCookie = requestCookie;
     }
 
     public HttpSession getSession(boolean create) {
-        if (cookie == null) {
+        if (requestCookie == null) {
             return sessionManager.createSession();
         }
 
-        String jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
+        String jSessionId = requestCookie.findByKey(JAVA_SESSION_ID_KEY);
         if (jSessionId != null) {
             return sessionManager.findSession(jSessionId);
         }
@@ -48,8 +48,8 @@ public class HttpRequest {
         return null;
     }
 
-    public Cookie getCookie() {
-        return cookie;
+    public RequestCookie getCookie() {
+        return requestCookie;
     }
 
     public String getHttpMethod() {

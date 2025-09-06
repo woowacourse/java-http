@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.Cookie;
+import org.apache.catalina.ResponseCookie;
 
 public record HttpResponse(
         double httpVersion,
@@ -11,7 +11,7 @@ public record HttpResponse(
         String location,
         String charSet,
         String responseBody,
-        Cookie cookie
+        ResponseCookie responseCookie
 ) {
     private static final String DEFAULT_CHARSET = "charset=utf-8";
 
@@ -41,7 +41,7 @@ public record HttpResponse(
             String status,
             String responseBody,
             String uri,
-            Cookie cookie
+            ResponseCookie responseCookie
     ) {
         this(
                 httpVersion,
@@ -52,7 +52,7 @@ public record HttpResponse(
                 null,
                 DEFAULT_CHARSET,
                 responseBody,
-                cookie
+                responseCookie
         );
     }
 
@@ -80,7 +80,7 @@ public record HttpResponse(
             int statusCode,
             String status,
             String location,
-            Cookie cookie
+            ResponseCookie responseCookie
     ) {
         this(
                 httpVersion,
@@ -91,7 +91,7 @@ public record HttpResponse(
                 location,
                 null,
                 null,
-                cookie
+                responseCookie
         );
     }
 
@@ -108,14 +108,14 @@ public record HttpResponse(
 
     public static HttpResponse createRedirectionResponseWithCookie(HttpRequest httpRequest,
                                                                    String redirectionLocation,
-                                                                   Cookie cookie) {
+                                                                   ResponseCookie responseCookie) {
         return new HttpResponse(httpRequest.getHttpVersion(), HTTPStatus.FOUND.getStatusCode(),
-                HTTPStatus.FOUND.getStatus(), redirectionLocation, cookie);
+                HTTPStatus.FOUND.getStatus(), redirectionLocation, responseCookie);
     }
 
     public static HttpResponse createOKResponseWithCookie(HttpRequest httpRequest, String responseBody, String uri,
-                                                          Cookie cookie) {
+                                                          ResponseCookie responseCookie) {
         return new HttpResponse(httpRequest.getHttpVersion(), HTTPStatus.OK.getStatusCode(), HTTPStatus.OK.getStatus(),
-                responseBody, uri, cookie);
+                responseBody, uri, responseCookie);
     }
 }

@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.catalina.Cookie;
+import org.apache.catalina.ResponseCookie;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -117,8 +117,8 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
-            Cookie cookie = getCookie(httpRequest, foundUser.get());
-            return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
+            ResponseCookie responseCookie = getCookie(httpRequest, foundUser.get());
+            return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
         }
 
         return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
@@ -132,16 +132,16 @@ public class Http11Processor implements Runnable, Processor {
                 parsedRequestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        Cookie cookie = getCookie(httpRequest, user);
-        return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
+        ResponseCookie responseCookie = getCookie(httpRequest, user);
+        return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
     }
 
-    private Cookie getCookie(HttpRequest httpRequest, User user) {
+    private ResponseCookie getCookie(HttpRequest httpRequest, User user) {
         HttpSession session = httpRequest.getSession(true);
         session.setAttribute(session.getId(), user);
 
-        Cookie cookie = new Cookie();
-        cookie.add(JAVA_SESSION_ID_KEY, session.getId());
-        return cookie;
+        ResponseCookie responseCookie = new ResponseCookie();
+        responseCookie.add(JAVA_SESSION_ID_KEY, session.getId());
+        return responseCookie;
     }
 }

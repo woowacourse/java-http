@@ -3,15 +3,15 @@ package org.apache.catalina;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cookie {
+public class RequestCookie {
 
     private final Map<String, String> cookieValues;
 
-    public Cookie(Map<String, String> cookieValues) {
+    public RequestCookie(Map<String, String> cookieValues) {
         this.cookieValues = cookieValues;
     }
 
-    public Cookie() {
+    public RequestCookie() {
         this.cookieValues = new HashMap<>();
     }
 

@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private record HttpRequest(String method, String endpoint, Map<String, String> queryStrings) {}
+    private record HttpRequest(String method, String path, Map<String, String> queryStrings) {}
 
     private record HttpResponse(String status, String contentType, String responseBody) {
         public String toString() {
@@ -68,16 +68,16 @@ public class Http11Processor implements Runnable, Processor {
             String method = methodAndUriAndProtocol[0];
 
             String uri = methodAndUriAndProtocol[1];
-            String endpoint = uri;
+            String path = uri;
             Map<String, String> queryStrings = null;
             int index = uri.indexOf("?");
             if (index != -1) {
-                endpoint = uri.substring(0, index);
+                path = uri.substring(0, index);
                 queryStrings = Arrays.stream(uri.substring(index + 1).split("&"))
                     .map(queryString -> queryString.split("="))
                     .collect(Collectors.toUnmodifiableMap(strings -> strings[0], strings -> strings[1]));
             }
-            return new HttpRequest(method, endpoint, queryStrings);
+            return new HttpRequest(method, path, queryStrings);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             log.error(exception.getMessage(), exception);
             return null;
@@ -89,22 +89,21 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("500 Internal Server Error", "text/html;charset=utf-8", null);
         }
 
-        if (httpRequest.endpoint.startsWith("/login")) {
+        if (httpRequest.path.startsWith("/login")) {
             handleLogin(httpRequest);
         }
 
-        if (httpRequest.endpoint.equals("/")) {
+        if (httpRequest.path.equals("/")) {
             return new HttpResponse("200 OK", "text/html;charset=utf-8", "Hello world!");
         }
 
         try {
-            URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint);
-            if (httpRequest.endpoint.lastIndexOf(".") == -1) {
-                resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.endpoint + ".html");
+            URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.path);
+            if (httpRequest.path.lastIndexOf(".") == -1) {
+                resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.path + ".html");
             }
-            Path path = Path.of(resourceUrl.toURI());
-            String responseBody = Files.readString(path);
-            if (httpRequest.endpoint.endsWith(".css")) {
+            String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
+            if (httpRequest.path.endsWith(".css")) {
                 return new HttpResponse("200 OK", "text/css;charset=utf-8", responseBody);
             }
             return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
@@ -119,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = httpRequest.queryStrings.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 혹은 비밀번호입니다." + " " + account));
-        if (user.isPasswordSameWith(password)) {
+        if (user.isPasswordValid(password)) {
             log.info(user.toString());
             return;
         }

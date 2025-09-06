@@ -38,9 +38,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
              final var outputStream = connection.getOutputStream()) {
 
-            final var requestData = getRequestData(inputStream);
+            final var requestData = getRequestData(bufferedReader);
             log.info("requestData : {}", requestData);
             tomcatController.handleRequest(requestData);
             final var response = getResponse(requestData);
@@ -53,9 +54,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestData getRequestData(InputStream inputStream) throws IOException {
-        var inputReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final List<String> rawHttpRequest = inputReader.lines()
+    private RequestData getRequestData(BufferedReader bufferedReader) throws IOException {
+        final List<String> rawHttpRequest = bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
                 .toList();
         if (rawHttpRequest.isEmpty()) {

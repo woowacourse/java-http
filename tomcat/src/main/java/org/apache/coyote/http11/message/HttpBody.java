@@ -30,4 +30,8 @@ public class HttpBody {
     public int length() {
         return content.length;
     }
+
+    public byte[] getBytes() {
+        return Arrays.copyOf(content, content.length);
+    }
 }

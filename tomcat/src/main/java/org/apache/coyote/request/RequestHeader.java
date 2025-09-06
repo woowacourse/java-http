@@ -34,4 +34,9 @@ public class RequestHeader {
 
         return httpCookie.getSession();
     }
+
+    public boolean hasCookie() {
+        String cookie = headerValue.get(HttpHeaders.COOKIE);
+        return cookie != null;
+    }
 }

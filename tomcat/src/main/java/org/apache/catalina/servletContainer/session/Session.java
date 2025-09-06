@@ -2,6 +2,7 @@ package org.apache.catalina.servletContainer.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -29,7 +30,10 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
+    public Optional<Object> getAttribute(final String key) {
+        if (values.containsKey(key)) {
+            return Optional.of(values.get(key));
+        }
+        return Optional.empty();
     }
 }

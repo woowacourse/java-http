@@ -15,7 +15,6 @@ public class Http11Request {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final String QUERY_PARAMETER_DELIMiTER = "?";
 
-    private InputStream inputStream;
     private String header;
     private String firstLine;
     private String[] firstLineConditions;
@@ -23,8 +22,7 @@ public class Http11Request {
     private Map<String, String> queryParams;
 
     public Http11Request(InputStream inputStream) throws IOException {
-        this.inputStream = inputStream;
-        extractHeader();
+        extractHeader(inputStream);
     }
 
     public String getPath() {
@@ -45,7 +43,7 @@ public class Http11Request {
         return requestMethod;
     }
 
-    private void extractHeader() throws IOException {
+    private void extractHeader(InputStream inputStream) throws IOException {
         final StringBuilder requestHeader = new StringBuilder();
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream, DEFAULT_CHARSET));

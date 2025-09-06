@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,11 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<String, String> mimeTypes = Map.of(
+            "html", "text/html; charset=UTF-8",
+            "css", "text/css; charset=UTF-8",
+            "js", "application/javascript; charset=UTF-8"
+    );
 
     private final Socket connection;
 
@@ -42,16 +48,20 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info(path);
 
-            if ("/".equals(path) || "/index.html".equals(path)) {
-                serveStatic(out, "static/index.html", "text/html; charset=UTF-8");
-                return;
+            if (path.equals("/")) {
+                path = "/index";
             }
 
-            if ("/css/styles.css".equals(path)) {
-                serveStatic(out, "static/css/styles.css", "text/css; charset=UTF-8");
-                return;
+            InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
+            if (in == null && !path.contains(".")) {
+                in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
             }
 
+            if (in != null) {
+                serveStatic(out, in, path);
+                return;
+            }
+            
             sendError(out, 404, "Not Found");
         } catch (Exception e) {
             try (var out = new BufferedOutputStream(connection.getOutputStream())) {
@@ -63,14 +73,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void serveStatic(BufferedOutputStream out, String resourcePath, String contentType) throws IOException {
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (in == null) {
-                sendError(out, 404, "Not Found");
-                return;
+    private void serveStatic(BufferedOutputStream out, InputStream inputStream, String path) throws IOException {
+        try (inputStream) {
+            String ext = "";
+            if (path.contains(".")) {
+                ext = path.substring(path.lastIndexOf(".") + 1);
             }
-            byte[] body = in.readAllBytes();
-            write(out, 200, "OK", contentType, body, false);
+
+            String contentType = mimeTypes.get(ext);
+            byte[] body = inputStream.readAllBytes();
+
+            write(out, 200, "OK", contentType, body, true);
         }
     }
 

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.util;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +26,14 @@ public class UriParser {
         }
         return Arrays.stream(uri.substring(indexOfQueryDelimiter + 1).split("&"))
             .map(queryString -> queryString.split("="))
-            .collect(Collectors.toUnmodifiableMap(
-                strings -> strings[0], // key
-                strings -> strings[1] // value
+            .collect(Collectors.toMap(
+                strings -> decodeValue(strings[0]), // key
+                strings -> decodeValue(strings[1]), // value
+                (oldValue, newValue) -> newValue
             ));
+    }
+
+    private static String decodeValue(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

@@ -31,12 +31,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String firstLine = br.readLine();
+            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final var requestLine = bufferedReader.readLine();
 
-            String uri = firstLine.split(" ")[1];
-
-            final var response = new RequestResolver().resolve(uri);
+            final var response = new RequestProcessor().process(requestLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

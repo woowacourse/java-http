@@ -13,10 +13,9 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public void ok(final String rawPath) throws IOException {
+    public void sendResponse(final String rawPath) throws IOException {
         final String filePath = processFilePath(rawPath);
-        try (InputStream fileInputStream =
-                     getClass().getClassLoader().getResourceAsStream("static/" + filePath)) {
+        try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream("static/" + filePath)) {
             if (fileInputStream == null) {
                 sendResponse(new byte[0], ContentType.HTML, HttpStatus.NOT_FOUND);
                 return;

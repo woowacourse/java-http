@@ -92,6 +92,10 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("500 Internal Server Error", "text/html;charset=utf-8", null);
         }
 
+        if (httpRequest.pathEquals("/")) {
+            return new HttpResponse("200 OK", "text/html;charset=utf-8", "Hello world!");
+        }
+
         URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
         if (resourceUrl == null) {
             return handleApi(httpRequest);
@@ -100,10 +104,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleApi(HttpRequest httpRequest) {
-        if (httpRequest.pathEquals("/")) {
-            return new HttpResponse("200 OK", "text/html;charset=utf-8", "Hello world!");
-        }
-
         if (httpRequest.pathEquals("/login")) {
             return handleLogin(httpRequest);
         }
@@ -134,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = findUserWithAccountAndPassword(account, password);
         log.info(user.toString());
         try {
-            URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
+            URL resourceUrl = getClass().getClassLoader().getResource("static/login.html");
             String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
             return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
         } catch (IOException | URISyntaxException exception) {

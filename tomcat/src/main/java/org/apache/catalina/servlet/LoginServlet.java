@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
@@ -32,27 +33,32 @@ public class LoginServlet extends HttpServlet {
     public HttpResponse doGet(final HttpRequest httpRequest) {
         RequestPath requestPath = httpRequest.getRequestPath();
 
-        String resource = findResource(LOGIN_PATH + "." + ContentType.HTML);
+        String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
 
-        Map<String, String> requestQueryParams = requestPath.getQueryParams();
-        if(requestQueryParams.isEmpty()){
-            return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
+        return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
+    }
+
+    @Override
+    public HttpResponse doPost(final HttpRequest httpRequest) {
+        final String requestBody = httpRequest.getRequestBody().getBody();
+
+        Map<String, String> bodyValues = new HashMap<>();
+        String[] values = requestBody.split("&");
+        for (String value : values) {
+            final String[] split = value.split("=");
+
+            bodyValues.put(split[0], split[1]);
         }
 
         final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
 
         try {
-            loginController.login(requestQueryParams.get("account"), requestQueryParams.get("password"));
+            loginController.login(bodyValues.get("account"), bodyValues.get("password"));
         } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
             return HttpResponseGenerator.generate(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
         }
 
         return HttpResponseGenerator.generate(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
-    }
-
-    @Override
-    public HttpResponse doPost(final HttpRequest httpRequest) {
-        return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     private String findResource(final String requestPath) {

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,28 +48,19 @@ public class Http11Processor implements Runnable, Processor {
                     st.append(line2).append("\r\n");
                 }
 
-                String responseBody = st.toString();
-                String response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
+                ResponseManager responseManager = new ResponseManager(new ResponseHeaderManager(),
+                        new ResponseBodyManager(st.toString()));
+                outputStream.write(responseManager.getContents().getBytes());
                 outputStream.flush();
                 return;
             }
 
             final var responseBody = "Hello world!";
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            ResponseManager responseManager = new ResponseManager(new ResponseHeaderManager(),
+                    new ResponseBodyManager(responseBody));
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseManager.getContents().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

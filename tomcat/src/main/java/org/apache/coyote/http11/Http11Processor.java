@@ -40,21 +40,22 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream();
+             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        ) {
             String uri = parseUri(br);
-            if(uri.startsWith("/login")){
+            if (uri.startsWith("/login")) {
                 handleLogin(uri);
-                respondStaticResource("/login.html", outputStream);
+                respondStaticResource(Paths.get("/login.html"), outputStream);
                 return;
             }
-            respondStaticResource(uri, outputStream);
+            respondStaticResource(Paths.get(uri), outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static String parseUri(BufferedReader br) throws IOException {
+    private String parseUri(BufferedReader br) throws IOException {
         String requestLine = br.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException(INVALID_REQUEST_LINE.getMessage());
@@ -66,8 +67,8 @@ public class Http11Processor implements Runnable, Processor {
         return parts[1];
     }
 
-    private static void handleLogin(String uri) {
-        if(!uri.contains("?")){
+    private void handleLogin(String uri) {
+        if (!uri.contains("?")) {
             return;
         }
         int index = uri.indexOf("?");
@@ -82,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
         user.logUserInfo(password, log);
     }
 
-    private static void parseQueryString(String queryString, Map<String, String> params) {
+    private void parseQueryString(String queryString, Map<String, String> params) {
         String[] pairs = queryString.split("&");
         for (String pair : pairs) {
             String[] parts = pair.split("=");
@@ -92,38 +93,39 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(String uri, OutputStream outputStream) throws IOException, URISyntaxException {
-        String contentType = getContentType(uri);
-        final var responseBody = getResponseBodyFromStaticResource(uri);
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private void respondStaticResource(Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+        String contentType = getContentType(path);
+        final var responseBody = getResponseBodyFromStaticResource(path);
+        final var response = formatHttpResponse(contentType, responseBody);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
 
-    private static String getContentType(String uri) {
-        String[] parts = uri.split("\\.");
-        if (parts.length < 2) {
-            return "html";
+    private String getContentType(Path path) throws IOException {
+        String contentType = Files.probeContentType(path);
+        if (contentType == null) {
+            contentType = "text/html";
         }
-        String extension = parts[parts.length-1];
-        return switch (extension) {
-            case "css" -> "css";
-            case "js" -> "javascript";
-            case "png", "jpg", "jpeg" -> "image/" + extension;
-            default -> "html";
-        };
+        return contentType;
     }
 
-    private String getResponseBodyFromStaticResource(String uri) throws IOException, URISyntaxException {
-        return new String(Files.readAllBytes(getStaticPath(uri)));
+    private String getResponseBodyFromStaticResource(Path path) throws IOException, URISyntaxException {
+        if (path.equals(Path.of("\\"))) {
+            return "Hello world!";
+        }
+        return new String(Files.readAllBytes(getStaticPath(path)));
     }
 
-    private Path getStaticPath(String uri) throws URISyntaxException {
-        return Paths.get(getClass().getClassLoader().getResource("static" + uri).toURI());
+    private Path getStaticPath(Path path) throws URISyntaxException {
+        return Paths.get(getClass().getClassLoader().getResource("static" + path).toURI());
+    }
+
+    private String formatHttpResponse(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

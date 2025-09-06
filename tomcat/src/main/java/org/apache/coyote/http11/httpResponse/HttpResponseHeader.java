@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.httpResponse;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.coyote.http11.HttpStatus;
+
 public class HttpResponseHeader {
 
     private final String requestUri;
@@ -10,13 +14,22 @@ public class HttpResponseHeader {
         this.requestUri = requestUri;
     }
 
-    public String getHeader(final int contentLength) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: "+ getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + contentLength + " ",
-                "\r\n"
-        );
+    public String getHeader(
+            final HttpStatus httpStatus,
+            final int contentLength,
+            final String location
+    ) {
+        final List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 " + httpStatus.toString());
+        headers.add("Content-Type: " + getContentType() + ";charset=utf-8");
+        headers.add("Content-Length: " + contentLength);
+
+        if (location != null) {
+            headers.add("Location: " + location);
+        }
+
+        headers.add("\r\n");
+        return String.join(" \r\n", headers);
     }
 
     private String getContentType() {

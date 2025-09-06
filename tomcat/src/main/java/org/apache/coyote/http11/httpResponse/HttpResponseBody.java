@@ -26,13 +26,16 @@ public class HttpResponseBody {
         this.requestUri = requestUri;
     }
 
-    public String getBody() throws IOException {
+    public HttpResponseContent getContent() throws IOException {
         if (requestUri.equals("/")) {
-            return "Hello world!";
+            return HttpResponseContent.success("Hello world!");
         }
+
+        String filePath = DEFAULT_RESOURCE_PATH + requestUri;
 
         if (requestUri.contains("?")) {
             int index = requestUri.indexOf("?");
+            filePath = DEFAULT_RESOURCE_PATH + requestUri.substring(0, index);
 
             final String queryString = requestUri.substring(index + 1);
             final String[] queryStrings = queryString.split("&");
@@ -45,37 +48,49 @@ public class HttpResponseBody {
             }
 
             final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(params.get("account"));
-            userOrEmpty.ifPresent(user -> log.info("user: {}", user));
+            if (userOrEmpty.isPresent()) {
+                final User user = userOrEmpty.get();
+                log.info("user: {}", user);
 
-            return getResponseBodyIfHasQueryString(index);
+                if (!user.checkPassword(params.get("password"))) {
+                    final String body = getBodyFromStaticFile("/401.html");
+                    return HttpResponseContent.redirect(body, "/401.html");
+                }
+
+                final String body = getBodyFromStaticFile("/index.html");
+                return HttpResponseContent.redirect(body, "/index.html");
+            }
         }
 
-        return getPlainResponseBody();
-    }
-
-    private String getResponseBodyIfHasQueryString(final int index) throws IOException {
-        final String filePath = DEFAULT_RESOURCE_PATH + requestUri.substring(0, index);
-        return readResourceAsString(filePath);
-    }
-
-    private String getPlainResponseBody() throws IOException {
-        final String filePath = DEFAULT_RESOURCE_PATH + requestUri;
-        return readResourceAsString(filePath);
-    }
-
-    private String readResourceAsString(
-            String filePath
-    ) throws IOException {
         if (!requestUri.contains(".")) {
             filePath += ".html";
         }
 
-        URL resource  = getClass().getClassLoader().getResource(filePath);
-        if (resource == null) {
-            resource = getClass().getClassLoader().getResource(DEFAULT_RESOURCE_PATH + "/404.html");
-        }
+        return createHttpResponseContentFrom(filePath);
+    }
+
+    private String getBodyFromStaticFile(final String fileName) throws IOException {
+        final String filePath = DEFAULT_RESOURCE_PATH + fileName;
+        final URL resource = getClass().getClassLoader().getResource(filePath);
+        return getBodyFromResource(resource);
+    }
+
+    private String getBodyFromResource(final URL resource) throws IOException {
         final File file = new File(resource.getFile());
         final Path path = file.toPath();
         return new String(Files.readAllBytes(path));
+    }
+
+    private HttpResponseContent createHttpResponseContentFrom(
+            String filePath
+    ) throws IOException {
+        URL resource  = getClass().getClassLoader().getResource(filePath);
+        if (resource == null) {
+            final String body = getBodyFromStaticFile("/404.html");
+            return HttpResponseContent.error(body);
+        }
+
+        final String body = getBodyFromResource(resource);
+        return HttpResponseContent.success(body);
     }
 }

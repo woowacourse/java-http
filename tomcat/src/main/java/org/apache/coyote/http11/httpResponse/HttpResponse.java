@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
@@ -16,10 +17,15 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() throws IOException {
-        final String body = httpResponseBody.getBody();
-        int bodyLength = body.getBytes(StandardCharsets.UTF_8).length;
+        final HttpResponseContent content = httpResponseBody.getContent();
+        final HttpStatus httpStatus = content.httpStatus();
 
-        final String header = httpResponseHeader.getHeader(bodyLength);
+        final String body = content.body();
+        final int bodyLength = body.getBytes(StandardCharsets.UTF_8).length;
+
+        final String location = content.location();
+
+        final String header = httpResponseHeader.getHeader(httpStatus, bodyLength, location);
 
         return (header + body).getBytes(StandardCharsets.UTF_8);
     }

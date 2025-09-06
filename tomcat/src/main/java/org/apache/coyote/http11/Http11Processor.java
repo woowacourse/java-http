@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handle.handler.HttpHandler;
+import org.apache.coyote.http11.handle.HttpHandlerMapper;
+import org.apache.coyote.http11.reqeust.HttpRequest;
+import org.apache.coyote.http11.reqeust.util.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.util.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,20 +33,17 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()
+        ) {
+            final HttpRequestReader reader = new HttpRequestReader(inputStream);
+            final HttpResponseWriter writer = new HttpResponseWriter(outputStream);
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            final HttpRequest request = reader.read();
+            final HttpHandlerMapper handlerMapper = HttpHandlerMapper.getInstance();
+            final HttpHandler handler = handlerMapper.getHandler(request);
+            final HttpResponse response = handler.handle(request);
+            writer.write(response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

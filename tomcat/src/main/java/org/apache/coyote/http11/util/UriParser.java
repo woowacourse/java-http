@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.util;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,9 @@ public class UriParser {
 
     public static Map<String, String> parseQueryStrings(String uri) {
         int indexOfQueryDelimiter = uri.indexOf(QUERY_DELIMITER);
+        if (indexOfQueryDelimiter == -1) {
+            return new HashMap<>();
+        }
         return Arrays.stream(uri.substring(indexOfQueryDelimiter + 1).split("&"))
             .map(queryString -> queryString.split("="))
             .collect(Collectors.toUnmodifiableMap(

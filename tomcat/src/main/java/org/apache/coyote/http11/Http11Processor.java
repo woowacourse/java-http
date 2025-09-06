@@ -92,29 +92,11 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("500 Internal Server Error", "text/html;charset=utf-8", null);
         }
 
-        if (httpRequest.isStaticFileRequest()) {
-            return handleStaticFile(httpRequest);
+        URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
+        if (resourceUrl == null) {
+            return handleApi(httpRequest);
         }
-
-        return handleApi(httpRequest);
-    }
-
-    private HttpResponse handleStaticFile(HttpRequest httpRequest) {
-        try {
-            String responseBody = readFile("static" + httpRequest.getPath());
-            if (httpRequest.getPath().endsWith(".css")) {
-                return new HttpResponse("200 OK", "text/css;charset=utf-8", responseBody);
-            }
-            return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
-        } catch (IOException | URISyntaxException exception) {
-            log.error(exception.getMessage(), exception);
-            return new HttpResponse("404 Not Found", "text/html;charset=utf-8", null);
-        }
-    }
-
-    private String readFile(String path) throws IOException, URISyntaxException {
-        URL resourceUrl = getClass().getClassLoader().getResource(path);
-        return Files.readString(Path.of(resourceUrl.toURI()));
+        return handleStaticFile(httpRequest, resourceUrl);
     }
 
     private HttpResponse handleApi(HttpRequest httpRequest) {
@@ -129,6 +111,19 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpResponse("404 Not Found", "text/html;charset=utf-8", null);
     }
 
+    private HttpResponse handleStaticFile(HttpRequest httpRequest, URL resourceUrl) {
+        try {
+            String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
+            if (httpRequest.getPath().endsWith(".css")) {
+                return new HttpResponse("200 OK", "text/css;charset=utf-8", responseBody);
+            }
+            return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
+        } catch (IOException | URISyntaxException exception) {
+            log.error(exception.getMessage(), exception);
+            return new HttpResponse("404 Not Found", "text/html;charset=utf-8", null);
+        }
+    }
+
     private HttpResponse handleLogin(HttpRequest httpRequest) {
         String account = httpRequest.getQueryStringOf("account");
         String password = httpRequest.getQueryStringOf("password");
@@ -139,7 +134,8 @@ public class Http11Processor implements Runnable, Processor {
         User user = findUserWithAccountAndPassword(account, password);
         log.info(user.toString());
         try {
-            String responseBody = readFile("static/login.html");
+            URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
+            String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
             return new HttpResponse("200 OK", "text/html;charset=utf-8", responseBody);
         } catch (IOException | URISyntaxException exception) {
             log.error(exception.getMessage(), exception);

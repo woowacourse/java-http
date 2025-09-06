@@ -37,12 +37,6 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        /*
-         * 1. inputStream -> Request resource 읽어오기
-         *      첫 번째 줄 파싱 (method 뒤에 명시된 파일 명 기반으로 찾기)
-         * 2. resource 찾기 (with ClassLoader)
-         * 3. 찾은 파일 내용을 읽어서 outputStream 에 전달 (바이트 코드로)
-         */
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             try {
@@ -73,8 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         final var reader = new BufferedReader(new InputStreamReader(inputStream));
         final var request = reader.readLine();
 
-        // 1-2. request url 에서 리소스명 추출
-        final var split = Arrays.stream(request.split("\\s+")).toList(); // 공백 문자를 기준으로 파싱
+        final var split = Arrays.stream(request.split("\\s+")).toList();
         if (split.isEmpty()) {
             throw new IllegalArgumentException();
         }

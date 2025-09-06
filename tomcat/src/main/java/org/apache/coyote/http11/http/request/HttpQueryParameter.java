@@ -9,7 +9,7 @@ public class HttpQueryParameter {
     private final Map<String, String> queryParameterInfo;
 
     private HttpQueryParameter(final String path) {
-        final String targetPath = clean(path);
+        final String targetPath = path.trim();
         final int queryParameterStartIndex = targetPath.indexOf(HttpSplitFormat.QUERY_PARAMETER_START.getValue());
         if (queryParameterStartIndex != -1 && queryParameterStartIndex != targetPath.length() - 1) {
 
@@ -29,29 +29,49 @@ public class HttpQueryParameter {
 
     private Map<String, String> createQueryParameterInfo(final String[] queryParameterElements) {
         final Map<String, String> queryParameterInfo = new HashMap<>();
-        for (String queryParameterElement : queryParameterElements) {
-            String[] queryParameter = queryParameterElement.split(
-                    HttpSplitFormat.QUERY_PARAMETER_ELEMENT.getValue());
-            validateQueryParameterFormat(queryParameter);
-            queryParameterInfo.put(clean(queryParameter[0]), clean(queryParameter[1]));
+        for (final String queryParameterElement : queryParameterElements) {
+            String queryParameterElementLine = queryParameterElement.trim();
+            parseQueryParameterElement(queryParameterElementLine, queryParameterInfo);
         }
         return queryParameterInfo;
     }
 
-    private void validateQueryParameterFormat(final String[] queryParameter) {
-        if (queryParameter == null) {
-            throw new IllegalArgumentException("query parameter는 null일 수 없습니다");
+    private void parseQueryParameterElement(final String queryParameterElementLine,
+                                            final Map<String, String> queryParameterInfo) {
+        int queryParameterSplitIndex = queryParameterElementLine
+                .indexOf(HttpSplitFormat.QUERY_PARAMETER_ELEMENT.getValue());
+        validateQueryParameterElementFormat(queryParameterSplitIndex);
+
+        final String queryParameterElementKey = queryParameterElementLine
+                .substring(0, queryParameterSplitIndex)
+                .trim();
+        final String queryParameterElementValue = queryParameterElementLine
+                .substring(queryParameterSplitIndex + 1)
+                .trim();
+        validateQueryParameterKeyFormat(queryParameterElementKey);
+        validateQueryParameterValueFormat(queryParameterElementValue);
+        queryParameterInfo.put(queryParameterElementKey, queryParameterElementValue);
+    }
+
+    private void validateQueryParameterKeyFormat(final String queryParameterElementKey) {
+        if (queryParameterElementKey == null) {
+            throw new IllegalArgumentException("queryParameter key는 null일 수 없습니다.");
         }
-        if (queryParameter.length != 2) {
-            throw new IllegalArgumentException("query parameter는 2개의 원소로 구성되어야 합니다");
-        }
-        if (queryParameter[0].isBlank()) {
-            throw new IllegalArgumentException("query parameter의 key는 빈 값일 수 없습니다");
+        if (queryParameterElementKey.isBlank()) {
+            throw new IllegalArgumentException("query parameter key는 빈 값일 수 없습니다");
         }
     }
 
-    private String clean(final String target) {
-        return target.trim();
+    private void validateQueryParameterValueFormat(final String queryParameterElementValue) {
+        if (queryParameterElementValue == null) {
+            throw new IllegalArgumentException("queryParameter value는 null일 수 없습니다.");
+        }
+    }
+
+    private void validateQueryParameterElementFormat(final int queryParameterSplitIndex) {
+        if (queryParameterSplitIndex == -1) {
+            throw new IllegalArgumentException("유효하지 않은 query parameter element format 입니다.");
+        }
     }
 
     public String getValue(final String target) {
@@ -59,7 +79,7 @@ public class HttpQueryParameter {
             throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
         }
 
-        final String targetKey = clean(target);
+        final String targetKey = target.trim();
 
         if (!queryParameterInfo.containsKey(targetKey)) {
             throw new IllegalArgumentException("존재하지 않는 query parameter key 입니다: %s".formatted(target));

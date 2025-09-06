@@ -7,10 +7,11 @@ public record HttpRequest(
         String host,
         String contentType,
         int contentLength,
-        String requestBody
+        String requestBody,
+        Cookie cookie
 ) {
     public HttpRequest(String httpMethod, String uri, double httpVersion, String host, String contentType,
-                       String requestBody) {
+                       String requestBody, Cookie cookie) {
         this(
                 httpMethod,
                 uri,
@@ -18,7 +19,8 @@ public record HttpRequest(
                 host,
                 contentType,
                 requestBody == null ? 0 : requestBody.length(),
-                requestBody
+                requestBody,
+                cookie
         );
     }
 }

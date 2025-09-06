@@ -8,7 +8,8 @@ public record HttpResponse(
         int contentLength,
         String location,
         String charSet,
-        String responseBody
+        String responseBody,
+        Cookie cookie
 ) {
     private static final String DEFAULT_CHARSET = "charset=utf-8";
 
@@ -27,7 +28,29 @@ public record HttpResponse(
                 responseBody != null ? responseBody.getBytes().length : 0,
                 null,
                 DEFAULT_CHARSET,
-                responseBody
+                responseBody,
+                null
+        );
+    }
+
+    public HttpResponse(
+            double httpVersion,
+            int statusCode,
+            String status,
+            String responseBody,
+            String uri,
+            Cookie cookie
+    ) {
+        this(
+                httpVersion,
+                statusCode,
+                status,
+                StaticResourceExtension.findMimeTypeByUrl(uri),
+                responseBody != null ? responseBody.getBytes().length : 0,
+                null,
+                DEFAULT_CHARSET,
+                responseBody,
+                cookie
         );
     }
 
@@ -45,7 +68,28 @@ public record HttpResponse(
                 0,
                 location,
                 null,
+                null,
                 null
+        );
+    }
+
+    public HttpResponse(
+            double httpVersion,
+            int statusCode,
+            String status,
+            String location,
+            Cookie cookie
+    ) {
+        this(
+                httpVersion,
+                statusCode,
+                status,
+                null,
+                0,
+                location,
+                null,
+                null,
+                cookie
         );
     }
 
@@ -55,5 +99,17 @@ public record HttpResponse(
 
     public static HttpResponse createOKResponse(HttpRequest httpRequest, String responseBody, String uri) {
         return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri);
+    }
+
+
+    public static HttpResponse createRedirectionResponseWithCookie(HttpRequest httpRequest,
+                                                                   String redirectionLocation,
+                                                                   Cookie cookie) {
+        return new HttpResponse(httpRequest.httpVersion(), 302, "Found", redirectionLocation, cookie);
+    }
+
+    public static HttpResponse createOKResponseWithCookie(HttpRequest httpRequest, String responseBody, String uri,
+                                                          Cookie cookie) {
+        return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri, cookie);
     }
 }

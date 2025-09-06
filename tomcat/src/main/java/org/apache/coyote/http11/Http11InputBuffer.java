@@ -19,6 +19,8 @@ public class Http11InputBuffer {
         String host = "";
         String contentType = "";
         int contentLength = 0;
+        String rawCookie = "";
+        Cookie cookie = null;
 
         while (true) {
             String nextLine = bufferedReader.readLine();
@@ -33,6 +35,8 @@ public class Http11InputBuffer {
                 contentType = nextLine.split(":")[1].trim();
             } else if (lowerCaseNextLine.startsWith("content-length")) {
                 contentLength = Integer.parseInt(nextLine.split(":")[1].trim());
+            } else if (lowerCaseNextLine.startsWith("rawCookie")) {
+                rawCookie = nextLine.split(":")[1].trim();
             }
         }
 
@@ -43,13 +47,18 @@ public class Http11InputBuffer {
             requestBody = new String(bodyChars);
         }
 
+        if (!rawCookie.isEmpty()) {
+            cookie = new Cookie(rawCookie);
+        }
+
         return new HttpRequest(
                 httpMethod,
                 uri,
                 httpVersion,
                 host,
                 contentType,
-                requestBody
+                requestBody,
+                cookie
         );
     }
 }

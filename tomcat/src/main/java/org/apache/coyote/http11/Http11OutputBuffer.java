@@ -24,6 +24,10 @@ public class Http11OutputBuffer {
         responseBuilder.append("Content-Length: ").append(httpResponse.contentLength()).append(" ");
         responseBuilder.append("\r\n");
 
+        if (httpResponse.cookie() != null) {
+            responseBuilder.append("Set-Cookie: ").append(httpResponse.cookie().parseToString()).append(" ");
+        }
+
         responseBuilder.append("\r\n");
 
         if (httpResponse.responseBody() != null) {

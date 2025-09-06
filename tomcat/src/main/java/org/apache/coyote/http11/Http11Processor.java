@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,29 +71,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryStrings(String uri, int index) {
-        if (index == -1) {
-            return null;
-        }
-
-        String rawQueryString = uri.substring(index + 1);
-        String[] pairs = rawQueryString.split("&");
-
-        Map<String, String> queryParams = new HashMap<>();
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            String key = keyValue[0];
-            String value = keyValue[1];
-            queryParams.put(key, value);
-        }
-        return queryParams;
-    }
-
     private HttpResponse handleForStaticResource(HttpRequest httpRequest, String uri) throws IOException {
         if (!StaticResourceExtension.anyMatch(uri)) {
             uri = uri + ".html";
         }
-        log.info("uri = {}", uri);
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
         return HttpResponse.createOKResponse(httpRequest, responseBody, uri);
@@ -132,7 +114,8 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
-            return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
+            Cookie cookie = getCookie(httpRequest);
+            return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
         }
 
         return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
@@ -146,6 +129,20 @@ public class Http11Processor implements Runnable, Processor {
                 parsedRequestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
+        Cookie cookie = getCookie(httpRequest);
+        return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
+    }
+
+    private Cookie getCookie(HttpRequest httpRequest) {
+        if (httpRequest.cookie() != null && httpRequest.cookie().hasSession()) {
+            System.out.println("======");
+            System.out.println("쿠키 이미 존재!!");
+            System.out.println("======");
+            return httpRequest.cookie();
+        }
+
+        Cookie cookie = new Cookie();
+        cookie.add("JSESSIONID", UUID.randomUUID().toString());
+        return cookie;
     }
 }

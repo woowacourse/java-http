@@ -13,13 +13,10 @@ public class HttpRequest {
     private final HttpVersion version;
 
     public HttpRequest(List<String> message) {
-        if (message.size() <= 0) {
-            throw new InvalidRequestException("요청 메세지가 비어있습니다.");
-        }
+        validateEmptyMessage(message);
+        validateStartLineFormat(message.getFirst());
+
         List<String> startLine = List.of(message.getFirst().split(" "));
-        if (startLine.size() < 3) {
-            throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");
-        }
         method = HttpMethod.valueOf(startLine.get(0));
         uri = parseUri(startLine.get(1));
         queryString = parseQueryParam(startLine.get(1));
@@ -54,18 +51,35 @@ public class HttpRequest {
     private Map<String, String> parseQueryParam(String uriLine) {
         HashMap<String, String> queryStrings = new HashMap<>();
 
-        List<String> startLinePart = List.of(uriLine.split("\\?"));
-        if (startLinePart.size() < 2) {
+        if (!hasQueryParam(uriLine)) {
             return queryStrings;
         }
 
+        List<String> startLinePart = List.of(uriLine.split("\\?"));
         String queryStringLine = startLinePart.getLast();
         List<String> queryStringParts = List.of(queryStringLine.split("&"));
         for (String queryStringPart : queryStringParts) {
             List<String> keyValue = List.of(queryStringPart.split("="));
             queryStrings.put(keyValue.getFirst(), keyValue.getLast());
         }
-
         return queryStrings;
+    }
+
+    private void validateEmptyMessage(List<String> message) {
+        if (message.isEmpty()) {
+            throw new InvalidRequestException("요청 메세지가 비어있습니다.");
+        }
+    }
+
+    private void validateStartLineFormat(String startLine) {
+        List<String> startLinePart = List.of(startLine.split(" "));
+        if (startLinePart.size() < 3) {
+            throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");
+        }
+    }
+
+    private boolean hasQueryParam(String uriLine) {
+        return uriLine.contains("?")
+                && uriLine.indexOf("?") != uriLine.length() - 1;
     }
 }

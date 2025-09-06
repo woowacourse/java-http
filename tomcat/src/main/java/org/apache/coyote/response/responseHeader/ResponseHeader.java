@@ -10,14 +10,14 @@ public class ResponseHeader {
     private static final String HEADER_COMBINATOR = ": ";
     private static final String ENCODING_TYPE = ";charset=utf-8";
 
-    private final Map<String, String> headers;
+    private Map<String, String> headers;
 
     public ResponseHeader(final int bodyLength, final ContentType contentType) {
         this.headers = initHeaders(bodyLength, contentType);
     }
 
     private Map<String, String> initHeaders(final int bodyLength, final ContentType contentType) {
-        Map<String, String> headers = new LinkedHashMap<>();
+        headers = new LinkedHashMap<>();
 
         headers.put(
                 "Content-Type",

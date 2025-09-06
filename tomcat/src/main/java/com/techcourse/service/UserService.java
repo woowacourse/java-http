@@ -19,4 +19,8 @@ public class UserService {
 
         logger.info(user.toString());
     }
+
+    public void register(String account, String password, String email) {
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
 }

@@ -36,7 +36,7 @@ class StaticFileHandlerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/index.html", "/style.css", "/script.js"})
-    void 정적_파일_요청을_처리할_수_있다(String path) {
+    void 존재하는_정적_파일_요청을_처리할_수_있다(String path) {
         // given
         when(request.getRequestPath()).thenReturn(path);
 
@@ -48,9 +48,9 @@ class StaticFileHandlerTest {
     }
 
     @Test
-    void 정적_파일이_아닌_요청은_처리할_수_없다() {
+    void 존재하지_않는_정적_파일_요청은_처리할_수_없다() {
         // given
-        when(request.getRequestPath()).thenReturn("/other");
+        when(request.getRequestPath()).thenReturn("/other.html");
 
         // when
         boolean canHandle = staticFileHandler.canHandle(request);

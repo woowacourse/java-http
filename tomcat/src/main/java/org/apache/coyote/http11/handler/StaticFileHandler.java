@@ -7,6 +7,7 @@ import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.ContentType;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
@@ -17,7 +18,7 @@ public class StaticFileHandler implements HttpRequestHandler {
     @Override
     public boolean canHandle(HttpRequest request) {
         String path = request.getRequestPath();
-        return path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js");
+        return getClass().getClassLoader().getResource(STATIC_DIR + path) != null;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class StaticFileHandler implements HttpRequestHandler {
 
             HttpHeaders headers = HttpHeaders.fromLines(
                     List.of(
-                            "Content-Type: " + getContentType(path),
+                            "Content-Type: " + ContentType.getMimeTypeFrom(path),
                             "Content-Length: " + content.length
                     )
             );
@@ -44,28 +45,5 @@ public class StaticFileHandler implements HttpRequestHandler {
         if (inputStream == null) {
             throw new NotFoundException();
         }
-    }
-
-    //TODO: enum으로 분리  (2025-09-4, 목, 7:1)
-    private String getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-        if (path.endsWith(".png")) {
-            return "image/png";
-        }
-        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-            return "image/jpeg";
-        }
-        if (path.endsWith(".gif")) {
-            return "image/gif";
-        }
-        return "application/octet-stream"; // 기본 바이너리
     }
 }

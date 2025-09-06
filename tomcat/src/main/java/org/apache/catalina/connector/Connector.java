@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.TomcatController;
+import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var tomcatController = new TomcatController();
+        var tomcatController = new RequestHandler();
         var httpRequestParser = new HttpRequestParser();
         var processor = new Http11Processor(connection, httpRequestParser, tomcatController);
         new Thread(processor).start();

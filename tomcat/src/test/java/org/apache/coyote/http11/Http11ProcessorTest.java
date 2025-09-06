@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.TomcatController;
+import org.apache.coyote.RequestHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,7 +15,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var tomcatController = new TomcatController();
+        final var tomcatController = new RequestHandler();
         final var httpRequestParser = new HttpRequestParser();
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket, httpRequestParser, tomcatController);
@@ -37,7 +37,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final var tomcatController = new TomcatController();
+        final var tomcatController = new RequestHandler();
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",

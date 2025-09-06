@@ -2,6 +2,7 @@ package org.apache.coyote.http11.http.response;
 
 import http.ContentTypeValue;
 import http.HttpHeaderKey;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +32,10 @@ public class HttpResponse {
         return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
     }
 
-    public static HttpResponse ok(final String returnValue) {
+    public static HttpResponse ok(final String responseBodyValue) {
         final HttpResponseLine httpResponseLine = HttpResponseLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.withString(returnValue);
-        final HttpHeader httpHeader = createHeader(httpResponseBody, returnValue);
+        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName(responseBodyValue);
+        final HttpHeader httpHeader = createHeader(httpResponseBody, responseBodyValue);
         return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
     }
 
@@ -48,7 +49,7 @@ public class HttpResponse {
         responseHeaderInfo.put(HttpHeaderKey.CONTENT_TYPE.getValue(),
                 ContentTypeValue.findFormatByPattern(returnValue) + ";charset=utf-8");
 
-        final Optional<String> valueOptional = responseBody.getValue();
+        final Optional<byte[]> valueOptional = responseBody.getValue();
 
         if (valueOptional.isPresent()) {
             responseHeaderInfo.put(HttpHeaderKey.CONTENT_LENGTH.getValue(),
@@ -68,13 +69,13 @@ public class HttpResponse {
         formatLine.add(responseLine.getFormat());
         formatLine.addAll(header.getFormat());
 
-        final Optional<String> responseBodyValue = responseBody.getValue();
+        final Optional<byte[]> responseBodyValue = responseBody.getValue();
 
         if (responseBodyValue.isEmpty()) {
             return formatLine;
         }
         formatLine.add("");
-        formatLine.add(responseBodyValue.get());
+        formatLine.add(new String(responseBodyValue.get(), StandardCharsets.UTF_8));
         return formatLine;
     }
 }

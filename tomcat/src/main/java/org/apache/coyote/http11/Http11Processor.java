@@ -76,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private byte[] createResponseHeader(final Http11Request http11Request, final int length) {
-        String contentType = findAvailableContentType(http11Request);
+        String contentType = guessByFileExtension(http11Request.getUri());
 
         String header = "HTTP/1.1 200 OK" + " \r\n" +
         "Content-Type: " + contentType + ";charset=utf-8" + " \r\n" +
@@ -86,17 +86,14 @@ public class Http11Processor implements Runnable, Processor {
         return header.getBytes();
     }
 
-    private String findAvailableContentType(final Http11Request http11Request) {
-        String accept = http11Request.getHeader("Accept");
-
-        if(accept == null || accept.contains("text/html")) {
-            return "text/html";
-        }
-        if (accept.contains("text/css")) {
-            return "text/css";
-        }
-
-        return accept;
+    private String guessByFileExtension(String path) {
+        if (path.endsWith(".html") || path.endsWith(".htm") || path.equals("/")) return "text/html";
+        if (path.endsWith(".css")) return "text/css";
+        if (path.endsWith(".js")) return "application/javascript";
+        if (path.endsWith(".json")) return "application/json";
+        if (path.endsWith(".png")) return "image/png";
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+        return "application/octet-stream"; // fallback
     }
 
     private byte[] readFromResourcePath(final String resourcePath) throws IOException {

@@ -1,12 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +32,82 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (var input = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+             var out = new BufferedOutputStream(connection.getOutputStream())) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = new HttpRequest(input);
+            HttpResponse response = new HttpResponse(out);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if ("/login".equals(request.getPath())) {
+                String account = request.getParams().get("account");
+                String password = request.getParams().get("password");
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+                if (account == null || password == null) {
+                    response.sendError(HttpStatus.BAD_REQUEST);
+                    return;
+                }
+
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+                if (optionalUser.isEmpty()) {
+                    response.sendError(HttpStatus.UNAUTHORIZED);
+                    return;
+                }
+
+                User user = optionalUser.get();
+                if (!user.checkPassword(password)) {
+                    response.sendError(HttpStatus.UNAUTHORIZED);
+                    return;
+                }
+
+                log.info(user.toString());
+                if (checkStaticFile("/index.html", response)) {
+                    return;
+                }
+            }
+
+            if (checkStaticFile(request.getPath(), response)) {
+                return;
+            }
+
+            response.sendError(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            try (HttpResponse response = new HttpResponse(new BufferedOutputStream(connection.getOutputStream()))) {
+                log.error(e.getMessage());
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (Exception exception) {
+                log.error(exception.getMessage());
+            }
+        }
+    }
+
+    private boolean checkStaticFile(String path, HttpResponse response) throws IOException {
+        if (path.equals("/")) {
+            path = "/index.html";
+        }
+
+        InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
+        if (in == null && !path.contains(".")) {
+            in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
+        }
+
+        if (in != null) {
+            serveStaticFile(response, in, path);
+            return true;
+        }
+        return false;
+    }
+
+    private void serveStaticFile(HttpResponse response, InputStream inputStream, String path) throws IOException {
+        try (inputStream) {
+            String ext = "";
+            if (path.contains(".")) {
+                ext = path.substring(path.lastIndexOf(".") + 1);
+            }
+
+            String contentType = MimeTypeResolver.resolve(ext);
+            byte[] body = inputStream.readAllBytes();
+
+            response.send(HttpStatus.OK, contentType, body);
         }
     }
 }

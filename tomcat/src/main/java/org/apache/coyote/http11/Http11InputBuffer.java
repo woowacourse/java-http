@@ -8,41 +8,25 @@ import org.apache.catalina.Cookie;
 import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
-    public static HttpRequest parseToRequest(BufferedReader bufferedReader) throws IOException {
+
+    public static HttpRequest parseToRequest(BufferedReader bufferedReader, SessionManager sessionManager)
+            throws IOException {
         String requestLine = bufferedReader.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
         }
 
         String[] splitRequestLine = requestLine.split(" ");
-
         String httpMethod = splitRequestLine[0];
         String uri = splitRequestLine[1];
         double httpVersion = Double.parseDouble(splitRequestLine[2].split("/")[1]);
 
-        String host = "";
-        String contentType = "";
-        int contentLength = 0;
-        String rawCookie = "";
-        Cookie cookie = null;
+        Map<String, String> headers = parseHeaders(bufferedReader);
 
-        while (true) {
-            String nextLine = bufferedReader.readLine();
-            if (nextLine == null || nextLine.isEmpty()) {
-                break;
-            }
-
-            String lowerCaseNextLine = nextLine.toLowerCase();
-            if (lowerCaseNextLine.startsWith("host")) {
-                host = nextLine.split(":")[1].trim();
-            } else if (lowerCaseNextLine.startsWith("content-type")) {
-                contentType = nextLine.split(":")[1].trim();
-            } else if (lowerCaseNextLine.startsWith("content-length")) {
-                contentLength = Integer.parseInt(nextLine.split(":")[1].trim());
-            } else if (lowerCaseNextLine.startsWith("cookie")) {
-                rawCookie = nextLine.split(":")[1].trim();
-            }
-        }
+        String host = headers.getOrDefault("host", "");
+        String contentType = headers.getOrDefault("content-type", "");
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        String rawCookie = headers.getOrDefault("cookie", "");
 
         String requestBody = null;
         if (httpMethod.equals("POST") && contentLength > 0) {
@@ -51,12 +35,13 @@ public class Http11InputBuffer {
             requestBody = new String(bodyChars);
         }
 
+        Cookie cookie = null;
         if (!rawCookie.isEmpty()) {
             cookie = parseToCookie(rawCookie);
         }
 
         return new HttpRequest(
-                new SessionManager(),
+                sessionManager,
                 httpMethod,
                 uri,
                 httpVersion,
@@ -65,6 +50,20 @@ public class Http11InputBuffer {
                 requestBody,
                 cookie
         );
+    }
+
+    private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(":");
+            if (colonIndex > 0) {
+                String key = line.substring(0, colonIndex).toLowerCase().trim();
+                String value = line.substring(colonIndex + 1).trim();
+                headers.put(key, value);
+            }
+        }
+        return headers;
     }
 
     private static Cookie parseToCookie(String rawCookies) {
@@ -80,5 +79,4 @@ public class Http11InputBuffer {
 
         return new Cookie(cookieValues);
     }
-
 }

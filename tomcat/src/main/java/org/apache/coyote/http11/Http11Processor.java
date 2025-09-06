@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Cookie;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
 
-            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(bufferedReader);
+            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(bufferedReader, new SessionManager());
             String uri = httpRequest.getUrl();
             String path = uri;
 

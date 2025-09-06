@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,12 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, String> mimeTypes = Map.of(
-            "html", "text/html; charset=UTF-8",
-            "css", "text/css; charset=UTF-8",
-            "svg", "image/svg+xml",
-            "js", "application/javascript; charset=UTF-8"
-    );
 
     private final Socket connection;
 
@@ -43,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              var out = new BufferedOutputStream(connection.getOutputStream())) {
 
             HttpRequest request = new HttpRequest(input);
-            log.info(request.toString());
+            HttpResponse response = new HttpResponse(out);
 
             if ("/login".equals(request.getPath())) {
                 String account = request.getParams().get("account");
@@ -51,38 +44,38 @@ public class Http11Processor implements Runnable, Processor {
 
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isEmpty()) {
-                    sendError(out, HttpStatus.BAD_REQUEST);
+                    sendError(response, HttpStatus.BAD_REQUEST);
                     return;
                 }
 
                 User user = optionalUser.get();
                 if (!user.checkPassword(password)) {
-                    sendError(out, HttpStatus.UNAUTHORIZED);
+                    sendError(response, HttpStatus.UNAUTHORIZED);
                     return;
                 }
 
                 log.info("Login success: {}", user);
-                if (checkStaticFile("/index.html", out)) {
+                if (checkStaticFile("/index.html", response)) {
                     return;
                 }
             }
 
-            if (checkStaticFile(request.getPath(), out)) {
+            if (checkStaticFile(request.getPath(), response)) {
                 return;
             }
 
-            sendError(out, HttpStatus.NOT_FOUND);
+            sendError(response, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            try (var out = new BufferedOutputStream(connection.getOutputStream())) {
+            try (HttpResponse response = new HttpResponse(new BufferedOutputStream(connection.getOutputStream()))) {
                 log.error(e.getMessage());
-                sendError(out, HttpStatus.INTERNAL_SERVER_ERROR);
-            } catch (IOException ioException) {
-                log.error(ioException.getMessage());
+                sendError(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (Exception exception) {
+                log.error(exception.getMessage());
             }
         }
     }
 
-    private boolean checkStaticFile(String path, BufferedOutputStream out) throws IOException {
+    private boolean checkStaticFile(String path, HttpResponse response) throws IOException {
         if (path.equals("/")) {
             path = "/index";
         }
@@ -93,59 +86,32 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (in != null) {
-            serveStaticFile(out, in, path);
+            serveStaticFile(response, in, path);
             return true;
         }
         return false;
     }
 
-    private void serveStaticFile(BufferedOutputStream out, InputStream inputStream, String path) throws IOException {
+    private void serveStaticFile(HttpResponse response, InputStream inputStream, String path) throws IOException {
         try (inputStream) {
             String ext = "";
             if (path.contains(".")) {
                 ext = path.substring(path.lastIndexOf(".") + 1);
             }
 
-            String contentType = mimeTypes.get(ext);
+            String contentType = MimeTypeResolver.resolve(ext);
             byte[] body = inputStream.readAllBytes();
 
-            write(out, 200, "OK", contentType, body, true);
+            response.send(HttpStatus.OK, contentType, body, true);
         }
     }
 
-    private void write(BufferedOutputStream out, int status, String reason,
-                       String contentType, byte[] body, boolean keepAlive) throws IOException {
-        String head = "HTTP/1.1 " + status + " " + reason + "\r\n"
-                + "Content-Type: " + contentType + "\r\n"
-                + "Content-Length: " + body.length + "\r\n"
-                + (keepAlive ? "Connection: keep-alive\r\n" : "Connection: close\r\n")
-                + "\r\n";
-        out.write(head.getBytes(StandardCharsets.UTF_8));
-        out.write(body);
-        out.flush();
-    }
-
-    private void sendError(BufferedOutputStream out, HttpStatus httpStatus) {
+    private void sendError(HttpResponse response, HttpStatus httpStatus) {
         String errorResource = "static/" + httpStatus.getCode() + ".html";
 
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(errorResource)) {
             byte[] errorBody = getErrorBody(inputStream, httpStatus);
-
-            String header = String.format("""
-                            HTTP/1.1 %d %s\r
-                            Content-Type: text/html; charset=UTF-8\r
-                            Content-Length: %d\r
-                            Connection: keep-alive\r
-                            \r
-                            """,
-                    httpStatus.getCode(),
-                    httpStatus.getMessage(),
-                    errorBody.length
-            );
-
-            out.write(header.getBytes(StandardCharsets.UTF_8));
-            out.write(errorBody);
-            out.flush();
+            response.sendError(httpStatus, errorBody);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

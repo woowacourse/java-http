@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.BadRequestException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.service.UserService;
 import java.io.BufferedReader;
@@ -21,10 +22,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CRLF = "\r\n";
-    private static final String QUERY_STRING = "?";
+    private static final String QUESTION = "?";
     private static final String AND = "&";
     private static final String EQUAL = "=";
-    private static final String REQUEST_LINE = "requestLine";
     private static final String COLON = ":";
 
     private final Socket connection;
@@ -44,14 +44,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            var requestHeaders = findRequestHeaders(inputStream);
-            var requestLine = requestHeaders.get(REQUEST_LINE);
-            var parts = requestLine.split(" ");
-            var method = parts[0];
-            var uri = parts[1];
-            int queryStartIndex = uri.indexOf(QUERY_STRING);
-            String uriExceptQuery = findUriExceptQuery(queryStartIndex, uri);
-            Map<String, String> queries = parseQueryString(queryStartIndex, uri);
+            HttpRequest requestHeaders = readHttpRequest(inputStream);
+            RequestLine requestLine = requestHeaders.requestLine();
+            String method = requestLine.method();
+            String uri = requestLine.uri();
+
+            int questionIndex = uri.indexOf(QUESTION);
+            String path = findPath(questionIndex, uri);
+
+            Map<String, String> queries = findQueries(questionIndex, uri);
 
             if (uri.startsWith("/login")) {
                 String account = queries.get("account");
@@ -61,12 +62,12 @@ public class Http11Processor implements Runnable, Processor {
 
             var status = 200;
             var reason = "OK";
-            var responseBody = findResponseBody(uriExceptQuery);
+            var responseBody = findResponseBody(path);
             if (!responseBody.found()) {
                 status = 404;
                 reason = "NOT FOUND";
             }
-            var contentType = findContentType(uriExceptQuery);
+            var contentType = findContentType(path);
 
             final var response = String.join(CRLF,
                     "HTTP/1.1 " + status + " " + reason,
@@ -82,15 +83,43 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> findRequestHeaders(final InputStream inputStream) throws IOException {
+    private HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        Map<String, String> headers = new HashMap<>();
+
+        RequestLine requestLine = readRequestLine(br);
+        Map<String, String> headers = readHeaders(br);
+
+        byte[] body = new byte[0];
+        String len = headers.get("content-length");
+        if (len != null) {
+            int contentLength = Integer.parseInt(len);
+            body = inputStream.readNBytes(contentLength);
+        }
+        return new HttpRequest(requestLine, headers, body);
+    }
+
+    private RequestLine readRequestLine(final BufferedReader br) throws IOException {
         String requestLine = br.readLine();
-        headers.put(REQUEST_LINE, requestLine);
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new BadRequestException("Request line is empty");
+        }
+
+        String[] parts = requestLine.split(" ");
+        String method = parts[0];
+        String uri = parts[1];
+        String version = parts[2];
+        return new RequestLine(method, uri, version);
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader br) throws IOException {
+        Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null && !line.isEmpty()) {
             int colon = line.indexOf(COLON);
-            String name = line.substring(0, colon);
+            if (colon < 0) {
+                throw new BadRequestException("Header is malformed");
+            }
+            String name = line.substring(0, colon).toLowerCase();
             String value = line.substring(colon + 1);
             headers.put(name, value);
         }
@@ -129,15 +158,8 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String findUriExceptQuery(final int queryStartIndex, final String uri) {
-        if (queryStartIndex == -1) {
-            return uri;
-        }
-        return uri.substring(0, queryStartIndex);
-    }
-
     private Map<String, String> parseQueryString(final int queryStartIndex, final String uri) {
-        if (!uri.contains(QUERY_STRING)) {
+        if (!uri.contains(QUESTION)) {
             return Map.of();
         }
         String query = uri.substring(queryStartIndex + 1);
@@ -150,5 +172,20 @@ public class Http11Processor implements Runnable, Processor {
             queries.put(name, value);
         }
         return queries;
+    }
+
+    private String findPath(final int queryStartIndex, final String uri) {
+        if (queryStartIndex < 0) {
+            return uri;
+        }
+        return uri.substring(0, queryStartIndex);
+    }
+
+    private Map<String, String> findQueries(final int questionIndex, final String uri) {
+        if (questionIndex > 0) {
+            String rawQueries = uri.substring(questionIndex + 1);
+            return parseQueryString(questionIndex, rawQueries);
+        }
+        return Map.of();
     }
 }

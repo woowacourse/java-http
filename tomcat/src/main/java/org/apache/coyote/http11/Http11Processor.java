@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
             final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
 
             return parseResponse(httpStatusCode, contentType, responseBody);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             final String responseBody = String.format("""
                 <html>
                     <head><title>Error</title></head>

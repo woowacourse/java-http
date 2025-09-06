@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum ContentType {
+public enum MimeType {
     TEXT_HTML("html", "text/html;charset=utf-8"),
     TEXT_CSS("css", "text/css;charset=utf-8"),
     APPLICATION_JAVASCRIPT("js", "application/javascript;charset=utf-8"),
@@ -12,7 +12,7 @@ public enum ContentType {
     private final String extension;
     private final String value;
 
-    ContentType(String extension, String value) {
+    MimeType(String extension, String value) {
         this.extension = extension;
         this.value = value;
     }
@@ -21,9 +21,9 @@ public enum ContentType {
         return value;
     }
 
-    public static ContentType from(String extension) {
+    public static MimeType from(String extension) {
         return Arrays.stream(values())
-                .filter(contentType -> Objects.equals(contentType.extension, extension))
+                .filter(mimeType -> Objects.equals(mimeType.extension, extension))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 파일 타입입니다: "  + extension));
     }

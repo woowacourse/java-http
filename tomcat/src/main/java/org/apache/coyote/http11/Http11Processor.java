@@ -8,7 +8,7 @@ import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethodType;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.MimeType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse generateHttpResponse(final String requestPath) throws IOException {
         if ("/".equals(requestPath)) {
-            return HttpResponse.ok("Hello world!", ContentType.TEXT_PLAIN);
+            return HttpResponse.ok("Hello world!", MimeType.TEXT_PLAIN);
         }
         
         return createFileResponse(requestPath);
@@ -110,8 +110,8 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createFileResponse(final String requestPath) throws IOException {
         if (staticFileHandler.exists(requestPath)) {
             String fileContent = staticFileHandler.readFile(requestPath);
-            ContentType contentType = staticFileHandler.getContentType(requestPath);
-            return HttpResponse.ok(fileContent, contentType);
+            MimeType mimeType = staticFileHandler.getContentType(requestPath);
+            return HttpResponse.ok(fileContent, mimeType);
         } else {
             return HttpResponse.notFound();
         }

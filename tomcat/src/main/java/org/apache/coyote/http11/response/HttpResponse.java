@@ -5,10 +5,10 @@ public record HttpResponse(
         HttpResponseHeader header,
         String body) {
 
-    public static HttpResponse ok(String body, ContentType contentType) {
+    public static HttpResponse ok(String body, MimeType mimeType) {
         return new HttpResponse(
             HttpStatus.OK,
-            HttpResponseHeader.of(contentType, body),
+            HttpResponseHeader.of(mimeType, body),
             body
         );
     }
@@ -16,7 +16,7 @@ public record HttpResponse(
     public static HttpResponse notFound() {
         return new HttpResponse(
             HttpStatus.NOT_FOUND,
-            HttpResponseHeader.of(ContentType.TEXT_HTML, "404 Not Found"),
+            HttpResponseHeader.of(MimeType.TEXT_HTML, "404 Not Found"),
             "404 Not Found"
         );
     }

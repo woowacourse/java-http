@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.MimeType;
 
 public class StaticFileHandler {
     
@@ -26,9 +26,9 @@ public class StaticFileHandler {
         return getClass().getResource("/static" + filePath) != null;
     }
     
-    public ContentType getContentType(String filePath) {
+    public MimeType getContentType(String filePath) {
         final String extension = extractExtension(filePath);
-        return ContentType.from(extension);
+        return MimeType.from(extension);
     }
 
     private String extractExtension(String filePath) {

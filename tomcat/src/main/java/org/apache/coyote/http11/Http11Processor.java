@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -93,10 +94,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+            responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
 
             final String response = buildResponse(statusLine, responseHeaders, responseBody);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

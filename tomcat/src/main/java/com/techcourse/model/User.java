@@ -28,7 +28,7 @@ public class User {
             return;
         }
 
-        throw new NoSuchUserException();
+        throw new NoSuchUserException("[ERROR] invalid password");
     }
 
     public boolean checkPassword(String password) {

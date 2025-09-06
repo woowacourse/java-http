@@ -152,7 +152,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = accountAndPassword.get(LoginParam.PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account, password)
-                .orElseThrow(NoSuchUserException::new);
+                .orElseThrow(() -> new NoSuchUserException("[ERROR] no such user"));
 
         user.validatePasswordAndLog(password);
         log.info(user.toString());

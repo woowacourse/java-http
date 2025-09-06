@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class HttpRequest {
 
     private final String path;
@@ -40,14 +39,16 @@ public class HttpRequest {
     }
 
     private Map<String, String> parseQueryString(String queryString) {
-        if (queryString == null) {
+        if (queryString == null || queryString.isEmpty()) {
             return Map.of();
         }
         Map<String, String> params = new HashMap<>();
         for (String pair : queryString.split("&")) {
-            String[] keyValue = pair.split("=");
+            String[] keyValue = pair.split("=", 2);
             if (keyValue.length == 2) {
                 params.put(keyValue[0], keyValue[1]);
+            } else if (keyValue.length == 1) {
+                params.put(keyValue[0], "");
             }
         }
         return params;

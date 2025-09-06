@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -35,89 +36,68 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (
                 final var inputStream = connection.getInputStream();
-                final var inputReader = new BufferedReader(new InputStreamReader(inputStream));
                 final var outputStream = connection.getOutputStream()
         ) {
-            final String line = inputReader.readLine();
-            if (line == null || line.isBlank()) {
-                final String responseBody = "Hello world!";
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-            final String requestTarget = line.split(" ")[1];
-            String path = requestTarget;
-            String queryString = "";
-            if (requestTarget.contains("?")) {
-                int queryIndex = requestTarget.indexOf("?");
-                path = requestTarget.substring(0, queryIndex);
-                queryString = requestTarget.substring(queryIndex + 1);
-            }
-            final var queryParams = parseQueryString(queryString);
-            String filePath = path;
-
-            if ("/login".equals(path)) {
-                if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-                    final String account = queryParams.get("account");
-                    final String password = queryParams.get("password");
-                    InMemoryUserRepository.findByAccount(account)
-                            .filter(user -> user.checkPassword(password))
-                            .ifPresent(user -> log.info("login success: {}", user));
-                }
-                filePath = "/login.html";
-            }
-            if ("/".equals(filePath)) {
-                final String responseBody = "Hello world!";
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-            final String resourcePath = "static" + filePath;
-            try (
-                    final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)
-            ) {
-                if (resourceStream == null) {
-                    final String responseBody = "File Not Found!";
-                    final var response = String.join("\r\n",
-                            "HTTP/1.1 404 Not Found ",
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-                final byte[] responseBody = resourceStream.readAllBytes();
-                final String contentType = getContentType(filePath);
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + " ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        "");
-                outputStream.write(response.getBytes());
-                outputStream.write(responseBody);
-                outputStream.flush();
-            }
+            final var httpRequest = parseRequest(inputStream);
+            final var response = dispatch(httpRequest);
+            outputStream.write(response.getResponseBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
+    private Http11Request parseRequest(final InputStream inputStream) throws IOException {
+        final var reader = new BufferedReader(new InputStreamReader(inputStream));
+        final String requestLineString = reader.readLine();
+        if (requestLineString == null || requestLineString.isBlank()) {
+            return Http11Request.createInvalid();
+        }
+        final var requestLine = parseRequestLine(requestLineString);
+        final var headers = parseHeaders(reader);
+        final String body = parseBody(reader, headers);
+        return new Http11Request(requestLine.method(), requestLine.path(), requestLine.queryParams(), headers, body);
+    }
+
+    private RequestLine parseRequestLine(final String line) {
+        final var parts = line.split(" ");
+        final String method = parts[0];
+        final String requestTarget = parts[1];
+        String path = requestTarget;
+        String queryString = "";
+        if (requestTarget.contains("?")) {
+            final int queryIndex = requestTarget.indexOf("?");
+            path = requestTarget.substring(0, queryIndex);
+            queryString = requestTarget.substring(queryIndex + 1);
+        }
+        final var queryParams = parseQueryString(queryString);
+        return new RequestLine(method, path, queryParams);
+    }
+
+    private Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
+        final var headers = new HashMap<String, String>();
+        String headerLine;
+        while (!(headerLine = reader.readLine()).isBlank()) {
+            final var header = headerLine.split(": ");
+            headers.put(header[0].trim(), header[1].trim());
+        }
+        return headers;
+    }
+
+    private String parseBody(
+            final BufferedReader reader,
+            final Map<String, String> headers
+    ) throws IOException {
+        if (!headers.containsKey("Content-Length")) {
+            return "";
+        }
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
         if (queryString == null || queryString.isBlank()) {
             return Collections.emptyMap();
         }
@@ -132,6 +112,53 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return params;
+    }
+
+    private Http11Response dispatch(final Http11Request httpRequest) {
+        final var path = httpRequest.getPath();
+        if ("/".equals(path)) {
+            return new Http11Response(200, "text/html;charset=utf-8", "Hello world!");
+        }
+        if ("/login".equals(path)) {
+            handleLogin(httpRequest);
+            return serveStaticFile("/login.html");
+        }
+        return serveStaticFile(path);
+    }
+
+    private void handleLogin(final Http11Request httpRequest) {
+        final var queryParams = httpRequest.getQueryParams();
+        if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
+            final String account = queryParams.get("account");
+            final String password = queryParams.get("password");
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user -> log.info("login success: {}", user));
+        }
+    }
+
+    private Http11Response serveStaticFile(final String path) {
+        return readStaticResource(path)
+                .map(body -> new Http11Response(200, getContentType(path), body))
+                .orElseGet(this::serveNotFoundPage);
+    }
+
+    private Http11Response serveNotFoundPage() {
+        return readStaticResource("/404.html")
+                .map(body -> new Http11Response(404, "text/html;charset=utf-8", body))
+                .orElse(new Http11Response(404, "text/html;charset=utf-8", "404 Not Found"));
+    }
+
+    private Optional<byte[]> readStaticResource(final String path) {
+        final String resourcePath = "static" + path;
+        try (final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resourceStream == null) {
+                return Optional.empty();
+            }
+            return Optional.of(resourceStream.readAllBytes());
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
+        }
     }
 
     private String getContentType(final String path) {

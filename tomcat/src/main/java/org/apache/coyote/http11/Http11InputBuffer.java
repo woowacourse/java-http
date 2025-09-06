@@ -35,7 +35,7 @@ public class Http11InputBuffer {
                 contentType = nextLine.split(":")[1].trim();
             } else if (lowerCaseNextLine.startsWith("content-length")) {
                 contentLength = Integer.parseInt(nextLine.split(":")[1].trim());
-            } else if (lowerCaseNextLine.startsWith("rawCookie")) {
+            } else if (lowerCaseNextLine.startsWith("cookie")) {
                 rawCookie = nextLine.split(":")[1].trim();
             }
         }

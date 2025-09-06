@@ -42,9 +42,14 @@ public class Http11Processor implements Runnable, Processor {
                 String account = request.getParams().get("account");
                 String password = request.getParams().get("password");
 
+                if (account == null || password == null) {
+                    response.sendError(HttpStatus.BAD_REQUEST);
+                    return;
+                }
+
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isEmpty()) {
-                    response.sendError(HttpStatus.BAD_REQUEST);
+                    response.sendError(HttpStatus.UNAUTHORIZED);
                     return;
                 }
 

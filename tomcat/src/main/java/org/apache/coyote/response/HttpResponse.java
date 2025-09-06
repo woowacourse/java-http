@@ -35,10 +35,11 @@ public class HttpResponse {
     }
 
     public void setCookies(final String sessionId) {
-        responseHeader.addCookie(HttpCookie.loginCookie(sessionId).combine());
+        responseHeader.addCookie(HttpCookie.ofJSessionId(sessionId).combine());
     }
 
-    public void setLocation() {
-        responseHeader.addLocation("/index.html");
+    public void sendRedirect(final String location) {
+        responseHeader.addLocation(location);
+        responseLine.init(HttpStatus.FOUND);
     }
 }

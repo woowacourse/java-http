@@ -29,7 +29,7 @@ public class HttpCookie {
                 ));
     }
 
-    public static HttpCookie loginCookie(String sessionId) {
+    public static HttpCookie ofJSessionId(String sessionId) {
         return new HttpCookie(JSESSIONID + COOKIE_SEPARATOR + sessionId);
     }
 

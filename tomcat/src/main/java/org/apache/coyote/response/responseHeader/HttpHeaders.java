@@ -44,4 +44,8 @@ public enum HttpHeaders {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("[ERROR] 잘못된 헤더입니다: %s", headerKey)));
     }
+
+    public String getValue() {
+        return value;
+    }
 }

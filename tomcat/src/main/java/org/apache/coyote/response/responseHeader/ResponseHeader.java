@@ -10,7 +10,7 @@ public class ResponseHeader {
     private static final String HEADER_COMBINATOR = ": ";
     private static final String ENCODING_TYPE = ";charset=utf-8";
 
-    private Map<HttpHeaders, String> headers;
+    private Map<String, String> headers;
 
     public ResponseHeader() {
         this.headers = new HashMap<>();
@@ -21,21 +21,21 @@ public class ResponseHeader {
         return this;
     }
 
-    private Map<HttpHeaders, String> initHeaders(final int bodyLength, final ContentType contentType) {
+    private Map<String, String> initHeaders(final int bodyLength, final ContentType contentType) {
         headers.put(
-                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.CONTENT_TYPE.getValue(),
                 contentType.isImage()
                         ? contentType.getContentType()
                         : contentType.getContentType() + ENCODING_TYPE
         );
 
-        headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(bodyLength));
+        headers.put(HttpHeaders.CONTENT_LENGTH.getValue(), String.valueOf(bodyLength));
 
         return headers;
     }
 
     public void addCookie(String cookies) {
-        headers.put(HttpHeaders.SET_COOKIE, cookies);
+        headers.put(HttpHeaders.SET_COOKIE.getValue(), cookies);
     }
 
     public String toCombine() {
@@ -46,6 +46,6 @@ public class ResponseHeader {
     }
 
     public void addLocation(final String location) {
-        headers.put(HttpHeaders.LOCATION, location);
+        headers.put(HttpHeaders.LOCATION.getValue(), location);
     }
 }

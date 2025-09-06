@@ -35,9 +35,9 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-//        if (httpRequest.hasCookie()) {
-//            if(isLoggedInUser(httpRequest, httpResponse))return;
-//        }
+        if (httpRequest.hasCookie()) {
+            if(isLoggedInUser(httpRequest, httpResponse))return;
+        }
 
         RequestPath requestPath = httpRequest.getRequestPath();
         String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
@@ -61,9 +61,9 @@ public class LoginServlet extends HttpServlet {
 
         try {
             User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));
+
             setCookie(httpRequest, httpResponse, user);
-            httpResponse.setLocation();
-            httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
+            httpResponse.sendRedirect("/index.html");
         } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
             httpResponse.init(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
         }

@@ -15,4 +15,12 @@ public enum HttpStatus {
     public int getStatus() {
         return status;
     }
+
+    @Override
+    public String toString() {
+        return String.join(" ",
+                this.name(),
+                String.valueOf(this.status)
+        );
+    }
 }

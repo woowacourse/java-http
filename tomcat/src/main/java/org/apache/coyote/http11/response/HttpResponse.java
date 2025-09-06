@@ -27,6 +27,6 @@ public class HttpResponse {
         return String.join("\r\n",
                 statusLine.toString(),
                 headers.toString(),
-                body.toString());
+                body);
     }
 }

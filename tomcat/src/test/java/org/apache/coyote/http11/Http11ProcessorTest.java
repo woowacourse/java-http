@@ -24,9 +24,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -37,9 +37,9 @@ class Http11ProcessorTest {
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -51,9 +51,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -64,9 +64,9 @@ class Http11ProcessorTest {
     void css() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -81,9 +81,9 @@ class Http11ProcessorTest {
                 .getResource("static/css/styles.css")
                 .getPath());
         int contentLength = Files.readAllBytes(path).length;
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: " + contentLength + " \r\n\r\n"+
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/css;charset=utf-8\r\n" +
+                "Content-Length: " + contentLength + "\r\n\r\n"+
                 new String(Files.readAllBytes(path));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -93,9 +93,9 @@ class Http11ProcessorTest {
     void js() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /js/scripts.js HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /js/scripts.js HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -110,9 +110,9 @@ class Http11ProcessorTest {
                 .getResource("static/js/scripts.js")
                 .getPath());
         int contentLength = Files.readAllBytes(path).length;
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: application/javascript;charset=utf-8 \r\n" +
-                "Content-Length: " + contentLength + " \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: application/javascript;charset=utf-8" + "\r\n" +
+                "Content-Length: " + contentLength + "\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(path));
 

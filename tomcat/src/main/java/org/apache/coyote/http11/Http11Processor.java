@@ -6,20 +6,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.StatusLine;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
 
@@ -35,33 +38,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final HttpRequestParser httpRequestParser = new HttpRequestParser();
+            final HttpRequest request = httpRequestParser.parse(reader);
 
-            // 1. 요청 라인 파싱
-            final String requestLine = reader.readLine();
-            if (requestLine == null || requestLine.isBlank()) return;
+            final URL resource = getResource(request.getPath());
 
-            String[] parsedLine = requestLine.split(" ");
-            String requestUri = parsedLine[1];
-
-            String path = requestUri;
-            Map<String, String> queryParams = Collections.emptyMap();
-
-            // 2. 쿼리 파라미터 분리
-            if (requestUri.contains("?")) {
-                int index = requestUri.indexOf("?");
-                path = requestUri.substring(0, index);
-                String queryString = requestUri.substring(index + 1);
-                queryParams = parseQueryString(queryString);
-            }
-
-            // 3. 로그인 처리
-            if ("/login".equals(path)) {
-                String account = queryParams.get("account");
-                String password = queryParams.get("password");
+            if ("/login".equals(request.getPath())) {
+                final String account = request.getQueryParams().get("account");
+                final String password = request.getQueryParams().get("password");
 
                 if (account != null && password != null) {
                     InMemoryUserRepository.findByAccount(account)
@@ -75,49 +63,24 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            // 4. 리소스 로딩
-            URL resource;
-            if (requestUri.endsWith(".html") || requestUri.endsWith(".css") || requestUri.endsWith(".js")) {
-                resource = getClass().getClassLoader().getResource("static" + requestUri);
-            } else if ("/login".equals(path)) {
-                resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
-            } else {
-                resource = getClass().getClassLoader().getResource(requestUri);
-            }
-
-            // 5. 응답 바디 및 상태 결정
             final String responseBody;
-            final String statusLine;
+            final StatusLine statusLine;
 
             if (resource != null) {
                 responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
-                statusLine = "HTTP/1.1 200 OK ";
-            } else if ("/".equals(path)) {
+                statusLine = new StatusLine(HTTP_VERSION, StatusCode.OK);
+            } else if ("/".equals(request.getPath())) {
                 responseBody = "Hello world!";
-                statusLine = "HTTP/1.1 200 OK ";
+                statusLine = new StatusLine(HTTP_VERSION, StatusCode.OK);
             } else {
                 responseBody = "";
-                statusLine = "HTTP/1.1 404 Not Found";
+                statusLine = new StatusLine(HTTP_VERSION, StatusCode.NOT_FOUND);
             }
 
-            // 6. Content-Type 결정
-            String contentType = "text/plain;charset=utf-8";
-            if (path.endsWith(".html") || "/login".equals(path) || "/".equals(path)) {
-                contentType = "text/html;charset=utf-8";
-            } else if (path.endsWith(".css")) {
-                contentType = "text/css;charset=utf-8";
-            } else if (path.endsWith(".js")) {
-                contentType = "application/javascript;charset=utf-8";
-            }
-
-            // 7. 응답 전송
-            final var response = String.join("\r\n",
-                    statusLine,
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody
-            );
+            final String contentType = getContentType(request.getPath());
+            final HttpHeaders headers = getHttpHeaders(contentType, responseBody);
+            final HttpResponse httpResponse = new HttpResponse(statusLine, headers, responseBody.getBytes());
+            final String response = httpResponse.toString();
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -127,15 +90,39 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> params = new HashMap<>();
-        String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
+    private URL getResource(final String path) {
+        if (("/login".equals(path))) {
+            return getClass().getClassLoader()
+                    .getResource("static" + path + ".html");
         }
-        return params;
+
+        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
+            return getClass().getClassLoader()
+                    .getResource("static" + path);
+        }
+        return getClass().getClassLoader().getResource(path);
+    }
+
+    private HttpHeaders getHttpHeaders(final String contentType, final String responseBody) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Type", contentType);
+        headers.addHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        return headers;
+    }
+
+    private String getContentType(final String path) {
+        if (path.endsWith(".html") || "/login".equals(path) || "/".equals(path)) {
+            return "text/html;charset=utf-8";
+        }
+
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+
+        if (path.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+
+        return "text/plain;charset=utf-8";
     }
 }

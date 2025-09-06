@@ -62,13 +62,13 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = handleForStaticResource(path);
             }
 
-            if (uri.contains("/login") && !uri.contains("?")) {
+            if (uri.contains("/login") && queryStrings.isEmpty()) {
                 responseBody = handleForStaticResource("login.html");
             }
 
-            if (uri.contains("/login") && uri.contains("?")) {
-                responseBody = handleForStaticResource("login.html");
-                handleForLogin(queryStrings);
+            if (uri.contains("/login") && !queryStrings.isEmpty()) {
+                handleForStaticResource("login.html");
+                responseBody = handleForLogin(queryStrings);
             }
 
             if (responseBody == null) {

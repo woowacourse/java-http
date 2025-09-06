@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class DynamicRequestProcessor {
 
@@ -21,13 +22,13 @@ public class DynamicRequestProcessor {
     private static final String KEY_VALUE_SEPARATOR = "=";
     public static final String INDEX_HTML = "/index.html";
 
-    public static void processDynamic(String httpMethod, String requestUri, String body, OutputStream outputStream) throws IOException, URISyntaxException {
+    public static void processDynamic(String httpMethod, String requestUri, String body, HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
         if ("POST".equals(httpMethod)) {
             Map<String, String> formData = parseFormData(body);
             if (requestUri.equals("/register")) {
-                handleRegister(formData, outputStream);
+                handleRegister(formData, httpCookie, outputStream);
             } else if (requestUri.equals("/login")) {
-                handleLogin(formData, outputStream);
+                handleLogin(formData, httpCookie, outputStream);
             }
         } else {
             String resourcePath;
@@ -40,16 +41,16 @@ public class DynamicRequestProcessor {
         }
     }
 
-    private static void handleRegister(Map<String, String> formData, OutputStream outputStream) throws IOException {
+    private static void handleRegister(Map<String, String> formData, HttpCookie httpCookie, OutputStream outputStream) throws IOException {
         AuthHandler.register(formData);
-        String redirectResponse = buildRedirectResponse(INDEX_HTML);
+        String redirectResponse = buildAuthRedirectResponse(INDEX_HTML, httpCookie);
         sendResponse(outputStream, redirectResponse);
     }
 
-    private static void handleLogin(Map<String, String> formData, OutputStream outputStream) throws IOException, URISyntaxException {
+    private static void handleLogin(Map<String, String> formData, HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
         try {
             AuthHandler.authenticate(formData);
-            String redirectResponse = buildRedirectResponse(INDEX_HTML);
+            String redirectResponse = buildAuthRedirectResponse(INDEX_HTML, httpCookie);
             sendResponse(outputStream, redirectResponse);
         } catch (IllegalArgumentException e) {
             send401Page(outputStream);
@@ -68,13 +69,18 @@ public class DynamicRequestProcessor {
         return params;
     }
 
-    private static String buildRedirectResponse(String location) {
-        return String.join(HTTP_LINE_SEPARATOR,
-                HttpStatus.FOUND.getStatusLine(),
-                HEADER_LOCATION + location,
-                HEADER_CONTENT_LENGTH + "0",
-                "",
-                "");
+    private static String buildAuthRedirectResponse(String location, HttpCookie httpCookie) {
+        StringBuilder response = new StringBuilder();
+        response.append(HttpStatus.FOUND.getStatusLine()).append(HTTP_LINE_SEPARATOR);
+        response.append(HEADER_LOCATION).append(location).append(HTTP_LINE_SEPARATOR);
+        if (!httpCookie.hasJSESSIONID()) {
+            response.append("Set-Cookie: JSESSIONID=").append(UUID.randomUUID()).append(HTTP_LINE_SEPARATOR);
+        }
+        response.append(HEADER_CONTENT_LENGTH).append("0").append(HTTP_LINE_SEPARATOR);
+        response.append("").append(HTTP_LINE_SEPARATOR);
+        response.append("");
+
+        return response.toString();
     }
 
     private static void send401Page(OutputStream outputStream) throws IOException, URISyntaxException {

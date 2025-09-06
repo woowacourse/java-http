@@ -44,18 +44,13 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = requestParts[1];
 
             Map<String, String> headers = parseHttpHeaders(br);
-            String body = "";
-            if ("POST".equals(httpMethod)) {
-                int contentLength = Integer.parseInt(headers.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                body = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
-            }
+            String body = "POST".equals(httpMethod) ? getBody(headers, br) : "";
+            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
 
             if (requestUri.contains(".")) {
                 StaticResourceProcessor.processStatic(requestUri, outputStream);
             } else {
-                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, outputStream);
+                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, httpCookie, outputStream);
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -70,5 +65,12 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(headerParts[0].strip(), headerParts[1].strip());
         }
         return headers;
+    }
+
+    private String getBody(Map<String, String> headers, BufferedReader br) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
 }

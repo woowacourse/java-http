@@ -13,13 +13,18 @@ public class HttpResponse implements AutoCloseable {
     }
 
     public void send(HttpStatus status, String contentType,
-                     byte[] body, boolean keepAlive) throws IOException {
-        String head = "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + "\r\n"
-                + "Content-Type: " + contentType + "\r\n"
-                + "Content-Length: " + body.length + "\r\n"
-                + (keepAlive ? "Connection: keep-alive\r\n" : "Connection: close\r\n")
-                + "\r\n";
-        outputStream.write(head.getBytes(StandardCharsets.UTF_8));
+                     byte[] body) throws IOException {
+        String header = String.format(
+                "HTTP/1.1 %d %s \r\n" +
+                        "Content-Type: %s \r\n" +
+                        "Content-Length: %d \r\n" +
+                        "\r\n",
+                status.getCode(),
+                status.getMessage(),
+                contentType,
+                body.length
+        );
+        outputStream.write(header.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
         outputStream.flush();
     }

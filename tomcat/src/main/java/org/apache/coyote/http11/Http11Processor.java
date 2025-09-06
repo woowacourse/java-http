@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -37,16 +38,17 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String firstLine = getFirstLine(bufferedReader);
-
-            HttpRequest httpRequest = HttpRequest.parseByFirstLine(firstLine);
+            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(bufferedReader);
             String uri = httpRequest.uri();
             String path = uri;
+
+            if (!Objects.equals(httpRequest.host(), "localhost:8080")) {
+                throw new IllegalArgumentException("올바른 요청 host 가 아니므로 요청을 거절합니다.");
+            }
 
             Map<String, String> queryStrings = new HashMap<>();
 

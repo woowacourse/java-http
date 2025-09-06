@@ -6,6 +6,10 @@ import java.io.IOException;
 public class Http11InputBuffer {
     public static HttpRequest parseToRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
+        }
+
         String[] splitRequestLine = requestLine.split(" ");
 
         String httpMethod = splitRequestLine[0];

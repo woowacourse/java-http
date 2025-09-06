@@ -9,14 +9,14 @@ import org.apache.coyote.http11.http.common.startline.HttpMethod;
 
 public class HttpRequest {
 
-    private final HttpRequestLine httpRequestLine;
+    private final HttpStartLine httpStartLine;
     private final HttpHeader httpHeader;
     private final HttpRequestBody httpRequestBody;
 
-    private HttpRequest(final HttpRequestLine httpRequestLine,
+    private HttpRequest(final HttpStartLine httpStartLine,
                         final HttpHeader httpHeader,
                         final HttpRequestBody httpRequestBody) {
-        this.httpRequestLine = httpRequestLine;
+        this.httpStartLine = httpStartLine;
         this.httpHeader = httpHeader;
         this.httpRequestBody = httpRequestBody;
     }
@@ -24,10 +24,10 @@ public class HttpRequest {
     public static HttpRequest from(final InputStream inputStream) throws IOException {
         validateNull(inputStream);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final HttpRequestLine httpRequestLine = HttpRequestLine.from(bufferedReader);
+        final HttpStartLine httpStartLine = HttpStartLine.from(bufferedReader);
         final HttpHeader httpHeader = HttpHeader.from(bufferedReader);
         final HttpRequestBody httpRequestBody = HttpRequestBody.of(inputStream, httpHeader);
-        return new HttpRequest(httpRequestLine, httpHeader, httpRequestBody);
+        return new HttpRequest(httpStartLine, httpHeader, httpRequestBody);
     }
 
     private static void validateNull(final InputStream inputStream) {
@@ -37,14 +37,14 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return httpRequestLine.getMethod();
+        return httpStartLine.getMethod();
     }
 
     public String getPath() {
-        return httpRequestLine.getPath();
+        return httpStartLine.getPath();
     }
 
     public String getTargetQueryParameter(String target) {
-        return httpRequestLine.getTargetQueryParameter(target);
+        return httpStartLine.getTargetQueryParameter(target);
     }
 }

@@ -2,18 +2,18 @@ package org.apache.coyote.http11.http.response;
 
 import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
-public class HttpResponseLine {
+public class HttpStatusLine {
 
     HttpVersion version;
     HttpStatus status;
 
-    private HttpResponseLine(final HttpVersion version, final HttpStatus status) {
+    private HttpStatusLine(final HttpVersion version, final HttpStatus status) {
         this.version = version;
         this.status = status;
     }
 
-    public static HttpResponseLine of(final HttpVersion version, final HttpStatus status) {
-        return new HttpResponseLine(version, status);
+    public static HttpStatusLine of(final HttpVersion version, final HttpStatus status) {
+        return new HttpStatusLine(version, status);
     }
 
     public String getFormat() {

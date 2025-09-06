@@ -8,22 +8,22 @@ import org.apache.coyote.http11.http.common.startline.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpRequestLine {
+public class HttpStartLine {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpStartLine.class);
 
     private final HttpMethod method;
     private final HttpRequestPath path;
     private final HttpVersion version;
 
-    private HttpRequestLine(final HttpMethod method, final HttpRequestPath path, final HttpVersion version) {
+    private HttpStartLine(final HttpMethod method, final HttpRequestPath path, final HttpVersion version) {
         this.method = method;
         this.path = path;
         this.version = version;
 
     }
 
-    public static HttpRequestLine from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpStartLine from(final BufferedReader bufferedReader) throws IOException {
         validateNull(bufferedReader);
         final String httpRequestLine = bufferedReader.readLine();
         validateNull(httpRequestLine);
@@ -32,7 +32,7 @@ public class HttpRequestLine {
         final HttpMethod method = HttpMethod.findMethod(httpRequestElements[0].trim());
         final HttpRequestPath path = HttpRequestPath.from(httpRequestElements[1].trim());
         final HttpVersion version = HttpVersion.find(httpRequestElements[2].trim());
-        return new HttpRequestLine(method, path, version);
+        return new HttpStartLine(method, path, version);
     }
 
     private static void validateNull(final BufferedReader bufferedReader) {

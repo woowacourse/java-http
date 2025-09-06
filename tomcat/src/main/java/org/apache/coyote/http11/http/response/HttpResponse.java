@@ -13,11 +13,11 @@ import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
 public class HttpResponse {
 
-    private final HttpResponseLine responseLine;
+    private final HttpStatusLine responseLine;
     private final HttpHeader header;
     private final HttpResponseBody responseBody;
 
-    private HttpResponse(final HttpResponseLine responseLine,
+    private HttpResponse(final HttpStatusLine responseLine,
                          final HttpHeader header,
                          final HttpResponseBody responseBody) {
         this.responseLine = responseLine;
@@ -26,17 +26,19 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok() {
-        final HttpResponseLine httpResponseLine = HttpResponseLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1,
+                HttpStatus.OK);
         final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
         final HttpHeader httpHeader = createHeader(httpResponseBody, null);
-        return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
+        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
     public static HttpResponse ok(final String responseBodyValue) {
-        final HttpResponseLine httpResponseLine = HttpResponseLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1,
+                HttpStatus.OK);
         final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName(responseBodyValue);
         final HttpHeader httpHeader = createHeader(httpResponseBody, responseBodyValue);
-        return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
+        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
     private static HttpHeader createHeader(final HttpResponseBody responseBody, final String returnValue) {

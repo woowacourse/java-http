@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.stream.Collectors;
-import org.apache.catalina.RequestCookie;
+import org.apache.catalina.ResponseCookie;
 
 public class Http11OutputBuffer {
     public static String parseToString(HttpResponse httpResponse) {
@@ -24,11 +24,13 @@ public class Http11OutputBuffer {
             responseBuilder.append("\r\n");
         }
 
-        responseBuilder.append("Content-Length: ").append(httpResponse.contentLength());
-        responseBuilder.append("\r\n");
+        if (httpResponse.contentLength() > 0) {
+            responseBuilder.append("Content-Length: ").append(httpResponse.contentLength());
+            responseBuilder.append("\r\n");
+        }
 
-        if (httpResponse.requestCookie() != null) {
-            responseBuilder.append("Set-Cookie: ").append(parseCookie(httpResponse.requestCookie()));
+        if (httpResponse.responseCookie() != null) {
+            responseBuilder.append("Set-Cookie: ").append(parseCookie(httpResponse.responseCookie()));
         }
 
         responseBuilder.append("\r\n");
@@ -40,9 +42,9 @@ public class Http11OutputBuffer {
         return responseBuilder.toString();
     }
 
-    private static String parseCookie(RequestCookie requestCookie) {
-        return requestCookie.getCookieValues().keySet().stream()
-                .map(key -> key + "=" + requestCookie.getCookieValues().get(key))
+    private static String parseCookie(ResponseCookie responseCookie) {
+        return responseCookie.getCookieValues().keySet().stream()
+                .map(key -> key + "=" + responseCookie.getCookieValues().get(key))
                 .collect(Collectors.joining("; "));
     }
 }

@@ -17,8 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -52,6 +55,19 @@ public class Http11Processor implements Runnable, Processor {
             final var method = request.get("method");
             final var path = request.get("path");
             final var params = parseQueryString(request.get("params"));
+            final var cookieHeader = request.get("cookie");
+
+            final var cookie = RequestCookie.from(cookieHeader);
+            final var extraHeaders = new LinkedHashMap<String, List<String>>();
+
+            if (!cookie.contains("JSESSIONID")) {
+                final var jsessionId = UUID.randomUUID()
+                        .toString();
+                extraHeaders.put(
+                        "Set-Cookie",
+                        List.of("JSESSIONID=" + jsessionId)
+                );
+            }
 
             if ("/login".equals(path)) {
                 if ("GET".equalsIgnoreCase(method)) {
@@ -59,14 +75,7 @@ public class Http11Processor implements Runnable, Processor {
                             .getResource("static/login.html"));
                     final var body = readResourceFile(resourceUrl);
 
-                    writeResponse(
-                            outputStream,
-                            200,
-                            "OK",
-                            null,
-                            body,
-                            "text/html;charset=utf-8"
-                    );
+                    writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
                     return;
                 }
 
@@ -75,25 +84,13 @@ public class Http11Processor implements Runnable, Processor {
                     final var password = params.get("password");
 
                     if (loginService.login(account, password)) {
-                        writeResponse(
-                                outputStream,
-                                302,
-                                "Found",
-                                Map.of("Location", "/index.html"),
-                                null,
-                                "text/html;charset=utf-8"
-                        );
+                        extraHeaders.put("Location", List.of("/index.html"));
+                        writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
                         return;
                     }
 
-                    writeResponse(
-                            outputStream,
-                            302,
-                            "Found",
-                            Map.of("Location", "/401.html"),
-                            null,
-                            "text/html;charset=utf-8"
-                    );
+                    extraHeaders.put("Location", List.of("/401.html"));
+                    writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
                     return;
                 }
             }
@@ -104,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
                             .getResource("static/register.html"));
                     final var body = readResourceFile(resourceUrl);
 
-                    writeResponse(outputStream, 200, "OK", null, body, "text/html;charset=utf-8");
+                    writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
                     return;
                 }
 
@@ -115,14 +112,8 @@ public class Http11Processor implements Runnable, Processor {
 
                     registerService.register(account, password, email);
 
-                    writeResponse(
-                            outputStream,
-                            302,
-                            "Found",
-                            Map.of("Location", "/index.html"),
-                            null,
-                            "text/html;charset=utf-8"
-                    );
+                    extraHeaders.put("Location", List.of("/index.html"));
+                    writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
                     return;
                 }
             }
@@ -135,33 +126,18 @@ public class Http11Processor implements Runnable, Processor {
                 final var body = readResourceFile(staticResourceUrl);
                 final var contentType = detectContentType(staticResourceUrl);
 
-                writeResponse(
-                        outputStream,
-                        200,
-                        "OK",
-                        null,
-                        body,
-                        contentType
-                );
+                writeResponse(outputStream, 200, "OK", extraHeaders, body, contentType);
                 return;
             }
 
             final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            writeResponse(
-                    outputStream,
-                    200,
-                    "OK",
-                    null,
-                    body,
-                    "text/html;charset=utf-8"
-            );
+            writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
         } catch (Exception e) {
             log.error("Internal Server Error: {}", e.getMessage(), e);
             sendInternalServerErrorResponse(connection);
         }
     }
 
-    // TODO. 추후 HttpRequest로 분리
     private Map<String, String> parseRequest(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
         if (requestLine == null || requestLine.isBlank()) {
@@ -203,6 +179,7 @@ public class Http11Processor implements Runnable, Processor {
         result.put("method", method);
         result.put("path", path);
         result.put("params", allParams.toString());
+        result.put("cookie", headers.get("Cookie"));
 
         return result;
     }
@@ -256,12 +233,11 @@ public class Http11Processor implements Runnable, Processor {
         return contentType != null ? contentType : "text/plain;charset=utf-8";
     }
 
-    // TODO. 추후 HttpResponse 분리
     private void writeResponse(
             final OutputStream outputStream,
             final int statusCode,
             final String statusMessage,
-            final Map<String, String> extraHeaders,
+            final Map<String, List<String>> extraHeaders,
             final byte[] body,
             final String contentType
     ) throws IOException {
@@ -282,10 +258,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (extraHeaders != null) {
-            extraHeaders.forEach((k, v) -> headers.append(k)
-                    .append(": ")
-                    .append(v)
-                    .append("\r\n"));
+            extraHeaders.forEach((k, values) -> values.forEach(v ->
+                    headers.append(k)
+                            .append(": ")
+                            .append(v)
+                            .append("\r\n")));
         }
 
         headers.append("\r\n");
@@ -311,7 +288,7 @@ public class Http11Processor implements Runnable, Processor {
                     connection.getOutputStream(),
                     500,
                     "Internal Server Error",
-                    null,
+                    Map.of(),
                     body,
                     "text/html;charset=utf-8"
             );

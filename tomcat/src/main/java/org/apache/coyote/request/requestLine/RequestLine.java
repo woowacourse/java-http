@@ -40,7 +40,7 @@ public class RequestLine {
     }
 
     public boolean isDefaultPath() {
-        return this.requestPath.equals("/");
+        return this.requestPath.getRequestPath().equals("/");
     }
 
     public RequestPath getRequestPath() {

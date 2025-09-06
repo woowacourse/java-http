@@ -12,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +38,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
+            final HttpResponse httpResponse = HttpResponseGenerator.create();
 
-            final HttpResponse httpResponse = servletContainer.process(httpRequest);
+            servletContainer.process(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.combine());
             outputStream.flush();

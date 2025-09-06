@@ -7,12 +7,10 @@ public interface Servlet {
 
     boolean canHandle(final HttpRequest httpRequest);
 
-    HttpResponse service(final HttpRequest httpRequest);
+    void service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    HttpResponse doGet(final HttpRequest httpRequest);
+    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    HttpResponse doPost(final HttpRequest httpRequest);
+    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    //TODO: init, destroy
-    //TODO: request와  response 같이 넘겨주기 (실제 방식)
 }

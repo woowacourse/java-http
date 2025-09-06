@@ -13,11 +13,10 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseGenerator;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class RegisterServlet extends HttpServlet{
+public class RegisterServlet extends HttpServlet {
 
     private static final String REGISTER_PATH = "/register";
     private static final String STATIC_RECOURSE_PATH = "static";
@@ -30,15 +29,15 @@ public class RegisterServlet extends HttpServlet{
     }
 
     @Override
-    public HttpResponse doGet(final HttpRequest httpRequest) {
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         RequestPath requestPath = httpRequest.getRequestPath();
 
         String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
-        return HttpResponseGenerator.generate(resource, ContentType.HTML, HttpStatus.OK);
+        httpResponse.init(resource, ContentType.HTML, HttpStatus.OK);
     }
 
     @Override
-    public HttpResponse doPost(final HttpRequest httpRequest) {
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String requestBody = httpRequest.getRequestBody().getBody();
 
         Map<String, String> bodyValues = new HashMap<>();
@@ -52,7 +51,7 @@ public class RegisterServlet extends HttpServlet{
         final RegisterController registerController = new RegisterController(new UserService());
 
         registerController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
-        return HttpResponseGenerator.generate(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
+        httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
     }
 
     private String findResource(final String requestPath) {

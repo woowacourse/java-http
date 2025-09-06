@@ -1,6 +1,6 @@
 package org.apache.coyote.response.responseHeader;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,8 +16,17 @@ public class ResponseHeader {
         this.headers = initHeaders(bodyLength, contentType);
     }
 
+    public ResponseHeader() {
+        this.headers = new HashMap<>();
+    }
+
+    public ResponseHeader init(final int length, final ContentType contentType) {
+        this.headers = initHeaders(length, contentType);
+        return this;
+    }
+
     private Map<HttpHeaders, String> initHeaders(final int bodyLength, final ContentType contentType) {
-        headers = new LinkedHashMap<>();
+        headers = new HashMap<>();
 
         headers.put(
                 HttpHeaders.CONTENT_TYPE,

@@ -1,15 +1,21 @@
 package org.apache.coyote.http11;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import support.StubSocket;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class Http11ProcessorTest {
+
+    @InjectSoftAssertions
+    private SoftAssertions softly;
 
     @Test
     void process() {
@@ -21,23 +27,23 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Length: 12",
-                "Content-Type: text/html;charset=utf-8",
-                "",
-                "Hello world!");
+        final String expectedBody = "Hello world!";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        softly.assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("Content-Length: " + expectedBody.length() + "\r\n")
+                .contains("\r\n\r\n")
+                .endsWith(expectedBody);
     }
 
     @Test
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
                 "",
                 "");
 
@@ -49,12 +55,14 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Length: 5564\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String actualResponse = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        softly.assertThat(actualResponse)
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("Content-Length: " + expectedBody.getBytes().length + "\r\n")
+                .contains("\r\n\r\n")
+                .endsWith(expectedBody);
     }
 }

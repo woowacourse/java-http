@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +40,41 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestLine = reader.readLine();
             String[] parsedLine = requestLine.split(" ");
-            String requestUrl = parsedLine[1];
+            String requestUri = parsedLine[1];
 
             URL resource;
-            if (requestUrl.endsWith(".html") || requestUrl.endsWith(".css") || requestUrl.endsWith(".js")) {
-                resource = getClass().getClassLoader().getResource("static" + requestUrl);
+            if (requestUri.endsWith(".html") || requestUri.endsWith(".css") || requestUri.endsWith(".js")) {
+                resource = getClass().getClassLoader().getResource("static" + requestUri);
             } else {
-                resource = getClass().getClassLoader().getResource(requestUrl);
+                resource = getClass().getClassLoader().getResource(requestUri);
+            }
+
+            if (requestUri.contains("?")) {
+                int index = requestUri.indexOf("?");
+                String path = requestUri.substring(0, index);
+                String queryString = requestUri.substring(index + 1);
+
+                Map<String, String> params = parseQueryString(queryString);
+                if ("/login".equals(path)) {
+                    String account = params.get("account");
+                    String password = params.get("password");
+
+                    if (account == null || password == null) {
+                        log.warn("Missing account or password");
+                        return;
+                    }
+
+                    InMemoryUserRepository.findByAccount(account)
+                            .ifPresentOrElse(user -> {
+                                if (user.checkPassword(password)) {
+                                    log.info("user : {}", user);
+                                } else {
+                                    log.info("Login failed for account: {}", account);
+                                }
+                            }, () -> log.info("No such account: {}", account));
+                }
+
+                resource = getClass().getClassLoader().getResource("static/" + path + ".html");
             }
 
             if (resource == null) {
@@ -61,12 +92,14 @@ public class Http11Processor implements Runnable, Processor {
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             String contentType = "text/plain;charset=utf-8";
-            if (requestUrl.endsWith(".html")) {
+            if (requestUri.endsWith(".html")) {
                 contentType = "text/html;charset=utf-8";
-            } else if (requestUrl.endsWith(".css")) {
+            } else if (requestUri.endsWith(".css")) {
                 contentType = "text/css;charset=utf-8";
-            } else if (requestUrl.endsWith(".js")) {
+            } else if (requestUri.endsWith(".js")) {
                 contentType = "application/javascript;charset=utf-8";
+            } else if (requestUri.startsWith("/login")) {
+                contentType = "text/html;charset=utf-8";
             }
 
             final var response = String.join("\r\n",
@@ -81,5 +114,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> params = new HashMap<>();
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return params;
     }
 }

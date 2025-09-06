@@ -33,7 +33,7 @@ public class LoginRequestHandler {
                     ContentType.APPLICATION_JSON, "");
         }
 
-        return new HttpResponse(httpVersion, HttpStatus.UNAUTHORIZED, new Location("/401.html"),
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, new Location("/401.html"),
                 ContentType.APPLICATION_JSON, "");
     }
 }

@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,52 +30,48 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
-                String line;
-                List<String> header = new ArrayList<>();
-                while ((line = br.readLine()) != null && !line.isEmpty()) {
-                    header.add(line);
-                }
+            RequestManager requestManager = new RequestManager(new RequestHeaderManager(), new RequestBodyManager());
+            requestManager.read(bufferedReader);
 
-                if (header.get(0).startsWith("GET /index.html HTTP/1.1")) {
-                    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("static/index.html");
-                    if (resourceAsStream == null) {
-                        return;
-                    }
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream));
-                    StringBuilder st = new StringBuilder();
-                    String line2;
-                    while ((line2 = reader.readLine()) != null) {
-                        st.append(line2).append("\r\n");
-                    }
-
-                    String responseBody = st.toString();
-                    String response = String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                            "",
-                            responseBody);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
+            if (requestManager.equalsPath("/index.html")) {
+                InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("static/index.html");
+                if (resourceAsStream == null) {
                     return;
                 }
-                final var responseBody = "Hello world!";
 
-                final var response = String.join("\r\n",
+                BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream));
+                StringBuilder st = new StringBuilder();
+                String line2;
+                while ((line2 = reader.readLine()) != null) {
+                    st.append(line2).append("\r\n");
+                }
+
+                String responseBody = st.toString();
+                String response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
                         responseBody);
-
                 outputStream.write(response.getBytes());
                 outputStream.flush();
-
+                return;
             }
+
+            final var responseBody = "Hello world!";
+
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

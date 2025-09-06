@@ -1,6 +1,16 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,20 +36,47 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var inputStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String requestLine = inputStream.readLine();
+            if (requestLine == null || requestLine.isEmpty()) return;
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String[] requestParts = requestLine.split(" ");
+            String method = requestParts[0];
+            String path = requestParts[1];
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if(method.equals("GET")) {
+                if(path.equals("/")) {
+                    final var responseBody = "Hello world!";
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                }
+                if (path.equals("/index.html")) {
+                    try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+                        if (fileInputStream == null) {
+                            return;
+                        }
+                        byte[] bodyBytes = fileInputStream.readAllBytes();
+                        final var response = String.join("\r\n",
+                                "HTTP/1.1 200 OK ",
+                                "Content-Type: text/html;charset=utf-8 ",
+                                "Content-Length: " + bodyBytes.length + " ",
+                                "","");
+
+                        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                        outputStream.write(bodyBytes);
+                        outputStream.flush();
+                    }
+                }
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

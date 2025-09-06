@@ -7,12 +7,12 @@ import org.apache.coyote.response.responseHeader.HttpHeaders;
 
 public class RequestHeader {
 
-    public static final String HEADER_SPLITER = ":";
+    public static final String HEADER_SEPARATOR = ":";
     private final Map<HttpHeaders, String> headerValue;
 
     public RequestHeader(final List<String> headerLines) {
         this.headerValue = headerLines.stream()
-                .map(headerLine -> headerLine.split(HEADER_SPLITER))
+                .map(headerLine -> headerLine.split(HEADER_SEPARATOR))
                 .collect(Collectors.toMap(
                         keyValue -> HttpHeaders.find(keyValue[0]),
                         keyValue -> keyValue[1]

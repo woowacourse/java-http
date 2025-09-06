@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +17,7 @@ public class FormDataParser {
         for (String pair : pairs) {
             String[] keyValue = pair.split(KEY_VALUE_SEPARATOR, 2);
             if (keyValue.length == 2) {
-                String key = URLDecoder.decode(keyValue[0].strip(), StandardCharsets.UTF_8);
-                String value = URLDecoder.decode(keyValue[1].strip(), StandardCharsets.UTF_8);
-                params.put(key, value);
+                params.put(keyValue[0].strip(), keyValue[1].strip());
             }
         }
         return params;

@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.catalina.Cookie;
+import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
     public static HttpRequest parseToRequest(BufferedReader bufferedReader) throws IOException {

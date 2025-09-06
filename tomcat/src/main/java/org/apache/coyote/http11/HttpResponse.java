@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Cookie;
+
 public record HttpResponse(
         double httpVersion,
         int statusCode,

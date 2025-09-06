@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Cookie;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 

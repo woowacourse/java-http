@@ -15,6 +15,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final LoginController loginController = new LoginController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -36,6 +37,13 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = httpRequest.getUri();
 
             if (requestMethod == GET) {
+                if (requestUri.equals("/login") && httpRequest.getQuery().isEmpty()) {
+                    processGet(requestUri, httpResponse);
+                    return;
+                }
+                if (requestUri.equals("/login")) {
+                    loginController.login(httpRequest, httpResponse);
+                }
                 processGet(requestUri, httpResponse);
             }
         } catch (IOException | UncheckedServletException e) {
@@ -47,6 +55,6 @@ public class Http11Processor implements Runnable, Processor {
             final String uri,
             final HttpResponse httpResponse
     ) throws IOException {
-        httpResponse.ok(uri);
+        httpResponse.sendResponse(uri);
     }
 }

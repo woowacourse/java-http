@@ -84,4 +84,19 @@ class HttpHeadersTest {
                 "application/xml;q=0.9"
         );
     }
+
+    @Test
+    void 헤더_키의_대소문자를_구분하지_않는다() {
+        // given
+        List<String> headerLines = List.of(
+                "host: localhost:8080",
+                "Host: localhost:8081"
+        );
+
+        // when
+        HttpHeaders httpHeaders = HttpHeaders.fromLines(headerLines);
+
+        // then
+        assertThat(httpHeaders.get("host")).containsExactly("localhost:8080", "localhost:8081");
+    }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpHeaders {
-    private final Map<String, List<String>> headers = new HashMap<>();
+    private final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     private HttpHeaders() {
     }

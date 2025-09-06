@@ -42,22 +42,12 @@ public class Http11Processor implements Runnable, Processor {
         try (var input = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              var out = new BufferedOutputStream(connection.getOutputStream())) {
 
-            String requestLine = input.readLine();
-            if (requestLine == null) {
-                return;
-            }
+            HttpRequest request = new HttpRequest(input);
+            log.info(request.toString());
 
-            String[] tokens = requestLine.split(" ");
-            String path = tokens[1];
-
-            if (path.contains("/login") && path.contains("?")) {
-                int index = path.indexOf("?");
-                String uri = path.substring(0, index);
-                String query = path.substring(index + 1);
-
-                String[] params = query.split("&");
-                String account = params[0].split("=")[1];
-                String password = params[1].split("=")[1];
+            if ("/login".equals(request.getPath())) {
+                String account = request.getParams().get("account");
+                String password = request.getParams().get("password");
 
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isEmpty()) {
@@ -71,12 +61,13 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                log.info(user.toString());
-                checkStaticFile(uri, out);
-                return;
+                log.info("Login success: {}", user);
+                if (checkStaticFile("/index.html", out)) {
+                    return;
+                }
             }
 
-            if (checkStaticFile(path, out)) {
+            if (checkStaticFile(request.getPath(), out)) {
                 return;
             }
 

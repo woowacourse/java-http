@@ -16,10 +16,10 @@ public class HttpRequest {
     private final String contentType;
     private final int contentLength;
     private final String requestBody;
-    private final RequestCookie requestCookie;
+    private final RequestCookie cookie;
 
     public HttpRequest(SessionManager sessionManager, String httpMethod, String url, double httpVersion, String host,
-                       String contentType, String requestBody, RequestCookie requestCookie) {
+                       String contentType, String requestBody, RequestCookie cookie) {
         this.sessionManager = sessionManager;
         this.httpMethod = httpMethod;
         this.url = url;
@@ -28,28 +28,31 @@ public class HttpRequest {
         this.contentType = contentType;
         this.contentLength = requestBody == null ? 0 : requestBody.length();
         this.requestBody = requestBody;
-        this.requestCookie = requestCookie;
+        this.cookie = cookie;
     }
 
     public HttpSession getSession(boolean create) {
-        if (requestCookie == null) {
-            return sessionManager.createSession();
+        String jSessionId = null;
+        if (cookie != null) {
+            jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
         }
 
-        String jSessionId = requestCookie.findByKey(JAVA_SESSION_ID_KEY);
         if (jSessionId != null) {
-            return sessionManager.findSession(jSessionId);
+            HttpSession existingSession = sessionManager.findSession(jSessionId);
+            if (existingSession != null) {
+                return existingSession;
+            }
         }
 
         if (create) {
-            sessionManager.createSession();
+            return sessionManager.createSession();
         }
 
         return null;
     }
 
     public RequestCookie getCookie() {
-        return requestCookie;
+        return cookie;
     }
 
     public String getHttpMethod() {

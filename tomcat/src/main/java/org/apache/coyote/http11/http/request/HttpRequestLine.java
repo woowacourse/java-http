@@ -21,9 +21,9 @@ public class HttpRequestLine {
         validateNull(httpRequestLine);
         final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
         validateFormat(httpRequestElements);
-        this.method = HttpMethod.findMethod(clean(httpRequestElements[0]));
-        this.path = HttpRequestPath.from(clean(httpRequestElements[1]));
-        this.version = HttpVersion.find(clean(httpRequestElements[2]));
+        this.method = HttpMethod.findMethod(httpRequestElements[0].trim());
+        this.path = HttpRequestPath.from(httpRequestElements[1].trim());
+        this.version = HttpVersion.find(httpRequestElements[2].trim());
     }
 
     public static HttpRequestLine from(final BufferedReader bufferedReader) throws IOException {
@@ -52,10 +52,6 @@ public class HttpRequestLine {
             throw new IllegalArgumentException(
                     "httpRequestElements는 3개로 구성되어야 합니다: %d".formatted(httpRequestElements.length));
         }
-    }
-
-    private String clean(final String target) {
-        return target.trim();
     }
 
     public HttpMethod getMethod() {

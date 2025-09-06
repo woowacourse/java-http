@@ -55,7 +55,7 @@ public class HttpRequestParser {
     public HttpHeaders parseHeaders(final List<String> headerLines) {
         final HttpHeaders headers = new HttpHeaders();
         for (final String rawHeader : headerLines) {
-            final String[] rawHeaders = rawHeader.split(": ");
+            final String[] rawHeaders = rawHeader.split(": ", 2);
             headers.addHeader(rawHeaders[0], rawHeaders[1]);
         }
 

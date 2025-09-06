@@ -20,11 +20,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Map<String, String> contentType = Map.of(
-            "css", "Content-Type: text/css;charset=utf-8 ",
-            "html", "Content-Type: text/html;charset=utf-8 ",
-            "js", "Content-Type: "
-    );
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -43,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            final var request = reader.readLine().trim();
+            final var request = getRequest(reader);
 
             String[] requestLineParts = request.split(" ");
 
@@ -115,6 +110,15 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String getRequest(BufferedReader reader) throws IOException {
+        final var request = reader.readLine();
+        if (request == null || request.isBlank()) {
+            throw new IllegalArgumentException("[ERROR] request is empty");
+        }
+
+        return request.trim();
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {

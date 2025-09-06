@@ -61,13 +61,13 @@ public class Http11Processor implements Runnable, Processor {
 
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isEmpty()) {
-                    sendError(out, 400, "Client Error");
+                    sendError(out, HttpStatus.BAD_REQUEST);
                     return;
                 }
 
                 User user = optionalUser.get();
                 if (!user.checkPassword(password)) {
-                    sendError(out, 401, "Error");
+                    sendError(out, HttpStatus.UNAUTHORIZED);
                     return;
                 }
 
@@ -80,11 +80,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            sendError(out, 404, "Not Found");
+            sendError(out, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             try (var out = new BufferedOutputStream(connection.getOutputStream())) {
                 log.error(e.getMessage());
-                sendError(out, 500, "Internal Server Error");
+                sendError(out, HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (IOException ioException) {
                 log.error(ioException.getMessage());
             }
@@ -134,11 +134,11 @@ public class Http11Processor implements Runnable, Processor {
         out.flush();
     }
 
-    private void sendError(BufferedOutputStream out, int status, String reason) {
-        String errorResource = "static/" + status + ".html";
+    private void sendError(BufferedOutputStream out, HttpStatus httpStatus) {
+        String errorResource = "static/" + httpStatus.getCode() + ".html";
 
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(errorResource)) {
-            byte[] errorBody = getErrorBody(status, reason, inputStream);
+            byte[] errorBody = getErrorBody(inputStream, httpStatus);
 
             String header = String.format("""
                             HTTP/1.1 %d %s\r
@@ -147,8 +147,8 @@ public class Http11Processor implements Runnable, Processor {
                             Connection: keep-alive\r
                             \r
                             """,
-                    status,
-                    reason,
+                    httpStatus.getCode(),
+                    httpStatus.getMessage(),
                     errorBody.length
             );
 
@@ -160,10 +160,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private byte[] getErrorBody(int status, String reason, InputStream inputStream) throws IOException {
+    private byte[] getErrorBody(InputStream inputStream, HttpStatus httpStatus) throws IOException {
         if (inputStream != null) {
             return inputStream.readAllBytes();
         }
-        return ("<h1>" + status + " " + reason + "</h1>").getBytes(StandardCharsets.UTF_8);
+        return ("<h1>" + httpStatus.getCode() + " " + httpStatus.getMessage() + "</h1>").getBytes(
+                StandardCharsets.UTF_8);
     }
 }

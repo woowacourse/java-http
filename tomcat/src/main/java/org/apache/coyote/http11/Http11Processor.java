@@ -83,12 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                 bytes = Files.readAllBytes(path);
             }
 
-            String responseHeader;
-            if (requestUri.contains("css")) {
-                responseHeader = getHeader(bytes, "css");
-            } else {
-                responseHeader = getHeader(bytes, "html");
-            }
+            final String responseHeader = getResponseHeader(requestUri, bytes);
 
             outputStream.write(responseHeader.getBytes());
             outputStream.write(bytes);
@@ -97,6 +92,21 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String getResponseHeader(final String requestUri, final byte[] bytes) {
+        String responseHeader = "";
+        if (requestUri.endsWith(".css")) {
+            responseHeader = getHeader(bytes, "css");
+        }
+        if (requestUri.endsWith(".html")) {
+            responseHeader = getHeader(bytes, "html");
+        }
+
+        if (requestUri.endsWith(".js")) {
+            responseHeader = getHeader(bytes, "js");
+        }
+        return responseHeader;
     }
 
     private static String getHeader(final byte[] bytes, String type) {

@@ -1,6 +1,7 @@
 package org.apache.catalina.servlet;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.servletContainer.session.Session;
+import org.apache.catalina.servletContainer.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
@@ -52,12 +56,23 @@ public class LoginServlet extends HttpServlet {
         final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
 
         try {
-            loginController.login(bodyValues.get("account"), bodyValues.get("password"));
+            User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));
+            setCookie(httpResponse, user);
+            httpResponse.setLocation();
+            httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
         } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
             httpResponse.init(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
         }
+    }
 
-        httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
+    private void setCookie(final HttpResponse httpResponse, final User user) {
+        Session session = new Session(String.valueOf(UUID.randomUUID()));
+        session.setAttribute("User", user);
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+
+        httpResponse.setCookies(session.getId());
     }
 
     private String findResource(final String requestPath) {

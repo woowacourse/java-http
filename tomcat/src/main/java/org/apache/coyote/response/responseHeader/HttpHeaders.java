@@ -26,7 +26,11 @@ public enum HttpHeaders {
     UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
     USER_AGENT("User-Agent"),
 
-    LOCATION("Location");
+    PRAGMA("Pragma"),
+    LOCATION("Location"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie")
+    ;
 
     private final String value;
 
@@ -38,6 +42,6 @@ public enum HttpHeaders {
         return Arrays.stream(HttpHeaders.values())
                 .filter(httpHeaders -> httpHeaders.value.equals(headerKey))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 헤더입니다"));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("[ERROR] 잘못된 헤더입니다: %s", headerKey)));
     }
 }

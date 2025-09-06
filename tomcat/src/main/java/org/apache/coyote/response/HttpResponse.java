@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import org.apache.catalina.servlet.cookie.HttpCookie;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseHeader.ResponseHeader;
 import org.apache.coyote.response.responseLine.HttpStatus;
@@ -10,13 +11,6 @@ public class HttpResponse {
     private ResponseLine responseLine;
     private ResponseHeader responseHeader;
     private ResponseBody responseBody;
-
-    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader,
-                        final ResponseBody responseBody) {
-        this.responseLine = responseLine;
-        this.responseHeader = responseHeader;
-        this.responseBody = responseBody;
-    }
 
     public HttpResponse() {
         this.responseLine = new ResponseLine();
@@ -38,5 +32,13 @@ public class HttpResponse {
         this.responseLine = responseLine.init(httpStatus);
         this.responseHeader = responseHeader.init(body.getBytes().length, contentType);
         this.responseBody = responseBody.init(body);
+    }
+
+    public void setCookies(final String sessionId) {
+        responseHeader.addCookie(HttpCookie.loginCookie(sessionId).combine());
+    }
+
+    public void setLocation() {
+        responseHeader.addLocation("/index.html");
     }
 }

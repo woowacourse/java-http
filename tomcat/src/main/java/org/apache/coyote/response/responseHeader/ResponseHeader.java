@@ -12,10 +12,6 @@ public class ResponseHeader {
 
     private Map<HttpHeaders, String> headers;
 
-    public ResponseHeader(final int bodyLength, final ContentType contentType) {
-        this.headers = initHeaders(bodyLength, contentType);
-    }
-
     public ResponseHeader() {
         this.headers = new HashMap<>();
     }
@@ -26,8 +22,6 @@ public class ResponseHeader {
     }
 
     private Map<HttpHeaders, String> initHeaders(final int bodyLength, final ContentType contentType) {
-        headers = new HashMap<>();
-
         headers.put(
                 HttpHeaders.CONTENT_TYPE,
                 contentType.isImage()
@@ -40,10 +34,18 @@ public class ResponseHeader {
         return headers;
     }
 
+    public void addCookie(String cookies) {
+        headers.put(HttpHeaders.SET_COOKIE, cookies);
+    }
+
     public String toCombine() {
         return headers.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + HEADER_COMBINATOR + entry.getValue() + " ")
                 .collect(Collectors.joining(HEADER_DELIMITER));
+    }
+
+    public void addLocation(final String location) {
+        headers.put(HttpHeaders.LOCATION, location);
     }
 }

@@ -3,6 +3,8 @@ package org.apache.coyote.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.servlet.cookie.HttpCookie;
+import org.apache.catalina.servletContainer.session.Session;
 import org.apache.coyote.response.responseHeader.HttpHeaders;
 
 public class RequestHeader {
@@ -24,5 +26,12 @@ public class RequestHeader {
             return Integer.parseInt(headerValue.get(HttpHeaders.CONTENT_LENGTH).trim());
         }
         return 0;
+    }
+
+    public Session getSession() {
+        String cookie = headerValue.get(HttpHeaders.COOKIE);
+        HttpCookie httpCookie = new HttpCookie(cookie);
+
+        return httpCookie.getSession();
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.request;
 
+import org.apache.catalina.servletContainer.session.Session;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
 
@@ -30,5 +31,9 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        return requestHeader.getSession();
     }
 }

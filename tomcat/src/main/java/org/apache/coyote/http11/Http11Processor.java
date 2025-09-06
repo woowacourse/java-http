@@ -13,6 +13,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final LoginController loginController = new LoginController();
+    private final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -31,21 +32,14 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
             String requestUri = httpRequest.getUri();
-            
+
             if (requestUri.equals("/login") && !httpRequest.getQuery().isEmpty()) {
                 loginController.login(httpRequest, httpResponse);
                 return;
             }
-            process(requestUri, httpResponse);
+            staticResourceHandler.serveStatic(httpRequest, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void process(
-            final String uri,
-            final HttpResponse httpResponse
-    ) throws IOException {
-        httpResponse.sendResponse(uri);
     }
 }

@@ -86,15 +86,4 @@ public class HttpRequest {
     public Map<String, String> getParams() {
         return params;
     }
-
-    @Override
-    public String toString() {
-        return "HttpRequest{" +
-                "method='" + method + '\'' +
-                ", path='" + path + '\'' +
-                ", queryString='" + queryString + '\'' +
-                ", params=" + params +
-                ", headers=" + headers +
-                '}';
-    }
 }

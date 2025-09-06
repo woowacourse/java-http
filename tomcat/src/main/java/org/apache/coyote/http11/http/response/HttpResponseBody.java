@@ -11,31 +11,34 @@ import java.util.Optional;
 
 public class HttpResponseBody {
 
-    private final String value;
+    private final byte[] value;
 
-    private HttpResponseBody(final String value) {
-        final URL url = getClass().getClassLoader().getResource("static/" + value);
-
-        if (url == null) {
-            this.value = value;
-            return;
-        }
-
-        try {
-            final Path path = Paths.get(url.toURI());
-            this.value = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (IOException | URISyntaxException e) {
-            throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
-        }
+    private HttpResponseBody(final byte[] value) {
+        this.value = value;
     }
 
     public static HttpResponseBody emptyBody() {
-        return new HttpResponseBody(null);
+        return new HttpResponseBody(new byte[0]);
     }
 
     public static HttpResponseBody withString(String value) {
         validateNull(value);
-        return new HttpResponseBody(value);
+        return new HttpResponseBody(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static HttpResponseBody withStaticResourceName(String resourceName) {
+        final URL url = HttpResponseBody.class.getClassLoader().getResource("static/" + resourceName);
+
+        if (url == null) {
+            return withString(resourceName);
+        }
+
+        try {
+            final Path path = Paths.get(url.toURI());
+            return new HttpResponseBody(Files.readAllBytes(path));
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
+        }
     }
 
     private static void validateNull(final String value) {
@@ -44,7 +47,7 @@ public class HttpResponseBody {
         }
     }
 
-    public Optional<String> getValue() {
+    public Optional<byte[]> getValue() {
         return Optional.ofNullable(value);
     }
 
@@ -52,6 +55,6 @@ public class HttpResponseBody {
         if (value == null) {
             throw new IllegalArgumentException("body 내용물이 존재하지 않습니다");
         }
-        return value.getBytes(StandardCharsets.UTF_8).length;
+        return value.length;
     }
 }

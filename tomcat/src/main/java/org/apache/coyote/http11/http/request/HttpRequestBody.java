@@ -3,23 +3,22 @@ package org.apache.coyote.http11.http.request;
 import http.HttpHeaderKey;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 
 public class HttpRequestBody {
 
-    private final String value;
+    private final byte[] value;
 
-    private HttpRequestBody(final String value) {
+    private HttpRequestBody(final byte[] value) {
         this.value = value;
     }
 
     public static HttpRequestBody of(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
         validateNull(inputStream, httpHeader);
-        String value = null;
+        byte[] value = new byte[0];
         if (httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
             final int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
-            value = new String(inputStream.readNBytes(contentLength), StandardCharsets.UTF_8);
+            value = inputStream.readNBytes(contentLength);
         }
         return new HttpRequestBody(value);
     }
@@ -33,7 +32,7 @@ public class HttpRequestBody {
         }
     }
 
-    public String getValue() {
+    public byte[] getValue() {
         return value;
     }
 }

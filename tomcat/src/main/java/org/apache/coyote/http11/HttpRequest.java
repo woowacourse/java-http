@@ -32,23 +32,18 @@ public class HttpRequest {
 
     public HttpSession getSession(boolean create) {
         if (cookie == null) {
-            System.out.println("======= 쿠키 없음 ======= ");
             return sessionManager.createSession();
         }
 
         String jSessionId = cookie.findByKey("JSESSIONID");
-
         if (jSessionId != null) {
-            System.out.println("======= 세션 있어서 찾아서 반환함 ======= ");
             return sessionManager.findSession(jSessionId);
         }
 
         if (create) {
-            System.out.println("======= 세션 없어서 만들어서 줌 ======= ");
             sessionManager.createSession();
         }
 
-        System.out.println("======= 세션 필요 없음 ======= ");
         return null;
     }
 

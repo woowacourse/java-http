@@ -45,17 +45,9 @@ public class Http11Processor implements Runnable, Processor {
             String uri = httpRequest.uri();
             String path = uri;
 
-            Map<String, String> queryStrings = null;
-
-            if (uri.contains("?")) {
-                int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                queryStrings = parseQueryStrings(uri, index);
-            }
-
             HttpResponse response = null;
-            if (uri.contains("/login") && queryStrings != null) {
-                response = handleForLogin(httpRequest, queryStrings);
+            if (uri.contains("/login") && httpRequest.httpMethod().equals("POST")) {
+                response = handleForLogin(httpRequest);
             }
 
             if (uri.contains("/register") && httpRequest.httpMethod().equals("POST")) {
@@ -120,10 +112,26 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private HttpResponse handleForLogin(HttpRequest httpRequest, Map<String, String> queryStrings) {
-        Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
+    private Map<String, String> parseRequestBody(String requestBody) {
+        Map<String, String> parsedRequestBody = new HashMap<>();
 
-        if (foundUser.isPresent() && foundUser.get().checkPassword(queryStrings.get("password"))) {
+        String[] pairs = requestBody.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+            parsedRequestBody.put(key, value);
+        }
+
+        return parsedRequestBody;
+    }
+
+    private HttpResponse handleForLogin(HttpRequest httpRequest) {
+        Map<String, String> parsedRequestBody = parseRequestBody(httpRequest.requestBody());
+
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
+
+        if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
             return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
         }
 
@@ -139,19 +147,5 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
-    }
-
-    private Map<String, String> parseRequestBody(String requestBody) {
-        Map<String, String> parsedRequestBody = new HashMap<>();
-
-        String[] pairs = requestBody.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            String key = keyValue[0];
-            String value = keyValue[1];
-            parsedRequestBody.put(key, value);
-        }
-
-        return parsedRequestBody;
     }
 }

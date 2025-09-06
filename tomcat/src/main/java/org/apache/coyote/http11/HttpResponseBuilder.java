@@ -4,45 +4,54 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.dto.ResourceResult;
 
 public class HttpResponseBuilder {
 
+    private static final String ROOT = "/";
+
     public HttpResponse build(final String path) throws IOException {
-        var status = 200;
-        var reason = "OK";
-        var responseBody = findResponseBody(path);
-        if (!responseBody.found()) {
+        String formattedPath = formatPath(path);
+
+        int status = 200;
+        String reason = "OK";
+        ResourceResult resourceResult = loadResource(formattedPath);
+        if (!resourceResult.found()) {
             status = 404;
             reason = "NOT FOUND";
         }
-        String mimeType = MimeType.fromPath(path);
-        if (path.equals("/")) {
-            mimeType = MimeType.HTML.mimeType();
-        }
 
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", mimeType);
-        headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
+        headers.put("Content-Type", resourceResult.mimeType());
+        headers.put("Content-Length", String.valueOf(resourceResult.body().getBytes().length));
 
-        return new HttpResponse(status, reason, headers, responseBody.body().getBytes());
+        return new HttpResponse(status, reason, headers, resourceResult.body().getBytes());
     }
 
-    private ResourceResult findResponseBody(String uri) throws IOException {
-        if (uri.equals("/")) {
-            return ResourceResult.found("Hello world!");
+    private String formatPath(final String path) {
+        if (path == null || path.isBlank() || path.equals(ROOT)) {
+            return ROOT;
         }
-        if (!uri.contains(".")) {
-            uri += ".html";
+        if (!path.contains(".")) {
+            return path + ".html";
         }
-        final URL resource = getClass().getClassLoader().getResource("static/" + uri);
+        return path;
+    }
+
+    private ResourceResult loadResource(String path) throws IOException {
+        if (ROOT.equals(path)) {
+            return ResourceResult.found(MimeType.HTML.mimeType(), "Hello world!");
+        }
+
+        final URL resource = getClass().getClassLoader().getResource("static/" + path);
         if (resource == null) {
             return ResourceResult.notFound();
         }
         String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return ResourceResult.found(content);
+
+        String mimeType = MimeType.fromPath(path);
+        return ResourceResult.found(mimeType, content);
     }
 }

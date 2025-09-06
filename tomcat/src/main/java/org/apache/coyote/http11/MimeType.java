@@ -15,9 +15,11 @@ public enum MimeType {
     JPEG(".jpeg", "image/jpeg"),
     GIF(".gif", "image/gif"),
     ICO(".ico", "image/x-icon"),
+    TXT(".txt", "text/plain;charset=utf-8"),
     DEFAULT("", "application/octet-stream");
 
     private static final String DOT = ".";
+
     private final String extension;
     private final String mimeType;
 

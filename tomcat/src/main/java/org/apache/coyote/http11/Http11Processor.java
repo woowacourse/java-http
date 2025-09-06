@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,23 +45,30 @@ public class Http11Processor implements Runnable, Processor {
          */
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // 1. request resource 읽어오기
-            // 1-1. inputStream 에서 request 정보 읽어오기 위한 준비 - 라인별 텍스트 처리를 위해 BufferedReader 사용
-            final var target = getRequestUri(inputStream);
+            try {
+                final var requestUri = getRequestUri(inputStream);
+                final var responseBody = getResponseBody(requestUri);
+                final var response = getHttpResponse(requestUri, 200, responseBody);
 
-            // 3. 파일 내용 읽기
-            String responseBody = readStaticFileByName(target);
-
-            // 파일 내용을 바이트로 변환하여 응답
-            final var response = getHttp200Response(target, responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } catch (FileNotFoundException | IllegalArgumentException e) {
+                final var responseBody = readNotFoundFile();
+                final var response = getHttpResponse(400, responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    /**
+     *
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     private String getRequestUri(InputStream inputStream) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(inputStream));
         final var request = reader.readLine();
@@ -67,11 +76,9 @@ public class Http11Processor implements Runnable, Processor {
         // 1-2. request url 에서 리소스명 추출
         final var split = Arrays.stream(request.split("\\s+")).toList(); // 공백 문자를 기준으로 파싱
         if (split.isEmpty()) {
-            // TODO: 404 Bad Request
-            throw new IllegalArgumentException("요청 정보가 올바르지 않습니다.");
+            throw new IllegalArgumentException();
         }
-        final var target = split.get(1);
-        return target;
+        return split.get(1);
     }
 
     private Map<String, String> getHeaders(InputStream inputStream) throws IOException {
@@ -90,19 +97,106 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     /**
+     * handle request and get response body
+     * @param requestUri HTTP request uri
+     * @return response body text
+     * @throws FileNotFoundException occurs when couldn't find target file
+     * @throws IOException occurs when there are invalid bytes in file
+     */
+    private String getResponseBody(final String requestUri) throws FileNotFoundException, IOException {
+        // 1. 정적 파일에 대한 요청인 경우
+        if (isStaticFileUri(requestUri)) {
+            return readStaticFileByName(requestUri);
+        }
+        // 2. API 요청인 경우
+        final var queryIndex = requestUri.indexOf("?");
+        final var endpoint = getAPIEndpoint(requestUri, queryIndex);
+
+        // 3. endpoint 에 따른 처리 로직 분기 (= handler mapping)
+        if (endpoint.equals("/login")) { // handler logic (Controller -> Service -> Repo)
+            final var queryString = requestUri.substring(queryIndex + 1);
+            final var queryParams = getQueryParams(queryString);
+
+            final var account = queryParams.get("account");
+            final var password = queryParams.get("password");
+
+            InMemoryUserRepository.findByAccount(account)
+                    .ifPresent((user) -> {
+                        if (user.checkPassword(password)) {
+                            log.info("user : {}", user);
+                        }
+                    });
+
+            return readStaticFileByName("/login.html");
+        }
+
+        // 4. 존재하지 않는 리소스/endpoint 에 대한 요청인 경우
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     * parse API endpoint from request uri
+     * @param requestUri request uri (ex. '/home?name=hello')
+     * @param queryIndex index of '?' in query string
+     * @return
+     */
+    private String getAPIEndpoint(final String requestUri, final int queryIndex) {
+        if (queryIndex == -1) {
+            return requestUri;
+        }
+        return requestUri.substring(0, queryIndex);
+    }
+
+    /**
+     *
+     * @param queryString ex) 'name=123&age=1'
+     * @return query params map
+     */
+    private Map<String, String> getQueryParams(final String queryString) {
+        final Map<String, String> result = new HashMap<>();
+
+        final var split = Arrays.stream(queryString.split("&")).toList();
+        for (String param : split) {
+            final var pair = Arrays.stream(param.split("=")).toList();
+            // TODO: pair size != 2 예외
+            final var key = pair.getFirst().trim();
+            final var value = pair.get(1).trim();
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    /**
+     * check if uri is for static file or not
+     * @param uri request uri text
+     * @return whether uri is for static file or not
+     * @throws FileNotFoundException occurs when couldn't find target file
+     */
+    private boolean isStaticFileUri(final String uri) throws FileNotFoundException {
+        final var dotIndex = uri.indexOf(".");
+        if (uri.equals("/") || dotIndex > 0 && dotIndex < uri.length() - 1) {
+            return true;
+        }
+        if (dotIndex == -1) {
+            return false;
+        }
+        throw new FileNotFoundException("요청 리소스가 유효하지 않습니다.");
+    }
+
+    /**
      * get content by static file name
      * @param target target file name
      * @return target html file's text content
+     * @throws FileNotFoundException occurs when couldn't find target file
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String readStaticFileByName(final String target) throws IOException {
+    private String readStaticFileByName(final String target) throws FileNotFoundException, IOException {
         if (target.equals("/")) {
             return "Hello world!";
         }
-
         final var resource = getStaticResource(target);
         if (resource == null) {
-            return readNotFoundFile();
+            throw new FileNotFoundException();
         }
         return readContent(resource);
     }
@@ -112,9 +206,13 @@ public class Http11Processor implements Runnable, Processor {
      * @return not found html file's text content
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String readNotFoundFile() throws IOException {
-        final var notfoundResource = getStaticResource("/404.html");
-        return readContent(notfoundResource);
+    private String readNotFoundFile() {
+        try {
+            final var notfoundResource = getStaticResource("/404.html");
+            return readContent(notfoundResource);
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -144,16 +242,45 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     /**
-     * get HTTP 200 OK response
+     * get HTTP response
+     * @param content request content
+     * @param status status code
      * @param responseBody response body
-     * @return 200 response body text
+     * @return response body text
      */
-    private String getHttp200Response(final String target, final String responseBody) {
-        final var fileExtension = getFileExtension(target);
+    private String getHttpResponse(final String content, final int status, final String responseBody) {
+        // TODO: status, status code enum
+        String statusCode = "";
+        if (status == 200) statusCode = "OK";
+        if (status == 400) statusCode = "NOT FOUND";
+        final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", status, statusCode);
+
+        final var fileExtension = getFileExtension(content);
         final var contentTypeHeader = String.format("Content-Type: text/%s;charset=utf-8 ", fileExtension);
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                responseInfoHeader,
                 contentTypeHeader,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    /**
+     * get HTTP response
+     * @param status status code
+     * @param responseBody response body
+     * @return response body text
+     */
+    private String getHttpResponse(final int status, final String responseBody) {
+        // TODO: status, status code enum
+        String statusCode = "";
+        if (status == 200) statusCode = "OK";
+        if (status == 400) statusCode = "NOT FOUND";
+        final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", status, statusCode);
+
+        return String.join("\r\n",
+                responseInfoHeader,
+                "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

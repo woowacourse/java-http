@@ -1,21 +1,27 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.coyote.Processor;
+import org.apache.coyote.RequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpRequestParser httpRequestParser;
+    private final RequestHandler requestHandler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection,
+                           HttpRequestParser httpRequestParser,
+                           RequestHandler requestHandler) {
         this.connection = connection;
+        this.httpRequestParser = httpRequestParser;
+        this.requestHandler = requestHandler;
     }
 
     @Override
@@ -29,16 +35,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest httpRequest = httpRequestParser.parse(inputStream);
+            log.info("httpRequest : {}", httpRequest);
+            final HttpResponse httpResponse = requestHandler.handleRequest(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

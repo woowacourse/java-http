@@ -14,4 +14,9 @@ public class RootHandler implements HttpRequestHandler {
         response.setContentType("text/html;charset=utf-8");
         response.setBody("Hello world!");
     }
+
+    @Override
+    public void handlePost(HttpRequest request, HttpResponse response) {
+        throw new UnsupportedOperationException("POST 요청은 지원하지 않습니다.");
+    }
 }

@@ -28,6 +28,11 @@ public class DefaultHandler implements HttpRequestHandler {
         buildSuccessResponse(response, mimeType, content);
     }
 
+    @Override
+    public void handlePost(HttpRequest request, HttpResponse response) {
+        throw new UnsupportedOperationException("POST 요청은 지원하지 않습니다.");
+    }
+
     private static void buildSuccessResponse(HttpResponse response, String mimeType, String content) {
         response.setStatus(OK);
         response.setContentType(mimeType + ";charset=utf-8");

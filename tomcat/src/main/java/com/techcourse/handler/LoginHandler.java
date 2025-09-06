@@ -1,14 +1,8 @@
 package com.techcourse.handler;
 
-import static org.apache.coyote.HttpStatus.OK;
-
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import com.techcourse.exception.UnauthorizedException;
+import com.techcourse.model.User;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
 import org.apache.coyote.HttpResponse;
@@ -18,47 +12,28 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler implements HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private static final String LOGIN_FILE_PATH = "static/login.html";
+    private static final String LOGIN_PAGE_PATH = "/login.html";
+    private static final String MAIN_PAGE_PATH = "/index.html";
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
 
     @Override
     public void handleGet(HttpRequest request, HttpResponse response) {
-        final Optional<String> contentOpt = getResourceContent(LOGIN_FILE_PATH);
-
-        if (contentOpt.isEmpty()) {
-            throw new NoSuchElementException("해당 경로에 파일이 존재하지 않습니다: " + request.getPath());
-        }
-
-        final String content = contentOpt.get();
-        response.setStatus(OK);
-        response.setContentType("text/html;charset=utf-8");
-        response.setBody(content);
-
-        logLoginSuccess(request);
+        response.sendRedirect(LOGIN_PAGE_PATH);
     }
 
-    private void logLoginSuccess(HttpRequest request) {
-        final String account = request.getParameter("account");
-        final String password = request.getParameter("password");
+    @Override
+    public void handlePost(HttpRequest request, HttpResponse response) {
 
-        InMemoryUserRepository.findByAccount(account).ifPresent(
-                user -> {
-                    if (user.checkPassword(password)) {
-                        log.info("user : {}", user);
-                    }
-                }
-        );
-    }
+        final User findUser = InMemoryUserRepository.findByAccount(request.getBody(ACCOUNT_KEY))
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자 입니다 account: " + request.getBody(ACCOUNT_KEY)));
 
-    private Optional<String> getResourceContent(String resourcePath) {
-        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-
-            if (inputStream == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
+        if(!findUser.checkPassword(request.getBody(PASSWORD_KEY))){
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다 account : " + findUser.getAccount());
         }
+
+        log.info("로그인 성공! account : {}", findUser.getAccount());
+
+        response.sendRedirect(MAIN_PAGE_PATH);
     }
 }

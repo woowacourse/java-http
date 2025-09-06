@@ -5,6 +5,7 @@ import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.HttpStatus.NOT_FOUND;
 
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
@@ -70,6 +71,9 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IllegalArgumentException e){
             updateResponseWithError(BAD_REQUEST, response, e);
             log.warn("잘못된 요청 형식: {}", e.getMessage());
+        } catch (UnauthorizedException e) {
+            response.sendRedirect("401.html");
+            log.warn(e.getMessage());
         } catch (NoSuchElementException e) {
             updateResponseWithError(NOT_FOUND, response, e);
             log.warn("존재하지 않는 리소스: {}", e.getMessage());
@@ -93,6 +97,7 @@ public class Http11Processor implements Runnable, Processor {
 
         switch (request.getMethod()) {
             case "GET" -> handler.handleGet(request, response);
+            case "POST" -> handler.handlePost(request, response);
             default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
         }
     }

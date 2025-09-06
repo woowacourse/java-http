@@ -12,17 +12,13 @@ public class HttpHeader {
 
     private final Map<String, String> httpHeaderInfo;
 
-    private HttpHeader(final BufferedReader bufferedReader) throws IOException {
-        this.httpHeaderInfo = createHeaderInfo(bufferedReader);
-    }
-
     private HttpHeader(final Map<String, String> httpHeaderInfo) {
         this.httpHeaderInfo = Map.copyOf(httpHeaderInfo);
     }
 
     public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
         validateNull(bufferedReader);
-        return new HttpHeader(bufferedReader);
+        return new HttpHeader(createHeaderInfo(bufferedReader));
     }
 
     public static HttpHeader from(final Map<String, String> httpHeaderInfo) {
@@ -50,12 +46,12 @@ public class HttpHeader {
         }
     }
 
-    private Map<String, String> createHeaderInfo(final BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> createHeaderInfo(final BufferedReader bufferedReader) throws IOException {
         final List<String> headerLines = readHeaderLines(bufferedReader);
         return parseHeaderLines(headerLines);
     }
 
-    private List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
+    private static List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
         final List<String> headerLines = new ArrayList<>();
         String headerLine = null;
         while ((headerLine = bufferedReader.readLine()) != null) {
@@ -67,7 +63,7 @@ public class HttpHeader {
         return headerLines;
     }
 
-    private Map<String, String> parseHeaderLines(final List<String> httpHeaderLines) {
+    private static Map<String, String> parseHeaderLines(final List<String> httpHeaderLines) {
         final Map<String, String> httpHeaderInfo = new HashMap<>();
         for (final String requestPayload : httpHeaderLines) {
             final int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
@@ -82,7 +78,7 @@ public class HttpHeader {
         return httpHeaderInfo;
     }
 
-    private void validateHeaderFormat(final String headerKey, final String headerValue) {
+    private static void validateHeaderFormat(final String headerKey, final String headerValue) {
         if (headerKey == null || headerValue == null) {
             throw new IllegalArgumentException(
                     "header key와 value는 null일 수 없습니다: headerKey=%s, headerValue=%s".formatted(headerKey, headerValue));

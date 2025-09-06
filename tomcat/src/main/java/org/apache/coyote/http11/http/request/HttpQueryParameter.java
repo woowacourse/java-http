@@ -8,7 +8,11 @@ public class HttpQueryParameter {
 
     private final Map<String, String> queryParameterInfo;
 
-    private HttpQueryParameter(final String path) {
+    private HttpQueryParameter(final Map<String, String> queryParameterInfo) {
+        this.queryParameterInfo = queryParameterInfo;
+    }
+
+    public static HttpQueryParameter from(final String path) {
         final String targetPath = path.trim();
         final int queryParameterStartIndex = targetPath.indexOf(HttpSplitFormat.QUERY_PARAMETER_START.getValue());
         if (queryParameterStartIndex != -1 && queryParameterStartIndex != targetPath.length() - 1) {
@@ -17,17 +21,12 @@ public class HttpQueryParameter {
             final String[] queryParameterElements = queryParameterLine.split(
                     HttpSplitFormat.QUERY_PARAMETER.getValue());
 
-            this.queryParameterInfo = createQueryParameterInfo(queryParameterElements);
-            return;
+            return new HttpQueryParameter(createQueryParameterInfo(queryParameterElements));
         }
-        this.queryParameterInfo = new HashMap<>();
+        return new HttpQueryParameter(new HashMap<>());
     }
 
-    public static HttpQueryParameter from(final String path) {
-        return new HttpQueryParameter(path);
-    }
-
-    private Map<String, String> createQueryParameterInfo(final String[] queryParameterElements) {
+    private static Map<String, String> createQueryParameterInfo(final String[] queryParameterElements) {
         final Map<String, String> queryParameterInfo = new HashMap<>();
         for (final String queryParameterElement : queryParameterElements) {
             String queryParameterElementLine = queryParameterElement.trim();
@@ -36,8 +35,8 @@ public class HttpQueryParameter {
         return queryParameterInfo;
     }
 
-    private void parseQueryParameterElement(final String queryParameterElementLine,
-                                            final Map<String, String> queryParameterInfo) {
+    private static void parseQueryParameterElement(final String queryParameterElementLine,
+                                                   final Map<String, String> queryParameterInfo) {
         int queryParameterSplitIndex = queryParameterElementLine
                 .indexOf(HttpSplitFormat.QUERY_PARAMETER_ELEMENT.getValue());
         validateQueryParameterElementFormat(queryParameterSplitIndex);
@@ -53,7 +52,7 @@ public class HttpQueryParameter {
         queryParameterInfo.put(queryParameterElementKey, queryParameterElementValue);
     }
 
-    private void validateQueryParameterKeyFormat(final String queryParameterElementKey) {
+    private static void validateQueryParameterKeyFormat(final String queryParameterElementKey) {
         if (queryParameterElementKey == null) {
             throw new IllegalArgumentException("queryParameter key는 null일 수 없습니다.");
         }
@@ -62,13 +61,13 @@ public class HttpQueryParameter {
         }
     }
 
-    private void validateQueryParameterValueFormat(final String queryParameterElementValue) {
+    private static void validateQueryParameterValueFormat(final String queryParameterElementValue) {
         if (queryParameterElementValue == null) {
             throw new IllegalArgumentException("queryParameter value는 null일 수 없습니다.");
         }
     }
 
-    private void validateQueryParameterElementFormat(final int queryParameterSplitIndex) {
+    private static void validateQueryParameterElementFormat(final int queryParameterSplitIndex) {
         if (queryParameterSplitIndex == -1) {
             throw new IllegalArgumentException("유효하지 않은 query parameter element format 입니다.");
         }

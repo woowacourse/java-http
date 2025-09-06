@@ -4,17 +4,19 @@ import org.apache.coyote.http11.http.common.HttpSplitFormat;
 
 public class HttpRequestPath {
 
-    private final String path;
+    private final String rootPath;
     private final HttpQueryParameter queryParameter;
 
-    private HttpRequestPath(final String path) {
-        this.path = removeQueryParameterLine(path);
-        this.queryParameter = HttpQueryParameter.from(path);
+    private HttpRequestPath(final String rootPath, final HttpQueryParameter queryParameter) {
+        this.rootPath = rootPath;
+        this.queryParameter = queryParameter;
     }
 
     public static HttpRequestPath from(final String path) {
         validateNull(path);
-        return new HttpRequestPath(path);
+        final String rootPath = removeQueryParameterLine(path);
+        final HttpQueryParameter queryParameter = HttpQueryParameter.from(path);
+        return new HttpRequestPath(rootPath, queryParameter);
     }
 
     private static void validateNull(final String path) {
@@ -23,7 +25,7 @@ public class HttpRequestPath {
         }
     }
 
-    private String removeQueryParameterLine(final String path) {
+    private static String removeQueryParameterLine(final String path) {
         int queryParameterStartIndex = path.indexOf(HttpSplitFormat.QUERY_PARAMETER_START.getValue());
         if (queryParameterStartIndex == -1) {
             return path;
@@ -37,8 +39,8 @@ public class HttpRequestPath {
         }
     }
 
-    public String getPath() {
-        return path;
+    public String getRootPath() {
+        return rootPath;
     }
 
     public String getTargetQueryParameter(final String target) {

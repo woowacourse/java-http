@@ -16,25 +16,34 @@ public class HttpResponse {
     private final HttpHeader header;
     private final HttpResponseBody responseBody;
 
-    private HttpResponse(final HttpVersion version, final HttpStatus status, final HttpResponseBody responseBody,
-                         final String returnValue) {
-        this.responseLine = HttpResponseLine.of(version, status);
+    private HttpResponse(final HttpResponseLine responseLine,
+                         final HttpHeader header,
+                         final HttpResponseBody responseBody) {
+        this.responseLine = responseLine;
+        this.header = header;
         this.responseBody = responseBody;
-        this.header = createHeader(responseBody, returnValue);
     }
 
     public static HttpResponse ok() {
-        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, HttpResponseBody.emptyBody(), "");
+        final HttpResponseLine httpResponseLine = HttpResponseLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
+        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
+        final HttpHeader httpHeader = createHeader(httpResponseBody, null);
+        return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
     }
 
     public static HttpResponse ok(final String returnValue) {
-        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, HttpResponseBody.withString(returnValue),
-                returnValue);
+        final HttpResponseLine httpResponseLine = HttpResponseLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
+        final HttpResponseBody httpResponseBody = HttpResponseBody.withString(returnValue);
+        final HttpHeader httpHeader = createHeader(httpResponseBody, returnValue);
+        return new HttpResponse(httpResponseLine, httpHeader, httpResponseBody);
     }
 
-    private HttpHeader createHeader(final HttpResponseBody responseBody, final String returnValue) {
+    private static HttpHeader createHeader(final HttpResponseBody responseBody, final String returnValue) {
 
         final Map<String, String> responseHeaderInfo = new HashMap<>();
+        if (returnValue == null) {
+            return HttpHeader.from(responseHeaderInfo);
+        }
 
         responseHeaderInfo.put(HttpHeaderKey.CONTENT_TYPE.getValue(),
                 ContentTypeValue.findFormatByPattern(returnValue) + ";charset=utf-8");

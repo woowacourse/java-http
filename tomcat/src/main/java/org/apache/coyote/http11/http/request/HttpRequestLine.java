@@ -16,19 +16,23 @@ public class HttpRequestLine {
     private final HttpRequestPath path;
     private final HttpVersion version;
 
-    private HttpRequestLine(final BufferedReader bufferedReader) throws IOException {
-        final String httpRequestLine = bufferedReader.readLine();
-        validateNull(httpRequestLine);
-        final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
-        validateFormat(httpRequestElements);
-        this.method = HttpMethod.findMethod(httpRequestElements[0].trim());
-        this.path = HttpRequestPath.from(httpRequestElements[1].trim());
-        this.version = HttpVersion.find(httpRequestElements[2].trim());
+    private HttpRequestLine(final HttpMethod method, final HttpRequestPath path, final HttpVersion version) {
+        this.method = method;
+        this.path = path;
+        this.version = version;
+
     }
 
     public static HttpRequestLine from(final BufferedReader bufferedReader) throws IOException {
         validateNull(bufferedReader);
-        return new HttpRequestLine(bufferedReader);
+        final String httpRequestLine = bufferedReader.readLine();
+        validateNull(httpRequestLine);
+        final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
+        validateFormat(httpRequestElements);
+        final HttpMethod method = HttpMethod.findMethod(httpRequestElements[0].trim());
+        final HttpRequestPath path = HttpRequestPath.from(httpRequestElements[1].trim());
+        final HttpVersion version = HttpVersion.find(httpRequestElements[2].trim());
+        return new HttpRequestLine(method, path, version);
     }
 
     private static void validateNull(final BufferedReader bufferedReader) {
@@ -37,13 +41,13 @@ public class HttpRequestLine {
         }
     }
 
-    private void validateNull(final String httpRequestLine) {
+    private static void validateNull(final String httpRequestLine) {
         if (httpRequestLine == null) {
             throw new IllegalArgumentException("유효하지 않은 Http request line 형식입니다");
         }
     }
 
-    private void validateFormat(final String[] httpRequestElements) {
+    private static void validateFormat(final String[] httpRequestElements) {
         if (httpRequestElements == null) {
             throw new IllegalArgumentException("httpRequestElements null일 수 없습니다");
         }
@@ -59,7 +63,7 @@ public class HttpRequestLine {
     }
 
     public String getPath() {
-        return path.getPath();
+        return path.getRootPath();
     }
 
     public String getTargetQueryParameter(final String target) {

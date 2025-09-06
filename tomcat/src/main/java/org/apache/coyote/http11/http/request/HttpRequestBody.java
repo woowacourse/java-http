@@ -10,18 +10,18 @@ public class HttpRequestBody {
 
     private final String value;
 
-    private HttpRequestBody(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
-        if (!httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
-            this.value = null;
-            return;
-        }
-        final int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
-        this.value = new String(inputStream.readNBytes(contentLength), StandardCharsets.UTF_8);
+    private HttpRequestBody(final String value) {
+        this.value = value;
     }
 
     public static HttpRequestBody of(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
         validateNull(inputStream, httpHeader);
-        return new HttpRequestBody(inputStream, httpHeader);
+        String value = null;
+        if (httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
+            final int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
+            value = new String(inputStream.readNBytes(contentLength), StandardCharsets.UTF_8);
+        }
+        return new HttpRequestBody(value);
     }
 
     private static void validateNull(final InputStream inputStream, final HttpHeader httpHeader) {

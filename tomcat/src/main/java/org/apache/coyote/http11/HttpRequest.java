@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String requestMethod;
     private final String uri;
     private final Map<String, String> query;
 
@@ -24,7 +23,7 @@ public class HttpRequest {
         if (parts.length < 2) {
             throw new IOException("올바르지 않은 요청입니다.");
         }
-        this.requestMethod = parts[0];
+        
         if (parts[1].contains("?")) {
             int index = parts[1].indexOf("?");
             this.uri = parts[1].substring(0, index);
@@ -44,10 +43,6 @@ public class HttpRequest {
             query.put(i[0], i[1]);
         }
         return query;
-    }
-
-    public String getRequestMethod() {
-        return requestMethod;
     }
 
     public String getUri() {

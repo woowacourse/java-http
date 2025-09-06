@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.util.stream.Collectors;
+import org.apache.catalina.Cookie;
+
 public class Http11OutputBuffer {
     public static String parseToString(HttpResponse httpResponse) {
         StringBuilder responseBuilder = new StringBuilder();
@@ -25,7 +28,7 @@ public class Http11OutputBuffer {
         responseBuilder.append("\r\n");
 
         if (httpResponse.cookie() != null) {
-            responseBuilder.append("Set-Cookie: ").append(httpResponse.cookie().parseToString()).append(" ");
+            responseBuilder.append("Set-Cookie: ").append(parseCookie(httpResponse.cookie())).append(" ");
         }
 
         responseBuilder.append("\r\n");
@@ -35,5 +38,11 @@ public class Http11OutputBuffer {
         }
 
         return responseBuilder.toString();
+    }
+
+    private static String parseCookie(Cookie cookie) {
+        return cookie.getCookieValues().keySet().stream()
+                .map(key -> key + "=" + cookie.getCookieValues().get(key))
+                .collect(Collectors.joining("; "));
     }
 }

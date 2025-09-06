@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.Cookie;
 import org.apache.catalina.SessionManager;
 
@@ -50,7 +52,7 @@ public class Http11InputBuffer {
         }
 
         if (!rawCookie.isEmpty()) {
-            cookie = new Cookie(rawCookie);
+            cookie = parseToCookie(rawCookie);
         }
 
         return new HttpRequest(
@@ -64,4 +66,19 @@ public class Http11InputBuffer {
                 cookie
         );
     }
+
+    private static Cookie parseToCookie(String rawCookies) {
+        Map<String, String> cookieValues = new HashMap<>();
+
+        String[] pairs = rawCookies.split("; ");
+        for (String pair : pairs) {
+            String[] splitPair = pair.split("=");
+            String key = splitPair[0];
+            String value = splitPair[1];
+            cookieValues.put(key, value);
+        }
+
+        return new Cookie(cookieValues);
+    }
+
 }

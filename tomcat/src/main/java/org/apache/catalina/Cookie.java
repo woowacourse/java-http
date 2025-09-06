@@ -2,32 +2,17 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Cookie {
 
     private final Map<String, String> cookieValues;
 
+    public Cookie(Map<String, String> cookieValues) {
+        this.cookieValues = cookieValues;
+    }
+
     public Cookie() {
         this.cookieValues = new HashMap<>();
-    }
-
-    public Cookie(String rawCookies) {
-        this.cookieValues = new HashMap<>();
-
-        String[] pairs = rawCookies.split("; ");
-        for (String pair : pairs) {
-            String[] splitPair = pair.split("=");
-            String key = splitPair[0];
-            String value = splitPair[1];
-            cookieValues.put(key, value);
-        }
-    }
-
-    public String parseToString() {
-        return this.cookieValues.keySet().stream()
-                .map(key -> key + "=" + cookieValues.get(key))
-                .collect(Collectors.joining("; "));
     }
 
     public void add(String key, String value) {
@@ -36,5 +21,9 @@ public class Cookie {
 
     public String findByKey(String key) {
         return this.cookieValues.get(key);
+    }
+
+    public Map<String, String> getCookieValues() {
+        return cookieValues;
     }
 }

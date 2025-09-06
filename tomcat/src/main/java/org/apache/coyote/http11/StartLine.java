@@ -18,7 +18,11 @@ public class StartLine {
     }
 
     public boolean isStatic() {
-        return !uri.contains("?");
+        if (uri.matches(".*\\.(html|css|js|png|jpg|jpeg|gif|ico)$")) {
+            return true;
+        }
+
+        return httpMethod == HttpMethod.GET && !uri.contains("?");
     }
 
     public String extractStaticPath() {

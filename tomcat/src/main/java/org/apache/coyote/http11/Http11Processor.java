@@ -8,10 +8,8 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
@@ -23,7 +21,6 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String RESOURCE_PATH = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -44,7 +41,16 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream())
         {
             final Http11Request http11Request = new Http11Request(extractRequestHeaders(inputStream));
-            final Http11Response http11Response = handleRequest(http11Request);
+            final StartLine startLine = http11Request.getStartLine();
+
+            final Http11Response http11Response;
+            if (http11Request.isStatic()) {
+                String staticPath = startLine.extractStaticPath();
+                http11Response = handleStaticRequest(staticPath);
+            } else {
+                Map<String, String> params = startLine.extractQuerystring();
+                http11Response = handleDynamicRequest(params);
+            }
 
             outputStream.write(http11Response.toBytes());
             outputStream.flush();
@@ -53,25 +59,48 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response handleRequest(final Http11Request request) throws URISyntaxException, IOException {
-        final String uri = request.getUri();
-        final String path = extractPath(uri);
-        final URL url = getURL(path);
+    private Http11Response handleStaticRequest(final String path) throws IOException, URISyntaxException {
         final String contentType = extractContentType(path);
-        final String responseBody;
-
-        if (uri.equals("/")) {
-            responseBody = "Hello world!";
-            return Http11Response.ok(contentType, responseBody);
+        if (path.equals("/")) {
+            return Http11Response.ok(contentType, "Hello world!");
         }
 
+        final URL url = getURL(path);
+        final String responseBody;
         if (url == null) {
-            responseBody = Files.readString(Paths.get(getClass().getClassLoader().getResource("static/404.html").toURI()));
+            responseBody = readFile("static/404.html");
             return Http11Response.notFound(contentType, responseBody);
         }
 
-        responseBody = Files.readString(Paths.get(url.toURI()));
+        responseBody = readFile(path);
         return Http11Response.ok(contentType, responseBody);
+    }
+
+    private Http11Response handleDynamicRequest(final Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+
+        boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
+
+        if (loginSuccess) {
+            log.info("로그인 성공 - account: {}", account);
+        } else {
+            log.warn("로그인 실패 - account: {}", account);
+        }
+
+        String responseBody = String.format("{\"account\":\"%s\",\"success\":%b}", account, loginSuccess);
+        String contentType = "application/json;charset=utf-8";
+
+        return Http11Response.ok(contentType, responseBody);
+    }
+
+    private String readFile(final String fileName) throws IOException, URISyntaxException {
+        return Files.readString(Paths.get(getClass().getClassLoader()
+                .getResource(fileName)
+                .toURI())
+        );
     }
 
     private List<String> extractRequestHeaders(final InputStream inputStream) throws IOException{
@@ -86,54 +115,8 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeaders;
     }
 
-    private void parseQueryString(final String uri) {
-        final String query = extractQuery(uri);
-        if (query == null) {
-            return;
-        }
-
-        Map<String, String> params = new HashMap<>();
-        String[] pairs = query.split("&");
-
-        for(String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-
-        String account = params.get("account");
-        String password = params.get("password");
-
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("user : {}", user),
-                        () -> log.warn("계정과 비밀번호에 해당하는 user가 존재하지 않습니다.")
-                );
-    }
-
     private URL getURL(final String path) {
         return getClass().getClassLoader().getResource(path);
-    }
-
-    private String extractPath(final String uri) {
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return RESOURCE_PATH + uri;
-        }
-
-        parseQueryString(uri);
-        return RESOURCE_PATH + uri.substring(0, index) + ".html";
-    }
-
-    private String extractQuery(final String uri) {
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return null;
-        }
-
-        return uri.substring(index + 1);
     }
 
     private String extractContentType(final String requestPath) {

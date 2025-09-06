@@ -38,61 +38,61 @@ public class Session implements HttpSession {
 
     @Override
     public long getCreationTime() {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public long getLastAccessedTime() {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ServletContext getServletContext() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setMaxInactiveInterval(int interval) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getMaxInactiveInterval() {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpSessionContext getSessionContext() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object getValue(String name) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String[] getValueNames() {
-        return new String[0];
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void putValue(String name, Object value) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void removeValue(String name) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isNew() {
-        return false;
+        throw new UnsupportedOperationException();
     }
 }

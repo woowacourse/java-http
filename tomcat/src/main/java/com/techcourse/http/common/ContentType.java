@@ -24,10 +24,14 @@ public enum ContentType {
 
     public static ContentType from(final String extension) {
         Objects.requireNonNull(extension);
+        String normalized = extension.trim()
+                .toLowerCase()
+                .replaceFirst("^\\.", "");
+
         return Arrays.stream(values())
-                .filter(value -> value.extension.equals(extension))
+                .filter(value -> value.extension.equals(normalized))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 Content type 확장자입니다: " + extension));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 Content type 확장자입니다: " + normalized));
     }
 
     public String getMediaType() {

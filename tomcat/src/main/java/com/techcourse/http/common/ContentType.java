@@ -11,6 +11,7 @@ public enum ContentType {
     APPLICATION_JAVASCRIPT("js", "application/javascript"),
     IMAGE_X_ICON("ico", "image/x-icon"),
     IMAGE_SVG_XML("svg", "image/svg+xml"),
+    APPLICATION_JSON("json", "application/json"),
     ;
 
     private final String extension;

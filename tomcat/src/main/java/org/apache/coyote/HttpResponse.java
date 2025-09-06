@@ -2,7 +2,7 @@ package org.apache.coyote;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -17,7 +17,7 @@ public class HttpResponse {
     private Charset charset;
 
     public HttpResponse(String protocol) {
-        this.headers = new LinkedHashMap<>();
+        this.headers = new HashMap<>();
         this.protocol = protocol;
         this.body = "";
         this.charset = StandardCharsets.UTF_8;

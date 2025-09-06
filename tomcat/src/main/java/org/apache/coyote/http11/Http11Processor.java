@@ -105,12 +105,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(String responseBody, Path path) throws IOException {
+        String status = "HTTP/1.1 200 OK ";
         if (path.toAbsolutePath().endsWith("404.html")) {
             responseBody = "404 NOT FOUND";
+            status = "HTTP/1.1 404 NOT FOUND";
         }
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                status,
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

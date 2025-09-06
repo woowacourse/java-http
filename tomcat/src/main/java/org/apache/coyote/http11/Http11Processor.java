@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,12 +41,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);) {
 
-            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(bufferedReader, new SessionManager());
+            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(inputStreamReader, new SessionManager());
             String uri = httpRequest.getUrl();
-            String path = uri;
 
             HttpResponse response = null;
             if (uri.contains("/login") && httpRequest.getHttpMethod().equals("POST")) {
@@ -63,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (response == null) {
-                response = handleForStaticResource(httpRequest, path);
+                response = handleForStaticResource(httpRequest, uri);
             }
 
             outputStream.write(Http11OutputBuffer.parseToString(response).getBytes());

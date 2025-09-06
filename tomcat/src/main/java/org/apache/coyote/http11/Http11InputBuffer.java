@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -12,10 +11,9 @@ import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
 
-    public static HttpRequest parseToRequest(InputStream inputStream, SessionManager sessionManager)
+    public static HttpRequest parseToRequest(InputStreamReader inputStreamReader, SessionManager sessionManager)
             throws IOException {
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        BufferedReader bufferedReader = new BufferedReader(reader);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String requestLine = bufferedReader.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
@@ -36,15 +34,17 @@ public class Http11InputBuffer {
 
         String requestBody = null;
         if (httpMethod.equals("POST") && contentLength > 0) {
-            byte[] bodyBytes = new byte[contentLength];
+            StringBuilder bodyBuilder = new StringBuilder();
+            char[] buffer = new char[1024];
+            int charsRead;
             int totalBytesRead = 0;
-            int bytesRead;
-            while (totalBytesRead < contentLength
-                    && (bytesRead = inputStream.read(bodyBytes, totalBytesRead, contentLength - totalBytesRead))
-                    != -1) {
-                totalBytesRead += bytesRead;
+
+            while (totalBytesRead < contentLength && (charsRead = bufferedReader.read(buffer, 0,
+                    Math.min(buffer.length, contentLength - totalBytesRead))) != -1) {
+                totalBytesRead += new String(buffer, 0, charsRead).getBytes(StandardCharsets.UTF_8).length;
+                bodyBuilder.append(buffer, 0, charsRead);
             }
-            requestBody = new String(bodyBytes, StandardCharsets.UTF_8);
+            requestBody = bodyBuilder.toString();
         }
 
         RequestCookie requestCookie = null;

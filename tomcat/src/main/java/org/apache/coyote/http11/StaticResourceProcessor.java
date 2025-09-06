@@ -1,60 +1,98 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StaticResourceProcessor {
+
+    private static final Map<String, String> CONTENT_TYPE_MAP = Map.ofEntries(
+            Map.entry(".html", "text/html;charset=utf-8"),
+            Map.entry(".css",  "text/css"),
+            Map.entry(".js",   "application/javascript")
+    );
     
     public static final String STATIC_RESOURCE_PATH = "static";
-    public static final String HEADER_DELIMITER = "\\s+";
     public static final String QUERY_PARAM_STARTER = "?";
     private static final String HTML_EXTENSION = ".html";
-    private static final String PARAM_SEPARATOR = "&";
-    private static final String KEY_VALUE_SEPARATOR = "=";
 
-    public static ResourceResolutionResult resolveResourcePath(String requestLine) {
-        String[] splitRequestLine = requestLine.split(HEADER_DELIMITER);
-        String requestUri = splitRequestLine[1];
+    public static final String HEADER_CONTENT_TYPE = "Content-Type: ";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
+    public static final String HTTP_LINE_SEPARATOR = "\r\n";
 
-        int queryParamIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
-        String resource = requestUri;
-        Map<String, String> queryParams = null;
+    public static void processStatic(String requestUri, OutputStream outputStream) throws IOException, URISyntaxException {
+        String resourcePath = resolveResourcePath(requestUri);
+        String contentType = determineContentType(resourcePath);
         
-        if (queryParamIndex != -1) {
-            resource = requestUri.substring(0, queryParamIndex);
-            String queryString = requestUri.substring(queryParamIndex + 1);
-            queryParams = parseQueryString(queryString);
+        URL resourceUrl = StaticResourceProcessor.class.getClassLoader().getResource(resourcePath);
+        if (resourceUrl == null) {
+            sendNotFoundResponse(outputStream);
+            return;
         }
+        
+        String response = buildOkResponse(contentType, Path.of(resourceUrl.toURI()));
+        sendResponse(outputStream, response);
+    }
 
-        if (hasNoExtension(resource)) {
-            if (resource.equals("/")) {
-                resource = "/index.html";
+    private static String resolveResourcePath(String requestUri) {
+        int queryIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
+        if (queryIndex != -1) {
+            requestUri = requestUri.substring(0, queryIndex);
+        }
+        
+        if (hasNoExtension(requestUri)) {
+            if (requestUri.equals("/")) {
+                return STATIC_RESOURCE_PATH + "/index.html";
             } else {
-                resource += HTML_EXTENSION;
+                return STATIC_RESOURCE_PATH + requestUri + HTML_EXTENSION;
             }
         }
-        return ResourceResolutionResult.of(STATIC_RESOURCE_PATH + resource, queryParams);
+        return STATIC_RESOURCE_PATH + requestUri;
+    }
+
+    private static String determineContentType(String resourceName) {
+        int lastDotIndex = resourceName.lastIndexOf('.');
+        String fileExtension = "";
+        if (lastDotIndex > 0) {
+            fileExtension = resourceName.substring(lastDotIndex);
+        }
+        return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html;charset=utf-8");
     }
 
     private static boolean hasNoExtension(String resource) {
         int lastDotIndex = resource.lastIndexOf(".");
-        if (lastDotIndex == -1 || lastDotIndex == 0 || lastDotIndex == resource.length() - 1) {
-            return true;
-        }
-        return false;
+        return lastDotIndex == -1 || lastDotIndex == 0 || lastDotIndex == resource.length() - 1;
     }
 
-    private static Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> queryParams = new HashMap<>();
-        String[] paramTokens = queryString.split(PARAM_SEPARATOR);
-        for (String paramToken : paramTokens) {
-            String[] keyValue = paramToken.split(KEY_VALUE_SEPARATOR);
-            queryParams.put(keyValue[0], keyValue[1]);
-        }
-        return queryParams;
+    private static void sendNotFoundResponse(OutputStream outputStream) throws IOException {
+        String response = String.join(HTTP_LINE_SEPARATOR,
+                HttpStatus.NOT_FOUND.getStatusLine(),
+                HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
+                HEADER_CONTENT_LENGTH + "0",
+                "",
+                "");
+        sendResponse(outputStream, response);
+    }
+
+    private static String buildOkResponse(String contentType, Path path) throws IOException {
+        byte[] bodyBytes = Files.readAllBytes(path);
+        return String.join(HTTP_LINE_SEPARATOR,
+                HttpStatus.OK.getStatusLine(),
+                HEADER_CONTENT_TYPE + contentType,
+                HEADER_CONTENT_LENGTH + bodyBytes.length,
+                "",
+                Files.readString(path, StandardCharsets.UTF_8));
+    }
+
+    private static void sendResponse(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

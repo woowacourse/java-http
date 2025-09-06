@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleRoot(HttpResponse response) throws IOException {
         final var responseBody = "Hello world!";
-        response.ok("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
+        response.sendOk("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String contentType = determineContentType(path);
             byte[] bodyBytes = fileInputStream.readAllBytes();
-            response.ok(contentType, bodyBytes);
+            response.sendOk(contentType, bodyBytes);
         }
     }
 

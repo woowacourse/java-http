@@ -13,7 +13,7 @@ public class HttpResponse {
     }
 
 
-    public void ok(String contentType, byte[] body) throws IOException {
+    public void sendOk(String contentType, byte[] body) throws IOException {
         sendResponse("200 OK", contentType, body);
     }
 

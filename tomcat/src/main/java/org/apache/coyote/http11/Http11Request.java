@@ -14,9 +14,7 @@ public class Http11Request {
     private String protocol;
     private Map<String, String> headers = new HashMap<String, String>();
 
-    public Http11Request(final InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
+    public Http11Request(final BufferedReader bufferedReader) throws IOException {
         readRequestLine(bufferedReader);
         readHeaders(bufferedReader);
     }

@@ -25,6 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String AND = "&";
     private static final String EQUAL = "=";
     private static final String REQUEST_LINE = "requestLine";
+    private static final String COLON = ":";
 
     private final Socket connection;
 
@@ -88,8 +89,10 @@ public class Http11Processor implements Runnable, Processor {
         headers.put(REQUEST_LINE, requestLine);
         String line;
         while ((line = br.readLine()) != null && !line.isEmpty()) {
-            String[] split = line.split(":");
-            headers.put(split[0], split[1]);
+            int colon = line.indexOf(COLON);
+            String name = line.substring(0, colon);
+            String value = line.substring(colon + 1);
+            headers.put(name, value);
         }
         return headers;
     }
@@ -138,11 +141,13 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
         String query = uri.substring(queryStartIndex + 1);
-        String[] splitByAnd = query.split(AND);
+        String[] pairs = query.split(AND);
         Map<String, String> queries = new HashMap<>();
-        for (String s : splitByAnd) {
-            String[] splitByEqual = s.split(EQUAL);
-            queries.put(splitByEqual[0], splitByEqual[1]);
+        for (String pair : pairs) {
+            int equalIndex = pair.indexOf(EQUAL);
+            String name = pair.substring(0, equalIndex);
+            String value = pair.substring(equalIndex + 1);
+            queries.put(name, value);
         }
         return queries;
     }

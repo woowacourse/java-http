@@ -12,7 +12,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
-            final HttpResponse httpResponse = HttpResponseGenerator.create();
+            final HttpResponse httpResponse = new HttpResponse();
 
             servletContainer.process(httpRequest, httpResponse);
 

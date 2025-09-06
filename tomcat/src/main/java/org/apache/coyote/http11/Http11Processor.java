@@ -136,11 +136,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("400 Bad Request", "text/html;charset=utf-8", "잘못된 접근입니다.");
         }
 
-        User user = InMemoryUserRepository.findByAccount(account)
-            .orElse(null);
-        if (user == null || !user.isPasswordValid(password)) {
-            throw new IllegalArgumentException("잘못된 아이디 혹은 비밀번호입니다 : " + account);
-        }
+        User user = findUserWithAccountAndPassword(account, password);
         log.info(user.toString());
         try {
             String responseBody = readFile("static/login.html");
@@ -148,6 +144,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException exception) {
             log.error(exception.getMessage(), exception);
             return new HttpResponse("404 Not Found", "text/html;charset=utf-8", null);
+        }
+    }
+
+    private User findUserWithAccountAndPassword(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+            .orElse(null);
+        validateAccountAndPassword(user, password);
+        return user;
+    }
+
+    private void validateAccountAndPassword(User user, String password) {
+        if (user == null) {
+            throw new IllegalArgumentException("잘못된 아이디 혹은 비밀번호입니다.");
+        }
+        if (!user.isPasswordValid(password)) {
+            throw new IllegalArgumentException("잘못된 아이디 혹은 비밀번호입니다.");
         }
     }
 }

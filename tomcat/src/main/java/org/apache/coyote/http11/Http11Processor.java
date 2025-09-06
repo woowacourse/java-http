@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
             final URL resource = getResourceUrl(path);
 
             if (resource == null) {
-                sendResponse(generateErrorResponse(404), connection.getOutputStream());
+                sendResponse(generateErrorResponse(404), outputStream);
                 return;
             }
 

@@ -107,6 +107,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String parsePath(final String requestUri) {
         String path = requestUri;
+        if ("/".equals(requestUri)) {
+            return path + "index.html";
+        }
         if (path.contains("?")) {
             path = path.split("\\?")[0];
         }
@@ -116,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private URL getResourceUrl(final String path) throws FileNotFoundException {
+    private URL getResourceUrl(String path) throws FileNotFoundException {
         return getClass()
                 .getClassLoader()
                 .getResource("static" + path);

@@ -4,29 +4,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestData {
+public class HttpRequest {
 
-    private final HttpMethod httpMethod;
-    private final String resource;
+    private final Method method;
+    private final String path;
     private final HttpVersion httpVersion;
-    private final HttpContentType httpContentType;
+    private final ContentType contentType;
     private final Map<String, String> queryParameter;
 
-    private RequestData(HttpMethod httpMethod,
-                        String resource,
+    private HttpRequest(Method method,
+                        String path,
                         HttpVersion httpVersion,
-                        HttpContentType httpContentType,
+                        ContentType contentType,
                         Map<String, String> queryParameter) {
-        this.httpMethod = httpMethod;
-        this.resource = resource;
+        this.method = method;
+        this.path = path;
         this.httpVersion = httpVersion;
-        this.httpContentType = httpContentType;
+        this.contentType = contentType;
         this.queryParameter = queryParameter;
     }
 
-    public static RequestData of(List<String> rawHttpRequest) {
+    public static HttpRequest of(List<String> rawHttpRequest) {
         String[] firstLine = rawHttpRequest.get(0).split(" ");
-        HttpMethod httpMethod = HttpMethod.fromHeaderValue(firstLine[0].trim());
+        Method method = Method.fromHeaderValue(firstLine[0].trim());
         String resource = firstLine[1].trim();
         Map<String, String> queryParameter = new HashMap<>();
         if (resource.contains("?")) {
@@ -34,21 +34,21 @@ public class RequestData {
             resource = resource.substring(0, resource.indexOf("?"));
         }
         HttpVersion httpVersion = HttpVersion.fromHeaderValue(firstLine[2].trim());
-        HttpContentType httpContentType = getHttpContentType(rawHttpRequest);
-        return new RequestData(httpMethod, resource, httpVersion, httpContentType, queryParameter);
+        ContentType contentType = getHttpContentType(rawHttpRequest);
+        return new HttpRequest(method, resource, httpVersion, contentType, queryParameter);
     }
 
     private static void getQueryParameter(String resource, Map<String, String> queryParameter) {
         String queryString = resource.substring(resource.indexOf("?") + 1);
         for (String pair : queryString.split("&")) {
-            String[] keyValue = pair.split("=");
+            String[] keyValue = pair.split("=", 2);
             if (keyValue.length == 2) {
                 queryParameter.put(keyValue[0], keyValue[1]);
             }
         }
     }
 
-    private static HttpContentType getHttpContentType(List<String> rawHttpRequest) {
+    private static ContentType getHttpContentType(List<String> rawHttpRequest) {
         for (String line : rawHttpRequest) {
             if (line.startsWith("Accept:")) {
                 String acceptValue = line.substring(("Accept: ").length()).trim();
@@ -58,10 +58,10 @@ public class RequestData {
                     acceptValue = acceptValue.substring(0, semicolonIndex).trim();
                 }
 
-                return HttpContentType.fromHeaderValue(acceptValue.trim());
+                return ContentType.fromHeaderValue(acceptValue.trim());
             }
         }
-        return HttpContentType.ALL;
+        return ContentType.ALL;
     }
 
     public String getQueryParameterValue(String key) {
@@ -72,20 +72,20 @@ public class RequestData {
         return value;
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public Method getHttpMethod() {
+        return method;
     }
 
-    public String getResource() {
-        return resource;
+    public String getPath() {
+        return path;
     }
 
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 
-    public HttpContentType getHttpContentType() {
-        return httpContentType;
+    public ContentType getHttpContentType() {
+        return contentType;
     }
 
     public Map<String, String> getQueryParameter() {
@@ -95,10 +95,10 @@ public class RequestData {
     @Override
     public String toString() {
         return "RequestData{" +
-                "httpMethod=" + httpMethod +
-                ", resource='" + resource + '\'' +
+                "httpMethod=" + method +
+                ", resource='" + path + '\'' +
                 ", httpVersion=" + httpVersion +
-                ", httpContentType=" + httpContentType +
+                ", httpContentType=" + contentType +
                 ", queryParameter=" + queryParameter +
                 '}';
     }

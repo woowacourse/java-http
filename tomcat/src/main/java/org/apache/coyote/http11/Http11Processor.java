@@ -3,14 +3,12 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.TomcatController;
@@ -54,25 +52,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestData getRequestData(BufferedReader bufferedReader) throws IOException {
+    private HttpRequest getRequestData(BufferedReader bufferedReader) throws IOException {
         final List<String> rawHttpRequest = bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
                 .toList();
         if (rawHttpRequest.isEmpty()) {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         }
-        return RequestData.of(rawHttpRequest);
+        return HttpRequest.of(rawHttpRequest);
     }
 
-    private String getResponse(RequestData requestData) {
+    private String getResponse(HttpRequest httpRequest) {
         try {
-            if (isRootPath(requestData)) {
+            if (isRootPath(httpRequest)) {
                 final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-                return buildSuccessResponse(HttpContentType.HTML, body);
+                return buildSuccessResponse(ContentType.HTML, body);
             }
-            final String staticFilePath = getStaticFilePath(requestData);
+            final String staticFilePath = getStaticFilePath(httpRequest);
             final byte[] body = readFile(staticFilePath);
-            final var contentType = HttpContentType.fromFileName(staticFilePath);
+            final var contentType = ContentType.fromFileName(staticFilePath);
             return buildSuccessResponse(contentType, body);
         } catch (UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -80,19 +78,19 @@ public class Http11Processor implements Runnable, Processor {
         throw new IllegalArgumentException("응답 생성 중에 오류가 발생했습니다.");
     }
 
-    private boolean isRootPath(RequestData requestData) {
-        return requestData.getResource() == null
-                || requestData.getResource().isBlank()
-                || requestData.getResource().equals("/");
+    private boolean isRootPath(HttpRequest httpRequest) {
+        return httpRequest.getPath() == null
+                || httpRequest.getPath().isBlank()
+                || httpRequest.getPath().equals("/");
     }
 
-    private String buildSuccessResponse(HttpContentType contentType, byte[] body) {
-        return buildResponse(HttpStatus.OK, contentType, body);
+    private String buildSuccessResponse(ContentType contentType, byte[] body) {
+        return buildResponse(ResponseStatus.OK, contentType, body);
     }
 
-    private String buildResponse(HttpStatus httpStatus, HttpContentType contentType, byte[] body) {
+    private String buildResponse(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
         final var headers = String.join("\r\n",
-                HttpVersion.V_11.getResponseHeader() + " " + httpStatus.getResponseHeader() + " ",
+                HttpVersion.HTTP11.getResponseHeader() + " " + responseStatus.getResponseHeader() + " ",
                 contentType.getResponseHeader() + " ",
                 "Content-Length: " + body.length + " ",
                 "");
@@ -100,10 +98,10 @@ public class Http11Processor implements Runnable, Processor {
         return headers + "\r\n" + bodyString;
     }
 
-    private String getStaticFilePath(RequestData requestData) {
-        final var staticFilePath = "static" + requestData.getResource();
-        if (requestData.getHttpContentType() == HttpContentType.HTML && !staticFilePath.endsWith(".html")) {
-            return staticFilePath + "." + HttpContentType.HTML.getExtension();
+    private String getStaticFilePath(HttpRequest httpRequest) {
+        final var staticFilePath = "static" + httpRequest.getPath();
+        if (httpRequest.getHttpContentType() == ContentType.HTML && !staticFilePath.endsWith(".html")) {
+            return staticFilePath + "." + ContentType.HTML.getExtension();
         }
         return staticFilePath;
     }

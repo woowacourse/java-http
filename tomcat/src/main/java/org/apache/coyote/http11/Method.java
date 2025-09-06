@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum HttpMethod {
+public enum Method {
     GET,
     HEAD,
     POST,
@@ -12,12 +12,12 @@ public enum HttpMethod {
     PATCH,
     ;
 
-    public static HttpMethod fromHeaderValue(String headerValue) {
-        for (HttpMethod value : HttpMethod.values()) {
+    public static Method fromHeaderValue(String headerValue) {
+        for (Method value : Method.values()) {
             if (value.name().equals(headerValue)) {
                 return value;
             }
         }
-        throw new IllegalArgumentException("잘못된 http Method 입니다. :" + headerValue);
+        throw new IllegalArgumentException("잘못된 Method 입니다. :" + headerValue);
     }
 }

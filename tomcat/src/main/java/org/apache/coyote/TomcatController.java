@@ -5,8 +5,8 @@ import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.RequestData;
+import org.apache.coyote.http11.Method;
+import org.apache.coyote.http11.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,25 +14,25 @@ public class TomcatController {
 
     private static final Logger log = LoggerFactory.getLogger(TomcatController.class);
 
-    private final Map<RequestMapping, Consumer<RequestData>> requestMappings;
+    private final Map<RequestMapping, Consumer<HttpRequest>> requestMappings;
 
     public TomcatController() {
         this.requestMappings = new HashMap<>();
-        requestMappings.put(new RequestMapping("/login", HttpMethod.GET), this::handleLogin);
+        requestMappings.put(new RequestMapping("/login", Method.GET), this::handleLogin);
     }
 
-    public void handleRequest(RequestData requestData) {
+    public void handleRequest(HttpRequest httpRequest) {
         for (var entry : requestMappings.entrySet()) {
-            if (entry.getKey().isSupported(requestData)) {
-                entry.getValue().accept(requestData);
+            if (entry.getKey().isSupported(httpRequest)) {
+                entry.getValue().accept(httpRequest);
                 return;
             }
         }
     }
 
-    private void handleLogin(RequestData requestData) {
-        final String account = requestData.getQueryParameterValue("account");
-        final String password = requestData.getQueryParameterValue("password");
+    private void handleLogin(HttpRequest httpRequest) {
+        final String account = httpRequest.getQueryParameterValue("account");
+        final String password = httpRequest.getQueryParameterValue("password");
         if (account.isBlank() || password.isBlank()) {
             return;
         }
@@ -46,12 +46,12 @@ public class TomcatController {
 
     record RequestMapping(
             String resource,
-            HttpMethod httpMethod
+            Method method
     ) {
 
-        public boolean isSupported(RequestData requestData) {
-            return requestData.getResource().equals(resource)
-                    && requestData.getHttpMethod() == httpMethod;
+        public boolean isSupported(HttpRequest httpRequest) {
+            return httpRequest.getPath().equals(resource)
+                    && httpRequest.getHttpMethod() == method;
         }
     }
 }

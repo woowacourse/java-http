@@ -1,27 +1,27 @@
 package org.apache.coyote.http11;
 
 public enum HttpVersion {
-    V_11("HTTP/1.1"),
-    V_2("HTTP/2"),
-    V_3("HTTP/3"),
+    HTTP11("HTTP/1.1"),
+    HTTP2("HTTP/2"),
+    HTTP3("HTTP/3"),
     ;
 
-    private final String versionLabel;
+    private final String httpVersionLabel;
 
-    HttpVersion(String versionLabel) {
-        this.versionLabel = versionLabel;
+    HttpVersion(String httpVersionLabel) {
+        this.httpVersionLabel = httpVersionLabel;
     }
 
     public static HttpVersion fromHeaderValue(String headerValue) {
         for (HttpVersion httpVersion : HttpVersion.values()) {
-            if (httpVersion.versionLabel.equals(headerValue)) {
+            if (httpVersion.httpVersionLabel.equals(headerValue)) {
                 return httpVersion;
             }
         }
-        throw new IllegalArgumentException("잘못된 Http version 입니다. : " + headerValue);
+        throw new IllegalArgumentException("잘못된 Protocol 입니다. : " + headerValue);
     }
 
     public String getResponseHeader() {
-        return this.versionLabel;
+        return this.httpVersionLabel;
     }
 }

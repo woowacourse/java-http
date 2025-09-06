@@ -91,12 +91,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String determineContentType(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript";
-        }
-        return "text/html;charset=utf-8";
+        return ContentType.fromPath(path);
     }
 }

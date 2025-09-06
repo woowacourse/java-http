@@ -10,23 +10,23 @@ public class ResponseHeader {
     private static final String HEADER_COMBINATOR = ": ";
     private static final String ENCODING_TYPE = ";charset=utf-8";
 
-    private Map<String, String> headers;
+    private Map<HttpHeaders, String> headers;
 
     public ResponseHeader(final int bodyLength, final ContentType contentType) {
         this.headers = initHeaders(bodyLength, contentType);
     }
 
-    private Map<String, String> initHeaders(final int bodyLength, final ContentType contentType) {
+    private Map<HttpHeaders, String> initHeaders(final int bodyLength, final ContentType contentType) {
         headers = new LinkedHashMap<>();
 
         headers.put(
-                "Content-Type",
+                HttpHeaders.CONTENT_TYPE,
                 contentType.isImage()
                         ? contentType.getContentType()
                         : contentType.getContentType() + ENCODING_TYPE
         );
 
-        headers.put("Content-Length", String.valueOf(bodyLength));
+        headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(bodyLength));
 
         return headers;
     }

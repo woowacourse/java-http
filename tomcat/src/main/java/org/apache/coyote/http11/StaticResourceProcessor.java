@@ -2,13 +2,11 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 
 public class StaticResourceProcessor {
@@ -48,11 +46,7 @@ public class StaticResourceProcessor {
         }
         
         if (hasNoExtension(requestUri)) {
-            if (requestUri.equals("/")) {
-                return STATIC_RESOURCE_PATH + "/index.html";
-            } else {
-                return STATIC_RESOURCE_PATH + requestUri + HTML_EXTENSION;
-            }
+            return STATIC_RESOURCE_PATH + requestUri + HTML_EXTENSION;
         }
         return STATIC_RESOURCE_PATH + requestUri;
     }

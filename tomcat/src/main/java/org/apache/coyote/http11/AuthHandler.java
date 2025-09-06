@@ -22,8 +22,7 @@ public class AuthHandler {
 
     public static void register(Map<String, String> registerInfo) {
         User user = new User(registerInfo.get("account"), registerInfo.get("password"), registerInfo.get("email"));
-        InMemoryUserRepository.save(user
-        );
+        InMemoryUserRepository.save(user);
         log.info("회원가입 성공: {}", user);
     }
 }

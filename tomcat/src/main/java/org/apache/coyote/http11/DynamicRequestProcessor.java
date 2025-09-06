@@ -17,58 +17,43 @@ public class DynamicRequestProcessor {
     public static final String HEADER_LOCATION = "Location: ";
     public static final String HTTP_LINE_SEPARATOR = "\r\n";
 
-    public static final String QUERY_PARAM_STARTER = "?";
-    private static final String HTML_EXTENSION = ".html";
     private static final String PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
-    
-    public static void processDynamic(String httpMethod, String requestUri, Map<String, String> headers, String body, OutputStream outputStream) throws IOException, URISyntaxException {
+    public static final String INDEX_HTML = "/index.html";
+
+    public static void processDynamic(String httpMethod, String requestUri, String body, OutputStream outputStream) throws IOException, URISyntaxException {
         if ("POST".equals(httpMethod)) {
             Map<String, String> formData = parseFormData(body);
-            try {
-                AuthHandler.register(formData);
-                String redirectResponse = buildRedirectResponse("/index.html");
-                sendResponse(outputStream, redirectResponse);
-            } catch (IllegalArgumentException e) {
-                send401Page(outputStream);
+            if (requestUri.equals("/register")) {
+                handleRegister(formData, outputStream);
+            } else if (requestUri.equals("/login")) {
+                handleLogin(formData, outputStream);
             }
         } else {
-            Map<String, String> queryParams = parseQueryParams(requestUri);
-            if (hasAuthParams(queryParams)) {
-                try {
-                    AuthHandler.authenticate(queryParams);
-                    String redirectResponse = buildRedirectResponse("/index.html");
-                    sendResponse(outputStream, redirectResponse);
-                } catch (IllegalArgumentException e) {
-                    send401Page(outputStream);
-                }
+            String resourcePath;
+            if (requestUri.equals("/")) {
+                resourcePath = INDEX_HTML;
             } else {
-                String resourcePath;
-                if (requestUri.equals("/")) {
-                    resourcePath = "/index.html";
-                } else {
-                    resourcePath = requestUri + HTML_EXTENSION;
-                }
-                StaticResourceProcessor.processStatic(resourcePath, outputStream);
+                resourcePath = requestUri;
             }
+            StaticResourceProcessor.processStatic(resourcePath, outputStream);
         }
     }
 
-    private static Map<String, String> parseQueryParams(String requestUri) {
-        int queryIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
+    private static void handleRegister(Map<String, String> formData, OutputStream outputStream) throws IOException {
+        AuthHandler.register(formData);
+        String redirectResponse = buildRedirectResponse(INDEX_HTML);
+        sendResponse(outputStream, redirectResponse);
+    }
 
-        Map<String, String> params = new HashMap<>();
-        if (queryIndex != -1) {
-            String queryString = requestUri.substring(queryIndex + 1);
-            String[] pairs = queryString.split(PARAM_SEPARATOR);
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(KEY_VALUE_SEPARATOR);
-                if (keyValue.length == 2) {
-                    params.put(keyValue[0], keyValue[1]);
-                }
-            }
+    private static void handleLogin(Map<String, String> formData, OutputStream outputStream) throws IOException, URISyntaxException {
+        try {
+            AuthHandler.authenticate(formData);
+            String redirectResponse = buildRedirectResponse(INDEX_HTML);
+            sendResponse(outputStream, redirectResponse);
+        } catch (IllegalArgumentException e) {
+            send401Page(outputStream);
         }
-        return params;
     }
 
     private static Map<String, String> parseFormData(String formData) {
@@ -77,14 +62,10 @@ public class DynamicRequestProcessor {
         for (String pair : pairs) {
             String[] keyValue = pair.split(KEY_VALUE_SEPARATOR, 2);
             if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
+                params.put(keyValue[0].strip(), keyValue[1].strip());
             }
         }
         return params;
-    }
-
-    private static boolean hasAuthParams(Map<String, String> queryParams) {
-        return queryParams.containsKey("account") && queryParams.containsKey("password");
     }
 
     private static String buildRedirectResponse(String location) {

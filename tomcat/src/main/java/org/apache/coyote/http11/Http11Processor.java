@@ -43,23 +43,20 @@ public class Http11Processor implements Runnable, Processor {
             String httpMethod = requestParts[0];
             String requestUri = requestParts[1];
 
-            // 헤더와 body 파싱
-            Map<String, String> headers = new HashMap<>();
+            Map<String, String> headers = parseHttpHeaders(br);
             String body = "";
-            
             if ("POST".equals(httpMethod)) {
-                headers = parseHttpHeaders(br);
                 int contentLength = Integer.parseInt(headers.get("Content-Length"));
-                body = readPostBody(br, contentLength);
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                body = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
             }
 
-            // 요청 처리
             if (requestUri.contains(".")) {
                 StaticResourceProcessor.processStatic(requestUri, outputStream);
             } else {
-                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, headers, body, outputStream);
+                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, outputStream);
             }
-            
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -73,11 +70,5 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(headerParts[0].strip(), headerParts[1].strip());
         }
         return headers;
-    }
-
-    private String readPostBody(BufferedReader br, int contentLength) throws IOException {
-        char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-        return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
 }

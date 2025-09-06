@@ -6,7 +6,7 @@ public enum ContentType {
     CSS("text/css"),
     JAVASCRIPT("application/javascript");
 
-    private String value;
+    private final String value;
 
     ContentType(final String value) {
         this.value = value;

@@ -6,6 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -56,17 +60,20 @@ class StaticFileHandlerTest {
     }
 
     @Test
-    void 존재하는_정적_파일_요청을_처리한다() throws IOException {
+    void 존재하는_정적_파일_요청을_처리한다() throws IOException, URISyntaxException {
         // given
         when(request.getRequestPath()).thenReturn("/test.html");
 
         // when
         HttpResponse response = staticFileHandler.handle(request);
-
+        String expectedBody = Files.readString(
+                Paths.get(getClass().getClassLoader().getResource("static/test.html").toURI().getPath()),
+                StandardCharsets.UTF_8
+        );
         // then
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.getCode()),
-                () -> assertThat(response.getBody().toText()).isEqualTo("<html>test</html>"),
+                () -> assertThat(response.getBody().toText()).isEqualTo(expectedBody),
                 () -> assertThat(response.getHeaders().get("Content-Type")).contains("text/html;charset=utf-8")
         );
     }

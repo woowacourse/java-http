@@ -14,7 +14,6 @@ public class HttpHeaders {
 
     public static HttpHeaders fromLines(List<String> lines) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        validateLines(lines);
         for (String line : lines) {
             if (line == null || line.isBlank()) {
                 continue;
@@ -34,7 +33,7 @@ public class HttpHeaders {
     }
 
     public List<String> get(String name) {
-        return headers.getOrDefault(name, Collections.emptyList());
+        return new ArrayList<>(headers.getOrDefault(name, Collections.emptyList()));
     }
 
     public List<String> getLines() {
@@ -50,12 +49,6 @@ public class HttpHeaders {
     private static void validateHeader(String line, String[] parts) {
         if (parts.length != 2) {
             throw new IllegalArgumentException("유효하지 않은 헤더: " + line);
-        }
-    }
-
-    private static void validateLines(List<String> lines) {
-        if (lines == null || lines.isEmpty()) {
-            throw new IllegalArgumentException("헤더가 비어있습니다");
         }
     }
 

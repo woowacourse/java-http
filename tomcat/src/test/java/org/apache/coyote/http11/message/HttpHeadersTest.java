@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
@@ -43,7 +44,7 @@ class HttpHeadersTest {
     }
 
     @Test
-    void 빈_줄이나_잘못된_형식의_헤더는_무시한다() {
+    void 빈_줄이나_잘못된_형식의_헤더일_경우_예외_발생() {
         // given
         List<String> headerLines = List.of(
                 "Content-Type: text/html;charset=utf-8",
@@ -53,15 +54,25 @@ class HttpHeadersTest {
                 "Host: localhost:8080"
         );
 
+        // when & then
+        assertThatThrownBy(() -> HttpHeaders.fromLines(headerLines))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 헤더_CRLF_포함시_무시() {
+        // given
+        List<String> headerLines = List.of(
+                "Header-Injection: bad\r\nvalue"
+        );
+
         // when
-        HttpHeaders httpHeaders = HttpHeaders.fromLines(headerLines);
+        HttpHeaders headers = HttpHeaders.fromLines(headerLines);
 
         // then
-        assertAll(
-                () -> assertThat(httpHeaders.get("Content-Type")).containsExactly("text/html;charset=utf-8"),
-                () -> assertThat(httpHeaders.get("Content-Length")).containsExactly("23"),
-                () -> assertThat(httpHeaders.get("Host")).containsExactly("localhost:8080"),
-                () -> assertThat(httpHeaders.get("Invalid-Header")).isEmpty()
+        List<String> lines = headers.getLines();
+        assertThat(lines).containsOnly(
+                "Header-Injection: badvalue"
         );
     }
 

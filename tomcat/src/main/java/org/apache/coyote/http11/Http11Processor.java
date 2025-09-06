@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = HttpResponse.createOKResponse(httpRequest, DEFAULT_RESPONSE_BODY, uri);
             }
 
-            outputStream.write(response.parseToString().getBytes());
+            outputStream.write(Http11OutputBuffer.parseToString(response).getBytes());
             outputStream.flush();
         } catch (IOException |
                  UncheckedServletException e) {

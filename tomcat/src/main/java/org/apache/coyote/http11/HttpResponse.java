@@ -56,35 +56,4 @@ public record HttpResponse(
     public static HttpResponse createOKResponse(HttpRequest httpRequest, String responseBody, String uri) {
         return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri);
     }
-
-    public String parseToString() {
-        StringBuilder responseBuilder = new StringBuilder();
-
-        responseBuilder.append(String.format("HTTP/%.1f %d %s ", httpVersion, statusCode, status));
-        responseBuilder.append("\r\n");
-
-        if (contentType != null) {
-            responseBuilder.append("Content-Type: ").append(contentType);
-            if (charSet != null) {
-                responseBuilder.append(";").append(charSet).append(" ");
-            }
-            responseBuilder.append("\r\n");
-        }
-
-        if (location != null) {
-            responseBuilder.append("Location: ").append(location);
-            responseBuilder.append("\r\n");
-        }
-
-        responseBuilder.append("Content-Length: ").append(contentLength).append(" ");
-        responseBuilder.append("\r\n");
-
-        responseBuilder.append("\r\n");
-
-        if (responseBody != null) {
-            responseBuilder.append(responseBody);
-        }
-
-        return responseBuilder.toString();
-    }
 }

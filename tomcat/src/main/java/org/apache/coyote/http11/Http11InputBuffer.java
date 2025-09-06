@@ -16,32 +16,31 @@ public class Http11InputBuffer {
         String uri = splitRequestLine[1];
         double httpVersion = Double.parseDouble(splitRequestLine[2].split("/")[1]);
 
-        String hostLine = bufferedReader.readLine();
-        String[] splitHostLine = hostLine.split(" ");
-        String host = splitHostLine[1];
-
+        String host = "";
         String contentType = "";
+        int contentLength = 0;
+
         while (true) {
             String nextLine = bufferedReader.readLine();
-            if (nextLine.isEmpty()) {
+            if (nextLine == null || nextLine.isEmpty()) {
                 break;
             }
-            if (nextLine.contains("contentType")) {
-                contentType = nextLine.split(":")[1];
+
+            String lowerCaseNextLine = nextLine.toLowerCase();
+            if (lowerCaseNextLine.startsWith("host")) {
+                host = nextLine.split(":")[1].trim();
+            } else if (lowerCaseNextLine.startsWith("content-type")) {
+                contentType = nextLine.split(":")[1].trim();
+            } else if (lowerCaseNextLine.startsWith("content-length")) {
+                contentLength = Integer.parseInt(nextLine.split(":")[1].trim());
             }
         }
 
-        if (httpMethod.equals("POST")) {
-            String requestBody = bufferedReader.readLine();
-
-            return new HttpRequest(
-                    httpMethod,
-                    uri,
-                    httpVersion,
-                    host,
-                    contentType,
-                    requestBody
-            );
+        String requestBody = null;
+        if (httpMethod.equals("POST") && contentLength > 0) {
+            char[] bodyChars = new char[contentLength];
+            bufferedReader.read(bodyChars, 0, contentLength);
+            requestBody = new String(bodyChars);
         }
 
         return new HttpRequest(
@@ -49,8 +48,8 @@ public class Http11InputBuffer {
                 uri,
                 httpVersion,
                 host,
-                null,
-                null
+                contentType,
+                requestBody
         );
     }
 }

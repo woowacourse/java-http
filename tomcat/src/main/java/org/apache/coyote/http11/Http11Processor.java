@@ -12,7 +12,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -46,11 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             String uri = httpRequest.uri();
             String path = uri;
 
-            if (!Objects.equals(httpRequest.host(), "localhost:8080")) {
-                throw new IllegalArgumentException("올바른 요청 host 가 아니므로 요청을 거절합니다.");
-            }
-
-            Map<String, String> queryStrings = new HashMap<>();
+            Map<String, String> queryStrings = null;
 
             if (uri.contains("?")) {
                 int index = uri.indexOf("?");
@@ -59,21 +54,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpResponse response = null;
-
-            if (StaticResourceExtension.anyMatch(path)) {
-                response = handleForStaticResource(httpRequest, path);
-            }
-
-            if (uri.contains("/login") && queryStrings.isEmpty()) {
-                response = handleForStaticResource(httpRequest, "login.html");
-            }
-
-            if (uri.contains("/login") && !queryStrings.isEmpty()) {
+            if (uri.contains("/login") && queryStrings != null) {
                 response = handleForLogin(httpRequest, queryStrings);
             }
 
-            if (response == null) {
+            if (uri.contains("/register") && httpRequest.httpMethod().equals("POST")) {
+                response = handleForRegister(httpRequest);
+            }
+
+            if (uri.equals("/")) {
                 response = HttpResponse.createOKResponse(httpRequest, DEFAULT_RESPONSE_BODY, uri);
+            }
+
+            if (response == null) {
+                response = handleForStaticResource(httpRequest, path);
             }
 
             outputStream.write(Http11OutputBuffer.parseToString(response).getBytes());
@@ -82,14 +76,6 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getFirstLine(BufferedReader bufferedReader) throws IOException {
-        String firstLine = bufferedReader.readLine();
-        if (firstLine == null || firstLine.isBlank()) {
-            throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
-        }
-        return firstLine;
     }
 
     private Map<String, String> parseQueryStrings(String uri, int index) {
@@ -111,10 +97,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleForStaticResource(HttpRequest httpRequest, String uri) throws IOException {
+        if (!StaticResourceExtension.anyMatch(uri)) {
+            uri = uri + ".html";
+        }
         log.info("uri = {}", uri);
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
-
         return HttpResponse.createOKResponse(httpRequest, responseBody, uri);
     }
 
@@ -140,5 +128,30 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
+    }
+
+    private HttpResponse handleForRegister(HttpRequest httpRequest) {
+        String requestBody = httpRequest.requestBody();
+
+        Map<String, String> parsedRequestBody = parseRequestBody(requestBody);
+        User user = new User(parsedRequestBody.get("account"), parsedRequestBody.get("password"),
+                parsedRequestBody.get("email"));
+        InMemoryUserRepository.save(user);
+
+        return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
+    }
+
+    private Map<String, String> parseRequestBody(String requestBody) {
+        Map<String, String> parsedRequestBody = new HashMap<>();
+
+        String[] pairs = requestBody.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+            parsedRequestBody.put(key, value);
+        }
+
+        return parsedRequestBody;
     }
 }

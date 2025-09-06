@@ -38,39 +38,19 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+
             final var reader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
             }
 
-            final String[] requestLineArray = requestLine.split(" ");
-            final String uri = requestLineArray[1];
-
-            final int index = uri.indexOf("?");
-            String path = (index != -1) ? uri.substring(0, index) : uri;
-            final String queryString = (index != -1) ? uri.substring(index + 1) : "";
-
-            if ("/login".equals(path)) {
-                handleLogin(queryString);
-                path += ".html";
+            final String[] requestInfo = parseRequestLine(requestLine);
+            if (requestInfo == null) {
+                return;
             }
 
-            final URL resource = getClass().getClassLoader().getResource("static" + path);
-            final Path filePath = Paths.get(resource.toURI());
-            final byte[] bytes = Files.readAllBytes(filePath);
-            final String responseBody = new String(bytes);
-            String contentType = "text/html";
-            if (path.endsWith(".css")) {
-                contentType = "text/css";
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + bytes.length + " ",
-                    "",
-                    responseBody);
+            final String response = handleRequest(requestInfo);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -79,32 +59,98 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(String queryString) {
-        Map<String, String> parameters = parseQueryString(queryString);
-        String account = parameters.get("account");
-        String password = parameters.get("password");
+    private String[] parseRequestLine(final String requestLine) {
+        final String[] requestLineArray = requestLine.split(" ");
+        if (requestLineArray.length < 2) {
+            return null;
+        }
 
-        if (account != null && password != null) {
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow();
-            if (user.checkPassword(password)) {
-                log.info("login successful");
-                log.info("user: {}", user);
-                return;
-            }
+        final String uri = requestLineArray[1];
+        final int index = uri.indexOf("?");
+        final String path = (index != -1) ? uri.substring(0, index) : uri;
+        final String queryString = (index != -1) ? uri.substring(index + 1) : "";
+
+        return new String[]{path, queryString};
+    }
+
+    private String handleRequest(final String[] requestInfo) throws IOException, URISyntaxException {
+        String path = requestInfo[0];
+        final String queryString = requestInfo[1];
+
+        if ("/login".equals(path)) {
+            handleLogin(queryString);
+            path += ".html";
+        }
+
+        final byte[] bytes = readFile(path);
+        return generateResponse(path, bytes);
+    }
+
+    private void handleLogin(final String queryString) {
+        final Map<String, String> parameters = parseQueryString(queryString);
+        if (login(parameters)) {
+            log.info("login successful");
+            return;
         }
         log.info("login failed");
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> parameters = new HashMap<>();
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> parameters = new HashMap<>();
         if (queryString != null && !queryString.isEmpty()) {
-            String[] pairs = queryString.split("&");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split("=");
+            final String[] pairs = queryString.split("&");
+            for (final String pair : pairs) {
+                final String[] keyValue = pair.split("=");
                 parameters.put(keyValue[0], keyValue[1]);
             }
         }
         return parameters;
+    }
+
+    private boolean login(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElse(null);
+
+        if (user == null) {
+            return false;
+        }
+
+        if (user.checkPassword(password)) {
+            log.info("user: {}", user);
+            return true;
+        }
+        return false;
+    }
+
+    private byte[] readFile(final String path) throws IOException, URISyntaxException {
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
+        final Path filePath = Paths.get(resource.toURI());
+        return Files.readAllBytes(filePath);
+    }
+
+    private String generateResponse(final String path, final byte[] bytes) {
+        final String responseBody = new String(bytes);
+        final String contentType = getContentType(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + bytes.length + " ",
+                "",
+                responseBody);
+    }
+
+    private String getContentType(final String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

@@ -61,9 +61,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseQuery(final String uri) {
         HashMap<String, String> queryMap = new HashMap<>();
-        String queryString = uri.substring(uri.indexOf('?') + 1);
 
         if(uri.contains("?")) {
+            String queryString = uri.substring(uri.indexOf('?') + 1);
+
             String[] split = queryString.split("&");
             for (String query : split) {
                 String[] splitQuery = query.split("=");
@@ -75,26 +76,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private byte[] createResponseHeader(final Http11Request http11Request, final int length) {
-        String accept = parseAccept(http11Request);
+        String contentType = findAvailableContentType(http11Request);
 
         String header = "HTTP/1.1 200 OK" + " \r\n" +
-        "Content-Type: " + accept + ";charset=utf-8" + " \r\n" +
+        "Content-Type: " + contentType + ";charset=utf-8" + " \r\n" +
         "Content-Length: " + length + " \r\n" +
         "\r\n";
 
         return header.getBytes();
     }
 
-    private String parseAccept(final Http11Request http11Request) {
+    private String findAvailableContentType(final Http11Request http11Request) {
         String accept = http11Request.getHeader("Accept");
 
-        if(accept.contains("text/html")) {
+        if(accept == null || accept.contains("text/html")) {
             return "text/html";
         }
         if (accept.contains("text/css")) {
             return "text/css";
         }
-        return "*/*";
+
+        return accept;
     }
 
     private byte[] readFromResourcePath(final String resourcePath) throws IOException {

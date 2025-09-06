@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 
 public class DynamicRequestProcessor {
 
@@ -107,25 +105,12 @@ public class DynamicRequestProcessor {
     }
 
     private static void handleAuthPageAccess(String pagePath, HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
-        if (isLoggedIn(httpCookie)) {
+        if (AuthHandler.isLoggedIn(httpCookie)) {
             String redirectResponse = buildRedirectResponse(INDEX_HTML);
             sendResponse(outputStream, redirectResponse);
         } else {
             StaticResourceProcessor.processStatic(pagePath, outputStream);
         }
-    }
-
-    private static boolean isLoggedIn(HttpCookie httpCookie) {
-        if (!httpCookie.hasJSESSIONID()) {
-            return false;
-        }
-        String sessionId = httpCookie.getJSESSIONID();
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = sessionManager.findSession(sessionId);
-        if (session == null) {
-            return false;
-        }
-        return session.getAttribute("user") != null;
     }
 
     private static void sendResponse(OutputStream outputStream, String response) throws IOException {

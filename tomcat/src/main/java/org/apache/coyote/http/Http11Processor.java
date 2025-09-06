@@ -25,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        log.info("연결된 호스트: {}, 포트: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -44,13 +44,14 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
         final StringBuilder requestBuilder = new StringBuilder();
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         String line;
         while ((line = reader.readLine()) != null) {
@@ -64,74 +65,69 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse buildResponse(final HttpRequest request) {
-        final String contentType = getContentType(request.getPath());
-        return new HttpResponse(
-                request.getVersion(),
-                200,
-                contentType,
-                buildResponseBody(request));
-    }
-
-    private String getContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript";
-        }
-
-        return "text/html;charset=utf-8";
-    }
-
-    private String buildResponseBody(final HttpRequest request) {
-        String path = request.getPath();
+        final String path = request.getPath();
 
         if ("/".equals(path)) {
-            return "Hello world!"; // 1-2 미션 요구사항은 index.html 이지만, 1-1 테스트 요구사항에 맞춤.
+            return new HttpResponse(request.getVersion(), HttpStatus.OK, ContentType.HTML, "Hello world!");
         }
 
-        if ("/login".equals(path)) {
-            handleLogin(request);
+        if ("/login".equals(path) && !request.getQueryParams().isEmpty()) {
+            return handleLoginRequest(request);
         }
 
-        String fileName = "static" + path;
-
-        if (!path.contains(".")) {
-            fileName += ".html";
-        }
-
-        final URL resource = getClass().getClassLoader().getResource(fileName);
-
-        if (resource == null) {
-            return "Not Found";
-        }
-
-        try {
-            return new String(Files.readAllBytes(Paths.get(resource.toURI())));
-        } catch (final Exception e) {
-            return "Error reading file";
-        }
+        return serveStaticFile(request, path);
     }
 
-    private void handleLogin(final HttpRequest request) {
+    private HttpResponse handleLoginRequest(final HttpRequest request) {
+        final boolean loginSuccess = processLogin(request);
+
+        if (loginSuccess) {
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
+        }
+        return HttpResponse.redirect(request.getVersion(), "/401.html");
+    }
+
+    private boolean processLogin(final HttpRequest request) {
         final String account = request.getQueryParam("account");
         final String password = request.getQueryParam("password");
 
         if (account.isEmpty() || password.isEmpty()) {
-            return;
+            return false;
         }
 
         try {
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
 
-            if (user.checkPassword(password)) {
-                log.debug("로그인 성공: {}", account);
-                return;
-            }
-            throw new RuntimeException("비밀번호가 틀렸습니다");
+            return user.checkPassword(password);
         } catch (final Exception e) {
-            log.debug(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private HttpResponse serveStaticFile(final HttpRequest request, final String path) {
+        final ContentType contentType = ContentType.from(path);
+        String resourcePath = "static" + path;
+
+        if (!path.contains(".")) {
+            resourcePath += ".html";
+        }
+
+        try {
+            final URL resource = getClass().getClassLoader().getResource(resourcePath);
+
+            if (resource == null) {
+                return new HttpResponse(request.getVersion(), HttpStatus.NOT_FOUND, ContentType.HTML, "Not Found");
+            }
+
+            final String fileContent = new String(
+                    Files.readAllBytes(Paths.get(resource.toURI())), StandardCharsets.UTF_8);
+
+            return new HttpResponse(request.getVersion(), HttpStatus.OK, contentType, fileContent);
+
+        } catch (final Exception e) {
+            log.error("정적 파일 서빙 중 오류 발생: {}", resourcePath, e);
+            return new HttpResponse(request.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR, ContentType.HTML, "Internal Server Error");
         }
     }
 }

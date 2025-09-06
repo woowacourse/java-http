@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.response.ContentType;
 
 public class StaticFileHandler {
     
@@ -15,7 +16,7 @@ public class StaticFileHandler {
             }
             
             Path path = Paths.get(resourceUrl.getPath());
-            return String.join("\n", Files.readAllLines(path));
+            return new String(Files.readAllBytes(path));
         } catch (IOException e) {
             throw new IOException("파일을 읽을 수 없습니다: " + filePath, e);
         }
@@ -25,16 +26,16 @@ public class StaticFileHandler {
         return getClass().getResource("/static" + filePath) != null;
     }
     
-    public String getContentType(String filePath) {
-        if (filePath.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        } else if (filePath.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        } else if (filePath.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        } else if (filePath.endsWith(".json")) {
-            return "application/json;charset=utf-8";
+    public ContentType getContentType(String filePath) {
+        final String extension = extractExtension(filePath);
+        return ContentType.from(extension);
+    }
+
+    private String extractExtension(String filePath) {
+        int lastDotIndex = filePath.lastIndexOf('.');
+        if (lastDotIndex == -1 || lastDotIndex == filePath.length() - 1) {
+            throw new IllegalArgumentException("파일 확장자가 없습니다: " + filePath);
         }
-        return "text/plain;charset=utf-8";
+        return filePath.substring(lastDotIndex + 1);
     }
 }

@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse generateHttpResponse(final String requestPath) throws IOException {
         if ("/".equals(requestPath)) {
-            return HttpResponse.ok("Hello world!");
+            return HttpResponse.ok("Hello world!", ContentType.TEXT_PLAIN);
         }
         
         return createFileResponse(requestPath);

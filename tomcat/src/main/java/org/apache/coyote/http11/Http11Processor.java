@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean checkStaticFile(String path, HttpResponse response) throws IOException {
         if (path.equals("/")) {
-            path = "/index";
+            path = "/index.html";
         }
 
         InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
@@ -102,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = MimeTypeResolver.resolve(ext);
             byte[] body = inputStream.readAllBytes();
 
-            response.send(HttpStatus.OK, contentType, body, true);
+            response.send(HttpStatus.OK, contentType, body);
         }
     }
 }

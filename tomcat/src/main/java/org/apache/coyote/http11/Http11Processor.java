@@ -1,16 +1,37 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.controller.Controller;
+import org.apache.controller.LoginController;
+import org.apache.controller.RootController;
+import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
+import org.apache.exception.DataNotFoundException;
+import org.apache.exception.InvalidRequestException;
+import org.apache.exception.SocketReadException;
+import org.apache.exception.SocketWriteException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final List<Controller> controllers = List.of(
+            new LoginController(),
+            new RootController(),
+            new StaticFileController()
+    );
 
     private final Socket connection;
 
@@ -27,21 +48,65 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+                final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = makeRequest(inputStream);
+            HttpResponse response = makeResponse(request.getVersion());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Controller controller = findControllerByRequest(request);
+            controller.processRequest(request, response);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            writeResponseMessage(response, outputStream);
+
+        } catch (InvalidRequestException e) {
+            log.info(e.getMessage(), e);
+            //TODO: 400 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
+        } catch (DataNotFoundException e) {
+            log.info(e.getMessage(), e);
+            //TODO: 404 예외응답을 구성해보자.  (2025-09-5, 금, 16:34)
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            //TODO: 500 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
         }
+    }
+
+    private HttpRequest makeRequest(InputStream inputStream) {
+        List<String> message = readRequestMessage(inputStream);
+        return new HttpRequest(message);
+    }
+
+    private HttpResponse makeResponse(HttpVersion httpVersion) {
+        return new HttpResponse(httpVersion);
+    }
+
+    private List<String> readRequestMessage(InputStream inputStream) {
+        try {
+            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
+            List<String> message = new ArrayList<>();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            message.add(bufferedReader.readLine());
+            return message;
+        } catch (IOException e) {
+            throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
+        }
+    }
+
+    private void writeResponseMessage(HttpResponse response, OutputStream outputStream) {
+        String message = response.getMessage();
+        try {
+            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
+        }
+    }
+
+    private Controller findControllerByRequest(HttpRequest request) {
+        for (Controller controller : controllers) {
+            if (controller.isProcessableRequest(request)) {
+                return controller;
+            }
+        }
+        throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
     }
 }

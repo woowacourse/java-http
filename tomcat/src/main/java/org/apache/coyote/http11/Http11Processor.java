@@ -56,57 +56,58 @@ public class Http11Processor implements Runnable, Processor {
 
             final String[] request = bufferedReader.readLine().split(" ");
             final String requestUri = request[1];
+            final Map<String, String> queryMap = extractQueryParams(requestUri);
 
-            Map<String, String> queryMap = extractQueryParams(requestUri);
-
-            String path = requestUri;
-            if (path.contains("?")) {
-                path = path.split("\\?")[0];
-            }
-            if (!requestUri.contains(".")) {
-                path = path + ".html";
-            }
+            final String path = parsePath(requestUri);
             log.debug("resource : {}", path);
 
-            final URL resource = getClass().getClassLoader().getResource("static" + path);
+            final URL resource = getResourceUrl(path);
             if (resource == null) {
-                final URL notFoundPage = getClass().getClassLoader().getResource("static/404.html");
-                final String response = generateResponse(404, notFoundPage);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                final URL notFoundPage = getResourceUrl("/404.html");
+                writeResponse(400, notFoundPage, outputStream);
                 return;
             }
 
-            final String response = generateResponse(200, resource);
-            if ("/login.html".equals(path) && !queryMap.isEmpty()) {
-                login(queryMap);
-            }
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-
+            handleLogin(path, queryMap);
+            writeResponse(200, resource, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private URL getResourceUrl(final String path) {
+        return getClass().getClassLoader().getResource("static" + path);
     }
 
     private Map<String, String> extractQueryParams(final String uri) {
         if (!uri.contains("?")) {
             return Map.of();
         }
-
         final String[] split = uri.split("\\?");
         final String queryString = split.length > 1 ? split[1] : "";
         return parseQueryString(queryString);
     }
 
+    private String parsePath(final String requestUri) {
+        String path = requestUri;
+        if (path.contains("?")) {
+            path = path.split("\\?")[0];
+        }
+        if (!requestUri.contains(".")) {
+            path = path + ".html";
+        }
+        return path;
+    }
+
     private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
         final String resourceName = resource.getFile();
-        final String extension = resourceName.substring(resourceName.lastIndexOf(".") + 1);
+        final String extension = extractExtension(resourceName);
         final String responseBody = Files.readString(new File(resourceName).toPath());
+        final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
 
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
-                "Content-Type: " + MIME_TYPES.get(extension) + " ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -131,7 +132,28 @@ public class Http11Processor implements Runnable, Processor {
         return queryMap;
     }
 
-    private void login(final Map<String, String> queryMap) {
+    private String extractExtension(final String resourceName) {
+        int dotIndex = resourceName.lastIndexOf(".");
+        if (dotIndex == -1) {
+            return "";
+        }
+        return resourceName.substring(dotIndex + 1);
+    }
+
+    private void writeResponse(
+            final int statusCode,
+            final URL notFoundPage,
+            final OutputStream outputStream
+    ) throws IOException {
+        final String response = generateResponse(statusCode, notFoundPage);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void handleLogin(final String path, final Map<String, String> queryMap) {
+        if (!"/login.html".equals(path) || queryMap.isEmpty()) {
+            return;
+        }
         final String account = queryMap.get("account");
         final String password = queryMap.get("password");
 

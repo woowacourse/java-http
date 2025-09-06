@@ -20,15 +20,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final String OK_RESPONSE_LINE = "HTTP/1.1 200 OK ";
-    private static final String REDIRECTION_RESPONSE_LINE = "HTTP/1.1 302 Found ";
-
-    private static final String CONTENT_TYPE_RESPONSE_HEADER_KEY = "Content-Type: ";
-    private static final String CONTENT_LENGTH_RESPONSE_HEADER_KEY = "Content-Length: ";
-    private static final String REDIRECTION_LOCATION_RESPONSE_HEADER_KEY = "Location: ";
-
-    private static final String CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8 = ";charset=utf-8 ";
     public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
@@ -51,8 +42,12 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String uri = parseUrl(bufferedReader);
+            String firstLine = getFirstLine(bufferedReader);
+
+            HttpRequest httpRequest = HttpRequest.parseByFirstLine(firstLine);
+            String uri = httpRequest.uri();
             String path = uri;
+
             Map<String, String> queryStrings = new HashMap<>();
 
             if (uri.contains("?")) {
@@ -61,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
                 queryStrings = parseQueryStrings(uri, index);
             }
 
-            String response = null;
+            HttpResponse response = null;
 
             if (StaticResourceExtension.anyMatch(path)) {
                 response = handleForStaticResource(path);
@@ -76,10 +71,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (response == null) {
-                response = createOKResponse(uri, DEFAULT_RESPONSE_BODY);
+                response = HttpResponse.createOKResponse(DEFAULT_RESPONSE_BODY, uri);
             }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.parseToString().getBytes());
             outputStream.flush();
         } catch (IOException |
                  UncheckedServletException e) {
@@ -87,29 +82,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createOKResponse(String uri, String responseBody) {
-        return String.join("\r\n",
-                OK_RESPONSE_LINE,
-                CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(uri)
-                        + CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8,
-                CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String createdRedirectionResponse(String redirectionPath) {
-        return String.join("\r\n",
-                REDIRECTION_RESPONSE_LINE,
-                REDIRECTION_LOCATION_RESPONSE_HEADER_KEY + redirectionPath,
-                CONTENT_LENGTH_RESPONSE_HEADER_KEY + 0 + " ");
-    }
-
-    private String parseUrl(BufferedReader bufferedReader) throws IOException {
+    private String getFirstLine(BufferedReader bufferedReader) throws IOException {
         String firstLine = bufferedReader.readLine();
         if (firstLine == null || firstLine.isBlank()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
         }
-        return firstLine.split(" ")[1];
+        return firstLine;
     }
 
     private Map<String, String> parseQueryStrings(String uri, int index) {
@@ -130,12 +108,12 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String handleForStaticResource(String uri) throws IOException {
+    private HttpResponse handleForStaticResource(String uri) throws IOException {
         log.info("uri = {}", uri);
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
 
-        return createOKResponse(uri, responseBody);
+        return HttpResponse.createOKResponse(responseBody, uri);
     }
 
     private URL getPathOfResource(String uri) {
@@ -152,13 +130,13 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private String handleForLogin(Map<String, String> queryStrings) {
+    private HttpResponse handleForLogin(Map<String, String> queryStrings) {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(queryStrings.get("password"))) {
-            return createdRedirectionResponse("index.html");
+            return HttpResponse.createRedirectionResponse("index.html");
         }
 
-        return createdRedirectionResponse("401.html");
+        return HttpResponse.createRedirectionResponse("401.html");
     }
 }

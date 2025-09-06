@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
+import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +12,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.catalina.ResponseCookie;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final String OK_RESPONSE_LINE = "HTTP/1.1 200 OK ";
-    private static final String CONTENT_TYPE_RESPONSE_HEADER_KEY = "Content-Type: ";
-    private static final String CONTENT_LENGTH_RESPONSE_HEADER_KEY = "Content-Length: ";
-    private static final String CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8 = ";charset=utf-8 ";
-    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
 
     private final Socket connection;
 
@@ -41,49 +40,30 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            HttpRequest httpRequest = Http11InputBuffer.parseToRequest(inputStreamReader, new SessionManager());
+            String uri = httpRequest.getUrl();
 
-            String uri = parseUrl(bufferedReader);
-            String path = uri;
-            Map<String, String> queryStrings = new HashMap<>();
-
-            if (uri.contains("?")) {
-                int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                queryStrings = parseQueryStrings(uri, index);
+            HttpResponse response = null;
+            if (uri.contains("/login") && httpRequest.getHttpMethod().equals("POST")) {
+                response = handleForLogin(httpRequest);
             }
 
-            String responseBody = null;
-
-            if (StaticResourceExtension.anyMatch(path)) {
-                responseBody = handleForStaticResource(path);
+            if (uri.contains("/register") && httpRequest.getHttpMethod().equals("POST")) {
+                response = handleForRegister(httpRequest);
             }
 
-            if (uri.contains("/login") && !uri.contains("?")) {
-                responseBody = handleForStaticResource("login.html");
+            if (uri.equals("/")) {
+                response = HttpResponse.createOKResponse(httpRequest, DEFAULT_RESPONSE_BODY, uri);
             }
 
-            if (uri.contains("/login") && uri.contains("?")) {
-                responseBody = handleForStaticResource("login.html");
-                handleForLogin(queryStrings);
+            if (response == null) {
+                response = handleForStaticResource(httpRequest, uri);
             }
 
-            if (responseBody == null) {
-                responseBody = DEFAULT_RESPONSE_BODY;
-            }
-
-            final var response = String.join("\r\n",
-                    OK_RESPONSE_LINE,
-                    CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(uri)
-                            + CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8,
-                    CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(Http11OutputBuffer.parseToString(response).getBytes());
             outputStream.flush();
         } catch (IOException |
                  UncheckedServletException e) {
@@ -91,39 +71,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUrl(BufferedReader bufferedReader) throws IOException {
-        String firstLine = bufferedReader.readLine();
-        if (firstLine == null || firstLine.isBlank()) {
-            throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
+    private HttpResponse handleForStaticResource(HttpRequest httpRequest, String uri) throws IOException {
+        if (!StaticResourceExtension.anyMatch(uri)) {
+            uri = uri + ".html";
         }
-        return firstLine.split(" ")[1];
+        URL resource = getPathOfResource(uri);
+        String responseBody = readFile(resource);
+        return HttpResponse.createOKResponse(httpRequest, responseBody, uri);
     }
 
-    private Map<String, String> parseQueryStrings(String uri, int index) {
-        if (index == -1) {
-            return null;
-        }
-
-        String rawQueryString = uri.substring(index + 1);
-        String[] pairs = rawQueryString.split("&");
-
-        Map<String, String> queryParams = new HashMap<>();
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            String key = keyValue[0];
-            String value = keyValue[1];
-            queryParams.put(key, value);
-        }
-        return queryParams;
-    }
-
-    private String handleForStaticResource(String url) throws IOException {
-        URL resource = getPathOfResource(url);
-        return readFile(resource);
-    }
-
-    private URL getPathOfResource(String url) {
-        URL resource = getClass().getClassLoader().getResource("static/" + url);
+    private URL getPathOfResource(String uri) {
+        URL resource = getClass().getClassLoader().getResource("static/" + uri);
         if (resource != null) {
             return resource;
         }
@@ -136,14 +94,51 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private void handleForLogin(Map<String, String> queryStrings) {
-        if (queryStrings == null) {
-            return;
+    private Map<String, String> parseRequestBody(String requestBody) {
+        Map<String, String> parsedRequestBody = new HashMap<>();
+
+        String[] pairs = requestBody.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+            parsedRequestBody.put(key, value);
         }
 
-        User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return parsedRequestBody;
+    }
 
-        log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
+    private HttpResponse handleForLogin(HttpRequest httpRequest) throws IOException {
+        Map<String, String> parsedRequestBody = parseRequestBody(httpRequest.getRequestBody());
+
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
+
+        if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
+            ResponseCookie responseCookie = getCookie(httpRequest, foundUser.get());
+            return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
+        }
+
+        return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
+    }
+
+    private HttpResponse handleForRegister(HttpRequest httpRequest) throws IOException {
+        String requestBody = httpRequest.getRequestBody();
+
+        Map<String, String> parsedRequestBody = parseRequestBody(requestBody);
+        User user = new User(parsedRequestBody.get("account"), parsedRequestBody.get("password"),
+                parsedRequestBody.get("email"));
+        InMemoryUserRepository.save(user);
+
+        ResponseCookie responseCookie = getCookie(httpRequest, user);
+        return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
+    }
+
+    private ResponseCookie getCookie(HttpRequest httpRequest, User user) {
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute(session.getId(), user);
+
+        ResponseCookie responseCookie = new ResponseCookie();
+        responseCookie.add(JAVA_SESSION_ID_KEY, session.getId());
+        return responseCookie;
     }
 }

@@ -16,8 +16,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var tomcatController = new TomcatController();
+        final var httpRequestParser = new HttpRequestParser();
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, tomcatController);
+        final var processor = new Http11Processor(socket, httpRequestParser, tomcatController);
 
         // when
         processor.process(socket);
@@ -45,7 +46,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, tomcatController);
+        final var httpRequestParser = new HttpRequestParser();
+        final Http11Processor processor = new Http11Processor(socket, httpRequestParser, tomcatController);
 
         // when
         processor.process(socket);

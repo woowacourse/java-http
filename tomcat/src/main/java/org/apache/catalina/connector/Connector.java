@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.TomcatController;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,8 @@ public class Connector implements Runnable {
             return;
         }
         var tomcatController = new TomcatController();
-        var processor = new Http11Processor(connection, tomcatController);
+        var httpRequestParser = new HttpRequestParser();
+        var processor = new Http11Processor(connection, httpRequestParser, tomcatController);
         new Thread(processor).start();
     }
 

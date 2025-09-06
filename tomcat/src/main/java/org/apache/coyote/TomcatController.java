@@ -5,8 +5,8 @@ import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.apache.coyote.http11.Method;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class TomcatController {
 
         public boolean isSupported(HttpRequest httpRequest) {
             return httpRequest.getPath().equals(resource)
-                    && httpRequest.getHttpMethod() == method;
+                    && httpRequest.getMethod() == method;
         }
     }
 }

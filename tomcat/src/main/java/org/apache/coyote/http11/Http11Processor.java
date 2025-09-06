@@ -22,8 +22,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String OK_RESPONSE_LINE = "HTTP/1.1 200 OK ";
+    private static final String REDIRECTION_RESPONSE_LINE = "HTTP/1.1 302 Found ";
+
     private static final String CONTENT_TYPE_RESPONSE_HEADER_KEY = "Content-Type: ";
     private static final String CONTENT_LENGTH_RESPONSE_HEADER_KEY = "Content-Length: ";
+    private static final String REDIRECTION_LOCATION_RESPONSE_HEADER_KEY = "Location: ";
+
     private static final String CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8 = ";charset=utf-8 ";
     public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
@@ -68,7 +72,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (uri.contains("/login") && !queryStrings.isEmpty()) {
-                response = handleForStaticResource("login.html");
                 response = handleForLogin(queryStrings);
             }
 
@@ -92,6 +95,13 @@ public class Http11Processor implements Runnable, Processor {
                 CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String createdRedirectionResponse(String redirectionPath) {
+        return String.join("\r\n",
+                REDIRECTION_RESPONSE_LINE,
+                REDIRECTION_LOCATION_RESPONSE_HEADER_KEY + redirectionPath,
+                CONTENT_LENGTH_RESPONSE_HEADER_KEY + 0 + " ");
     }
 
     private String parseUrl(BufferedReader bufferedReader) throws IOException {
@@ -121,13 +131,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleForStaticResource(String uri) throws IOException {
+        log.info("uri = {}", uri);
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
+
         return createOKResponse(uri, responseBody);
     }
 
-    private URL getPathOfResource(String url) {
-        URL resource = getClass().getClassLoader().getResource("static/" + url);
+    private URL getPathOfResource(String uri) {
+        URL resource = getClass().getClassLoader().getResource("static/" + uri);
         if (resource != null) {
             return resource;
         }
@@ -143,10 +155,10 @@ public class Http11Processor implements Runnable, Processor {
     private String handleForLogin(Map<String, String> queryStrings) {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
-        if (foundUser.isPresent()) {
-
+        if (foundUser.isPresent() && foundUser.get().checkPassword(queryStrings.get("password"))) {
+            return createdRedirectionResponse("index.html");
         }
 
-        return
+        return createdRedirectionResponse("401.html");
     }
 }

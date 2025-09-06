@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -12,11 +13,6 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 public class StaticFileHandler implements HttpRequestHandler {
 
     private static final String STATIC_DIR = "static";
-    private final HttpRequestHandler notFoundHandler;
-
-    public StaticFileHandler(HttpRequestHandler notFoundHandler) {
-        this.notFoundHandler = notFoundHandler;
-    }
 
     @Override
     public boolean canHandle(HttpRequest request) {
@@ -29,7 +25,7 @@ public class StaticFileHandler implements HttpRequestHandler {
         String path = request.getRequestPath();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(STATIC_DIR + path);
         if (inputStream == null) {
-            return notFoundHandler.handle(request);
+            throw new NotFoundException();
         }
 
         byte[] content = inputStream.readAllBytes();

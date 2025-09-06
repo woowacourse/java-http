@@ -1,11 +1,12 @@
 package org.apache.coyote.http11.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -71,14 +72,12 @@ class StaticFileHandlerTest {
     }
 
     @Test
-    void 존재하지_않는_정적_파일_요청시_notFoundHandler를_호출한다() throws IOException {
+    void 존재하지_않는_정적_파일_요청시_예외_발생() {
         // given
         when(request.getRequestPath()).thenReturn("/non-existent.html");
 
-        // when
-        staticFileHandler.handle(request);
-
-        // then
-        verify(notFoundHandler).handle(request);
+        // when & then
+        assertThatThrownBy(() -> staticFileHandler.handle(request))
+                .isInstanceOf(NotFoundException.class);
     }
 }

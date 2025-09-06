@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -78,17 +76,17 @@ public class DynamicRequestProcessor {
         return response.toString();
     }
 
-    private static void send401Page(OutputStream outputStream) throws IOException, URISyntaxException {
-        URI resourceUri = DynamicRequestProcessor.class.getClassLoader().getResource("static/401.html").toURI();
-        Path path = Path.of(resourceUri);
-        byte[] bodyBytes = Files.readAllBytes(path);
-        String response = String.join(HTTP_LINE_SEPARATOR,
-                HttpStatus.UNAUTHORIZED.getStatusLine(),
-                HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
-                HEADER_CONTENT_LENGTH + bodyBytes.length,
-                "",
-                Files.readString(path, StandardCharsets.UTF_8));
-        sendResponse(outputStream, response);
+    private static void send401Page(OutputStream outputStream) throws IOException {
+        try (InputStream inputStream = DynamicRequestProcessor.class.getClassLoader().getResourceAsStream("static/401.html")) {
+            byte[] responseBody = inputStream.readAllBytes();
+            String response = String.join(HTTP_LINE_SEPARATOR,
+                    HttpStatus.UNAUTHORIZED.getStatusLine(),
+                    HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
+                    HEADER_CONTENT_LENGTH + responseBody.length,
+                    "",
+                    new String(responseBody, StandardCharsets.UTF_8));
+            sendResponse(outputStream, response);
+        }
     }
 
     private static String buildRedirectResponse(String location) {

@@ -1,12 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class StaticResourceProcessor {
@@ -25,18 +22,18 @@ public class StaticResourceProcessor {
     public static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
     public static final String HTTP_LINE_SEPARATOR = "\r\n";
 
-    public static void processStatic(String requestUri, OutputStream outputStream) throws IOException, URISyntaxException {
+    public static void processStatic(String requestUri, OutputStream outputStream) throws IOException {
         String resourcePath = resolveResourcePath(requestUri);
         String contentType = determineContentType(resourcePath);
         
-        URL resourceUrl = StaticResourceProcessor.class.getClassLoader().getResource(resourcePath);
-        if (resourceUrl == null) {
-            sendNotFoundResponse(outputStream);
-            return;
+        try (InputStream inputStream = StaticResourceProcessor.class.getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                sendNotFoundResponse(outputStream);
+                return;
+            }
+            String response = buildOkResponse(contentType, inputStream.readAllBytes());
+            sendResponse(outputStream, response);
         }
-        
-        String response = buildOkResponse(contentType, Path.of(resourceUrl.toURI()));
-        sendResponse(outputStream, response);
     }
 
     private static String resolveResourcePath(String requestUri) {
@@ -75,14 +72,13 @@ public class StaticResourceProcessor {
         sendResponse(outputStream, response);
     }
 
-    private static String buildOkResponse(String contentType, Path path) throws IOException {
-        byte[] bodyBytes = Files.readAllBytes(path);
+    private static String buildOkResponse(String contentType, byte[] responseBody) {
         return String.join(HTTP_LINE_SEPARATOR,
                 HttpStatus.OK.getStatusLine(),
                 HEADER_CONTENT_TYPE + contentType,
-                HEADER_CONTENT_LENGTH + bodyBytes.length,
+                HEADER_CONTENT_LENGTH + responseBody.length,
                 "",
-                Files.readString(path, StandardCharsets.UTF_8));
+                new String(responseBody, StandardCharsets.UTF_8));
     }
 
     private static void sendResponse(OutputStream outputStream, String response) throws IOException {

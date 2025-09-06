@@ -10,17 +10,15 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
 
-    private HttpStatus status;
     private final String protocol;
+    private HttpStatus status;
     private String body;
-    private final Map<String, String> headers;
+    private Map<String, String> headers;
     private Charset charset;
 
     public HttpResponse(String protocol) {
-        this.headers = new HashMap<>();
         this.protocol = protocol;
-        this.body = "";
-        this.charset = StandardCharsets.UTF_8;
+        initialize();
     }
 
     public void setBody(String body) {
@@ -30,6 +28,17 @@ public class HttpResponse {
 
     public void setStatus(HttpStatus status) {
         this.status = status;
+    }
+
+    public void setContentType(String contentType) {
+        headers.put("Content-Type", contentType);
+    }
+
+    public void sendRedirect(String location){
+        initialize();
+        status = HttpStatus.FOUND;
+        headers.put("Location", location);
+        setContentLength();
     }
 
     public String getResponse() {
@@ -53,8 +62,10 @@ public class HttpResponse {
         return builder.toString();
     }
 
-    public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+    private void initialize(){
+        this.headers = new HashMap<>();
+        this.body = "";
+        this.charset = StandardCharsets.UTF_8;
     }
 
     private void setContentLength() {

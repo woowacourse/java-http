@@ -11,20 +11,20 @@ public class HttpHeaderParser {
 
     private static final Pattern REQUEST_LINE_PATTERN = Pattern.compile("^(\\S+)\\s+(\\S+)\\s+(\\S+)$");
 
-    protected static HttpMethod findHttpMethod(final String requestLine) {
+    static HttpMethod findHttpMethod(final String requestLine) {
         validateRequestLine(requestLine);
         final StringTokenizer stringTokenizer = new StringTokenizer(requestLine);
         return HttpMethod.findHttpMethod(stringTokenizer.nextToken());
     }
 
-    protected static String findPath(final String requestLine) {
+    static String findPath(final String requestLine) {
         validateRequestLine(requestLine);
         final StringTokenizer stringTokenizer = new StringTokenizer(requestLine);
         stringTokenizer.nextToken();
         return stringTokenizer.nextToken();
     }
 
-    protected static String findProtocol(final String requestLine) {
+    static String findProtocol(final String requestLine) {
         validateRequestLine(requestLine);
         final StringTokenizer stringTokenizer = new StringTokenizer(requestLine);
         stringTokenizer.nextToken();
@@ -32,7 +32,7 @@ public class HttpHeaderParser {
         return stringTokenizer.nextToken();
     }
 
-    protected static Map<String, String> getHeaders(final List<String> headers) {
+    static Map<String, String> getHeaders(final List<String> headers) {
         return headers.stream()
                 .map(header -> header.split(": ", 2))
                 .filter(parts -> parts.length == 2)

@@ -7,12 +7,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,16 +45,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             // 1. request resource 읽어오기
             // 1-1. inputStream 에서 request 정보 읽어오기 위한 준비 - 라인별 텍스트 처리를 위해 BufferedReader 사용
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
-            final var request = reader.readLine();
-
-            // 1-2. request url 에서 리소스명 추출
-            final var split = Arrays.stream(request.split("\\s+")).toList(); // 공백 문자를 기준으로 파싱
-            if (split.isEmpty()) {
-                // TODO: 404 Bad Request
-                throw new IllegalArgumentException("요청 정보가 올바르지 않습니다.");
-            }
-            final var target = split.get(1);
+            final var target = getRequestUri(inputStream);
 
             // 3. 파일 내용 읽기
             String responseBody = readStaticFileByName(target);
@@ -64,6 +58,35 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getRequestUri(InputStream inputStream) throws IOException {
+        final var reader = new BufferedReader(new InputStreamReader(inputStream));
+        final var request = reader.readLine();
+
+        // 1-2. request url 에서 리소스명 추출
+        final var split = Arrays.stream(request.split("\\s+")).toList(); // 공백 문자를 기준으로 파싱
+        if (split.isEmpty()) {
+            // TODO: 404 Bad Request
+            throw new IllegalArgumentException("요청 정보가 올바르지 않습니다.");
+        }
+        final var target = split.get(1);
+        return target;
+    }
+
+    private Map<String, String> getHeaders(InputStream inputStream) throws IOException {
+        final var reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        final Map<String, String> result = new HashMap<>();
+        while (!reader.readLine().isBlank()) {
+            final var line = reader.readLine();
+            final var colonIndex = line.indexOf(":");
+            final var key = line.substring(0, colonIndex).trim();
+            final var value = line.substring(colonIndex + 1).trim();
+            result.put(key, value);
+        }
+
+        return result;
     }
 
     /**

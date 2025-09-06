@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = getRequest(reader);
 
-            String[] requestLineParts = request.split(" ");
+            String[] requestLineParts = getRequestLineParts(request);
 
             String method = requestLineParts[0];
             String requestPath = requestLineParts[1];
@@ -57,6 +57,7 @@ public class Http11Processor implements Runnable, Processor {
                     authenticateUserFromRequestPath(requestPath);
 
                     serveStaticFile(requestPath, outputStream);
+                    return;
                 }
 
                 serveStaticFile(requestPath, outputStream);
@@ -119,6 +120,15 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return request.trim();
+    }
+
+    private String[] getRequestLineParts(String request) {
+        String[] requestLineParts = request.split(" ");
+        if (requestLineParts.length < 3) {
+            throw new IllegalArgumentException("[ERROR] invalid request: " + request);
+        }
+
+        return requestLineParts;
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {

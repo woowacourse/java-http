@@ -3,9 +3,8 @@ package org.apache.coyote;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +34,11 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/register", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/css/styles.css", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/chart-area.js", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/js/scripts.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/chart-bar.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/chart-pie.js", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/assets/img/error-404-monochrome.svg", Method.GET),
+                this::handleStaticResource);
 
         requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleLogin);
         requestMappings.put(new RequestMapping("/login", Method.GET), this::handleLogin);
@@ -79,7 +81,7 @@ public class RequestHandler {
     }
 
     private HttpResponse responseNotFoundView() {
-        final byte[] body = readFile(Path.of("static", "401.html").toString());
+        final byte[] body = readFile(Path.of("static", "404.html").toString());
         return HttpResponse.of(ResponseStatus.NOT_FOUND, ContentType.HTML, body);
     }
 
@@ -92,17 +94,15 @@ public class RequestHandler {
     }
 
     private byte[] readFile(String staticFilePath) {
-        try {
-            final URL resourceUrl = getClass().getClassLoader().getResource(staticFilePath);
-            if (resourceUrl == null) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(staticFilePath)) {
+            if (is == null) {
                 throw new IllegalArgumentException("존재하지 않는 리소스입니다.: " + staticFilePath);
             }
-            final var path = resourceUrl.getPath();
-            return Files.readString(Path.of(path)).getBytes(StandardCharsets.UTF_8);
+            return is.readAllBytes();
         } catch (IOException e) {
             log.error("파일을 불러오는데 실패했습니다. : {} {}", staticFilePath, e.getMessage(), e);
+            throw new IllegalArgumentException("파일을 불러오는데 실패했습니다.: " + staticFilePath, e);
         }
-        throw new IllegalArgumentException("파일을 불러오는데 실패했습니다.: " + staticFilePath);
     }
 
     record RequestMapping(

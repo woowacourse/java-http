@@ -8,7 +8,7 @@ public enum ContentType {
     HTML(new String[]{"text/html"}, "html"),
     CSS(new String[]{"text/css"}, "css"),
     JS(new String[]{"application/javascript", "text/javascript"}, "js"),
-    IMAGE_AVIF(new String[]{"image/avif"}, "avif"),
+    IMAGE_AVIF(new String[]{"image/svg+xml", "image/avif"}, "svg"),
     ;
 
     private final List<String> mimeTypes;
@@ -42,7 +42,7 @@ public enum ContentType {
     }
 
     public String getResponseHeader() {
-        return "Content-Type: " + mimeTypes.getFirst() + ";charset=utf-8";
+        return "Content-Type: " + mimeTypes.getFirst();
     }
 
     public String getExtension() {

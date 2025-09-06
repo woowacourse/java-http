@@ -53,4 +53,8 @@ public class StartLine {
 
         return params;
     }
+
+    public String getUri() {
+        return uri;
+    }
 }

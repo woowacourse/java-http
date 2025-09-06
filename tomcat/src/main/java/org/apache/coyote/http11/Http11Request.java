@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Http11Request {
 
@@ -9,18 +12,28 @@ public class Http11Request {
     private final List<Header> headers;
     private final String body;
 
-    public Http11Request(final List<String> lines) {
+    public Http11Request(final List<String> lines, final String body) {
         this.startLine = extractStartLine(lines.getFirst());
         this.headers = extractHeaders(lines);
-        this.body = "";
+        this.body = body;
+    }
+
+    public String extractStaticPath() {
+        return startLine.extractStaticPath();
+    }
+
+    public String getUri() {
+        return startLine.getUri();
+    }
+
+    public Map<String, String> extractRequestBody() {
+        return Arrays.stream(body.split("&"))
+                .map(s -> s.split("="))
+                .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
     }
 
     public boolean isStatic() {
         return startLine.isStatic();
-    }
-
-    public StartLine getStartLine() {
-        return startLine;
     }
 
     private List<Header> extractHeaders(final List<String> lines) {

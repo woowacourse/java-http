@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum ContentType {
 
     HTML("text/html;charset=utf-8"),
-    CSS("text/css");
+    CSS("text/css"),
+    JAVASCRIPT("application/javascript");
 
     private String value;
 

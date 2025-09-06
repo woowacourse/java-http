@@ -1,10 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.ContentType.CSS;
-import static org.apache.coyote.http11.ContentType.HTML;
-import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
-import static org.apache.coyote.http11.HttpStatus.OK;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,19 +13,27 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public void ok(final byte[] body) throws IOException {
-        sendResponse(body, HTML, OK);
-    }
-
-    public void ok(final String filePath) throws IOException {
-        try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
+    public void ok(final String rawPath) throws IOException {
+        final String filePath = processFilePath(rawPath);
+        try (InputStream fileInputStream =
+                     getClass().getClassLoader().getResourceAsStream("static/" + filePath)) {
             if (fileInputStream == null) {
-                sendResponse(new byte[0], HTML, NOT_FOUND);
+                sendResponse(new byte[0], ContentType.HTML, HttpStatus.NOT_FOUND);
                 return;
             }
             byte[] body = fileInputStream.readAllBytes();
-            sendResponse(body, getContentType(filePath), OK);
+            sendResponse(body, getContentType(filePath), HttpStatus.OK);
         }
+    }
+
+    private String processFilePath(String filePath) {
+        if (filePath == null || filePath.isBlank() || "/".equals(filePath)) {
+            return "index.html";
+        }
+        if (!filePath.contains(".")) {
+            return filePath + ".html";
+        }
+        return filePath;
     }
 
     private void sendResponse(byte[] body, ContentType contentType, HttpStatus httpStatus) throws IOException {
@@ -47,11 +50,15 @@ public class HttpResponse {
 
     private ContentType getContentType(String filePath) throws IOException {
         if (filePath.endsWith(".html")) {
-            return HTML;
+            return ContentType.HTML;
         }
         if (filePath.endsWith(".css")) {
-            return CSS;
+            return ContentType.CSS;
+        }
+        if (filePath.endsWith(".js")) {
+            return ContentType.JAVASCRIPT;
         }
         throw new IOException("지원하지 않는 파일 형식입니다.");
     }
 }
+

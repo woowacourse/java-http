@@ -6,7 +6,6 @@ import static org.apache.coyote.http11.RequestMethod.valueOf;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +47,6 @@ public class Http11Processor implements Runnable, Processor {
             final String uri,
             final HttpResponse httpResponse
     ) throws IOException {
-        if (uri.equals("/")) {
-            final byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            httpResponse.ok(body);
-            return;
-        }
-        httpResponse.ok("static" + uri);
+        httpResponse.ok(uri);
     }
 }

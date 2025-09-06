@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             final String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String response = handleRequest(requestInfo);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

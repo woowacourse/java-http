@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import com.techcourse.model.LoginParam;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -141,10 +142,10 @@ public class Http11Processor implements Runnable, Processor {
         int index = requestPath.indexOf("?");
         String queryString = requestPath.substring(index + 1);
 
-        Map<String, String> accountAndPassword = queryParser(queryString);
+        Map<LoginParam, String> accountAndPassword = queryParser(queryString);
 
-        String account = accountAndPassword.get("account");
-        String password = accountAndPassword.get("password");
+        String account = accountAndPassword.get(LoginParam.ACCOUNT);
+        String password = accountAndPassword.get(LoginParam.PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account, password)
                 .orElseThrow(() ->  new IllegalArgumentException("[ERROR] no such user"));
@@ -153,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info(user.toString());
     }
 
-    private Map<String, String> queryParser(String queryString) {
+    private Map<LoginParam, String> queryParser(String queryString) {
         String[] accountAndPassword = queryString.split("&");
         String[] accountInfo = accountAndPassword[0].split("=");
         String[] passwordInfo = accountAndPassword[1].split("=");
@@ -162,8 +163,8 @@ public class Http11Processor implements Runnable, Processor {
         String password = passwordInfo[1];
 
         return Map.of(
-                "account", account,
-                "password", password
+                LoginParam.ACCOUNT, account,
+                LoginParam.PASSWORD, password
         );
     }
 

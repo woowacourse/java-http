@@ -15,7 +15,8 @@ public class RequestMappingHandler {
             return new HttpResponse(HttpStatusCode.OK, ContentType.JAVASCRIPT, request.getPath());
         }
         if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
-            return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/login.html");
+            LoginHandler loginHandler = new LoginHandler();
+            return loginHandler.login(request);
         }
 
         return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html");

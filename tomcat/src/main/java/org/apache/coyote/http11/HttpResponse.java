@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import org.apache.catalina.ResponseCookie;
 
 public record HttpResponse(
@@ -13,7 +15,8 @@ public record HttpResponse(
         String responseBody,
         ResponseCookie responseCookie
 ) {
-    private static final String DEFAULT_CHARSET = "charset=utf-8";
+    private static final String DEFAULT_CHARSET_VALUE = "charset=utf-8";
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public HttpResponse(
             double httpVersion,
@@ -27,9 +30,9 @@ public record HttpResponse(
                 statusCode,
                 status,
                 StaticResourceExtension.findMimeTypeByUrl(uri),
-                responseBody != null ? responseBody.getBytes().length : 0,
+                responseBody != null ? responseBody.getBytes(DEFAULT_CHARSET).length : 0,
                 null,
-                DEFAULT_CHARSET,
+                DEFAULT_CHARSET_VALUE,
                 responseBody,
                 null
         );
@@ -50,7 +53,7 @@ public record HttpResponse(
                 StaticResourceExtension.findMimeTypeByUrl(uri),
                 responseBody != null ? responseBody.getBytes().length : 0,
                 null,
-                DEFAULT_CHARSET,
+                DEFAULT_CHARSET_VALUE,
                 responseBody,
                 responseCookie
         );

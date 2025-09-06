@@ -51,8 +51,16 @@ public class AuthHandler {
 
     private static String getOrCreateSession(HttpCookie httpCookie) {
         if (httpCookie.hasJSESSIONID()) {
-            log.info("기존 세션 사용: {}", httpCookie.getJSESSIONID());
-            return httpCookie.getJSESSIONID();
+            String sessionId = httpCookie.getJSESSIONID();
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(sessionId);
+
+            if (session != null) {
+                log.info("기존 세션 사용: {}", sessionId);
+                return sessionId;
+            } else {
+                log.info("세션이 만료되었습니다. 새 세션 생성을 진행하겠습니다.");
+            }
         }
 
         Session session = new Session();

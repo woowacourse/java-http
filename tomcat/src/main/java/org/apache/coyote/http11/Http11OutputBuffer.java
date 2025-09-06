@@ -7,14 +7,14 @@ public class Http11OutputBuffer {
     public static String parseToString(HttpResponse httpResponse) {
         StringBuilder responseBuilder = new StringBuilder();
 
-        responseBuilder.append(String.format("HTTP/%.1f %d %s ", httpResponse.httpVersion(), httpResponse.statusCode(),
+        responseBuilder.append(String.format("HTTP/%.1f %d %s", httpResponse.httpVersion(), httpResponse.statusCode(),
                 httpResponse.status()));
         responseBuilder.append("\r\n");
 
         if (httpResponse.contentType() != null) {
             responseBuilder.append("Content-Type: ").append(httpResponse.contentType());
             if (httpResponse.charSet() != null) {
-                responseBuilder.append(";").append(httpResponse.charSet()).append(" ");
+                responseBuilder.append(";").append(httpResponse.charSet());
             }
             responseBuilder.append("\r\n");
         }
@@ -24,11 +24,11 @@ public class Http11OutputBuffer {
             responseBuilder.append("\r\n");
         }
 
-        responseBuilder.append("Content-Length: ").append(httpResponse.contentLength()).append(" ");
+        responseBuilder.append("Content-Length: ").append(httpResponse.contentLength());
         responseBuilder.append("\r\n");
 
         if (httpResponse.cookie() != null) {
-            responseBuilder.append("Set-Cookie: ").append(parseCookie(httpResponse.cookie())).append(" ");
+            responseBuilder.append("Set-Cookie: ").append(parseCookie(httpResponse.cookie()));
         }
 
         responseBuilder.append("\r\n");

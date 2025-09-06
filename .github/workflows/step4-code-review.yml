@@ -1,7 +1,7 @@
 name: Step4 Code Review
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
   issue_comment:
     types: [created]
@@ -9,7 +9,7 @@ on:
 jobs:
   claude-review:
     if: |
-      (github.event_name == 'pull_request' && (
+      (github.event_name == 'pull_request_target' && (
         contains(github.event.pull_request.title, 'step4') ||
         contains(github.event.pull_request.title, 'Step4') ||
         contains(github.event.pull_request.title, '4단계') ||
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
       issues: write
       id-token: write
@@ -31,6 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 1
 
       - name: Generate GitHub App token

@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.RequestCookie;
@@ -9,8 +12,11 @@ import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
 
-    public static HttpRequest parseToRequest(BufferedReader bufferedReader, SessionManager sessionManager)
+    public static HttpRequest parseToRequest(InputStream inputStream, SessionManager sessionManager)
             throws IOException {
+        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+
         String requestLine = bufferedReader.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
@@ -30,9 +36,15 @@ public class Http11InputBuffer {
 
         String requestBody = null;
         if (httpMethod.equals("POST") && contentLength > 0) {
-            char[] bodyChars = new char[contentLength];
-            bufferedReader.read(bodyChars, 0, contentLength);
-            requestBody = new String(bodyChars);
+            byte[] bodyBytes = new byte[contentLength];
+            int totalBytesRead = 0;
+            int bytesRead;
+            while (totalBytesRead < contentLength
+                    && (bytesRead = inputStream.read(bodyBytes, totalBytesRead, contentLength - totalBytesRead))
+                    != -1) {
+                totalBytesRead += bytesRead;
+            }
+            requestBody = new String(bodyBytes, StandardCharsets.UTF_8);
         }
 
         RequestCookie requestCookie = null;
@@ -68,7 +80,6 @@ public class Http11InputBuffer {
 
     private static RequestCookie parseToCookie(String rawCookies) {
         Map<String, String> cookieValues = new HashMap<>();
-
         String[] pairs = rawCookies.split("; ");
         for (String pair : pairs) {
             String[] splitPair = pair.split("=");
@@ -76,7 +87,6 @@ public class Http11InputBuffer {
             String value = splitPair[1];
             cookieValues.put(key, value);
         }
-
         return new RequestCookie(cookieValues);
     }
 }

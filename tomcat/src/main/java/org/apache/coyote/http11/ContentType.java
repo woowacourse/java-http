@@ -16,6 +16,9 @@ public enum ContentType {
     }
 
     public static String detectMimeType(String path) {
+        if (path == null || path.isBlank()) {
+            return HTML.mimeType;
+        }
         return Arrays.stream(ContentType.values())
                 .filter(type -> path.toLowerCase().endsWith(type.extension))
                 .findFirst()

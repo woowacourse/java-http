@@ -51,17 +51,17 @@
 
 ### STEP2. 로그인 구현하기
 
-- [ ] HTTP Status Code 302
+- [x] HTTP Status Code 302
     - 로그인 여부에 따라 다른 페이지로 이동하도록 만들어야 한다.
-    - /login 페이지에서 아이디는 gugu, 비밀번호는 password를 입력했을 때 로그인이 성공하도록 만들어야 한다.
-        - 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
-        - 로그인에 실패하면 401.html로 리다이렉트한다.
+    - `/login` 페이지에서 아이디는 gugu, 비밀번호는 password를 입력했을 때 로그인이 성공하도록 만들어야 한다.
+        - 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트 한다.
+        - 로그인에 실패하면 `401.html`로 리다이렉트한다.
 
 - [ ] POST 방식으로 회원가입
-    - http://localhost:8080/register 으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+    - http://localhost:8080/register 으로 접속하면 회원가입 페이지(`register.html`)를 보여준다.
     - 회원가입 페이지를 보여줄 때는 GET을 사용한다.
     - 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
-    - 회원가입을 완료하면 index.html로 리다이렉트한다.
+    - 회원가입을 완료하면 `index.html`로 리다이렉트한다.
     - 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경해야 한다.
 
 - [ ] Cookie에 JSESSIONID 값 저장하기
@@ -90,6 +90,6 @@
 - [ ] Session 구현하기
     - 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
     - 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장해야 한다.
-    - 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
+    - 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
 
 

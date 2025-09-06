@@ -1,7 +1,11 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.LoginService;
 import com.techcourse.model.RegisterService;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.SimpleHttpSession;
+import org.apache.catalina.SimpleManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +25,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final SimpleManager sessionManager = new SimpleManager();
 
     private final Socket connection;
     private final LoginService loginService = new LoginService();
@@ -60,17 +65,31 @@ public class Http11Processor implements Runnable, Processor {
             final var cookie = RequestCookie.from(cookieHeader);
             final var extraHeaders = new LinkedHashMap<String, List<String>>();
 
-            if (!cookie.contains("JSESSIONID")) {
-                final var jsessionId = UUID.randomUUID()
-                        .toString();
-                extraHeaders.put(
-                        "Set-Cookie",
-                        List.of("JSESSIONID=" + jsessionId)
-                );
+            HttpSession session;
+            if (cookie.contains("JSESSIONID")) {
+                final var sessionId = cookie.get("JSESSIONID");
+                session = sessionManager.findSession(sessionId);
+                if (session == null) {
+                    session = SimpleHttpSession.ofGeneratedId();
+                    sessionManager.add(session);
+                    extraHeaders.put("Set-Cookie", List.of("JSESSIONID=" + session.getId()));
+                }
+            } else {
+                session = SimpleHttpSession.ofGeneratedId();
+                sessionManager.add(session);
+                extraHeaders.put("Set-Cookie", List.of("JSESSIONID=" + session.getId()));
             }
 
             if ("/login".equals(path)) {
+                final var sessionUser = session.getAttribute("user");
+
                 if ("GET".equalsIgnoreCase(method)) {
+                    if (sessionUser != null) {
+                        extraHeaders.put("Location", List.of("/index.html"));
+                        writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
+                        return;
+                    }
+
                     final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
                             .getResource("static/login.html"));
                     final var body = readResourceFile(resourceUrl);
@@ -83,7 +102,12 @@ public class Http11Processor implements Runnable, Processor {
                     final var account = params.get("account");
                     final var password = params.get("password");
 
-                    if (loginService.login(account, password)) {
+                    final var user = InMemoryUserRepository.findByAccount(account)
+                            .filter(u -> u.checkPassword(password))
+                            .orElse(null);
+
+                    if (user != null) {
+                        session.setAttribute("user", user);
                         extraHeaders.put("Location", List.of("/index.html"));
                         writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
                         return;
@@ -278,9 +302,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void sendInternalServerErrorResponse(final Socket connection) {
         try {
-            var resourceUrl = getClass().getClassLoader()
+            final var resourceUrl = getClass().getClassLoader()
                     .getResource("static/500.html");
-            byte[] body = (resourceUrl != null)
+            final var body = (resourceUrl != null)
                     ? readResourceFile(resourceUrl)
                     : "Internal Server Error".getBytes(StandardCharsets.UTF_8);
 

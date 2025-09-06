@@ -17,12 +17,6 @@ public class HttpResponse {
         sendResponse("200 OK", contentType, body);
     }
 
-    public void notFound() throws IOException {
-        final var responseBody = "404 Not Found";
-        final var bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-        sendResponse("404 Not Found", "text/plain;charset=utf-8", bodyBytes);
-    }
-
     private void sendResponse(String statusLine, String contentType, byte[] body) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + statusLine + " ",
@@ -34,5 +28,23 @@ public class HttpResponse {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
         outputStream.flush();
+    }
+
+    public void sendNotFound() throws IOException {
+        final var responseBody = "404 Not Found";
+        final var bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        sendResponse("404 Not Found", "text/plain;charset=utf-8", bodyBytes);
+    }
+
+    public void sendBadRequest() throws IOException {
+        final var responseBody = "400 Bad Request";
+        final var bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        sendResponse("400 Bad Request", "text/html;charset=utf-8", bodyBytes);
+    }
+
+    public void sendInternalServerError() throws IOException {
+        final var responseBody = "500 Internal Server Error";
+        final var bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        sendResponse("500 Internal Server Error", "text/html;charset=utf-8", bodyBytes);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.BadRequestException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,23 +31,30 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            HttpRequest request = new HttpRequest(inputStream);
             HttpResponse response = new HttpResponse(outputStream);
-            String path = request.getPath();
-
-            if ("/".equals(path)) {
-                handleRoot(response);
-                return;
+            try {
+                HttpRequest request = new HttpRequest(inputStream);
+                String path = request.getPath();
+                dispatchRequest(request, response);
+            } catch (BadRequestException e) {
+                response.sendBadRequest();
+            } catch (Exception e) {
+                response.sendInternalServerError();
             }
-            if ("/login".equals(path)) {
-                handleLogin(request, response);
-                return;
-            }
-            handleStaticResource(response, path);
-
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
+        String path = request.getPath();
+
+        if ("/".equals(path)) {
+            handleRoot(response);
+        } else if ("/login".equals(path)) {
+            handleLogin(request, response);
+        } else {
+            handleStaticResource(response, path);
         }
     }
 
@@ -80,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
         String resourcePath = "static" + path;
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (fileInputStream == null) {
-                response.notFound();
+                response.sendNotFound();
                 return;
             }
 

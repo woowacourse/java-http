@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +20,11 @@ public class HttpRequest {
         String requestLine = reader.readLine();
 
         if (requestLine == null) {
-            throw new IOException("잘못된 요청 라인입니다.");
+            throw new BadRequestException("잘못된 요청 라인입니다.");
         }
         String[] tokens = requestLine.split(" ");
         if (tokens.length != 3) {
-            throw new IOException("잘못된 요청 라인입니다.");
+            throw new BadRequestException("잘못된 요청 라인입니다.");
         }
         String uri = tokens[1];
 

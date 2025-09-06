@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.RequestMethod.GET;
-import static org.apache.coyote.http11.RequestMethod.valueOf;
-
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
@@ -33,25 +30,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
-            RequestMethod requestMethod = valueOf(httpRequest.getRequestMethod());
             String requestUri = httpRequest.getUri();
-
-            if (requestMethod == GET) {
-                if (requestUri.equals("/login") && httpRequest.getQuery().isEmpty()) {
-                    processGet(requestUri, httpResponse);
-                    return;
-                }
-                if (requestUri.equals("/login")) {
-                    loginController.login(httpRequest, httpResponse);
-                }
-                processGet(requestUri, httpResponse);
+            
+            if (requestUri.equals("/login") && !httpRequest.getQuery().isEmpty()) {
+                loginController.login(httpRequest, httpResponse);
+                return;
             }
+            process(requestUri, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void processGet(
+    private void process(
             final String uri,
             final HttpResponse httpResponse
     ) throws IOException {

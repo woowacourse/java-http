@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,32 +57,24 @@ public class Http11Processor implements Runnable, Processor {
                 queryStrings = parseQueryStrings(uri, index);
             }
 
-            String responseBody = null;
+            String response = null;
 
             if (StaticResourceExtension.anyMatch(path)) {
-                responseBody = handleForStaticResource(path);
+                response = handleForStaticResource(path);
             }
 
             if (uri.contains("/login") && queryStrings.isEmpty()) {
-                responseBody = handleForStaticResource("login.html");
+                response = handleForStaticResource("login.html");
             }
 
             if (uri.contains("/login") && !queryStrings.isEmpty()) {
-                handleForStaticResource("login.html");
-                responseBody = handleForLogin(queryStrings);
+                response = handleForStaticResource("login.html");
+                response = handleForLogin(queryStrings);
             }
 
-            if (responseBody == null) {
-                responseBody = DEFAULT_RESPONSE_BODY;
+            if (response == null) {
+                response = createOKResponse(uri, DEFAULT_RESPONSE_BODY);
             }
-
-            final var response = String.join("\r\n",
-                    OK_RESPONSE_LINE,
-                    CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(uri)
-                            + CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8,
-                    CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -89,6 +82,16 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createOKResponse(String uri, String responseBody) {
+        return String.join("\r\n",
+                OK_RESPONSE_LINE,
+                CONTENT_TYPE_RESPONSE_HEADER_KEY + StaticResourceExtension.findMimeTypeByUrl(uri)
+                        + CONTENT_TYPE_RESPONSE_LINE_CHARSET_UTF_8,
+                CONTENT_LENGTH_RESPONSE_HEADER_KEY + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String parseUrl(BufferedReader bufferedReader) throws IOException {
@@ -117,9 +120,10 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String handleForStaticResource(String url) throws IOException {
-        URL resource = getPathOfResource(url);
-        return readFile(resource);
+    private String handleForStaticResource(String uri) throws IOException {
+        URL resource = getPathOfResource(uri);
+        String responseBody = readFile(resource);
+        return createOKResponse(uri, responseBody);
     }
 
     private URL getPathOfResource(String url) {
@@ -136,14 +140,13 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private void handleForLogin(Map<String, String> queryStrings) {
-        if (queryStrings == null) {
-            return;
+    private String handleForLogin(Map<String, String> queryStrings) {
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
+
+        if (foundUser.isPresent()) {
+
         }
 
-        User foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-        log.info("로그인한 사용자의 이름: {}", foundUser.getAccount());
+        return
     }
 }

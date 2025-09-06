@@ -7,9 +7,11 @@ import com.techcourse.model.User;
 import com.techcourse.model.LoginParam;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -72,10 +74,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private void serveStaticFile(String requestPath, OutputStream outputStream) throws IOException {
         final var path = getPath(requestPath);
-        final var responseBody = Files.readString(path);
-        final var response = getResponse(responseBody, path);
+        if (Files.exists(path)) {
+            final var responseHeaders = getResponse(path);
+            sendResponse(outputStream, responseHeaders);
 
-        sendResponse(outputStream, response);
+            try(InputStream inputStream = Files.newInputStream(path)) {
+                inputStream.transferTo(outputStream);
+            }
+            return;
+        }
+
+        String notFoundResponse = getNotFoundResponse();
+        sendResponse(outputStream, notFoundResponse);
     }
 
     private Path getPath(String requestPath) {
@@ -104,19 +114,24 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String getResponse(String responseBody, Path path) throws IOException {
-        String status = "HTTP/1.1 200 OK ";
-        if (path.toAbsolutePath().endsWith("404.html")) {
-            responseBody = "404 NOT FOUND";
-            status = "HTTP/1.1 404 NOT FOUND";
-        }
+    private String getResponse(Path path) throws IOException {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
+                "Content-Length: " + Files.size(path) + " ",
+                "", "");
+    }
+
+    private String getNotFoundResponse() {
+        String body = "404 Not Found";
 
         return String.join("\r\n",
-                status,
-                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/plain; charset=utf-8",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "",
-                responseBody);
+                body
+        );
     }
 
     private String getRequest(BufferedReader reader) throws IOException {
@@ -138,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 

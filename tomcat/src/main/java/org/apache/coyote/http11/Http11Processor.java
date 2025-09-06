@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final var requestLine = parseRequestLine(requestLineString);
         final var headers = parseHeaders(reader);
-        final String body = parseBody(reader, headers);
+        final String body = parseBody(inputStream, headers);
         return new Http11Request(requestLine.method(), requestLine.path(), requestLine.queryParams(), headers, body);
     }
 
@@ -85,16 +85,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseBody(
-            final BufferedReader reader,
+            final InputStream inputStream,
             final Map<String, String> headers
     ) throws IOException {
         if (!headers.containsKey("Content-Length")) {
             return "";
         }
         final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        final var bodyBytes = inputStream.readNBytes(contentLength);
+        return new String(bodyBytes, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

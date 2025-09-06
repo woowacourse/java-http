@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.NoSuchUserException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import com.techcourse.model.LoginParam;
@@ -107,6 +108,7 @@ public class Http11Processor implements Runnable, Processor {
         if (path.toAbsolutePath().endsWith("404.html")) {
             responseBody = "404 NOT FOUND";
         }
+
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
@@ -118,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getRequest(BufferedReader reader) throws IOException {
         final var request = reader.readLine();
         if (request == null || request.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] request is empty");
+            throw new IllegalArgumentException("[ERROR] request is empty: " + request);
         }
 
         return request.trim();
@@ -148,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = accountAndPassword.get(LoginParam.PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account, password)
-                .orElseThrow(() ->  new IllegalArgumentException("[ERROR] no such user"));
+                .orElseThrow(NoSuchUserException::new);
 
         user.validatePasswordAndLog(password);
         log.info(user.toString());

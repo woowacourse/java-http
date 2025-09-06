@@ -1,5 +1,6 @@
 package com.techcourse.model;
 
+import com.techcourse.exception.NoSuchUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class User {
             return;
         }
 
-        throw new IllegalArgumentException("[ERROR] No Such User");
+        throw new NoSuchUserException();
     }
 
     public boolean checkPassword(String password) {

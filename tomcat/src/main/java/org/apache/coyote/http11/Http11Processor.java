@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = handlerDispatcher.handle(request);
             log.debug("response status line: {}", response.getStatusLine());
             log.debug("response headers: {}", response.getHeaders());
-            log.debug("response body: {}", response.getBody());
+//            log.debug("response body: {}", response.getBody());
 
             outputStream.write(response.toBytes());
             outputStream.flush();

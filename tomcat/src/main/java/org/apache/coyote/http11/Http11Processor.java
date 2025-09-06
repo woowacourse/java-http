@@ -110,14 +110,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String findContentType(final String uri) {
+        String encoding = ";charset=utf-8";
         if (uri.endsWith(".html")) {
-            return "text/html;charset=utf-8";
+            return "text/html" + encoding;
         }
         if (uri.endsWith(".css")) {
-            return "text/css";
+            return "text/css" + encoding;
         }
         if (uri.endsWith(".js")) {
-            return "application/javascript";
+            return "application/javascript" + encoding;
+        }
+        if (uri.endsWith(".png")) {
+            return "image/png";
         }
         return "";
     }

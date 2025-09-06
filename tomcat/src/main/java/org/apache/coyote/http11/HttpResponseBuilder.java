@@ -15,19 +15,14 @@ public class HttpResponseBuilder {
     public HttpResponse build(final String path) throws IOException {
         String formattedPath = formatPath(path);
 
-        int status = 200;
-        String reason = "OK";
         ResourceResult resourceResult = loadResource(formattedPath);
-        if (!resourceResult.found()) {
-            status = 404;
-            reason = "NOT FOUND";
-        }
+        HttpStatus status = findStatus(resourceResult);
 
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", resourceResult.mimeType());
         headers.put("Content-Length", String.valueOf(resourceResult.body().getBytes().length));
 
-        return new HttpResponse(status, reason, headers, resourceResult.body().getBytes());
+        return new HttpResponse(status, headers, resourceResult.body().getBytes());
     }
 
     private String formatPath(final String path) {
@@ -53,5 +48,12 @@ public class HttpResponseBuilder {
 
         String mimeType = MimeType.fromPath(path);
         return ResourceResult.found(mimeType, content);
+    }
+
+    private HttpStatus findStatus(final ResourceResult resourceResult) {
+        if (resourceResult.found()) {
+            return HttpStatus.OK;
+        }
+        return HttpStatus.NOT_FOUND;
     }
 }

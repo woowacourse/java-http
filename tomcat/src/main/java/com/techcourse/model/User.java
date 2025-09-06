@@ -1,13 +1,21 @@
 package com.techcourse.model;
 
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
+
 public class User {
 
+    @Nullable
     private final Long id;
     private final String account;
     private final String password;
     private final String email;
 
-    private User(final Long id, final String account, final String password, final String email) {
+    public User(final Long id, final String account, final String password, final String email) {
+        Objects.requireNonNull(account, "account must not be null");
+        Objects.requireNonNull(password, "password must not be null");
+        Objects.requireNonNull(email, "email must not be null");
         this.id = id;
         this.account = account;
         this.password = password;

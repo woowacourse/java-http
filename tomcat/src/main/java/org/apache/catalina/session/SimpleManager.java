@@ -1,6 +1,7 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Manager;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class SimpleManager implements Manager {
         if (id == null) {
             return null;
         }
-        
+
         return sessions.get(id);
     }
 

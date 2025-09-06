@@ -1,11 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.LoginService;
 import com.techcourse.model.RegisterService;
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.SimpleHttpSession;
-import org.apache.catalina.SimpleManager;
+import org.apache.catalina.session.SimpleHttpSession;
+import org.apache.catalina.session.SimpleManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    // TODO. Controller 인터페이스 추가하기
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
@@ -64,104 +64,26 @@ public class Http11Processor implements Runnable, Processor {
 
             final var cookie = RequestCookie.from(cookieHeader);
             final var extraHeaders = new LinkedHashMap<String, List<String>>();
-
-            HttpSession session;
-            if (cookie.contains("JSESSIONID")) {
-                final var sessionId = cookie.get("JSESSIONID");
-                session = sessionManager.findSession(sessionId);
-                if (session == null) {
-                    session = SimpleHttpSession.ofGeneratedId();
-                    sessionManager.add(session);
-                    extraHeaders.put("Set-Cookie", List.of("JSESSIONID=" + session.getId()));
-                }
-            } else {
-                session = SimpleHttpSession.ofGeneratedId();
-                sessionManager.add(session);
-                extraHeaders.put("Set-Cookie", List.of("JSESSIONID=" + session.getId()));
-            }
+            final var session = resolveSession(cookie, extraHeaders);
 
             if ("/login".equals(path)) {
-                final var sessionUser = session.getAttribute("user");
-
-                if ("GET".equalsIgnoreCase(method)) {
-                    if (sessionUser != null) {
-                        extraHeaders.put("Location", List.of("/index.html"));
-                        writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
-                        return;
-                    }
-
-                    final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
-                            .getResource("static/login.html"));
-                    final var body = readResourceFile(resourceUrl);
-
-                    writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
-                    return;
-                }
-
-                if ("POST".equalsIgnoreCase(method)) {
-                    final var account = params.get("account");
-                    final var password = params.get("password");
-
-                    final var user = InMemoryUserRepository.findByAccount(account)
-                            .filter(u -> u.checkPassword(password))
-                            .orElse(null);
-
-                    if (user != null) {
-                        session.setAttribute("user", user);
-                        extraHeaders.put("Location", List.of("/index.html"));
-                        writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
-                        return;
-                    }
-
-                    extraHeaders.put("Location", List.of("/401.html"));
-                    writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
-                    return;
-                }
-            }
-
-            if ("/register".equals(path)) {
-                if ("GET".equalsIgnoreCase(method)) {
-                    final var resourceUrl = Objects.requireNonNull(getClass().getClassLoader()
-                            .getResource("static/register.html"));
-                    final var body = readResourceFile(resourceUrl);
-
-                    writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
-                    return;
-                }
-
-                if ("POST".equalsIgnoreCase(method)) {
-                    final var account = params.get("account");
-                    final var password = params.get("password");
-                    final var email = params.get("email");
-
-                    registerService.register(account, password, email);
-
-                    extraHeaders.put("Location", List.of("/index.html"));
-                    writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
-                    return;
-                }
-            }
-
-            final var staticResourcePath = "static" + path;
-            final var staticResourceUrl = getClass().getClassLoader()
-                    .getResource(staticResourcePath);
-
-            if (staticResourceUrl != null && !Files.isDirectory(Path.of(staticResourceUrl.toURI()))) {
-                final var body = readResourceFile(staticResourceUrl);
-                final var contentType = detectContentType(staticResourceUrl);
-
-                writeResponse(outputStream, 200, "OK", extraHeaders, body, contentType);
+                handleLoginRequest(method, session, params, outputStream, extraHeaders);
                 return;
             }
 
-            final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
+            if ("/register".equals(path)) {
+                handleRegisterRequest(method, params, outputStream, extraHeaders);
+                return;
+            }
+
+            handleStaticResource(path, outputStream, extraHeaders);
         } catch (Exception e) {
             log.error("Internal Server Error: {}", e.getMessage(), e);
             sendInternalServerErrorResponse(connection);
         }
     }
 
+    // TODO. HttpRequest 클래스 구현하기
     private Map<String, String> parseRequest(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
         if (requestLine == null || requestLine.isBlank()) {
@@ -246,6 +168,152 @@ public class Http11Processor implements Runnable, Processor {
         return paramMap;
     }
 
+    private HttpSession resolveSession(
+            final RequestCookie cookie,
+            final LinkedHashMap<String, List<String>> extraHeaders
+    ) throws IOException {
+        if (cookie.contains("JSESSIONID")) {
+            final var sessionId = cookie.get("JSESSIONID");
+            final var found = sessionManager.findSession(sessionId);
+            if (found != null) {
+                return found;
+            }
+        }
+
+        final var newSession = SimpleHttpSession.ofGeneratedId();
+        sessionManager.add(newSession);
+        extraHeaders.put("Set-Cookie", List.of("JSESSIONID=" + newSession.getId()));
+
+        return newSession;
+    }
+
+    private void handleLoginRequest(
+            final String method,
+            final HttpSession session,
+            final Map<String, String> params,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException, URISyntaxException {
+        if ("GET".equalsIgnoreCase(method)) {
+            handleLoginGet(session, outputStream, extraHeaders);
+            return;
+        }
+
+        if ("POST".equalsIgnoreCase(method)) {
+            handleLoginPost(params, session, outputStream, extraHeaders);
+        }
+    }
+
+    private void handleLoginGet(
+            final HttpSession session,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException, URISyntaxException {
+        if (session.getAttribute("user") != null) {
+            redirect(outputStream, extraHeaders, "/index.html");
+            return;
+        }
+
+        final var resourceUrl = Objects.requireNonNull(
+                getClass().getClassLoader()
+                        .getResource("static/login.html")
+        );
+        final var body = readResourceFile(resourceUrl);
+        writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
+    }
+
+    private void handleLoginPost(
+            final Map<String, String> params,
+            final HttpSession session,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException {
+        final var account = params.get("account");
+        final var password = params.get("password");
+
+        if (loginService.login(account, password, session)) {
+            redirect(outputStream, extraHeaders, "/index.html");
+            return;
+        }
+
+        redirect(outputStream, extraHeaders, "/401.html");
+    }
+
+    private void handleRegisterRequest(
+            final String method,
+            final Map<String, String> params,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException, URISyntaxException {
+        if ("GET".equalsIgnoreCase(method)) {
+            handleRegisterGet(outputStream, extraHeaders);
+            return;
+        }
+
+        if ("POST".equalsIgnoreCase(method)) {
+            handleRegisterPost(params, outputStream, extraHeaders);
+        }
+    }
+
+    private void handleRegisterGet(
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException, URISyntaxException {
+        final var resourceUrl = Objects.requireNonNull(
+                getClass().getClassLoader()
+                        .getResource("static/register.html")
+        );
+        final var body = readResourceFile(resourceUrl);
+        writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
+    }
+
+    private void handleRegisterPost(
+            final Map<String, String> params,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException {
+        final var account = params.get("account");
+        final var password = params.get("password");
+        final var email = params.get("email");
+
+        registerService.register(account, password, email);
+        redirect(outputStream, extraHeaders, "/index.html");
+    }
+
+    private void redirect(
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders,
+            final String location
+    ) throws IOException {
+        extraHeaders.put("Location", List.of(location));
+        writeResponse(outputStream, 302, "Found", extraHeaders, null, "text/html;charset=utf-8");
+    }
+
+    private void handleStaticResource(
+            final String path,
+            final OutputStream outputStream,
+            final Map<String, List<String>> extraHeaders
+    ) throws IOException, URISyntaxException {
+        final var staticResourcePath = "static" + path;
+        final var staticResourceUrl = getClass().getClassLoader()
+                .getResource(staticResourcePath);
+
+        if (isValidStaticResource(staticResourceUrl)) {
+            final var body = readResourceFile(staticResourceUrl);
+            final var contentType = detectContentType(staticResourceUrl);
+
+            writeResponse(outputStream, 200, "OK", extraHeaders, body, contentType);
+            return;
+        }
+
+        final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+        writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
+    }
+
+    private boolean isValidStaticResource(final URL resourceUrl) throws URISyntaxException {
+        return resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()));
+    }
+
     private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
         return Files.readAllBytes(path);
@@ -257,6 +325,7 @@ public class Http11Processor implements Runnable, Processor {
         return contentType != null ? contentType : "text/plain;charset=utf-8";
     }
 
+    // TODO. HttpResponse 클래스 구현하기
     private void writeResponse(
             final OutputStream outputStream,
             final int statusCode,
@@ -282,10 +351,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (extraHeaders != null) {
-            extraHeaders.forEach((k, values) -> values.forEach(v ->
-                    headers.append(k)
+            extraHeaders.forEach((key, values) -> values.forEach(value ->
+                    headers.append(key)
                             .append(": ")
-                            .append(v)
+                            .append(value)
                             .append("\r\n")));
         }
 

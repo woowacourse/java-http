@@ -53,16 +53,38 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest parseHttpRequest(BufferedReader bufferedReader) {
         try {
-            String[] methodAndUriAndProtocol = bufferedReader.readLine().split(" ");
-            String method = methodAndUriAndProtocol[0];
-            String uri = methodAndUriAndProtocol[1];
-            String path = UriParser.parsePath(uri);
-            Map<String, String> queryStrings = UriParser.parseQueryStrings(uri);
-            return new HttpRequest(method, path, queryStrings);
+            String line = readLine(bufferedReader);
+            String[] methodAndUriAndProtocol = parseMethodAndUriAndProtocol(line);
+            if (methodAndUriAndProtocol == null) {
+                return null;
+            }
+            return buildHttpRequest(methodAndUriAndProtocol[0], methodAndUriAndProtocol[1]);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             log.error(exception.getMessage(), exception);
             return null;
         }
+    }
+
+    private String readLine(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        if (line == null || line.isBlank()) {
+            return "";
+        }
+        return line;
+    }
+
+    private String[] parseMethodAndUriAndProtocol(String rawLine) {
+        String[] tokens = rawLine.split(" ");
+        if (tokens.length < 3) {
+            return null;
+        }
+        return tokens;
+    }
+
+    private HttpRequest buildHttpRequest(String method, String uri) {
+        String path = UriParser.parsePath(uri);
+        Map<String, String> queryStrings = UriParser.parseQueryStrings(uri);
+        return new HttpRequest(method, path, queryStrings);
     }
 
     private HttpResponse handleHttpRequest(HttpRequest httpRequest) {

@@ -24,7 +24,6 @@ public class User {
 
     public void validatePasswordAndLog(String password) {
         if (checkPassword(password)) {
-            log.info(this.toString());
             return;
         }
 

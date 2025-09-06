@@ -150,6 +150,7 @@ public class Http11Processor implements Runnable, Processor {
                 .orElseThrow(() ->  new IllegalArgumentException("[ERROR] no such user"));
 
         user.validatePasswordAndLog(password);
+        log.info(user.toString());
     }
 
     private Map<String, String> queryParser(String queryString) {

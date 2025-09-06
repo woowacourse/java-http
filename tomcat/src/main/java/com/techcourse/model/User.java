@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import org.slf4j.Logger;
+
 public class User {
 
     private final Long id;
@@ -34,5 +36,13 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public void logUserInfo(String password, Logger logger){
+        if(checkPassword(password)){
+            logger.info(this.toString());
+            return;
+        }
+        throw new IllegalArgumentException();
     }
 }

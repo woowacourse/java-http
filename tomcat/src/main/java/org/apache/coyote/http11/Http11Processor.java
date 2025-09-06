@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Request parseRequest(final InputStream inputStream) throws IOException {
-        final var reader = new BufferedReader(new InputStreamReader(inputStream));
+        final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
         final String requestLineString = reader.readLine();
         if (requestLineString == null || requestLineString.isBlank()) {
             return Http11Request.createInvalid();

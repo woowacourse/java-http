@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSessionContext;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,7 +20,7 @@ public class SimpleHttpSession implements HttpSession {
         Objects.requireNonNull(id, "id must not be null");
         Objects.requireNonNull(attributes, "attributes must not be null");
         this.id = id;
-        this.attributes = attributes;
+        this.attributes = new HashMap<>(attributes);
     }
 
     public static SimpleHttpSession ofGeneratedId() {

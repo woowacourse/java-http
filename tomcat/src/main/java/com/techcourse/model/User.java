@@ -22,8 +22,8 @@ public class User {
         this.email = email;
     }
 
-    public User(final String account, final String password, final String email) {
-        this(null, account, password, email);
+    public static User of(final String account, final String password, final String email) {
+        return new User(null, account, password, email);
     }
 
     public boolean checkPassword(final String password) {

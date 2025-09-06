@@ -3,7 +3,6 @@ package org.apache.catalina.session;
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +18,7 @@ public class SimpleManager implements Manager {
     }
 
     @Override
-    public HttpSession findSession(final String id) throws IOException {
+    public HttpSession findSession(final String id) {
         if (id == null) {
             return null;
         }

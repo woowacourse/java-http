@@ -171,7 +171,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpSession resolveSession(
             final RequestCookie cookie,
             final LinkedHashMap<String, List<String>> extraHeaders
-    ) throws IOException {
+    ) {
         if (cookie.contains("JSESSIONID")) {
             final var sessionId = cookie.get("JSESSIONID");
             final var found = sessionManager.findSession(sessionId);

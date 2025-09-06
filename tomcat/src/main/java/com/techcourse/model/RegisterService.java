@@ -9,7 +9,7 @@ public class RegisterService {
     private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
 
     public void register(final String account, final String password, final String email) {
-        final var user = new User(
+        final var user = User.of(
                 account,
                 password,
                 email

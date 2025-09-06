@@ -57,21 +57,18 @@ public class Http11Processor implements Runnable, Processor {
             final String[] request = bufferedReader.readLine().split(" ");
             final String requestUri = request[1];
 
-            Map<String, String> queryMap = new HashMap<>();
+            Map<String, String> queryMap = extractQueryParams(requestUri);
 
-            String requestResourceName = requestUri;
-            if (requestResourceName.contains("?")) {
-                final String[] split = requestResourceName.split("\\?");
-                requestResourceName = split[0];
-                String queryString = split[1];
-                queryMap = parseQueryString(queryString);
+            String path = requestUri;
+            if (path.contains("?")) {
+                path = path.split("\\?")[0];
             }
             if (!requestUri.contains(".")) {
-                requestResourceName = requestResourceName + ".html";
+                path = path + ".html";
             }
-            log.debug("resource : {}", requestResourceName);
+            log.debug("resource : {}", path);
 
-            final URL resource = getClass().getClassLoader().getResource("static" + requestResourceName);
+            final URL resource = getClass().getClassLoader().getResource("static" + path);
             if (resource == null) {
                 final URL notFoundPage = getClass().getClassLoader().getResource("static/404.html");
                 final String response = generateResponse(404, notFoundPage);
@@ -81,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String response = generateResponse(200, resource);
-            if ("/login.html".equals(requestResourceName) && !queryMap.isEmpty()) {
+            if ("/login.html".equals(path) && !queryMap.isEmpty()) {
                 login(queryMap);
             }
             outputStream.write(response.getBytes());
@@ -90,6 +87,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        if (!uri.contains("?")) {
+            return Map.of();
+        }
+
+        final String[] split = uri.split("\\?");
+        final String queryString = split.length > 1 ? split[1] : "";
+        return parseQueryString(queryString);
     }
 
     private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {

@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = parseHttpRequest(bufferedReader);
             HttpResponse httpResponse = handleHttpRequest(httpRequest);
 
-            outputStream.write(httpResponse.toString().getBytes());
+            outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -122,7 +122,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("200 OK", "text/html;charset=utf-8", "Hello world!");
         }
 
-        if (httpRequest.pathStartsWith("/login")) {
+        if (httpRequest.pathEquals("/login")) {
             return handleLogin(httpRequest);
         }
 
@@ -132,6 +132,10 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleLogin(HttpRequest httpRequest) {
         String account = httpRequest.getQueryStringOf("account");
         String password = httpRequest.getQueryStringOf("password");
+        if (account == null || password == null) {
+            return new HttpResponse("400 Bad Request", "text/html;charset=utf-8", "잘못된 접근입니다.");
+        }
+
         User user = InMemoryUserRepository.findByAccount(account)
             .orElse(null);
         if (user == null || !user.isPasswordValid(password)) {

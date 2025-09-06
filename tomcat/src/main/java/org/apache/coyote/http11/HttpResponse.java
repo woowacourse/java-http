@@ -24,7 +24,8 @@ public class HttpResponse implements AutoCloseable {
         outputStream.flush();
     }
 
-    public void sendError(HttpStatus status, byte[] body) throws IOException {
+    public void sendError(HttpStatus status) throws IOException {
+        String body = "<h1>" + status.getCode() + " " + status.getMessage() + "</h1>";
         String header = String.format("""
                         HTTP/1.1 %d %s\r
                         Content-Type: text/html; charset=UTF-8\r
@@ -34,10 +35,10 @@ public class HttpResponse implements AutoCloseable {
                         """,
                 status.getCode(),
                 status.getMessage(),
-                body.length
+                body.getBytes().length
         );
         outputStream.write(header.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
+        outputStream.write(body.getBytes());
         outputStream.flush();
     }
 

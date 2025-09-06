@@ -44,17 +44,17 @@ public class Http11Processor implements Runnable, Processor {
 
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isEmpty()) {
-                    sendError(response, HttpStatus.BAD_REQUEST);
+                    response.sendError(HttpStatus.BAD_REQUEST);
                     return;
                 }
 
                 User user = optionalUser.get();
                 if (!user.checkPassword(password)) {
-                    sendError(response, HttpStatus.UNAUTHORIZED);
+                    response.sendError(HttpStatus.UNAUTHORIZED);
                     return;
                 }
 
-                log.info("Login success: {}", user);
+                log.info(user.toString());
                 if (checkStaticFile("/index.html", response)) {
                     return;
                 }
@@ -64,11 +64,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            sendError(response, HttpStatus.NOT_FOUND);
+            response.sendError(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             try (HttpResponse response = new HttpResponse(new BufferedOutputStream(connection.getOutputStream()))) {
                 log.error(e.getMessage());
-                sendError(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (Exception exception) {
                 log.error(exception.getMessage());
             }
@@ -104,24 +104,5 @@ public class Http11Processor implements Runnable, Processor {
 
             response.send(HttpStatus.OK, contentType, body, true);
         }
-    }
-
-    private void sendError(HttpResponse response, HttpStatus httpStatus) {
-        String errorResource = "static/" + httpStatus.getCode() + ".html";
-
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(errorResource)) {
-            byte[] errorBody = getErrorBody(inputStream, httpStatus);
-            response.sendError(httpStatus, errorBody);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private byte[] getErrorBody(InputStream inputStream, HttpStatus httpStatus) throws IOException {
-        if (inputStream != null) {
-            return inputStream.readAllBytes();
-        }
-        return ("<h1>" + httpStatus.getCode() + " " + httpStatus.getMessage() + "</h1>").getBytes(
-                StandardCharsets.UTF_8);
     }
 }

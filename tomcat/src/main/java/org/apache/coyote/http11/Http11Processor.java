@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -145,7 +146,10 @@ public class Http11Processor implements Runnable, Processor {
         String account = accountAndPassword.get("account");
         String password = accountAndPassword.get("password");
 
-        InMemoryUserRepository.findByAccount(account, password);
+        User user = InMemoryUserRepository.findByAccount(account, password)
+                .orElseThrow(() ->  new IllegalArgumentException("[ERROR] no such user"));
+
+        user.validatePasswordAndLog(password);
     }
 
     private Map<String, String> queryParser(String queryString) {

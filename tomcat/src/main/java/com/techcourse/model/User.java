@@ -22,7 +22,7 @@ public class User {
         this(null, account, password, email);
     }
 
-    public void logCheckPassword(String password) {
+    public void validatePasswordAndLog(String password) {
         if (checkPassword(password)) {
             log.info(this.toString());
             return;

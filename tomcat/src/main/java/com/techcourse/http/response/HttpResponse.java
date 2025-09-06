@@ -3,19 +3,20 @@ package com.techcourse.http.response;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.common.Location;
 import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
-    private final String location;
+    private final Location location;
     private final ContentType contentType;
     private final String responseBody;
 
     public HttpResponse(final HttpVersion httpVersion,
                         final HttpStatus httpStatus,
-                        final String location,
+                        final Location location,
                         final ContentType contentType,
                         final String responseBody
     ) {
@@ -35,7 +36,7 @@ public class HttpResponse {
                 httpVersion.toProtocolString() + " " + httpStatus.toStatusLine() + " ",
                 "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "Location: " + location + " ",
+                location.toHttpHeaderFormat(),
                 "",
                 responseBody);
     }

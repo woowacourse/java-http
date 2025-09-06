@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Map<Integer, String> HTTP_STATUS_CODES = Map.ofEntries(
             Map.entry(200, "200 OK"),
             Map.entry(400, "400 Bad Request"),
+            Map.entry(401, "401 Unauthorized"),
             Map.entry(404, "404 Not Found")
     );
     private static final Map<String, String> MIME_TYPES = Map.ofEntries(
@@ -62,21 +64,17 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("resource : {}", path);
 
             final URL resource = getResourceUrl(path);
+
             if (resource == null) {
-                final URL notFoundPage = getResourceUrl("/404.html");
-                writeResponse(400, notFoundPage, outputStream);
+                sendResponse(generateErrorResponse(404), connection.getOutputStream());
                 return;
             }
 
             handleLogin(path, queryMap);
-            writeResponse(200, resource, outputStream);
+            sendResponse(generateResponse(200, resource), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private URL getResourceUrl(final String path) {
-        return getClass().getClassLoader().getResource("static" + path);
     }
 
     private Map<String, String> extractQueryParams(final String uri) {
@@ -86,31 +84,6 @@ public class Http11Processor implements Runnable, Processor {
         final String[] split = uri.split("\\?");
         final String queryString = split.length > 1 ? split[1] : "";
         return parseQueryString(queryString);
-    }
-
-    private String parsePath(final String requestUri) {
-        String path = requestUri;
-        if (path.contains("?")) {
-            path = path.split("\\?")[0];
-        }
-        if (!requestUri.contains(".")) {
-            path = path + ".html";
-        }
-        return path;
-    }
-
-    private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
-        final String resourceName = resource.getFile();
-        final String extension = extractExtension(resourceName);
-        final String responseBody = Files.readString(new File(resourceName).toPath());
-        final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {
@@ -132,22 +105,70 @@ public class Http11Processor implements Runnable, Processor {
         return queryMap;
     }
 
+    private String parsePath(final String requestUri) {
+        String path = requestUri;
+        if (path.contains("?")) {
+            path = path.split("\\?")[0];
+        }
+        if (!requestUri.contains(".")) {
+            path = path + ".html";
+        }
+        return path;
+    }
+
+    private URL getResourceUrl(final String path) throws FileNotFoundException {
+        return getClass()
+                .getClassLoader()
+                .getResource("static" + path);
+    }
+
+    private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
+        final String resourceName = resource.getFile();
+        final String extension = extractExtension(resourceName);
+        final String responseBody = Files.readString(new File(resourceName).toPath());
+        final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
+
+        return parseResponse(httpStatusCode, contentType, responseBody);
+    }
+
+    private String generateErrorResponse(final int httpStatusCode) {
+        try {
+            if (!HTTP_STATUS_CODES.containsKey(httpStatusCode)) {
+                throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
+            }
+            final String extension = ".html";
+            final URL resource = getResourceUrl("/" + httpStatusCode + extension);
+            final String responseBody = Files.readString(new File(resource.getFile()).toPath());
+            final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
+
+            return parseResponse(httpStatusCode, contentType, responseBody);
+        } catch (IOException e) {
+            final String responseBody = String.format("""
+                <html>
+                    <head><title>Error</title></head>
+                    <body><h1>%d %s</h1></body>
+                </html>
+            """, httpStatusCode, HTTP_STATUS_CODES.get(httpStatusCode));
+
+            return parseResponse(httpStatusCode, "text/plain", responseBody);
+        }
+    }
+
+    private String parseResponse(final int httpStatusCode, final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
     private String extractExtension(final String resourceName) {
         int dotIndex = resourceName.lastIndexOf(".");
         if (dotIndex == -1) {
             return "";
         }
         return resourceName.substring(dotIndex + 1);
-    }
-
-    private void writeResponse(
-            final int statusCode,
-            final URL notFoundPage,
-            final OutputStream outputStream
-    ) throws IOException {
-        final String response = generateResponse(statusCode, notFoundPage);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 
     private void handleLogin(final String path, final Map<String, String> queryMap) {
@@ -162,5 +183,10 @@ public class Http11Processor implements Runnable, Processor {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
         }
+    }
+
+    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

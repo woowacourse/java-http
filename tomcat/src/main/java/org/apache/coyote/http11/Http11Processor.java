@@ -69,14 +69,17 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = methodAndUriAndProtocol[1];
             String path = uri;
-            Map<String, String> queryStrings = null;
             int index = uri.indexOf("?");
-            if (index != -1) {
-                path = uri.substring(0, index);
-                queryStrings = Arrays.stream(uri.substring(index + 1).split("&"))
-                    .map(queryString -> queryString.split("="))
-                    .collect(Collectors.toUnmodifiableMap(strings -> strings[0], strings -> strings[1]));
+            if (index == -1) {
+                return new HttpRequest(method, path, null);
             }
+            path = uri.substring(0, index);
+            Map<String, String> queryStrings = Arrays.stream(uri.substring(index + 1).split("&"))
+                .map(queryString -> queryString.split("="))
+                .collect(Collectors.toUnmodifiableMap(
+                    strings -> strings[0], // key
+                    strings -> strings[1] // value
+                ));
             return new HttpRequest(method, path, queryStrings);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             log.error(exception.getMessage(), exception);

@@ -16,27 +16,28 @@ public class StaticResourceProcessor {
     private static final String PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
-    private static final Logger log = LoggerFactory.getLogger(StaticResourceProcessor.class);
-
-    public static String resolveResourcePath(String requestLine) {
+    public static ResourceResolutionResult resolveResourcePath(String requestLine) {
         String[] splitRequestLine = requestLine.split(HEADER_DELIMITER);
         String requestUri = splitRequestLine[1];
 
         int queryParamIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
         String resource = requestUri;
+        Map<String, String> queryParams = null;
+        
         if (queryParamIndex != -1) {
             resource = requestUri.substring(0, queryParamIndex);
-            if (hasNoExtension(resource) && !resource.endsWith(".html")) {
+            String queryString = requestUri.substring(queryParamIndex + 1);
+            queryParams = parseQueryString(queryString);
+        }
+
+        if (hasNoExtension(resource)) {
+            if (resource.equals("/")) {
+                resource = "/index.html";
+            } else {
                 resource += HTML_EXTENSION;
             }
-            String queryString = requestUri.substring(queryParamIndex + 1);
-            Map<String, String> queryParams = parseQueryString(queryString);
-
-            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-                authenticate(queryParams);
-            }
         }
-        return STATIC_RESOURCE_PATH + resource;
+        return ResourceResolutionResult.of(STATIC_RESOURCE_PATH + resource, queryParams);
     }
 
     private static boolean hasNoExtension(String resource) {
@@ -55,13 +56,5 @@ public class StaticResourceProcessor {
             queryParams.put(keyValue[0], keyValue[1]);
         }
         return queryParams;
-    }
-
-    private static void authenticate(Map<String, String> authInfo) {
-        User user = InMemoryUserRepository.findByAccount(authInfo.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 정보입니다."));
-        if (user.checkPassword(authInfo.get("password"))) {
-            log.info(user.toString());
-        }
     }
 }

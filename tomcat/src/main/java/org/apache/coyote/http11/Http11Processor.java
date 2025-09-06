@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Map<String, String> mimeTypes = Map.of(
             "html", "text/html; charset=UTF-8",
             "css", "text/css; charset=UTF-8",
+            "svg", "image/svg+xml",
             "js", "application/javascript; charset=UTF-8"
     );
 
@@ -46,22 +50,36 @@ public class Http11Processor implements Runnable, Processor {
             String[] tokens = requestLine.split(" ");
             String path = tokens[1];
 
-            log.info(path);
+            if (path.contains("/login") && path.contains("?")) {
+                int index = path.indexOf("?");
+                String uri = path.substring(0, index);
+                String query = path.substring(index + 1);
 
-            if (path.equals("/")) {
-                path = "/index";
-            }
+                String[] params = query.split("&");
+                String account = params[0].split("=")[1];
+                String password = params[1].split("=")[1];
 
-            InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
-            if (in == null && !path.contains(".")) {
-                in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
-            }
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+                if (optionalUser.isEmpty()) {
+                    sendError(out, 400, "Client Error");
+                    return;
+                }
 
-            if (in != null) {
-                serveStatic(out, in, path);
+                User user = optionalUser.get();
+                if (!user.checkPassword(password)) {
+                    sendError(out, 401, "Error");
+                    return;
+                }
+
+                log.info(user.toString());
+                checkStaticFile(uri, out);
                 return;
             }
-            
+
+            if (checkStaticFile(path, out)) {
+                return;
+            }
+
             sendError(out, 404, "Not Found");
         } catch (Exception e) {
             try (var out = new BufferedOutputStream(connection.getOutputStream())) {
@@ -73,7 +91,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void serveStatic(BufferedOutputStream out, InputStream inputStream, String path) throws IOException {
+    private boolean checkStaticFile(String path, BufferedOutputStream out) throws IOException {
+        if (path.equals("/")) {
+            path = "/index";
+        }
+
+        InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
+        if (in == null && !path.contains(".")) {
+            in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
+        }
+
+        if (in != null) {
+            serveStaticFile(out, in, path);
+            return true;
+        }
+        return false;
+    }
+
+    private void serveStaticFile(BufferedOutputStream out, InputStream inputStream, String path) throws IOException {
         try (inputStream) {
             String ext = "";
             if (path.contains(".")) {
@@ -89,8 +124,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void write(BufferedOutputStream out, int status, String reason,
                        String contentType, byte[] body, boolean keepAlive) throws IOException {
-        String head = ""
-                + "HTTP/1.1 " + status + " " + reason + "\r\n"
+        String head = "HTTP/1.1 " + status + " " + reason + "\r\n"
                 + "Content-Type: " + contentType + "\r\n"
                 + "Content-Length: " + body.length + "\r\n"
                 + (keepAlive ? "Connection: keep-alive\r\n" : "Connection: close\r\n")

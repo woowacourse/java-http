@@ -4,8 +4,10 @@ package com.techcourse.http.common;
 public enum HttpStatus {
 
     OK(200, "OK"),
-   
+
     NO_CONTENT(204, "No Content"),
+
+    FOUND(302, "Found"),
 
     NOT_FOUND(404, "Not Found"),
     ;

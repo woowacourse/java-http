@@ -5,6 +5,7 @@ import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -38,11 +39,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> requestLines = getInput(reader);
-
-            HttpRequest request = new HttpRequest(requestLines);
+            HttpRequest request = getHttpRequest(inputStream);
 
             if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
                 UserService.checkUser(
@@ -57,6 +54,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        List<String> requestLines = getInput(reader);
+
+        return new HttpRequest(requestLines);
     }
 
     private List<String> getInput(BufferedReader reader) throws IOException {

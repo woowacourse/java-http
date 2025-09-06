@@ -59,19 +59,19 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = null;
 
             if (StaticResourceExtension.anyMatch(path)) {
-                response = handleForStaticResource(path);
+                response = handleForStaticResource(httpRequest, path);
             }
 
             if (uri.contains("/login") && queryStrings.isEmpty()) {
-                response = handleForStaticResource("login.html");
+                response = handleForStaticResource(httpRequest, "login.html");
             }
 
             if (uri.contains("/login") && !queryStrings.isEmpty()) {
-                response = handleForLogin(queryStrings);
+                response = handleForLogin(httpRequest, queryStrings);
             }
 
             if (response == null) {
-                response = HttpResponse.createOKResponse(DEFAULT_RESPONSE_BODY, uri);
+                response = HttpResponse.createOKResponse(httpRequest, DEFAULT_RESPONSE_BODY, uri);
             }
 
             outputStream.write(response.parseToString().getBytes());
@@ -108,12 +108,12 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private HttpResponse handleForStaticResource(String uri) throws IOException {
+    private HttpResponse handleForStaticResource(HttpRequest httpRequest, String uri) throws IOException {
         log.info("uri = {}", uri);
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
 
-        return HttpResponse.createOKResponse(responseBody, uri);
+        return HttpResponse.createOKResponse(httpRequest, responseBody, uri);
     }
 
     private URL getPathOfResource(String uri) {
@@ -130,13 +130,13 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath());
     }
 
-    private HttpResponse handleForLogin(Map<String, String> queryStrings) {
+    private HttpResponse handleForLogin(HttpRequest httpRequest, Map<String, String> queryStrings) {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(queryStrings.get("password"))) {
-            return HttpResponse.createRedirectionResponse("index.html");
+            return HttpResponse.createRedirectionResponse(httpRequest, "index.html");
         }
 
-        return HttpResponse.createRedirectionResponse("401.html");
+        return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
     }
 }

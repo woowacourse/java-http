@@ -11,16 +11,16 @@ public record HttpResponse(
         String responseBody
 ) {
     private static final String DEFAULT_CHARSET = "charset=utf-8";
-    private static final double DEFAULT_HTTP_VERSION = 1.1;
 
     public HttpResponse(
+            double httpVersion,
             int statusCode,
             String status,
             String responseBody,
             String uri
     ) {
         this(
-                DEFAULT_HTTP_VERSION,
+                httpVersion,
                 statusCode,
                 status,
                 StaticResourceExtension.findMimeTypeByUrl(uri),
@@ -32,12 +32,13 @@ public record HttpResponse(
     }
 
     public HttpResponse(
+            double httpVersion,
             int statusCode,
             String status,
             String location
     ) {
         this(
-                DEFAULT_HTTP_VERSION,
+                httpVersion,
                 statusCode,
                 status,
                 null,
@@ -48,12 +49,12 @@ public record HttpResponse(
         );
     }
 
-    public static HttpResponse createRedirectionResponse(String redirectionLocation) {
-        return new HttpResponse(302, "Found", redirectionLocation);
+    public static HttpResponse createRedirectionResponse(HttpRequest httpRequest, String redirectionLocation) {
+        return new HttpResponse(httpRequest.httpVersion(), 302, "Found", redirectionLocation);
     }
 
-    public static HttpResponse createOKResponse(String responseBody, String uri) {
-        return new HttpResponse(200, "OK", responseBody, uri);
+    public static HttpResponse createOKResponse(HttpRequest httpRequest, String responseBody, String uri) {
+        return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri);
     }
 
     public String parseToString() {

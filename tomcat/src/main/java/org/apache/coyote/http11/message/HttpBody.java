@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class HttpBody {
 
@@ -15,7 +16,7 @@ public class HttpBody {
     }
 
     public static HttpBody from(byte[] body) {
-        return new HttpBody(body);
+        return new HttpBody(Arrays.copyOf(body, body.length));
     }
 
     public static HttpBody empty() {

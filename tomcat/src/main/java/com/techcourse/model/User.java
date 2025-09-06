@@ -28,7 +28,7 @@ public class User {
             return;
         }
 
-        throw new IllegalArgumentException("[ERROR] No Such User" + password);
+        throw new IllegalArgumentException("[ERROR] No Such User");
     }
 
     public boolean checkPassword(String password) {

@@ -1,12 +1,28 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.httpHeader.HttpHeader;
+import org.apache.coyote.httpHeader.HttpMethod;
+import org.apache.coyote.httpResponse.HttpResponse;
+import org.apache.coyote.httpResponse.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +45,156 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var bufferReader = new BufferedReader(new InputStreamReader(inputStream));
+            final HttpHeader httpHeader = readHttpHeader(bufferReader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpMethod httpMethod = httpHeader.getHttpMethod();
+            final String path = httpHeader.getPurePath();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            if (httpMethod == HttpMethod.GET && path.equals("/")) {
+                responseHome(outputStream);
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && path.contains("/login")) {
+                printMemberLog(httpHeader);
+                responseLoginHtml(outputStream);
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
+                responseHtml(outputStream, httpHeader);
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && path.endsWith(".css")) {
+                responseCss(outputStream, httpHeader);
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
+                responseJs(outputStream, httpHeader);
+            }
+
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void printMemberLog(final HttpHeader httpHeader) {
+        final Map<String, String> queries = httpHeader.getQueries();
+        final User user = InMemoryUserRepository.findByAccount(queries.get("account"))
+                .orElse(null);
+        if (user != null && user.checkPassword(queries.get("password"))) {
+            log.info("user : {}", user);
+        }
+    }
+
+    private void responseHtml(
+            final OutputStream outputStream,
+            final HttpHeader httpHeader
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
+
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
+                body
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseLoginHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static/login.html");
+
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
+                body
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseCss(
+            final OutputStream outputStream,
+            final HttpHeader httpHeader
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/css;charset=utf-8",
+                body
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseJs(
+            final OutputStream outputStream,
+            final HttpHeader httpHeader
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
+
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "application/javascript;charset=utf-8",
+                body
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseHome(final OutputStream outputStream) throws IOException {
+        final var responseBody = "Hello world!";
+        final HttpResponse httpResponse = new HttpResponse(
+                "HTTP/1.1",
+                StatusCode.OK,
+                "text/html;charset=utf-8",
+                responseBody
+        );
+        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        final String response = httpResponse.getResponse();
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private HttpHeader readHttpHeader(final BufferedReader bufferReader) throws IOException {
+        final String requestLine = bufferReader.readLine();
+        final List<String> headers = new ArrayList<>();
+        String headerLine;
+        while ((headerLine = bufferReader.readLine()) != null && !headerLine.isEmpty()) {
+            headers.add(headerLine);
+        }
+
+        return new HttpHeader(requestLine, headers);
+    }
+
+    private String getStaticResponseBody(final String httpHeader) throws URISyntaxException, IOException {
+        final URI uri = getClass().getClassLoader()
+                .getResource(httpHeader)
+                .toURI();
+        final Path htmlPath = Path.of(uri);
+        final byte[] read = Files.readAllBytes(htmlPath);
+        final String body = new String(read, StandardCharsets.UTF_8);
+        return body;
     }
 }

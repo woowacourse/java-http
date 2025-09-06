@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             String body = "POST".equals(httpMethod) ? getBody(headers, br) : "";
             HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
 
-            if (requestUri.contains(".")) {
+            if (isStaticResource(requestUri)) {
                 StaticResourceProcessor.processStatic(requestUri, outputStream);
             } else {
                 DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, httpCookie, outputStream);
@@ -55,6 +55,10 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isStaticResource(String requestUri) {
+        return requestUri.contains(".") && !requestUri.contains("/login") && !requestUri.contains("/register");
     }
 
     private Map<String, String> parseHttpHeaders(BufferedReader br) throws IOException {

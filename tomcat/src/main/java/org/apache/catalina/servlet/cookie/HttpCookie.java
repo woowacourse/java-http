@@ -24,7 +24,7 @@ public class HttpCookie {
         return httpCookies.stream()
                 .map(cookie -> cookie.split(COOKIE_SEPARATOR))
                 .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[0].trim(),
                         keyValue -> keyValue[1]
                 ));
     }

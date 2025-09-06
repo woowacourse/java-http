@@ -17,7 +17,7 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
-
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
@@ -27,6 +27,6 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(final Session session) {
-
+        SESSIONS.remove(session.getId());
     }
 }

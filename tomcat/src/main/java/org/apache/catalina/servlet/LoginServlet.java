@@ -36,7 +36,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.hasCookie()) {
-            if(isLoggedInUser(httpRequest, httpResponse))return;
+            if (isLoggedInUser(httpRequest, httpResponse))return;
         }
 
         RequestPath requestPath = httpRequest.getRequestPath();

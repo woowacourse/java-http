@@ -161,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String buildResponse(String statusLine, Map<String, String> responseHeaders, String responseBody) {
         final StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append(statusLine).append(" \r\n");
+        responseBuilder.append(statusLine).append("\r\n");
         appendResponseHeaders(responseHeaders, responseBuilder);
         responseBuilder.append("\r\n");
         responseBuilder.append(responseBody);
@@ -173,7 +173,7 @@ public class Http11Processor implements Runnable, Processor {
             responseBuilder.append(entry.getKey())
                     .append(": ")
                     .append(entry.getValue())
-                    .append(" \r\n");
+                    .append("\r\n");
         }
     }
 }

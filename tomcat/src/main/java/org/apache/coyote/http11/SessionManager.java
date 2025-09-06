@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -16,8 +16,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public HttpSession findSession(String id) throws IOException {
-        checkExistence(id);
+    public HttpSession findSession(String id) {
         return SESSIONS.get(id);
     }
 
@@ -25,6 +24,14 @@ public class SessionManager implements Manager {
     public void remove(HttpSession session) {
         checkExistence(session.getId());
         SESSIONS.remove(session.getId());
+    }
+
+    public HttpSession createSession() {
+        UUID uuid = UUID.randomUUID();
+        HttpSession httpSession = new Session(uuid.toString());
+        SESSIONS.put(uuid.toString(), httpSession);
+
+        return httpSession;
     }
 
     private void checkExistence(String id) {

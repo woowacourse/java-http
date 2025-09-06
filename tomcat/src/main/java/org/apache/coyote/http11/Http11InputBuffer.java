@@ -52,6 +52,7 @@ public class Http11InputBuffer {
         }
 
         return new HttpRequest(
+                new SessionManager(),
                 httpMethod,
                 uri,
                 httpVersion,

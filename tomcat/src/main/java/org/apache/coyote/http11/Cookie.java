@@ -34,8 +34,7 @@ public class Cookie {
         this.cookieValues.put(key, value);
     }
 
-    public boolean hasSession() {
-        return this.cookieValues.keySet().stream()
-                .anyMatch(key -> key.equals("JSESSIONID"));
+    public String findByKey(String key) {
+        return this.cookieValues.get(key);
     }
 }

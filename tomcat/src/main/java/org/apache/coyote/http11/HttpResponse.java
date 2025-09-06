@@ -94,22 +94,22 @@ public record HttpResponse(
     }
 
     public static HttpResponse createRedirectionResponse(HttpRequest httpRequest, String redirectionLocation) {
-        return new HttpResponse(httpRequest.httpVersion(), 302, "Found", redirectionLocation);
+        return new HttpResponse(httpRequest.getHttpVersion(), 302, "Found", redirectionLocation);
     }
 
     public static HttpResponse createOKResponse(HttpRequest httpRequest, String responseBody, String uri) {
-        return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri);
+        return new HttpResponse(httpRequest.getHttpVersion(), 200, "OK", responseBody, uri);
     }
 
 
     public static HttpResponse createRedirectionResponseWithCookie(HttpRequest httpRequest,
                                                                    String redirectionLocation,
                                                                    Cookie cookie) {
-        return new HttpResponse(httpRequest.httpVersion(), 302, "Found", redirectionLocation, cookie);
+        return new HttpResponse(httpRequest.getHttpVersion(), 302, "Found", redirectionLocation, cookie);
     }
 
     public static HttpResponse createOKResponseWithCookie(HttpRequest httpRequest, String responseBody, String uri,
                                                           Cookie cookie) {
-        return new HttpResponse(httpRequest.httpVersion(), 200, "OK", responseBody, uri, cookie);
+        return new HttpResponse(httpRequest.getHttpVersion(), 200, "OK", responseBody, uri, cookie);
     }
 }

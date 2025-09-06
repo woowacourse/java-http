@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +43,15 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
 
             HttpRequest httpRequest = Http11InputBuffer.parseToRequest(bufferedReader);
-            String uri = httpRequest.uri();
+            String uri = httpRequest.getUrl();
             String path = uri;
 
             HttpResponse response = null;
-            if (uri.contains("/login") && httpRequest.httpMethod().equals("POST")) {
+            if (uri.contains("/login") && httpRequest.getHttpMethod().equals("POST")) {
                 response = handleForLogin(httpRequest);
             }
 
-            if (uri.contains("/register") && httpRequest.httpMethod().equals("POST")) {
+            if (uri.contains("/register") && httpRequest.getHttpMethod().equals("POST")) {
                 response = handleForRegister(httpRequest);
             }
 
@@ -108,41 +108,37 @@ public class Http11Processor implements Runnable, Processor {
         return parsedRequestBody;
     }
 
-    private HttpResponse handleForLogin(HttpRequest httpRequest) {
-        Map<String, String> parsedRequestBody = parseRequestBody(httpRequest.requestBody());
+    private HttpResponse handleForLogin(HttpRequest httpRequest) throws IOException {
+        Map<String, String> parsedRequestBody = parseRequestBody(httpRequest.getRequestBody());
 
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
-            Cookie cookie = getCookie(httpRequest);
+            Cookie cookie = getCookie(httpRequest, foundUser.get());
             return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
         }
 
         return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
     }
 
-    private HttpResponse handleForRegister(HttpRequest httpRequest) {
-        String requestBody = httpRequest.requestBody();
+    private HttpResponse handleForRegister(HttpRequest httpRequest) throws IOException {
+        String requestBody = httpRequest.getRequestBody();
 
         Map<String, String> parsedRequestBody = parseRequestBody(requestBody);
         User user = new User(parsedRequestBody.get("account"), parsedRequestBody.get("password"),
                 parsedRequestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        Cookie cookie = getCookie(httpRequest);
+        Cookie cookie = getCookie(httpRequest, user);
         return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", cookie);
     }
 
-    private Cookie getCookie(HttpRequest httpRequest) {
-        if (httpRequest.cookie() != null && httpRequest.cookie().hasSession()) {
-            System.out.println("======");
-            System.out.println("쿠키 이미 존재!!");
-            System.out.println("======");
-            return httpRequest.cookie();
-        }
+    private Cookie getCookie(HttpRequest httpRequest, User user) {
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute(session.getId(), user);
 
         Cookie cookie = new Cookie();
-        cookie.add("JSESSIONID", UUID.randomUUID().toString());
+        cookie.add("JSESSIONID", session.getId());
         return cookie;
     }
 }

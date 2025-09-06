@@ -1,14 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -31,6 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final LoginRequestHandler loginRequestHandler = new LoginRequestHandler(HttpVersion.HTTP_1_1);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -53,9 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             String line = bufferedReader.readLine();
             HttpRequest httpRequest = HttpRequest.from(line);
 
-            printLoginUser(httpRequest);
-
-            HttpResponse response = createResponseBody(httpRequest);
+            HttpResponse response = handleHttpRequest(httpRequest);
 
             outputStream.write(response.toBytes());
             outputStream.flush();
@@ -64,20 +61,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void printLoginUser(final HttpRequest httpRequest) {
+    private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
         if (httpRequest.getFilePath().equals("/login.html")) {
-            Map<String, String> queryParams = httpRequest.getRequestParams();
-
-            String account = queryParams.get("account");
-            String password = queryParams.get("password");
-
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
-
-            if (user.checkPassword(password)) {
-                log.info("user : {}", user);
-            }
+            return loginRequestHandler.handleLoginRequest(httpRequest);
         }
+        return createResponseBody(httpRequest);
     }
 
     private HttpResponse createResponseBody(final HttpRequest httpRequest) {

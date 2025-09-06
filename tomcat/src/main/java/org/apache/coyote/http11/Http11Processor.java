@@ -1,12 +1,24 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.NoSuchUserException;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import com.techcourse.model.LoginParam;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,21 +39,155 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
 
-            final var responseBody = "Hello world!";
+            final var request = getRequest(reader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String[] requestLineParts = getRequestLineParts(request);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            String method = requestLineParts[0];
+            String requestPath = requestLineParts[1];
+
+            if (isGetMethod(method)) {
+                if (requestPath.equals("/")) {
+                    final var response = getResponse();
+
+                    sendResponse(outputStream, response);
+                    return;
+                }
+
+                if (requestPath.startsWith("/login")) {
+                    authenticateUserFromRequestPath(requestPath);
+
+                    serveStaticFile(requestPath, outputStream);
+                    return;
+                }
+
+                serveStaticFile(requestPath, outputStream);
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void serveStaticFile(String requestPath, OutputStream outputStream) throws IOException {
+        final var path = getPath(requestPath);
+        if (Files.exists(path)) {
+            final var responseHeaders = getResponse(path);
+            sendResponse(outputStream, responseHeaders);
+
+            try(InputStream inputStream = Files.newInputStream(path)) {
+                inputStream.transferTo(outputStream);
+            }
+            return;
+        }
+
+        String notFoundResponse = getNotFoundResponse();
+        sendResponse(outputStream, notFoundResponse);
+    }
+
+    private Path getPath(String requestPath) {
+        if (requestPath.startsWith("/login")) {
+            return Path.of(
+                    Objects.requireNonNull(
+                            getClass().getClassLoader().getResource("static/login.html")).getPath()
+            );
+        }
+
+        var resource = getClass().getClassLoader().getResource("static/" + requestPath);
+        return Path.of(Objects.requireNonNullElseGet(
+                resource, () -> Objects.requireNonNull(
+                        getClass().getClassLoader().getResource("static/404.html")
+                )
+        ).getPath());
+    }
+
+    private String getResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!"
+        );
+    }
+
+    private String getResponse(Path path) throws IOException {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
+                "Content-Length: " + Files.size(path) + " ",
+                "", "");
+    }
+
+    private String getNotFoundResponse() {
+        String body = "404 Not Found";
+
+        return String.join("\r\n",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/plain; charset=utf-8",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body
+        );
+    }
+
+    private String getRequest(BufferedReader reader) throws IOException {
+        final var request = reader.readLine();
+        if (request == null || request.isBlank()) {
+            throw new IllegalArgumentException("[ERROR] request is empty: " + request);
+        }
+
+        return request.trim();
+    }
+
+    private String[] getRequestLineParts(String request) {
+        String[] requestLineParts = request.split(" ");
+        if (requestLineParts.length < 3) {
+            throw new IllegalArgumentException("[ERROR] invalid request: " + request);
+        }
+
+        return requestLineParts;
+    }
+
+    private void sendResponse(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private void authenticateUserFromRequestPath(String requestPath) {
+        int index = requestPath.indexOf("?");
+        String queryString = requestPath.substring(index + 1);
+
+        Map<LoginParam, String> accountAndPassword = queryParser(queryString);
+
+        String account = accountAndPassword.get(LoginParam.ACCOUNT);
+        String password = accountAndPassword.get(LoginParam.PASSWORD);
+
+        User user = InMemoryUserRepository.findByAccount(account, password)
+                .orElseThrow(() -> new NoSuchUserException("[ERROR] no such user"));
+
+        user.validatePasswordAndLog(password);
+        log.info(user.toString());
+    }
+
+    private Map<LoginParam, String> queryParser(String queryString) {
+        String[] accountAndPassword = queryString.split("&");
+        String[] accountInfo = accountAndPassword[0].split("=");
+        String[] passwordInfo = accountAndPassword[1].split("=");
+
+        String account = accountInfo[1];
+        String password = passwordInfo[1];
+
+        return Map.of(
+                LoginParam.ACCOUNT, account,
+                LoginParam.PASSWORD, password
+        );
+    }
+
+    private boolean isGetMethod(String method) {
+        return method.equals("GET");
     }
 }

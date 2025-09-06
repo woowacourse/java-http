@@ -1,7 +1,12 @@
 package com.techcourse.model;
 
+import com.techcourse.exception.NoSuchUserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class User {
 
+    private static final Logger log = LoggerFactory.getLogger(User.class);
     private final Long id;
     private final String account;
     private final String password;
@@ -16,6 +21,14 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public void validatePasswordAndLog(String password) {
+        if (checkPassword(password)) {
+            return;
+        }
+
+        throw new NoSuchUserException("[ERROR] invalid password");
     }
 
     public boolean checkPassword(String password) {

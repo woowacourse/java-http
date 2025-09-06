@@ -23,8 +23,9 @@ class Http11ProcessorTest {
 
         // then
         String actual = socket.output();
+        final String lineSeparator = "\r\n";
         assertThat(actual).isEqualTo(
-                String.join(System.lineSeparator(),
+                String.join(lineSeparator,
                         "HTTP/1.1 200 OK",
                         "Content-Type: text/html;charset=utf-8",
                         "Content-Length: 12",
@@ -58,8 +59,9 @@ class Http11ProcessorTest {
         );
 
         String actual = socket.output();
+        final String lineSeparator = "\r\n";
         assertThat(actual).isEqualTo(
-                String.join(System.lineSeparator(),
+                String.join(lineSeparator,
                         "HTTP/1.1 200 OK",
                         "Content-Type: text/html;charset=utf-8",
                         "Content-Length: " + fileBytes.length,

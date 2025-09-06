@@ -18,7 +18,7 @@ public class HttpResponse {
     }
 
     public byte[] toBytes() {
-        final String lineSeparator = System.lineSeparator();
+        final String lineSeparator = "\r\n";
 
         StringBuilder responseBuilder = new StringBuilder();
 

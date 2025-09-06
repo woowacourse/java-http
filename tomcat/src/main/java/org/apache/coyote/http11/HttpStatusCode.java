@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 public enum HttpStatusCode {
 
     OK(200, "OK"),
-    NOTFOUND(404, "NOT FOUND"),
+    NOTFOUND(404, "Not Found"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     HttpStatusCode(int status, String statusCode) {

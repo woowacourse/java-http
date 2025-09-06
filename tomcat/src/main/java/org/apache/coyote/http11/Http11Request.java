@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class Http11Request {
 
-    private static final Charset DEFAULD_CHARSET = StandardCharsets.UTF_8;
-    private static final String QUREYPARAMETER_DELIMETER = "?";
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private static final String QUERY_PARAMETER_DELIMiTER = "?";
 
     private InputStream inputStream;
     private String header;
@@ -40,13 +40,15 @@ public class Http11Request {
     }
 
     public String getRequestMethod() {
-        return firstLineConditions[0];
+        String requestMethod = firstLineConditions[0];
+
+        return requestMethod;
     }
 
     private void extractHeader() throws IOException {
         final StringBuilder requestHeader = new StringBuilder();
         BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(inputStream, DEFAULD_CHARSET));
+                new InputStreamReader(inputStream, DEFAULT_CHARSET));
 
         String line;
         while (((line = bufferedReader.readLine()) != null) && (!line.isEmpty())) {
@@ -71,8 +73,8 @@ public class Http11Request {
     private void extractUri() {
         String uri = firstLineConditions[1];
 
-        if (uri.contains(QUREYPARAMETER_DELIMETER)) {
-            int queryStartIndex = uri.indexOf(QUREYPARAMETER_DELIMETER);
+        if (uri.contains(QUERY_PARAMETER_DELIMiTER)) {
+            int queryStartIndex = uri.indexOf(QUERY_PARAMETER_DELIMiTER);
             path = uri.substring(0, queryStartIndex);
             String queryString = uri.substring(queryStartIndex + 1);
 

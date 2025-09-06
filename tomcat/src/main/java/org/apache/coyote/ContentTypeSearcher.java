@@ -44,10 +44,12 @@ public enum ContentTypeSearcher {
             extension = "";
         }
 
-        return Arrays.stream(values())
+        String contentType = Arrays.stream(values())
                 .filter(ct -> ct.extension.equals(extension))
                 .findFirst()
                 .orElse(NOTHING)
                 .getContentType();
+
+        return contentType;
     }
 }

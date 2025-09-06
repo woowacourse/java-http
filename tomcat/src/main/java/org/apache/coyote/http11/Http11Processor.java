@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.LoginHandler;

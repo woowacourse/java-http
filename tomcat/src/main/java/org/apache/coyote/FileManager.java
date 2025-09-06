@@ -13,7 +13,7 @@ public class FileManager {
     public FileManager(String relativePath, String path) {
         this.relativePath = relativePath;
         this.path = path;
-        contents = findContents();
+        this.contents = findContents();
     }
 
     public byte[] getContent() {
@@ -25,9 +25,12 @@ public class FileManager {
     }
 
     private byte[] findContents() {
+        byte[] contents;
 
         if (path.equals("/")) {
-            return "Hello world!".getBytes(StandardCharsets.UTF_8);
+            contents = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
+            return contents;
         }
 
         try {
@@ -37,8 +40,9 @@ public class FileManager {
             }
             Path absolutePath = Path.of(url.toURI());
 
-            byte[] responseBody = Files.readAllBytes(absolutePath);
-            return responseBody;
+            contents = Files.readAllBytes(absolutePath);
+
+            return contents;
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to read resource: " + relativePath, e);

@@ -34,7 +34,7 @@ public class ResponseEntity {
     }
 
     public static HttpResponse unauthorized(String body) {
-        return badRequest(body, "text/plain;charset=utf-8");
+        return unauthorized(body, "text/plain;charset=utf-8");
     }
 
     public static HttpResponse unauthorized(String body, String contentType) {

@@ -4,14 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,20 +73,10 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = handleLogin(queryParams);
                     responseHeaders.put("Content-Type", "text/html");
                 } else if (!"/".equals(path)) {
-                    try {
-                        final String resourcePath = "static" + path;
-                        final URL resource = getClass().getClassLoader().getResource(resourcePath);
-                        if (resource != null) {
-                            final File file = new File(resource.getFile());
-                            if (file.exists()) {
-                                responseBody = new String(Files.readAllBytes(file.toPath()));
-                                if (path.endsWith(".css")) { // TODO: 다양한 content type 지원
-                                    responseHeaders.put("Content-Type", "text/css");
-                                }
-                            }
-                        }
-                    } catch (IOException e) {
-                        log.error("Failed to read file: {}", path, e);
+                    final String resourcePath = "static" + path;
+                    responseBody = readFileFromClasspath(resourcePath);
+                    if (path.endsWith(".css")) {
+                        responseHeaders.put("Content-Type", "text/css");
                     }
                 }
             }
@@ -158,6 +145,24 @@ public class Http11Processor implements Runnable, Processor {
             log.error("Login failed", e);
             return "Login failed";
         }
+    }
+
+    private String readFileFromClasspath(String resourcePath) {
+        InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        StringBuilder fileContents = new StringBuilder();
+        if (input == null) {
+            log.error("resource not found: {}", resourcePath);
+            return fileContents.toString();
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            log.error("Failed to read file: {}", resourcePath, e);
+        }
+        return fileContents.toString();
     }
 
     private String buildResponse(String statusLine, Map<String, String> responseHeaders, String responseBody) {

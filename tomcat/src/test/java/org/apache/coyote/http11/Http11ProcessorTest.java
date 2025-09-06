@@ -35,7 +35,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join(System.lineSeparator(),
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -54,6 +54,122 @@ class Http11ProcessorTest {
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 5564",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/css;charset=utf-8",
+                "Content-Length: 211991",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void js() throws IOException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /js/scripts.js HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK",
+                "Content-Type: application/javascript;charset=utf-8",
+                "Content-Length: 976",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /notfound HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 2426",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /login?account=javajigi&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 3796",
                 "",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );

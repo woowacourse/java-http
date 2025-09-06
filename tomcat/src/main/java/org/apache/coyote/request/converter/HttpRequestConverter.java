@@ -8,12 +8,8 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestHeader;
 import org.apache.coyote.request.requestLine.RequestLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpRequestConverter {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestConverter.class);
 
     private HttpRequestConverter() {
     }

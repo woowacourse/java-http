@@ -2,6 +2,7 @@ package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpMethod;
 import com.techcourse.http.common.HttpVersion;
 import java.util.Map;
 import java.util.Objects;
@@ -21,16 +22,19 @@ public class HttpRequest {
     private static final int REQUEST_LINE_PARTS = 3;
     private static final int NOT_FOUND_INDEX = -1;
 
+    private final HttpMethod httpMethod;
     private final String path;
     private final RequestParams requestParams;
     private final ContentType contentType;
     private final HttpVersion httpVersion;
 
-    public HttpRequest(final String path,
+    public HttpRequest(final HttpMethod httpMethod,
+                       final String path,
                        final RequestParams requestParams,
                        final ContentType contentType,
                        final HttpVersion httpVersion
     ) {
+        this.httpMethod = httpMethod;
         this.path = path;
         this.requestParams = requestParams;
         this.contentType = contentType;
@@ -44,12 +48,17 @@ public class HttpRequest {
         String requestUri = requestLineValues[URI_INDEX];
         String requestProtocolVersion = requestLineValues[VERSION_INDEX];
 
+        HttpMethod httpMethod = HttpMethod.from(requestMethod);
+
         String path = extractPath(requestUri);
-        RequestParams requestParams = RequestParams.from(extractQueryString(requestUri));
+        String queryString = extractQueryString(requestUri);
+
+        RequestParams requestParams = RequestParams.from(queryString);
         ContentType contentType = extractContentType(path);
+
         HttpVersion httpVersion = HttpVersion.from(requestProtocolVersion);
 
-        return new HttpRequest(path, requestParams, contentType, httpVersion);
+        return new HttpRequest(httpMethod, path, requestParams, contentType, httpVersion);
     }
 
     private static String[] splitRequestLine(final String requestLine) {
@@ -72,20 +81,20 @@ public class HttpRequest {
     }
 
     private static String extractPath(final String requestUri) {
-        int queryStringStartIndex = findQueryStringDelimiterIndex(requestUri);
+        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringStartIndex != NOT_FOUND_INDEX) {
-            return requestUri.substring(0, queryStringStartIndex);
+        if (queryStringDelimiterIndex != NOT_FOUND_INDEX) {
+            return requestUri.substring(0, queryStringDelimiterIndex);
         }
 
         return requestUri;
     }
 
     private static String extractQueryString(final String requestUri) {
-        int queryStringStartIndex = findQueryStringDelimiterIndex(requestUri);
+        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringStartIndex != NOT_FOUND_INDEX) {
-            return requestUri.substring(queryStringStartIndex + 1);
+        if (queryStringDelimiterIndex != NOT_FOUND_INDEX) {
+            return requestUri.substring(queryStringDelimiterIndex + 1);
         }
 
         return EMPTY;
@@ -124,11 +133,19 @@ public class HttpRequest {
         return path.equals(ROOT_PATH);
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     public Map<String, String> getRequestParams() {
         return requestParams.queryParameters();
     }
 
     public ContentType getContentType() {
         return contentType;
+    }
+
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 }

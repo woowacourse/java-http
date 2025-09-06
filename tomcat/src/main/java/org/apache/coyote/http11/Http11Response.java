@@ -8,7 +8,7 @@ public class Http11Response {
 
     private final int statusCode;
     private final String statusMessage;
-    private final String contentType;
+    private final String contentType; //헤더를 이거말고 더 필요하네,, 홀륑..
     private final String responseBody;
 
     private Http11Response(final int statusCode, final String statusMessage, final String contentType, final String responseBody) {
@@ -24,6 +24,22 @@ public class Http11Response {
 
     public static Http11Response notFound(final String contentType, final String responseBody) {
         return new Http11Response(404, "Not Found", contentType, responseBody);
+    }
+
+    public static Http11Response redirect(final String location) {
+        return new Http11Response(302, "Found", "text/html;charset=utf-8", "") {
+            @Override
+            public byte[] toBytes() {
+                String response = String.join(CRLF,
+                        "HTTP/1.1 " + 302 + " " + "Found",
+                        "Location: " + location,
+                        "Content-Length: 0",
+                        "",
+                        ""
+                );
+                return response.getBytes(StandardCharsets.UTF_8);
+            }
+        };
     }
 
     public byte[] toBytes() {

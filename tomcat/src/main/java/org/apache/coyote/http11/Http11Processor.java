@@ -86,14 +86,10 @@ public class Http11Processor implements Runnable, Processor {
 
         if (loginSuccess) {
             log.info("로그인 성공 - account: {}", account);
-        } else {
-            log.warn("로그인 실패 - account: {}", account);
+            return Http11Response.redirect("/index.html");
         }
-
-        String responseBody = String.format("{\"account\":\"%s\",\"success\":%b}", account, loginSuccess);
-        String contentType = "application/json;charset=utf-8";
-
-        return Http11Response.ok(contentType, responseBody);
+        log.warn("로그인 실패 - account: {}", account);
+        return Http11Response.redirect("/401.html");
     }
 
     private String readFile(final String fileName) throws IOException, URISyntaxException {

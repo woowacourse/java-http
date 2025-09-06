@@ -136,8 +136,8 @@ public class Http11Processor implements Runnable, Processor {
             if (!HTTP_STATUS_CODES.containsKey(httpStatusCode)) {
                 throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
             }
-            final String extension = ".html";
-            final URL resource = getResourceUrl("/" + httpStatusCode + extension);
+            final String extension = "html";
+            final URL resource = getResourceUrl("/" + httpStatusCode + "." +extension);
             final String responseBody = Files.readString(new File(resource.getFile()).toPath());
             final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
 
@@ -150,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
                 </html>
             """, httpStatusCode, HTTP_STATUS_CODES.get(httpStatusCode));
 
-            return parseResponse(httpStatusCode, "text/plain", responseBody);
+            return parseResponse(httpStatusCode, "text/html", responseBody);
         }
     }
 

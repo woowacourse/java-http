@@ -6,8 +6,9 @@ import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
-    private final SessionManager sessionManager;
+    public static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
 
+    private final SessionManager sessionManager;
     private final String httpMethod;
     private final String url;
     private final double httpVersion;
@@ -35,7 +36,7 @@ public class HttpRequest {
             return sessionManager.createSession();
         }
 
-        String jSessionId = cookie.findByKey("JSESSIONID");
+        String jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
         if (jSessionId != null) {
             return sessionManager.findSession(jSessionId);
         }

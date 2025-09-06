@@ -22,7 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
 
     private final Socket connection;
 
@@ -139,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute(session.getId(), user);
 
         Cookie cookie = new Cookie();
-        cookie.add("JSESSIONID", session.getId());
+        cookie.add(JAVA_SESSION_ID_KEY, session.getId());
         return cookie;
     }
 }

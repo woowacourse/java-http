@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http.common.header;
+package http;
 
 import java.util.Arrays;
 import org.slf4j.Logger;

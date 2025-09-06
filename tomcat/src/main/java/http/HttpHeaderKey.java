@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http.common.header;
+package http;
 
 public enum HttpHeaderKey {
 

@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.http.request;
 
+import http.HttpHeaderKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
-import org.apache.coyote.http11.http.common.header.HttpHeaderKey;
 
 public class HttpRequestBody {
 

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.http.response;
 
+import http.ContentTypeValue;
+import http.HttpHeaderKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.http.common.header.ContentTypeValue;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
-import org.apache.coyote.http11.http.common.header.HttpHeaderKey;
 import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
 public class HttpResponse {

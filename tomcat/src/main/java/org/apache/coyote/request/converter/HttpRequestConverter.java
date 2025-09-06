@@ -17,7 +17,7 @@ public class HttpRequestConverter {
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
         final RequestHeader requestHeader = toRequestHeader(bufferedReader);
-        final RequestBody requestBody = toRequestBody(bufferedReader);
+        final RequestBody requestBody = toRequestBody(bufferedReader, requestHeader.getBodyLength());
 
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
@@ -26,24 +26,23 @@ public class HttpRequestConverter {
         final List<String> headerLines = new ArrayList<>();
 
         String headerLine;
-        while (bufferedReader.ready()) {
-            headerLine = bufferedReader.readLine();
-            if (headerLine.isBlank()) {
-                break;
-            }
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isBlank()) {
             headerLines.add(headerLine);
         }
 
         return new RequestHeader(headerLines);
     }
 
-    private static RequestBody toRequestBody(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    private static RequestBody toRequestBody(final BufferedReader bufferedReader, final int bodyLength) throws IOException {
 
-        while (bufferedReader.ready()) {
-            stringBuilder.append(bufferedReader.readLine());
+        char[] buffer = new char[bodyLength];
+        int totalRead = 0;
+        while (totalRead < bodyLength) {
+            int read = bufferedReader.read(buffer, totalRead, bodyLength - totalRead);
+            if (read == -1) break;
+            totalRead += read;
         }
-
-        return new RequestBody(stringBuilder.toString());
+        return new RequestBody(new String(buffer, 0, totalRead));
     }
+
 }

@@ -1,6 +1,9 @@
 package org.apache.coyote.request;
 
+import java.util.UUID;
+import org.apache.catalina.servletContainer.session.Session;
 import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestPath;
 
 public class HttpRequest {
 
@@ -23,7 +26,22 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getRequestPath() {
+    public RequestPath getRequestPath() {
         return requestLine.getRequestPath();
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
+    }
+
+    public Session getSession(boolean isNew) {
+        if (isNew) {
+            return new Session(String.valueOf(UUID.randomUUID()));
+        }
+        return requestHeader.getSession();
+    }
+
+    public boolean hasCookie() {
+        return requestHeader.hasCookie();
     }
 }

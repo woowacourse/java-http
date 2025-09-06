@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,18 +39,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            RequestMappingHandler requestMappingHandler = new RequestMappingHandler();
+
             HttpRequest request = getHttpRequest(inputStream);
+            HttpResponse response = requestMappingHandler.request(request);
 
-            if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
-                UserService.checkUser(
-                        request.getQueryParameter("account"),
-                        request.getQueryParameter("password")
-                );
-            }
-
-            String contentType = parseContentType(request.getPath());
-            String body = getResponseBody(request.getPath());
-            response(body, contentType, outputStream);
+            respond(response, outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -72,14 +66,21 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private String parseContentType(String uri) {
-        if (uri.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        } else if (uri.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        } else {
-            return "text/html;charset=utf-8";
-        }
+    private void respond(HttpResponse response, OutputStream outputStream) throws IOException, URISyntaxException {
+        final var responseText = createHttpResponse(response);
+        outputStream.write(responseText.getBytes());
+        outputStream.flush();
+    }
+
+    private String createHttpResponse(HttpResponse response) throws IOException, URISyntaxException {
+        String responseBody = getResponseBody(response.getBody());
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + response.getStatusCode().getValue() + " " + response.getStatusCode(),
+                "Content-Type: " + response.getContentType() + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String getResponseBody(String path) throws IOException, URISyntaxException {
@@ -91,31 +92,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private URL getResource(String path) {
-        StringBuilder targetPath = new StringBuilder("static");
-
-        if (path.equals("/login")) {
-            targetPath.append("/login.html");
-        } else {
-            targetPath.append(path);
-        }
-
         return getClass()
                 .getClassLoader()
-                .getResource(targetPath.toString());
-    }
-
-    private void response(String body, String contentType, OutputStream outputStream) throws IOException {
-        final var response = createHttpResponse(body, contentType);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private String createHttpResponse(String body, String contentType) throws IOException {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+                .getResource("static/" + path);
     }
 }

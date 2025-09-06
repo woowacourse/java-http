@@ -28,14 +28,15 @@ public final class Http11Response {
 
     public byte[] getResponseBytes() {
         final String statusText = getStatusText(this.statusCode);
-        final String responseHeaders = """
+        final String responseHeadersLf = """
                 HTTP/1.1 %d %s
                 Content-Type: %s
                 Content-Length: %d
                 
                 """.formatted(this.statusCode, statusText, this.contentType, this.body.length);
-        byte[] headers = responseHeaders.getBytes(StandardCharsets.UTF_8);
-        byte[] fullResponse = new byte[headers.length + this.body.length];
+        final String responseHeadersCrLf = responseHeadersLf.replace("\n", "\r\n");
+        var headers = responseHeadersCrLf.getBytes(StandardCharsets.UTF_8);
+        var fullResponse = new byte[headers.length + this.body.length];
         System.arraycopy(headers, 0, fullResponse, 0, headers.length);
         System.arraycopy(this.body, 0, fullResponse, headers.length, this.body.length);
         return fullResponse;

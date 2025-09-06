@@ -22,7 +22,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 12",
@@ -35,7 +35,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -50,7 +50,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 5564",
@@ -64,7 +64,7 @@ class Http11ProcessorTest {
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -79,7 +79,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/css;charset=utf-8",
                 "Content-Length: 211991",
@@ -93,7 +93,7 @@ class Http11ProcessorTest {
     @Test
     void js() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /js/scripts.js HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -108,7 +108,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: application/javascript;charset=utf-8",
                 "Content-Length: 976",
@@ -122,7 +122,7 @@ class Http11ProcessorTest {
     @Test
     void notFound() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /notfound HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -137,7 +137,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 404 Not Found",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 2426",
@@ -151,7 +151,7 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login?account=javajigi&password=password HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -166,7 +166,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 3796",

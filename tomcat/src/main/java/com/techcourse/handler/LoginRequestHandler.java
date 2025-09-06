@@ -28,9 +28,9 @@ public class LoginRequestHandler {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         if (user.checkPassword(password)) {
-            return new HttpResponse(httpVersion, HttpStatus.FOUND, ContentType.APPLICATION_JSON, "");
+            return new HttpResponse(httpVersion, HttpStatus.FOUND, "/index.html", ContentType.APPLICATION_JSON, "");
         }
 
-        return new HttpResponse(httpVersion, HttpStatus.UNAUTHORIZED, ContentType.APPLICATION_JSON, "");
+        return new HttpResponse(httpVersion, HttpStatus.UNAUTHORIZED, "/401.html", ContentType.APPLICATION_JSON, "");
     }
 }

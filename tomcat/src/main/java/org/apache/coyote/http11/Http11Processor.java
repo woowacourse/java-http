@@ -62,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.getFilePath().equals("/login.html")) {
+        if (httpRequest.getFilePath().equals("/login.html") && httpRequest.getRequestParams().containsKey("account")) {
             return loginRequestHandler.handleLoginRequest(httpRequest);
         }
         return createResponseBody(httpRequest);
@@ -70,16 +70,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResponseBody(final HttpRequest httpRequest) {
         if (httpRequest.isRootPath()) {
-            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
+            return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK, "", ContentType.TEXT_HTML,
+                    "Hello world!");
         }
 
         String fileName = createFileName(httpRequest.getFilePath());
         if ("/static/favicon.ico".equals(fileName)) {
-            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NO_CONTENT, ContentType.IMAGE_X_ICON, "");
+            return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.NO_CONTENT, "", ContentType.IMAGE_X_ICON,
+                    "");
         }
 
         String responseBody = readResource(fileName);
-        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, httpRequest.getContentType(), responseBody);
+        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK, "", httpRequest.getContentType(),
+                responseBody);
     }
 
     private String readResource(final String fileName) {

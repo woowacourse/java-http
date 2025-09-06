@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,24 +22,35 @@ public class DynamicRequestProcessor {
     private static final String PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     
-    public static void processDynamic(String requestUri, OutputStream outputStream) throws IOException, URISyntaxException {
-        Map<String, String> queryParams = parseQueryParams(requestUri);
-        if (hasAuthParams(queryParams)) {
+    public static void processDynamic(String httpMethod, String requestUri, Map<String, String> headers, String body, OutputStream outputStream) throws IOException, URISyntaxException {
+        if ("POST".equals(httpMethod)) {
+            Map<String, String> formData = parseFormData(body);
             try {
-                AuthHandler.authenticate(queryParams);
+                AuthHandler.register(formData);
                 String redirectResponse = buildRedirectResponse("/index.html");
                 sendResponse(outputStream, redirectResponse);
             } catch (IllegalArgumentException e) {
                 send401Page(outputStream);
             }
         } else {
-            String resourcePath;
-            if (requestUri.equals("/")) {
-                resourcePath = "/index.html";
+            Map<String, String> queryParams = parseQueryParams(requestUri);
+            if (hasAuthParams(queryParams)) {
+                try {
+                    AuthHandler.authenticate(queryParams);
+                    String redirectResponse = buildRedirectResponse("/index.html");
+                    sendResponse(outputStream, redirectResponse);
+                } catch (IllegalArgumentException e) {
+                    send401Page(outputStream);
+                }
             } else {
-                resourcePath = requestUri + HTML_EXTENSION;
+                String resourcePath;
+                if (requestUri.equals("/")) {
+                    resourcePath = "/index.html";
+                } else {
+                    resourcePath = requestUri + HTML_EXTENSION;
+                }
+                StaticResourceProcessor.processStatic(resourcePath, outputStream);
             }
-            StaticResourceProcessor.processStatic(resourcePath, outputStream);
         }
     }
 
@@ -56,6 +66,18 @@ public class DynamicRequestProcessor {
                 if (keyValue.length == 2) {
                     params.put(keyValue[0], keyValue[1]);
                 }
+            }
+        }
+        return params;
+    }
+
+    private static Map<String, String> parseFormData(String formData) {
+        Map<String, String> params = new HashMap<>();
+        String[] pairs = formData.split(PARAM_SEPARATOR);
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(KEY_VALUE_SEPARATOR, 2);
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
             }
         }
         return params;

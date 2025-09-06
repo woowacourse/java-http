@@ -17,7 +17,13 @@ public class AuthHandler {
         if (!user.checkPassword(authInfo.get("password"))) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        
-        log.info("인증 성공: {}", user.toString());
+        log.info("로그인 성공: {}", user);
+    }
+
+    public static void register(Map<String, String> registerInfo) {
+        User user = new User(registerInfo.get("account"), registerInfo.get("password"), registerInfo.get("email"));
+        InMemoryUserRepository.save(user
+        );
+        log.info("회원가입 성공: {}", user);
     }
 }

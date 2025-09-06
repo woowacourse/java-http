@@ -4,14 +4,11 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -40,17 +37,47 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var br = new BufferedReader(new InputStreamReader(inputStream))) {
+            
             String requestLine = br.readLine();
             String[] requestParts = requestLine.split(HEADER_DELIMITER);
+            String httpMethod = requestParts[0];
             String requestUri = requestParts[1];
 
+            // 헤더와 body 파싱
+            Map<String, String> headers = new HashMap<>();
+            String body = "";
+            
+            if ("POST".equals(httpMethod)) {
+                headers = parseHttpHeaders(br);
+                int contentLength = Integer.parseInt(headers.get("Content-Length"));
+                body = readPostBody(br, contentLength);
+            }
+
+            // 요청 처리
             if (requestUri.contains(".")) {
                 StaticResourceProcessor.processStatic(requestUri, outputStream);
             } else {
-                DynamicRequestProcessor.processDynamic(requestUri, outputStream);
+                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, headers, body, outputStream);
             }
+            
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseHttpHeaders(BufferedReader br) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while (!(line = br.readLine()).isEmpty()) {
+            String[] headerParts = line.split(":", 2);
+            headers.put(headerParts[0].strip(), headerParts[1].strip());
+        }
+        return headers;
+    }
+
+    private String readPostBody(BufferedReader br, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
 }

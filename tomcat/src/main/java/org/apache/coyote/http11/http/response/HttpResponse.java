@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.http.response;
 
-import http.ContentTypeValue;
 import http.HttpHeaderKey;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -41,15 +40,15 @@ public class HttpResponse {
         return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
-    private static HttpHeader createHeader(final HttpResponseBody responseBody, final String returnValue) {
+    private static HttpHeader createHeader(final HttpResponseBody responseBody, final String responseReturnValue) {
 
         final Map<String, String> responseHeaderInfo = new HashMap<>();
-        if (returnValue == null) {
+        if (responseReturnValue == null) {
             return HttpHeader.from(responseHeaderInfo);
         }
 
         responseHeaderInfo.put(HttpHeaderKey.CONTENT_TYPE.getValue(),
-                ContentTypeValue.findFormatByPattern(returnValue) + ";charset=utf-8");
+                responseBody.getContentType().getFormat() + ";charset=utf-8");
 
         final Optional<byte[]> valueOptional = responseBody.getValue();
 

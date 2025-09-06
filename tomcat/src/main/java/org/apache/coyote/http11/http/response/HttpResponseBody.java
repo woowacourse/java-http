@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http.response;
 
+import http.ContentTypeValue;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -12,18 +13,20 @@ import java.util.Optional;
 public class HttpResponseBody {
 
     private final byte[] value;
+    private final ContentTypeValue contentType;
 
-    private HttpResponseBody(final byte[] value) {
+    private HttpResponseBody(final byte[] value, final ContentTypeValue contentType) {
         this.value = value;
+        this.contentType = contentType;
     }
 
     public static HttpResponseBody emptyBody() {
-        return new HttpResponseBody(new byte[0]);
+        return new HttpResponseBody(new byte[0], ContentTypeValue.HTML);
     }
 
     public static HttpResponseBody withString(String value) {
         validateNull(value);
-        return new HttpResponseBody(value.getBytes(StandardCharsets.UTF_8));
+        return new HttpResponseBody(value.getBytes(StandardCharsets.UTF_8), ContentTypeValue.HTML);
     }
 
     public static HttpResponseBody withStaticResourceName(String resourceName) {
@@ -31,11 +34,13 @@ public class HttpResponseBody {
 
         if (url == null) {
             return withString(resourceName);
+
         }
 
         try {
             final Path path = Paths.get(url.toURI());
-            return new HttpResponseBody(Files.readAllBytes(path));
+            return new HttpResponseBody(Files.readAllBytes(path),
+                    ContentTypeValue.findByTarget(Files.probeContentType(path)));
         } catch (IOException | URISyntaxException e) {
             throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
         }
@@ -56,5 +61,9 @@ public class HttpResponseBody {
             throw new IllegalArgumentException("body 내용물이 존재하지 않습니다");
         }
         return value.length;
+    }
+
+    public ContentTypeValue getContentType() {
+        return contentType;
     }
 }

@@ -44,6 +44,8 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);) {
 
             HttpRequest httpRequest = Http11InputBuffer.parseToRequest(inputStreamReader, new SessionManager());
+            Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
+
             String uri = httpRequest.getUrl();
 
             HttpResponse response = null;
@@ -63,8 +65,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = handleForStaticResource(httpRequest, uri);
             }
 
-            outputStream.write(Http11OutputBuffer.parseToString(response).getBytes());
-            outputStream.flush();
+            http11OutputBuffer.write(response);
         } catch (IOException |
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);

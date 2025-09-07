@@ -30,7 +30,7 @@ public enum MimeType {
 
     public static String fromPath(final String path) {
         String lowerCasePath = path.toLowerCase();
-        int dotIndex = lowerCasePath.indexOf(DOT);
+        int dotIndex = lowerCasePath.lastIndexOf(DOT);
         final String extension = parseExtension(dotIndex, lowerCasePath);
 
         return Arrays.stream(MimeType.values())

@@ -118,7 +118,6 @@ public class Http11Processor implements Runnable, Processor {
         final String password = request.getQueryParam("password");
 
         if (account.isEmpty() || password.isEmpty()) {
-            log.debug("로그인 실패: 계정 정보가 없습니다.");
             return;
         }
 

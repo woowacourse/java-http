@@ -2,6 +2,9 @@ package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.List;
+import java.util.UUID;
+import org.apache.coyote.http11.general.HttpHeader;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
@@ -33,7 +36,8 @@ public class UserService {
             return new StaticFileResponse(HttpStatus.UNAUTHORIZED, "401");
         }
         logger.info(user.toString());
-        return new StaticFileResponse(HttpStatus.OK, "index");
+        List<HttpHeader> headers = List.of(new HttpHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID()));
+        return new StaticFileResponse(HttpStatus.OK, headers, "index");
     }
 
     public ControllerResponse registerPage(HttpRequest httpRequest) {

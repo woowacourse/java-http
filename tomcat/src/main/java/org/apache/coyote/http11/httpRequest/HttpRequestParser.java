@@ -2,7 +2,6 @@ package org.apache.coyote.http11.httpRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.util.UriParser;
 import org.slf4j.Logger;
@@ -14,7 +13,7 @@ public class HttpRequestParser {
 
     public static HttpRequest parseHttpRequest(BufferedReader bufferedReader) {
         try {
-            HttpHeaders headers = UriParser.parseHeaders(bufferedReader);
+            HttpRequestHeaders headers = UriParser.parseHeaders(bufferedReader);
             HttpBody body = UriParser.parseBody(headers.getContentLength(), bufferedReader);
             return new HttpRequest(headers, body);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.httpRequest;
 
-public class HttpHeaders {
+public class HttpRequestHeaders {
 
     private final HttpMethod method;
     private final String path;
     private final QueryStrings queryStrings;
     private final int contentLength;
 
-    public HttpHeaders(HttpMethod method, String path, QueryStrings queryStrings, int contentLength) {
+    public HttpRequestHeaders(HttpMethod method, String path, QueryStrings queryStrings, int contentLength) {
         this.method = method;
         this.path = path;
         this.queryStrings = queryStrings;

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import org.apache.coyote.http11.general.ContentType;
+import org.apache.coyote.http11.general.HttpHeader;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
@@ -44,8 +45,17 @@ public class ApiRouter {
 
     private HttpResponse handleHttpResponse(ControllerResponse controllerResponse) {
         if (controllerResponse instanceof JsonResponse) {
-            return new HttpResponse(controllerResponse.status(), ContentType.APPLICATION_JSON, controllerResponse.content());
+            HttpResponse httpResponse = new HttpResponse(controllerResponse.status(),
+                ContentType.APPLICATION_JSON, controllerResponse.content());
+            for (HttpHeader header : controllerResponse.headers()) {
+                httpResponse.addHeader(header.key(), header.value());
+            }
+            return httpResponse;
         }
-        return StaticFileHandler.handleDefault(controllerResponse.content());
+        HttpResponse httpResponse = StaticFileHandler.handleDefault(controllerResponse.content());
+        for (HttpHeader header : controllerResponse.headers()) {
+            httpResponse.addHeader(header.key(), header.value());
+        }
+        return httpResponse;
     }
 }

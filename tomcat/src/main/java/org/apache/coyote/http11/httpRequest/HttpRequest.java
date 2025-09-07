@@ -4,10 +4,10 @@ import org.apache.coyote.http11.general.HttpBody;
 
 public class HttpRequest {
 
-    private final HttpHeaders headers;
+    private final HttpRequestHeaders headers;
     private final HttpBody body;
 
-    public HttpRequest(HttpHeaders headers, HttpBody body) {
+    public HttpRequest(HttpRequestHeaders headers, HttpBody body) {
         this.headers = headers;
         this.body = body;
     }

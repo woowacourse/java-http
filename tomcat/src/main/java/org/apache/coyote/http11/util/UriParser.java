@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.general.HttpBody;
-import org.apache.coyote.http11.httpRequest.HttpHeaders;
+import org.apache.coyote.http11.httpRequest.HttpRequestHeaders;
 import org.apache.coyote.http11.httpRequest.HttpMethod;
 import org.apache.coyote.http11.httpRequest.QueryStrings;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ public class UriParser {
     private static final Logger logger = LoggerFactory.getLogger(UriParser.class);
     private static final String QUERY_DELIMITER = "?";
 
-    public static HttpHeaders parseHeaders(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequestHeaders parseHeaders(BufferedReader bufferedReader) throws IOException {
         String firstLineOfHttpRequest = readOneLineOfInputStream(bufferedReader);
 
         String[] methodAndUriAndProtocol = parseMethodAndUriAndProtocol(firstLineOfHttpRequest);
@@ -29,7 +29,7 @@ public class UriParser {
         QueryStrings queryStrings = parseQueryStrings(methodAndUriAndProtocol[1]);
         int contentLength = parseContentLength(bufferedReader);
 
-        return new HttpHeaders(method, path, queryStrings, contentLength);
+        return new HttpRequestHeaders(method, path, queryStrings, contentLength);
     }
 
     private static String readOneLineOfInputStream(BufferedReader bufferedReader) throws IOException {

@@ -1,27 +1,22 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.LoginRequestHandler;
+import com.techcourse.handler.RegisterRequestHandler;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.common.Location;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
+import com.techcourse.util.FileUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final LoginRequestHandler loginRequestHandler = new LoginRequestHandler(HttpVersion.HTTP_1_1);
+    private final RegisterRequestHandler registerRequestHandler = new RegisterRequestHandler(HttpVersion.HTTP_1_1);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -66,6 +62,9 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.getFilePath().equals("/login.html") && httpRequest.getRequestParams().containsKey("account")) {
             return loginRequestHandler.handleLoginRequest(httpRequest);
         }
+        if (httpRequest.getFilePath().equals("/register.html")) {
+            return registerRequestHandler.handleRegisterRequest(httpRequest);
+        }
         return createResponseBody(httpRequest);
     }
 
@@ -77,37 +76,15 @@ public class Http11Processor implements Runnable, Processor {
                     ContentType.TEXT_HTML, "Hello world!");
         }
 
-        String fileName = createFileName(httpRequest.getFilePath());
+        String fileName = FileUtil.createFileName(httpRequest.getFilePath());
+
         if ("/static/favicon.ico".equals(fileName)) {
             return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(),
                     ContentType.IMAGE_X_ICON, "");
         }
 
-        String responseBody = readResource(fileName);
+        String responseBody = FileUtil.readResource(fileName);
         return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(),
                 httpRequest.getContentType(), responseBody);
-    }
-
-    private String readResource(final String fileName) {
-        try {
-            URL url = getClass().getResource(fileName);
-            Objects.requireNonNull(url, fileName + "에 파일이 없습니다.");
-
-            Path filePath = Paths.get(url.toURI());
-            return Files.readString(filePath);
-        } catch (URISyntaxException | IOException | NullPointerException e) {
-            throw new NotFoundException("존재하지 않는 파일입니다. :" + e.getMessage());
-        }
-    }
-
-    private String createFileName(String path) {
-        return String.format("/static/%s", toNormalizedPath(path));
-    }
-
-    private String toNormalizedPath(String path) {
-        if (path.startsWith("/")) {
-            return path.substring(1);
-        }
-        return path;
     }
 }

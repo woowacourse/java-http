@@ -7,6 +7,9 @@ public class UriParser {
 
     public static String extractPath(String uri) {
         int index = uri.indexOf(QUERY_SEPARATOR);
+        if (index == -1) {
+            return uri;
+        }
         return uri.substring(0, index);
     }
 

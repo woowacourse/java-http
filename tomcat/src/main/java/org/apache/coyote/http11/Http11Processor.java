@@ -86,6 +86,9 @@ public class Http11Processor implements Runnable, Processor {
             return contentType;
         }
 
+        if (UriParser.hasQuery(requestUri)) {
+            requestUri = UriParser.extractPath(requestUri);
+        }
         String extension = UriParser.extractExtension(requestUri);
         if (!extension.isEmpty()) {
             return extension;

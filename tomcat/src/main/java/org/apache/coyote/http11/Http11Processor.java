@@ -66,8 +66,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 final String queryString = endPoint.substring(index + 1);
                 final String[] splitQueryString = queryString.split("&");
-                final String[] split = splitQueryString[0].split("=");
-                final User user = getUserByAccount(split);
+                final String account = splitQueryString[0].split("=")[1];
+                final User user = getUserByAccount(account);
 
                 log.info("user: {}", user.toString());
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");

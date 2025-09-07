@@ -21,8 +21,8 @@ public class RequestRouter {
         this.pageRenderer = new PageRenderer();
     }
 
-    public String handleRoute(String method, String path, final Map<String, String> queryParams) {
-        String requestType = determineRequestType(path);
+    public String handleRoute(final String method,final  String path, final Map<String, String> queryParams) {
+        final String requestType = determineRequestType(path,queryParams);
 
         switch (requestType) {
             case LOGIN_REQUEST:
@@ -32,10 +32,11 @@ public class RequestRouter {
         }
     }
 
-    private String determineRequestType(String path) {
-        String cleanPath = path.contains("?") ? path.split("\\?")[0] : path;
-        if (cleanPath.startsWith("/login?")) {
-            return LOGIN_REQUEST;
+    private String determineRequestType(final String path, final Map<String, String> queryParams) {
+        if(queryParams != null){
+            if (path.startsWith("/login")) {
+                return LOGIN_REQUEST;
+            }
         }
         return STATIC_REQUEST;
     }

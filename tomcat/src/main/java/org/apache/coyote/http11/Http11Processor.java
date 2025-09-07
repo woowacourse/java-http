@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,11 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String OK = "200 OK";
+    private static final String FOUND = "302 Found";
+    private static final String UNAUTHORIZED = "401 Unauthorized";
+    private static final String NOT_FOUND = "404 Not Found";
+    private static final String INTERNAL_SERVER_ERROR = "500 Internal Server Error";
 
     private final Socket connection;
 
@@ -52,37 +58,48 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String url = requestHeaderInfo[1].substring(1);
+            String staticUrl = "static/" + url;
+            String response;
+
             if (url.isEmpty()) {
-                sendDefaultResource(outputStream);
+                response = sendDefaultResource();
+                sendResponse(outputStream, response);
                 return;
             }
 
-            String staticUrl = "static/" + url;
-            if (url.contains("?") && url.contains("login")) {
-                int index = url.indexOf("?");
-                staticUrl = "static/" + url.substring(0, index) + ".html";
-                authenticateUser(url, index);
+            if (!url.contains(".") && !url.contains("?")) {
+                staticUrl = "static/" + url + ".html";
+                response = getResponse(staticUrl, OK);
+                sendResponse(outputStream, response);
+                return;
             }
 
-            sendStaticResource(staticUrl, outputStream);
+            if (url.contains("?") && url.contains("login")) {
+                int index = url.indexOf("?");
+                response = authenticateUserResponse(url, index);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            response = getResponse(staticUrl, OK);
+            sendResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
-            throw new UncheckedServletException(e);
+            log.error(e.getMessage(), e);
         }
     }
 
-    private void sendDefaultResource(OutputStream outputStream) throws IOException {
+    private String sendDefaultResource() throws IOException {
         final var responseBody = "Hello world!";
-        final var response = String.join("\r\n",
+        return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody
         );
-        sendResponse(outputStream, response);
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
@@ -90,42 +107,27 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void authenticateUser(String url, int index) {
-        String queryString = url.substring(index + 1);
+    private String authenticateUserResponse(String uri, int index) throws URISyntaxException, IOException {
+        String queryString = uri.substring(index + 1);
         String accountQuery = queryString.split("&")[0];
         String passwordQuery = queryString.split("&")[1];
         String account = accountQuery.split("=")[1];
         String password = passwordQuery.split("=")[1];
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지않는 계정입니다."));
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (user.checkPassword(password)) {
+        if (user.isEmpty()) {
+            return getResponse("static/404.html", NOT_FOUND);
+        }
+        if (user.get().checkPassword(password)) {
             log.info(user.toString());
+            return getResponse("static/index.html", FOUND);
         }
+        return getResponse("static/401.html", UNAUTHORIZED);
     }
 
-    private void sendStaticResource(String staticUrl, OutputStream outputStream) throws URISyntaxException, IOException {
-        final URI uri = findUri(staticUrl);
-        final Path path = Paths.get(uri);
-        String statusCode = "200 OK";
-        if (uri.toString().contains("404.html")) {
-            statusCode = "404 Not Found";
-        }
-        final var response = getResponse(path, statusCode);
-        sendResponse(outputStream, response);
-    }
-
-    private URI findUri(String staticUrl) throws URISyntaxException {
-        final var resource = getClass().getClassLoader().getResource(staticUrl);
-
-        if (resource == null) {
-            return Objects.requireNonNull(getClass().getClassLoader().getResource("static/404.html")).toURI();
-        }
-        return resource.toURI();
-    }
-
-    private String getResponse(Path path, String statusCode) throws IOException {
+    private String getResponse(String uri, String statusCode) throws IOException, URISyntaxException {
+        final var path = Paths.get(findUri(uri));
         final var contentType = Files.probeContentType(path);
         final byte[] responseBodyBytes = Files.readAllBytes(path);
         final String responseBody = Files.readString(path);
@@ -136,5 +138,14 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBodyBytes.length + " ",
                 "",
                 responseBody);
+    }
+
+    private URI findUri(String staticUrl) throws URISyntaxException {
+        final var resource = getClass().getClassLoader().getResource(staticUrl);
+
+        if (resource == null) {
+            return Objects.requireNonNull(getClass().getClassLoader().getResource("static/404.html")).toURI();
+        }
+        return resource.toURI();
     }
 }

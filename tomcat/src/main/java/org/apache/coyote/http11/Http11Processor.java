@@ -80,13 +80,19 @@ public class Http11Processor implements Runnable, Processor {
                 final String queryString = endPoint.substring(index + 1);
                 final String[] splitQueryString = queryString.split("&");
                 final String account = splitQueryString[0].split("=")[1];
-                final User user = getUserByAccount(account);
+                final String password = splitQueryString[1].split("=")[1];
 
-                log.info("user: {}", user.toString());
+                final User user = getUserByAccount(account);
+                if (isLoginFailed(user, password)) {
+                    unAuthenticationResponse(outputStream);
+                    return;
+                }
+
+                log.info("user: {}", user);
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
+                final String response = createRedirectionResponse(responseBody, "/index.html");
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -102,6 +108,33 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private User getUserByAccount(final String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElse(null);
+    }
+
+    private boolean isLoginFailed(final User user, final String password) {
+        return user == null || isNotMatchPassword(user, password);
+    }
+
+    private boolean isNotMatchPassword(final User user, final String password) {
+        return !user.checkPassword(password);
+    }
+
+    private void unAuthenticationResponse(final OutputStream outputStream) throws IOException, URISyntaxException {
+        final URL resource = getClass().getClassLoader().getResource("static" + "/401" + ".html");
+        validateNullResource(resource);
+        final String responseBody = Files.readString(Paths.get(resource.toURI()));
+        final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
+        writeAndFlush(outputStream, response);
+    }
+
+    private void validateNullResource(final URL resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("존재하지 않는 resource 입니다.");
+        }
+    }
+
     private String createResponse(final String responseBody, final String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -111,15 +144,14 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private User getUserByAccount(final String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("user를 찾을 수 없습니다."));
-    }
-
-    private void validateNullResource(final URL resource) {
-        if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 resource 입니다.");
-        }
+    private String createRedirectionResponse(final String responseBody, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location,
+                "Content-Type: " + TEXT_HTML_CHARSET_UTF_8,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {

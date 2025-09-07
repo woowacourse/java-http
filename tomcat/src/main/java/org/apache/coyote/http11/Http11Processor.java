@@ -6,9 +6,10 @@ import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private final Socket connection;
 
@@ -40,11 +42,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);) {
+             final var outputStream = connection.getOutputStream();) {
 
+            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, new SessionManager(),
+                    DEFAULT_CHARSET);
             Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
-            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStreamReader, new SessionManager());
 
             HttpRequest httpRequest = http11InputBuffer.read();
 

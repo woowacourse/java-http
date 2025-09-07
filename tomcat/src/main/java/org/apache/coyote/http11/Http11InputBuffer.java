@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,15 +13,18 @@ import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
 
-    private final InputStreamReader inputStreamReader;
+    private final InputStream inputStream;
     private final SessionManager sessionManager;
+    private final Charset charset;
 
-    public Http11InputBuffer(InputStreamReader inputStreamReader, SessionManager sessionManager) {
-        this.inputStreamReader = inputStreamReader;
+    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset charset) {
+        this.inputStream = inputStream;
         this.sessionManager = sessionManager;
+        this.charset = charset;
     }
 
     public HttpRequest read() throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String requestLine = bufferedReader.readLine();

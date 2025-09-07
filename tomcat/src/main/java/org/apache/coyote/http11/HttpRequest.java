@@ -9,7 +9,4 @@ public record HttpRequest(
         Map<String, String> queries,
         byte[] body
 ) {
-    public String bodyAsString() {
-        return new String(body);
-    }
 }

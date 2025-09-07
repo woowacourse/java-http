@@ -44,9 +44,9 @@ public class HttpRequestReader {
         }
 
         String[] parts = requestLine.split(" ");
-        String method = parts[0];
+        HttpMethod method = HttpMethod.from(parts[0]);
         String uri = parts[1];
-        String version = parts[2];
+        HttpVersion version = HttpVersion.from(parts[2]);
         return new RequestLine(method, uri, version);
     }
 

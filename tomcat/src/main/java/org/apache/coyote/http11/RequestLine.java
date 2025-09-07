@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 public record RequestLine(
-        String method,
+        HttpMethod method,
         String uri,
-        String version
+        HttpVersion version
 ) {
 }

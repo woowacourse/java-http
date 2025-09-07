@@ -1,22 +1,26 @@
 package org.apache.catalina.domain;
 
-import java.util.LinkedHashMap;
+import com.http.enums.HttpStatus;
 import java.util.Map;
 
 public final class HttpResponse {
 
     private ResponseStartLine startLine;
-    private final Map<String, String> headers;
+    private final HttpHeader header;
     private byte[] body;
 
-    public HttpResponse(ResponseStartLine startLine, Map<String, String> headers, byte[] body) {
+    public HttpResponse(ResponseStartLine startLine, HttpHeader headers, byte[] body) {
         this.startLine = startLine;
-        this.headers = headers;
+        this.header = headers;
         this.body = body;
     }
 
-    public HttpResponse() {
-        this(null, new LinkedHashMap<>(), null);
+    public HttpResponse(String version) {
+        this(new ResponseStartLine(version), new HttpHeader(), null);
+    }
+
+    public HttpResponse(HttpRequest request) {
+        this(new ResponseStartLine(request), new HttpHeader(), null);
     }
 
     public ResponseStartLine getStartLine() {
@@ -28,11 +32,23 @@ public final class HttpResponse {
     }
 
     public void addHeader(String key, String value) {
-        this.headers.put(key, value);
+        this.header.put(key, value);
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return header.headers();
+    }
+
+    public HttpStatus getStatus() {
+        return this.startLine.getHttpStatus();
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        startLine.setHttpStatus(httpStatus);
+    }
+
+    public void setVersion(String version) {
+        startLine.setVersion(version);
     }
 
     public byte[] getBody() {
@@ -42,4 +58,5 @@ public final class HttpResponse {
     public void setBody(byte[] body) {
         this.body = body;
     }
+
 }

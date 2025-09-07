@@ -24,4 +24,12 @@ public enum HttpStatus {
     public String getReasonPhrase() {
         return reasonPhrase;
     }
+
+    @Override
+    public String toString() {
+        return "HttpStatus{" +
+                "code=" + code +
+                ", reasonPhrase='" + reasonPhrase + '\'' +
+                '}';
+    }
 }

@@ -2,6 +2,7 @@ package org.apache.catalina.servlet;
 
 import com.http.enums.HttpStatus;
 import com.http.servlet.LoginServlet;
+import com.techcourse.exception.HttpStatusException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,28 +30,39 @@ public final class HttpServletContainer {
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {
         final String path = request.requestStartLine().path();
-        HttpStatus status = HttpStatus.OK;
 
         try {
             handlers.getOrDefault(path, defaultServlet).handle(request, response);
+        } catch (HttpStatusException e) {
+            processResponse(request, response, e);
+            return;
         } catch (FileNotFoundException e) {
-            status = HttpStatus.NOT_FOUND;
+            response.setStatus(HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
-            status = HttpStatus.BAD_REQUEST;
+            response.setStatus(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        processResponse(request, response, status);
+        processResponse(request, response);
     }
 
-    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatus status)
+    private static void processResponse(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (status != HttpStatus.OK) {
-            ResponseProcessor.handleErrorPage(response, status);
+        if (response.getStatus() != HttpStatus.OK) {
+            log.debug("에러 페이지 접근 status : {}", response.getStatus());
+            ResponseProcessor.handleErrorPage(request, response);
             return;
         }
 
-        ResponseProcessor.handle(request, response, status);
+        ResponseProcessor.handle(request, response);
+    }
+
+    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatusException exception)
+            throws IOException {
+        log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
+
+        response.setStatus(exception.getHttpStatus());
+        ResponseProcessor.handleErrorPage(request, response);
     }
 }

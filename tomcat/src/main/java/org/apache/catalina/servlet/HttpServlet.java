@@ -6,5 +6,5 @@ import org.apache.catalina.domain.HttpResponse;
 
 public interface HttpServlet {
 
-    void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
+    void handle(HttpRequest request, HttpResponse response) throws IOException;
 }

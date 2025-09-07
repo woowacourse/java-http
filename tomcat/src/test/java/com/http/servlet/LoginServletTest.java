@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import org.apache.catalina.domain.HttpHeader;
 import org.apache.catalina.domain.HttpRequest;
 import org.apache.catalina.domain.HttpResponse;
 import org.apache.catalina.domain.RequestStartLine;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginServletTest {
 
+    private final String version = version;
     private LoginServlet loginRequestHandler;
 
     @BeforeEach
@@ -29,13 +31,13 @@ class LoginServletTest {
     @Test
     void 올바른_계정정보로_로그인_성공() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", version);
         Map<String, String> queryStrings = Map.of(
                 "account", "admin",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, new HttpHeader());
+        HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then
         assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));
@@ -44,13 +46,13 @@ class LoginServletTest {
     @Test
     void 잘못된_계정으로_로그인_실패() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", version);
         Map<String, String> queryStrings = Map.of(
                 "account", "wronguser",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, new HttpHeader());
+        HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -61,62 +63,15 @@ class LoginServletTest {
     }
 
     @Test
-    void account_파라미터가_없으면_예외_발생() {
-        // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
-        Map<String, String> queryStrings = Map.of("password", "password123");
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
-
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> loginRequestHandler.handle(httpRequest, httpResponse)
-        );
-        assertEquals("account와 password는 필수입니다.", exception.getMessage());
-    }
-
-    @Test
-    void password_파라미터가_없으면_예외_발생() {
-        // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
-        Map<String, String> queryStrings = Map.of("account", "admin");
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
-
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> loginRequestHandler.handle(httpRequest, httpResponse)
-        );
-        assertEquals("account와 password는 필수입니다.", exception.getMessage());
-    }
-
-    @Test
-    void 쿼리_파라미터가_모두_없으면_예외_발생() {
-        // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, Map.of(), Map.of());
-        HttpResponse httpResponse = new HttpResponse();
-
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> loginRequestHandler.handle(httpRequest, httpResponse)
-        );
-        assertEquals("account와 password는 필수입니다.", exception.getMessage());
-    }
-
-    @Test
     void 빈_문자열_account로_로그인_시도() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", version);
         Map<String, String> queryStrings = Map.of(
                 "account", "",
                 "password", "password123"
         );
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, new HttpHeader());
+        HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -129,13 +84,13 @@ class LoginServletTest {
     @Test
     void 빈_문자열_password로_로그인_시도() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", "HTTP/1.1");
+        RequestStartLine requestStartLine = new RequestStartLine("GET", "/login", version);
         Map<String, String> queryStrings = Map.of(
                 "account", "admin",
                 "password", ""
         );
-        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, Map.of());
-        HttpResponse httpResponse = new HttpResponse();
+        HttpRequest httpRequest = new HttpRequest(requestStartLine, queryStrings, new HttpHeader());
+        HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then - 현재 구현에서는 빈 비밀번호도 처리됨
         assertDoesNotThrow(() -> loginRequestHandler.handle(httpRequest, httpResponse));

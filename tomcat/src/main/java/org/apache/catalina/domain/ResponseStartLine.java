@@ -2,7 +2,38 @@ package org.apache.catalina.domain;
 
 import com.http.enums.HttpStatus;
 
-public record ResponseStartLine(String version, HttpStatus httpStatus) {
+public final class ResponseStartLine {
+    private String version;
+    private HttpStatus httpStatus;
+
+    public ResponseStartLine(String version) {
+        this(version, HttpStatus.OK);
+    }
+
+    public ResponseStartLine(HttpRequest request) {
+        this(request.requestStartLine().version(), HttpStatus.OK);
+    }
+
+    public ResponseStartLine(String version, HttpStatus httpStatus) {
+        this.version = version;
+        this.httpStatus = httpStatus;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
 
     @Override
     public String toString() {

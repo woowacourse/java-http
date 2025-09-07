@@ -1,14 +1,13 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -55,6 +54,85 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void get_login_page() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 3796\r\n" +
+                "\r\n"+ 
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login_success() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Location: /index.html\r\n" +
+                "Content-Length: 0\r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login_fail() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=wrongPassword HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Location: /401.html\r\n" +
+                "Content-Length: 0\r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

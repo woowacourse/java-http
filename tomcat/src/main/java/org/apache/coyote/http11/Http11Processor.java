@@ -53,12 +53,17 @@ public class Http11Processor implements Runnable, Processor {
 
             if ("/login".equals(path)) {
                 handleLogin(request, response);
-                response.send();
                 return;
             }
 
             if (path.endsWith(".css")) {
                 serveStaticFile(path, response, "text/css;charset=utf-8");
+                response.send();
+                return;
+            }
+
+            if (path.endsWith(".html")) {
+                serveStaticFile(path, response, "text/html;charset=utf-8");
                 response.send();
                 return;
             }
@@ -80,12 +85,18 @@ public class Http11Processor implements Runnable, Processor {
         String account = request.getQueryParam("account");
         String password = request.getQueryParam("password");
 
+        if (account == null || password == null) {
+            serveStaticFile("/login.html", response, "text/html;charset=utf-8");
+            response.send();
+        }
+
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
             log.info("user: {}", userOptional.get());
+            response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
+            return;
         }
-
-        serveStaticFile("/login.html", response, "text/html;charset=utf-8");
+        response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
     }
 
     private void serveStaticFile(String path, HttpResponse response, String contentType) throws IOException, URISyntaxException {

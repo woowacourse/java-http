@@ -9,6 +9,7 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
+import com.techcourse.handler.RegisterHandler;
 import com.techcourse.handler.RootHandler;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
         this.handlerMap = new HashMap<>();
         handlerMap.put("/", new RootHandler());
         handlerMap.put("/login", new LoginHandler());
+        handlerMap.put("/register", new RegisterHandler());
         this.defaultHandler = new DefaultHandler();
     }
 

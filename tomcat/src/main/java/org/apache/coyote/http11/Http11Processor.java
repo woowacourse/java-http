@@ -16,7 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.Optional;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,8 +26,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final int REQUEST_URL_INDEX = 1;
 
     private final Socket connection;
 
@@ -46,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final String requestURL = parseRequestURL(inputStream);
+            final String requestURL = parseRequestURL(inputStream, outputStream);
 
             if (requestURL.equals("/") || requestURL.equals("/index.html")) {
                 send200Response("/index.html", outputStream);
@@ -57,49 +56,104 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (requestURL.startsWith("/login?")) {
-                boolean loginSuccessful = isLoginSuccessful(requestURL);
+                boolean loginSuccessful = isLoginSuccessful(requestURL, outputStream);
                 if (loginSuccessful) {
                     send302Response("/login", outputStream);
                     return;
                 }
-                send200Response("/401.html", outputStream); // todo 401로 바꾸자
+                send401Response(outputStream);
                 return;
             }
             send200Response(requestURL, outputStream);
-        } catch (final IOException | UncheckedServletException e) { // todo exception이 터지는 경우 적절한 응답 추기
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String parseRequestURL(final InputStream inputStream) throws IOException {
+    private void send200Response(final String resource, final OutputStream outputStream) {
+        try {
+            final URL resourceUrl = getResourceUrl(resource);
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
+            final String response = create200HttpResponse(resourcePath);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final FileNotFoundException e) {
+            send404Response(outputStream);
+        } catch (final IOException e) {
+            send500Response(outputStream);
+        }
+    }
+
+    private void send302Response(final String redirectResource, final OutputStream outputStream) {
+        try {
+            final String response = create302HttpResponse(redirectResource);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            send500Response(outputStream);
+        }
+    }
+
+    private void send401Response(final OutputStream outputStream) {
+        try {
+            final String response = create401HttpResponse();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            send500Response(outputStream);
+        }
+    }
+
+    private void send404Response(final OutputStream outputStream) {
+        try {
+            final String response = create404HttpResponse();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            send500Response(outputStream);
+        }
+    }
+
+    private void send500Response(final OutputStream outputStream) {
+        try {
+            final String response = create500HttpResponse();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private String parseRequestURL(final InputStream inputStream, final OutputStream outputStream) {
+        final int REQUEST_URL_INDEX = 1;
+
         final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
         try {
             final String requestLine = httpRequestReader.readLine();
             return requestLine.split(" ")[REQUEST_URL_INDEX];
-        } catch (final NullPointerException | ArrayIndexOutOfBoundsException e) {
-            throw new IOException("Request Line을 읽어올 수 없습니다.");
+        } catch (final NullPointerException | ArrayIndexOutOfBoundsException | IOException e) {
+            send500Response(outputStream);
+            throw new UncheckedServletException(e);
         }
     }
 
-    private boolean isLoginSuccessful(final String requestURL) throws IOException {
-        final LoginDto loginDto = parseLoginRequest(requestURL);
-        try {
-            final User user = InMemoryUserRepository.findByAccount(loginDto.account())
-                    .orElseThrow(IllegalArgumentException::new);
-            if (!user.checkPassword(loginDto.password())) {
-                throw new IllegalArgumentException();
-            }
-            log.info("user: {}", user);
-            return true;
-        } catch (final IllegalArgumentException e) {
+    private boolean isLoginSuccessful(final String requestURL, final OutputStream outputStream) {
+        final LoginDto loginDto = parseLoginRequest(requestURL, outputStream);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(loginDto.account());
+        if (user.isEmpty()) {
             return false;
         }
+        if (!user.get().checkPassword(loginDto.password())) {
+            return false;
+        }
+        log.info("user: {}", user.get());
+        return true;
     }
 
-    private LoginDto parseLoginRequest(final String requestURL) throws IOException {
+    private LoginDto parseLoginRequest(final String requestURL, final OutputStream outputStream) {
         final int QUERY_KEY_INDEX = 0;
         final int QUERY_VALUE_INDEX = 1;
-        validateLoginRequestURL(requestURL);
+
         try {
             final String queryString = requestURL.split("\\?")[1];
             final Map<String, String> queries = Arrays.stream(queryString.split("&"))
@@ -112,56 +166,18 @@ public class Http11Processor implements Runnable, Processor {
             final String account = queries.get("account");
             final String password = queries.get("password");
             return new LoginDto(account, password);
-        } catch (final NullPointerException | ArrayIndexOutOfBoundsException e) {
-            throw new IOException("로그인 URL을 읽어올 수 없습니다.");
+        } catch (final NullPointerException
+                       | ArrayIndexOutOfBoundsException
+                       | PatternSyntaxException
+                       | ClassCastException e) {
+            send500Response(outputStream);
+            throw new UncheckedServletException(e);
         }
-    }
-
-    private void validateLoginRequestURL(final String requestURL) throws IOException {
-        final Pattern loginPattern = Pattern.compile("^/login\\?account=[a-zA-Z0-9]+&password=[a-zA-Z0-9]+$");
-        if (!loginPattern.matcher(requestURL).matches()) {
-            throw new IOException("형식에 맞지 않는 로그인 URL 입니다.");
-        }
-    }
-
-    private void send200Response(final String resource, final OutputStream outputStream) throws IOException {
-        try {
-            final URL resourceUrl = validateResource(resource);
-            final Path resourcePath = Paths.get(resourceUrl.getFile());
-            final String response = create200HttpResponse(resourcePath);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (final FileNotFoundException e) {
-            send404Response(outputStream);
-        }
-    }
-
-    private void send302Response(final String redirectResource, final OutputStream outputStream) throws IOException {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                String.format("Location: http://localhost:8080%s ", redirectResource),
-                "Content-Length: 0 ");
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void send404Response(final OutputStream outputStream) throws IOException {
-        final String response = create404HttpResponse();
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private URL validateResource(final String resource) throws FileNotFoundException {
-        final URL resourceUrl = getClass().getClassLoader().getResource("static" + resource);
-        if (resourceUrl == null) {
-            throw new FileNotFoundException("요청한 리소스를 찾을 수 없습니다.");
-        }
-        return resourceUrl;
     }
 
     private String create200HttpResponse(final Path resourcePath) throws IOException {
-        final String responseBody = new String(Files.readAllBytes(resourcePath));
         final String contentType = Files.probeContentType(resourcePath);
+        final String responseBody = new String(Files.readAllBytes(resourcePath));
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -170,25 +186,75 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String create404HttpResponse() throws IOException {
+    private String create302HttpResponse(final String redirectResource) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                String.format("Location: http://localhost:8080%s ", redirectResource),
+                "Content-Length: 0 ");
+    }
+
+    private String create401HttpResponse() {
         String responseBody;
-        String contentType;
 
         try {
-            final URL resourceUrl = validateResource("/404.html");
+            final URL resourceUrl = getResourceUrl("/401.html");
             final Path resourcePath = Paths.get(resourceUrl.getFile());
             responseBody = new String(Files.readAllBytes(resourcePath));
-            contentType = Files.probeContentType(resourcePath);
-        } catch (final FileNotFoundException e) {
-            responseBody = "<html><body><h1>404 Not Found</h1><p>요청하신 페이지를 찾을 수 없습니다.</p></body></html>";
-            contentType = "text/html";
+        } catch (final IOException e) {
+            responseBody = "<html><body><h1>401 Unauthorized</h1><p>Access to this resource is denied.</p></body></html>";
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html; charset=utf-8 ",
+                String.format("Content-Length: %s ", responseBody.getBytes().length),
+                "",
+                responseBody);
+    }
+
+    private String create404HttpResponse() {
+        String responseBody;
+
+        try {
+            final URL resourceUrl = getResourceUrl("/404.html");
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
+            responseBody = new String(Files.readAllBytes(resourcePath));
+        } catch (final IOException e) {
+            responseBody = "<html><body><h1>404 Not Found</h1><p>This requested URL was not found on this server.</p></body></html>";
         }
 
         return String.join("\r\n",
                 "HTTP/1.1 404 Not Found ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Type: text/html; charset=utf-8 ",
+                String.format("Content-Length: %s ", responseBody.getBytes().length),
                 "",
                 responseBody);
+    }
+
+    private String create500HttpResponse() {
+        String responseBody;
+
+        try {
+            final URL resourceUrl = getResourceUrl("/500.html");
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
+            responseBody = new String(Files.readAllBytes(resourcePath));
+        } catch (final IOException e) {
+            responseBody = "<html><body><h1>500 Internal</h1></body></html>";
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 500 Internal Server Error ",
+                "Content-Type: text/html; charset=utf-8 ",
+                String.format("Content-Length: %s ", responseBody.getBytes().length),
+                "",
+                responseBody);
+    }
+
+    private URL getResourceUrl(final String resource) throws FileNotFoundException {
+        final URL resourceUrl = getClass().getClassLoader().getResource("static" + resource);
+        if (resourceUrl == null) {
+            throw new FileNotFoundException("요청한 리소스를 찾을 수 없습니다.");
+        }
+        return resourceUrl;
     }
 }

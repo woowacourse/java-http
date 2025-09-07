@@ -13,4 +13,8 @@ public class QueryStrings {
     public String get(String key) {
         return this.queryStrings.get(key);
     }
+
+    public boolean isEmpty() {
+        return this.queryStrings.isEmpty();
+    }
 }

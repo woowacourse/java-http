@@ -34,4 +34,11 @@ public class UserService {
         logger.info(user.toString());
         return new StaticFileResponse(HttpStatus.OK, "index");
     }
+
+    public ControllerResponse register(HttpRequest httpRequest) {
+        if (httpRequest.isQueryStringsEmpty()) {
+            return new StaticFileResponse(HttpStatus.OK, "register");
+        }
+        return new StaticFileResponse(HttpStatus.UNAUTHORIZED, "401");
+    }
 }

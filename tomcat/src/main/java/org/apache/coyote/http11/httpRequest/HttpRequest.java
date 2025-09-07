@@ -16,6 +16,10 @@ public class HttpRequest {
         return this.path.equals(path);
     }
 
+    public boolean isQueryStringsEmpty() {
+        return this.queryStrings.isEmpty();
+    }
+
     public String getQueryStringOf(String key) {
         return queryStrings.get(key);
     }

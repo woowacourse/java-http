@@ -24,6 +24,7 @@ public class ApiRouter {
 
     private void initializeRouteTable() {
         routeMap.put("/login", userController::login);
+        routeMap.put("/register", userController::register);
     }
 
     public HttpResponse route(HttpRequest httpRequest) {
@@ -32,7 +33,6 @@ public class ApiRouter {
             if (handler == null) {
                 return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "서버 내부에서 오류가 발생했습니다.");
             }
-
             ControllerResponse controllerResponse = handler.apply(httpRequest);
             return handleHttpResponse(controllerResponse);
         } catch (Exception exception) {

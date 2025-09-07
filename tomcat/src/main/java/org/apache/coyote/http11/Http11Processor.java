@@ -39,7 +39,6 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequestParser.parseHttpRequest(bufferedReader);
             HttpResponse httpResponse = requestHandler.handleHttpRequest(httpRequest);
-
             outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {

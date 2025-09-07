@@ -14,6 +14,7 @@ public class StaticFileHandler implements Handler {
 
     private static final String STATIC_ROOT = "static/";
     private static final String NOT_FOUND_PAGE = "404.html";
+    private static final String SERVER_ERROR_PAGE = "500.html";
 
     @Override
     public HandlerResult doHandle(final HttpRequest request) {
@@ -27,19 +28,9 @@ public class StaticFileHandler implements Handler {
                 return served;
             }
 
-            // Fallback: 404 Page
-            final String notFoundResourcePath = STATIC_ROOT + NOT_FOUND_PAGE;
-            final HandlerResult notFound = tryServe(notFoundResourcePath);
-            if (notFound != null) {
-                return notFound;
-            } else {
-                return HandlerResult.notFound("404 Not Found");
-            }
-
+            return handleNotFound();    // 404 Page
         } catch (final IOException e) {
-            return HandlerResult.serverError(
-                    String.format("Failed to read static resource: %s (%s)", resourcePath, e.getMessage())
-            );
+            return handleServerError(); // 500 Page
         }
     }
 
@@ -66,5 +57,29 @@ public class StaticFileHandler implements Handler {
         final byte[] body = Files.readAllBytes(filePath);
 
         return HandlerResult.ok(contentType, body);
+    }
+
+    private HandlerResult handleNotFound() {
+        try {
+            final String resourcePath = STATIC_ROOT + NOT_FOUND_PAGE;
+            final HandlerResult result = tryServe(resourcePath);
+            if (result != null) {
+                return HandlerResult.notFound(result.contentType(), result.body());
+            }
+        } catch (final IOException ignored) {
+        }
+        return HandlerResult.notFound("404 Not Found");
+    }
+
+    private HandlerResult handleServerError() {
+        try {
+            final String resourcePath = STATIC_ROOT + SERVER_ERROR_PAGE;
+            final HandlerResult result = tryServe(resourcePath);
+            if (result != null) {
+                return HandlerResult.serverError(result.contentType(), result.body());
+            }
+        } catch (final IOException ignored) {
+        }
+        return HandlerResult.serverError("500 Internal Server Error");
     }
 }

@@ -36,36 +36,67 @@ public class LoginHandler implements Handler {
         final String password = getParam(request, "password");
 
         // 2. 파라미터 검증
-        if (account.isEmpty() || password.isEmpty()) {
-            log.debug("Login attempt with missing parameters. accountPresent={}, passwordPresent={}",
-                    !account.isEmpty(), !password.isEmpty());
-            return HandlerResult.badRequest("Both 'account' and 'password' parameters are required.");
+        if (hasMissingCredentials(account, password)) {
+            log.info("Login attempt with missing params. "
+                    + "accountPresent={}, passwordPresent={}", !account.isEmpty(), !password.isEmpty());
+            return handleUnauthorizedLogin(request);
         }
 
         // 3. 사용자 조회
         final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isEmpty()) {
+        if (isUserNotFound(optionalUser)) {
             log.info("Login failed: unknown account '{}'", account);
-            return HandlerResult.badRequest("Invalid user account");
+            return handleUnauthorizedLogin(request);
         }
 
         // 4. 비밀번호 검증
         final User user = optionalUser.get();
-        if (!user.checkPassword(password)) {
+        if (isPasswordMismatch(user, password)) {
             log.info("Login failed: wrong password for account '{}'", account);
-            return HandlerResult.badRequest("Invalid password of account.");
+            return handleUnauthorizedLogin(request);
         }
 
         // 5. 로그인 성공
         log.info("Login succeeded for account '{}'", account);
-        return staticFileHandler.doHandle(request);
+        return handleLoginSuccess(request);
     }
 
+    private HandlerResult handleUnauthorizedLogin(final HttpRequest request) {
+        final HttpRequest loginFailRequest = redirectHttpRequest(request, "401.html");
+        final HandlerResult loginFail = staticFileHandler.doHandle(loginFailRequest);
+        return HandlerResult.unauthorized(loginFail.contentType(), loginFail.body());
+    }
+
+    // 로그인 처리
+    private HandlerResult handleLoginSuccess(final HttpRequest request) {
+        final HttpRequest loginSuccessRequest = redirectHttpRequest(request, "index.html");
+        final HandlerResult loginSuccess = staticFileHandler.doHandle(loginSuccessRequest);
+        return HandlerResult.found(loginSuccess.contentType(), loginSuccess.body());
+    }
+
+    private HttpRequest redirectHttpRequest(final HttpRequest request, final String route) {
+        return new HttpRequest(request.method(), route, request.query(), request.protocol(), request.headers());
+    }
+
+    // 로그인 유효성 검증
+    private boolean hasMissingCredentials(final String account, final String password) {
+        return account.isEmpty() || password.isEmpty();
+    }
+
+    private boolean isUserNotFound(final Optional<User> optionalUser) {
+        return optionalUser.isEmpty();
+    }
+
+    private boolean isPasswordMismatch(final User user, final String password) {
+        return !user.checkPassword(password);
+    }
+
+    // 헬퍼 메서드
     private boolean isBlank(final String value) {
         return value == null || value.trim().isEmpty();
     }
 
-    private static String getParam(final HttpRequest request, final String key) {
+    private String getParam(final HttpRequest request, final String key) {
         if (request.query() == null) {
             return null;
         }

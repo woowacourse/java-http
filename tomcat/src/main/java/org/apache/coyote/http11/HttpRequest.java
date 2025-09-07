@@ -1,33 +1,33 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class HttpRequest {
 
-    private final Map<String, String> data;
-    private final QueryParameter queryParameter;
+    private final HttpStartLine startLine;
+    private final HttpHeader header;
+    private final HttpRequestBody body;
+    private final HttpQueryParameter queryParameter;
 
-    public HttpRequest(Map<String, String> data) {
-        this.data = new HashMap<>(data);
-        this.queryParameter = new QueryParameter();
+    public HttpRequest(HttpStartLine startLine, HttpHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
+        this.startLine = startLine;
+        this.header = header;
+        this.body = body;
+        this.queryParameter = queryParameter;
     }
 
-    public HttpRequest(Map<String, String> data, QueryParameter queryParameter) {
-        this.data = new HashMap<>(data);
-        this.queryParameter = new QueryParameter(queryParameter);
+    public HttpMethod getHttpMethod() {
+        return startLine.getHttpMethod();
     }
 
-    public String getHttpMethod() {
-        return data.get("method");
+    public HttpUri getUri() {
+        return startLine.getUri();
     }
 
-    public String getUri() {
-        return data.get("request-uri");
+    public String getResourcePath() {
+        return startLine.getResourcePath();
     }
 
-    public String getHttpVersion() {
-        return data.get("http-version");
+    public HttpProtocol getHttpProtocol() {
+        return startLine.getProtocol();
     }
 
     public String getQueryParameter(String name) {

@@ -75,18 +75,14 @@ public class HttpRequestReader {
     private Map<String, String> findQueries(final int questionIndex, final String uri) {
         if (questionIndex > 0) {
             String rawQueries = uri.substring(questionIndex + 1);
-            return parseQueryString(questionIndex, rawQueries);
+            return parseQueryString(rawQueries);
         }
         return Map.of();
 
     }
 
-    private Map<String, String> parseQueryString(final int queryStartIndex, final String uri) {
-        if (!uri.contains(QUESTION)) {
-            return Map.of();
-        }
-        String query = uri.substring(queryStartIndex + 1);
-        String[] pairs = query.split(AND);
+    private Map<String, String> parseQueryString(final String uri) {
+        String[] pairs = uri.split(AND);
         Map<String, String> queries = new HashMap<>();
         for (String pair : pairs) {
             int equalIndex = pair.indexOf(EQUAL);

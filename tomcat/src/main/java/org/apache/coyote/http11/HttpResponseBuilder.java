@@ -20,9 +20,9 @@ public class HttpResponseBuilder {
 
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", resourceResult.mimeType());
-        headers.put("Content-Length", String.valueOf(resourceResult.body().getBytes().length));
+        headers.put("Content-Length", String.valueOf(resourceResult.body().length));
 
-        return new HttpResponse(status, headers, resourceResult.body().getBytes());
+        return new HttpResponse(status, headers, resourceResult.body());
     }
 
     private String formatPath(final String path) {
@@ -37,17 +37,17 @@ public class HttpResponseBuilder {
 
     private ResourceResult loadResource(String path) throws IOException {
         if (ROOT.equals(path)) {
-            return ResourceResult.found(MimeType.HTML.mimeType(), "Hello world!");
+            return ResourceResult.found(MimeType.HTML.mimeType(), "Hello world!".getBytes());
         }
 
         final URL resource = getClass().getClassLoader().getResource("static/" + path);
         if (resource == null) {
             return ResourceResult.notFound();
         }
-        String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         String mimeType = MimeType.fromPath(path);
-        return ResourceResult.found(mimeType, content);
+        return ResourceResult.found(mimeType, bytes);
     }
 
     private HttpStatus findStatus(final ResourceResult resourceResult) {

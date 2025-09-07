@@ -2,10 +2,11 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,14 +47,12 @@ class FileTest {
     void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        Path path = Path.of(getClass().getClassLoader()
-                .getResource(fileName)
-                .toURI());
+        try (InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream(fileName);
+             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            final List<String> actual = br.lines().toList();
 
-        // todo
-        final List<String> actual = Files.readAllLines(path);
-
-        assertThat(actual).containsOnly("nextstep");
+            assertThat(actual).containsOnly("nextstep");
+        }
     }
 }

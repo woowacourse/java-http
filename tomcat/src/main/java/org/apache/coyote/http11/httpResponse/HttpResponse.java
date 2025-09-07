@@ -4,12 +4,12 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
-    private final String status;
+    private final HttpStatus httpStatus;
     private final String contentType;
     private final byte[] body;
 
-    public HttpResponse(String status, String contentType, String body) {
-        this.status = status;
+    public HttpResponse(HttpStatus httpStatus, String contentType, String body) {
+        this.httpStatus = httpStatus;
         this.contentType = contentType;
         if (body == null) {
             this.body = new byte[0];
@@ -20,7 +20,7 @@ public class HttpResponse {
 
     public String toString() {
         return String.join("\r\n",
-            "HTTP/1.1 " + status,
+            "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getMessage(),
             "Content-Type: " + contentType,
             "Content-Length: " + body.length,
             "",

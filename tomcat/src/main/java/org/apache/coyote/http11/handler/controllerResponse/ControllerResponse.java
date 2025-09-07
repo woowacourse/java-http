@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.handler.controllerResponse;
 
+import org.apache.coyote.http11.httpResponse.HttpStatus;
+
 public interface ControllerResponse {
 
-    String status();
+    HttpStatus status();
     String content();
 }

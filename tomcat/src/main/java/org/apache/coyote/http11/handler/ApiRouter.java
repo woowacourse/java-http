@@ -8,6 +8,7 @@ import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpResponse;
+import org.apache.coyote.http11.httpResponse.HttpStatus;
 
 public class ApiRouter {
 
@@ -28,13 +29,13 @@ public class ApiRouter {
         try {
             Function<HttpRequest, ControllerResponse> handler = routeMap.get(httpRequest.getPath());
             if (handler == null) {
-                return new HttpResponse("500 Internal Server Error", "text/html;charset=utf-8", "서버 내부에서 오류가 발생했습니다.");
+                return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, "text/html;charset=utf-8", "서버 내부에서 오류가 발생했습니다.");
             }
 
             ControllerResponse controllerResponse = handler.apply(httpRequest);
             return handleHttpResponse(controllerResponse);
         } catch (Exception exception) {
-            return new HttpResponse("500 Internal Server Error", "application/json;charset=utf-8", "서버 내부에서 오류가 발생했습니다.");
+            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, "application/json;charset=utf-8", "서버 내부에서 오류가 발생했습니다.");
         }
     }
 

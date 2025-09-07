@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.handler.controllerResponse;
 
-public record JsonResponse(String status, String content) implements ControllerResponse {
+import org.apache.coyote.http11.httpResponse.HttpStatus;
+
+public record JsonResponse(HttpStatus status, String content) implements ControllerResponse {
 
 }

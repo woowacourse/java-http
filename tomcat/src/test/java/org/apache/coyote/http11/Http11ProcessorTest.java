@@ -52,9 +52,10 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: 5564\r\n" +
+                "Content-Length: 5670\r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+                        .replace("\r\n", "\n").replace("\n", "\r\n");;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

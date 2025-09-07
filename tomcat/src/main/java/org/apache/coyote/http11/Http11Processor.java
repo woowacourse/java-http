@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CRLF = "\r\n";
 
     private final Socket connection;
 
@@ -38,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String request = buildRequest(inputStream);
-            final String[] requestLines = request.split("\r\n", -1);
+            final String[] requestLines = request.split(CRLF, -1);
             if (requestLines.length == 0 || requestLines[0].isEmpty()) {
                 log.error("request is empty");
                 return;
@@ -93,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             String line;
             while ((line = reader.readLine()) != null) {
-                requestBuilder.append(line).append("\r\n");
+                requestBuilder.append(line).append(CRLF);
                 if (line.isEmpty()) {
                     break;
                 }
@@ -153,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                fileContents.append(line).append("\n");
+                fileContents.append(line).append(CRLF);
             }
         } catch (IOException e) {
             log.error("Failed to read file: {}", resourcePath, e);
@@ -163,9 +164,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String buildResponse(String statusLine, Map<String, String> responseHeaders, String responseBody) {
         final StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append(statusLine).append("\r\n");
+        responseBuilder.append(statusLine).append(CRLF);
         appendResponseHeaders(responseHeaders, responseBuilder);
-        responseBuilder.append("\r\n");
+        responseBuilder.append(CRLF);
         responseBuilder.append(responseBody);
         return responseBuilder.toString();
     }
@@ -175,7 +176,7 @@ public class Http11Processor implements Runnable, Processor {
             responseBuilder.append(entry.getKey())
                     .append(": ")
                     .append(entry.getValue())
-                    .append("\r\n");
+                    .append(CRLF);
         }
     }
 }

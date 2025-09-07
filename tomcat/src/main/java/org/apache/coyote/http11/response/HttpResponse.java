@@ -10,7 +10,7 @@ public record HttpResponse(
         String body
 ) {
 
-    HttpResponse(
+    public HttpResponse(
             HttpProtocolVersion protocolVersion,
             HttpStatus status,
             HttpHeaders headers

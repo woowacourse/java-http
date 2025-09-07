@@ -2,6 +2,9 @@ package org.apache.coyote.http11.response;
 
 public enum HttpStatus {
     OK(200, "OK"),
+    FOUND(302, "Found"),
+    SEE_OTHER(303, "See Other"),
+    UNAUTHORIZED(401, "Unauthorized"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     ;
 

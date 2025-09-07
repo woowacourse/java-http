@@ -9,9 +9,9 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import org.apache.coyote.HttpRequest;
+import org.apache.catalina.request.ServletRequest;
+import org.apache.catalina.response.ServletResponse;
 import org.apache.coyote.HttpRequestHandler;
-import org.apache.coyote.HttpResponse;
 
 public class DefaultHandler implements HttpRequestHandler {
 
@@ -19,7 +19,7 @@ public class DefaultHandler implements HttpRequestHandler {
     private static final String DEFAULT_CONTENT_TYPE = "text/plain";
 
     @Override
-    public void handleGet(HttpRequest request, HttpResponse response) {
+    public void handleGet(ServletRequest request, ServletResponse response) {
         final String content = getResourceContent(STATIC_FILE_PATH_PREFIX + request.getPath())
                 .orElseThrow(() -> new NoSuchElementException("해당 경로에 파일이 존재하지 않습니다: " + request.getPath()));
 
@@ -29,11 +29,11 @@ public class DefaultHandler implements HttpRequestHandler {
     }
 
     @Override
-    public void handlePost(HttpRequest request, HttpResponse response) {
+    public void handlePost(ServletRequest request, ServletResponse response) {
         throw new UnsupportedOperationException("POST 요청은 지원하지 않습니다.");
     }
 
-    private static void buildSuccessResponse(HttpResponse response, String mimeType, String content) {
+    private static void buildSuccessResponse(ServletResponse response, String mimeType, String content) {
         response.setStatus(OK);
         response.setContentType(mimeType + ";charset=utf-8");
         response.setBody(content);

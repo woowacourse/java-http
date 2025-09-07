@@ -1,20 +1,19 @@
 package org.apache.coyote;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
+    private static final String EMPTY_BODY = "";
 
     private final String protocol;
     private HttpStatus status;
     private String body;
-    private Map<String, String> headers;
-    private Charset charset;
+    private HttpHeader headers;
 
     public HttpResponse(String protocol) {
         this.protocol = protocol;
@@ -26,19 +25,12 @@ public class HttpResponse {
         setContentLength();
     }
 
+    public void addHeader(String name, String value) {
+        headers.add(name, value);
+    }
+
     public void setStatus(HttpStatus status) {
         this.status = status;
-    }
-
-    public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
-    }
-
-    public void sendRedirect(String location){
-        initialize();
-        status = HttpStatus.FOUND;
-        headers.put("Location", location);
-        setContentLength();
     }
 
     public String getResponse() {
@@ -56,19 +48,20 @@ public class HttpResponse {
 
     private String getHeaderLine() {
         final StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.append(entry.getKey()).append(HEADER_DELIMITER).append(entry.getValue()).append(CRLF);
+        for (Map.Entry<String, List<String>> entry : headers.getAllHeaders().entrySet()) {
+            for (String headerValue : entry.getValue()) {
+                builder.append(entry.getKey()).append(HEADER_DELIMITER).append(headerValue).append(CRLF);
+            }
         }
         return builder.toString();
     }
 
-    private void initialize(){
-        this.headers = new HashMap<>();
-        this.body = "";
-        this.charset = StandardCharsets.UTF_8;
+    private void initialize() {
+        this.headers = new HttpHeader(new HashMap<>());
+        this.body = EMPTY_BODY;
     }
 
     private void setContentLength() {
-        headers.put("Content-Length", String.valueOf(body.getBytes(charset).length));
+        headers.setContentLength(String.valueOf(body.getBytes().length));
     }
 }

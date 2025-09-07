@@ -1,36 +1,102 @@
 package org.apache.coyote;
 
-import java.util.Collections;
+import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http.request.RequestBody;
-import org.apache.coyote.http.request.RequestHeader;
-import org.apache.coyote.http.request.RequestLine;
+import java.util.StringTokenizer;
 
 public class HttpRequest {
 
-    private final RequestLine requestLine;
-    private final RequestHeader header;
-    private final RequestBody body;
+    private static final char HEADER_DELIMITER = ':';
+    private static final int REQUEST_LINE_TOKENS = 3;
+    private static final String EMPTY_BODY = "";
 
-    public HttpRequest(RequestLine requestLine, RequestHeader header, RequestBody body) {
-        this.requestLine = requestLine;
-        this.header = header;
-        this.body = body;
+    private final String method;
+    private final String uri;
+    private final String protocol;
+    private final HttpHeader headers;
+    private final String body;
+
+    public HttpRequest(InputStream inputStream) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            String requestLine = reader.readLine();
+            validateRequestLine(requestLine);
+
+            StringTokenizer tokenizer = new StringTokenizer(requestLine);
+            this.method = tokenizer.nextToken();
+            this.uri = tokenizer.nextToken();
+            this.protocol = tokenizer.nextToken();
+            this.headers = parseHeaders(reader);
+            this.body = parseBody(reader, headers.getContentLength());
+
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
+        }
     }
 
     public String getMethod() {
-        return requestLine.getMethod();
+        return method;
     }
 
-    public String getPath() {
-        return requestLine.getPath();
+    public String getUri() {
+        return uri;
     }
 
-    public String getParameter(String name){
-        return requestLine.getParameter(name);
+
+    public String getBody() {
+        return body;
     }
 
-    public String getBody(String key) {
-        return body.getValue(key);
+    public Map<String, List<String>> getHeaders() {
+        return headers.getAllHeaders();
+    }
+
+    private HttpHeader parseHeaders(BufferedReader reader) throws IOException {
+        HttpHeader headers = new HttpHeader();
+        String line;
+
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(HEADER_DELIMITER);
+            if (colonIndex != -1) {
+                String headerName = line.substring(0, colonIndex).trim();
+                String headerValue = line.substring(colonIndex + 1).trim();
+                headers.add(headerName, headerValue);
+            }
+        }
+
+        return headers;
+    }
+
+    private void validateRequestLine(String requestLine) {
+        if (requestLine == null || requestLine.isBlank()) {
+            throw new IllegalArgumentException("요청 형식이 올바르지 않습니다.");
+        }
+
+        final StringTokenizer tokenizer = new StringTokenizer(requestLine);
+        if (tokenizer.countTokens() != REQUEST_LINE_TOKENS) {
+            throw new IllegalArgumentException("요청 형식이 올바르지 않습니다.");
+        }
+    }
+
+    private String parseBody(BufferedReader reader, String contentLength) throws IOException {
+        if (contentLength == null) {
+            return EMPTY_BODY;
+        }
+
+        int length = Integer.parseInt(contentLength);
+        if (length == 0) {
+            return EMPTY_BODY;
+        }
+
+        char[] buffer = new char[length];
+        reader.read(buffer, 0, length);
+        return new String(buffer);
     }
 }

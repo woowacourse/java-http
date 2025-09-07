@@ -19,9 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import org.apache.catalina.request.ServletRequest;
+import org.apache.catalina.response.ServletResponse;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
-import org.apache.coyote.HttpRequestParser;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
@@ -65,12 +66,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processRequest(InputStream inputStream) {
-        final HttpResponse response = new HttpResponse(PROTOCOL);
-
+        final ServletResponse response = new ServletResponse(PROTOCOL);
         try {
-            final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
+            final ServletRequest request = new ServletRequest(new HttpRequest(inputStream));
+
             handleRequest(request, response);
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             updateResponseWithError(BAD_REQUEST, response, e);
             log.warn("잘못된 요청 형식: {}", e.getMessage());
         } catch (UnauthorizedException e) {
@@ -86,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
             updateResponseWithError(INTERNAL_SERVER_ERROR, response, e);
             log.error("예상치 못한 서버 오류 발생", e);
         }
-        return response;
+        return response.toHttpResponse();
     }
 
     private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
@@ -94,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void handleRequest(HttpRequest request, HttpResponse response) {
+    private void handleRequest(ServletRequest request, ServletResponse response) {
         final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
 
         switch (request.getMethod()) {
@@ -104,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void updateResponseWithError(HttpStatus status, HttpResponse response, Exception e) {
+    private void updateResponseWithError(HttpStatus status, ServletResponse response, Exception e) {
         response.setStatus(status);
         response.setBody(e.getMessage());
         response.setContentType("text/plain;charset=utf-8");

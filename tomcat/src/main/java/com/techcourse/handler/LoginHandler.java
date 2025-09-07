@@ -3,9 +3,9 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
-import org.apache.coyote.HttpRequest;
+import org.apache.catalina.request.ServletRequest;
+import org.apache.catalina.response.ServletResponse;
 import org.apache.coyote.HttpRequestHandler;
-import org.apache.coyote.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,17 +18,18 @@ public class LoginHandler implements HttpRequestHandler {
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public void handleGet(HttpRequest request, HttpResponse response) {
+    public void handleGet(ServletRequest request, ServletResponse response) {
         response.sendRedirect(LOGIN_PAGE_PATH);
     }
 
     @Override
-    public void handlePost(HttpRequest request, HttpResponse response) {
+    public void handlePost(ServletRequest request, ServletResponse response) {
 
-        final User findUser = InMemoryUserRepository.findByAccount(request.getBody(ACCOUNT_KEY))
-                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자 입니다 account: " + request.getBody(ACCOUNT_KEY)));
+        final User findUser = InMemoryUserRepository.findByAccount(request.getParameter(ACCOUNT_KEY))
+                .orElseThrow(() -> new UnauthorizedException(
+                        "존재하지 않는 사용자 입니다 account: " + request.getParameter(ACCOUNT_KEY)));
 
-        if(!findUser.checkPassword(request.getBody(PASSWORD_KEY))){
+        if (!findUser.checkPassword(request.getParameter(PASSWORD_KEY))) {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다 account : " + findUser.getAccount());
         }
 

@@ -16,6 +16,8 @@ public class LoginHandler {
 
     public HttpResponse handle(HttpRequest request) {
         if (request.getMethod().equals("GET")) {
+            // TODO: 로그인 여부 따른 redirect html 재지정하기
+            // if (!request.existsCookie("JSESSIONID")) {
             return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/login.html");
         }
         if (request.getMethod().equals("POST")) {
@@ -34,12 +36,19 @@ public class LoginHandler {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("로그인 성공! 아이디: {}", user.get().getAccount());
             HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
-            if (!request.existsCookie("JSESSIONID")) {
-                response.addCookie("JSESSIONID", UUID.randomUUID().toString());
-            }
+            String sessionId = setUserSession(user.get());
+            response.addCookie("JSESSIONID", sessionId);
             return response;
         }
 
         return new HttpResponse(HttpStatusCode.UNAUTHORIZED, ContentType.HTML, "/401.html");
+    }
+
+    private String setUserSession(User user) {
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        return session.getId();
     }
 }

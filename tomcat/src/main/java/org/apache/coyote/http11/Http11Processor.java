@@ -77,7 +77,6 @@ public class Http11Processor implements Runnable, Processor {
         httpHeader.put("method", method);
 
         String uri = requestLineSplit[1];
-        System.out.println(uri);
         if (uri.contains("?")) {
             int index = uri.indexOf("?");
             String endpoint = uri.substring(0, index);
@@ -139,7 +138,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private QueryParameter parseQueryParameter(String uri) {
         if (uri.contains("?")) {
-            System.out.println(uri);
             int index = uri.indexOf("?");
             String queryString = uri.substring(index + 1);
 

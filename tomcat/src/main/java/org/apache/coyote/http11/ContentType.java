@@ -22,7 +22,7 @@ public enum ContentType {
     public static ContentType of(String fileExtension) {
         return Arrays.stream(ContentType.values())
                 .filter(type -> type.fileExtensions.contains(fileExtension))
-                .findFirst().orElseThrow(() -> new RuntimeException("잘못된 파일 확장자입니다."));
+                .findFirst().orElseThrow(() -> new RuntimeException("잘못된 파일 확장자입니다: " + fileExtension));
     }
 
     public String getMimeType() {

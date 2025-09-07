@@ -53,7 +53,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
-            outputStream.write("nextstep".getBytes());
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 

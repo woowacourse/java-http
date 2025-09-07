@@ -8,8 +8,11 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -45,12 +48,28 @@ public class Http11Processor implements Runnable, Processor {
             if (requestPath.isBlank() || "/".equals(requestPath)) {
                 requestPath = "index.html";
             }
-            if (requestPath.equals("login")) {
-                printMemberInfo(queryParameters.get("account"), queryParameters.get("password"));
+
+            var statusCode = "200 OK";
+            Map<String, String> additionalResponseHeaders = new HashMap<>();
+
+            if ("login".equals(requestPath)) {
+                var account = queryParameters.get("account");
+                var password = queryParameters.get("password");
+
+                if(account != null && password != null) {
+                    final var loginSuccess = checkLogin(account, password);
+                    final var redirectUrl = loginSuccess ? "/index.html" : "/401.html";
+
+                    Map<String, String> headers = Map.of("Location", redirectUrl);
+                    final var response = buildHttpResponse("302 Found", "text/html", "", headers);
+
+                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                }
             }
 
-            String statusCode = "200 OK";
-            String responseBody = readStaticFileContent(requestPath);
+            var responseBody = readStaticFileContent(requestPath);
             if (responseBody == null) {
                 statusCode = "404 Not Found";
                 responseBody = readStaticFileContent("404.html");
@@ -61,10 +80,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var contentType = ContentType.from(requestPath);
-            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody);
+            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody, additionalResponseHeaders);
             outputStream.write(response.getBytes());
             outputStream.flush();
-
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             try (final var outputStream = connection.getOutputStream()) {
@@ -76,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = "<h1>500 Internal Server Error</h1>";
                 }
 
-                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody);
+                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody, Collections.emptyMap());
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             } catch (IOException | URISyntaxException ex) {
@@ -85,18 +103,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public void printMemberInfo(String account, String password) {
+    public boolean checkLogin(String account, String password) {
         if(account == null || account.isBlank()) {
-            return;
+            return false;
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isEmpty()) {
-            return;
+            return false;
         }
         User user = optionalUser.get();
-        if (user.checkPassword(password)) {
-            System.out.println("user: " + user);
-        }
+        return user.checkPassword(password);
     }
 
     private URL getResourceFrom(String requestPath) {
@@ -115,12 +131,20 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(Paths.get(resource.toURI()));
     }
 
-    private String buildHttpResponse(String statusCode, String mimeType, String responseBody) throws IOException {
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + mimeType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private String buildHttpResponse(String statusCode, String mimeType, String responseBody, Map<String, String> additionalResponseHeaders) throws IOException {
+        StringBuilder response = new StringBuilder();
+
+        response.append("HTTP/1.1 ").append(statusCode).append("\r\n");
+        response.append("Content-Type: ").append(mimeType).append(";charset=utf-8\r\n");
+        byte[] bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        response.append("Content-Length: ").append(bodyBytes.length).append("\r\n");
+
+        for (Map.Entry<String, String> header : additionalResponseHeaders.entrySet()) {
+            response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+        }
+
+        response.append("\r\n"); // 헤더와 본문 구분
+        response.append(responseBody);
+        return response.toString();
     }
 }

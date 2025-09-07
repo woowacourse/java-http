@@ -17,7 +17,7 @@ public class RequestLine {
     private final Map<String, String> queryParameters;
     private final String protocolVersion;
 
-    public static RequestLine from(String requestLine) {
+    public static RequestLine from(final String requestLine) {
         if(requestLine == null || requestLine.isBlank()) {
             throw new IllegalStateException("잘못된 형식의 requestLine입니다: " + requestLine);
         }
@@ -40,7 +40,7 @@ public class RequestLine {
         return new RequestLine(method, path.substring(1), queryParameters, protocolVersion);
     }
 
-    private static Map<String, String> extractQueryParameters(String queryString) {
+    private static Map<String, String> extractQueryParameters(final String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
 
         for (String rawParam : queryString.split("&")) {

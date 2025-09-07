@@ -94,10 +94,6 @@ public class Http11Processor implements Runnable, Processor {
             handleLogin(request);
         }
 
-        if (path == null || path.isEmpty()) {
-            path = "/index";
-        }
-
         String fileName = "static" + path;
 
         if (!path.contains(".")) {

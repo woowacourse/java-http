@@ -43,24 +43,20 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()
+                final InputStream inputStream = connection.getInputStream();
+                final OutputStream outputStream = connection.getOutputStream()
         ) {
             final String requestURL = parseRequestURL(inputStream);
 
-            String resource = requestURL.split("\\?")[0];
+            final String resource = requestURL.split("\\?")[0];
 
-            if (resource.equals("/")) {
+            if (resource.equals("/") || resource.equals("/index.html")) {
                 send200Response("/index.html", outputStream);
                 return;
             }
             if (resource.startsWith("/login")) {
                 login(requestURL);
                 send200Response("/login.html", outputStream);
-                return;
-            }
-            if (resource.startsWith("/index.html")) {
-                send200Response("/index.html", outputStream);
                 return;
             }
             send200Response(resource, outputStream);
@@ -113,7 +109,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (final FileNotFoundException e) {
             send404Response(outputStream);
-            throw e;
         }
     }
 

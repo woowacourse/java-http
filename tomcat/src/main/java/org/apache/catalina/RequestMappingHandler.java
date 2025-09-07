@@ -18,6 +18,10 @@ public class RequestMappingHandler {
             LoginHandler loginHandler = new LoginHandler();
             return loginHandler.login(request);
         }
+        if (request.getPath().equals("/register")) {
+            RegisterHandler registerHandler = new RegisterHandler();
+            return registerHandler.handle(request);
+        }
 
         return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html");
     }

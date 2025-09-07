@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ResponseEntity {
@@ -12,29 +11,50 @@ public class ResponseEntity {
         this.httpResponse = httpResponse;
     }
 
-    public static ResponseEntity ok() {
-        return buildReponse(null, DEFAULT_CONTENT_TYPE);
+    public static Builder ok() {
+        return new Builder(DEFAULT_CONTENT_TYPE, null);
     }
 
-    public static ResponseEntity ok(String body) {
-        return buildReponse(body, DEFAULT_CONTENT_TYPE);
+    public static HttpResponse ok(Map<String, String> headers, byte[] body) {
+        return new HttpResponse(headers, body);
     }
 
-    public static ResponseEntity ok(String body, String contentType) {
-        return buildReponse(body, contentType);
+    public static HttpResponse ok(String body) {
+        return buildResponse(body.getBytes(), DEFAULT_CONTENT_TYPE);
     }
 
-    private static ResponseEntity buildReponse(String body, String contentType) {
+    public static HttpResponse ok(byte[] body, String contentType) {
+        return buildResponse(body, contentType);
+    }
+
+    private static HttpResponse buildResponse(byte[] body, String contentType) {
         if (body == null) {
-            body = "";
+            body = new byte[0];
         }
-
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
         Map<String, String> headers = Map.of(
                 "Content-Type", contentType,
-                "Content-Length", String.valueOf(bytes.length)
+                "Content-Length", String.valueOf(body.length)
         );
 
-        return new ResponseEntity(new HttpResponse(headers, body));
+        return new HttpResponse(headers, body);
+    }
+
+    public static class Builder {
+
+        private final String contentType;
+        private byte[] body;
+
+        private Builder(String contentType, byte[] body) {
+            this.contentType = contentType;
+            this.body = body;
+        }
+
+        public HttpResponse build() {
+            return buildResponse(body, contentType);
+        }
+    }
+
+    public HttpResponse getHttpResponse() {
+        return httpResponse;
     }
 }

@@ -64,7 +64,7 @@ public class HttpRequestReader {
             headers.put(name, value);
         }
 
-        return headers;
+        return Map.copyOf(headers);
     }
 
     private String findPath(final int queryStartIndex, final String uri) {

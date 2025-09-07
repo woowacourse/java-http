@@ -8,4 +8,6 @@ import java.util.Map;
 public interface HttpService {
 
     ContentParseResult doGet(Map<String, String> query) throws IOException;
+
+    ContentParseResult doPost(Map<String, String> query) throws IOException;
 }

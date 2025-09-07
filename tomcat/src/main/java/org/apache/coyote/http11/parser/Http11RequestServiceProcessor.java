@@ -14,8 +14,13 @@ public class Http11RequestServiceProcessor implements HttpParser {
     }
 
     @Override
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
-        return httpServices.processServiceRequest(contentPath, query);
+    public ContentParseResult parseContent(
+            String contentPath,
+            Map<String, String> query,
+            String method,
+            Map<String, String> requestBody
+    ) throws IOException {
+        return httpServices.processServiceRequest(contentPath, query, method, requestBody);
     }
 
     @Override

@@ -12,4 +12,9 @@ public class HelloService implements HttpService {
     public ContentParseResult doGet(final Map<String, String> query) {
         return new ContentParseResult(content, "Content-Type: text/html;charset=utf-8 ");
     }
+
+    @Override
+    public ContentParseResult doPost(Map<String, String> query) {
+        throw new IllegalArgumentException("제공되지 않는 기능입니다");
+    }
 }

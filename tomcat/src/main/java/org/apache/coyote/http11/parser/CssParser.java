@@ -15,7 +15,12 @@ public class CssParser implements HttpParser {
         return request.contains(FILE_EXTENSION) && request.length() > FILE_EXTENSION.length();
     }
 
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
+    public ContentParseResult parseContent(
+            String contentPath,
+            Map<String, String> query,
+            String method,
+            Map<String, String> requestBody
+    ) throws IOException {
         URL resource = classLoader.getResource("static" + contentPath);
         if (resource == null || resource.getFile() == null) {
             throw new IllegalArgumentException("존재하지않는 파일입니다 404 " + contentPath);

@@ -16,7 +16,12 @@ public class HtmlParser implements HttpParser {
         return request.contains(FILE_EXTENSION) && request.length() > FILE_EXTENSION.length();
     }
 
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
+    public ContentParseResult parseContent(
+            String contentPath,
+            Map<String, String> query,
+            String method,
+            Map<String, String> requestBody
+    ) throws IOException {
         if (!isParseAble(contentPath)) {
             throw new IllegalArgumentException("처리할 수 없는 요청입니다" + contentPath);
         }

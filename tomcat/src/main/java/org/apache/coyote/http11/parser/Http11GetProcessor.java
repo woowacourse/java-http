@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.parser;
 
+import org.apache.coyote.http11.ParseHttpRequest;
 import org.apache.coyote.http11.service.HttpServices;
 
 import java.io.IOException;
@@ -15,10 +16,10 @@ public class Http11GetProcessor {
         parsers = List.of(new HtmlParser(), new CssParser(), new Http11RequestServiceProcessor(new HttpServices()));
     }
 
-    public ContentParseResult parse(String httpRequest) throws IOException {
-        Map<String, String> queryFinder = parseQueries(httpRequest);
-        String contentPath = parseContentPath(httpRequest);
-        return getContentParseResult(contentPath, queryFinder);
+    public ContentParseResult parse(ParseHttpRequest httpRequest) throws IOException {
+        Map<String, String> queryFinder = parseQueries(httpRequest.httpRequest());
+        String contentPath = parseContentPath(httpRequest.httpRequest());
+        return getContentParseResult(contentPath, queryFinder, httpRequest.method(), httpRequest.requestBody());
     }
 
     private String parseContentPath(String httpRequest) {
@@ -54,7 +55,9 @@ public class Http11GetProcessor {
 
     private ContentParseResult getContentParseResult(
             String request,
-            final Map<String, String> query
+            final Map<String, String> query,
+            String method,
+            Map<String, String> requestBody
     ) throws IOException {
         if (request.isBlank()) {
             throw new IllegalArgumentException("처리할 수 없는 요청입니다");
@@ -65,7 +68,7 @@ public class Http11GetProcessor {
                 continue;
             }
 
-            return contentParser.parseContent(request, query);
+            return contentParser.parseContent(request, query, method, requestBody);
         }
 
         throw new IllegalArgumentException("처리할 수 없는 요청입니다");

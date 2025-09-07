@@ -5,7 +5,10 @@ import java.util.Map;
 
 public interface HttpParser {
 
-    ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException;
+    ContentParseResult parseContent(
+            String contentPath, Map<String, String> query, String method,
+            Map<String, String> requestBody
+    ) throws IOException;
 
     boolean isParseAble(String request);
 }

@@ -11,8 +11,15 @@ import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
 
-    public static HttpRequest parseToRequest(InputStreamReader inputStreamReader, SessionManager sessionManager)
-            throws IOException {
+    private final InputStreamReader inputStreamReader;
+    private final SessionManager sessionManager;
+
+    public Http11InputBuffer(InputStreamReader inputStreamReader, SessionManager sessionManager) {
+        this.inputStreamReader = inputStreamReader;
+        this.sessionManager = sessionManager;
+    }
+
+    public HttpRequest read() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String requestLine = bufferedReader.readLine();
@@ -64,7 +71,7 @@ public class Http11InputBuffer {
         );
     }
 
-    private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
@@ -78,7 +85,7 @@ public class Http11InputBuffer {
         return headers;
     }
 
-    private static RequestCookie parseToCookie(String rawCookies) {
+    private RequestCookie parseToCookie(String rawCookies) {
         Map<String, String> cookieValues = new HashMap<>();
         String[] pairs = rawCookies.split("; ");
         for (String pair : pairs) {

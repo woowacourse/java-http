@@ -5,9 +5,9 @@ import com.techcourse.exception.NotFoundException;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
-import com.techcourse.http.common.Location;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
+import com.techcourse.http.response.Location;
 import com.techcourse.model.User;
 import java.util.Map;
 

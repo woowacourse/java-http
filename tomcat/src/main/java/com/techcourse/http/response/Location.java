@@ -1,4 +1,4 @@
-package com.techcourse.http.common;
+package com.techcourse.http.response;
 
 public class Location {
 

@@ -3,7 +3,6 @@ package com.techcourse.http.response;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
-import com.techcourse.http.common.Location;
 import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {

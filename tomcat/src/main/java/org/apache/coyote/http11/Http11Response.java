@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +19,17 @@ public class Http11Response {
             final int httpStatusCode,
             final String httpStatusMessage,
             final Map<String, String> headers,
-            final String body
+            final byte[] body
     ) {
         this.httpVersion = httpVersion;
         this.httpStatusCode = httpStatusCode;
         this.httpStatusMessage = httpStatusMessage;
         this.headers = headers;
-        this.body = body;
+        this.body = new String(body, StandardCharsets.UTF_8);
+    }
+
+    public byte[] toMessage() {
+        return toString().getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
@@ -33,6 +39,7 @@ public class Http11Response {
             headerStrings.add(String.format("%s: %s ", key, headers.get(key)));
         }
         final String headerString = String.join("\r\n", headerStrings);
+
         return String.join("\r\n",
                 String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
                 headerString,

@@ -8,17 +8,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_FILE_LOCATION = "/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/tomcat/src/main/resources/static";
+    private static final String STATIC_FILE_LOCATION = "static";
 
     private final Socket connection;
 
@@ -36,12 +33,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final Http11Request request = findRequest(inputStream);
+            final Http11Request request = readRequest(inputStream);
 
             final Http11Response response = findResponse(request);
-            final String responseMessage = response.toString();
+            final byte[] responseMessage = response.toMessage();
 
-            outputStream.write(responseMessage.getBytes());
+            outputStream.write(responseMessage);
             outputStream.flush();
         } catch (final IllegalArgumentException e) {
             log.warn(String.format("bad request : %s", e.getMessage()));
@@ -72,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
             return createHtmlResponse(fileContent);
         }
         if (requestTarget.contains("/login")) {
-            final byte[] fileContent = readFile("login.html");
+            final byte[] fileContent = readFile("/login.html");
 
             final String account = request.findQueryParam("account");
             final String password = request.findQueryParam("password");
@@ -86,8 +83,8 @@ public class Http11Processor implements Runnable, Processor {
         return createCssResponse(fileContent);
     }
 
-    private Http11Request findRequest(final InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+    private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final List<String> requestMessage = new ArrayList<>();
@@ -100,8 +97,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private byte[] readFile(final String location) throws IOException {
-        try (final InputStream inputStream = new FileInputStream(getClass().getClassLoader().getResource("static" + location).getPath())) {
-            return inputStream.readAllBytes();
+        try (final InputStream fileInputStream = new FileInputStream(getClass().getClassLoader().getResource(STATIC_FILE_LOCATION + location).getPath())) {
+            return fileInputStream.readAllBytes();
         } catch (final NullPointerException e) {
             throw new NoSuchFileException(location);
         }
@@ -134,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
                 200,
                 "OK",
                 headers,
-                new String(body, StandardCharsets.UTF_8)
+                body
         );
     }
 
@@ -148,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
                 200,
                 "OK",
                 headers,
-                new String(body, StandardCharsets.UTF_8)
+                body
         );
     }
 }

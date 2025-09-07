@@ -14,9 +14,9 @@ public class RequestMappingHandler {
         if (request.getPath().endsWith(".js")) {
             return new HttpResponse(HttpStatusCode.OK, ContentType.JAVASCRIPT, request.getPath());
         }
-        if (request.getMethod().equals("GET") && request.getPath().equals("/login")) {
+        if (request.getPath().equals("/login")) {
             LoginHandler loginHandler = new LoginHandler();
-            return loginHandler.login(request);
+            return loginHandler.handle(request);
         }
         if (request.getPath().equals("/register")) {
             RegisterHandler registerHandler = new RegisterHandler();

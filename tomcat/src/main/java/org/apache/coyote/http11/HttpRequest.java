@@ -14,7 +14,7 @@ public class HttpRequest {
     private String path;
     private String protocol;
     private final Map<String, String> headers = new HashMap<>();
-    private final Map<String, String> queryParameters = new HashMap<>();
+    private Map<String, String> queryParameters = new HashMap<>();
     private String body;
 
     public HttpRequest(BufferedReader reader) throws IOException {
@@ -26,6 +26,20 @@ public class HttpRequest {
         parseUri(split[1]);
         parseHeaders(input.subList(1, input.size()));
         parseBody(reader);
+    }
+
+    public Map<String, String> parseQueryStringForm(String queryString) {
+        Map<String, String> map = new HashMap<>();
+        String[] parameters = queryString.split("&");
+
+        Arrays.stream(parameters)
+                .forEach(parameter -> {
+                            String[] split = parameter.split("=");
+                            map.put(split[0], split[1]);
+                        }
+                );
+
+        return map;
     }
 
     private List<String> getInput(BufferedReader reader) throws IOException {
@@ -44,18 +58,7 @@ public class HttpRequest {
             return;
         }
         path = uri.substring(0, index);
-        parseQueryString(uri.substring(index + 1));
-    }
-
-    private void parseQueryString(String queryString) {
-        String[] parameters = queryString.split("&");
-
-        Arrays.stream(parameters)
-                .forEach(parameter -> {
-                            String[] split = parameter.split("=");
-                            queryParameters.put(split[0], split[1]);
-                        }
-                );
+        queryParameters = parseQueryStringForm(uri.substring(index + 1));
     }
 
     private void parseHeaders(List<String> headerString) {

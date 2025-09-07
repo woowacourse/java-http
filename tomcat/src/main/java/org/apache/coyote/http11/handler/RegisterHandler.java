@@ -52,10 +52,10 @@ public class RegisterHandler implements Handler {
             return handleUnauthorizedRequest(request);
         }
 
-        // 3. 회원가입 처리
+        // 4. 회원가입 처리
         register(account, password, email);
 
-        // 4. 회원가입 성공
+        // 5. 회원가입 성공
         return handleRequestSuccess(request);
     }
 
@@ -64,7 +64,6 @@ public class RegisterHandler implements Handler {
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         log.info("Register succeeded for account '{}'", account);
-
     }
 
     // == 요청 처리 ==
@@ -83,7 +82,8 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpRequest redirectHttpRequest(final HttpRequest request, final String route) {
-        return new HttpRequest(request.method(), route, request.query(), request.protocol(), request.headers());
+        return new HttpRequest(request.method(), route, request.query(), request.protocol(), request.headers(),
+                request.httpCookie());
     }
 
     // == 요청 유효성 검증 ==

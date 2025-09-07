@@ -8,11 +8,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
 
     @Test
     void process() throws IOException {
@@ -49,6 +51,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive",
+                "Cookie: JSESSIONID=e30d9d64-ce8b-4cb4-90f0-767c87a94d23",
                 "",
                 "");
 

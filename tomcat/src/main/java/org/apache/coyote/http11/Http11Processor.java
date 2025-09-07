@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dto.HttpRequest;
 import org.apache.coyote.http11.dto.HttpResponse;
@@ -25,7 +26,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String COOKIE_JSESSIONID = "JSESSIONID";
     private static final String SEMICOLON = ";";
+    private static final String EQUAL = "=";
 
     private final Socket connection;
 
@@ -51,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             final HandlerResult result = handleRequest(request);
 
             // 3. HTTP 응답 생성 및 전송
-            sendResponse(outputStream, result);
+            sendResponse(outputStream, request, result);
         } catch (final IllegalArgumentException e) {
             log.warn(e.getMessage());
         } catch (final IOException | UncheckedServletException e) {
@@ -76,22 +80,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // 3. HTTP 응답 생성 및 전송
-    private void sendResponse(final OutputStream outputStream, final HandlerResult result) throws IOException {
-        final HttpResponse response = buildHttpResponse(result);
+    private void sendResponse(final OutputStream outputStream, final HttpRequest request, final HandlerResult result)
+            throws IOException {
+        final HttpResponse response = buildHttpResponse(request, result);
         outputStream.write(response.toBytes());
         outputStream.write(result.body());
         outputStream.flush();
     }
 
     // 3.1 HTTP 응답 생성 및 헤더 설정
-    private HttpResponse buildHttpResponse(final HandlerResult result) {
+    private HttpResponse buildHttpResponse(final HttpRequest request, final HandlerResult result) {
         final HttpResponse response = new HttpResponse(DEFAULT_PROTOCOL, result.status(), new LinkedHashMap<>());
         response.addHeader(CONTENT_TYPE_HEADER, result.mimeType() + SEMICOLON + result.mimeParameter());
         response.addHeader(CONTENT_LENGTH_HEADER, String.valueOf(result.body().length));
 
-        // 핸드러별 추가 헤더 설정 (e.g. LoginHandler의 302 Location)
+        // 핸들러별 추가 헤더 설정 (e.g. LoginHandler의 302 Location)
         for (final Entry<String, String> header : result.headers().entrySet()) {
             response.addHeader(header.getKey(), header.getValue());
+        }
+
+        // JSESSIONID 쿠키가 없다면 쿠키 헤더 설정
+        if (!request.httpCookie().containsCookie(COOKIE_JSESSIONID)) {
+            response.addHeader(SET_COOKIE_HEADER, COOKIE_JSESSIONID + EQUAL + UUID.randomUUID());
         }
         return response;
     }

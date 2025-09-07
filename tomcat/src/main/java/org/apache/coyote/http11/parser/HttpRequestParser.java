@@ -9,16 +9,19 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.dto.HttpCookie;
 import org.apache.coyote.http11.dto.HttpRequest;
 import org.apache.coyote.http11.dto.RequestLine;
 
 public final class HttpRequestParser {
 
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "Cookie";
     private static final String QUESTION = "?";
     private static final String EMPTY = "";
     private static final String COLON = ":";
     private static final String REQUEST_LINE_DELIMITER = " ";
+
 
     private HttpRequestParser() {
     }
@@ -33,18 +36,23 @@ public final class HttpRequestParser {
         // 2. 헤더 파싱
         final Map<String, String> headers = parseHeaders(bufferedReader);
 
-        // 3. URI 파싱 (경로, 쿼리)
+        // 3. 쿠키 파싱
+        final HttpCookie cookie = parseCookie(headers.get(COOKIE_HEADER));
+        headers.remove(COOKIE_HEADER);
+
+        // 4. URI 파싱 (경로, 쿼리)
         final String route = extractRoute(requestLine.uri());
         final Map<String, String> query = extractQueryFromUri(requestLine.uri());
 
-        // 4. 바디 파싱 및 쿼리 파리미터에 포함
+        // 5. 바디 파싱 및 쿼리 파리미터에 포함
         final String body = parseBody(bufferedReader, headers);
         if (!body.isEmpty()) {
             final Map<String, String> bodyQuery = QueryStringParser.parse(body);
             query.putAll(bodyQuery);
         }
 
-        return Optional.of(new HttpRequest(requestLine.method(), route, query, requestLine.protocol(), headers));
+        return Optional.of(
+                new HttpRequest(requestLine.method(), route, query, requestLine.protocol(), headers, cookie));
     }
 
     // 1. 요청 라인(Request Line) 파싱
@@ -73,13 +81,21 @@ public final class HttpRequestParser {
         return headers;
     }
 
-    // 3. URI 파싱 (경로)
+    // 3. 쿠키 파싱
+    private static HttpCookie parseCookie(final String cookieString) {
+        if (cookieString == null || cookieString.isBlank()) {
+            return new HttpCookie(new LinkedHashMap<>());
+        }
+        return HttpCookieParser.parse(cookieString);
+    }
+
+    // 4.1 URI 파싱 (경로)
     private static String extractRoute(final String uri) {
         final int qIdx = uri.indexOf(QUESTION);
         return (qIdx >= 0) ? uri.substring(0, qIdx) : uri;
     }
 
-    // 3. URI 파싱 (쿼리)
+    // 4.2 URI 파싱 (쿼리)
     private static Map<String, String> extractQueryFromUri(final String uri) {
         final int qIdx = uri.indexOf(QUESTION);
         if (qIdx < 0) {
@@ -89,7 +105,7 @@ public final class HttpRequestParser {
         return QueryStringParser.parse(queryString);
     }
 
-    // 4. 바디 파싱 및 쿼리 파리미터에 포함
+    // 5. 바디 파싱 및 쿼리 파리미터에 포함
     private static String parseBody(final BufferedReader bufferedReader, final Map<String, String> headers)
             throws IOException {
         final int contentLength = Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH_HEADER, "0"));

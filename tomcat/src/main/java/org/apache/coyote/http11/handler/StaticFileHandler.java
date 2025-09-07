@@ -49,15 +49,15 @@ public class StaticFileHandler implements Handler {
         }
 
         // 3. MIME 타입 판별
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = DEFAULT_MIME_TYPE;
+        String mimeType = Files.probeContentType(filePath);
+        if (mimeType == null) {
+            mimeType = DEFAULT_MIME_TYPE;
         }
 
         // 4. 파일 내용 읽기
         final byte[] body = Files.readAllBytes(filePath);
 
-        return HandlerResult.ok(contentType, body);
+        return HandlerResult.ok(mimeType, body);
     }
 
     // 404 Not Found 처리

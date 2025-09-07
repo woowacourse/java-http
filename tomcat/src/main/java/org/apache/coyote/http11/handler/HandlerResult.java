@@ -1,13 +1,16 @@
 package org.apache.coyote.http11.handler;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import org.apache.coyote.http11.dto.HttpCookie;
 
 public record HandlerResult(
         Status status,
         String mimeType,
         String mimeParameter,
-        byte[] body,
-        LinkedHashMap<String, String> headers
+        HashMap<String, String> headers,
+        HttpCookie httpCookie,
+        byte[] body
 ) {
 
     public final static String DEFAULT_MIME_TYPE = "text/plain";
@@ -15,7 +18,8 @@ public record HandlerResult(
 
     // == 팩토리 메서드 ==
     public static HandlerResult of(final Status status, final String contentType, final byte[] body) {
-        return new HandlerResult(status, contentType, DEFAULT_MIME_PARAMETER, body, new LinkedHashMap<>());
+        return new HandlerResult(status, contentType, DEFAULT_MIME_PARAMETER, new LinkedHashMap<>(),
+                new HttpCookie(new LinkedHashMap<>()), body);
     }
 
     public static HandlerResult text(final Status status, final String message) {
@@ -24,7 +28,6 @@ public record HandlerResult(
 
     // == 응답 생성 메서드 ==
     public static HandlerResult ok(final String contentType, final byte[] body) {
-        System.out.println(contentType);
         return of(Status.OK, contentType, body);
     }
 
@@ -55,6 +58,6 @@ public record HandlerResult(
 
     // == 추가 메서드 ==
     public void addHeader(final String name, final String value) {
-        headers.put(name, value);
+        this.headers.put(name, value);
     }
 }

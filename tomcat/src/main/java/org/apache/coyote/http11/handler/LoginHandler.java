@@ -67,7 +67,6 @@ public class LoginHandler implements Handler {
 
     // == 비즈니스 로직 처리 ==
     private void login(final String account, final String password) {
-
         log.info("Login succeeded for account '{}'", account);
     }
 
@@ -87,7 +86,8 @@ public class LoginHandler implements Handler {
     }
 
     private HttpRequest redirectHttpRequest(final HttpRequest request, final String route) {
-        return new HttpRequest(request.method(), route, request.query(), request.protocol(), request.headers());
+        return new HttpRequest(request.method(), route, request.query(), request.protocol(), request.headers(),
+                request.httpCookie());
     }
 
     // == 요청 유효성 검증 ==

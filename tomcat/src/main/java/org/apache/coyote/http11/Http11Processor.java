@@ -25,7 +25,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
+
+    private static final Charset DEFAULT_BODY_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_HEADER_CHARSET = StandardCharsets.ISO_8859_1;
 
     private final Socket connection;
 
@@ -45,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();) {
 
             Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, new SessionManager(),
-                    DEFAULT_CHARSET);
+                    DEFAULT_HEADER_CHARSET, DEFAULT_BODY_CHARSET);
             Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
 
             HttpRequest httpRequest = http11InputBuffer.read();

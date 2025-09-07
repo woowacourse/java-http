@@ -12,14 +12,18 @@ import org.apache.catalina.SessionManager;
 public class Http11InputBuffer {
 
     private static final int END_SIGN_FOR_STREAM = -1;
+
     private final InputStream inputStream;
     private final SessionManager sessionManager;
-    private final Charset headerCharset;
+    private final Charset defaultHeaderCharset;
+    private final Charset defaultBodyCharset;
 
-    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset headerCharset) {
+    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset defaultHeaderCharset,
+                             Charset defaultBodyCharset) {
         this.inputStream = inputStream;
         this.sessionManager = sessionManager;
-        this.headerCharset = headerCharset;
+        this.defaultHeaderCharset = defaultHeaderCharset;
+        this.defaultBodyCharset = defaultBodyCharset;
     }
 
     public HttpRequest read() throws IOException {
@@ -46,7 +50,7 @@ public class Http11InputBuffer {
         String requestBody = null;
         if ("POST".equalsIgnoreCase(httpMethod) && contentLength > 0) {
             byte[] body = inputStream.readNBytes(contentLength);
-            requestBody = new String(body, headerCharset);
+            requestBody = new String(body, extractBodyCharset(contentType));
         }
 
         RequestCookie requestCookie = null;
@@ -89,7 +93,7 @@ public class Http11InputBuffer {
         if (readByte == END_SIGN_FOR_STREAM && buffer.size() == 0) {
             return null;
         }
-        return buffer.toString(headerCharset);
+        return buffer.toString(defaultHeaderCharset);
     }
 
     private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
@@ -116,5 +120,23 @@ public class Http11InputBuffer {
             cookieValues.put(key, value);
         }
         return new RequestCookie(cookieValues);
+
+    }
+
+    private Charset extractBodyCharset(String contentType) {
+        if (contentType == null) {
+            return defaultBodyCharset;
+        }
+        for (String t : contentType.split(";")) {
+            int i = t.indexOf('=');
+            if (i > 0 && t.substring(0, i).trim().equalsIgnoreCase("charset")) {
+                try {
+                    return Charset.forName(t.substring(i + 1).trim());
+                } catch (Exception ignore) {
+                    return defaultBodyCharset;
+                }
+            }
+        }
+        return defaultBodyCharset;
     }
 }

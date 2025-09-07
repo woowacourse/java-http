@@ -40,7 +40,6 @@ public class ApiRouter {
             ControllerResponse controllerResponse = handler.apply(httpRequest);
             return handleHttpResponse(controllerResponse);
         } catch (Exception exception) {
-            exception.printStackTrace();
             return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "서버 내부에서 오류가 발생했습니다.");
         }
     }

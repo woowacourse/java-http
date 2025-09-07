@@ -8,7 +8,7 @@ public enum ContentType {
     TEXT_HTML(List.of("html"), "text/html;charset=utf-8"),
     TEXT_CSS(List.of("css"), "text/css"),
     TEXT_JAVASCRIPT(List.of("js"), "text/javascript"),
-    TEXT_PLAIN(List.of("txt"), "text/plain"),
+    TEXT_PLAIN(List.of("txt"), "text/plain;charset=utf-8"),
     IMAGE_SVG_XML(List.of("svg"), "image/svg+xml");
 
     private final List<String> fileExtensions;

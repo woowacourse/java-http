@@ -104,13 +104,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Location: /index.html\r\n" +
-                "Content-Length: 0\r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final var response = socket.output();
+        assertThat(response).startsWith("HTTP/1.1 302 Found");
+        assertThat(response).contains("Location: /index.html");
+        assertThat(response).contains("Set-Cookie: JSESSIONID=");
     }
 
     @Test
@@ -221,5 +218,50 @@ class Http11ProcessorTest {
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void get_main_page_when_logged_in() {
+        // given
+        final String loginRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(loginRequest);
+        final var processor = new Http11Processor(socket);
+        processor.process(socket);
+        final var loginResponse = socket.output();
+        final var jsessionid = extractJSessionId(loginResponse);
+
+        final String getLoginRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + jsessionid,
+                "",
+                "");
+        final var loggedInSocket = new StubSocket(getLoginRequest);
+        final var loggedInProcessor = new Http11Processor(loggedInSocket);
+
+        // when
+        loggedInProcessor.process(loggedInSocket);
+
+        // then
+        final var response = loggedInSocket.output();
+        assertThat(response).startsWith("HTTP/1.1 302 Found");
+        assertThat(response).contains("Location: /index.html");
+    }
+
+    private String extractJSessionId(String response) {
+        final var cookies = response.split("\r\n");
+        for (String cookie : cookies) {
+            if (cookie.startsWith("Set-Cookie: JSESSIONID=")) {
+                return cookie.substring("Set-Cookie: JSESSIONID=".length()).split(";")[0];
+            }
+        }
+        throw new IllegalStateException("Can't find jsessionid");
     }
 }

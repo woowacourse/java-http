@@ -10,6 +10,7 @@ public class HttpRequest {
     private final HttpCookie httpCookie;
     private final Map<String, String> headers;
     private final Map<String, String> formParams;
+    private Session session;
 
     public HttpRequest(
             HttpRequestMethod method,
@@ -25,7 +26,26 @@ public class HttpRequest {
         this.headers = headers;
         this.httpCookie = httpCookie;
         this.formParams = formParams;
+        findSession();
     }
+
+    private void findSession() {
+        String jsessionid = httpCookie.getCookie("JSESSIONID");
+        this.session = SessionManager.findSession(jsessionid);
+    }
+
+    public Session getSession(boolean create) {
+        if (this.session != null) {
+            return this.session;
+        }
+
+        if (create) {
+            this.session = SessionManager.createSession();
+            return this.session;
+        }
+        return null;
+    }
+
 
     public void setPath(String path) {
         this.path = path;
@@ -53,9 +73,5 @@ public class HttpRequest {
 
     public boolean endsWith(String type) {
         return path.endsWith(type);
-    }
-
-    public boolean hasJsessionId() {
-        return httpCookie.hasJsessionId();
     }
 }

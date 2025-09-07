@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,21 +61,21 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.endsWith(".css") && request.hasMethod(HttpRequestMethod.GET)) {
-                serveStaticFile(request, response, "text/css;charset=utf-8");
+                serveStaticFile(request.getPath(), response, "text/css;charset=utf-8");
                 return;
             }
 
             if (request.endsWith(".html") && request.hasMethod(HttpRequestMethod.GET)) {
-                serveStaticFile(request, response, "text/html;charset=utf-8");
+                serveStaticFile(request.getPath(), response, "text/html;charset=utf-8");
                 return;
             }
 
             if (request.endsWith(".js") && request.hasMethod(HttpRequestMethod.GET)) {
-                serveStaticFile(request, response, "text/javascript;charset=utf-8");
+                serveStaticFile(request.getPath(), response, "text/javascript;charset=utf-8");
                 return;
             }
 
-            serveStaticFile(request, response, "text/html;charset=utf-8");
+            serveStaticFile(request.getPath(), response, "text/html;charset=utf-8");
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -84,8 +83,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleLogin(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         if (request.hasMethod(HttpRequestMethod.GET)) {
-            request.setPath("/login.html");
-            serveStaticFile(request, response, "text/html;charset=utf-8");
+            Session session = request.getSession(false);
+            if (session != null && session.getAttribute("user") != null) {
+                response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
+            }
+            serveStaticFile("/login.html", response, "text/html;charset=utf-8");
             return;
         }
 
@@ -100,10 +102,9 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
             log.info("user: {}", userOptional.get());
-            if (!request.hasJsessionId()) {
-                String jsessionId = "JSESSIONID=" + UUID.randomUUID();
-                response.addHeader("Set-Cookie", jsessionId);
-            }
+            Session session = request.getSession(true);
+            session.setAttribute("user", userOptional.get());
+            response.addCookie("JSESSIONID", session.getId());
             response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
             return;
         }
@@ -113,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
     private void handleSignUp(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         if (request.hasMethod(HttpRequestMethod.GET)) {
             request.setPath("/register.html");
-            serveStaticFile(request, response, "text/html;charset=utf-8");
+            serveStaticFile(request.getPath(), response, "text/html;charset=utf-8");
             return;
         }
 
@@ -131,8 +132,8 @@ public class Http11Processor implements Runnable, Processor {
         response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
     }
 
-    private void serveStaticFile(HttpRequest request, HttpResponse response, String contentType) throws IOException, URISyntaxException {
-        final var resource = getClass().getClassLoader().getResource("static" + request.getPath());
+    private void serveStaticFile(String path, HttpResponse response, String contentType) throws IOException, URISyntaxException {
+        final var resource = getClass().getClassLoader().getResource("static" + path);
         if (resource != null) {
             final Path resourcePath = Paths.get(resource.toURI());
             byte[] body = Files.readAllBytes(resourcePath);

@@ -23,8 +23,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public boolean hasJsessionId() {
-        return cookies.keySet().stream()
-                .anyMatch(cookie -> cookie.equals("JSESSIONID"));
+    public String getCookie(String key) {
+        return cookies.get(key);
     }
 }

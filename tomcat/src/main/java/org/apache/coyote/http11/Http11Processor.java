@@ -47,27 +47,10 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestUri = getRequestUri(bufferedReader);
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
+
             String contentType = resolveContentType(requestUri, requestHeaders);
+            String response = generateResponse(requestUri, contentType);
 
-            if (UriParser.isRootPath(requestUri)) {
-                String response = buildResponse("Hello world!", contentType);
-                sendResponse(outputStream, response);
-                return;
-            }
-
-            String path = requestUri;
-            if (UriParser.hasQuery(requestUri)) {
-                path = UriParser.extractPath(requestUri);
-                String queryString = UriParser.extractQueryString(requestUri);
-                Map<String, String> queryParams = QueryParamsParser.parse(queryString);
-                if (path.equals("/login")) {
-                    findUserByAccountParam(queryParams);
-                }
-            }
-
-            Path filePath = getFilePath(path, contentType);
-            String responseBody = new String(Files.readAllBytes(filePath));
-            String response = buildResponse(responseBody, contentType);
             sendResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
@@ -95,6 +78,26 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "html";
+    }
+
+    private String generateResponse(String requestUri, String contentType) throws IOException {
+        if (UriParser.isRootPath(requestUri)) {
+            return buildResponse("Hello world!", contentType);
+        }
+
+        String path = requestUri;
+        if (UriParser.hasQuery(requestUri)) {
+            path = UriParser.extractPath(requestUri);
+            String queryString = UriParser.extractQueryString(requestUri);
+            Map<String, String> queryParams = QueryParamsParser.parse(queryString);
+            if (path.equals("/login")) {
+                findUserByAccountParam(queryParams);
+            }
+        }
+
+        Path filePath = getFilePath(path, contentType);
+        String responseBody = new String(Files.readAllBytes(filePath));
+        return buildResponse(responseBody, contentType);
     }
 
     private Path getFilePath(String path, String contentType) {

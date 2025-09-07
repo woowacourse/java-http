@@ -11,8 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -41,10 +39,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final var requestLine = reader.readLine();
-            final var requestPath = extractRequestPath(requestLine);
-            final Map<String, String> queryParameters = extractQueryParameters(requestLine);
-
+            final var requestLine = RequestLine.from(reader.readLine());
+            final var requestPath = requestLine.getPath();
+            final Map<String, String> queryParameters = requestLine.getQueryParameters();
             if(requestPath.equals("login")) {
                 printMemberInfo(queryParameters.get("account"), queryParameters.get("password"));
             }
@@ -70,45 +67,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String extractRequestPath(final String requestLine) {
-        if (requestLine == null || requestLine.isBlank()) {
-            return "";
-        }
-
-        final String[] parts = requestLine.split(" ");
-        if(parts.length < 2) {
-            return "";
-        }
-        String requestUri = parts[1].substring(1);
-        return requestUri.split("\\?")[0];
-    }
-
-    private Map<String, String> extractQueryParameters(String requestLine) {
-        if(requestLine == null || requestLine.isBlank()) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> queryParameters = new HashMap<>();
-        String[] requestLineParts = requestLine.split(" ");
-        if(requestLineParts.length <2) {
-            return Collections.emptyMap();
-        }
-        String requestUri = requestLineParts[1];
-
-        String[] requestUriParts = requestUri.split("\\?");
-        if(requestUriParts.length <2) {
-            return Collections.emptyMap();
-        }
-
-        String queryString = requestUriParts[1];
-        for (String rawParam : queryString.split("&")) {
-            String[] rawParamParts = rawParam.split("=");
-            if(rawParamParts.length>=2) {
-                queryParameters.put(rawParamParts[0], rawParamParts[1]);
-            }
-        }
-        return queryParameters;
     }
 
     public void printMemberInfo(String account, String password) {

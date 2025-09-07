@@ -86,6 +86,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public void printMemberInfo(String account, String password) {
+        if(account == null || account.isBlank()) {
+            return;
+        }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isEmpty()) {
             return;

@@ -18,8 +18,8 @@ public class HttpResponse {
         headers.put("Content-Type", "text/html;charset=utf-8");
     }
 
-    public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+    public void addHeader(String headerName, String value) {
+        headers.put(headerName, value);
     }
 
     public void setBody(byte[] body) {

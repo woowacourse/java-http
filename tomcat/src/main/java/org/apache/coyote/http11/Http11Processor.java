@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +100,10 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
             log.info("user: {}", userOptional.get());
+            if (!request.hasJsessionId()) {
+                String jsessionId = "JSESSIONID=" + UUID.randomUUID();
+                response.addHeader("Set-Cookie", jsessionId);
+            }
             response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
             return;
         }
@@ -131,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         if (resource != null) {
             final Path resourcePath = Paths.get(resource.toURI());
             byte[] body = Files.readAllBytes(resourcePath);
-            response.setContentType(contentType);
+            response.addHeader("Content-Type", contentType);
             response.setBody(body);
         }
         response.send();

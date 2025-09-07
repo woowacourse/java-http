@@ -7,20 +7,23 @@ public class HttpRequest {
     private final HttpRequestMethod method;
     private String path;
     private final Map<String, String> queryParams;
+    private final HttpCookie httpCookie;
     private final Map<String, String> headers;
     private final Map<String, String> formParams;
 
     public HttpRequest(
             HttpRequestMethod method,
             String path,
-            Map<String, String> headers,
             Map<String, String> queryParams,
+            Map<String, String> headers,
+            HttpCookie httpCookie,
             Map<String, String> formParams
     ) {
         this.method = method;
         this.path = path;
-        this.headers = headers;
         this.queryParams = queryParams;
+        this.headers = headers;
+        this.httpCookie = httpCookie;
         this.formParams = formParams;
     }
 
@@ -50,5 +53,9 @@ public class HttpRequest {
 
     public boolean endsWith(String type) {
         return path.endsWith(type);
+    }
+
+    public boolean hasJsessionId() {
+        return httpCookie.hasJsessionId();
     }
 }

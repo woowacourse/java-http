@@ -18,11 +18,12 @@ public class HttpRequestParser {
         final Map<String, String> queryParams = parseQueryParams(uri);
 
         final Map<String, String> headers = readHeaders(bufferedReader);
+        final HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
 
         final String body = readBody(headers, bufferedReader);
         final Map<String, String> formParams = readFormParams(headers, body);
 
-        return new HttpRequest(method, path, queryParams, headers, formParams);
+        return new HttpRequest(method, path, queryParams, headers, httpCookie, formParams);
     }
 
     private String readRequestLine(BufferedReader bufferedReader) throws IOException {

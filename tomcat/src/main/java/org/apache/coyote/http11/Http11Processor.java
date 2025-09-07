@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -55,8 +54,9 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpMethod.equals("GET") && endPoint.equals("/css/styles.css")) {
                 final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
-                final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                final String response = createCssResponse(responseBody);
+                validateNullResource(resource);
+                final String responseBody = Files.readString(Paths.get(resource.toURI()));
+                final String response = createHtmlResponse(responseBody);
                 writeAndFlush(outputStream, response);
             }
 
@@ -71,7 +71,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 log.info("user: {}", user.toString());
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
-                final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                validateNullResource(resource);
+                final String responseBody = Files.readString(Paths.get(resource.toURI()));
                 final String response = createHtmlResponse(responseBody);
                 writeAndFlush(outputStream, response);
                 return;

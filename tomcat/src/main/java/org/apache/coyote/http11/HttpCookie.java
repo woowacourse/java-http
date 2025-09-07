@@ -40,4 +40,8 @@ public class HttpCookie {
     public boolean contains(String key) {
         return map.containsKey(key);
     }
+
+    public String getValue(String key) {
+        return map.get(key);
+    }
 }

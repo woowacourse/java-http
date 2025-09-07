@@ -106,7 +106,10 @@ public class HttpRequest {
         return body;
     }
 
-    public boolean existsCookie(String key) {
-        return cookies != null && cookies.contains(key);
+    public String getCookie(String key) {
+        if (cookies == null) {
+            return null;
+        }
+        return cookies.getValue(key);
     }
 }

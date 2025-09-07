@@ -16,15 +16,27 @@ public class LoginHandler {
 
     public HttpResponse handle(HttpRequest request) {
         if (request.getMethod().equals("GET")) {
-            // TODO: 로그인 여부 따른 redirect html 재지정하기
-            // if (!request.existsCookie("JSESSIONID")) {
-            return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/login.html");
+            return getLoginPage(request);
         }
         if (request.getMethod().equals("POST")) {
             return login(request);
         }
 
         return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/401.html"); // TODO: 405 처리 필요
+    }
+
+    private HttpResponse getLoginPage(HttpRequest request) {
+        String sessionId = request.getCookie("JSESSIONID");
+        if (sessionId == null) {
+            return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/login.html");
+        }
+
+        Session session = SessionManager.getInstance().findSession(sessionId);
+        if (session != null && session.getUser() != null) {
+            return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+        }
+
+        return new HttpResponse(HttpStatusCode.UNAUTHORIZED, ContentType.HTML, "/401.html");
     }
 
     private HttpResponse login(HttpRequest request) {

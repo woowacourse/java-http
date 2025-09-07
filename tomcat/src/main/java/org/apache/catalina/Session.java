@@ -1,5 +1,6 @@
 package org.apache.catalina;
 
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,10 @@ public class Session {
 
     public Object getAttribute(final String name) {
         return values.get(name);
+    }
+
+    public User getUser() {
+        return (User) values.get("user");
     }
 
     public void setAttribute(final String name, final Object value) {

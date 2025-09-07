@@ -25,7 +25,7 @@ public class RegisterHandler {
     private HttpResponse register(HttpRequest request) {
         User user = createNewUser(request);
         InMemoryUserRepository.save(user);
-        log.info("로그인 성공! 아이디 : {}", user.getAccount());
+        log.info("회원가입 성공! 아이디 : {}", user.getAccount());
         return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
     }
 

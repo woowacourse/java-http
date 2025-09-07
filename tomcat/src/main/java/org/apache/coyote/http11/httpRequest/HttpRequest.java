@@ -1,30 +1,38 @@
 package org.apache.coyote.http11.httpRequest;
 
+import org.apache.coyote.http11.general.HttpBody;
+
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String path;
-    private final QueryStrings queryStrings;
+    private final HttpHeaders headers;
+    private final HttpBody body;
 
-    public HttpRequest(HttpMethod method, String path, QueryStrings queryStrings) {
-        this.method = method;
-        this.path = path;
-        this.queryStrings = queryStrings;
-    }
-
-    public boolean pathEquals(String path) {
-        return this.path.equals(path);
+    public HttpRequest(HttpHeaders headers, HttpBody body) {
+        this.headers = headers;
+        this.body = body;
     }
 
     public boolean isQueryStringsEmpty() {
-        return this.queryStrings.isEmpty();
+        return this.headers.isQueryStringsEmpty();
     }
 
-    public String getQueryStringOf(String key) {
-        return queryStrings.get(key);
+    public String getQueryStringValueOf(String key) {
+        return headers.getQueryStringOf(key);
+    }
+
+    public boolean pathEquals(String path) {
+        return this.headers.pathEquals(path);
+    }
+
+    public HttpMethod getMethod() {
+        return headers.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return headers.getPath();
+    }
+
+    public String getBodyValueOf(String key) {
+        return body.get(key);
     }
 }

@@ -23,13 +23,14 @@ public class ApiRouter {
     }
 
     private void initializeRouteTable() {
-        routeMap.put("/login", userController::login);
-        routeMap.put("/register", userController::register);
+        routeMap.put("GET /login", userController::loginGet);
+        routeMap.put("POST /login", userController::loginPost);
+        routeMap.put("GET /register", userController::registerGet);
     }
 
     public HttpResponse route(HttpRequest httpRequest) {
         try {
-            Function<HttpRequest, ControllerResponse> handler = routeMap.get(httpRequest.getPath());
+            Function<HttpRequest, ControllerResponse> handler = routeMap.get(httpRequest.getMethod() + " " + httpRequest.getPath());
             if (handler == null) {
                 return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "서버 내부에서 오류가 발생했습니다.");
             }

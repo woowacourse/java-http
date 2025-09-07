@@ -13,12 +13,13 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    public ControllerResponse loginPage(HttpRequest httpRequest) {
+        return new StaticFileResponse(HttpStatus.OK, "login");
+    }
+
     public ControllerResponse login(HttpRequest httpRequest) {
-        String account = httpRequest.getQueryStringOf("account");
-        String password = httpRequest.getQueryStringOf("password");
-        if (account == null && password == null) {
-            return new StaticFileResponse(HttpStatus.OK, "login");
-        }
+        String account = httpRequest.getBodyValueOf("account");
+        String password = httpRequest.getBodyValueOf("password");
         if (account != null && password != null) {
             return handleLoginResult(account, password);
         }

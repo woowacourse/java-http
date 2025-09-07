@@ -42,15 +42,8 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String line = br.readLine();
-            if (line == null || line.isBlank()) {
-                writeError(outputStream, 400, "Bad Request", "Request line is empty");
-                return;
-            }
-
-            String[] tokens = line.trim().split(" ");
-            if (tokens.length != 3) {
-                writeError(outputStream, 400, "Bad Request", "Invalid request line");
+            String[] tokens = readStartLine(br, outputStream);
+            if (tokens == null) {
                 return;
             }
 
@@ -79,6 +72,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String[] readStartLine(final BufferedReader br, final OutputStream outputStream) throws IOException {
+        String line = br.readLine();
+        if (line == null || line.isBlank()) {
+            writeError(outputStream, 400, "Bad Request", "Request line is empty");
+            return null;
+        }
+
+        String[] tokens = line.trim().split(" ");
+        if (tokens.length != 3) {
+            writeError(outputStream, 400, "Bad Request", "Invalid request line");
+            return null;
+        }
+        return tokens;
     }
 
     private String makeUri(final String rawUri, final int index) {

@@ -65,13 +65,23 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
-            final String statusLine = "HTTP/1.1 200 OK";
+            String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
             if ("GET".equals(method)) {
                 if ("/login".equals(path)) {
-                    responseBody = handleLogin(queryParams);
+                    if (queryParams.isEmpty()) {
+                        responseBody = readFileFromClasspath("static/login.html");
+                    } else {
+                        if (handleLogin(queryParams)) {
+                            statusLine = "HTTP/1.1 302 Found";
+                            responseHeaders.put("Location", "/index.html");
+                        } else {
+                            statusLine = "HTTP/1.1 302 Found";
+                            responseHeaders.put("Location", "/401.html");
+                        }
+                    }
                 } else if (!"/".equals(path)) {
                     final String resourcePath = "static" + path;
                     responseBody = readFileFromClasspath(resourcePath);
@@ -120,7 +130,7 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String handleLogin(Map<String, String> queryParams) {
+    private boolean handleLogin(Map<String, String> queryParams) {
         try {
             final String account = queryParams.get("account");
             final String password = queryParams.get("password");
@@ -129,11 +139,14 @@ public class Http11Processor implements Runnable, Processor {
 
             if (user.checkPassword(password)) {
                 log.info("user: {}", user);
+                return true;
+            } else {
+                return false;
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return false;
         }
-        return readFileFromClasspath("static/login.html");
     }
 
     private String readFileFromClasspath(String resourcePath) {

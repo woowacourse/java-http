@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
+    private static final String EMPTY_RESPONSE_BODY = "";
+
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
     private final Location location;
@@ -24,6 +26,24 @@ public class HttpResponse {
         this.location = location;
         this.contentType = contentType;
         this.responseBody = responseBody;
+    }
+
+    public static HttpResponse ok(
+            final HttpVersion httpVersion, final ContentType contentType, final String responseBody
+    ) {
+        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(), contentType, responseBody);
+    }
+
+    public static HttpResponse noContent(
+            final HttpVersion httpVersion, final ContentType contentType, final String responseBody
+    ) {
+        return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(), contentType, responseBody);
+    }
+
+    public static HttpResponse found(
+            final HttpVersion httpVersion, final Location location, final ContentType contentType
+    ) {
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, contentType, EMPTY_RESPONSE_BODY);
     }
 
     public byte[] toBytes() {

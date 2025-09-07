@@ -3,7 +3,6 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.NotFoundException;
 import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
@@ -29,11 +28,8 @@ public class LoginRequestHandler {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         if (user.checkPassword(password)) {
-            return new HttpResponse(httpVersion, HttpStatus.FOUND, new Location("/index.html"),
-                    ContentType.APPLICATION_JSON, "");
+            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON);
         }
-
-        return new HttpResponse(httpVersion, HttpStatus.FOUND, new Location("/401.html"),
-                ContentType.APPLICATION_JSON, "");
+        return HttpResponse.found(httpVersion, new Location("/401.html"), ContentType.APPLICATION_JSON);
     }
 }

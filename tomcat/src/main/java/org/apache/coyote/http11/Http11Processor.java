@@ -4,11 +4,9 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.handler.RegisterRequestHandler;
 import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpStatus;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
-import com.techcourse.http.response.Location;
 import com.techcourse.util.FileUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,19 +70,16 @@ public class Http11Processor implements Runnable, Processor {
         HttpVersion httpVersion = httpRequest.getHttpVersion();
 
         if (httpRequest.isRootPath()) {
-            return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(),
-                    ContentType.TEXT_HTML, "Hello world!");
+            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, "Hello world!");
         }
 
         String fileName = FileUtil.createFileName(httpRequest.getFilePath());
 
         if ("/static/favicon.ico".equals(fileName)) {
-            return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(),
-                    ContentType.IMAGE_X_ICON, "");
+            return HttpResponse.noContent(httpVersion, ContentType.IMAGE_X_ICON, "");
         }
 
         String responseBody = FileUtil.readResource(fileName);
-        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(),
-                httpRequest.getContentType(), responseBody);
+        return HttpResponse.ok(httpVersion, httpRequest.getContentType(), responseBody);
     }
 }

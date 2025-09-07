@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpStatus;
-
 public class StatusLine { // HTTP/1.1 200 OK
 
     private final String protocol; // HTTP/1.1

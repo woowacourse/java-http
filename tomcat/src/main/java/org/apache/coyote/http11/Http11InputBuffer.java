@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.RequestCookie;
@@ -13,31 +11,32 @@ import org.apache.catalina.SessionManager;
 
 public class Http11InputBuffer {
 
+    private static final int END_SIGN_FOR_STREAM = -1;
     private final InputStream inputStream;
     private final SessionManager sessionManager;
-    private final Charset charset;
+    private final Charset headerCharset;
 
-    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset charset) {
+    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset headerCharset) {
         this.inputStream = inputStream;
         this.sessionManager = sessionManager;
-        this.charset = charset;
+        this.headerCharset = headerCharset;
     }
 
     public HttpRequest read() throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        String requestLine = bufferedReader.readLine();
+        String requestLine = readLine(inputStream);
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
         }
 
         String[] splitRequestLine = requestLine.split(" ");
+        if (splitRequestLine.length < 3) {
+            throw new IllegalArgumentException("요청 라인 형식 오류: " + requestLine);
+        }
         String httpMethod = splitRequestLine[0];
         String uri = splitRequestLine[1];
-        double httpVersion = Double.parseDouble(splitRequestLine[2].split("/")[1]);
+        String httpVersion = splitRequestLine[2];
 
-        Map<String, String> headers = parseHeaders(bufferedReader);
+        Map<String, String> headers = parseHeaders(inputStream);
 
         String host = headers.getOrDefault("host", "");
         String contentType = headers.getOrDefault("content-type", "");
@@ -45,18 +44,9 @@ public class Http11InputBuffer {
         String rawCookie = headers.getOrDefault("cookie", "");
 
         String requestBody = null;
-        if (httpMethod.equals("POST") && contentLength > 0) {
-            StringBuilder bodyBuilder = new StringBuilder();
-            char[] buffer = new char[1024];
-            int charsRead;
-            int totalBytesRead = 0;
-
-            while (totalBytesRead < contentLength && (charsRead = bufferedReader.read(buffer, 0,
-                    Math.min(buffer.length, contentLength - totalBytesRead))) != -1) {
-                totalBytesRead += new String(buffer, 0, charsRead).getBytes(StandardCharsets.UTF_8).length;
-                bodyBuilder.append(buffer, 0, charsRead);
-            }
-            requestBody = bodyBuilder.toString();
+        if ("POST".equalsIgnoreCase(httpMethod) && contentLength > 0) {
+            byte[] body = inputStream.readNBytes(contentLength);
+            requestBody = new String(body, headerCharset);
         }
 
         RequestCookie requestCookie = null;
@@ -76,10 +66,36 @@ public class Http11InputBuffer {
         );
     }
 
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+    private String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int readByte;
+        boolean seenCR = false;
+
+        while ((readByte = inputStream.read()) != END_SIGN_FOR_STREAM) {
+            if (readByte == '\r') {
+                seenCR = true;
+                continue;
+            }
+            if (seenCR && readByte == '\n') {
+                break;
+            }
+            if (seenCR) {
+                buffer.write('\r');
+                seenCR = false;
+            }
+            buffer.write(readByte);
+        }
+
+        if (readByte == END_SIGN_FOR_STREAM && buffer.size() == 0) {
+            return null;
+        }
+        return buffer.toString(headerCharset);
+    }
+
+    private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+        while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
             int colonIndex = line.indexOf(":");
             if (colonIndex > 0) {
                 String key = line.substring(0, colonIndex).toLowerCase().trim();
@@ -94,9 +110,9 @@ public class Http11InputBuffer {
         Map<String, String> cookieValues = new HashMap<>();
         String[] pairs = rawCookies.split("; ");
         for (String pair : pairs) {
-            String[] splitPair = pair.split("=");
+            String[] splitPair = pair.split("=", 2);
             String key = splitPair[0];
-            String value = splitPair[1];
+            String value = (splitPair.length == 2) ? splitPair[1] : "";
             cookieValues.put(key, value);
         }
         return new RequestCookie(cookieValues);

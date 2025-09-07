@@ -21,7 +21,7 @@ public class Http11OutputBuffer {
     public String parseToString(HttpResponse httpResponse) {
         StringBuilder responseBuilder = new StringBuilder();
 
-        responseBuilder.append(String.format("HTTP/%.1f %d %s ", httpResponse.httpVersion(), httpResponse.statusCode(),
+        responseBuilder.append(String.format("%s %d %s ", httpResponse.httpVersion(), httpResponse.statusCode(),
                 httpResponse.status()));
         responseBuilder.append("\r\n");
 

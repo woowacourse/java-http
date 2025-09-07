@@ -25,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
     private final Socket connection;
 

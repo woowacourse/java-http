@@ -11,14 +11,14 @@ public class HttpRequest {
     private final SessionManager sessionManager;
     private final String httpMethod;
     private final String url;
-    private final double httpVersion;
+    private final String httpVersion;
     private final String host;
     private final String contentType;
     private final int contentLength;
     private final String requestBody;
     private final RequestCookie cookie;
 
-    public HttpRequest(SessionManager sessionManager, String httpMethod, String url, double httpVersion, String host,
+    public HttpRequest(SessionManager sessionManager, String httpMethod, String url, String httpVersion, String host,
                        String contentType, String requestBody, RequestCookie cookie) {
         this.sessionManager = sessionManager;
         this.httpMethod = httpMethod;
@@ -67,7 +67,7 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public double getHttpVersion() {
+    public String getHttpVersion() {
         return httpVersion;
     }
 }

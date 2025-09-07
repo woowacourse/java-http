@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.catalina.ResponseCookie;
 
 public record HttpResponse(
-        double httpVersion,
+        String httpVersion,
         int statusCode,
         String status,
         String contentType,
@@ -19,7 +19,7 @@ public record HttpResponse(
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public HttpResponse(
-            double httpVersion,
+            String httpVersion,
             int statusCode,
             String status,
             String responseBody,
@@ -39,7 +39,7 @@ public record HttpResponse(
     }
 
     public HttpResponse(
-            double httpVersion,
+            String httpVersion,
             int statusCode,
             String status,
             String responseBody,
@@ -60,7 +60,7 @@ public record HttpResponse(
     }
 
     public HttpResponse(
-            double httpVersion,
+            String httpVersion,
             int statusCode,
             String status,
             String location
@@ -79,7 +79,7 @@ public record HttpResponse(
     }
 
     public HttpResponse(
-            double httpVersion,
+            String httpVersion,
             int statusCode,
             String status,
             String location,

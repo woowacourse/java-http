@@ -48,10 +48,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String rawUri = tokens[1].trim();
-            int index = rawUri.indexOf("?");
+            int queryIndex = rawUri.indexOf("?");
 
-            String uri = makeUri(rawUri, index);
-            Map<String, List<String>> query = makeQuery(rawUri, index);
+            String uri = makeUri(rawUri, queryIndex);
+            Map<String, List<String>> queryParameters = makeQueryParameters(rawUri, queryIndex);
 
             if (uri.equals("/") || uri.isEmpty()) {
                 String responseBody = "Hello world!";
@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (uri.equals("/login")) {
-                handleLogin(outputStream, query);
+                handleLogin(outputStream, queryParameters);
                 return;
             }
 
@@ -89,30 +89,30 @@ public class Http11Processor implements Runnable, Processor {
         return tokens;
     }
 
-    private String makeUri(final String rawUri, final int index) {
-        return (index >= 0) ? rawUri.substring(0, index) : rawUri;
+    private String makeUri(final String rawUri, final int queryIndex) {
+        return (queryIndex >= 0) ? rawUri.substring(0, queryIndex) : rawUri;
     }
 
-    private Map<String, List<String>> makeQuery(final String rawUri, final int index) {
-        String rawQuery = (index >= 0) ? rawUri.substring(index + 1) : "";
-        return parseQuery(rawQuery);
+    private Map<String, List<String>> makeQueryParameters(final String rawUri, final int queryIndex) {
+        String rawQueryParameters = (queryIndex >= 0) ? rawUri.substring(queryIndex + 1) : "";
+        return parseQueryParameters(rawQueryParameters);
     }
 
-    private Map<String, List<String>> parseQuery(final String queryString) {
-        Map<String, List<String>> query = new HashMap<>();
-        if (queryString == null || queryString.isEmpty()) {
-            return query;
+    private Map<String, List<String>> parseQueryParameters(final String queryParameters) {
+        Map<String, List<String>> parameters = new HashMap<>();
+        if (queryParameters == null || queryParameters.isEmpty()) {
+            return parameters;
         }
-        String[] split = queryString.split("&");
+        String[] split = queryParameters.split("&");
         for (String pair : split) {
             int eq = pair.indexOf("=");
 
             String key = pair.substring(0, eq);
             String value = pair.substring(eq + 1);
 
-            query.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+            parameters.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
         }
-        return query;
+        return parameters;
     }
 
     private void handleStatic(String uri, final OutputStream outputStream) throws IOException, URISyntaxException {
@@ -134,11 +134,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleLogin(
             final OutputStream outputStream,
-            final Map<String, List<String>> query
+            final Map<String, List<String>> queryParameters
     )
             throws IOException, URISyntaxException {
-        String account = getFirst(query, "account");
-        String password = getFirst(query, "password");
+        String account = getFirst(queryParameters, "account");
+        String password = getFirst(queryParameters, "password");
 
         if (account != null && password != null) {
             InMemoryUserRepository.findByAccount(account).ifPresentOrElse(

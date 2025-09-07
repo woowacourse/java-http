@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,21 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
+    private String makeResponse(String responseBody, Map<String, String> requests, HttpStatus httpStatus) {
+
+        final String contentType = parseContentType(requests.getOrDefault("Accept", ""));
+        final String protocol = requests.getOrDefault("Protocol", "");
+
+        final String statusLine = protocol + " " + httpStatus.getCode() + " " + httpStatus.getCodeName() + " ";
+
+        return String.join("\r\n",
+                statusLine,
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -45,21 +61,44 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final Map<String, String> requests = parseRequest(bufferedReader);
+            HttpStatus httpStatus = HttpStatus.OK;
+
+            Map<String, String> queries;
 
             final String path = requests.get("Path");
 
-            if (!path.equals("/")) {
-                responseBody = makeResponseBody(path);
+            queries = parseQueries(path);
+
+            // ------------------- 컨트롤러 로직 ---------------------------
+            if (!queries.isEmpty()) {
+                String account = queries.get("account");
+                String password = queries.get("password");
+
+                try {
+                    User user = InMemoryUserRepository.findByAccount(account)
+                            .orElseThrow(IllegalArgumentException::new);
+
+                    if (!user.checkPassword(password)) {
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                    }
+
+                    if (user.checkPassword(password)) {
+                        log.info("user: {}", user);
+                        httpStatus = HttpStatus.FOUND;
+                    }
+
+                } catch (Exception e) {
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                }
             }
 
-            final String contentType = parseContentType(requests.getOrDefault("Accept", ""));
+            if (!path.equals("/")) {
+                responseBody = makeResponseBody(path, httpStatus);
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            // ------------------- 컨트롤러 로직 ---------------------------
+
+            final var response = makeResponse(responseBody, requests, httpStatus);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -105,13 +144,36 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponseBody(String resource) throws URISyntaxException, IOException {
-        final ClassLoader classLoader = getClass().getClassLoader();
+    private String makeResponseBody(String resource, HttpStatus httpStatus) throws URISyntaxException, IOException {
         String filePath = "";
 
+        if (httpStatus == HttpStatus.UNAUTHORIZED) {
+            filePath = "/401.html";
+        }
+
+        if (httpStatus == HttpStatus.FOUND) {
+            filePath = "/index.html";
+        }
+
+        if (httpStatus == HttpStatus.OK) {
+            filePath = parseFilePath(resource);
+        }
+
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final URL url = classLoader.getResource("static" + filePath);
+        if (url == null) {
+            throw new IOException("파일이 존재하지 않습니다.");
+        }
+
+        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
+        final Path path = resourceFile.toPath();
+
+        return new String(Files.readAllBytes(path));
+    }
+
+    private Map<String, String> parseQueries(String resource) {
         if (resource.contains("?")) {
             int questionIndex = resource.indexOf("?");
-            filePath = resource.substring(0, questionIndex) + ".html";
 
             String queryString = resource.substring(questionIndex + 1);
             String[] queryStrings = queryString.split("&");
@@ -122,25 +184,10 @@ public class Http11Processor implements Runnable, Processor {
                 queryKeyAndValues.put(queries[0], queries[1]);
             }
 
-            String account = queryKeyAndValues.get("account");
-
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-            log.info("user:{}", user);
+            return queryKeyAndValues;
         }
 
-        if (ALLOWED_EXTENSIONS.stream().anyMatch(resource::endsWith)) {
-            filePath = resource;
-        }
-
-        final URL url = classLoader.getResource("static" + filePath);
-        if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
-        }
-        
-        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
-        final Path path = resourceFile.toPath();
-
-        return new String(Files.readAllBytes(path));
+        return Map.of();
     }
 
     private String parseContentType(String headerAccept) {
@@ -148,5 +195,20 @@ public class Http11Processor implements Runnable, Processor {
             return DEFAULT_CONTENT_TYPE;
         }
         return headerAccept.split(",")[0];
+    }
+
+    private String parseFilePath(String resource) {
+        // 쿼리 스트링이 있는 경우
+        if (resource.contains("?")) {
+            int questionIndex = resource.indexOf("?");
+            return resource.substring(0, questionIndex) + ".html";
+        }
+
+        // 쿼리 스트링 없이 확장자로 주어지는 경우
+        if (ALLOWED_EXTENSIONS.stream().anyMatch(resource::endsWith)) {
+            return resource;
+        }
+
+        return resource + ".html";
     }
 }

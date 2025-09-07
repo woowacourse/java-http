@@ -8,4 +8,12 @@ public class Header {
         this.header = header;
         this.value = value;
     }
+
+    public boolean isCookeHeader() {
+        return header.equals("Cookie");
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

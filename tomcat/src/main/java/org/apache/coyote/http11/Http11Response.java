@@ -34,7 +34,22 @@ public class Http11Response {
                         "HTTP/1.1 " + 302 + " " + "Found",
                         "Location: " + location,
                         "Content-Length: 0",
-                        "",
+                        ""
+                );
+                return response.getBytes(StandardCharsets.UTF_8);
+            }
+        };
+    }
+
+    public static Http11Response redirect(final String location, final String cookieHeader) {
+        return new Http11Response(302, "Found", "text/html;charset=utf-8", "") {
+            @Override
+            public byte[] toBytes() {
+                String response = String.join(CRLF,
+                        "HTTP/1.1 302 Found",
+                        "Location: " + location,
+                        "Set-Cookie: " + cookieHeader,
+                        "Content-Length: 0",
                         ""
                 );
                 return response.getBytes(StandardCharsets.UTF_8);

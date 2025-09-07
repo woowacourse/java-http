@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Http11Request {
@@ -67,6 +68,30 @@ public class Http11Request {
         return Arrays.stream(body.split("&"))
                 .map(s -> s.split("="))
                 .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+    }
+
+    public Session getSession(final boolean create) {
+        for (Header header : headers) {
+            if (header.isCookeHeader()) {
+                final Http11Cookie cookie = new Http11Cookie(header.getValue());
+                final String sessionId = cookie.get("JSESSIONID");
+                final Session session = SessionManager.findSession(sessionId);
+                if (session != null) {
+                    return session;
+                }
+                break;
+            }
+        }
+
+        if (create) {
+            final String newSessionId = UUID.randomUUID().toString();
+            final Session newSession = new Session(newSessionId);
+            SessionManager.add(newSession);
+
+            return newSession;
+        }
+
+        return null;
     }
 
     public String extractPath() {

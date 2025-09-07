@@ -11,11 +11,11 @@ public class ControllerMapping {
     public ControllerMapping() {
         //Dynamic
         register("/login", HttpMethod.POST, new LoginController());
+        register("/login", HttpMethod.GET, new LoginController());
         register("/register", HttpMethod.POST, new RegisterController());
 
         //html
         register("/", HttpMethod.GET, new StaticResourcesController());
-        register("/login", HttpMethod.GET, new StaticResourcesController());
         register("/register", HttpMethod.GET, new StaticResourcesController());
         register("/401.html", HttpMethod.GET, new StaticResourcesController());
         register("/404.html", HttpMethod.GET, new StaticResourcesController());

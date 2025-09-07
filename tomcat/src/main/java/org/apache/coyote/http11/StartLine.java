@@ -17,14 +17,6 @@ public class StartLine {
         this.httpVersion = httpVersion;
     }
 
-    public boolean isStatic() {
-        if (uri.matches(".*\\.(html|css|js|png|jpg|jpeg|gif|ico)$")) {
-            return true;
-        }
-
-        return httpMethod == HttpMethod.GET && !uri.contains("?");
-    }
-
     public String extractPath() {
         if (uri.equals(ROUTE_PATH)) {
             return uri;

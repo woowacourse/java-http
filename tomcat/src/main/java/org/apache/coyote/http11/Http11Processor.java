@@ -12,7 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.catalina.RequestMappingHandler;
+import org.apache.catalina.handler.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

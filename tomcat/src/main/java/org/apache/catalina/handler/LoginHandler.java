@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.handler;
 
 import static org.reflections.Reflections.log;
 
@@ -7,6 +7,8 @@ import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

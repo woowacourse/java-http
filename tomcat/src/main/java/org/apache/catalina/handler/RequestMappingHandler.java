@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.handler;
 
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;

@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface HttpService {
 
-    ContentParseResult doRequest(Map<String, String> query) throws IOException;
+    ContentParseResult doGet(Map<String, String> query) throws IOException;
 }

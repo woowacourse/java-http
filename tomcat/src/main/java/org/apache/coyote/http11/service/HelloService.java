@@ -9,7 +9,7 @@ public class HelloService implements HttpService {
     private static final byte[] content = "Hello world!".getBytes();
 
     @Override
-    public ContentParseResult doRequest(final Map<String, String> query) {
+    public ContentParseResult doGet(final Map<String, String> query) {
         return new ContentParseResult(content, "Content-Type: text/html;charset=utf-8 ");
     }
 }

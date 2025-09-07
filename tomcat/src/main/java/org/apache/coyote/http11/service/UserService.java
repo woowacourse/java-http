@@ -15,19 +15,56 @@ public class UserService implements HttpService {
 
     private static final Logger log = LoggerFactory.getLogger(HttpService.class);
 
-    public ContentParseResult doRequest(Map<String, String> query) throws IOException {
-        String account = query.get("account");
-        String password = query.get("password");
-        if (account != null) {
-            User user = InMemoryUserRepository.findByAccountAndPassword(account, password);
+    public ContentParseResult doGet(Map<String, String> query) throws IOException {
+        try {
+            String account = query.get("account");
+            String password = query.get("password");
+            if (account != null) {
+                User user = InMemoryUserRepository.getByAccountAndPassword(account, password);
+                log.info(user.toString());
+                return new ContentParseResult(getRedirectHtml(), "text/html;charset=utf-8 ", "HTTP/1.1 302 Found ");
+            }
 
-            log.info(user.toString());
+            return new ContentParseResult(getLoginHtml(), "text/html;charset=utf-8 ");
+        } catch (IllegalArgumentException e) {
+            return new ContentParseResult(
+                    getAuthorizationFailHtml(),
+                    "text/html;charset=utf-8 ",
+                    "HTTP/1.1 302 Found "
+            );
         }
+    }
 
+    private static byte[] getAuthorizationFailHtml() throws IOException {
+        URL resource = ClassLoader.getSystemClassLoader()
+                .getResource("static/401.html");
+
+        FileInputStream fileInputStream = new FileInputStream(resource.getFile());
+        return fileInputStream.readAllBytes();
+    }
+
+    private byte[] getRedirectHtml() throws IOException {
+        URL resource = ClassLoader.getSystemClassLoader()
+                .getResource("static/index.html");
+
+        FileInputStream fileInputStream = new FileInputStream(resource.getFile());
+        return fileInputStream.readAllBytes();
+    }
+
+    private static byte[] getLoginHtml() throws IOException {
         URL resource = ClassLoader.getSystemClassLoader()
                 .getResource("static/login.html");
 
         FileInputStream fileInputStream = new FileInputStream(resource.getFile());
-        return new ContentParseResult(fileInputStream.readAllBytes(), "text/html;charset=utf-8 ");
+        return fileInputStream.readAllBytes();
+    }
+
+    public ContentParseResult doPost(Map<String, String> query) throws IOException {
+        String account = query.get("account");
+        String password = query.get("password");
+        User user = InMemoryUserRepository.getByAccountAndPassword(account, password);
+        log.info(user.toString());
+
+        return new ContentParseResult(getLoginHtml(), "text/html;charset=utf-8 ");
     }
 }

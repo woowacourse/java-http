@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] response = String.join(
                             "\r\n",
-                            "HTTP/1.1 200 OK ",
+                            parseResult.getHttpResponseStatus(),
                             parseResult.getAdditionalResponse(),
                             "Content-Length: " + parsedContent.length + " ",
                             "",

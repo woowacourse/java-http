@@ -19,7 +19,7 @@ public class HttpServices {
         validateExistHttpService(contentPath);
 
         HttpService httpService = serviceMap.get(contentPath);
-        return httpService.doRequest(query);
+        return httpService.doGet(query);
     }
 
     private void validateExistHttpService(String contentPath) {

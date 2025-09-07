@@ -2,9 +2,10 @@ package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
-import org.apache.coyote.http11.general.HttpHeader;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
@@ -15,9 +16,30 @@ import org.slf4j.LoggerFactory;
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final SessionManager sessionManager;
+
+    public UserService(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public ControllerResponse loginPage(HttpRequest httpRequest) {
-        return new StaticFileResponse(HttpStatus.OK, "login");
+        String sessionId = findSessionId(httpRequest);
+        if (sessionId == null) {
+            return new StaticFileResponse(HttpStatus.OK, "login");
+        }
+        return new StaticFileResponse(HttpStatus.OK, "index");
+    }
+
+    private String findSessionId(HttpRequest httpRequest) {
+        String cookie = httpRequest.getHeaderValueOf("Cookie");
+        if (cookie == null) {
+            return null;
+        }
+        String[] splittedCookie = cookie.split("; ");
+        return Arrays.stream(splittedCookie)
+            .filter(splitted -> splitted.split("=")[0].equals("JSESSIONID"))
+            .findFirst()
+            .orElse(null);
     }
 
     public ControllerResponse login(HttpRequest httpRequest) {
@@ -36,11 +58,20 @@ public class UserService {
             return new StaticFileResponse(HttpStatus.UNAUTHORIZED, "401");
         }
         logger.info(user.toString());
-        List<HttpHeader> headers = List.of(new HttpHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID()));
-        return new StaticFileResponse(HttpStatus.OK, headers, "index");
+        Session session = buildSessionOfUser(user);
+        StaticFileResponse response = new StaticFileResponse(HttpStatus.OK, "index");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        return response;
     }
 
-    public ControllerResponse registerPage(HttpRequest httpRequest) {
+    private Session buildSessionOfUser(User user) {
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return session;
+    }
+
+    public ControllerResponse registerPage() {
         return new StaticFileResponse(HttpStatus.OK, "register");
     }
 
@@ -50,6 +81,9 @@ public class UserService {
         String password = httpRequest.getBodyValueOf("password");
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
-        return new StaticFileResponse(HttpStatus.CREATED, "index");
+        Session session = buildSessionOfUser(newUser);
+        StaticFileResponse response = new StaticFileResponse(HttpStatus.CREATED, "index");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        return response;
     }
 }

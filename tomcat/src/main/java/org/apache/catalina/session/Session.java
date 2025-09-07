@@ -20,14 +20,17 @@ public class Session implements HttpSession {
         return this.id;
     }
 
+    @Override
     public Object getAttribute(final String key) {
         return this.values.get(key);
     }
 
+    @Override
     public void setAttribute(final String key, final Object value) {
         this.values.put(key, value);
     }
 
+    @Override
     public void removeAttribute(final String key) {
         this.values.remove(key);
     }

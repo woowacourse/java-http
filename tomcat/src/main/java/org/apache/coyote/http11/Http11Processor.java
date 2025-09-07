@@ -39,27 +39,31 @@ public class Http11Processor implements Runnable, Processor {
             String requestStartLine = bufferedReader.readLine();
             HttpRequestUrl url = new HttpRequestUrl(requestStartLine.split(" ")[1]);
 
-            String response;
-            if (url.equalPath("/")) {
-                response = create200Response("Hello world!", ContentType.TEXT_PLAIN);
-            } else if (url.equalPath("/login")) {
-                String account = url.getParameter("account");
-                String password = url.getParameter("password");
-                if (account != null && password != null) {
-                    validateAccount(account, password);
-                }
-                response = createStaticResourceResponse("/login.html");
-            } else if (url.isStaticResourcePath()) {
-                response = createStaticResourceResponse(url.getPath());
-            } else {
-                response = create404Response();
-            }
+            String response = getResponse(url);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(HttpRequestUrl url) throws IOException {
+        if (url.equalPath("/")) {
+            return create200Response("Hello world!", ContentType.TEXT_PLAIN);
+        }
+        if (url.equalPath("/login")) {
+            String account = url.getParameter("account");
+            String password = url.getParameter("password");
+            if (account != null && password != null) {
+                validateAccount(account, password);
+            }
+            return createStaticResourceResponse("/login.html");
+        }
+        if (url.isStaticResourcePath()) {
+            return createStaticResourceResponse(url.getPath());
+        }
+        return create404Response();
     }
 
     private String createStaticResourceResponse(String path) throws IOException {
@@ -75,14 +79,14 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isEmpty()) {
             log.info("존재하지 않는 유저입니다.");
-        } else {
-            User user = optionalUser.get();
-            if (user.checkPassword(password)) {
-                log.info(user.toString());
-            } else {
-                log.info("비밀번호가 일치하지 않습니다.");
-            }
+            return;
         }
+        User user = optionalUser.get();
+        if (!user.checkPassword(password)) {
+            log.info("비밀번호가 일치하지 않습니다.");
+            return;
+        }
+        log.info(user.toString());
     }
 
     private Path getStaticResource(String url) {

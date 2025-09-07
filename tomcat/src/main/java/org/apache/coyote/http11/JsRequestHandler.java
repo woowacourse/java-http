@@ -5,10 +5,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class CssRequestHandler implements HttpRequestHandler {
+public class JsRequestHandler implements HttpRequestHandler {
     @Override
     public boolean support(final RequestStartLine requestStartLine) {
-        return requestStartLine.requestMethod() == RequestMethod.GET && requestStartLine.requestUrl().endsWith(".css");
+        return requestStartLine.requestMethod() == RequestMethod.GET && requestStartLine.requestUrl().endsWith(".js");
     }
 
     @Override
@@ -20,7 +20,7 @@ public class CssRequestHandler implements HttpRequestHandler {
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Type: application/javascript;charset=utf-8 ",
                 "Content-Length: " + bytes.length + " ",
                 "",
                 new String(bytes));

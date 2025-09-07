@@ -10,8 +10,12 @@ public record RequestStartLine(
 ) {
     public Map<String, String> queryParameters() {
         int index = requestUrl.indexOf("?");
-        String queryStrings = requestUrl.substring(index + 1);
+        if (index == -1) {
+            return new HashMap<>();
+        }
         
+        String queryStrings = requestUrl.substring(index + 1);
+
         Map<String, String> queryParameters = new HashMap<>();
         for (String queryString : queryStrings.split("&")) {
             String[] strings = queryString.split("=");

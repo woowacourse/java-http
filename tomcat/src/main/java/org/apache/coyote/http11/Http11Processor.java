@@ -19,7 +19,8 @@ public class Http11Processor implements Runnable, Processor {
             new HomeHttpRequestHandler(),
             new IndexHtmlRequestHandler(),
             new CssRequestHandler(),
-            new LoginRequestHandler()
+            new LoginRequestHandler(),
+            new JsRequestHandler()
     );
 
     private final Socket connection;
@@ -36,14 +37,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream();
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             RequestStartLine requestStartLine = createRequestStartLine(bufferedReader.readLine());
-
             handle(requestStartLine, outputStream);
-            bufferedReader.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

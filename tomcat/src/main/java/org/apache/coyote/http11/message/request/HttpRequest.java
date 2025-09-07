@@ -8,6 +8,9 @@ import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
+
+    //TODO: 요청라인을 전담하는 값 객체로 묶기  (2025-09-7, 일, 17:19)
+    // https://github.com/woowacourse/java-http/pull/800#discussion_r2321263491
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
     private final String version;

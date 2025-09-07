@@ -28,6 +28,8 @@ public class HttpHeaders {
         return httpHeaders;
     }
 
+    //TODO: 여기에도 sanitize 적용하기  (2025-09-7, 일, 17:22)
+    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895285
     public void add(String name, String value) {
         headers.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
     }
@@ -46,6 +48,8 @@ public class HttpHeaders {
         return lines;
     }
 
+    //TODO: 헤더 유효성 검증 강화 필요  (2025-09-7, 일, 17:23)
+    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895289
     private static void validateHeader(String line, String[] parts) {
         if (parts.length != 2) {
             throw new IllegalArgumentException("유효하지 않은 헤더: " + line);

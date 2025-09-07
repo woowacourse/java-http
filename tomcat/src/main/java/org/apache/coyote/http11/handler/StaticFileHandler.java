@@ -15,6 +15,8 @@ public class StaticFileHandler implements HttpRequestHandler {
 
     private static final String STATIC_DIR = "static";
 
+    //TODO: path 검증하기
+    // https://github.com/woowacourse/java-http/pull/800#discussion_r2321263455  (2025-09-7, 일, 17:17)
     @Override
     public boolean canHandle(HttpRequest request) {
         String path = request.getRequestPath();

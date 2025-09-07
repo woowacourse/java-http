@@ -13,6 +13,7 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
+//TODO: com에 의존하는 형상 끊어내기  (2025-09-7, 일, 17:21)
 public class LoginHandler implements HttpRequestHandler {
     private final LoginController loginController = new LoginController();
 

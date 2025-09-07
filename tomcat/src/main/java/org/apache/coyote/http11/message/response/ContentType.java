@@ -24,6 +24,8 @@ public enum ContentType {
         return mimeType;
     }
 
+    //TODO: 널/대소문자/쿼리스트링 케이스 처리하기  (2025-09-7, 일, 17:24)
+    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895296
     public static String getMimeTypeFrom(String path) {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.extension != null && path.endsWith(contentType.extension))

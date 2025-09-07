@@ -47,4 +47,8 @@ public class HttpResponse {
     public void addCookie(String key, String value) {
         cookie.add(key, value);
     }
+
+    public void setLocation(String value) {
+        headers.put("Location", value);
+    }
 }

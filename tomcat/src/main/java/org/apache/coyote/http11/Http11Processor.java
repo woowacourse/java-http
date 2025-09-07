@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,11 +185,7 @@ public class Http11Processor implements Runnable, Processor {
         if (target.equals("/")) {
             return "Hello world!";
         }
-        final var resource = getStaticResource(target);
-        if (resource == null) {
-            throw new FileNotFoundException();
-        }
-        return readContent(resource);
+        return readContent("static" + target);
     }
 
     /**
@@ -201,8 +195,7 @@ public class Http11Processor implements Runnable, Processor {
      */
     private String readNotFoundFile() {
         try {
-            final var notfoundResource = getStaticResource("/404.html");
-            return readContent(notfoundResource);
+            return readContent("static/404.html");
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
@@ -212,26 +205,17 @@ public class Http11Processor implements Runnable, Processor {
      *
      * @param url resource's URL
      * @return resource's text content
+     * @throws FileNotFoundException occurs when couldn't find target file
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String readContent(final URL url) throws IOException {
-        final var result = new StringBuilder();
-        final var readLines = Files.readAllLines(Path.of(url.getPath()));
-        for (String line : readLines) {
-            result.append(line);
-            result.append("\n");
+    private String readContent(final String url) throws FileNotFoundException, IOException {
+        try (final var stream = getClass().getClassLoader()
+                .getResourceAsStream(url)) {
+            if (stream == null) {
+                throw new FileNotFoundException();
+            }
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         }
-        return result.toString();
-    }
-
-    /**
-     * find static resource path url
-     * @param target target file name
-     * @return target resource path url
-     */
-    private URL getStaticResource(final String target) {
-        final var loader = getClass().getClassLoader();
-        return loader.getResource("static" + target);
     }
 
     /**

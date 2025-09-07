@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
 public enum ContentType {
-    
-    HTML("text/html"),
-    TEXT("text/plain"),
-    CSS("text/css"),
+
+    HTML("text/html;charset=utf-8"),
+    TEXT("text/plain;charset=utf-8"),
+    CSS("text/css;charset=utf-8"),
     JAVASCRIPT("application/javascript"),
     JSON("application/json");
 

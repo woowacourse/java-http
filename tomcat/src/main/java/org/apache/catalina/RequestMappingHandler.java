@@ -8,6 +8,12 @@ import org.apache.coyote.http11.HttpStatusCode;
 public class RequestMappingHandler {
 
     public HttpResponse request(HttpRequest request) {
+        if (request.getPath().equals("/")) {
+            return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
+        }
+        if (request.getPath().endsWith(".html")) {
+            return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
+        }
         if (request.getPath().endsWith(".css")) {
             return new HttpResponse(HttpStatusCode.OK, ContentType.CSS, request.getPath());
         }

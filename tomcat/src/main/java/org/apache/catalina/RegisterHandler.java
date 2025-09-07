@@ -4,8 +4,6 @@ import static org.reflections.Reflections.log;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
@@ -32,24 +30,11 @@ public class RegisterHandler {
     }
 
     private User createNewUser(HttpRequest request) {
-        Map<String, String> requestBody = parseRegisterRequestBody(request);
+        Map<String, String> requestBody = request.parseQueryStringForm(request.getBody());
         Long id = InMemoryUserRepository.getNextId();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");
         return new User(id, account, password, email);
-    }
-
-    private Map<String, String> parseRegisterRequestBody(HttpRequest request) {
-        Map<String, String> body = new HashMap<>();
-        String[] parameters = request.getBody().split("&");
-
-        Arrays.stream(parameters)
-                .forEach(parameter -> {
-                            String[] split = parameter.split("=");
-                            body.put(split[0], split[1]);
-                        }
-                );
-        return body;
     }
 }

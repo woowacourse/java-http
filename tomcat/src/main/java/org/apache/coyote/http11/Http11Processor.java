@@ -230,7 +230,7 @@ public class Http11Processor implements Runnable, Processor {
      * @return target resource path url
      */
     private URL getStaticResource(final String target) {
-        final var loader = ClassLoader.getSystemClassLoader();
+        final var loader = getClass().getClassLoader();
         return loader.getResource("static" + target);
     }
 

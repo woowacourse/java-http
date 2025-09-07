@@ -2,6 +2,7 @@ package study;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
@@ -30,11 +31,10 @@ class FileTest {
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
-        final Path path = Path.of("/src/test/resources/" + fileName);
-        final File file = path.toFile();
+        final URL url = getClass().getClassLoader().getResource(fileName);
 
         // todo
-        final String actual = file.getPath();
+        final String actual = url.getFile();
 
         assertThat(actual).endsWith(fileName);
     }

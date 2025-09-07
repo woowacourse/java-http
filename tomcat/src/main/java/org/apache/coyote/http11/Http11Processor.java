@@ -72,8 +72,8 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> request = new HashMap<>();
 
         String requestLine = reader.readLine();
-        if (requestLine == null) {
-            return request;
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new IOException("유효하지 않은 요청입니다.");
         }
         parseRequestLine(requestLine, request);
 
@@ -113,8 +113,7 @@ public class Http11Processor implements Runnable, Processor {
             int questionIndex = resource.indexOf("?");
             filePath = resource.substring(0, questionIndex) + ".html";
 
-            int startIndex = resource.indexOf("?");
-            String queryString = resource.substring(startIndex + 1);
+            String queryString = resource.substring(questionIndex + 1);
             String[] queryStrings = queryString.split("&");
             Map<String, String> queryKeyAndValues = new HashMap<>();
 
@@ -126,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
             String account = queryKeyAndValues.get("account");
 
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-            log.info(user.toString());
+            log.info("user:{}", user);
         }
 
         if (ALLOWED_EXTENSIONS.stream().anyMatch(resource::endsWith)) {
@@ -134,6 +133,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final URL url = classLoader.getResource("static" + filePath);
+        if (url == null) {
+            throw new IOException("파일이 존재하지 않습니다.");
+        }
+        
         final File resourceFile = new File(Objects.requireNonNull(url).toURI());
         final Path path = resourceFile.toPath();
 

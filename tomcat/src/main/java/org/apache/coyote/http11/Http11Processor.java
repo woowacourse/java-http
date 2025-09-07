@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -85,16 +86,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> extractQueryParameters(String requestLine) {
+        if(requestLine == null || requestLine.isBlank()) {
+            return Collections.emptyMap();
+        }
         Map<String, String> queryParameters = new HashMap<>();
         String[] requestLineParts = requestLine.split(" ");
         if(requestLineParts.length <2) {
-            return queryParameters;
+            return Collections.emptyMap();
         }
         String requestUri = requestLineParts[1];
 
         String[] requestUriParts = requestUri.split("\\?");
         if(requestUriParts.length <2) {
-            return queryParameters;
+            return Collections.emptyMap();
         }
 
         String queryString = requestUriParts[1];

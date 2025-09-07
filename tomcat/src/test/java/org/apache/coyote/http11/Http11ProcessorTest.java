@@ -23,7 +23,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/plain ",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -105,7 +105,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
+                "Content-Length: 2430 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

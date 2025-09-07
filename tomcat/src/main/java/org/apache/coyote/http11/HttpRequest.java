@@ -79,7 +79,7 @@ public class HttpRequest {
         if (contentLengthValue == null) {
             return;
         }
-        int contentLength = Integer.parseInt(contentLengthValue);
+        int contentLength = Integer.parseInt(contentLengthValue.trim());
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         this.body = new String(buffer);
@@ -93,11 +93,11 @@ public class HttpRequest {
         return path;
     }
 
-    public String getHeader(String key) {
-        return headers.get(key);
-    }
-
     public String getQueryParameter(String key) {
         return queryParameters.get(key);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

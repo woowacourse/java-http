@@ -2,10 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -48,15 +47,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Request parseRequest(final InputStream inputStream) throws IOException {
-        final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
-        final String requestLineString = reader.readLine();
-        if (requestLineString == null || requestLineString.isBlank()) {
+        final String requestLineString = readLine(inputStream);
+        if (requestLineString.isBlank()) {
             return Http11Request.createInvalid();
         }
         final var requestLine = parseRequestLine(requestLineString);
-        final var headers = parseHeaders(reader);
+        final var headers = parseHeaders(inputStream);
         final String body = parseBody(inputStream, headers);
         return new Http11Request(requestLine.method(), requestLine.path(), requestLine.queryParams(), headers, body);
+    }
+
+    /**
+     * InputStream에서 CRLF(\r\n)를 기준으로 한 줄을 바이트 단위로 읽어 US-ASCII 문자열로 반환합니다.
+     */
+    private String readLine(final InputStream inputStream) throws IOException {
+        final var buffer = new ByteArrayOutputStream();
+        int nextByte;
+        while ((nextByte = inputStream.read()) != -1) {
+            if (nextByte == '\r') {
+                inputStream.read(); // '\n'을 읽고 버립니다.
+                break;
+            }
+            buffer.write(nextByte);
+        }
+        return buffer.toString(StandardCharsets.US_ASCII);
     }
 
     private RequestLine parseRequestLine(final String line) {
@@ -74,10 +88,10 @@ public class Http11Processor implements Runnable, Processor {
         return new RequestLine(method, path, queryParams);
     }
 
-    private Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
+    private Map<String, String> parseHeaders(final InputStream inputStream) throws IOException {
         final var headers = new HashMap<String, String>();
         String headerLine;
-        while (!(headerLine = reader.readLine()).isBlank()) {
+        while (!(headerLine = readLine(inputStream)).isBlank()) {
             final var header = headerLine.split(": ", 2);
             headers.put(header[0].trim(), header[1].trim());
         }

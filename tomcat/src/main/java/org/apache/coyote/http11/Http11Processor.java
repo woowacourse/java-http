@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IllegalArgumentException e) {
             log.warn("bad request : {}", e.getMessage());
         } catch (final NoSuchFileException e) {
-            log.warn("file not found : {}", e.getMessage());
+            log.warn("not found : {}", e.getMessage());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
         } finally {
@@ -63,11 +63,6 @@ public class Http11Processor implements Runnable, Processor {
 
             return createHtmlResponse(defaultResponseBytes);
         }
-        if (requestTarget.equals("/index.html")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createHtmlResponse(fileContent);
-        }
         if (requestTarget.contains("/login")) {
             final byte[] fileContent = readFile("/login.html");
 
@@ -78,9 +73,22 @@ public class Http11Processor implements Runnable, Processor {
 
             return createHtmlResponse(fileContent);
         }
-        final byte[] fileContent = readFile(requestTarget);
+        if (requestTarget.endsWith(".html")) {
+            final byte[] fileContent = readFile(requestTarget);
 
-        return createCssResponse(fileContent);
+            return createHtmlResponse(fileContent);
+        }
+        if (requestTarget.endsWith(".css")) {
+            final byte[] fileContent = readFile(requestTarget);
+
+            return createCssResponse(fileContent);
+        }
+        if (requestTarget.endsWith(".js")) {
+            final byte[] fileContent = readFile(requestTarget);
+
+            return createJsResponse(fileContent);
+        }
+        throw new NoSuchFileException(requestTarget);
     }
 
     private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
@@ -121,7 +129,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("User found : {}", user);
     }
 
-    private static Http11Response createHtmlResponse(final byte[] body) {
+    private Http11Response createHtmlResponse(final byte[] body) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/html;charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.length));
@@ -135,9 +143,23 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private static Http11Response createCssResponse(final byte[] body) {
+    private Http11Response createCssResponse(final byte[] body) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/css;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.length));
+
+        return new Http11Response(
+                "HTTP/1.1",
+                200,
+                "OK",
+                headers,
+                body
+        );
+    }
+
+    private  Http11Response createJsResponse(final byte[] body) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "application/javascript;charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.length));
 
         return new Http11Response(

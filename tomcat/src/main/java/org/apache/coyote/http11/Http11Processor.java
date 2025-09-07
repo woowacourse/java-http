@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.dto.RequestInfo;
 import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.RequestLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +52,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final String requestLine) throws IOException {
-        final String[] parts = requestLine.split(" ");
-        final String method = getMethod(parts);
-        final String path = getPath(parts);
-
-        return requestRouter.handleRoute(method, path);
+        RequestInfo requestInfo = RequestLineParser.parse(requestLine);
+        return requestRouter.handleRoute(requestInfo.method(),requestInfo.path());
     }
 
-    private String getPath(final String[] parts) {
-        return parts.length >= 2 ? parts[1] : "/";
-    }
-
-    private String getMethod(final String[] parts) {
-        return parts.length >= 1 ? parts[0].toUpperCase() : "GET";
-    }
 }

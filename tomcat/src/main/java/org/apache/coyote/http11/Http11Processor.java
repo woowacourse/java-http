@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String RESOURCE_EXTENSION_SEPARATOR = "\\.";
+    private static final String RESOURCE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
 
@@ -111,7 +111,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final URL resource) {
-        final String responseResourceExtension = resource.getPath().split(RESOURCE_EXTENSION_SEPARATOR)[1];
+        final int extensionIndex = resource.getPath().lastIndexOf(RESOURCE_EXTENSION_SEPARATOR);
+        final String responseResourceExtension = resource.getPath().substring(extensionIndex + 1);
         return HttpResponse.getContentType(responseResourceExtension);
     }
 }

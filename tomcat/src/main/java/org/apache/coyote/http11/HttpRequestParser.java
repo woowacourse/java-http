@@ -19,11 +19,12 @@ public class HttpRequestParser {
             throw new IOException("Invalid: malformed request line. " + requestLine);
         }
 
+        final HttpRequestMethod method = HttpRequestMethod.valueOf(requestParts[0]);
         final String uri = requestParts[1];
         final String path = parsePath(uri);
         final Map<String, String> queryParams = parseQueryParams(uri);
 
-        return new HttpRequest(path, queryParams);
+        return new HttpRequest(method, path, queryParams);
     }
 
     private String readRequestLine(BufferedReader bufferedReader) throws IOException {

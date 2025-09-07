@@ -42,39 +42,43 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestParser parser = new HttpRequestParser();
             HttpRequest request = parser.parse(bufferedReader);
             HttpResponse response = new HttpResponse(outputStream);
-            final String path = request.getPath();
 
-            if ("/".equals(path)) {
+            if (request.isPath("/") && request.hasMethod(HttpRequestMethod.GET)) {
                 final byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
                 response.setBody(body);
                 response.send();
                 return;
             }
 
-            if ("/login".equals(path)) {
+            if (request.isPath("/login") && request.hasMethod(HttpRequestMethod.GET)) {
                 handleLogin(request, response);
                 return;
             }
 
-            if (path.endsWith(".css")) {
-                serveStaticFile(path, response, "text/css;charset=utf-8");
+            if (request.isPath("/register") && request.hasMethod(HttpRequestMethod.POST)) {
+                handleSignUp(request, response);
+                return;
+            }
+
+            if (request.endsWith(".css") && request.hasMethod(HttpRequestMethod.GET)) {
+                serveStaticFile(request, response, "text/css;charset=utf-8");
                 response.send();
                 return;
             }
 
-            if (path.endsWith(".html")) {
-                serveStaticFile(path, response, "text/html;charset=utf-8");
+            if (request.endsWith(".html") && request.hasMethod(HttpRequestMethod.GET)) {
+                serveStaticFile(request, response, "text/html;charset=utf-8");
                 response.send();
                 return;
             }
 
-            if (path.endsWith(".js")) {
-                serveStaticFile(path, response, "text/javascript;charset=utf-8");
+            if (request.endsWith(".js") && request.hasMethod(HttpRequestMethod.GET)) {
+                serveStaticFile(request, response, "text/javascript;charset=utf-8");
                 response.send();
                 return;
             }
 
-            serveStaticFile("/index.html", response, "text/html;charset=utf-8");
+            serveStaticFile(request, response, "text/html;charset=utf-8");
             response.send();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -86,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = request.getQueryParam("password");
 
         if (account == null || password == null) {
-            serveStaticFile("/login.html", response, "text/html;charset=utf-8");
+            serveStaticFile(request, response, "text/html;charset=utf-8");
             response.send();
         }
 
@@ -99,8 +103,12 @@ public class Http11Processor implements Runnable, Processor {
         response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
     }
 
-    private void serveStaticFile(String path, HttpResponse response, String contentType) throws IOException, URISyntaxException {
-        final var resource = getClass().getClassLoader().getResource("static" + path);
+    private void handleSignUp(HttpRequest request, HttpResponse response) {
+
+    }
+
+    private void serveStaticFile(HttpRequest request, HttpResponse response, String contentType) throws IOException, URISyntaxException {
+        final var resource = getClass().getClassLoader().getResource("static" + request.getPath());
         if (resource != null) {
             final Path resourcePath = Paths.get(resource.toURI());
             byte[] body = Files.readAllBytes(resourcePath);

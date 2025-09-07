@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(final String requestLine) throws IOException {
         RequestInfo requestInfo = RequestLineParser.parse(requestLine);
-        return requestRouter.handleRoute(requestInfo.method(),requestInfo.path());
+        return requestRouter.handleRoute(requestInfo.method(),requestInfo.path(),requestInfo.queryParams());
     }
 
 }

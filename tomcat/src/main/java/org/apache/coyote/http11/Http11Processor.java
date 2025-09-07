@@ -78,13 +78,13 @@ public class Http11Processor implements Runnable, Processor {
             response.sendRedirect("401.html");
             log.warn(e.getMessage());
         } catch (NoSuchElementException e) {
-            updateResponseWithError(NOT_FOUND, response, e);
+            response.sendRedirect("404.html");
             log.warn("존재하지 않는 리소스: {}", e.getMessage());
         } catch (UnsupportedOperationException e) {
             updateResponseWithError(METHOD_NOT_ALLOWED, response, e);
             log.warn("지원하지 않는 HTTP 메서드: {}", e.getMessage());
-        } catch (UncheckedServletException e) {
-            updateResponseWithError(INTERNAL_SERVER_ERROR, response, e);
+        } catch (Exception e) {
+            response.sendRedirect("500.html");
             log.error("예상치 못한 서버 오류 발생", e);
         }
         return response.toHttpResponse();

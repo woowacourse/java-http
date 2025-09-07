@@ -3,6 +3,7 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
+import java.util.UUID;
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
 import org.apache.coyote.HttpRequestHandler;
@@ -16,6 +17,8 @@ public class LoginHandler implements HttpRequestHandler {
     private static final String MAIN_PAGE_PATH = "/index.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
+
 
     @Override
     public void handleGet(ServletRequest request, ServletResponse response) {
@@ -35,6 +38,13 @@ public class LoginHandler implements HttpRequestHandler {
 
         log.info("로그인 성공! account : {}", findUser.getAccount());
 
+        setJSessionCookie(response);
+
         response.sendRedirect(MAIN_PAGE_PATH);
+    }
+
+    private void setJSessionCookie(ServletResponse response){
+        String uuid = UUID.randomUUID().toString();
+        response.setCookie(JSESSIONID_COOKIE_NAME, uuid);
     }
 }

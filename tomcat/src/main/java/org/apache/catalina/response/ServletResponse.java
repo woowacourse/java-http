@@ -46,6 +46,10 @@ public class ServletResponse {
         headers.add(name, value);
     }
 
+    public void setCookie(String name, String value){
+        cookies.setCookie(name, value);
+    }
+
     public HttpResponse toHttpResponse() {
         HttpResponse httpResponse = new HttpResponse(protocol);
 

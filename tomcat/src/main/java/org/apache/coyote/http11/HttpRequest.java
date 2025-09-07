@@ -5,13 +5,27 @@ import java.util.Map;
 public class HttpRequest {
 
     private final HttpRequestMethod method;
-    private final String path;
+    private String path;
     private final Map<String, String> queryParams;
+    private final Map<String, String> headers;
+    private final Map<String, String> formParams;
 
-    public HttpRequest(HttpRequestMethod method, String path, Map<String, String> queryParams) {
+    public HttpRequest(
+            HttpRequestMethod method,
+            String path,
+            Map<String, String> headers,
+            Map<String, String> queryParams,
+            Map<String, String> formParams
+    ) {
         this.method = method;
         this.path = path;
+        this.headers = headers;
         this.queryParams = queryParams;
+        this.formParams = formParams;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getPath() {
@@ -20,6 +34,10 @@ public class HttpRequest {
 
     public String getQueryParam(String key) {
         return queryParams.get(key);
+    }
+
+    public String getFormParam(String key) {
+        return formParams.get(key);
     }
 
     public boolean hasMethod(HttpRequestMethod method) {

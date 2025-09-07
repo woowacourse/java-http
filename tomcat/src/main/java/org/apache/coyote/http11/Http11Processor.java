@@ -50,48 +50,50 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (request.isPath("/login") && request.hasMethod(HttpRequestMethod.GET)) {
+            if (request.isPath("/login")) {
                 handleLogin(request, response);
                 return;
             }
 
-            if (request.isPath("/register") && request.hasMethod(HttpRequestMethod.POST)) {
+            if (request.isPath("/register")) {
                 handleSignUp(request, response);
                 return;
             }
 
             if (request.endsWith(".css") && request.hasMethod(HttpRequestMethod.GET)) {
                 serveStaticFile(request, response, "text/css;charset=utf-8");
-                response.send();
                 return;
             }
 
             if (request.endsWith(".html") && request.hasMethod(HttpRequestMethod.GET)) {
                 serveStaticFile(request, response, "text/html;charset=utf-8");
-                response.send();
                 return;
             }
 
             if (request.endsWith(".js") && request.hasMethod(HttpRequestMethod.GET)) {
                 serveStaticFile(request, response, "text/javascript;charset=utf-8");
-                response.send();
                 return;
             }
 
             serveStaticFile(request, response, "text/html;charset=utf-8");
-            response.send();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private void handleLogin(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
+        if (request.hasMethod(HttpRequestMethod.GET)) {
+            request.setPath("/login.html");
+            serveStaticFile(request, response, "text/html;charset=utf-8");
+            return;
+        }
+
+        String account = request.getFormParam("account");
+        String password = request.getFormParam("password");
 
         if (account == null || password == null) {
-            serveStaticFile(request, response, "text/html;charset=utf-8");
-            response.send();
+            response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
+            return;
         }
 
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
@@ -103,8 +105,25 @@ public class Http11Processor implements Runnable, Processor {
         response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
     }
 
-    private void handleSignUp(HttpRequest request, HttpResponse response) {
+    private void handleSignUp(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
+        if (request.hasMethod(HttpRequestMethod.GET)) {
+            request.setPath("/register.html");
+            serveStaticFile(request, response, "text/html;charset=utf-8");
+            return;
+        }
 
+        String account = request.getFormParam("account");
+        String password = request.getFormParam("password");
+        String email = request.getFormParam("email");
+
+        if (account == null || password == null) {
+            response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
+            return;
+        }
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
     }
 
     private void serveStaticFile(HttpRequest request, HttpResponse response, String contentType) throws IOException, URISyntaxException {
@@ -115,5 +134,6 @@ public class Http11Processor implements Runnable, Processor {
             response.setContentType(contentType);
             response.setBody(body);
         }
+        response.send();
     }
 }

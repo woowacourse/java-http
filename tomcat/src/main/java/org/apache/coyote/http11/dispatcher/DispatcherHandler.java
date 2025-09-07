@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.coyote.http11.dispatcher.handlerAdapter.HandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class DispatcherHandler {
 
@@ -20,6 +21,6 @@ public class DispatcherHandler {
             }
         }
 
-        throw new IllegalArgumentException();
+        return ResponseEntity.notFound();
     }
 }

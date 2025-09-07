@@ -20,8 +20,12 @@ public class HttpResponse {
         this(new StatusLine(), headers, body);
     }
 
+    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, byte[] body) {
+        this(new StatusLine(httpStatus), headers, body);
+    }
+
     public HttpResponse(Map<String, String> headers) {
-        this(new StatusLine(), headers, null);
+        this(new StatusLine(), headers, new byte[0]);
     }
 
     public byte[] toBytes() {

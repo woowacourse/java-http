@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.dispatcher.handlerAdapter;
 
 import com.techcourse.Controller;
+import com.techcourse.Service;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,10 +19,13 @@ public class MethodHandlerAdapter implements HandlerAdapter {
     }
 
     public static void init() {
-        Controller controller = new Controller();
+        Controller controller = new Controller(new Service());
 
         mappings.put(new RouteKey("GET", "/"),
                 new HandlerMethod(controller, method(controller, "hello")));
+        mappings.put(new RouteKey("POST", "/login"),
+                new HandlerMethod(controller, method(controller, "signIn", Map.class))
+        );
     }
 
     private static Method method(Object object, String name, Class<?>... p) {

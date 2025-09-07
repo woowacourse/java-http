@@ -28,7 +28,15 @@ public class ResponseEntity {
         return buildResponse(body, contentType);
     }
 
+    public static HttpResponse notFound() {
+        return buildResponse(HttpStatus.NOT_FOUND, null, DEFAULT_CONTENT_TYPE);
+    }
+
     private static HttpResponse buildResponse(byte[] body, String contentType) {
+        return buildResponse(HttpStatus.OK, body, contentType);
+    }
+
+    private static HttpResponse buildResponse(HttpStatus httpStatus, byte[] body, String contentType) {
         if (body == null) {
             body = new byte[0];
         }
@@ -36,7 +44,7 @@ public class ResponseEntity {
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(body.length));
 
-        return new HttpResponse(headers, body);
+        return new HttpResponse(httpStatus, headers, body);
     }
 
     public static class Builder {

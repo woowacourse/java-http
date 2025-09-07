@@ -16,8 +16,9 @@ public class StaticResourceHandlerAdapter implements HandlerAdapter {
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
         String url = httpRequest.getMappingLine().getUrl();
-        Optional<URL> foundUrl = ResourceUtil.find(normalize(url));
-        if (foundUrl.isEmpty()) {
+        Optional<URL> foundUrl1 = ResourceUtil.find(normalize(url));
+        Optional<URL> foundUrl2 = ResourceUtil.find(normalize(url) + ".html");
+        if (foundUrl1.isEmpty() && foundUrl2.isEmpty()) {
             return false;
         }
         return true;
@@ -26,16 +27,23 @@ public class StaticResourceHandlerAdapter implements HandlerAdapter {
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
         String url = httpRequest.getMappingLine().getUrl(); // TODO 2025. 9. 7. 21:12: 같은 로직 반복
-        Optional<URL> foundUrl = ResourceUtil.find(normalize(url));
+        Optional<URL> foundUrl1 = ResourceUtil.find(normalize(url));
+        Optional<URL> foundUrl2 = ResourceUtil.find(normalize(url) + ".html");
 
+        URL foundUrl;
+        if (!foundUrl1.isEmpty()) {
+            foundUrl = foundUrl1.get();
+        } else {
+            foundUrl = foundUrl2.get();
+        }
         byte[] body;
         try {
-            body = ResourceUtil.readAll(foundUrl.get());
+            body = ResourceUtil.readAll(foundUrl);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        String contentType = URLConnection.guessContentTypeFromName(url);
+        String contentType = URLConnection.guessContentTypeFromName(foundUrl.toString());
         if (contentType == null) {
             contentType = "application/octet-stream";
         }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.dispatcher;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -14,11 +16,27 @@ public class HandlerMethod {
         this.method = method;
     }
 
-    public HttpResponse invoke(HttpRequest httpRequest) {
+    public HttpResponse invoke(HttpRequest req) {
         try {
-            return (HttpResponse) method.invoke(controller);
+            Map<String, String> qp = req.getMappingLine().getParameters();
+
+            Parameter[] params = method.getParameters();
+            Object[] args = new Object[params.length];
+
+            for (int i = 0; i < params.length; i++) {
+                Class<?> t = params[i].getType();
+                if (t == HttpRequest.class) {
+                    args[i] = req;
+                } else if (Map.class.isAssignableFrom(t)) {
+                    args[i] = qp;
+                } else {
+                    throw new IllegalArgumentException("unsupported param type: " + t.getName());
+                }
+            }
+
+            return (HttpResponse) method.invoke(controller, args);
         } catch (ReflectiveOperationException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(e);
         }
     }
 

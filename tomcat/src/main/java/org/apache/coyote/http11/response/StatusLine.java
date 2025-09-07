@@ -10,8 +10,8 @@ public class StatusLine { // HTTP/1.1 200 OK
         this.httpStatus = HttpStatus.OK;
     }
 
-    public StatusLine(String protocol, HttpStatus httpStatus) {
-        this.protocol = protocol;
+    public StatusLine(HttpStatus httpStatus) {
+        this.protocol = "HTTP/1.1";
         this.httpStatus = httpStatus;
     }
 

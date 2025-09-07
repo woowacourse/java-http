@@ -21,6 +21,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8 ";
+    private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8 ";
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -47,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             final String endPoint = requestHeader[1];
 
             if (httpMethod.equals("GET") && endPoint.equals("/")) {
-                final String response = createHtmlResponse("Hello world!");
+                final String response = createResponse("Hello world!", TEXT_HTML_CHARSET_UTF_8);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -56,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
                 validateNullResource(resource);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                final String response = createCssResponse(responseBody);
+                final String response = createResponse(responseBody, TEXT_CSS_CHARSET_UTF_8);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -65,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + endPoint + ".html");
                 validateNullResource(resource);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                final String response = createHtmlResponse(responseBody);
+                final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -83,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                final String response = createHtmlResponse(responseBody);
+                final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -91,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
             final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
             validateNullResource(resource);
             final String responseBody = Files.readString(Paths.get(resource.toURI()));
-            final String response = createHtmlResponse(responseBody);
+            final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
             writeAndFlush(outputStream, response);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -99,19 +102,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createHtmlResponse(final String responseBody) {
+    private String createResponse(final String responseBody, final String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String createCssResponse(final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css",
+                "Content-Type: " + contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

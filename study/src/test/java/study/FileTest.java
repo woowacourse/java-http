@@ -7,7 +7,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.*;
 import java.util.List;
 
@@ -28,22 +30,12 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final File file = new File("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/study/src/test/resources", fileName);
-        final String actual = file.getAbsolutePath();
-
-        // 파일을 읽을 수 있다.
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final File file = new File(resource.toURI());
+        final String actual = file.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -58,23 +50,9 @@ class FileTest {
     void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        /*
-         file의 경로여야 한다. (디렉토리면 안됨)
-         상대경로로 두면 아예 경로를 찾지 못한다 - 절대경로로 인식하는 듯하다.
-         */
-        /*
-        Path.of나 Paths.get을 통해 경로를 조각조각 붙일 수 있다.
-         */
-        final Path path = Path.of("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/study/src/test/resources", fileName);
+        final Path path = Path.of(getClass().getClassLoader().getResource(fileName).toURI());
 
-        // todo
         final List<String> actual = Files.readAllLines(path);
-
-        // File을 대상으로 CRUD할 수 있다.
-        final Path newPath = Path.of("/Users/ichaeyeong/Desktop/woowacourse/level3/java-http/study/src/test/resources", "copy.txt");
-        Files.copy(path, newPath, StandardCopyOption.REPLACE_EXISTING);
-        Files.writeString(newPath, "copy of nextstep");
 
         assertThat(actual).containsOnly("nextstep");
     }

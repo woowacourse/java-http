@@ -17,6 +17,10 @@ public class UserController {
     }
 
     public ControllerResponse registerGet(HttpRequest httpRequest) {
+        return userService.registerPage(httpRequest);
+    }
+
+    public ControllerResponse registerPost(HttpRequest httpRequest) {
         return userService.register(httpRequest);
     }
 }

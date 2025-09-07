@@ -36,10 +36,16 @@ public class UserService {
         return new StaticFileResponse(HttpStatus.OK, "index");
     }
 
+    public ControllerResponse registerPage(HttpRequest httpRequest) {
+        return new StaticFileResponse(HttpStatus.OK, "register");
+    }
+
     public ControllerResponse register(HttpRequest httpRequest) {
-        if (httpRequest.isQueryStringsEmpty()) {
-            return new StaticFileResponse(HttpStatus.OK, "register");
-        }
-        return new StaticFileResponse(HttpStatus.UNAUTHORIZED, "401");
+        String account = httpRequest.getBodyValueOf("account");
+        String email = httpRequest.getBodyValueOf("email");
+        String password = httpRequest.getBodyValueOf("password");
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        return new StaticFileResponse(HttpStatus.CREATED, "index");
     }
 }

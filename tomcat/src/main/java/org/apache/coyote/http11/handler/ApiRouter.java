@@ -26,6 +26,7 @@ public class ApiRouter {
         routeMap.put("GET /login", userController::loginGet);
         routeMap.put("POST /login", userController::loginPost);
         routeMap.put("GET /register", userController::registerGet);
+        routeMap.put("POST /register", userController::registerPost);
     }
 
     public HttpResponse route(HttpRequest httpRequest) {

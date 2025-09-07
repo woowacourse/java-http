@@ -40,37 +40,41 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            try {
-                final HttpRequest httpRequest = new HttpRequest(reader);
-                httpRequest.parseHttpRequest();
-                final String requestPath = httpRequest.getRequestPath();
-
-                if (requestPath.equals("/")) {
-                    final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
-                    sendHttpResponse(response, outputStream);
-                    return;
-                }
-
-                if (requestPath.equals("/login")) {
-                    final URL resource = getStaticResource("/login.html");
-                    final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
-                    sendHttpResponse(response, outputStream);
-                    logUserInformationIfExists(httpRequest);
-                    return;
-                }
-
-                final URL resource = getStaticResource(httpRequest.getRequestPath());
-                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
-                sendHttpResponse(response, outputStream);
-            } catch (HttpStatusException e) {
-                final HttpStatusCode statusCode = e.getStatusCode();
-                final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
-                final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
-                sendHttpResponse(errorResponse, outputStream);
-            }
+            handleRequest(reader, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void handleRequest(final BufferedReader reader, final OutputStream outputStream) throws IOException {
+        try {
+            final HttpRequest httpRequest = new HttpRequest(reader);
+            httpRequest.parseHttpRequest();
+            final String requestPath = httpRequest.getRequestPath();
+
+            if (requestPath.equals("/")) {
+                final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
+                sendHttpResponse(response, outputStream);
+                return;
+            }
+
+            if (requestPath.equals("/login")) {
+                final URL resource = getStaticResource("/login.html");
+                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+                sendHttpResponse(response, outputStream);
+                logUserInformationIfExists(httpRequest);
+                return;
+            }
+
+            final URL resource = getStaticResource(httpRequest.getRequestPath());
+            final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+            sendHttpResponse(response, outputStream);
+            
+        } catch (HttpStatusException e) {
+            final HttpStatusCode statusCode = e.getStatusCode();
+            final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
+            final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
+            sendHttpResponse(errorResponse, outputStream);
         }
     }
 

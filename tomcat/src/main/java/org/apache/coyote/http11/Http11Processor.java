@@ -24,6 +24,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<String> ALLOWED_EXTENSIONS = List.of(".css", ".html", ".js");
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8 ";
 
     private final Socket connection;
 
@@ -51,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = makeResponseBody(path);
             }
 
-            final String contentType = parseContentType(requests.get("Accept"));
+            final String contentType = parseContentType(requests.getOrDefault("Accept", ""));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -140,7 +141,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseContentType(String headerAccept) {
-
+        if (headerAccept.isBlank()) {
+            return DEFAULT_CONTENT_TYPE;
+        }
         return headerAccept.split(",")[0];
     }
 }

@@ -1,11 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
-public final class Http11Response {
+public class Http11Response {
 
     private final int statusCode;
-    private final String contentType;
+    private final Map<String, String> headers;
     private final byte[] body;
 
     public Http11Response(
@@ -13,7 +17,7 @@ public final class Http11Response {
             final String contentType,
             final String body
     ) {
-        this(statusCode, contentType, body.getBytes(StandardCharsets.UTF_8));
+        this(statusCode, Map.of("Content-Type", contentType), body.getBytes(StandardCharsets.UTF_8));
     }
 
     public Http11Response(
@@ -21,30 +25,48 @@ public final class Http11Response {
             final String contentType,
             final byte[] body
     ) {
+        this(statusCode, Map.of("Content-Type", contentType), body);
+    }
+
+    public Http11Response(
+            final int statusCode,
+            final Map<String, String> headers,
+            final byte[] body
+    ) {
         this.statusCode = statusCode;
-        this.contentType = contentType;
+        this.headers = new HashMap<>(headers);
         this.body = body;
+    }
+
+    public static Http11Response redirect(final String location) {
+        return new Http11Response(302, Map.of("Location", location), new byte[0]);
     }
 
     public byte[] getResponseBytes() {
         final String statusText = getStatusText(this.statusCode);
-        final String responseHeadersLf = """
-                HTTP/1.1 %d %s
-                Content-Type: %s
-                Content-Length: %d
-                
-                """.formatted(this.statusCode, statusText, this.contentType, this.body.length);
-        final String responseHeadersCrLf = responseHeadersLf.replace("\n", "\r\n");
-        var headers = responseHeadersCrLf.getBytes(StandardCharsets.UTF_8);
-        var fullResponse = new byte[headers.length + this.body.length];
-        System.arraycopy(headers, 0, fullResponse, 0, headers.length);
-        System.arraycopy(this.body, 0, fullResponse, headers.length, this.body.length);
-        return fullResponse;
+        final String responseLine = "HTTP/1.1 " + this.statusCode + " " + statusText;
+        final var responseHeaders = new HashMap<>(this.headers);
+        responseHeaders.put("Content-Length", String.valueOf(this.body.length));
+        try (final var outputStream = new ByteArrayOutputStream()) {
+            outputStream.write(responseLine.getBytes(StandardCharsets.UTF_8));
+            outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            for (final var header : responseHeaders.entrySet()) {
+                final String headerLine = header.getKey() + ": " + header.getValue();
+                outputStream.write(headerLine.getBytes(StandardCharsets.UTF_8));
+                outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            }
+            outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            outputStream.write(this.body);
+            return outputStream.toByteArray();
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String getStatusText(int code) {
         return switch (code) {
             case 200 -> "OK";
+            case 302 -> "Found";
             case 404 -> "Not Found";
             default -> "OK";
         };

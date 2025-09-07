@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,9 +58,6 @@ public class Http11Processor implements Runnable, Processor {
         return new Http11Request(requestLine.method(), requestLine.path(), requestLine.queryParams(), headers, body);
     }
 
-    /**
-     * InputStream에서 CRLF(\r\n)를 기준으로 한 줄을 바이트 단위로 읽어 US-ASCII 문자열로 반환합니다.
-     */
     private String readLine(final InputStream inputStream) throws IOException {
         final var buffer = new ByteArrayOutputStream();
         int nextByte;
@@ -116,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final Map<String, String> params = new HashMap<>();
         final String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
+        for (final String pair : pairs) {
             String[] keyValue = pair.split("=");
             if (keyValue.length == 2) {
                 final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
@@ -133,21 +131,38 @@ public class Http11Processor implements Runnable, Processor {
             return new Http11Response(200, "text/html;charset=utf-8", "Hello world!");
         }
         if ("/login".equals(path)) {
-            handleLogin(httpRequest);
-            return serveStaticFile("/login.html");
+            return handleLoginRequest(httpRequest);
         }
         return serveStaticFile(path);
     }
 
-    private void handleLogin(final Http11Request httpRequest) {
+    private Http11Response handleLoginRequest(final Http11Request httpRequest) {
         final var queryParams = httpRequest.getQueryParams();
-        if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-            final String account = queryParams.get("account");
-            final String password = queryParams.get("password");
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info("login success: {}", user));
+        if (queryParams.containsKey("account")) {
+            if (isLoginSuccessful(queryParams)) {
+                return Http11Response.redirect("/index.html");
+            }
+            return Http11Response.redirect("/401.html");
         }
+        return serveStaticFile("/login.html");
+    }
+
+    private boolean isLoginSuccessful(final Map<String, String> queryParams) {
+        if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {
+            return false;
+        }
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+        final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+        final var user = userOptional.get();
+        if (!user.checkPassword(password)) {
+            return false;
+        }
+        log.info("login success: {}", user);
+        return true;
     }
 
     private Http11Response serveStaticFile(final String path) {

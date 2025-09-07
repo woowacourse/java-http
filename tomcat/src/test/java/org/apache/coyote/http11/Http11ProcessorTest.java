@@ -1,17 +1,19 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    @DisplayName("기본 요청이 들어오면 Hello world!를 응답한다.")
     @Test
     void process() {
         // given
@@ -22,158 +24,193 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: 12"),
+                () -> assertThat(output).endsWith("Hello world!")
+        );
     }
 
+    @DisplayName("index.html을 요청하면 index.html을 응답한다.")
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
+        final var httpRequest = """
+                GET /index.html HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 5564",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        final byte[] body = readFileBytes("static/index.html");
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: " + body.length),
+                () -> assertThat(output).endsWith(new String(body))
         );
-
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("styles.css를 요청하면 styles.css를 응답한다.")
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
+        final var httpRequest = """
+                GET /css/styles.css HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/css;charset=utf-8",
-                "Content-Length: 211991",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        final byte[] body = readFileBytes("static/css/styles.css");
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                () -> assertThat(output).contains("Content-Type: text/css;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: " + body.length),
+                () -> assertThat(output).endsWith(new String(body))
         );
-
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("scripts.js를 요청하면 scripts.js를 응답한다.")
     @Test
     void js() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /js/scripts.js HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
+        final var httpRequest = """        
+                GET /js/scripts.js HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: application/javascript;charset=utf-8",
-                "Content-Length: 976",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        final byte[] body = readFileBytes("static/js/scripts.js");
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                () -> assertThat(output).contains("Content-Type: application/javascript;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: " + body.length),
+                () -> assertThat(output).endsWith(new String(body))
         );
-
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("없는 페이지를 요청하면 404.html을 응답한다.")
     @Test
     void notFound() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /notfound HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
+        final var httpRequest = """
+                GET /notfound HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        var expected = String.join("\r\n",
-                "HTTP/1.1 404 Not Found",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 2426",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        final byte[] body = readFileBytes("static/404.html");
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 404 Not Found"),
+                () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: " + body.length),
+                () -> assertThat(output).endsWith(new String(body))
         );
-
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("로그인 페이지를 요청하면 login.html을 응답한다.")
     @Test
-    void login() throws IOException {
+    void login_page() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=javajigi&password=password HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
+        final var httpRequest = """
+                GET /login HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 3796",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        final byte[] body = readFileBytes("static/login.html");
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(output).contains("Content-Length: " + body.length),
+                () -> assertThat(output).endsWith(new String(body))
         );
+    }
 
-        assertThat(socket.output()).isEqualTo(expected);
+    @DisplayName("로그인 성공 시 /index.html로 리다이렉트한다.")
+    @Test
+    void login_success() {
+        // given
+        final var httpRequest = """
+                GET /login?account=gugu&password=password HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 302 Found"),
+                () -> assertThat(output).contains("Location: /index.html")
+        );
+    }
+
+    @DisplayName("로그인 실패 시 /401.html로 리다이렉트한다.")
+    @Test
+    void login_fail() {
+        // given
+        final var httpRequest = """
+                GET /login?account=invalid&password=password HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 302 Found"),
+                () -> assertThat(output).contains("Location: /401.html")
+        );
+    }
+
+    private byte[] readFileBytes(final String path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(path);
+        return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 }

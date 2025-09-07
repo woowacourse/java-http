@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class PageRenderer{
 
@@ -34,9 +35,14 @@ public class PageRenderer{
     }
 
     private static String readStaticFile(final String path) throws IOException {
-        InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(STATIC_FILE_ROOT + path);
-        return new String(inputStream.readAllBytes());
-    }
+        String fullPath = STATIC_FILE_ROOT + path;
 
+        try (InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(fullPath)) {
+            if (inputStream == null) {
+                throw new IOException("파일을 찾을 수 없습니다: " + fullPath);
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
 
 }

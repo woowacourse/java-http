@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.vo.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +14,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -38,9 +41,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             try {
-                final var requestUri = getRequestUri(inputStream);
-                final var responseBody = getResponseBody(requestUri);
-                final var response = getHttpResponse(requestUri, 200, responseBody);
+                final var httpRequest = getHttpRequest(inputStream);
+                final var responseBody = getResponseBody(httpRequest);
+                final var response = getHttpResponse(httpRequest.uri(), 200, responseBody);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -55,57 +58,72 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    /**
-     *
-     * @param inputStream
-     * @return
-     * @throws IOException
-     */
-    private String getRequestUri(InputStream inputStream) throws IOException {
+    private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(inputStream));
         final var request = reader.readLine();
 
-        final var split = Arrays.stream(request.split("\\s+")).toList();
-        if (split.isEmpty()) {
+        final var firstLine = Arrays.stream(request.split("\\s+")).toList();
+        if (firstLine.size() != 3 || !firstLine.getLast().equals("HTTP/1.1")) {
             throw new IllegalArgumentException();
         }
-        return split.get(1);
+
+        final var headerLines = new ArrayList<String>();
+        while (true) {
+            final var read = reader.readLine();
+            if (read == null || read.isBlank()) break;
+            headerLines.add(read);
+        }
+
+        return new HttpRequest(
+                firstLine.getFirst(),
+                firstLine.get(1),
+                getHeaders(headerLines)
+        );
     }
 
-    private Map<String, String> getHeaders(InputStream inputStream) throws IOException {
-        final var reader = new BufferedReader(new InputStreamReader(inputStream));
-
-        final Map<String, String> result = new HashMap<>();
-        while (!reader.readLine().isBlank()) {
-            final var line = reader.readLine();
+    private Map<String, String> getHeaders(final List<String> headerLines) {
+        final var result = new HashMap<String, String>();
+        for (String line : headerLines) {
             final var colonIndex = line.indexOf(":");
             final var key = line.substring(0, colonIndex).trim();
             final var value = line.substring(colonIndex + 1).trim();
             result.put(key, value);
         }
-
         return result;
     }
 
     /**
      * handle request and get response body
-     * @param requestUri HTTP request uri
+     * @param request HTTP request
      * @return response body text
      * @throws FileNotFoundException occurs when couldn't find target file
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String getResponseBody(final String requestUri) throws FileNotFoundException, IOException {
-        // 1. 정적 파일에 대한 요청인 경우
-        if (isStaticFileUri(requestUri)) {
-            return readStaticFileByName(requestUri);
-        }
-        // 2. API 요청인 경우
-        final var queryIndex = requestUri.indexOf("?");
-        final var endpoint = getAPIEndpoint(requestUri, queryIndex);
+    private String getResponseBody(final HttpRequest request) throws FileNotFoundException, IOException {
+        final var method = request.method();
+        final var uri = request.uri();
 
-        // 3. endpoint 에 따른 처리 로직 분기 (= handler mapping)
-        if (endpoint.equals("/login")) { // handler logic (Controller -> Service -> Repo)
-            final var queryString = requestUri.substring(queryIndex + 1);
+        // handler mapping
+        // 1. / 요청인 경우
+        if (method.equalsIgnoreCase("GET") && uri.equals("/")) {
+            return "Hello world!";
+        }
+        // 2. static file 요청인 경우
+        if (method.equalsIgnoreCase("GET") && isStaticFileUri(uri)) {
+            return readStaticFileByName(uri);
+        }
+        // 3. login 화면 요청인 경우
+        if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
+            return readStaticFileByName("login.html");
+        }
+        // 4. login API 요청인 경우
+        if (method.equalsIgnoreCase("GET") && uri.startsWith("/login")) {
+            final var queryIndex = uri.indexOf("?");
+            if (queryIndex == -1) {
+                throw new IllegalArgumentException();
+            }
+
+            final var queryString = uri.substring(queryIndex + 1);
             final var queryParams = getQueryParams(queryString);
 
             final var account = queryParams.get("account");
@@ -120,22 +138,7 @@ public class Http11Processor implements Runnable, Processor {
 
             return readStaticFileByName("/login.html");
         }
-
-        // 4. 존재하지 않는 리소스/endpoint 에 대한 요청인 경우
         throw new IllegalArgumentException();
-    }
-
-    /**
-     * parse API endpoint from request uri
-     * @param requestUri request uri (ex. '/home?name=hello')
-     * @param queryIndex index of '?' in query string
-     * @return
-     */
-    private String getAPIEndpoint(final String requestUri, final int queryIndex) {
-        if (queryIndex == -1) {
-            return requestUri;
-        }
-        return requestUri.substring(0, queryIndex);
     }
 
     /**
@@ -171,7 +174,7 @@ public class Http11Processor implements Runnable, Processor {
         if (dotIndex == -1) {
             return false;
         }
-        throw new FileNotFoundException("요청 리소스가 유효하지 않습니다.");
+        throw new FileNotFoundException();
     }
 
     /**
@@ -185,7 +188,10 @@ public class Http11Processor implements Runnable, Processor {
         if (target.equals("/")) {
             return "Hello world!";
         }
-        return readContent("static" + target);
+        if (target.startsWith("/")) {
+            return readContent("static" + target);
+        }
+        return readContent("static/" + target);
     }
 
     /**
@@ -203,14 +209,14 @@ public class Http11Processor implements Runnable, Processor {
 
     /**
      *
-     * @param url resource's URL
+     * @param target resource's URL
      * @return resource's text content
      * @throws FileNotFoundException occurs when couldn't find target file
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String readContent(final String url) throws FileNotFoundException, IOException {
+    private String readContent(final String target) throws FileNotFoundException, IOException {
         try (final var stream = getClass().getClassLoader()
-                .getResourceAsStream(url)) {
+                .getResourceAsStream(target)) {
             if (stream == null) {
                 throw new FileNotFoundException();
             }

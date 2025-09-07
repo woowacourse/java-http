@@ -57,4 +57,8 @@ public class StartLine {
     public String getUri() {
         return uri;
     }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
 }

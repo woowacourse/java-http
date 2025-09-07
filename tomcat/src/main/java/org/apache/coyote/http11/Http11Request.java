@@ -67,4 +67,8 @@ public class Http11Request {
             throw new IllegalArgumentException("StartLine의 3개의 값이 아닙니다.");
         }
     }
+
+    public StartLine getStartLine() {
+        return startLine;
+    }
 }

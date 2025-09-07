@@ -1,19 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.web.FrontController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final  FrontController frontController) {
         this.connection = connection;
+        this.frontController = frontController;
     }
 
     @Override
@@ -42,85 +38,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream())
         {
             final Http11Request http11Request = extractRequest(inputStream);
-
-            final Http11Response http11Response;
-            if (http11Request.isStatic()) {
-                String staticPath = http11Request.extractStaticPath();
-                http11Response = handleStaticRequest(staticPath);
-            } else {
-                Map<String, String> params = http11Request.extractRequestBody();
-                http11Response = handleDynamicRequest(http11Request.getUri(),params);
-            }
-
+            final Http11Response http11Response = frontController.service(http11Request);
             outputStream.write(http11Response.toBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Http11Response handleStaticRequest(final String path) throws IOException, URISyntaxException {
-        final String contentType = extractContentType(path);
-        if (path.equals("/")) {
-            return Http11Response.ok(contentType, "Hello world!");
-        }
-
-        final URL url = getURL(path);
-        final String responseBody;
-        if (url == null) {
-            responseBody = readFile("static/404.html");
-            return Http11Response.notFound(contentType, responseBody);
-        }
-
-        responseBody = readFile(path);
-        return Http11Response.ok(contentType, responseBody);
-    }
-
-    private Http11Response handleDynamicRequest(final String uri, final Map<String, String> params) {
-        switch (uri) {
-            case "/login": {
-                String account = params.get("account");
-                String password = params.get("password");
-
-                boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .isPresent();
-
-                if (loginSuccess) {
-                    log.info("로그인 성공 - account: {}", account);
-                    return Http11Response.redirect("/index.html");
-                }
-                log.warn("로그인 실패 - account: {}", account);
-                return Http11Response.redirect("/401.html");
-            }
-            case "/register": {
-                String account = params.get("account");
-                String password = params.get("password");
-                String email = params.get("email");
-                User newUser = new User(account, password, email);
-                InMemoryUserRepository.save(newUser);
-
-                boolean registerSuccess = InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.getAccount().equals(account) && user.checkPassword(password))
-                        .isPresent();
-
-                if (registerSuccess) {
-                    log.info("회원가입 성공 - account: {}, email: {}", account, email);
-                    return Http11Response.redirect("/index.html");
-                }
-                log.warn("회원가입 실패 - account: {}, email: {}", account, email);
-                return Http11Response.redirect("/401.html");
-            }
-            default:
-                return Http11Response.notFound("text/html;charset=utf-8", "지원하지 않는 URI입니다.");
-        }
-    }
-
-    private String readFile(final String fileName) throws IOException, URISyntaxException {
-        return Files.readString(Paths.get(getClass().getClassLoader()
-                .getResource(fileName)
-                .toURI())
-        );
     }
 
     private Http11Request extractRequest(final InputStream inputStream) throws IOException{
@@ -162,17 +85,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new String(bodyChars);
-    }
-
-    private URL getURL(final String path) {
-        return getClass().getClassLoader().getResource(path);
-    }
-
-    private String extractContentType(final String requestPath) {
-        if (requestPath.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-
-        return "text/html;charset=utf-8";
     }
 }

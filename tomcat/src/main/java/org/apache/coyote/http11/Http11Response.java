@@ -42,6 +42,17 @@ public class Http11Response {
         };
     }
 
+    public static Http11Response serverError() {
+        final String body = "Internal Server Error";
+
+        return new Http11Response(
+                500,
+                "Internal Server Error",
+                "text/html;charset=utf-8",
+                body
+        );
+    }
+
     public byte[] toBytes() {
         String response = String.join(CRLF,
                 "HTTP/1.1 " + statusCode + " " + statusMessage + " ",

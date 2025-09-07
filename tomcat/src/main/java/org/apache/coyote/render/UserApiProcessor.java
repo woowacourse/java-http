@@ -1,6 +1,5 @@
-package com.techcourse.web.api;
+package org.apache.coyote.render;
 
-import com.techcourse.web.HttpRequestHandler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.slf4j.Logger;
@@ -8,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.techcourse.util.PathParser.parsingQueryString;
+import static org.apache.coyote.util.PathParser.parsingQueryString;
 
 public class UserApiProcessor implements HttpRequestHandler {
 

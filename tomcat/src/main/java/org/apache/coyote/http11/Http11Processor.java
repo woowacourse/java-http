@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.web.router.RequestRouter;
+import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -30,12 +32,15 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final byte[] bytes = new byte[2048];
-            inputStream.read(bytes);
-            final String request = new String(bytes);
-            final String response = createResponse(request);
+            final String requestLine = reader.readLine();
+            if (requestLine == null || requestLine.isEmpty()) {
+                return;
+            }
+
+            final String response = createResponse(requestLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -44,28 +49,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String request) throws IOException {
-        String path = getPath(request);
-        String method = getMethod(request);
+    private String createResponse(final String requestLine) throws IOException {
+        final String[] parts = requestLine.split(" ");
+        final String method = getMethod(parts);
+        final String path = getPath(parts);
 
         return requestRouter.handleRoute(method, path);
     }
 
-    private String getPath(final String request) {
-        String requestLine = getRequestLine(request);
-        String[] parts = requestLine.split(" ");
+    private String getPath(final String[] parts) {
         return parts.length >= 2 ? parts[1] : "/";
     }
 
-    private String getMethod(final String request) {
-        final String requestLine = getRequestLine(request);
-        final String[] parts = requestLine.split(" ");
+    private String getMethod(final String[] parts) {
         return parts.length >= 1 ? parts[0].toUpperCase() : "GET";
     }
-
-    private String getRequestLine(final String request) {
-        String[] lines  = request.split("\r\n");
-        return lines[0].trim();
-    }
-
 }

@@ -1,6 +1,5 @@
-package com.techcourse.web.ui;
+package org.apache.coyote.render;
 
-import com.techcourse.web.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

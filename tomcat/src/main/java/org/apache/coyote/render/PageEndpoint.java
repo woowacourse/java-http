@@ -1,4 +1,4 @@
-package com.techcourse.web.ui;
+package org.apache.coyote.render;
 
 public enum PageEndpoint {
     BASIC("/","/index.html"),

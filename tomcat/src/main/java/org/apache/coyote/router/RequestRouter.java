@@ -1,7 +1,7 @@
-package com.techcourse.web.router;
+package org.apache.coyote.router;
 
-import com.techcourse.web.api.UserApiProcessor;
-import com.techcourse.web.ui.PageRenderer;
+import org.apache.coyote.render.UserApiProcessor;
+import org.apache.coyote.render.PageRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

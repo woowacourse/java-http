@@ -1,4 +1,4 @@
-package com.techcourse.util;
+package org.apache.coyote.util;
 
 import java.util.HashMap;
 import java.util.Map;

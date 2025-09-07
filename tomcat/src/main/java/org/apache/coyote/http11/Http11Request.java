@@ -7,8 +7,6 @@ import java.util.Map;
 public class Http11Request {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String QUERY_PARAM_START_SYMBOL = "?";
-    private static final String QUERY_PARAM_DELIMITER = "[=?&]";
 
     private final String method;
     private final String target;
@@ -21,13 +19,15 @@ public class Http11Request {
         int pointer = 0;
 
         final String[] firstLine = requestMessage.get(pointer++).split(" ");
+        validateFirstLineSize(firstLine);
+
         final String method = firstLine[0];
         String target = firstLine[1];
         final String httpVersion = firstLine[2];
 
         final Map<String, String> queryParams = getQueryParams(target);
         if (!queryParams.isEmpty()) {
-            final int queryParamStartIndex = target.indexOf(QUERY_PARAM_START_SYMBOL);
+            final int queryParamStartIndex = target.indexOf("?");
             target = target.substring(0, queryParamStartIndex);
         }
 
@@ -36,19 +36,36 @@ public class Http11Request {
         return new Http11Request(method, target, queryParams, httpVersion, headers, null);
     }
 
-    private static Map<String, String> getQueryParams(final String target) {
-        final Map<String, String> queryParams = new HashMap<>();
-        if (target.contains(QUERY_PARAM_START_SYMBOL)) {
-            final String[] targetWithQueryParams = target.split(QUERY_PARAM_DELIMITER);
-            int queryParamPointer = 1;
-            while (queryParamPointer < targetWithQueryParams.length) {
-                final String key = targetWithQueryParams[queryParamPointer++];
-                final String value = targetWithQueryParams[queryParamPointer++];
-
-                queryParams.put(key, value);
-            }
+    private static void validateFirstLineSize(final String[] firstLine) {
+        if (firstLine.length != 3) {
+            throw new IllegalArgumentException(String.format("Wrong Http Request Start Line : %s", String.join("", firstLine)));
         }
-        return queryParams;
+    }
+
+    private static Map<String, String> getQueryParams(final String target) {
+        final Map<String, String> params = new HashMap<>();
+        if (target == null || target.isEmpty()) {
+            return params;
+        }
+
+        final String[] targetAndQueryParams = target.split("\\?");
+        if (targetAndQueryParams.length != 2) {
+            return params;
+        }
+
+        final String queryParams = targetAndQueryParams[1];
+
+        final String[] pairs = queryParams.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+                continue;
+            }
+            throw new IllegalArgumentException(String.format("Wrong Query Parameter : %s", pair));
+        }
+
+        return params;
     }
 
     private static Map<String, String> getHeaders(

@@ -8,16 +8,20 @@ public enum HttpVersion {
     HTTP_1_1("HTTP/1.1"),
     HTTP_2("HTTP/2");
 
-    private final String text;
+    private final String name;
 
-    HttpVersion(final String text) {
-        this.text = text;
+    HttpVersion(final String name) {
+        this.name = name;
     }
 
     public static HttpVersion from(final String version) {
         return Arrays.stream(HttpVersion.values())
-                .filter(v -> v.text.equals(version))
+                .filter(v -> v.name.equals(version))
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException("HTTP Version not supported: " + version));
+    }
+
+    public String getName() {
+        return name;
     }
 }

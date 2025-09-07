@@ -47,6 +47,7 @@ public class HttpRequestReader {
         HttpMethod method = HttpMethod.from(parts[0]);
         String uri = parts[1];
         HttpVersion version = HttpVersion.from(parts[2]);
+
         return new RequestLine(method, uri, version);
     }
 
@@ -62,6 +63,7 @@ public class HttpRequestReader {
             String value = line.substring(colon + 1);
             headers.put(name, value);
         }
+
         return headers;
     }
 
@@ -69,6 +71,7 @@ public class HttpRequestReader {
         if (queryStartIndex < 0) {
             return uri;
         }
+
         return uri.substring(0, queryStartIndex);
     }
 
@@ -77,8 +80,8 @@ public class HttpRequestReader {
             String rawQueries = uri.substring(questionIndex + 1);
             return parseQueryString(rawQueries);
         }
-        return Map.of();
 
+        return Map.of();
     }
 
     private Map<String, String> parseQueryString(final String uri) {
@@ -90,6 +93,7 @@ public class HttpRequestReader {
             String value = pair.substring(equalIndex + 1);
             queries.put(name, value);
         }
+
         return queries;
     }
 }

@@ -9,14 +9,14 @@ public record HttpResponse(
 ) {
 
     private static final String CRLF = "\r\n";
+    private static final String RESPONSE_LINE_FORMAT = "%s %d %s\r\n";
 
     public String asString() {
         StringBuilder response = new StringBuilder();
 
         int statusCode = status.code();
         String reason = status.reason();
-        String responseLine = "HTTP/1.1 " + statusCode + " " + reason + CRLF;
-        response.append(responseLine);
+        response.append(String.format(RESPONSE_LINE_FORMAT, HttpVersion.HTTP_1_1.getName(), statusCode, reason));
 
         for (Map.Entry<String, String> header : headers().entrySet()) {
             response.append(header.getKey()).append(": ").append(header.getValue()).append(CRLF);

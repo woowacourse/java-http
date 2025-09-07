@@ -124,24 +124,16 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final String account = queryParams.get("account");
             final String password = queryParams.get("password");
-            if (account == null || password == null) {
-                log.error("account or password is empty");
-                return "account or password is empty";
-            }
-
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
 
             if (user.checkPassword(password)) {
-                log.info("Login successful: {}", user);
-                return "Login successful";
-            } else {
-                return "Invalid password";
+                log.info("user: {}", user);
             }
         } catch (Exception e) {
-            log.error("Login failed", e);
-            return "Login failed";
+            log.error(e.getMessage(), e);
         }
+        return readFileFromClasspath("static/login.html");
     }
 
     private String readFileFromClasspath(String resourcePath) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,8 +27,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final int REQUEST_URL_INDEX = 1;
-    private static final int QUERY_KEY_INDEX = 0;
-    private static final int QUERY_VALUE_INDEX = 1;
 
     private final Socket connection;
 
@@ -48,19 +48,25 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final String requestURL = parseRequestURL(inputStream);
 
-            final String resource = requestURL.split("\\?")[0];
-
-            if (resource.equals("/") || resource.equals("/index.html")) {
+            if (requestURL.equals("/") || requestURL.equals("/index.html")) {
                 send200Response("/index.html", outputStream);
                 return;
             }
-            if (resource.startsWith("/login")) {
-                login(requestURL);
+            if (requestURL.equals("/login")) {
                 send200Response("/login.html", outputStream);
                 return;
             }
-            send200Response(resource, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+            if (requestURL.startsWith("/login?")) {
+                boolean loginSuccessful = isLoginSuccessful(requestURL);
+                if (loginSuccessful) {
+                    send302Response("/login", outputStream);
+                    return;
+                }
+                send200Response("/401.html", outputStream); // todo 401로 바꾸자
+                return;
+            }
+            send200Response(requestURL, outputStream);
+        } catch (final IOException | UncheckedServletException e) { // todo exception이 터지는 경우 적절한 응답 추기
             log.error(e.getMessage(), e);
         }
     }
@@ -70,34 +76,52 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final String requestLine = httpRequestReader.readLine();
             return requestLine.split(" ")[REQUEST_URL_INDEX];
-        } catch (final NullPointerException | ArrayIndexOutOfBoundsException exception) {
+        } catch (final NullPointerException | ArrayIndexOutOfBoundsException e) {
             throw new IOException("Request Line을 읽어올 수 없습니다.");
         }
     }
 
-    private void login(final String requestURL) {
-        if (!requestURL.contains("?")) {
-            return;
+    private boolean isLoginSuccessful(final String requestURL) throws IOException {
+        final LoginDto loginDto = parseLoginRequest(requestURL);
+        try {
+            final User user = InMemoryUserRepository.findByAccount(loginDto.account())
+                    .orElseThrow(IllegalArgumentException::new);
+            if (!user.checkPassword(loginDto.password())) {
+                throw new IllegalArgumentException();
+            }
+            log.info("user: {}", user);
+            return true;
+        } catch (final IllegalArgumentException e) {
+            return false;
         }
+    }
 
-        final String queryString = requestURL.split("\\?")[1];
-        final Map<String, String> queries = Arrays.stream(queryString.split("&"))
-                .collect(
-                        Collectors.toMap(
-                                query -> query.split("=")[QUERY_KEY_INDEX],
-                                query -> query.split("=")[QUERY_VALUE_INDEX]
-                        )
-                );
+    private LoginDto parseLoginRequest(final String requestURL) throws IOException {
+        final int QUERY_KEY_INDEX = 0;
+        final int QUERY_VALUE_INDEX = 1;
+        validateLoginRequestURL(requestURL);
+        try {
+            final String queryString = requestURL.split("\\?")[1];
+            final Map<String, String> queries = Arrays.stream(queryString.split("&"))
+                    .collect(
+                            Collectors.toMap(
+                                    query -> query.split("=")[QUERY_KEY_INDEX],
+                                    query -> query.split("=")[QUERY_VALUE_INDEX]
+                            )
+                    );
+            final String account = queries.get("account");
+            final String password = queries.get("password");
+            return new LoginDto(account, password);
+        } catch (final NullPointerException | ArrayIndexOutOfBoundsException e) {
+            throw new IOException("로그인 URL을 읽어올 수 없습니다.");
+        }
+    }
 
-        final String account = queries.get("account");
-        final String password = queries.get("password");
-        InMemoryUserRepository.findByAccount(account).ifPresent(
-                user -> {
-                    if (user.checkPassword(password)) {
-                        log.info("user: {}", user);
-                    }
-                }
-        );
+    private void validateLoginRequestURL(final String requestURL) throws IOException {
+        final Pattern loginPattern = Pattern.compile("^/login\\?account=[a-zA-Z0-9]+&password=[a-zA-Z0-9]+$");
+        if (!loginPattern.matcher(requestURL).matches()) {
+            throw new IOException("형식에 맞지 않는 로그인 URL 입니다.");
+        }
     }
 
     private void send200Response(final String resource, final OutputStream outputStream) throws IOException {
@@ -110,6 +134,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final FileNotFoundException e) {
             send404Response(outputStream);
         }
+    }
+
+    private void send302Response(final String redirectResource, final OutputStream outputStream) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                String.format("Location: http://localhost:8080%s ", redirectResource),
+                "Content-Length: 0 ");
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private void send404Response(final OutputStream outputStream) throws IOException {

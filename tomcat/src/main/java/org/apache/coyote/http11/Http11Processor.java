@@ -32,9 +32,9 @@ public class Http11Processor implements Runnable, Processor {
             Map.entry(404, "404 Not Found")
     );
     private static final Map<String, String> MIME_TYPES = Map.ofEntries(
-            Map.entry("html", "text/html; charset=UTF-8"),
-            Map.entry("css", "text/css; charset=UTF-8"),
-            Map.entry("js", "application/javascript; charset=UTF-8"),
+            Map.entry("html", "text/html;charset=UTF-8"),
+            Map.entry("css", "text/css;charset=UTF-8"),
+            Map.entry("js", "application/javascript;charset=UTF-8"),
             Map.entry("ico", "image/x-icon")
     );
 

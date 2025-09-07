@@ -69,9 +69,9 @@ public class HttpRequestHandler {
             if (line == null) {
                 throw new IllegalArgumentException();
             }
-            String[] split = line.split(":");
-            String fieldName = split[0];
-            String value = split[1];
+            int index = line.indexOf(":");
+            String fieldName = line.substring(0, index);
+            String value = line.substring(index + 1);
             headers.put(fieldName, value);
         }
         return new HttpHeader(headers);
@@ -87,9 +87,9 @@ public class HttpRequestHandler {
 
         String[] parameters = queryString.split("&");
         for (String parameter : parameters) {
-            String[] split = parameter.split("=");
-            String key = split[0];
-            String value = split[1];
+            int index = parameter.indexOf("=");
+            String key = parameter.substring(0, index);
+            String value = parameter.substring(index + 1);
             queryParameters.put(key, value);
         }
         return new HttpQueryParameter(queryParameters);

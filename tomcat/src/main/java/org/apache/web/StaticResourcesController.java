@@ -17,7 +17,7 @@ public class StaticResourcesController implements Controller {
     @Override
     public Http11Response control(final Http11Request request) {
         try {
-            String path = request.extractStaticPath();
+            String path = request.extractPath();
             if (path.equals("/")) {
                 return Http11Response.ok("text/html;charset=utf-8", "Hello world!");
             }

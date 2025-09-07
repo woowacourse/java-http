@@ -20,8 +20,4 @@ public enum HttpMethod {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 Http Method 입니다."));
     }
-
-    public boolean isPost() {
-        return this == POST;
-    }
 }

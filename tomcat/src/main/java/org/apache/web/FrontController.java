@@ -2,16 +2,16 @@ package org.apache.web;
 
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.StartLine;
+import org.apache.coyote.http11.HttpMethod;
 
 public class FrontController {
 
     private final ControllerMapping controllerMapping = new ControllerMapping();
 
     public Http11Response service(final Http11Request request) {
-        //요청에 해당하는 Controller를 찾아야함.
-        final StartLine startLine = request.getStartLine();
-        final Controller controller = controllerMapping.findController(startLine);
+        final String uri = request.getUri();
+        final HttpMethod httpMethod = request.getHttpMethod();
+        final Controller controller = controllerMapping.findController(uri, httpMethod);
 
         if (controller == null) {
             return Http11Response.notFound("text/html;charset=utf-8", "Not Found");

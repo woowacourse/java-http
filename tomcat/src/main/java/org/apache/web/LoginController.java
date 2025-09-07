@@ -13,7 +13,7 @@ public class LoginController implements Controller {
 
     @Override
     public Http11Response control(final Http11Request request) {
-        final Map<String, String> params = request.extractRequestBody();
+        final Map<String, String> params = request.extractRequestBodyParams();
         final String account = params.get("account");
         final String passwor = params.get("password");
 

@@ -3,7 +3,6 @@ package org.apache.web;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.StartLine;
 
 public class ControllerMapping {
 
@@ -36,10 +35,7 @@ public class ControllerMapping {
         controllers.put(new RequestKey(uri, method), controller);
     }
 
-    public Controller findController(final StartLine startLine) {
-        final String uri = startLine.getUri();
-        final HttpMethod httpMethod = startLine.getHttpMethod();
-
+    public Controller findController(final String uri, final HttpMethod httpMethod) {
         final RequestKey key = new RequestKey(uri, httpMethod);
 
         return controllers.get(key);

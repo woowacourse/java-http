@@ -25,7 +25,7 @@ public class StartLine {
         return httpMethod == HttpMethod.GET && !uri.contains("?");
     }
 
-    public String extractStaticPath() {
+    public String extractPath() {
         if (uri.equals(ROUTE_PATH)) {
             return uri;
         }
@@ -36,22 +36,6 @@ public class StartLine {
         }
 
         return RESOURCE_PATH + path;
-    }
-
-    public Map<String, String> extractQuerystring() {
-        int index = uri.indexOf("?");
-        String query = uri.substring(index + 1);
-
-        Map<String, String> params = new HashMap<>();
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-
-        return params;
     }
 
     public String getUri() {

@@ -60,12 +60,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            var mimeType = "text/html";
-            if (requestPath.endsWith(".css")) {
-                mimeType = "text/css";
-            }
-
-            final var response = buildHttpResponse(statusCode, mimeType, responseBody);
+            final var contentType = ContentType.from(requestPath);
+            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
 

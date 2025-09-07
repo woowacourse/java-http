@@ -12,7 +12,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(final Http11Request request, final Http11Response response) {
         //Todo: HTTP 매서드 매핑 방식 수정 필요 [2025-09-05 17:18:12]
-        switch (request.method()) {
+        switch (request.getMethod()) {
             case "GET" -> toGet(request, response);
             case "POST" -> toPost(request, response);
             default -> handlingUnsupportedMethod(request, response);
@@ -22,7 +22,7 @@ public abstract class AbstractController implements Controller {
     public void handlingUnsupportedMethod(final Http11Request request,
                                           final Http11Response response
     ) {
-        log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.method(), request.path());
+        log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.getMethod(), request.getRequestTarget());
         response.setStatusCode(405);
         response.setResourcePath("/4xx.html");
     }

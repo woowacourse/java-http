@@ -13,7 +13,7 @@ public class DefaultController extends AbstractController {
 
     @Override
     public void service(Http11Request request, Http11Response response) {
-        log.info("Path:{}", request.path());
+        log.info("Path:{}", request.parseResourcePath());
     }
 
     @Override

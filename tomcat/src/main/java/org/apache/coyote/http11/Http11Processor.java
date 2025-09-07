@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.ContentType;
-import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +18,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CONTENT_LENGTH = "Content-Length";
-    public static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE = "Content-Type";
 
     private final Socket connection;
     private final Adapter adapter;
-    private final HttpRequestParser httpRequestParser;
 
     public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
         this.adapter = adapter;
-        this.httpRequestParser = new HttpRequestParser();
     }
 
     @Override
@@ -41,10 +39,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var httpRequest = httpRequestParser.getHttpRequest(bufferedReader);
-            if (httpRequest == null) {
-                return;
-            }
+            final var httpRequest = Http11Request.from(bufferedReader);
             final var resourcePath = httpRequest.parseResourcePath();
             final var httpResponse = new Http11Response(resourcePath);
             setContentType(httpResponse.getResourcePath(), httpResponse);

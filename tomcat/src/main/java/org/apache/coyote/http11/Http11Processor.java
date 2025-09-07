@@ -58,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
                 final String response = createCssResponse(responseBody);
                 writeAndFlush(outputStream, response);
+                return;
             }
 
             if (httpMethod.equals("GET") && endPoint.equals("/login")) {

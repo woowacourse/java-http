@@ -13,6 +13,7 @@ public class HttpRequest {
     private String method;
     private String path;
     private String protocol;
+    private HttpCookie cookies;
     private final Map<String, String> headers = new HashMap<>();
     private Map<String, String> queryParameters = new HashMap<>();
     private String body;
@@ -69,9 +70,14 @@ public class HttpRequest {
         headerString.forEach(
                 header -> {
                     int index = header.indexOf(": ");
+                    if (header.substring(0, index).equals("Cookie")) {
+                        cookies = new HttpCookie(header.substring(index + 1).trim());
+                        return;
+                    }
+
                     headers.put(
-                            header.substring(0, index),
-                            header.substring(index + 1)
+                            header.substring(0, index).trim(),
+                            header.substring(index + 1).trim()
                     );
                 }
         );
@@ -96,11 +102,11 @@ public class HttpRequest {
         return path;
     }
 
-    public String getQueryParameter(String key) {
-        return queryParameters.get(key);
-    }
-
     public String getBody() {
         return body;
+    }
+
+    public boolean existsCookie(String key) {
+        return cookies != null && cookies.contains(key);
     }
 }

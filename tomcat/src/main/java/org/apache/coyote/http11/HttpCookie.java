@@ -36,4 +36,8 @@ public class HttpCookie {
     public boolean isEmpty() {
         return map.isEmpty();
     }
+
+    public boolean contains(String key) {
+        return map.containsKey(key);
+    }
 }

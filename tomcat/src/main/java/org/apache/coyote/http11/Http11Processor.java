@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
         for (HttpRequestHandler handler : httpRequestHandlers) {
             if (handler.support(requestStartLine)) {
                 String response = handler.response(requestStartLine);
-                outputStream.write(response.getBytes());
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }

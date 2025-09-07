@@ -1,4 +1,6 @@
 package org.apache.coyote.dto;
 
-public record RequestInfo(String method, String path) {
+import java.util.Map;
+
+public record RequestInfo(String method, String path, Map<String, String> queryParams) {
 }

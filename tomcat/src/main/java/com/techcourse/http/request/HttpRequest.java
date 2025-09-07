@@ -26,22 +26,30 @@ public class HttpRequest {
     private final String path;
     private final RequestParams requestParams;
     private final ContentType contentType;
+    private final RequestHeader requestHeader;
+    private final RequestBody requestBody;
     private final HttpVersion httpVersion;
 
     public HttpRequest(final HttpMethod httpMethod,
                        final String path,
                        final RequestParams requestParams,
                        final ContentType contentType,
+                       final RequestHeader requestHeader,
+                       final RequestBody requestBody,
                        final HttpVersion httpVersion
     ) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.requestParams = requestParams;
         this.contentType = contentType;
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
         this.httpVersion = httpVersion;
     }
 
-    public static HttpRequest from(final String requestHeaderFirstLine) {
+    public static HttpRequest of(final String requestHeaderFirstLine,
+                                 final RequestHeader requestHeader,
+                                 final RequestBody requestBody) {
         String[] requestLineValues = splitRequestLine(requestHeaderFirstLine);
 
         String requestMethod = requestLineValues[METHOD_INDEX];
@@ -58,7 +66,7 @@ public class HttpRequest {
 
         HttpVersion httpVersion = HttpVersion.from(requestProtocolVersion);
 
-        return new HttpRequest(httpMethod, path, requestParams, contentType, httpVersion);
+        return new HttpRequest(httpMethod, path, requestParams, contentType, requestHeader, requestBody, httpVersion);
     }
 
     private static String[] splitRequestLine(final String requestLine) {
@@ -143,6 +151,10 @@ public class HttpRequest {
 
     public ContentType getContentType() {
         return contentType;
+    }
+
+    public Map<String, String> getRequestBody() {
+        return requestBody.values();
     }
 
     public HttpVersion getHttpVersion() {

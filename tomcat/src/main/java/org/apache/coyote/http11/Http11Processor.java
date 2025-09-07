@@ -6,6 +6,8 @@ import com.techcourse.handler.RegisterRequestHandler;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
+import com.techcourse.http.request.RequestBody;
+import com.techcourse.http.request.RequestHeader;
 import com.techcourse.http.response.HttpResponse;
 import com.techcourse.http.response.ResponseBody;
 import com.techcourse.util.FileUtil;
@@ -16,6 +18,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +49,51 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()
         ) {
-            String line = bufferedReader.readLine();
-            HttpRequest httpRequest = HttpRequest.from(line);
+            String requestLine = bufferedReader.readLine();
+            RequestHeader requestHeader = RequestHeader.from(parseRequestHeader(bufferedReader));
+            RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
 
-            HttpResponse response = handleHttpRequest(httpRequest);
+            HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+            HttpResponse httpResponse = handleHttpRequest(httpRequest);
 
-            outputStream.write(response.toBytes());
+            outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    private List<String> parseRequestHeader(
+            final BufferedReader reader
+    ) throws IOException {
+        List<String> httpRequestHeaders = new ArrayList<>();
+        String line = reader.readLine();
+        if (line == null) {
+            return httpRequestHeaders;
+        }
+        while (!"".equals(line)) {
+            httpRequestHeaders.add(line);
+            line = reader.readLine();
+        }
+        return httpRequestHeaders;
+    }
+
+    private RequestBody parseRequestBody(
+            final BufferedReader reader, final RequestHeader requestHeader
+    ) throws IOException {
+        if (requestHeader.hasContentLengthKey()) {
+            int contentLength = requestHeader.getContentLength();
+
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+
+            return RequestBody.from(new String(buffer));
+        }
+        return RequestBody.empty();
+    }
+
     private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.getFilePath().equals("/login.html") && httpRequest.getRequestParams().containsKey("account")) {
+        if (httpRequest.getFilePath().equals("/login.html")) {
             return loginRequestHandler.handleLoginRequest(httpRequest);
         }
         if (httpRequest.getFilePath().equals("/register.html")) {

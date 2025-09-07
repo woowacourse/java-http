@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -26,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String OK = "200 OK";
     private static final String FOUND = "302 Found";
+    private static final String BAD_REQUEST = "400 Bad Request";
     private static final String UNAUTHORIZED = "401 Unauthorized";
     private static final String NOT_FOUND = "404 Not Found";
     private static final String INTERNAL_SERVER_ERROR = "500 Internal Server Error";
@@ -46,49 +49,89 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String requestLine = br.readLine();
-            if (requestLine == null) {
+
+            if (requestLine == null || requestLine.isBlank()) {
                 return;
             }
 
-            String[] requestHeaderInfo = requestLine.split(" ");
-            if (requestHeaderInfo.length < 2) {
+            String[] requestLineInfo = requestLine.split(" ");
+            if (requestLineInfo.length < 2) {
                 return;
             }
 
-            String url = requestHeaderInfo[1].substring(1);
-            String staticUrl = "static/" + url;
+            String httpMethod = requestLineInfo[0];
+            String url = requestLineInfo[1];
             String response;
 
-            if (url.isEmpty()) {
+            StringBuilder header = new StringBuilder();
+            String line;
+            int contentLength = 0;
+            while ((line = br.readLine()) != null && !line.isBlank()) {
+                header.append(line).append("\r\n");
+                if (line.startsWith("Content-Length:")) {
+                    String lengthStr = line.substring("Content-Length:".length()).trim();
+                    contentLength = Integer.parseInt(lengthStr);
+                }
+            }
+
+            StringBuilder body = new StringBuilder();
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                br.read(bodyChars, 0, contentLength);
+                body.append(bodyChars);
+            }
+
+            if (url.equals("/")) {
                 response = sendDefaultResource();
                 sendResponse(outputStream, response);
                 return;
             }
 
-            if (!url.contains(".") && !url.contains("?")) {
-                staticUrl = "static/" + url + ".html";
+            if (httpMethod.equals("GET") && !url.contains("?")) {
+                String staticUrl = "static" + url;
+                if (!url.contains(".")) {
+                    staticUrl += ".html";
+                }
                 response = getResponse(staticUrl, OK);
                 sendResponse(outputStream, response);
                 return;
             }
 
-            if (url.contains("?") && url.contains("login")) {
-                int index = url.indexOf("?");
-                response = authenticateUserResponse(url, index);
+            if (httpMethod.equals("POST")&& url.equals("/login")) {
+                response = loginUserResponse(body);
                 sendResponse(outputStream, response);
                 return;
             }
 
-            response = getResponse(staticUrl, OK);
+            if (httpMethod.equals("POST") && url.equals("/register")) {
+                response = registerUserResponse(body);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            response = getResponse("static/404.html", "404 Not Found");
             sendResponse(outputStream, response);
 
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {
+        Map<String, String> formData = parseQueryParams(body.toString());
+        String account = formData.get("account");
+        String password = formData.get("password");
+        String email = formData.get("email");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return getResponse("static/index.html", BAD_REQUEST);
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return getResponse("static/index.html", OK);
     }
 
     private String sendDefaultResource() throws IOException {
@@ -107,12 +150,10 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String authenticateUserResponse(String uri, int index) throws URISyntaxException, IOException {
-        String queryString = uri.substring(index + 1);
-        String accountQuery = queryString.split("&")[0];
-        String passwordQuery = queryString.split("&")[1];
-        String account = accountQuery.split("=")[1];
-        String password = passwordQuery.split("=")[1];
+    private String loginUserResponse(StringBuilder body) throws URISyntaxException, IOException {
+        Map<String, String> queryParams = parseQueryParams(body.toString());
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
@@ -147,5 +188,19 @@ public class Http11Processor implements Runnable, Processor {
             return Objects.requireNonNull(getClass().getClassLoader().getResource("static/404.html")).toURI();
         }
         return resource.toURI();
+    }
+
+    private Map<String, String> parseQueryParams(String queryString) {
+        Map<String, String> queryParams = new HashMap<>();
+        String[] params = queryString.split("&");
+        for (String param : params) {
+            String[] keyValue = param.split("=", 2);
+            if (keyValue.length == 2) {
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                queryParams.put(key, value);
+            }
+        }
+        return queryParams;
     }
 }

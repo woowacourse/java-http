@@ -12,8 +12,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.catalina.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -52,18 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> requestLines = getInput(reader);
-
-        return new HttpRequest(requestLines);
-    }
-
-    private List<String> getInput(BufferedReader reader) throws IOException {
-        List<String> lines = new ArrayList<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            lines.add(line);
-        }
-        return lines;
+        return new HttpRequest(reader);
     }
 
     private void respond(HttpResponse response, OutputStream outputStream) throws IOException, URISyntaxException {

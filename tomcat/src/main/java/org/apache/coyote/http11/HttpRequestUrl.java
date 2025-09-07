@@ -20,7 +20,7 @@ public class HttpRequestUrl {
     }
 
     private Map<String, String> parseQueryString(String queryString) {
-        return Arrays.stream(queryString.split("&")).map(s -> s.split("="))
+        return Arrays.stream(queryString.split("&")).map(s -> s.split("=", 2))
                 .filter(keyValue -> keyValue.length == 2)
                 .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
     }

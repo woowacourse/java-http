@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
-public enum ContentType {
+public enum MediaType {
 
     CSS(".css", "text/css;charset=utf-8"),
     HTML(".html", "text/html;charset=utf-8");
@@ -10,7 +10,7 @@ public enum ContentType {
     private final String extension;
     private final String mimeType;
 
-    ContentType(String extension, String mimeType) {
+    MediaType(String extension, String mimeType) {
         this.extension = extension;
         this.mimeType = mimeType;
     }
@@ -19,7 +19,7 @@ public enum ContentType {
         if (path == null || path.isBlank()) {
             return HTML.mimeType;
         }
-        return Arrays.stream(ContentType.values())
+        return Arrays.stream(MediaType.values())
                 .filter(type -> path.toLowerCase().endsWith(type.extension))
                 .findFirst()
                 .map(type -> type.mimeType)

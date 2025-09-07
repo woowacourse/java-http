@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
             final String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
-            responseHeaders.put("Content-Type", ContentType.detectMimeType(path));
+            responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
             if ("GET".equals(method)) {
                 if ("/login".equals(path)) {

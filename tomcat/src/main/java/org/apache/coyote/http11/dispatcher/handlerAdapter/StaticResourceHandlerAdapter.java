@@ -3,6 +3,7 @@ package org.apache.coyote.http11.dispatcher.handlerAdapter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -43,10 +44,11 @@ public class StaticResourceHandlerAdapter implements HandlerAdapter {
         if (idx == -1) {
             contentType = "application/octet-stream";
         }
-        return ResponseEntity.ok(Map.of(
-                "Content-Type", contentType + ";charset=utf-8",
-                "Content-Length", String.valueOf(body.length)), body
-        );
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", contentType + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.length));
+        return ResponseEntity.ok(headers, body);
     }
 
     private String normalize(String url) {

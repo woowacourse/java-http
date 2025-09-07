@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

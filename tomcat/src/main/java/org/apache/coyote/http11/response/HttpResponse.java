@@ -27,10 +27,10 @@ public class HttpResponse {
     public byte[] toBytes() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(statusLine.toString()).append("\r\n");
+        sb.append(statusLine.toString()).append(" \r\n");
 
         for (Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
 
         sb.append("\r\n");

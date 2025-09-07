@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.response;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseEntity {
 
-    private static final String DEFAULT_CONTENT_TYPE = "text/plain;charset=utf-8";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private final HttpResponse httpResponse;
 
     private ResponseEntity(HttpResponse httpResponse) {
@@ -31,10 +32,9 @@ public class ResponseEntity {
         if (body == null) {
             body = new byte[0];
         }
-        Map<String, String> headers = Map.of(
-                "Content-Type", contentType,
-                "Content-Length", String.valueOf(body.length)
-        );
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", contentType);
+        headers.put("Content-Length", String.valueOf(body.length));
 
         return new HttpResponse(headers, body);
     }

@@ -19,8 +19,8 @@ public enum HttpStatus {
     @Override
     public String toString() {
         return String.join(" ",
-                this.name(),
-                String.valueOf(this.status)
+                String.valueOf(this.status),
+                this.name()
         );
     }
 }

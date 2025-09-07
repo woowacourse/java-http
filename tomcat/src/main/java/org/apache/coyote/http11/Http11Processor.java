@@ -41,16 +41,16 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(responseMessage);
             outputStream.flush();
         } catch (final IllegalArgumentException e) {
-            log.warn(String.format("bad request : %s", e.getMessage()));
+            log.warn("bad request : {}", e.getMessage());
         } catch (final NoSuchFileException e) {
-            log.warn(String.format("file not found : %s", e.getMessage()));
+            log.warn("file not found : {}", e.getMessage());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
         } finally {
             try {
                 connection.close();
             } catch (final IOException e) {
-                log.error("failed to close connection", e);
+                log.error("failed to close connection : ", e);
             }
         }
     }
@@ -108,17 +108,17 @@ public class Http11Processor implements Runnable, Processor {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {
-            log.warn(String.format("User not found : account = %s", account));
+            log.warn("User not found : account = {}", account);
             return;
         }
 
         final User user = userOrEmpty.get();
         if (!user.checkPassword(password)) {
-            log.warn(String.format("Wrong password : account = %s", account));
+            log.warn("Wrong password : account = {}", account);
             return;
         }
 
-        log.info(String.format("User found : %s", user));
+        log.info("User found : {}", user);
     }
 
     private static Http11Response createHtmlResponse(final byte[] body) {

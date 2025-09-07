@@ -10,12 +10,13 @@ public record HttpRequest(
 ) {
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
-        RequestLine requestLine = RequestLine.from(inputStream);
-        RequestUri uri = RequestUri.from(requestLine.getUri());
-        QueryParameters queryParameters = QueryParameters.from(uri.getQueryString());
+        final RequestLine requestLine = RequestLine.from(inputStream);
+        final RequestUri uri = RequestUri.from(requestLine.uri());
+        final QueryParameters queryParameters = QueryParameters.from(uri.queryString());
+        final HttpMethod httpMethod = HttpMethod.from(requestLine.method());
 
         return new HttpRequest(
-                HttpMethod.from(requestLine.getMethod()),
+                httpMethod,
                 uri,
                 queryParameters
         );
@@ -26,7 +27,7 @@ public record HttpRequest(
     }
 
     public String getPath() {
-        return requestUri.getPath();
+        return requestUri.path();
     }
 
     public String getParameter(String key) {

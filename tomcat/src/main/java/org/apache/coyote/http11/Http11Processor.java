@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.Objects;
 import org.apache.coyote.Processor;
@@ -48,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseRequest(final java.io.InputStream inputStream) throws IOException {
+    private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
         try {
             return HttpRequest.from(inputStream);
         } catch (IllegalArgumentException e) {
@@ -100,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse generateHttpResponse(final String requestPath) throws IOException {
-        if ("/".equals(requestPath)) {
+        if (Objects.equals("/", requestPath)) {
             return HttpResponse.ok("Hello world!", MimeType.TEXT_PLAIN);
         }
         

@@ -10,20 +10,21 @@ record RequestLine(
         String uri,
         String protocol
 ) {
+
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
     private static final int EXPECTED_PARTS_COUNT = 3;
-    
+
     public static RequestLine from(InputStream inputStream) throws IOException {
         String[] parts = parseParts(inputStream);
         return new RequestLine(
-            parts[METHOD_INDEX],
-            parts[URI_INDEX], 
-            parts[PROTOCOL_INDEX]
+                parts[METHOD_INDEX],
+                parts[URI_INDEX],
+                parts[PROTOCOL_INDEX]
         );
     }
-    
+
     private static String[] parseParts(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -42,7 +43,4 @@ record RequestLine(
         }
         return parts;
     }
-    
-    String getMethod() { return method; }
-    String getUri() { return uri; }
 }

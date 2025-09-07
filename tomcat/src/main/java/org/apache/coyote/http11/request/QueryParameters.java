@@ -12,7 +12,7 @@ record QueryParameters(Map<String, String> parameters) {
     private static final int VALUE_INDEX = 1;
 
     public static QueryParameters from(String queryString) {
-        Map<String, String> parameters = new HashMap<>();
+        final Map<String, String> parameters = new HashMap<>();
 
         if (queryString != null && !queryString.isEmpty()) {
             String[] pairs = queryString.split(PARAMETER_SEPARATOR);

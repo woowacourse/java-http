@@ -21,12 +21,4 @@ record RequestUri(
         String queryString = uri.substring(queryIndex + 1);
         return new RequestUri(uri, path, queryString);
     }
-
-    String getPath() {
-        return path;
-    }
-
-    String getQueryString() {
-        return queryString;
-    }
 }

@@ -8,8 +8,8 @@ import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
 import com.techcourse.http.response.Location;
+import com.techcourse.http.response.ResponseBody;
 import com.techcourse.model.User;
-import com.techcourse.util.FileUtil;
 import java.util.Map;
 
 public class RegisterRequestHandler {
@@ -24,10 +24,7 @@ public class RegisterRequestHandler {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
 
         if (httpMethod == HttpMethod.GET) { // 회원 가입 페이지를 보여줄 때
-            String fileName = FileUtil.createFileName(httpRequest.getFilePath());
-            String responseBody = FileUtil.readResource(fileName);
-
-            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, responseBody);
+            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
         }
         if (httpMethod == HttpMethod.POST) { // 회원 가입 버튼을 누를 때
             Map<String, String> requestParams = httpRequest.getRequestParams();

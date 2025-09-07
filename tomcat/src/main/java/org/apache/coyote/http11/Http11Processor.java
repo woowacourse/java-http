@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.flush();
             } catch (FileNotFoundException | IllegalArgumentException e) {
                 final var responseBody = readNotFoundFile();
-                final var response = getHttpResponse(400, responseBody);
+                final var response = getHttpResponse(404, responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             }
@@ -245,7 +245,7 @@ public class Http11Processor implements Runnable, Processor {
         // TODO: status, status code enum
         String statusCode = "";
         if (status == 200) statusCode = "OK";
-        if (status == 400) statusCode = "NOT FOUND";
+        if (status == 404) statusCode = "NOT FOUND";
         final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", status, statusCode);
 
         final var fileExtension = getFileExtension(content);

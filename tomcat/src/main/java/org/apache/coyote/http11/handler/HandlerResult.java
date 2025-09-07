@@ -1,50 +1,60 @@
 package org.apache.coyote.http11.handler;
 
+import java.util.LinkedHashMap;
+
 public record HandlerResult(
-        String status,
-        String contentType,
-        byte[] body
+        Status status,
+        String mimeType,
+        String mimeParameter,
+        byte[] body,
+        LinkedHashMap<String, String> headers
 ) {
 
-    public final static String DEFAULT_CONTENT_TYPE = "text/plain";
-    public final static String DEFAULT_ENCODING_TYPE = "utf-8";
+    public final static String DEFAULT_MIME_TYPE = "text/plain";
+    public final static String DEFAULT_MIME_PARAMETER = "charset=utf-8";
 
-    public static HandlerResult ok(final String contentType, final byte[] body) {
-        final String contentTypeValue = createContentTypeValue(contentType, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("200 OK", contentTypeValue, body);
+    // == 팩토리 메서드 ==
+    public static HandlerResult of(final Status status, final String contentType, final byte[] body) {
+        return new HandlerResult(status, contentType, DEFAULT_MIME_PARAMETER, body, new LinkedHashMap<>());
     }
 
-    public static HandlerResult found(final String contentType, final byte[] body) {
-        final String contentTypeValue = createContentTypeValue(contentType, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("302 Found", contentTypeValue, body);
+    public static HandlerResult text(final Status status, final String message) {
+        return of(status, DEFAULT_MIME_TYPE, message.getBytes());
+    }
+
+    // == 응답 생성 메서드 ==
+    public static HandlerResult ok(final String contentType, final byte[] body) {
+        System.out.println(contentType);
+        return of(Status.OK, contentType, body);
+    }
+
+    public static HandlerResult redirectFound(final String contentType, final byte[] body) {
+        return of(Status.FOUND, contentType, body);
     }
 
     public static HandlerResult unauthorized(final String contentType, final byte[] body) {
-        final String contentTypeValue = createContentTypeValue(contentType, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("401 Unauthorized", contentTypeValue, body);
-    }
-
-    public static HandlerResult notFound(final String message) {
-        final String contentTypeValue = createContentTypeValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("404 Not Found", contentTypeValue, message.getBytes());
+        return of(Status.UNAUTHORIZED, contentType, body);
     }
 
     public static HandlerResult notFound(final String contentType, final byte[] body) {
-        final String contentTypeValue = createContentTypeValue(contentType, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("404 Not Found", contentTypeValue, body);
-    }
-
-    public static HandlerResult serverError(final String message) {
-        final String contentTypeValue = createContentTypeValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("500 Internal Server Error", contentTypeValue, message.getBytes());
+        return of(Status.NOT_FOUND, contentType, body);
     }
 
     public static HandlerResult serverError(final String contentType, final byte[] body) {
-        final String contentTypeValue = createContentTypeValue(contentType, DEFAULT_ENCODING_TYPE);
-        return new HandlerResult("500 Internal Server Error", contentTypeValue, body);
+        return of(Status.INTERNAL_ERROR, contentType, body);
     }
 
-    private static String createContentTypeValue(final String contentType, final String encodingType) {
-        return String.format("%s;charset=%s", contentType, encodingType);
+    // == 텍스트 기반 응답 생성 메서드 ==
+    public static HandlerResult notFound(final String message) {
+        return text(Status.NOT_FOUND, message);
+    }
+
+    public static HandlerResult serverError(final String message) {
+        return text(Status.INTERNAL_ERROR, message);
+    }
+
+    // == 추가 메서드 ==
+    public void addHeader(final String name, final String value) {
+        headers.put(name, value);
     }
 }

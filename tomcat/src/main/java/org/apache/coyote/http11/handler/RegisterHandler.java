@@ -7,9 +7,9 @@ import org.apache.coyote.http11.dto.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
+public class RegisterHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
     private static final String SLASH = "/";
     private static final String GET_METHOD = "GET";
     private static final String UNAUTHORIZED_PAGE = "401.html";
@@ -17,58 +17,54 @@ public class LoginHandler implements Handler {
 
     private final StaticFileHandler staticFileHandler;
 
-    public LoginHandler(final StaticFileHandler staticFileHandler) {
+    public RegisterHandler(final StaticFileHandler staticFileHandler) {
         this.staticFileHandler = staticFileHandler;
     }
 
     @Override
     public HandlerResult doHandle(final HttpRequest request) {
-        // 1, GET /login (returns login.html)
+        // 1. GET /register (returns register.html)
         if (GET_METHOD.equalsIgnoreCase(request.method())) {
             return staticFileHandler.doHandle(request);
         }
 
-        // 2. POST /login [with params] (returns index.html or 401.html)
-        return tryServeWithParams(request);
+        // 2. POST /register (returns index.html)
+        return tryServe(request);
     }
 
-    private HandlerResult tryServeWithParams(final HttpRequest request) {
+    private HandlerResult tryServe(final HttpRequest request) {
         // 1. 쿼리 파라미터 추출
         final String account = getParam(request, "account");
         final String password = getParam(request, "password");
+        final String email = getParam(request, "email");
 
         // 2. 파라미터 검증
-        if (hasMissingCredentials(account, password)) {
-            log.info("Login attempt with missing params. "
-                    + "accountPresent={}, passwordPresent={}", !account.isEmpty(), !password.isEmpty());
+        if (hasMissingCredentials(account, password, email)) {
+            log.info("Register attempt with missing params. accountPresent={}, passwordPresent={}, emailPresent={}",
+                    !account.isEmpty(), !password.isEmpty(), !email.isEmpty());
             return handleUnauthorizedRequest(request);
         }
 
         // 3. 사용자 조회
         final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (isUserNotFound(optionalUser)) {
-            log.info("Login failed: unknown account '{}'", account);
+        if (isRegisteredUser(optionalUser)) {
+            log.info("Register failed: registered account '{}'", account);
             return handleUnauthorizedRequest(request);
         }
 
-        // 4. 비밀번호 검증
-        final User user = optionalUser.get();
-        if (isPasswordMismatch(user, password)) {
-            log.info("Login failed: wrong password for account '{}'", account);
-            return handleUnauthorizedRequest(request);
-        }
+        // 3. 회원가입 처리
+        register(account, password, email);
 
-        // 5. 로그인 처리
-        login(account, password);
-
-        // 6. 로그인 성공
+        // 4. 회원가입 성공
         return handleRequestSuccess(request);
     }
 
     // == 비즈니스 로직 처리 ==
-    private void login(final String account, final String password) {
+    private void register(final String account, final String password, final String email) {
+        final User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        log.info("Register succeeded for account '{}'", account);
 
-        log.info("Login succeeded for account '{}'", account);
     }
 
     // == 요청 처리 ==
@@ -91,16 +87,13 @@ public class LoginHandler implements Handler {
     }
 
     // == 요청 유효성 검증 ==
-    private boolean hasMissingCredentials(final String account, final String password) {
-        return account == null || account.isEmpty() || password == null || password.isEmpty();
+    private boolean hasMissingCredentials(final String account, final String password, final String email) {
+        return account == null || account.isEmpty() || password == null || password.isEmpty()
+                || email == null || email.isEmpty();
     }
 
-    private boolean isUserNotFound(final Optional<User> optionalUser) {
-        return optionalUser.isEmpty();
-    }
-
-    private boolean isPasswordMismatch(final User user, final String password) {
-        return !user.checkPassword(password);
+    private boolean isRegisteredUser(final Optional<User> optionalUser) {
+        return optionalUser.isPresent();
     }
 
     // == 헬퍼 메서드 ==

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.HandlerResult.DEFAULT_CONTENT_TYPE;
+import static org.apache.coyote.http11.handler.HandlerResult.DEFAULT_MIME_TYPE;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,14 +12,15 @@ import org.apache.coyote.http11.resolver.PathResolver;
 
 public class StaticFileHandler implements Handler {
 
-    private static final String STATIC_ROOT = "static/";
+    private static final String SLASH = "/";
+    private static final String STATIC_ROOT = "static";
     private static final String NOT_FOUND_PAGE = "404.html";
     private static final String SERVER_ERROR_PAGE = "500.html";
 
     @Override
     public HandlerResult doHandle(final HttpRequest request) {
         final String resolved = PathResolver.resolve(request.route());
-        final String resourcePath = STATIC_ROOT + resolved;
+        final String resourcePath = STATIC_ROOT + SLASH + resolved;
 
         try {
             // 기존 리소스 요청
@@ -50,7 +51,7 @@ public class StaticFileHandler implements Handler {
         // 3. MIME 타입 판별
         String contentType = Files.probeContentType(filePath);
         if (contentType == null) {
-            contentType = DEFAULT_CONTENT_TYPE;
+            contentType = DEFAULT_MIME_TYPE;
         }
 
         // 4. 파일 내용 읽기
@@ -59,24 +60,26 @@ public class StaticFileHandler implements Handler {
         return HandlerResult.ok(contentType, body);
     }
 
+    // 404 Not Found 처리
     private HandlerResult handleNotFound() {
         try {
-            final String resourcePath = STATIC_ROOT + NOT_FOUND_PAGE;
+            final String resourcePath = STATIC_ROOT + SLASH + NOT_FOUND_PAGE;
             final HandlerResult result = tryServe(resourcePath);
             if (result != null) {
-                return HandlerResult.notFound(result.contentType(), result.body());
+                return HandlerResult.notFound(result.mimeType(), result.body());
             }
         } catch (final IOException ignored) {
         }
         return HandlerResult.notFound("404 Not Found");
     }
 
+    // 500 Server Error 처리
     private HandlerResult handleServerError() {
         try {
-            final String resourcePath = STATIC_ROOT + SERVER_ERROR_PAGE;
+            final String resourcePath = STATIC_ROOT + SLASH + SERVER_ERROR_PAGE;
             final HandlerResult result = tryServe(resourcePath);
             if (result != null) {
-                return HandlerResult.serverError(result.contentType(), result.body());
+                return HandlerResult.serverError(result.mimeType(), result.body());
             }
         } catch (final IOException ignored) {
         }

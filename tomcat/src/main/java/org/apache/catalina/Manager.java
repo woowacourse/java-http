@@ -34,7 +34,7 @@ public interface Manager {
      * <code>null</code>.
      *
      * @param id The session id for the session to be returned
-     * @return the request session or {@code null} if a session with the requested ID could not be found
+     * @return the request session or {@code null} if a session with the requested ID could not be redirectFound
      * @throws IllegalStateException if a new session cannot be instantiated for any reason
      * @throws IOException           if an input/output error occurs while processing this request
      */

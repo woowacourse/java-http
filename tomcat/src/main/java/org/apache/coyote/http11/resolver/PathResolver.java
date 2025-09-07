@@ -1,6 +1,10 @@
 package org.apache.coyote.http11.resolver;
 
-public class PathResolver {
+import java.util.Set;
+
+public final class PathResolver {
+
+    private static final Set<String> HTML_PATHS = Set.of("/login", "/register");
 
     private PathResolver() {
     }
@@ -11,9 +15,10 @@ public class PathResolver {
         }
 
         String resolved = route;
-        if (route.startsWith("/login") && !route.endsWith(".html")) {
+        if (HTML_PATHS.stream().anyMatch(route::startsWith) && !route.endsWith(".html")) {
             resolved = route + ".html";
         }
-        return resolved.substring(route.indexOf("/") + 1);
+
+        return resolved.substring(1);
     }
 }

@@ -2,8 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dto.HttpRequest;
@@ -19,6 +22,10 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String SEMICOLON = ";";
 
     private final Socket connection;
 
@@ -37,29 +44,55 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            // 1. 요청 라인(Request Line) 파싱
-            final Optional<HttpRequest> optionalRequest = HttpRequestParser.parse(inputStream);
-            if (optionalRequest.isEmpty()) {
-                return;
-            }
-            final HttpRequest request = optionalRequest.get();
+            // 1. HTTP 요청 파싱
+            final HttpRequest request = readRequest(inputStream);
 
             // 2. 라우팅 및 핸들러 실행
-            final Router router = new Router(new StaticFileHandler());
-            final Handler handler = router.route(request);
-            final HandlerResult result = handler.doHandle(request);
+            final HandlerResult result = handleRequest(request);
 
-            // 3. HTTP 응답 생성 및 헤더 설정
-            final HttpResponse response = new HttpResponse("HTTP/1.1", result.status(), new LinkedHashMap<>());
-            response.addHeader("Content-Type", result.contentType());
-            response.addHeader("Content-Length", String.valueOf(result.body().length));
-
-            // 4. 응답 전송
-            outputStream.write(response.toBytes());
-            outputStream.write(result.body());
-            outputStream.flush();
+            // 3. HTTP 응답 생성 및 전송
+            sendResponse(outputStream, result);
+        } catch (final IllegalArgumentException e) {
+            log.warn(e.getMessage());
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    // 1. HTTP 요청 파싱
+    private HttpRequest readRequest(final InputStream inputStream) throws IOException {
+        final Optional<HttpRequest> optionalRequest = HttpRequestParser.parse(inputStream);
+        if (optionalRequest.isEmpty()) {
+            throw new IllegalArgumentException("Invalid or empty HTTP request");
+        }
+        return optionalRequest.get();
+    }
+
+    // 2. 라우팅 및 핸들러 실행
+    private HandlerResult handleRequest(final HttpRequest request) {
+        final Router router = new Router(new StaticFileHandler());
+        final Handler handler = router.route(request);
+        return handler.doHandle(request);
+    }
+
+    // 3. HTTP 응답 생성 및 전송
+    private void sendResponse(final OutputStream outputStream, final HandlerResult result) throws IOException {
+        final HttpResponse response = buildHttpResponse(result);
+        outputStream.write(response.toBytes());
+        outputStream.write(result.body());
+        outputStream.flush();
+    }
+
+    // 3.1 HTTP 응답 생성 및 헤더 설정
+    private HttpResponse buildHttpResponse(final HandlerResult result) {
+        final HttpResponse response = new HttpResponse(DEFAULT_PROTOCOL, result.status(), new LinkedHashMap<>());
+        response.addHeader(CONTENT_TYPE_HEADER, result.mimeType() + SEMICOLON + result.mimeParameter());
+        response.addHeader(CONTENT_LENGTH_HEADER, String.valueOf(result.body().length));
+
+        // 핸드러별 추가 헤더 설정 (e.g. LoginHandler의 302 Location)
+        for (final Entry<String, String> header : result.headers().entrySet()) {
+            response.addHeader(header.getKey(), header.getValue());
+        }
+        return response;
     }
 }

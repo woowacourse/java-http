@@ -7,6 +7,7 @@ public final class QueryStringParser {
 
     private static final String AMPERSAND = "&";
     private static final String EQUAL = "=";
+    private static final String EMPTY = "";
 
     private QueryStringParser() {
     }
@@ -20,7 +21,7 @@ public final class QueryStringParser {
             if (keyValue.length == 2) {
                 query.put(keyValue[0], keyValue[1]);
             } else if (keyValue.length == 1) {
-                query.put(keyValue[0], "");
+                query.put(keyValue[0], EMPTY);
             }
         }
 

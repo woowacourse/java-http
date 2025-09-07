@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,18 +39,24 @@ public class Http11Processor implements Runnable, Processor {
              var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final var requestLine = RequestLine.from(reader.readLine());
-            final var requestPath = requestLine.getPath();
+            var requestPath = requestLine.getPath();
             final Map<String, String> queryParameters = requestLine.getQueryParameters();
-            if(requestPath.equals("login")) {
+
+            if (requestPath.isBlank() || "/".equals(requestPath)) {
+                requestPath = "index.html";
+            }
+            if (requestPath.equals("login")) {
                 printMemberInfo(queryParameters.get("account"), queryParameters.get("password"));
             }
 
-            var responseBody = "Hello world!";
-            if (!requestPath.isBlank()) {
-                var resource = getResourceFrom(requestPath);
-                if (resource != null) {
-                    var path = Paths.get(resource.toURI());
-                    responseBody = Files.readString(path);
+            String statusCode = "200 OK";
+            String responseBody = readStaticFileContent(requestPath);
+            if (responseBody == null) {
+                statusCode = "404 Not Found";
+                responseBody = readStaticFileContent("404.html");
+
+                if (responseBody == null) {
+                    responseBody = "<h1>404 Not Found</h1>";
                 }
             }
 
@@ -60,37 +65,60 @@ public class Http11Processor implements Runnable, Processor {
                 mimeType = "text/css";
             }
 
-            final var response = buildHttpResponse(mimeType, responseBody);
-
+            final var response = buildHttpResponse(statusCode, mimeType, responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            try (final var outputStream = connection.getOutputStream()) {
+                String responseBody;
+                URL errorResource = getResourceFrom("500.html");
+                if (errorResource != null) {
+                    responseBody = Files.readString(Paths.get(errorResource.toURI()));
+                } else {
+                    responseBody = "<h1>500 Internal Server Error</h1>";
+                }
+
+                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } catch (IOException | URISyntaxException ex) {
+                log.error("500 에러 전송 실패: " + ex.getMessage(), ex);
+            }
         }
     }
 
     public void printMemberInfo(String account, String password) {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if(optionalUser.isEmpty()) {
+        if (optionalUser.isEmpty()) {
             return;
         }
         User user = optionalUser.get();
-        if(user.checkPassword(password)) {
+        if (user.checkPassword(password)) {
             System.out.println("user: " + user);
         }
     }
 
     private URL getResourceFrom(String requestPath) {
         var resource = getClass().getClassLoader().getResource("static/" + requestPath);
-        if(resource == null) {
+        if (resource == null) {
             resource = getClass().getClassLoader().getResource("static/" + requestPath + ".html");
         }
         return resource;
     }
 
-    private String buildHttpResponse(String mimeType, String responseBody) {
+    private String readStaticFileContent(String requestPath) throws URISyntaxException, IOException {
+        URL resource = getResourceFrom(requestPath);
+        if (resource == null) {
+            return null;
+        }
+        return Files.readString(Paths.get(resource.toURI()));
+    }
+
+    private String buildHttpResponse(String statusCode, String mimeType, String responseBody) throws IOException {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + mimeType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

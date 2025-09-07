@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -99,8 +100,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private byte[] readFile(final String location) throws IOException {
-        final var path = Path.of(STATIC_FILE_LOCATION, location);
-        return Files.readAllBytes(path);
+        try (final InputStream inputStream = new FileInputStream(getClass().getClassLoader().getResource("static" + location).getPath())) {
+            return inputStream.readAllBytes();
+        } catch (final NullPointerException e) {
+            throw new NoSuchFileException(location);
+        }
     }
 
     private void validateUserByAccount(final String account, final String password) {

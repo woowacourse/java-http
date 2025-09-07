@@ -18,7 +18,7 @@ public class HttpRequestParser {
 
             String method = methodAndUriAndProtocol[0];
             String path = UriParser.parsePath(methodAndUriAndProtocol[1]);
-            Map<String, String> queryStrings = UriParser.parseQueryStrings(methodAndUriAndProtocol[1]);
+            QueryStrings queryStrings = UriParser.parseQueryStrings(methodAndUriAndProtocol[1]);
             return new HttpRequest(HttpMethod.from(method), path, queryStrings);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             logger.error(exception.getMessage(), exception);

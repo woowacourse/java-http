@@ -11,4 +11,8 @@ public class UserController {
     public ControllerResponse login(HttpRequest httpRequest) {
         return userService.login(httpRequest);
     }
+
+    public ControllerResponse register(HttpRequest httpRequest) {
+        return userService.register(httpRequest);
+    }
 }

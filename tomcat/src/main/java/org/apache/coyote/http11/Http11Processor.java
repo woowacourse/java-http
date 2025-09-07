@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,6 +14,7 @@ import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.HttpStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,37 +41,43 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = new HttpRequest(reader);
-            httpRequest.parseHttpRequest();
-            final String requestPath = httpRequest.getRequestPath();
+            try {
+                final HttpRequest httpRequest = new HttpRequest(reader);
+                httpRequest.parseHttpRequest();
+                final String requestPath = httpRequest.getRequestPath();
 
-            if (requestPath.equals("/")) {
-                final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
+                if (requestPath.equals("/")) {
+                    final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
+                    sendHttpResponse(response, outputStream);
+                    return;
+                }
+
+                if (requestPath.equals("/login")) {
+                    final URL resource = getStaticResource("/login.html");
+                    final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+                    sendHttpResponse(response, outputStream);
+                    logUserInformationIfExists(httpRequest);
+                    return;
+                }
+
+                final URL resource = getStaticResource(httpRequest.getRequestPath());
+                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
-                return;
+            } catch (HttpStatusException e) {
+                final HttpStatusCode statusCode = e.getStatusCode();
+                final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
+                final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
+                sendHttpResponse(errorResponse, outputStream);
             }
-
-            if (requestPath.equals("/login")) {
-                final URL resource = getStaticResource("/login.html");
-                final HttpResponse response = getHttpResponse(resource);
-                sendHttpResponse(response, outputStream);
-                logUserInformationIfExists(httpRequest);
-                return;
-            }
-
-            final URL resource = getStaticResource(httpRequest.getRequestPath());
-            final HttpResponse response = getHttpResponse(resource);
-            sendHttpResponse(response, outputStream);
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private URL getStaticResource(final String path) throws IOException {
+    private URL getStaticResource(final String path) {
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
-            throw new FileNotFoundException();
+            throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
         }
         return resource;
     }
@@ -94,8 +100,9 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 
-    private HttpResponse getHttpResponse(final URL resource) throws IOException {
-        final String responseLine = "HTTP/1.1 200 OK";
+    private HttpResponse getHttpResponse(final HttpStatusCode statusCode, final URL resource) throws IOException {
+        final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
+                statusCode.getStatusMessage());
         final byte[] responseBody = readFile(resource);
         final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
         responseHeaders.put("Content-Type", getContentType(resource));

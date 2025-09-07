@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.exception.HttpStatusException;
 
 public class HttpResponse {
 
@@ -38,6 +39,10 @@ public class HttpResponse {
 
     public static String getContentType(final String resourceExtension) {
         final String mimeType = MIME_TYPES.get(resourceExtension);
+        if (mimeType == null) {
+            throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
+        }
+
         if (mimeType.equals("text/html")) {
             return mimeType + ";charset=utf-8";
         }

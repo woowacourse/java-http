@@ -1,11 +1,15 @@
 package study;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +32,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = new ClassPathResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,11 +48,18 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+//        final Path path = Path.of(new ClassPathResource(fileName).getPath());
+//        final Path path = Paths.get(new ClassPathResource(fileName).getPath());
+//        final Path path = Path.of(ClassLoader.getSystemResource(fileName).getPath());
+        final Path path = Paths.get(ClassLoader.getSystemResource(fileName).getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try {
+            final List<String> actual = Files.readAllLines(path);
+            assertThat(actual).containsOnly("nextstep");
+        }
+        catch (IOException e) {
+            System.out.println("I/O error!");
+        }
     }
 }

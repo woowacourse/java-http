@@ -49,21 +49,26 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(HttpRequestUrl url) throws IOException {
-        if (url.equalPath("/")) {
-            return create200Response("Hello world!", ContentType.TEXT_PLAIN);
-        }
-        if (url.equalPath("/login")) {
-            String account = url.getParameter("account");
-            String password = url.getParameter("password");
-            if (account != null && password != null) {
-                validateAccount(account, password);
+        try {
+            if (url.equalPath("/")) {
+                return create200Response("Hello world!", ContentType.TEXT_PLAIN);
             }
-            return createStaticResourceResponse("/login.html");
+            if (url.equalPath("/login")) {
+                String account = url.getParameter("account");
+                String password = url.getParameter("password");
+                if (account != null && password != null) {
+                    validateAccount(account, password);
+                }
+                return createStaticResourceResponse("/login.html");
+            }
+            if (url.isStaticResourcePath()) {
+                return createStaticResourceResponse(url.getPath());
+            }
+            return create404Response();
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+            return create500Response();
         }
-        if (url.isStaticResourcePath()) {
-            return createStaticResourceResponse(url.getPath());
-        }
-        return create404Response();
     }
 
     private String createStaticResourceResponse(String path) throws IOException {
@@ -110,6 +115,16 @@ public class Http11Processor implements Runnable, Processor {
         String body = Files.readString(getStaticResource("/404.html"));
         return String.join("\r\n",
                 "HTTP/1.1 404 NOT FOUND ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
+    }
+
+    private String create500Response() throws IOException {
+        String body = Files.readString(getStaticResource("/500.html"));
+        return String.join("\r\n",
+                "HTTP/1.1 500 Internal Server Error ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + body.getBytes().length + " ",
                 "",

@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             path = requestTarget.substring(0, queryIndex);
             queryString = requestTarget.substring(queryIndex + 1);
         }
-        final var queryParams = parseQueryString(queryString);
+        final var queryParams = parseUrlEncodedParams(queryString);
         return new RequestLine(method, path, queryParams);
     }
 
@@ -108,12 +108,12 @@ public class Http11Processor implements Runnable, Processor {
         return new String(bodyBytes, StandardCharsets.UTF_8);
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
-        if (queryString == null || queryString.isBlank()) {
+    private Map<String, String> parseUrlEncodedParams(final String data) {
+        if (data == null || data.isBlank()) {
             return Collections.emptyMap();
         }
         final Map<String, String> params = new HashMap<>();
-        final String[] pairs = queryString.split("&");
+        final String[] pairs = data.split("&");
         for (final String pair : pairs) {
             String[] keyValue = pair.split("=");
             if (keyValue.length == 2) {
@@ -133,13 +133,16 @@ public class Http11Processor implements Runnable, Processor {
         if ("/login".equals(path)) {
             return handleLoginRequest(httpRequest);
         }
+        if ("/register".equals(path)) {
+            return handleRegisterRequest(httpRequest);
+        }
         return serveStaticFile(path);
     }
 
     private Http11Response handleLoginRequest(final Http11Request httpRequest) {
-        final var queryParams = httpRequest.getQueryParams();
-        if (queryParams.containsKey("account")) {
-            if (isLoginSuccessful(queryParams)) {
+        if (httpRequest.isPost()) {
+            final var params = parseUrlEncodedParams(httpRequest.getBody());
+            if (isLoginSuccessful(params)) {
                 return Http11Response.redirect("/index.html");
             }
             return Http11Response.redirect("/401.html");
@@ -147,12 +150,12 @@ public class Http11Processor implements Runnable, Processor {
         return serveStaticFile("/login.html");
     }
 
-    private boolean isLoginSuccessful(final Map<String, String> queryParams) {
-        if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {
+    private boolean isLoginSuccessful(final Map<String, String> params) {
+        if (!params.containsKey("account") || !params.containsKey("password")) {
             return false;
         }
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
+        final String account = params.get("account");
+        final String password = params.get("password");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty()) {
             return false;
@@ -163,6 +166,21 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.info("login success: {}", user);
         return true;
+    }
+
+    private Http11Response handleRegisterRequest(final Http11Request httpRequest) {
+        if (httpRequest.isPost()) {
+            final var params = parseUrlEncodedParams(httpRequest.getBody());
+            final var user = new User(
+                    params.get("account"),
+                    params.get("password"),
+                    params.get("email")
+            );
+            InMemoryUserRepository.save(user);
+            log.info("user created: {}", user);
+            return Http11Response.redirect("/index.html");
+        }
+        return serveStaticFile("/register.html");
     }
 
     private Http11Response serveStaticFile(final String path) {

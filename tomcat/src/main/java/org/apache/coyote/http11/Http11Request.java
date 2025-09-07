@@ -40,4 +40,12 @@ public final class Http11Request {
     public String getBody() {
         return body;
     }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public boolean isPost() {
+        return "POST".equalsIgnoreCase(method);
+    }
 }

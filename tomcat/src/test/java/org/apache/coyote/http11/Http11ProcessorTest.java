@@ -167,11 +167,15 @@ class Http11ProcessorTest {
     @Test
     void login_success() {
         // given
-        final var httpRequest = """
-                GET /login?account=gugu&password=password HTTP/1.1\r
-                Host: localhost:8080\r
-                \r
-                """;
+        final String body = "account=gugu&password=password";
+        final var httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body
+        );
+
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
@@ -190,11 +194,15 @@ class Http11ProcessorTest {
     @Test
     void login_fail() {
         // given
-        final var httpRequest = """
-                GET /login?account=invalid&password=password HTTP/1.1\r
-                Host: localhost:8080\r
-                \r
-                """;
+        final String body = "account=invalid&password=password";
+        final var httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body
+        );
+
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 

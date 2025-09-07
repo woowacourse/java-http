@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         final var headers = new HashMap<String, String>();
         String headerLine;
         while (!(headerLine = reader.readLine()).isBlank()) {
-            final var header = headerLine.split(": ");
+            final var header = headerLine.split(": ", 2);
             headers.put(header[0].trim(), header[1].trim());
         }
         return headers;

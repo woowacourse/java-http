@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpRequestHandler requestHandler;
+    private final HttpResponseHandler responseHandler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.requestHandler = new HttpRequestHandler();
+        this.responseHandler = new HttpResponseHandler();
     }
 
     @Override
@@ -29,16 +35,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = requestHandler.handleRequest(inputStream);
+            HttpUri requestUri = request.getUri();
+            String path = requestUri.getPath();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (path.startsWith("/login")) {
+                String account = request.getQueryParameter("account");
+                User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+                if (user != null) {
+                    log.info("user: {}", user);
+                }
+            }
 
-            outputStream.write(response.getBytes());
+            HttpResponse response = responseHandler.handleResponse(request, HttpStatusCode.OK);
+
+            outputStream.write(response.asString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

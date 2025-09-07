@@ -1,5 +1,20 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.DriverManager;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,9 +41,38 @@ class FileTest {
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+/*
+        String s = new String();
+        ClassLoader classLoader1 = s.getClass().getClassLoader();
+        System.out.println(classLoader1);
+
+        Time time = new Time(2);
+        ClassLoader classLoader2 = time.getClass().getClassLoader();
+        System.out.println(classLoader2);
+
+        FileTest fileTest = new FileTest();
+        ClassLoader classLoader3 = fileTest.getClass().getClassLoader();
+        System.out.println(classLoader3);*/
+
+        System.out.println("Platform Classloader:"
+                + ClassLoader.getPlatformClassLoader());
+
+        System.out.println("System Classloader:"
+                + ClassLoader.getSystemClassLoader());
+
+        System.out.println("Classloader of this class:"
+                + FileTest.class.getClassLoader());
+
+        System.out.println("Classloader of DriverManager:"
+                + DriverManager.class.getClassLoader());
+
+        System.out.println("Classloader of ArrayList:"
+                + ArrayList.class.getClassLoader());
 
         // todo
-        final String actual = "";
+        final String actual = resource.getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +84,17 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        URL systemResource = ClassLoader.getSystemResource(fileName);
+        System.out.println(systemResource.getPath());
+
+        final Path path = Path.of(systemResource.getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

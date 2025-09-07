@@ -70,12 +70,12 @@ public class Http11Processor implements Runnable, Processor {
         StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append("HTTP/1.1 ")
                 .append(response.getStatusCode().getValue()).append(" ")
-                .append(response.getStatusCode()).append("\r\n");
+                .append(response.getStatusCode()).append(" \r\n");
         if (headerString != null) {
-            responseBuilder.append(headerString).append("\r\n");
+            responseBuilder.append(headerString).append(" \r\n");
         }
-        responseBuilder.append("Content-Type: ").append(response.getContentType()).append("\r\n");
-        responseBuilder.append("Content-Length: ").append(responseBody.getBytes().length).append("\r\n\r\n");
+        responseBuilder.append("Content-Type: ").append(response.getContentType()).append(" \r\n");
+        responseBuilder.append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n\r\n");
         responseBuilder.append(responseBody);
         return responseBuilder;
     }

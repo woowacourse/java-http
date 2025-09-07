@@ -78,7 +78,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            validateNullResource(resource);
+            final String responseBody = Files.readString(Paths.get(resource.toURI()));
             final String response = createHtmlResponse(responseBody);
             writeAndFlush(outputStream, response);
 
@@ -108,6 +109,12 @@ public class Http11Processor implements Runnable, Processor {
     private User getUserByAccount(final String[] split) {
         return InMemoryUserRepository.findByAccount(split[1])
                 .orElseThrow(() -> new IllegalArgumentException("user를 찾을 수 없습니다."));
+    }
+
+    private void validateNullResource(final URL resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("존재하지 않는 resource 입니다.");
+        }
     }
 
     private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {

@@ -34,7 +34,9 @@ public class LoginHandler {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("로그인 성공! 아이디: {}", user.get().getAccount());
             HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
-            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+            if (!request.existsCookie("JSESSIONID")) {
+                response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+            }
             return response;
         }
 

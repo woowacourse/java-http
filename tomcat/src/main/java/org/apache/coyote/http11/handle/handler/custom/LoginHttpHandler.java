@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.handle.HttpHandlerCondition;
-import org.apache.coyote.http11.handle.handler.HttpHandler;
+import org.apache.coyote.http11.handle.handler.MultiConditionHandler;
 import org.apache.coyote.http11.handle.handler.resource.HtmlHttpHandler;
 import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
@@ -17,7 +17,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHttpHandler implements HttpHandler {
+public class LoginHttpHandler extends MultiConditionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHttpHandler.class);
 
@@ -33,21 +33,8 @@ public class LoginHttpHandler implements HttpHandler {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
-        final Function<HttpRequest, HttpResponse> handlerMethod = handlerMethodMapper.get(requestCondition);
-        if (handlerMethod == null) {
-            throw new IllegalStateException("해당 요청을 처리할 수 없는 핸들러입니다. " + requestCondition);
-        }
-
-        return handlerMethod.apply(request);
-    }
-
-    @Override
-    public boolean canHandle(final HttpRequest request) {
-        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
-
-        return handlerMethodMapper.containsKey(requestCondition);
+    protected Map<HttpHandlerCondition, Function<HttpRequest, HttpResponse>> getHandlerMethodMapper() {
+        return handlerMethodMapper;
     }
 
     private HttpResponse handleGetLogin(final HttpRequest request) {

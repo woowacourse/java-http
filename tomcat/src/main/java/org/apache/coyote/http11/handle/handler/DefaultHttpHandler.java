@@ -9,7 +9,7 @@ import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class DefaultHttpHandler implements HttpHandler {
+public class DefaultHttpHandler extends MultiConditionHandler {
 
     private static final DefaultHttpHandler instance = new DefaultHttpHandler();
 
@@ -21,21 +21,8 @@ public class DefaultHttpHandler implements HttpHandler {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
-        final Function<HttpRequest, HttpResponse> handlerMethod = handlerMethodMapper.get(requestCondition);
-        if (handlerMethod == null) {
-            throw new IllegalStateException("해당 요청을 처리할 수 없는 핸들러입니다. " + requestCondition);
-        }
-
-        return handlerMethod.apply(request);
-    }
-
-    @Override
-    public boolean canHandle(final HttpRequest request) {
-        final HttpHandlerCondition requestCondition = HttpHandlerCondition.from(request);
-
-        return handlerMethodMapper.containsKey(requestCondition);
+    protected Map<HttpHandlerCondition, Function<HttpRequest, HttpResponse>> getHandlerMethodMapper() {
+        return handlerMethodMapper;
     }
 
     private HttpResponse handleGetRoot(final HttpRequest request) {

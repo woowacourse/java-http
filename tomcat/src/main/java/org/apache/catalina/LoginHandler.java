@@ -6,6 +6,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -32,7 +33,9 @@ public class LoginHandler {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user: {}", user.get());
-            return new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+            return response;
         }
 
         return new HttpResponse(HttpStatusCode.UNAUTHORIZED, ContentType.HTML, "/401.html");

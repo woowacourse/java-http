@@ -61,13 +61,23 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createHttpResponse(HttpResponse response) throws IOException, URISyntaxException {
         String responseBody = getResponseBody(response.getBody());
+        String headerString = response.headersToString();
+        StringBuilder responseBuilder = createResponseString(response, headerString, responseBody);
+        return responseBuilder.toString();
+    }
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + response.getStatusCode().getValue() + " " + response.getStatusCode(),
-                "Content-Type: " + response.getContentType() + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private StringBuilder createResponseString(HttpResponse response, String headerString, String responseBody) {
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("HTTP/1.1 ")
+                .append(response.getStatusCode().getValue()).append(" ")
+                .append(response.getStatusCode()).append("\r\n");
+        if (headerString != null) {
+            responseBuilder.append(headerString).append("\r\n");
+        }
+        responseBuilder.append("Content-Type: ").append(response.getContentType()).append("\r\n");
+        responseBuilder.append("Content-Length: ").append(responseBody.getBytes().length).append("\r\n\r\n");
+        responseBuilder.append(responseBody);
+        return responseBuilder;
     }
 
     private String getResponseBody(String path) throws IOException, URISyntaxException {
@@ -81,6 +91,6 @@ public class Http11Processor implements Runnable, Processor {
     private URL getResource(String path) {
         return getClass()
                 .getClassLoader()
-                .getResource("static/" + path);
+                .getResource("static" + path);
     }
 }

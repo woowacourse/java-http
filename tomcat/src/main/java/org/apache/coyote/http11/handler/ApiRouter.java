@@ -3,9 +3,10 @@ package org.apache.coyote.http11.handler;
 import com.techcourse.controller.UserController;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.general.ContentType;
-import org.apache.coyote.http11.general.HttpHeader;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
@@ -19,7 +20,7 @@ public class ApiRouter {
 
     public ApiRouter() {
         this.routeMap = new HashMap<>();
-        this.userController = new UserController();
+        this.userController = new UserController(new SessionManager());
         initializeRouteTable();
     }
 
@@ -47,14 +48,14 @@ public class ApiRouter {
         if (controllerResponse instanceof JsonResponse) {
             HttpResponse httpResponse = new HttpResponse(controllerResponse.status(),
                 ContentType.APPLICATION_JSON, controllerResponse.content());
-            for (HttpHeader header : controllerResponse.headers()) {
-                httpResponse.addHeader(header.key(), header.value());
+            for (Entry<String, String> header : controllerResponse.headers().getHeaders().entrySet()) {
+                httpResponse.addHeader(header.getKey(), header.getValue());
             }
             return httpResponse;
         }
         HttpResponse httpResponse = StaticFileHandler.handleDefault(controllerResponse.content());
-        for (HttpHeader header : controllerResponse.headers()) {
-            httpResponse.addHeader(header.key(), header.value());
+        for (Entry<String, String> header : controllerResponse.headers().getHeaders().entrySet()) {
+            httpResponse.addHeader(header.getKey(), header.getValue());
         }
         return httpResponse;
     }

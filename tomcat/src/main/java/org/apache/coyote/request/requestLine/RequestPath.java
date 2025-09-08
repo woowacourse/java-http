@@ -9,9 +9,11 @@ public class RequestPath {
     private Map<String, String> queryParams;
 
     public static RequestPath from(final String requestPath) {
-        if(requestPath.contains("?")){
-            final String[] splitRequestPath = requestPath.split("\\?");
-            return new RequestPath(splitRequestPath[0], splitRequestPath[1]);
+        int questionMarkIndex = requestPath.indexOf('?');
+        if(questionMarkIndex >= 0){
+            String path = requestPath.substring(0, questionMarkIndex);
+            String query = requestPath.substring(questionMarkIndex + 1);
+            return new RequestPath(path, query);
         }
         return new RequestPath(requestPath);
     }

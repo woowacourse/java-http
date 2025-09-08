@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,32 +43,53 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String[] tokens = readStartLine(br, outputStream);
             if (tokens == null) {
                 return;
             }
 
+            String method = tokens[0].trim();
             String rawUri = tokens[1].trim();
             int queryIndex = rawUri.indexOf("?");
 
+            // 1. 헤더, 바디 읽기
+            Map<String, String> headers = readHeaders(br);
+            String body = readBody(headers, br);
+
+            // 2. uri/쿼리 파싱
             String uri = makeUri(rawUri, queryIndex);
             Map<String, List<String>> queryParameters = makeQueryParameters(rawUri, queryIndex);
 
-            if (uri.equals("/") || uri.isEmpty()) {
+            // 3. POST form body를 queryParameters에 합치기
+            String contentType = headers.get("Content-Type");
+            if ("POST".equals(method) && contentType.startsWith("application/x-www-form-urlencoded")) {
+                Map<String, List<String>> form = parseQueryParameters(body);
+                form.forEach((key, value) -> {
+                    queryParameters.computeIfAbsent(key, k -> new ArrayList<>()).addAll(value);
+                });
+            }
+
+            // 4. 라우팅
+            if ((uri.equals("/") || uri.isEmpty()) && method.equals("GET")) {
                 String responseBody = "Hello world!";
                 writeResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes());
                 return;
             }
-
             if (uri.equals("/login")) {
-                handleLogin(outputStream, queryParameters);
+                handleLogin(outputStream, queryParameters, method);
                 return;
             }
-
-            if (uri.endsWith(".html") || uri.endsWith(".css")) {
+            if (uri.equals("/register")) {
+                handleRegister(outputStream, queryParameters, method);
+                return;
+            }
+            if ((uri.endsWith(".html") || uri.endsWith(".css") || uri.endsWith(".js")) && method.equals("GET")) {
                 handleStatic(uri, outputStream);
             }
+
+            // 5. 매칭 안 된것들 라우트
+            writeError(outputStream, 404, "Not Found", "No Route");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -74,9 +97,42 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Map<String, String> readHeaders(final BufferedReader br) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.isEmpty()) {
+                break;
+            }
+            int colon = line.indexOf(':');
+            if (colon > 0) {
+                String name = line.substring(0, colon).trim();
+                String value = line.substring(colon + 1).trim();
+                headers.put(name, value);
+            }
+        }
+        return headers;
+    }
+
+    private String readBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+        String contentLengthHeader = headers.get("Content-Length");
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(contentLengthHeader);
+        final char[] body = new char[contentLength];
+        bufferedReader.read(body, 0, contentLength);
+
+        return new String(body);
+    }
+
     private String[] readStartLine(final BufferedReader br, final OutputStream outputStream) throws IOException {
         String line = br.readLine();
-        if (line == null || line.isBlank()) {
+        if (line == null) {
+            return null;
+        }
+        if (line.isBlank()) {
             writeError(outputStream, 400, "Bad Request", "Request line is empty");
             return null;
         }
@@ -134,9 +190,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleLogin(
             final OutputStream outputStream,
-            final Map<String, List<String>> queryParameters
-    )
-            throws IOException, URISyntaxException {
+            final Map<String, List<String>> queryParameters,
+            final String method
+    ) throws IOException, URISyntaxException {
+        if (method.equals("GET")) {
+            writeRedirect(outputStream, "/login.html");
+            return;
+        }
         String account = getFirst(queryParameters, "account");
         String password = getFirst(queryParameters, "password");
 
@@ -153,7 +213,26 @@ public class Http11Processor implements Runnable, Processor {
             log.info("Login FAILED - invalid password {}", account);
             writeRedirect(outputStream, "/401.html");
         }
-        writeRedirect(outputStream, "/login.html");
+    }
+
+    private void handleRegister(
+            final OutputStream outputStream,
+            final Map<String, List<String>> queryParameters,
+            final String method
+    ) throws IOException {
+        if (method.equals("GET")) {
+            writeRedirect(outputStream, "/register.html");
+            return;
+        }
+        String account = getFirst(queryParameters, "account");
+        String email = getFirst(queryParameters, "email");
+        String password = getFirst(queryParameters, "password");
+
+        if (account != null && email != null && password != null) {
+            InMemoryUserRepository.save(new User(account, password, email));
+            log.info("Register OK - account {}", account);
+            writeRedirect(outputStream, "/index.html");
+        }
     }
 
     private String getFirst(final Map<String, List<String>> map, final String key) {
@@ -201,7 +280,8 @@ public class Http11Processor implements Runnable, Processor {
         String response = "HTTP/1.1 302 Found " + "\r\n"
                 + "Location: " + location + "\r\n"
                 + "Content-Type: text/html;charset=utf-8 " + "\r\n"
-                + "Content-Length: " + "\r\n"
+                + "Content-Length: 0" + "\r\n"
+                + "Connection: close " + "\r\n"
                 + "\r\n";
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -216,6 +296,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (target.endsWith(".css")) {
             return "text/css;charset=utf-8";
+        }
+        if (target.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
         }
         return null;
     }

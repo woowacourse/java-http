@@ -2,9 +2,9 @@ package org.apache.coyote.http11.parser;
 
 public class UriParser {
 
-    public static final String QUERY_SEPARATOR = "?";
-    public static final String ROOT_PATH = "/";
-    public static final String EXTENSION_SEPARATOR = ".";
+    private static final String QUERY_SEPARATOR = "?";
+    private static final String ROOT_PATH = "/";
+    private static final String EXTENSION_SEPARATOR = ".";
 
     public static String extractPath(String uri) {
         int index = uri.indexOf(QUERY_SEPARATOR);

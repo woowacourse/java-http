@@ -2,14 +2,16 @@ package org.apache.coyote.http11.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HeaderParser {
 
-    public static final String HEADER_DELIMITER = ":";
-    public static final String MEDIA_TYPE_DELIMITER = ",";
-    public static final String ACCEPT_HEADER = "Accept";
+    private static final String HEADER_DELIMITER = ":";
+    private static final String MEDIA_TYPE_DELIMITER = ",";
+    private static final String ACCEPT_HEADER = "Accept";
 
     public static Map<String, String> parse(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
@@ -17,7 +19,9 @@ public class HeaderParser {
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] split = line.split(HEADER_DELIMITER, 2);
-            headers.put(split[0], split[1]);
+            String key = URLDecoder.decode(split[0], StandardCharsets.UTF_8).trim();
+            String value = URLDecoder.decode(split[1], StandardCharsets.UTF_8).trim();
+            headers.put(key, value);
         }
         return headers;
     }

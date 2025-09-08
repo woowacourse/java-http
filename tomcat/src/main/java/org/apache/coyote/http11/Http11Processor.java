@@ -44,22 +44,28 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String requestUri = getRequestUri(bufferedReader);
+            RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
+            MimeType mimeType = resolveMimeType(requestLine.getPath(), requestHeaders);
 
-            MimeType mimeType = resolveMimeType(requestUri, requestHeaders);
-            HttpResponse response = buildResponse(requestUri, mimeType);
+            if (requestLine.getMethod().equalsIgnoreCase("GET")) {
+                HttpResponse response = buildResponse(requestLine.getPath(), mimeType);
+                sendResponse(outputStream, response);
+            }
 
-            sendResponse(outputStream, response);
+            if (requestLine.getMethod().equalsIgnoreCase("POST")) {
+                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                Map<String, String> queryParams = QueryParamsParser.parse(requestBody);
+                HttpResponse response = handleRegister(queryParams, mimeType);
+                sendResponse(outputStream, response);
+            }
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getRequestUri(BufferedReader bufferedReader) throws IOException {
-        String startLine = bufferedReader.readLine();
-        return startLine.split(" ")[1];
     }
 
     private MimeType resolveMimeType(String requestUri, Map<String, String> requestHeaders) {
@@ -106,25 +112,33 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleLogin(Map<String, String> queryParams, MimeType mimeType) {
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> handleSuccess(user, mimeType))
-                .orElseGet(() -> handleFailure(account, mimeType));
+                .map(user -> {
+                    log.info("login success: account= {}", account);
+                    return redirectTo("/index.html", mimeType);
+                })
+                .orElseGet(() -> {
+                    log.info("login failure: account= {}", account);
+                    return redirectTo("/401.html", mimeType);
+                });
     }
 
-    private HttpResponse handleSuccess(User user, MimeType mimeType) {
-        log.info("login success: {}", user);
-        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
-        httpResponse.addHeader("Location", "/index.html");
-        return httpResponse;
+    private HttpResponse handleRegister(Map<String, String> queryParams, MimeType mimeType) {
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        String email = queryParams.get("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("register success: account= {} email= {}", account, email);
+        return redirectTo("/index.html", mimeType);
     }
 
-    private HttpResponse handleFailure(String account, MimeType mimeType) {
-        log.info("login failure: account= {}", account);
+    private HttpResponse redirectTo(String location, MimeType mimeType) {
         HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
-        httpResponse.addHeader("Location", "/401.html");
+        httpResponse.addHeader("Location", location);
         return httpResponse;
     }
 

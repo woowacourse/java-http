@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    public static final String CONTENT_TYPE_HEADER = "Content-Type";
-    public static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     private final String protocolVersion;
     private final HttpStatus status;

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class MappingLine { // GET /endPoint HTTP/1.1
 
-    private final String requestMapping; // GET //-
+    private final String method; // GET //-
     private final String url; // /endPoint
     private final Map<String, String> parameters;
     private final String protocol; // HTTP/1.1
@@ -16,7 +16,7 @@ public class MappingLine { // GET /endPoint HTTP/1.1
     public MappingLine(BufferedReader bufferedReader) throws IOException {
         String[] parsedRequestLine = parseRequestLine(bufferedReader);
 
-        this.requestMapping = parsedRequestLine[0];
+        this.method = parsedRequestLine[0];
         String fullUrl = parsedRequestLine[1];
         int idx = fullUrl.indexOf("?");
         if (idx != -1) { // TODO 2025. 9. 7. 22:42: if-else 리펙터링 하기
@@ -56,8 +56,8 @@ public class MappingLine { // GET /endPoint HTTP/1.1
         return parameters;
     }
 
-    public String getRequestMapping() {
-        return requestMapping;
+    public String getMethod() {
+        return method;
     }
 
     public String getUrl() {

@@ -58,4 +58,27 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void cookie() throws IOException {
+        // given
+        String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).matches("(?s).*Set-Cookie: JSESSIONID=([a-z0-9\\-]+).*");
+    }
 }

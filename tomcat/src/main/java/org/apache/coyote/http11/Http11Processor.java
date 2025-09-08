@@ -125,14 +125,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(path)) {
-            final User user = InMemoryUserRepository.findByAccount(params.get("account"))
-                    .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
+            try {
+                final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                        .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
 
-            if (user.checkPassword(params.get("password"))) {
-                createSessionAndSetCookie(user, request, responseHeaders);
-                responseHeaders.put("Location", "/index.html");
-                return "HTTP/1.1 302 Found";
-            } else {
+                if (user.checkPassword(params.get("password"))) {
+                    createSessionAndSetCookie(user, request, responseHeaders);
+                    responseHeaders.put("Location", "/index.html");
+                    return "HTTP/1.1 302 Found";
+                } else {
+                    responseHeaders.put("Location", "/401.html");
+                    return "HTTP/1.1 302 Found";
+                }
+            } catch (IllegalArgumentException e) {
                 responseHeaders.put("Location", "/401.html");
                 return "HTTP/1.1 302 Found";
             }

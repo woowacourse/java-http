@@ -2,7 +2,7 @@ package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Arrays;
+import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -27,7 +27,7 @@ public class UserService {
 
     public ControllerResponse loginPage(HttpRequest httpRequest) {
         String sessionId = findSessionId(httpRequest);
-        if (sessionId == null) {
+        if (sessionId == null || !isValidSession(sessionId)) {
             JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
             response.addHeader("Location", "/login.html");
             return response;
@@ -43,6 +43,12 @@ public class UserService {
             return null;
         }
         return cookies.get("JSESSIONID");
+    }
+
+    private boolean isValidSession(String sessionId) {
+        HttpSession session = sessionManager.findSession(sessionId);
+        User user = (User) session.getAttribute("user");
+        return user != null;
     }
 
     public ControllerResponse login(HttpRequest httpRequest) {

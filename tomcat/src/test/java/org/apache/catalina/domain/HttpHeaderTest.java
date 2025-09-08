@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-import org.apache.catalina.domain.cookie.HttpCookie;
 import org.apache.catalina.domain.cookie.HttpCookies;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,7 +92,7 @@ class HttpHeaderTest {
         HttpCookies cookies = header.getCookies();
 
         // then
-        assertThat(cookies.cookies()).isEmpty();
+        assertThat(cookies.toString()).isEmpty();
         assertThat(cookies.toString()).isEmpty();
     }
 
@@ -113,35 +112,6 @@ class HttpHeaderTest {
         assertThat(reconstructed).isEqualTo("sessionId=abc123; userId=456; theme=dark");
     }
 
-    @DisplayName("addSetCookie 메서드: Set-Cookie 헤더에 쿠키를 추가한다")
-    @Test
-    void addSetCookie_singleCookie() {
-        // given
-        HttpHeader header = new HttpHeader();
-        HttpCookie cookie = new HttpCookie("sessionId", "abc123");
-
-        // when
-        header.addSetCookie(cookie);
-
-        // then
-        assertThat(header.get("Set-Cookie")).isEqualTo("sessionId=abc123");
-    }
-
-    @DisplayName("addSetCookie 메서드: 여러 쿠키를 추가하면 ,로 구분된다")
-    @Test
-    void addSetCookie_multipleCookies() {
-        // given
-        HttpHeader header = new HttpHeader();
-        HttpCookie cookie1 = new HttpCookie("sessionId", "abc123");
-        HttpCookie cookie2 = new HttpCookie("userId", "456");
-
-        // when
-        header.addSetCookie(cookie1);
-        header.addSetCookie(cookie2);
-
-        // then
-        assertThat(header.get("Set-Cookie")).isEqualTo("sessionId=abc123, userId=456");
-    }
 
     @DisplayName("HttpHeader toString: 헤더 정보가 적절히 문자열로 변환된다")
     @Test

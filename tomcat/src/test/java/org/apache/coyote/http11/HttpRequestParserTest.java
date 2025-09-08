@@ -31,8 +31,8 @@ class HttpRequestParserTest {
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
         assertThat(result.requestStartLine().path()).isEqualTo("/index.html");
         assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
-        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
-        assertThat(result.header().headers()).containsEntry("User-Agent", "Mozilla/5.0");
+        assertThat(result.header().get("Host")).isEqualTo("localhost:8080");
+        assertThat(result.header().get("User-Agent")).isEqualTo("Mozilla/5.0");
         assertThat(result.queryStrings()).isEmpty();
     }
 
@@ -56,8 +56,8 @@ class HttpRequestParserTest {
         assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
         assertThat(result.queryStrings()).containsEntry("account", "admin");
         assertThat(result.queryStrings()).containsEntry("password", "123");
-        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
-        assertThat(result.header().headers()).containsEntry("Content-Type", "text/html");
+        assertThat(result.header().get("Host")).isEqualTo("localhost:8080");
+        assertThat(result.header().get("Content-Type")).isEqualTo("text/html");
     }
 
     @Test
@@ -79,9 +79,9 @@ class HttpRequestParserTest {
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
         assertThat(result.requestStartLine().path()).isEqualTo("/api/users");
         assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
-        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
-        assertThat(result.header().headers()).containsEntry("Content-Type", "application/json");
-        assertThat(result.header().headers()).containsEntry("Content-Length", "25");
+        assertThat(result.header().get("Host")).isEqualTo("localhost:8080");
+        assertThat(result.header().get("Content-Type")).isEqualTo("application/json");
+        assertThat(result.header().get("Content-Length")).isEqualTo("25");
         assertThat(result.queryStrings()).isEmpty();
     }
 
@@ -101,7 +101,7 @@ class HttpRequestParserTest {
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
         assertThat(result.requestStartLine().path()).isEqualTo("/simple");
         assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
-        assertThat(result.header().headers()).isEmpty();
+        assertThat(result.header().get("Host")).isNull();
         assertThat(result.queryStrings()).isEmpty();
     }
 
@@ -170,9 +170,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
-        assertThat(result.header().headers()).containsEntry("Content-Type", "text/html");
-        assertThat(result.header().headers()).doesNotContainKey("InvalidHeader");
+        assertThat(result.header().get("Host")).isEqualTo("localhost:8080");
+        assertThat(result.header().get("Content-Type")).isEqualTo("text/html");
+        assertThat(result.header().get("InvalidHeader")).isNull();
     }
 
     @Test
@@ -212,7 +212,7 @@ class HttpRequestParserTest {
         // then
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
         assertThat(result.requestStartLine().path()).isEqualTo("/api/users");
-        assertThat(result.header().headers()).containsEntry("Content-Type", "application/json");
+        assertThat(result.header().get("Content-Type")).isEqualTo("application/json");
         assertThat(result.body().content()).isEqualTo("{\"name\":\"john\",\"age\":25}");
     }
 
@@ -234,7 +234,7 @@ class HttpRequestParserTest {
         // then
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
         assertThat(result.requestStartLine().path()).isEqualTo("/login");
-        assertThat(result.header().headers()).containsEntry("Content-Type", "application/x-www-form-urlencoded");
+        assertThat(result.header().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
         assertThat(result.body().content()).isEqualTo("account=admin&password=123");
     }
 
@@ -256,7 +256,7 @@ class HttpRequestParserTest {
         // then
         assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
         assertThat(result.requestStartLine().path()).isEqualTo("/api/ping");
-        assertThat(result.header().headers()).containsEntry("Content-Length", "0");
+        assertThat(result.header().get("Content-Length")).isEqualTo("0");
         assertThat(result.body().content()).isEmpty();
     }
 

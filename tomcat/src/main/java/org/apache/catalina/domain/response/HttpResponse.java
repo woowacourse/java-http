@@ -2,6 +2,8 @@ package org.apache.catalina.domain.response;
 
 import com.http.enums.HttpStatus;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.catalina.domain.HttpHeader;
 import org.apache.catalina.domain.cookie.HttpCookie;
 import org.apache.catalina.domain.request.HttpRequest;
@@ -10,11 +12,13 @@ public final class HttpResponse {
 
     private ResponseStartLine startLine;
     private final HttpHeader header;
+    private final List<HttpCookie> setCookies;
     private byte[] body;
 
     public HttpResponse(ResponseStartLine startLine, HttpHeader headers, byte[] body) {
         this.startLine = startLine;
         this.header = headers;
+        this.setCookies = new ArrayList<>();
         this.body = body;
     }
 
@@ -39,11 +43,17 @@ public final class HttpResponse {
     }
 
     public void addSetCookie(HttpCookie cookie) {
-        this.header.addSetCookie(cookie);
+        this.setCookies.add(cookie);
     }
 
     public String getHeaderString() {
-        return header.toHeaderString();
+        StringBuilder headerString = new StringBuilder(header.toHeaderString());
+        
+        for (HttpCookie cookie : setCookies) {
+            headerString.append("Set-Cookie: ").append(cookie.toString()).append("\r\n");
+        }
+        
+        return headerString.toString();
     }
 
     public HttpStatus getStatus() {

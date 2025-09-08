@@ -22,16 +22,24 @@ public record HttpRequest(
 
     public Map<String, String> parseBody() {
         final String contentType = header.getContentType();
-        if (contentType == null) {
-            throw new HttpStatusException("Content-Type header is missing",
-                    HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-        }
+        validateParsingBody(contentType);
 
         if (contentType.startsWith(URL_ENCODED)) {
             return body.parseFormData();
         }
 
         throw new HttpStatusException("Unsupported Content-Type: " + contentType, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    private void validateParsingBody(String contentType) {
+        if (contentType == null) {
+            throw new HttpStatusException("Content-Type header is missing",
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        }
+
+        if (body == null) {
+            throw new HttpStatusException("Request body is missing", HttpStatus.BAD_REQUEST);
+        }
     }
 
     public Session getSession(boolean create) {

@@ -30,6 +30,7 @@ public class DefaultServlet implements HttpServlet {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws IOException {
+        response.addHeader("Allow", "GET");
         response.sendError(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 메서드입니다.");
     }
 }

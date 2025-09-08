@@ -3,7 +3,13 @@ package org.apache.catalina.domain.cookie;
 import java.util.ArrayList;
 import java.util.List;
 
-public record HttpCookies(List<HttpCookie> cookies) {
+public final class HttpCookies {
+
+    private final List<HttpCookie> cookies;
+
+    public HttpCookies(List<HttpCookie> cookies) {
+        this.cookies = cookies;
+    }
 
     public HttpCookies() {
         this(new ArrayList<>());
@@ -43,7 +49,7 @@ public record HttpCookies(List<HttpCookie> cookies) {
         return cookies.stream()
                 .filter(cookie -> cookie.sameName(name))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("No cookie found with name: " + name));
     }
 
     public void addCookie(HttpCookie cookie) {

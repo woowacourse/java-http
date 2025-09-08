@@ -3,15 +3,18 @@ package org.apache.catalina.domain;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.domain.cookie.HttpCookie;
 import org.apache.catalina.domain.cookie.HttpCookies;
 
-public record HttpHeader(Map<String, String> headers) {
+public final class HttpHeader {
 
-    private static final String SET_COOKIE = "Set-Cookie";
     private static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
+    private final Map<String, String> headers;
+
+    public HttpHeader(Map<String, String> headers) {
+        this.headers = headers;
+    }
 
     public HttpHeader() {
         this(new LinkedHashMap<>());
@@ -27,7 +30,7 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     private static void putHeader(Map<String, String> headers, String line) {
-        String[] parts = line.split(": ", 2);
+        String[] parts = line.split(":", 2);
 
         if (parts.length != 2) {
             return;
@@ -104,19 +107,18 @@ public record HttpHeader(Map<String, String> headers) {
         return new HttpCookies();
     }
 
-    public void addSetCookie(HttpCookie cookie) {
-        final String headerKey = normalizeHeaderKey(SET_COOKIE);
-        if (headers.containsKey(headerKey)) {
-            headers.compute(headerKey, (k, existingValue) -> existingValue + ", " + cookie.toString());
-            return;
-        }
-        headers.put(headerKey, cookie.toString());
-    }
 
     public String toHeaderString() {
         StringBuilder builder = new StringBuilder();
         headers.forEach((key, value) ->
-                builder.append(key).append(": ").append(value).append(" ").append("\r\n"));
+                builder.append(key).append(": ").append(value).append("\r\n"));
         return builder.toString();
     }
+
+    @Override
+    public String toString() {
+        return "HttpHeader[" +
+                "headers=" + headers + ']';
+    }
+
 }

@@ -62,7 +62,7 @@ class HttpCookiesTest {
         HttpCookies cookies = HttpCookies.from(cookieHeader);
 
         // then
-        assertThat(cookies.cookies()).isEmpty();
+        assertThat(cookies.toString()).isEmpty();
     }
 
     @DisplayName("from 메서드: null일 때 빈 HttpCookies를 반환한다")
@@ -72,7 +72,7 @@ class HttpCookiesTest {
         HttpCookies cookies = HttpCookies.from(null);
 
         // then
-        assertThat(cookies.cookies()).isEmpty();
+        assertThat(cookies.toString()).isEmpty();
     }
 
     @DisplayName("from 메서드: 값이 없는 쿠키를 처리한다")

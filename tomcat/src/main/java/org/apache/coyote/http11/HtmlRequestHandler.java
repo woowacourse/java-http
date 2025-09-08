@@ -5,16 +5,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class IndexHtmlRequestHandler implements HttpRequestHandler {
+public class HtmlRequestHandler implements HttpRequestHandler {
     @Override
     public boolean support(final RequestStartLine requestStartLine) {
         return requestStartLine.requestMethod() == RequestMethod.GET &&
-                requestStartLine.requestUrl().equals("/index.html");
+                requestStartLine.requestUrl().endsWith(".html");
     }
 
     @Override
     public String response(final RequestStartLine requestStartLine) {
-        URL resource = getClass().getClassLoader().getResource("static/index.html");
+        URL resource = getClass().getClassLoader().getResource("static" + requestStartLine.requestUrl());
         Path resourcePath = Path.of(resource.getPath());
 
         byte[] bytes = readAllBytes(resourcePath);

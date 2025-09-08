@@ -18,7 +18,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final List<HttpRequestHandler> httpRequestHandlers = List.of(
             new HomeHttpRequestHandler(),
-            new IndexHtmlRequestHandler(),
+            new HtmlRequestHandler(),
             new CssRequestHandler(),
             new LoginRequestHandler(),
             new JsRequestHandler()

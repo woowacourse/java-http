@@ -34,16 +34,17 @@ public class LoginRequestHandler implements HttpRequestHandler {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(getQueryParameters.get("account"));
             if (foundUser.isEmpty()) {
                 log.info("존재하지 않는 user입니다.");
-                return createSuccessResponse(bytes);
+                return createRedirectResponse("http://localhost:8080/401.html");
             }
 
             User user = foundUser.get();
             if (!user.checkPassword(getQueryParameters.get("password"))) {
                 log.info("비밀번호 틀림");
+                return createRedirectResponse("http://localhost:8080/401.html");
             }
 
             log.info("user = {}", user);
-            return createRedirectResponse();
+            return createRedirectResponse("http://localhost:8080/index.html");
         }
 
         return createSuccessResponse(bytes);
@@ -66,11 +67,11 @@ public class LoginRequestHandler implements HttpRequestHandler {
                 new String(bytes));
     }
 
-    private String createRedirectResponse() {
+    private String createRedirectResponse(final String redirectUrl) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Length: " + 0 + " ",
-                "Location: http://localhost:8080/index.html ",
+                "Location: " + redirectUrl + " ",
                 "");
     }
 }

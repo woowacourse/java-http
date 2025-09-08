@@ -41,7 +41,7 @@ public class LoginController implements Controller {
 
         String sessionId = makeSession(user.get());
         response.setRedirection("/index.html");
-        response.setCookie(new Cookie("JSESSIONID", sessionId));
+        response.setCookie(Cookie.makeSessionCookie(sessionId));
     }
 
     private Optional<User> getUser(String account) {

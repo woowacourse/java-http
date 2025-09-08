@@ -32,7 +32,7 @@ public class RegisterController implements Controller {
 
         String sessionId = makeSession(user);
         response.setRedirection("/index.html");
-        response.setCookie(new Cookie("JSESSIONID", sessionId));
+        response.setCookie(Cookie.makeSessionCookie(sessionId));
     }
 
     private void validateAlreadyAccountExistence(String account) {

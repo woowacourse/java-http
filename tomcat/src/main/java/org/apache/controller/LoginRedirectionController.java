@@ -15,12 +15,12 @@ public class LoginRedirectionController implements Controller {
     public boolean isProcessableRequest(HttpRequest request) {
         return request.getMethod() == HttpMethod.GET
                 && request.getUri().equals("/login")
-                && request.checkCookieExistence("JSESSIONID");
+                && request.checkCookieExistence(Cookie.SESSION_COOKIE_KEY);
     }
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
-        Cookie cookie = request.getCookie("JSESSIONID");
+        Cookie cookie = request.getCookie(Cookie.SESSION_COOKIE_KEY);
         Session session = SessionManager.findSession(cookie.getValue());
         if (session != null && isValidUser(session.getUser())) {
             response.setRedirection("/index.html");

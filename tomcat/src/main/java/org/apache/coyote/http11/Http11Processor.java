@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = ResourceLoader.get(request.uri());
             }
 
-            final var response = responseBuilder.build(request.uri(), responseBody);
+            final var response = responseBuilder.build(request.uri(), "200 OK", responseBody, null);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

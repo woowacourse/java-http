@@ -2,6 +2,8 @@ package org.apache.coyote;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ResponseBuilder {
 
@@ -38,13 +40,28 @@ public class ResponseBuilder {
         }
     }
 
-    public String build(final String requestUri, final byte[] body) {
+    public String build(final String requestUri, final String status, final byte[] body, final Map<String, String> headers) {
         String contentType = getContentType(requestUri);
 
+        if (headers == null) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + status + " ",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + body.length + " ",
+                    "",
+                    new String(body));
+        }
+
+        String responseHeaders = headers.entrySet()
+                .stream()
+                .map(set -> set.getKey() + ": " + set.getValue())
+                .collect(Collectors.joining("\r\n"));
+
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + body.length + " ",
+                responseHeaders,
                 "",
                 new String(body));
     }

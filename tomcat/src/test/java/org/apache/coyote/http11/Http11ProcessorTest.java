@@ -17,7 +17,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var sessionManager = new SessionManager();
+        final var processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -44,7 +45,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var sessionManager = new SessionManager();
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);

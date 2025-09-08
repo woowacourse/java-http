@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +25,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -48,8 +49,10 @@ public class Http11Processor implements Runnable, Processor {
             final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
             final Map<String, String> responseHeaders = new HashMap<>();
 
-            if (requestCookies.getCookie("JSESSIONID") == null) {
-                final var sessionCookie = new ResponseCookie("JSESSIONID", UUID.randomUUID().toString());
+            var session = sessionManager.findSession(requestCookies.getCookie("JSESSIONID"));
+            if (session == null) {
+                session = Session.create(sessionManager);
+                final var sessionCookie = new ResponseCookie("JSESSIONID", session.getId());
                 responseHeaders.put("Set-Cookie", sessionCookie.toHeaderString());
             }
 
@@ -59,15 +62,23 @@ public class Http11Processor implements Runnable, Processor {
                 final Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
                 String redirectUrl = "/index.html";
 
-                if ("/login".equals(requestLine.getPath())) {
-                    final var loginSuccess = checkLogin(parameters.get("account"), parameters.get("password"));
-                    if (!loginSuccess) {
+                if ("login".equals(requestLine.getPath())) {
+                    String account = parameters.get("account");
+                    String password = parameters.get("password");
+                    final Optional<User> optionalUser = findUserByAccount(account, password);
+                    if (optionalUser.isPresent()) {
+                        User user = optionalUser.get();
+                        if(user.checkPassword(password)) {
+                            session.setAttribute("user", user);
+                            log.info("로그인 성공 account: {}", account);
+                        }
+                    } else {
                         redirectUrl = "/401.html";
+                        log.info("로그인 실패 account: {}", account);
                     }
-                    log.info("로그인 시도 account: {}", parameters.get("account"));
                 }
 
-                if ("/register".equals(requestLine.getPath())) {
+                if ("register".equals(requestLine.getPath())) {
                     final var newUser = new User(parameters.get("account"), parameters.get("password"),
                             parameters.get("email"));
                     InMemoryUserRepository.save(newUser);
@@ -123,16 +134,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public boolean checkLogin(String account, String password) {
+    public Optional<User> findUserByAccount(String account, String password) {
         if (account == null || account.isBlank() || password == null) {
-            return false;
+            return Optional.empty();
         }
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isEmpty()) {
-            return false;
-        }
-        User user = optionalUser.get();
-        return user.checkPassword(password);
+        return InMemoryUserRepository.findByAccount(account);
     }
 
     private URL getResourceFrom(String requestPath) {

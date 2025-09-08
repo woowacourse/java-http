@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String RESOURCE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
+    private final UserService userService;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.userService = new UserService();
     }
 
     @Override
@@ -54,18 +57,43 @@ public class Http11Processor implements Runnable, Processor {
             httpRequest.parseHttpRequest();
             final String requestPath = httpRequest.getRequestPath();
 
+            // GET /
             if (requestPath.equals("/")) {
                 final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
+            // GET /register
+            if (requestPath.equals("/register") && httpRequest.getHttpMethod() == HttpMethod.GET) {
+                final URL resource = getStaticResource("/register.html");
+                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+                sendHttpResponse(response, outputStream);
+                return;
+            }
+
+            // POST /register
+            if (requestPath.equals("/register") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+                Map<String, String> parameters = httpRequest.getRequestBody();
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+                final String email = parameters.get("email");
+
+                userService.signup(account, password, email);
+                final HttpResponse response = getRedirectHttpResponse("/index.html");
+                sendHttpResponse(response, outputStream);
+                return;
+            }
+
+            // GET /login
             if (requestPath.equals("/login") && !httpRequest.isQueryStringExists()) {
                 final URL resource = getStaticResource("/login.html");
                 final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
+                return;
             }
 
+            // POST /login
             if (requestPath.equals("/login") && httpRequest.isQueryStringExists()) {
                 final Map<String, String> parameters = httpRequest.getQueryParameters();
                 final String account = parameters.get("account");
@@ -79,20 +107,13 @@ public class Http11Processor implements Runnable, Processor {
                     sendHttpResponse(errorResponse, outputStream);
                 }
 
-                final HttpStatusCode statusCode = HttpStatusCode.FOUND;
-                final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
-                        statusCode.getStatusMessage());
-                final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
-                responseHeaders.put("Content-Type", "text/html; charset=UTF-8");
-                responseHeaders.put("Content-Length", "0");
-                responseHeaders.put("Location", "/index.html");
-                HttpResponse response = new HttpResponse(responseLine, responseHeaders, new byte[0]);
-
+                final HttpResponse response = getRedirectHttpResponse("/index.html");
                 sendHttpResponse(response, outputStream);
                 log.info("user: " + user);
                 return;
             }
 
+            // 이 외의 정적 요청
             final URL resource = getStaticResource(httpRequest.getRequestPath());
             final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
             sendHttpResponse(response, outputStream);
@@ -126,6 +147,18 @@ public class Http11Processor implements Runnable, Processor {
         responseHeaders.put("Content-Length", String.valueOf(responseBody.length));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
+    }
+
+    private HttpResponse getRedirectHttpResponse(final String location) {
+        final HttpStatusCode statusCode = HttpStatusCode.FOUND;
+        final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
+                statusCode.getStatusMessage());
+        final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", "text/html; charset=UTF-8");
+        responseHeaders.put("Content-Length", "0");
+        responseHeaders.put("Location", location);
+
+        return new HttpResponse(responseLine, responseHeaders, new byte[0]);
     }
 
     private void sendHttpResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {

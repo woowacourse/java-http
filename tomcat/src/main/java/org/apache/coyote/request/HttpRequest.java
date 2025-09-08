@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.UUID;
-import org.apache.catalina.requestMapping.session.Session;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
 

@@ -1,4 +1,4 @@
-package org.apache.catalina.requestMapping.session;
+package org.apache.catalina.session;
 
 public interface Manager {
 

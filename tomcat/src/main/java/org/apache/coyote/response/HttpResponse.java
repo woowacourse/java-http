@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import org.apache.catalina.controller.cookie.HttpCookie;
+import org.apache.catalina.cookie.HttpCookie;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseHeader.ResponseHeader;
 import org.apache.coyote.response.responseLine.HttpStatus;

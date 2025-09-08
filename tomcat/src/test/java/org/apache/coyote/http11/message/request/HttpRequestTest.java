@@ -42,7 +42,6 @@ class HttpRequestTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-
     @Test
     void 요청_파싱이_정상적으로_되는지_검증() throws IOException {
         String body = "account=gugu&password=password&email=hkkang%40woowahan.com";

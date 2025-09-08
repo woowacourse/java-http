@@ -115,6 +115,68 @@ class ApplicationTest {
                     () -> assertThat(output).endsWith(body)
             );
         }
+
+        @Test
+        void post_로그인_성공() {
+            // given
+            String account = "gugu";
+            String password = "password";
+            String requestBody = "account=" + account + "&password=" + password + "&email=hkkang%40woowahan.com";
+
+            String httpRequest =
+                    "POST /login HTTP/1.1\r\n" +
+                            "Host: localhost:8080\r\n" +
+                            "Connection: keep-alive\r\n" +
+                            "Content-Length: " + requestBody.length() + "\r\n" +
+                            "Content-Type: application/x-www-form-urlencoded\r\n" +
+                            "Accept: */*\r\n" +
+                            "\r\n" +
+                            requestBody;
+
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, ServletContainer.getInstance());
+
+            // when
+            processor.process(socket);
+            String output = socket.output();
+
+            // then
+            assertAll(
+                    () -> assertThat(output).startsWith("HTTP/1.1 303 See Other"),
+                    () -> assertThat(output).contains("Location: /index.html")
+            );
+        }
+
+        @Test
+        void post_로그인_인증_실패() {
+            // given
+            String account = "gugu";
+            String password = "otherPassword";
+            String requestBody = "account=" + account + "&password=" + password + "&email=hkkang%40woowahan.com";
+
+            String httpRequest =
+                    "POST /login HTTP/1.1\r\n" +
+                            "Host: localhost:8080\r\n" +
+                            "Connection: keep-alive\r\n" +
+                            "Content-Length: " + requestBody.length() + "\r\n" +
+                            "Content-Type: application/x-www-form-urlencoded\r\n" +
+                            "Accept: */*\r\n" +
+                            "\r\n" +
+                            requestBody;
+
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, ServletContainer.getInstance());
+
+            // when
+            processor.process(socket);
+            String output = socket.output();
+
+            // then
+            assertAll(
+                    () -> assertThat(output).startsWith("HTTP/1.1 303 See Other"),
+                    () -> assertThat(output).contains("Location: /401.html")
+            );
+        }
     }
 
     @Nested

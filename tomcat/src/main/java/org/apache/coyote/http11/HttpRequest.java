@@ -13,7 +13,7 @@ public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String queryString;
     private final Map<String, String> parameters;
@@ -28,7 +28,7 @@ public class HttpRequest {
     }
 
     public HttpRequest(final String method, final String uri, final String queryString, final String body, final String cookieHeader) {
-        this.method = method;
+        this.method = HttpMethod.fromString(method);
         this.uri = uri;
         this.queryString = queryString;
         this.parameters = new HashMap<>();
@@ -36,7 +36,7 @@ public class HttpRequest {
 
         parameters.putAll(parseParameters(queryString));
 
-        if ("POST".equals(method) && body != null) {
+        if (HttpMethod.POST == this.method && body != null) {
             parameters.putAll(parseParameters(body));
         }
     }
@@ -64,7 +64,7 @@ public class HttpRequest {
         return params;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

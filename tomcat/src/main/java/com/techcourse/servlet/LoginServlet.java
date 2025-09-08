@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -27,12 +28,12 @@ public class LoginServlet implements Servlet {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
-        if ("GET".equals(request.getMethod())) {
+        if (HttpMethod.GET == request.getMethod()) {
             handleGet(request, response);
             return;
         }
 
-        if ("POST".equals(request.getMethod())) {
+        if (HttpMethod.POST == request.getMethod()) {
             handlePost(request, response);
             return;
         }

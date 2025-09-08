@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.ContentTypeMapper;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class StaticResourceServlet implements Servlet {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
-        if (!"GET".equals(request.getMethod())) {
+        if (HttpMethod.GET != request.getMethod()) {
             response.setStatus(405);
             response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
             return;

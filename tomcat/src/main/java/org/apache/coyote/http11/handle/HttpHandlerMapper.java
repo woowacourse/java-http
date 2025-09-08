@@ -30,7 +30,7 @@ public class HttpHandlerMapper {
         return handlers.stream()
                 .filter(handler -> handler.canHandle(request))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("해당 요청을 처리할 수 있는 핸들러가 없습니다. " + request));
+                .orElseThrow(() -> new IllegalArgumentException("해당 요청을 처리할 수 있는 핸들러가 없습니다. " + request));
     }
 
     public static HttpHandlerMapper getInstance() {

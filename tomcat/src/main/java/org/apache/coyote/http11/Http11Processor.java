@@ -11,6 +11,7 @@ import org.apache.coyote.http11.handle.HttpHandlerMapper;
 import org.apache.coyote.http11.reqeust.HttpRequest;
 import org.apache.coyote.http11.reqeust.util.HttpRequestReader;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.util.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +43,31 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = reader.read();
             final HttpHandlerMapper handlerMapper = HttpHandlerMapper.getInstance();
             final HttpHandler handler = handlerMapper.getHandler(request);
-            final HttpResponse response = handler.handle(request);
+            HttpResponse response;
+            try {
+                response = handler.handle(request);
+            } catch (IllegalArgumentException e) {
+                response = handleBadRequest(request);
+            } catch (IllegalStateException e) {
+                response = handleInternalServerError(request);
+            }
             writer.write(response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse handleBadRequest(final HttpRequest request) {
+        return new HttpResponse(
+                request.protocolVersion(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    private HttpResponse handleInternalServerError(final HttpRequest request) {
+        return new HttpResponse(
+                request.protocolVersion(),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

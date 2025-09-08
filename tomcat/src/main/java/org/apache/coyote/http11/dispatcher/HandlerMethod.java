@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 
 public class HandlerMethod {
 
@@ -16,7 +15,7 @@ public class HandlerMethod {
         this.method = method;
     }
 
-    public HttpResponse invoke(HttpRequest req) {
+    public Object invoke(HttpRequest req) {
         try {
             Map<String, String> qp = req.getMappingLine().getParameters();
 
@@ -34,7 +33,7 @@ public class HandlerMethod {
                 }
             }
 
-            return (HttpResponse) method.invoke(controller, args);
+            return method.invoke(controller, args);
         } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(e);
         }

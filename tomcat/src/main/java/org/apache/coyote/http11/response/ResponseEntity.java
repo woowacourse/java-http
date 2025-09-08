@@ -32,6 +32,10 @@ public class ResponseEntity {
         return buildResponse(HttpStatus.NOT_FOUND, null, DEFAULT_CONTENT_TYPE);
     }
 
+    public static HttpResponse noContent() {
+        return buildResponse(HttpStatus.NO_CONTENT, null, DEFAULT_CONTENT_TYPE);
+    }
+
     private static HttpResponse buildResponse(byte[] body, String contentType) {
         return buildResponse(HttpStatus.OK, body, contentType);
     }

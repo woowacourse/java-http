@@ -2,6 +2,8 @@ package org.apache.coyote.http;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.web.session.Session;
+import com.techcourse.web.session.SessionManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,15 +15,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.NoSuchElementException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Processor;
 
-@RequiredArgsConstructor
 @Slf4j
 public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
+    private final SessionManager sessionManager;
+
+    public Http11Processor(final Socket connection) {
+        this.connection = connection;
+        this.sessionManager = SessionManager.getInstance();
+    }
 
     @Override
     public void run() {
@@ -53,6 +59,13 @@ public class Http11Processor implements Runnable, Processor {
         final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
+        readHeader(reader, requestBuilder);
+        readBody(requestBuilder, reader);
+
+        return HttpRequest.from(requestBuilder.toString());
+    }
+
+    private void readHeader(final BufferedReader reader, final StringBuilder requestBuilder) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
             requestBuilder.append(line).append("\r\n");
@@ -60,53 +73,72 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
         }
+    }
 
-        return HttpRequest.from(requestBuilder.toString());
+    private void readBody(final StringBuilder requestBuilder, final BufferedReader reader) throws IOException {
+        final String header = requestBuilder.toString();
+        final int contentLength = extractContentLength(header);
+
+        if (contentLength <= 0) {
+            return;
+        }
+
+        final char[] buffer = new char[contentLength];
+        final int eof = -1;
+        int totalRead = 0;
+
+        while (totalRead < contentLength) {
+            final int bytesRead = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (bytesRead == eof) {
+                throw new IOException(
+                        "Content-Length와 실제 데이터 길이 불일치: 예상 " + contentLength + "바이트, 실제 " + totalRead + "바이트");
+            }
+            totalRead += bytesRead;
+        }
+        requestBuilder.append(buffer);
+    }
+
+    private int extractContentLength(final String request) {
+        for (final String line : request.split("\r\n")) {
+            final String contentLengthPrefix = "content-length:";
+
+            if (line.toLowerCase().startsWith(contentLengthPrefix)) {
+                return Integer.parseInt(line.substring(contentLengthPrefix.length()).trim());
+            }
+        }
+        return 0;
     }
 
     private HttpResponse buildResponse(final HttpRequest request) {
         final String path = request.getPath();
 
-        if ("/".equals(path)) {
-            return new HttpResponse(request.getVersion(), HttpStatus.OK, ContentType.HTML, "Hello world!");
+        if (HttpMethod.GET == request.getMethod()) {
+            if ("/".equals(path)) {
+                return new HttpResponse(request.getVersion(), HttpStatus.OK, ContentType.HTML, "Hello world!");
+            }
+
+            return serveStaticFile(request, path);
         }
 
-        if ("/login".equals(path) && !request.getQueryParams().isEmpty()) {
-            return handleLoginRequest(request);
+        if (HttpMethod.POST == request.getMethod()) {
+            switch (path) {
+                case "/login":
+                    return handleLoginRequest(request);
+                case "/register":
+                    return handleSignupRequest(request);
+            }
         }
 
-        return serveStaticFile(request, path);
-    }
-
-    private HttpResponse handleLoginRequest(final HttpRequest request) {
-        final boolean loginSuccess = processLogin(request);
-
-        if (loginSuccess) {
-            return HttpResponse.redirect(request.getVersion(), "/index.html");
-        }
-        return HttpResponse.redirect(request.getVersion(), "/401.html");
-    }
-
-    private boolean processLogin(final HttpRequest request) {
-        final String account = request.getQueryParam("account");
-        final String password = request.getQueryParam("password");
-
-        if (account.isEmpty() || password.isEmpty()) {
-            return false;
-        }
-
-        try {
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
-
-            return user.checkPassword(password);
-        } catch (final Exception e) {
-            return false;
-        }
+        throw new UnsupportedOperationException();
     }
 
     private HttpResponse serveStaticFile(final HttpRequest request, final String path) {
         final ContentType contentType = ContentType.from(path);
+
+        if (path.startsWith("/login") && isValidSessionInCookie(request)) {
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
+        }
+
         String resourcePath = "static" + path;
 
         if (!path.contains(".")) {
@@ -124,10 +156,62 @@ public class Http11Processor implements Runnable, Processor {
                     Files.readAllBytes(Paths.get(resource.toURI())), StandardCharsets.UTF_8);
 
             return new HttpResponse(request.getVersion(), HttpStatus.OK, contentType, fileContent);
-
         } catch (final Exception e) {
             log.error("정적 파일 서빙 중 오류 발생: {}", resourcePath, e);
-            return new HttpResponse(request.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR, ContentType.HTML, "Internal Server Error");
+            return new HttpResponse(request.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR, ContentType.HTML,
+                    "Internal Server Error");
+        }
+    }
+
+    private HttpResponse handleLoginRequest(final HttpRequest request) {
+        try {
+            final User user = processLogin(request);
+
+            final HttpResponse response = HttpResponse.redirect(request.getVersion(), "/index.html");
+
+            if (isValidSessionInCookie(request)) {
+                return response;
+            }
+
+            final Session session = new Session();
+            session.setAttribute("user", user);
+            sessionManager.add(session);
+            response.setCookie("JSESSIONID", session.getId());
+            return response;
+        } catch (final Exception e) {
+            return HttpResponse.redirect(request.getVersion(), "/401.html");
+        }
+    }
+
+    private boolean isValidSessionInCookie(final HttpRequest request) {
+        return sessionManager.isValidSession(
+                request.getCookie("JSESSIONID"));
+    }
+
+    private User processLogin(final HttpRequest request) {
+        final String account = request.getBodyParam("account");
+        final String password = request.getBodyParam("password");
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
+
+        user.checkPassword(password);
+        return user;
+    }
+
+    private HttpResponse handleSignupRequest(final HttpRequest request) {
+        final String account = request.getBodyParam("account");
+        final String password = request.getBodyParam("password");
+        final String email = request.getBodyParam("email");
+
+        try {
+            final User user = InMemoryUserRepository.save(User.withoutId(account, password, email));
+
+            log.debug("회원 가입 성공: {}", user);
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
+        } catch (final Exception e) {
+            log.debug("회원 가입 실패: {}", e.getMessage());
+            return HttpResponse.redirect(request.getVersion(), "/401.html");
         }
     }
 }

@@ -141,27 +141,19 @@ public class Http11Processor implements Runnable, Processor {
         String password = getFirst(queryParameters, "password");
 
         if (account != null && password != null) {
-            InMemoryUserRepository.findByAccount(account).ifPresentOrElse(
-                    user -> {
-                        try {
-                            user.checkPassword(password);
-                            log.info("Login OK - account {}", account);
-                        } catch (UncheckedServletException e) {
-                            log.info("Login FAILED - invalid password {}", account);
-                        }
-                    },
-                    () -> log.info("Login FAILED - no sush account {}", account)
-            );
+            boolean success = InMemoryUserRepository.findByAccount(account)
+                    .map(user -> user.checkPassword(password))
+                    .orElse(false);
+
+            if (success) {
+                log.info("Login OK - account {}", account);
+                writeRedirect(outputStream, "/index.html");
+                return;
+            }
+            log.info("Login FAILED - invalid password {}", account);
+            writeRedirect(outputStream, "/401.html");
         }
-        String resourcePath = "static/login.html";
-        URL url = getClass().getClassLoader().getResource(resourcePath);
-        if (url == null) {
-            writeError(outputStream, 400, "Bad Request", "Invalid request line");
-            return;
-        }
-        Path absoluteLogin = Path.of(url.toURI());
-        byte[] loginBytes = Files.readAllBytes(absoluteLogin);
-        writeResponse(outputStream, "text/html;charset=utf-8", loginBytes);
+        writeRedirect(outputStream, "/login.html");
     }
 
     private String getFirst(final Map<String, List<String>> map, final String key) {
@@ -199,6 +191,19 @@ public class Http11Processor implements Runnable, Processor {
                 + "\r\n";
         outputStream.write(response.getBytes());
         outputStream.write(bytes);
+        outputStream.flush();
+    }
+
+    private void writeRedirect(
+            final OutputStream outputStream,
+            final String location
+    ) throws IOException {
+        String response = "HTTP/1.1 302 Found " + "\r\n"
+                + "Location: " + location + "\r\n"
+                + "Content-Type: text/html;charset=utf-8 " + "\r\n"
+                + "Content-Length: " + "\r\n"
+                + "\r\n";
+        outputStream.write(response.getBytes());
         outputStream.flush();
     }
 

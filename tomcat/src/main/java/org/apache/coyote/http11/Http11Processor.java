@@ -80,8 +80,10 @@ public class Http11Processor implements Runnable, Processor {
             respond(loginResponse, outputStream);
             return true;
         }
-        if ("/register".equals(request.path())) {
+        if ("/register".equals(request.path()) && "POST".equals(request.method())) {
             HttpResponse registerResponse = processRegisterMember(request);
+            respond(registerResponse, outputStream);
+            return true;
         }
         return false;
     }
@@ -104,7 +106,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse processRegisterMember(HttpRequest request) {
         // TODO: 회원가입 처리
-
+        String account = request.getQueryValue("account")
+                .orElse(null);
+        String email = request.getQueryValue("email")
+                .orElse(null);
+        String password = request.getQueryValue("password")
+                .orElse(null);
+        if (account == null || email == null || password == null) {
+            return HttpResponse.redirect("static/404.html");
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("회원가입 성공! 아이디: {}", user.getAccount());
+        return HttpResponse.redirect("/index.html");
     }
 
     private byte[] readPathFile(String requestPath) {

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +21,21 @@ public class HttpRequestParser {
         String path = parsePath(httpLine[1]);
         Map<String, String> queries = parseQueries(httpLine[1]);
         String version = httpLine[2];
-        return new HttpRequest(method, path, version, queries);
+
+        Map<String, String> bodyParams = new HashMap<>();
+        Map<String, String> finalQueries = queries;
+        int contentLength = 0;
+        String line;
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            if (line.toLowerCase().startsWith("content-length:")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
+        }
+        if ("POST".equals(method) && contentLength > 0) {
+            bodyParams = parseBody(inputStream, contentLength);
+            finalQueries = bodyParams;
+        }
+        return new HttpRequest(method, path, version, finalQueries);
     }
 
     private static String[] readHttpLine(BufferedReader br) throws IOException {
@@ -66,5 +82,28 @@ public class HttpRequestParser {
             key = pair;
         }
         queries.put(key, value);
+    }
+
+    private static Map<String, String> parseBody(InputStream inputStream, int contentLength) throws IOException {
+        byte[] bodyBytes = inputStream.readNBytes(contentLength);
+        String body = new String(bodyBytes, StandardCharsets.UTF_8);
+        return parseQueryString(body);
+    }
+
+    public static Map<String, String> parseQueryString(String query) {
+        Map<String, String> queryMap = new HashMap<>();
+        if (query == null || query.isBlank()) {
+            return queryMap;
+        }
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=", 2);
+            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+            String value = keyValue.length > 1
+                    ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
+                    : "";
+            queryMap.put(key, value);
+        }
+        return queryMap;
     }
 }

@@ -18,10 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ServletContainer servletContainer = ServletContainer.getInstance();
+    private final ServletContainer servletContainer;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, ServletContainer servletContainer) {
         this.connection = connection;
+        this.servletContainer = servletContainer;
     }
 
     @Override

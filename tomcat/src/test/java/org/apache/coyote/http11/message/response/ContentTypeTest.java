@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 class ContentTypeTest {
 
     @Test
-    void 확장자에_따라_알맞는_MIME_타입을_반환한다() {
+    void 확장자에_따라_알맞는_ContentType를_반환한다() {
         // given
         String path = "index.html";
 
         // when
-        String actual = ContentType.getContentTypeFrom(path);
+        ContentType actual = ContentType.getContentTypeFrom(path);
 
         // then
-        assertThat(actual).isEqualTo(ContentType.HTML.getMimeType());
+        assertThat(actual).isEqualTo(ContentType.HTML);
     }
 
     @Test
@@ -24,9 +24,9 @@ class ContentTypeTest {
         String path = "index.test";
 
         // when
-        String actual = ContentType.getContentTypeFrom(path);
+        ContentType actual = ContentType.getContentTypeFrom(path);
 
         // then
-        assertThat(actual).isEqualTo(ContentType.DEFAULT.getMimeType());
+        assertThat(actual).isEqualTo(ContentType.DEFAULT);
     }
 }

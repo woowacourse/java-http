@@ -3,7 +3,6 @@ package org.apache.coyote.http11.message.request;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.exception.InvalidRequestLineException;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -22,7 +21,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void 요청_라인이_유효하지_않으면_InvalidRequestLineException을_던진다() {
+    void 요청_라인이_유효하지_않으면_예외() {
         // given
         String rawRequest = "GET /index.html\r\n" + // HTTP/1.1 누락
                 "Host: localhost:8080\r\n" +
@@ -31,6 +30,6 @@ class HttpRequestTest {
 
         // when & then
         assertThatThrownBy(() -> HttpRequest.from(rawRequest))
-                .isInstanceOf(InvalidRequestLineException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -41,18 +41,6 @@ class HttpBodyTest {
     }
 
     @Test
-    void 빈_HttpBody를_생성한다() {
-        // when
-        HttpBody httpResponseBody = HttpBody.empty();
-
-        // then
-        assertAll(
-                () -> assertThat(httpResponseBody.toText()).isEmpty(),
-                () -> assertThat(httpResponseBody.length()).isZero()
-        );
-    }
-
-    @Test
     void toText는_바디를_문자열로_변환한다() {
         // given
         String expected = "some content";

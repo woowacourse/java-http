@@ -5,6 +5,7 @@ import com.techcourse.servlet.util.StaticFileLoader;
 import java.io.IOException;
 import org.apache.coyote.http11.message.response.ContentType;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class ServletExceptionHandler {
     public static ServletExceptionHandler INSTANCE = new ServletExceptionHandler();
@@ -28,6 +29,7 @@ public class ServletExceptionHandler {
         try {
             byte[] content = StaticFileLoader.loadStaticFile(NOT_FOUND_PAGE);
             response.init();
+            response.setStatus(HttpStatus.NOT_FOUND);
             response.setContentType(ContentType.getContentTypeFrom(NOT_FOUND_PAGE));
             response.appendToBody(content);
 
@@ -40,12 +42,14 @@ public class ServletExceptionHandler {
         try {
             byte[] content = StaticFileLoader.loadStaticFile(INTERNAL_SERVER_ERROR_PAGE);
             response.init();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             response.setContentType(ContentType.getContentTypeFrom(INTERNAL_SERVER_ERROR_PAGE));
             response.appendToBody(content);
 
         } catch (IOException e) {
             // 재귀 없이 간단한 텍스트 응답으로 fallback
             response.init();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             response.setContentType(ContentType.PLAIN);
             response.appendToBody("500 Internal Server Error".getBytes());
         }

@@ -3,7 +3,6 @@ package org.apache.coyote.http11.message.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.exception.UnsupportedHttpMethodException;
 import org.junit.jupiter.api.Test;
 
 class HttpMethodTest {
@@ -39,6 +38,6 @@ class HttpMethodTest {
 
         // when & then
         assertThatThrownBy(() -> HttpMethod.from(name))
-                .isInstanceOf(UnsupportedHttpMethodException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

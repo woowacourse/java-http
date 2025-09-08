@@ -37,7 +37,7 @@ public abstract class HttpRequestHandler {
         String responseBody = String.format("Http Method %s not allowed", requestMethod);
         return String.join(
                 "\r\n",
-                "HTTP/1.1 " + HttpStatus.METHOD_NOT_ALLOWED.getPrase(),
+                "HTTP/1.1 " + HttpStatus.METHOD_NOT_ALLOWED.getPhrase(),
                 "Content-Type: " + MimeType.TEXT_PLAIN.getMimeType(),
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
                 "",

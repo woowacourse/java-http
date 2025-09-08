@@ -3,9 +3,9 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
-import java.util.UUID;
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,13 @@ public class LoginHandler implements HttpRequestHandler {
     private static final String MAIN_PAGE_PATH = "/index.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
-    public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
-
 
     @Override
     public void handleGet(ServletRequest request, ServletResponse response) {
+        if (isLoginUser(request)) {
+            response.sendRedirect(MAIN_PAGE_PATH);
+            return;
+        }
         response.sendRedirect(LOGIN_PAGE_PATH);
     }
 
@@ -38,13 +40,23 @@ public class LoginHandler implements HttpRequestHandler {
 
         log.info("로그인 성공! account : {}", findUser.getAccount());
 
-        setJSessionCookie(response);
+        Session session = request.getSession(true);
+        session.setAttribute("user", findUser);
 
         response.sendRedirect(MAIN_PAGE_PATH);
     }
 
-    private void setJSessionCookie(ServletResponse response){
-        String uuid = UUID.randomUUID().toString();
-        response.setCookie(JSESSIONID_COOKIE_NAME, uuid);
+    private boolean isLoginUser(ServletRequest request) {
+        Session session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+
+        Object userAttribute = session.getAttribute("user");
+        if (userAttribute == null) {
+            return false;
+        }
+        User user = (User) userAttribute;
+        return true;
     }
 }

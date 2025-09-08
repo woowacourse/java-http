@@ -1,11 +1,10 @@
 package org.apache.catalina.controller;
 
+import static org.apache.catalina.controller.param.QueryParam.getQueryParams;
+import static org.apache.catalina.controller.util.ResourceFinder.findResource;
+
+import com.techcourse.restController.RegisterRestController;
 import com.techcourse.service.UserService;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
@@ -18,7 +17,6 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PATH = "/register";
-    private static final String STATIC_RECOURSE_PATH = "static";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
@@ -38,32 +36,12 @@ public class RegisterController extends AbstractController {
     @Override
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String requestBody = httpRequest.getRequestBody().getBody();
+        Map<String, String> bodyValues = getQueryParams(requestBody);
 
-        Map<String, String> bodyValues = new HashMap<>();
-        String[] values = requestBody.split("&");
-        for (String value : values) {
-            final String[] split = value.split("=");
+        final RegisterRestController registerRestController = new RegisterRestController(
+                new UserService());
 
-            bodyValues.put(split[0], split[1]);
-        }
-
-        final com.techcourse.restController.RegisterController registerController = new com.techcourse.restController.RegisterController(new UserService());
-
-        registerController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
+        registerRestController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
         httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
-    }
-
-    private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
-
-        try {
-            Path filePath = Path.of(resourceUrl.toURI());
-
-            return Files.readString(filePath);
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
-        } catch (NullPointerException e) {
-            throw new NullPointerException(e.getMessage());
-        }
     }
 }

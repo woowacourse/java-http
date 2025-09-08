@@ -1,12 +1,11 @@
 package org.apache.catalina.controller;
 
+import static org.apache.catalina.controller.param.QueryParam.getQueryParams;
+import static org.apache.catalina.controller.util.ResourceFinder.findResource;
+
 import com.techcourse.model.User;
+import com.techcourse.restController.LoginRestController;
 import com.techcourse.service.UserService;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +21,6 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
-    private static final String STATIC_RECOURSE_PATH = "static";
     public static final String USER = "user";
 
     @Override
@@ -35,7 +33,9 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.hasCookie()) {
-            if (isLoggedInUser(httpRequest, httpResponse))return;
+            if (isLoggedInUser(httpRequest, httpResponse)) {
+                return;
+            }
         }
 
         RequestPath requestPath = httpRequest.getRequestPath();
@@ -47,19 +47,13 @@ public class LoginController extends AbstractController {
     @Override
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String requestBody = httpRequest.getRequestBody().getBody();
+        Map<String, String> bodyValues = getQueryParams(requestBody);
 
-        Map<String, String> bodyValues = new HashMap<>();
-        String[] values = requestBody.split("&");
-        for (String value : values) {
-            final String[] split = value.split("=");
-
-            bodyValues.put(split[0], split[1]);
-        }
-
-        final com.techcourse.restController.LoginController loginController = new com.techcourse.restController.LoginController(new UserService()); //TODO: Bean 구현 부분
+        final LoginRestController loginRestController = new LoginRestController(
+                new UserService()); //TODO: Bean 구현 부분
 
         try {
-            User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));
+            User user = loginRestController.login(bodyValues.get("account"), bodyValues.get("password"));
 
             setCookie(httpRequest, httpResponse, user);
             httpResponse.sendRedirect("/index.html");
@@ -87,19 +81,5 @@ public class LoginController extends AbstractController {
         sessionManager.add(session);
 
         httpResponse.setCookies(session.getId());
-    }
-
-    private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
-
-        try {
-            Path filePath = Path.of(resourceUrl.toURI());
-
-            return Files.readString(filePath);
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
-        } catch (NullPointerException e) {
-            throw new NullPointerException(e.getMessage());
-        }
     }
 }

@@ -1,10 +1,8 @@
 package org.apache.catalina.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import static org.apache.catalina.controller.util.ResourceFinder.findResource;
+
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
@@ -43,19 +41,5 @@ public class StaticResourceController extends AbstractController {
     private Optional<ContentType> findResourceExtension(final RequestLine requestLine) {
         String extension = requestLine.getRequestPathExtension();
         return ContentType.findContentType(extension);
-    }
-
-    private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
-
-        try {
-            Path filePath = Path.of(resourceUrl.toURI());
-
-            return Files.readString(filePath);
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e);
-        } catch (NullPointerException e) {
-            throw new NullPointerException(e.getMessage());
-        }
     }
 }

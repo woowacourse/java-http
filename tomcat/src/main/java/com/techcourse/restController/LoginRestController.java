@@ -3,11 +3,11 @@ package com.techcourse.restController;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class LoginController {
+public class LoginRestController {
 
     private final UserService userService;
 
-    public LoginController(final UserService userService) {
+    public LoginRestController(final UserService userService) {
         this.userService = userService;
     }
 

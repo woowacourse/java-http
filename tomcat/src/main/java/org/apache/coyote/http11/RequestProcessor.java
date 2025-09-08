@@ -8,12 +8,12 @@ import com.techcourse.presentation.ResponseWithType;
 import com.techcourse.presentation.StaticResourceController;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestProcessor {
 
-    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+    private static final Map<String, Controller> controllers = new LinkedHashMap<>();
 
     public RequestProcessor() {
         controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());

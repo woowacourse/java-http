@@ -8,7 +8,7 @@ public class Service {
 
     public User getUser(Map<String, String> loginRequest) {
         User user = InMemoryUserRepository.findByAccount(loginRequest.get("account"))
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("User not found : " + loginRequest.get("account")));
 
         if (user.checkPassword(loginRequest.get("password"))) {
             return user;

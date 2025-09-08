@@ -9,11 +9,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.HttpContentTypeResolver;
-import org.apache.coyote.util.HttpRequest;
-import org.apache.coyote.util.HttpRequestParser;
-import org.apache.coyote.util.HttpResponse;
-import org.apache.coyote.util.StaticResourcePathGenerator;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.HttpRequestParser;
+import org.apache.coyote.response.HttpContentTypeResolver;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.StaticResourcePathGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,57 +40,57 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequestParser.parse(inputStream);
             if (request == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 404 Not Found",
-                        "static/404.html"
-                ), outputStream);
+                respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
                 return;
             }
-            String path = StaticResourcePathGenerator.generate(request.path());
-            if (path == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 200 OK",
-                        "text/html;charset=utf-8",
-                        "Hello world!".getBytes()
-                ), outputStream);
+            if (!request.queries().isEmpty() && handleApiIfNeeded(request, outputStream)) {
                 return;
             }
-            byte[] body = readPathFile(path);
-            if (body == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 404 Not Found",
-                        "static/404.html"
-                ), outputStream);
+            String resourcePath = StaticResourcePathGenerator.generate(request.path());
+            if (resourcePath != null) {
+                byte[] resourceBody = readPathFile(resourcePath);
+                if (resourceBody != null) {
+                    respond(HttpResponse.of(
+                            "HTTP/1.1 200 OK",
+                            HttpContentTypeResolver.resolve(resourcePath),
+                            resourceBody
+                    ), outputStream);
+                    return;
+                }
+            }
+            if (request.queries().isEmpty() && handleApiIfNeeded(request, outputStream)) {
                 return;
             }
-            if ("/login".equals(request.path())) {
-                processLoginMemberInfo(request);
-            }
-            respond(HttpResponse.of(
-                    "HTTP/1.1 200 OK",
-                    HttpContentTypeResolver.resolve(path),
-                    body
-            ), outputStream);
+            respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void processLoginMemberInfo(HttpRequest httpRequest) {
+    private boolean handleApiIfNeeded(HttpRequest request, OutputStream outputStream) throws IOException {
+        if ("/login".equals(request.path())) {
+            HttpResponse loginResponse = processLoginMemberInfo(request);
+            System.out.println(loginResponse.createHeader());
+            respond(loginResponse, outputStream);
+            return true;
+        }
+        return false;
+    }
+
+    private HttpResponse processLoginMemberInfo(HttpRequest httpRequest) {
         String account = httpRequest.getQueryValue("account")
                 .orElse(null);
         String password = httpRequest.getQueryValue("password")
                 .orElse(null);
         if (account == null || password == null) {
-            return;
+            return HttpResponse.redirect("401.html");
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return;
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            return HttpResponse.redirect("401.html");
         }
-        if (user.get().checkPassword(password)) {
-            log.info("User: {}", user.get());
-        }
+        log.info("User: {}", user.get());
+        return HttpResponse.redirect("/index.html");
     }
 
     private byte[] readPathFile(String requestPath) {

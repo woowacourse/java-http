@@ -1,4 +1,4 @@
-package org.apache.coyote.util;
+package org.apache.coyote.response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,9 +52,17 @@ public class HttpResponse {
     }
 
     public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse("HTTP/1.1 302 Found", "text/plain;charset=utf-8", "".getBytes());
-        response.headers.put("Location", location);
+        HttpResponse response = new HttpResponse(
+                "HTTP/1.1 302 Found",
+                "text/plain;charset=utf-8",
+                "".getBytes()
+        );
+        response.addHeader("Location", location);
         return response;
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
     public byte[] getBody() {

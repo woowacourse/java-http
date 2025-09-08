@@ -1,5 +1,6 @@
-package org.apache.coyote.util;
+package org.apache.coyote.request;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -9,6 +10,12 @@ public record HttpRequest(
         String version,
         Map<String, String> queries
 ) {
+
+    public HttpRequest {
+        if (queries == null) {
+            queries = new HashMap<>();
+        }
+    }
 
     public Optional<String> getQueryValue(String key) {
         return Optional.ofNullable(queries.get(key));

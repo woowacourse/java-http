@@ -65,7 +65,16 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
-            if ("GET".equals(method)) {
+            if ("/logout".equals(path)) {
+                Http11Cookie cookie = request.getCookie();
+                if (cookie.isContainsSessionId()) {
+                    sessions.remove(cookie.getSessionId());
+                }
+                statusLine = "HTTP/1.1 302 Found";
+                responseHeaders.put("Location", "/index.html");
+                responseHeaders.put("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
+                responseBody = "";
+            } else if ("GET".equals(method)) {
                 if ("/register".equals(path)) {
                     responseBody = readFileFromClasspath("static/register.html");
                 } else if ("/login".equals(path) || "/login.html".equals(path)) {

@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.exception.InvalidRequestException;
 import org.apache.exception.SocketReadException;
+import org.apache.http.value.HttpHeader;
+import org.apache.http.value.HttpMethod;
+import org.apache.http.value.HttpVersion;
 
 public class HttpRequest {
 

@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.http.value;
 
 public enum StatusCode {
 

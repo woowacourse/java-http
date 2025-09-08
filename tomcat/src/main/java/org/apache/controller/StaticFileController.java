@@ -9,11 +9,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.apache.exception.InvalidRequestException;
 import org.apache.exception.RequestProcessingException;
-import org.apache.http.ContentType;
-import org.apache.http.HttpHeader;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusCode;
+import org.apache.http.value.ContentType;
+import org.apache.http.value.HttpHeader;
+import org.apache.http.value.StatusCode;
 
 public class StaticFileController implements Controller {
 

@@ -1,9 +1,9 @@
 package org.apache.controller;
 
-import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusCode;
+import org.apache.http.value.HttpMethod;
+import org.apache.http.value.StatusCode;
 
 public class RootController implements Controller {
 

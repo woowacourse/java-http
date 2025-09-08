@@ -3,9 +3,9 @@ package org.apache.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.http.Cookie;
-import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.value.HttpMethod;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 

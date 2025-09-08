@@ -10,7 +10,6 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
-import java.security.SecureRandom;
 import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
@@ -137,10 +136,9 @@ public class Http11Processor implements Runnable, Processor {
         return handleAuthorizedRequest(request);
     }
 
-    private String generateToken() {
-        final byte[] randomBytes = new byte[32];
-        new SecureRandom().nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    private String generateSessionID() {
+        final UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
@@ -166,7 +164,7 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response handleAuthorizedRequest(final Http11Request request) throws IOException {
         final Map<String, String> headers = new LinkedHashMap<>();
 
-        final String jSessionId = generateToken();
+        final String jSessionId = generateSessionID();
 
         final byte[] indexFileContent = readFile("/index.html");
         headers.put("Content-Type", "text/html;charset=utf-8");

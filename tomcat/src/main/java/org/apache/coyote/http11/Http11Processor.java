@@ -13,6 +13,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +46,20 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader br = new BufferedReader(inputStreamReader);
 
-            final String line = br.readLine();
-            final String[] requestHeader = line.split(" ");
-            final String httpMethod = requestHeader[0];
-            final String endPoint = requestHeader[1];
+            final List<String> headerLines = new ArrayList<>();
+            String line;
+            int contentLength = 0;
+            while ((line = br.readLine()) != null && !line.isEmpty()) {
+                headerLines.add(line);
+                if (line.startsWith("Content-Length")) {
+                    contentLength = getContentLengthBy(line);
+                }
+            }
+            final String startLine = headerLines.get(0);
+            final String[] startLineParts = startLine.split(" ");
+            final String httpMethod = startLineParts[0];
+            final String endPoint = startLineParts[1];
+            final String requestBody = getRequestBody(contentLength, br);
 
             if (httpMethod.equals("GET") && endPoint.equals("/")) {
                 final String response = createResponse("Hello world!", TEXT_HTML_CHARSET_UTF_8);
@@ -78,9 +90,9 @@ public class Http11Processor implements Runnable, Processor {
                 final String path = endPoint.substring(0, index);
 
                 final String queryString = endPoint.substring(index + 1);
-                final String[] splitQueryString = queryString.split("&");
-                final String account = splitQueryString[0].split("=")[1];
-                final String password = splitQueryString[1].split("=")[1];
+                final String[] queryStringParts = queryString.split("&");
+                final String account = queryStringParts[0].split("=")[1];
+                final String password = queryStringParts[1].split("=")[1];
 
                 final User user = getUserByAccount(account);
                 if (isLoginFailed(user, password)) {
@@ -96,6 +108,28 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if (httpMethod.equals("GET") && endPoint.equals("/register")) {
+                final URL resource = getClass().getClassLoader().getResource("static" + endPoint + ".html");
+                validateNullResource(resource);
+                final String responseBody = Files.readString(Paths.get(resource.toURI()));
+                final String response = createResponse(responseBody, TEXT_HTML_CHARSET_UTF_8);
+                writeAndFlush(outputStream, response);
+                return;
+            }
+
+            if (httpMethod.equals("POST") && endPoint.equals("/register")) {
+                final String[] queryStringParts = requestBody.split("&");
+                final String account = queryStringParts[0].split("=")[1];
+                final String email = queryStringParts[1].split("=")[1];
+                final String password = queryStringParts[2].split("=")[1];
+
+                final User user = createUser(account, email, password);
+                InMemoryUserRepository.save(user);
+                final String response = createRedirectionResponse("/index.html");
+                writeAndFlush(outputStream, response);
+                return;
+            }
+
             final URL resource = getClass().getClassLoader().getResource("static" + endPoint);
             validateNullResource(resource);
             final String responseBody = Files.readString(Paths.get(resource.toURI()));
@@ -105,6 +139,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private int getContentLengthBy(String line) {
+        return Integer.parseInt(line.split(":")[1].trim());
+    }
+
+    private String getRequestBody(int contentLength, BufferedReader br) throws IOException {
+        final char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private User getUserByAccount(final String account) {
@@ -148,6 +192,11 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 302 Found ",
                 "Location: " + location,
                 "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
+    }
+
+    private User createUser(String account, String email, String password) {
+        Long id = 1L;
+        return new User(++id, account, email, password);
     }
 
     private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {

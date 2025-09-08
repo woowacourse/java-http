@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
     
@@ -10,6 +12,7 @@ public class HttpResponse {
     private String contentType = "text/html;charset=utf-8";
     private int status = 200;
     private boolean committed = false;
+    private final Map<String, String> cookies = new HashMap<>();
     
     public HttpResponse(final OutputStream outputStream) {
         this.outputStream = outputStream;
@@ -29,6 +32,13 @@ public class HttpResponse {
         this.status = status;
     }
     
+    public void addCookie(final String name, final String value) {
+        if (committed) {
+            throw new IllegalStateException("Response already committed");
+        }
+        cookies.put(name, value);
+    }
+    
     public void write(final String content) {
         if (committed) {
             throw new IllegalStateException("Response already committed");
@@ -38,14 +48,20 @@ public class HttpResponse {
             final String reasonPhrase = getReasonPhrase(status);
             final byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
             
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 " + status + " " + reasonPhrase,
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + contentBytes.length,
-                    "",
-                    content);
+            final StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.append("HTTP/1.1 ").append(status).append(" ").append(reasonPhrase).append("\r\n");
+            responseBuilder.append("Content-Type: ").append(contentType).append("\r\n");
+            responseBuilder.append("Content-Length: ").append(contentBytes.length).append("\r\n");
+            
+            // Set-Cookie 헤더 추가
+            for (final Map.Entry<String, String> cookie : cookies.entrySet()) {
+                responseBuilder.append("Set-Cookie: ").append(cookie.getKey()).append("=").append(cookie.getValue()).append("\r\n");
+            }
+            
+            responseBuilder.append("\r\n");
+            responseBuilder.append(content);
                     
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBuilder.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
             committed = true;
         } catch (final IOException e) {
@@ -59,14 +75,19 @@ public class HttpResponse {
         }
         
         try {
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 302 Found",
-                    "Location: " + location,
-                    "Content-Length: 0",
-                    "",
-                    "");
+            final StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.append("HTTP/1.1 302 Found\r\n");
+            responseBuilder.append("Location: ").append(location).append("\r\n");
+            responseBuilder.append("Content-Length: 0\r\n");
+            
+            // Set-Cookie 헤더 추가
+            for (final Map.Entry<String, String> cookie : cookies.entrySet()) {
+                responseBuilder.append("Set-Cookie: ").append(cookie.getKey()).append("=").append(cookie.getValue()).append("\r\n");
+            }
+            
+            responseBuilder.append("\r\n");
                     
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBuilder.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
             committed = true;
         } catch (final IOException e) {

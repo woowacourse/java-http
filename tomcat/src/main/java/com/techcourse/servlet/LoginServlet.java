@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.HttpRequest;
@@ -50,18 +51,22 @@ public class LoginServlet implements Servlet {
         final String password = request.getParameter("password");
 
         if (account == null || password == null) {
-            // 파라미터 없으면 다시 로그인 페이지로
             response.sendRedirect("/login");
             return;
         }
 
         if (processLogin(account, password)) {
-            // 로그인 성공 - index.html로 리다이렉트
+            // JSESSIONID 쿠키가 없으면 새로 생성
+            String sessionId = request.getCookieValue("JSESSIONID");
+            if (sessionId == null) {
+                sessionId = UUID.randomUUID().toString();
+                response.addCookie("JSESSIONID", sessionId);
+            }
+            
             response.sendRedirect("/index.html");
             return;
         }
 
-        // 로그인 실패 - 401.html로 리다이렉트
         response.sendRedirect("/401.html");
     }
 

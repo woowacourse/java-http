@@ -95,6 +95,6 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        return new HttpRequest(method, uri, queryString, body);
+        return new HttpRequest(method, uri, queryString, body, headers.get("cookie"));
     }
 }

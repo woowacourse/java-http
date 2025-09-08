@@ -15,20 +15,25 @@ public class HttpRequest {
     private final String uri;
     private final String queryString;
     private final Map<String, String> parameters;
+    private final HttpCookie cookies;
 
     public HttpRequest(final String method, final String uri, final String queryString) {
-        this(method, uri, queryString, null);
+        this(method, uri, queryString, null, null);
     }
 
     public HttpRequest(final String method, final String uri, final String queryString, final String body) {
+        this(method, uri, queryString, body, null);
+    }
+
+    public HttpRequest(final String method, final String uri, final String queryString, final String body, final String cookieHeader) {
         this.method = method;
         this.uri = uri;
         this.queryString = queryString;
         this.parameters = new HashMap<>();
+        this.cookies = new HttpCookie(cookieHeader);
 
         parameters.putAll(parseParameters(queryString));
 
-        // POST 요청이면 body도 파싱
         if ("POST".equals(method) && body != null) {
             parameters.putAll(parseParameters(body));
         }
@@ -75,5 +80,13 @@ public class HttpRequest {
 
     public Map<String, String> getParameters() {
         return new HashMap<>(parameters);
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
+    }
+
+    public String getCookieValue(final String name) {
+        return cookies.getValue(name);
     }
 }

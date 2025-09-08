@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class MimeTypeResolver {
 
-    private static final Map<String, String> mimeTypes = Map.of(
+    private static final Map<String, String> MINE_TYPES = Map.of(
             "html", "text/html;charset=utf-8",
             "css", "text/css;charset=utf-8",
             "svg", "image/svg+xml",
@@ -12,6 +12,6 @@ public class MimeTypeResolver {
     );
 
     public static String resolve(String ext) {
-        return mimeTypes.get(ext);
+        return MINE_TYPES.get(ext);
     }
 }

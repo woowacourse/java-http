@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
             new CssRequestHandler(),
             new JsRequestHandler(),
             new LoginRequestHandler(),
+            new LoginPostRequestHandler(),
             new RegisterGetRequestHandler(),
             new RegisterPostRequestHandler()
     );

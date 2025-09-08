@@ -18,6 +18,7 @@ public class HttpHeaders {
         try {
             this.fields = headerLines.stream()
                     .map(line -> line.split(HEADER_SEPARATOR))
+                    .filter(splitByColon -> HttpHeaderField.anyMatch(splitByColon[FIELD_NAME_INDEX]))
                     .collect(
                             Collectors.toMap(
                                     splitByColon -> HttpHeaderField.of(splitByColon[FIELD_NAME_INDEX]),

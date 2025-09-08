@@ -57,10 +57,7 @@ public enum HttpHeaderField {
     CONTENT_RANGE("Content-Range"),
     CONTENT_TYPE("Content-Type"),
     EXPIRES("Expires"),
-    LAST_MODIFIED("Last-Modified"),
-
-    // Extension-header
-    EXTENSION_HEADER("");
+    LAST_MODIFIED("Last-Modified");
 
     private String value;
 
@@ -72,6 +69,11 @@ public enum HttpHeaderField {
         return Arrays.stream(values())
                 .filter(httpHeaderField -> httpHeaderField.value.equals(value))
                 .findFirst()
-                .orElse(EXTENSION_HEADER);
+                .orElseThrow();
+    }
+
+    public static boolean anyMatch(final String value) {
+        return Arrays.stream(values())
+                .anyMatch(httpHeaderField -> httpHeaderField.value.equals(value));
     }
 }

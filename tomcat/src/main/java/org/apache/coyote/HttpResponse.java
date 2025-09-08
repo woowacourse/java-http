@@ -1,6 +1,5 @@
 package org.apache.coyote;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +56,7 @@ public class HttpResponse {
     }
 
     private void initialize() {
-        this.headers = new HttpHeader(new HashMap<>());
+        this.headers = new HttpHeader();
         this.body = EMPTY_BODY;
     }
 

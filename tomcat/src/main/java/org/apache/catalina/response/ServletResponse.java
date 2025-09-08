@@ -18,7 +18,7 @@ public class ServletResponse {
     private String body;
 
     public ServletResponse(String protocol) {
-        this.headers = new HttpHeader(new HashMap<>());
+        this.headers = new HttpHeader();
         this.cookies = new HttpCookie();
         this.protocol = protocol;
         this.body = "";

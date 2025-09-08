@@ -12,8 +12,13 @@ public class HttpHeader {
     private final Map<String, List<String>> headers;
 
     public HttpHeader(Map<String, List<String>> headers) {
-        this.headers = new HashMap<>(headers);
+        this.headers = headers.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> new ArrayList<>(entry.getValue())
+                ));
     }
+
 
     public HttpHeader() {
         this.headers = new HashMap<>();

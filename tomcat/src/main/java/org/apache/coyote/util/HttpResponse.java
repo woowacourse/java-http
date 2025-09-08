@@ -2,12 +2,15 @@ package org.apache.coyote.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
     private final String statusLine;
     private final String contentType;
     private final byte[] body;
+    private final Map<String, String> headers = new HashMap<>();
 
     private HttpResponse(String statusLine, String contentType, byte[] body) {
         this.statusLine = statusLine;
@@ -37,12 +40,21 @@ public class HttpResponse {
     }
 
     public String createHeader() {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Type: " + contentType,
-                "Content-Length: " + body.length,
-                "", ""
-        );
+        StringBuilder builder = new StringBuilder();
+        builder.append(statusLine).append("\r\n");
+        builder.append("Content-Type: ").append(contentType).append("\r\n");
+        builder.append("Content-Length: ").append(body.length).append("\r\n");
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+        }
+        builder.append("\r\n");
+        return builder.toString();
+    }
+
+    public static HttpResponse redirect(String location) {
+        HttpResponse response = new HttpResponse("HTTP/1.1 302 Found", "text/plain;charset=utf-8", "".getBytes());
+        response.headers.put("Location", location);
+        return response;
     }
 
     public byte[] getBody() {

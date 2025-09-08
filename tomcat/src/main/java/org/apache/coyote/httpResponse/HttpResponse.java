@@ -8,11 +8,10 @@ public class HttpResponse {
     public HttpResponse(
             final String protocol,
             final StatusCode statusCode,
-            final String contentType,
             final String body
     ) {
         final StatusLine statusLine = new StatusLine(protocol, statusCode);
-        this.responseHeader = new HttpResponseHeader(statusLine, contentType);
+        this.responseHeader = new HttpResponseHeader(statusLine);
         this.body = body;
     }
 

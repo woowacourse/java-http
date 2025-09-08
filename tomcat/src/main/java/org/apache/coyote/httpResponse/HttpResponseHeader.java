@@ -11,11 +11,10 @@ public class HttpResponseHeader {
     private final Map<String, String> headers;
 
     public HttpResponseHeader(
-            final StatusLine statusLine,
-            final String contentType
+            final StatusLine statusLine
     ) {
         this.statusLine = statusLine;
-        this.headers = new LinkedHashMap<>(Map.of("Content-Type", contentType));
+        this.headers = new LinkedHashMap<>();
     }
 
     public void addHeader(

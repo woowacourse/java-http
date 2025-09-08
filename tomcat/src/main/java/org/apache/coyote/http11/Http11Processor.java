@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.coyote.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpRequest.httpBody.HttpBody;
@@ -55,56 +57,80 @@ public class Http11Processor implements Runnable, Processor {
             final String path = httpHeader.getPurePath();
 
             if (httpMethod == HttpMethod.GET && path.equals("/")) {
-                responseHome(outputStream);
+                HttpResponse httpResponse = responseHome();
+                writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.POST && path.contains("/login")) {
-                final boolean isValidLogin = isValidLogin(httpRequest);
-                if (isValidLogin) {
-                    responseRedirectPage(outputStream,"/index.html");
+                if (isValidLogin(httpRequest)) {
+                    HttpResponse httpResponse = responseRedirectPage("/index.html");
+                    addJSSESSIONIDIfNotExist(httpHeader,httpResponse);
+                    writeResponse(outputStream, httpResponse.getResponse());
                     return;
                 }
-                responseErrorPage(outputStream, "/401.html");
+                HttpResponse httpResponse = responseErrorPage( "/401.html");
+                writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.POST && path.contains("/register")) {
-                boolean isRegistered = registerMember(httpRequest);
-                if(isRegistered) {
-                    responseRedirectPage(outputStream,"/index.html");
+                final boolean isRegistered = registerMember(httpRequest);
+                if (isRegistered) {
+                    HttpResponse httpResponse = responseRedirectPage("/index.html");
+
+                    writeResponse(outputStream, httpResponse.getResponse());
                     return;
                 }
-                responseRedirectPage(outputStream,"/register.html");
+                HttpResponse httpResponse = responseErrorPage("/register.html");
+                writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.contains("/register")) {
-                responseHtml(outputStream, "register");
+                HttpResponse httpResponse = responseHtml("register");
+                writeResponse(outputStream, httpResponse.getResponse());
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.contains("/login")) {
                 printMemberLog(httpHeader);
-                responseHtml(outputStream, "login");
+                HttpResponse httpResponse = responseHtml("login");
+                writeResponse(outputStream,httpResponse.getResponse());
+                return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
-                responseHtml(outputStream, httpHeader);
+                HttpResponse httpResponse = responseHtml(httpHeader);
+                writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".css")) {
-                responseCss(outputStream, httpHeader);
+                HttpResponse httpResponse = responseCss(httpHeader);
+                writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
-                responseJs(outputStream, httpHeader);
+                HttpResponse httpResponse = responseJs(httpHeader);
+                writeResponse(outputStream, httpResponse.getResponse());
+                return;
             }
 
+            HttpResponse httpResponse = responseErrorPage("/404.html");
+            writeResponse(outputStream, httpResponse.getResponse());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String response
+    ) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private boolean registerMember(final HttpRequest httpRequest) {
@@ -117,8 +143,10 @@ public class Http11Processor implements Runnable, Processor {
         }
         boolean isAlreadyRegister = InMemoryUserRepository.findByAccount(account)
                 .isPresent();
-        if(isAlreadyRegister) return false;
-        User user = new User(account,password,email);
+        if (isAlreadyRegister) {
+            return false;
+        }
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return true;
     }
@@ -152,10 +180,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void responseHtml(
-            final OutputStream outputStream,
-            final HttpHeader httpHeader
-    ) throws URISyntaxException, IOException {
+    private HttpResponse responseHtml(final HttpHeader httpHeader) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
 
         final HttpResponse httpResponse = new HttpResponse(
@@ -166,14 +191,16 @@ public class Http11Processor implements Runnable, Processor {
 
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseRedirectPage(
-            final OutputStream outputStream,
+    private void addJSSESSIONIDIfNotExist(final HttpHeader httpHeader, final HttpResponse httpResponse) {
+        if (!httpHeader.hasCookie("JSESSIONID")) {
+            httpResponse.addCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
+        }
+    }
+
+    private HttpResponse responseRedirectPage(
             final String redirectPage
     ) throws IOException {
         final HttpResponse httpResponse = new HttpResponse(
@@ -183,15 +210,10 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Length", "0");
         httpResponse.addHeader("Location", redirectPage);
-
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseHtml(
-            final OutputStream outputStream,
+    private HttpResponse responseHtml(
             final String path
     ) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static/" + path + ".html");
@@ -203,16 +225,10 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseCss(
-            final OutputStream outputStream,
-            final HttpHeader httpHeader
-    ) throws URISyntaxException, IOException {
+    private HttpResponse responseCss(final HttpHeader httpHeader) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -222,16 +238,10 @@ public class Http11Processor implements Runnable, Processor {
 
         httpResponse.addHeader("Content-Type", "text/css;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseJs(
-            final OutputStream outputStream,
-            final HttpHeader httpHeader
-    ) throws URISyntaxException, IOException {
+    private HttpResponse responseJs(final HttpHeader httpHeader) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
 
         final HttpResponse httpResponse = new HttpResponse(
@@ -242,13 +252,10 @@ public class Http11Processor implements Runnable, Processor {
 
         httpResponse.addHeader("Content-Type", "application/javascript;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseHome(final OutputStream outputStream) throws IOException {
+    private HttpResponse responseHome() throws IOException {
         final var responseBody = "Hello world!";
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
@@ -257,14 +264,10 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
-    private void responseErrorPage(
-            final OutputStream outputStream,
+    private HttpResponse responseErrorPage(
             final String errorPagePath
     ) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static" + errorPagePath);
@@ -276,10 +279,7 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-        final String response = httpResponse.getResponse();
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return httpResponse;
     }
 
     private HttpRequest readHttpRequest(

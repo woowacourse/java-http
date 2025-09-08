@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
                 final String password = split[1].split("=")[1];
                 boolean loginSuccessful = isLoginSuccessful(account, password);
                 if (loginSuccessful) {
-                    send302Response("/login", outputStream);
+                    send302ResponseWithCookie("/login", outputStream);
                     return;
                 }
                 send401Response(outputStream);
@@ -110,6 +111,21 @@ public class Http11Processor implements Runnable, Processor {
     private void send302Response(final String redirectResource, final OutputStream outputStream) {
         try {
             final String response = create302HttpResponse(redirectResource);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            send500Response(outputStream);
+        }
+    }
+
+    private void send302ResponseWithCookie(
+            final String redirectResource,
+            final OutputStream outputStream
+    ) { // todo 3단계에 리팩터링 예정
+        try {
+            final String redirectResponse = create302HttpResponse(redirectResource);
+            final String cookieHeader = String.format("Set-Cookie: JSESSIONID=%s", UUID.randomUUID());
+            final String response = String.join("\r\n", redirectResponse, cookieHeader);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (final IOException e) {

@@ -227,6 +227,37 @@ class Http11ProcessorTest {
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
                     "Location: http://localhost:8080/login ",
+                    "Content-Length: 0 ",
+                    "Set-Cookie: JSESSIONID=");
+
+            assertThat(socket.output()).startsWith(expected);
+        }
+
+        @DisplayName("로그인에 성공하면 Set-Cookie 헤더를 응답에 포함한다.")
+        @Test
+        void testLoginSuccessCookie() {
+            // given
+            final String requestBody = String.format("account=gugu&password=password");
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    String.format("Content-Length: %d", requestBody.getBytes().length),
+                    "Content-Type: application/x-www-form-urlencoded",
+                    "Accept: */*",
+                    "",
+                    requestBody);
+
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final String expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/login ",
                     "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);

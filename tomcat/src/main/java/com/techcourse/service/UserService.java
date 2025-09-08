@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
+import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
@@ -25,9 +26,13 @@ public class UserService {
     public ControllerResponse loginPage(HttpRequest httpRequest) {
         String sessionId = findSessionId(httpRequest);
         if (sessionId == null) {
-            return new StaticFileResponse(HttpStatus.OK, "login");
+            JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
+            response.addHeader("Location", "/login.html");
+            return response;
         }
-        return new StaticFileResponse(HttpStatus.OK, "index");
+        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
+        response.addHeader("Location", "/index.html");
+        return response;
     }
 
     private String findSessionId(HttpRequest httpRequest) {
@@ -59,8 +64,9 @@ public class UserService {
         }
         logger.info(user.toString());
         Session session = buildSessionOfUser(user);
-        StaticFileResponse response = new StaticFileResponse(HttpStatus.OK, "index");
+        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
         response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.addHeader("Location", "/index.html");
         return response;
     }
 
@@ -82,8 +88,9 @@ public class UserService {
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         Session session = buildSessionOfUser(newUser);
-        StaticFileResponse response = new StaticFileResponse(HttpStatus.CREATED, "index");
+        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
         response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.addHeader("Location", "/index.html");
         return response;
     }
 }

@@ -6,7 +6,9 @@ import com.techcourse.exception.BusinessException;
 import com.techcourse.servlet.util.StaticFileLoader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.servlet.HttpServlet;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.ContentType;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -39,14 +41,24 @@ public class LoginServlet extends HttpServlet {
 
         try {
             authService.login(new LoginRequest(account, password));
+
             response.setStatus(HttpStatus.SEE_OTHER);
+            addJSessionCookie(request, response);
             response.addToHeader("Location", "/index.html");
+
             log.info("로그인 성공! 아이디 : " + account);
         } catch (BusinessException e) {
             response.setStatus(HttpStatus.SEE_OTHER);
             response.addToHeader("Location", "/401.html");
         } catch (Exception e) {
             ServletExceptionHandler.getInstance().handle(response, e);
+        }
+    }
+
+    private void addJSessionCookie(HttpRequest request, HttpResponse response) {
+        if (!request.hasJSessionCookie()) {
+            HttpCookie cookie = HttpCookie.of("JSESSIONID", UUID.randomUUID().toString());
+            response.addToHeader("Set-Cookie", cookie.toHeaderString());
         }
     }
 }

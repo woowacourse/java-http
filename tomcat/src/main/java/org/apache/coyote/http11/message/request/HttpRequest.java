@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.message.HttpBody;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.response.ContentType;
 
@@ -105,13 +106,18 @@ public class HttpRequest {
         }
     }
 
+    public boolean hasJSessionCookie() {
+        HttpCookie cookie = HttpCookie.from(headers);
+        return cookie.contains("JSESSIONID");
+    }
+
     private Map<String, String> parseFormUrlEncoded(String body) {
         Map<String, String> params = new HashMap<>();
         for (String pair : body.split("&")) {
-            String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                params.put(URLDecoder.decode(kv[0], StandardCharsets.UTF_8),
-                        URLDecoder.decode(kv[1], StandardCharsets.UTF_8));
+            String[] keyValuePair = pair.split("=", 2);
+            if (keyValuePair.length == 2) {
+                params.put(URLDecoder.decode(keyValuePair[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(keyValuePair[1], StandardCharsets.UTF_8));
             }
         }
         return params;

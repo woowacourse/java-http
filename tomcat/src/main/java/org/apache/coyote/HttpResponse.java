@@ -1,31 +1,23 @@
 package org.apache.coyote;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
+    private static final String EMPTY_BODY = "";
 
-    private HttpStatus status;
     private final String protocol;
+    private HttpStatus status;
     private String body;
-    private final Map<String, String> headers;
-    private Charset charset;
+    private HttpHeader headers;
 
     public HttpResponse(String protocol) {
-        this.headers = new LinkedHashMap<>();
         this.protocol = protocol;
-        this.body = "";
-        this.charset = StandardCharsets.UTF_8;
-    }
-
-    public void setBody(String body, Charset charset) {
-        this.charset = charset;
-        setBody(body);
+        initialize();
     }
 
     public void setBody(String body) {
@@ -33,8 +25,8 @@ public class HttpResponse {
         setContentLength();
     }
 
-    public void setHeader(String name, String value) {
-        this.headers.put(name, value);
+    public void addHeader(String name, String value) {
+        headers.add(name, value);
     }
 
     public void setStatus(HttpStatus status) {
@@ -56,17 +48,20 @@ public class HttpResponse {
 
     private String getHeaderLine() {
         final StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.append(entry.getKey()).append(HEADER_DELIMITER).append(entry.getValue()).append(CRLF);
+        for (Map.Entry<String, List<String>> entry : headers.getAllHeaders().entrySet()) {
+            for (String headerValue : entry.getValue()) {
+                builder.append(entry.getKey()).append(HEADER_DELIMITER).append(headerValue).append(CRLF);
+            }
         }
         return builder.toString();
     }
 
-    public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+    private void initialize() {
+        this.headers = new HttpHeader();
+        this.body = EMPTY_BODY;
     }
 
     private void setContentLength() {
-        headers.put("Content-Length", String.valueOf(body.getBytes(charset).length));
+        headers.setContentLength(String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 }

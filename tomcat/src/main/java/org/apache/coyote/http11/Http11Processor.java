@@ -1,23 +1,25 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
-import static org.apache.coyote.HttpStatus.NOT_FOUND;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
+import com.techcourse.handler.RegisterHandler;
 import com.techcourse.handler.RootHandler;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import org.apache.catalina.request.ServletRequest;
+import org.apache.catalina.response.ServletResponse;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
-import org.apache.coyote.HttpRequestParser;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
@@ -33,11 +35,12 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpRequestHandler defaultHandler;
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
         this.handlerMap = new HashMap<>();
         handlerMap.put("/", new RootHandler());
         handlerMap.put("/login", new LoginHandler());
+        handlerMap.put("/register", new RegisterHandler());
         this.defaultHandler = new DefaultHandler();
     }
 
@@ -49,49 +52,69 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final HttpRequest request = HttpRequestParser.parseRequest(inputStream);
-            final HttpResponse response = new HttpResponse(PROTOCOL);
-
-            handleRequest(request, response);
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            final HttpResponse response = processRequest(inputStream);
 
             writeResponse(response, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
-        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
-    }
-
-    private void handleRequest(HttpRequest request, HttpResponse response) {
-        final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
+    // TODO Controller로 분리
+    private HttpResponse processRequest(InputStream inputStream) {
+        final ServletResponse response = new ServletResponse(PROTOCOL);
+        final ServletRequest request = new ServletRequest(new HttpRequest(inputStream));
 
         try {
-            executeMethodHandler(request, response, handler);
+            handleRequest(request, response);
+        } catch (IllegalArgumentException e) {
+            updateResponseWithError(BAD_REQUEST, response, e);
+            log.warn("잘못된 요청 형식: {}", e.getMessage());
+        } catch (UnauthorizedException e) {
+            response.sendRedirect("401.html");
+            log.warn(e.getMessage());
         } catch (NoSuchElementException e) {
-            setErrorResponse(NOT_FOUND, response, e);
+            response.sendRedirect("404.html");
+            log.warn("존재하지 않는 리소스: {}", e.getMessage());
         } catch (UnsupportedOperationException e) {
-            setErrorResponse(METHOD_NOT_ALLOWED, response, e);
-        } catch (UncheckedServletException e) {
-            setErrorResponse(INTERNAL_SERVER_ERROR, response, e);
+            updateResponseWithError(METHOD_NOT_ALLOWED, response, e);
+            log.warn("지원하지 않는 HTTP 메서드: {}", e.getMessage());
+        } catch (Exception e) {
+            response.sendRedirect("500.html");
+            log.error("예상치 못한 서버 오류 발생", e);
         }
+
+        checkSessionCreated(request, response);
+
+        return response.toHttpResponse();
     }
 
-    private void executeMethodHandler(HttpRequest request, HttpResponse response, HttpRequestHandler handler) {
+    private void handleRequest(ServletRequest request, ServletResponse response) {
+        final HttpRequestHandler handler = handlerMap.getOrDefault(request.getPath(), defaultHandler);
+
         switch (request.getMethod()) {
             case "GET" -> handler.handleGet(request, response);
+            case "POST" -> handler.handlePost(request, response);
             default -> throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
         }
     }
 
-    private void setErrorResponse(HttpStatus status, HttpResponse response, Exception e) {
+    private void writeResponse(HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private void updateResponseWithError(HttpStatus status, ServletResponse response, Exception e) {
         response.setStatus(status);
         response.setBody(e.getMessage());
         response.setContentType("text/plain;charset=utf-8");
+    }
+
+    private void checkSessionCreated(ServletRequest request, ServletResponse response) {
+        if (request.isSessionCreated()) {
+            response.setCookie("JSESSIONID", request.getSession(false).getId());
+        }
     }
 }

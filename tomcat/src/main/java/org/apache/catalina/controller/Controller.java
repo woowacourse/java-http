@@ -9,8 +9,4 @@ public interface Controller {
 
     void service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
-
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
-
 }

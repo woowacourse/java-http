@@ -25,4 +25,8 @@ public abstract class AbstractController implements Controller {
 
         httpResponse.init("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
+
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse){};
+
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse){};
 }

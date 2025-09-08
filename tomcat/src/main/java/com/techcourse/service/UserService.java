@@ -6,14 +6,18 @@ import java.util.Optional;
 
 public class UserService {
 
-    public boolean login(final String account, final String password) {
+    public Optional<User> login(final String account, final String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
 
         final User existingUser = user.get();
-        return existingUser.checkPassword(password);
+        if (!existingUser.checkPassword(password)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(existingUser);
     }
 
     public boolean signup(final String account, final String password, final String email) {

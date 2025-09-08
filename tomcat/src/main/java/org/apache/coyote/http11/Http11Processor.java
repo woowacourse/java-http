@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,14 @@ public class Http11Processor implements Runnable, Processor {
                     InMemoryUserRepository.save(user);
 
                     statusLine = "HTTP/1.1 302 Found";
+                    if (requestHeaders.containsKey("Cookie")) {
+                        Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
+                        if (cookie.isNotContainsSessionId()) {
+                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                        }
+                    } else {
+                        responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                    }
                     responseHeaders.put("Location", "/index.html");
                 }
 
@@ -116,6 +125,14 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (user.checkPassword(params.get("password"))) {
                         statusLine = "HTTP/1.1 302 Found";
+                        if (requestHeaders.containsKey("Cookie")) {
+                            Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
+                            if (cookie.isNotContainsSessionId()) {
+                                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                            }
+                        } else {
+                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                        }
                         responseHeaders.put("Location", "/index.html");
                     } else {
                         statusLine = "HTTP/1.1 302 Found";

@@ -13,19 +13,25 @@ public class Session {
     }
 
     public String getId() {
-        return null;
+        return id;
     }
 
     public Object getAttribute(final String name) {
-        return null;
+        return values.getOrDefault(name, null);
     }
 
     public void setAttribute(final String name, final Object value) {
+        if (values.containsKey(name)) {
+            throw new IllegalArgumentException(String.format("Duplicated Session values: %s", name));
+        }
+        values.put(name, value);
     }
 
     public void removeAttribute(final String name) {
+        values.remove(name);
     }
 
     public void invalidate() {
+        //TODO
     }
 }

@@ -98,7 +98,7 @@ public class RegisterServlet implements Servlet {
     private String createErrorPage(final String message, final int statusCode) {
         return String.format("""
                 <html>
-                <head><title>Error %d</title></title>
+                <head><title>Error %d</title>
                 <body>
                     <h1>%s</h1>
                     <p>Status Code: %d</p>

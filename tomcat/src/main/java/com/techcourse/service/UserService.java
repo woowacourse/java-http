@@ -9,7 +9,7 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public void login(final String account, final String password) {
+    public User login(final String account, final String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다"));
 
@@ -18,5 +18,10 @@ public class UserService {
         }
 
         logger.info(user.toString());
+        return user;
+    }
+
+    public void register(String account, String password, String email) {
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 }

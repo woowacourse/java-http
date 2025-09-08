@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
+import org.apache.coyote.request.requestLine.RequestPath;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseGenerator;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
@@ -19,25 +19,25 @@ public class StaticResourceServlet extends HttpServlet {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        String requestPath = httpRequest.getRequestPath();
+        RequestPath requestPath = httpRequest.getRequestPath();
 
         URL resourceUrl = StaticResourceServlet.class.getClassLoader()
-                .getResource(STATIC_RECOURSE_PATH + requestPath);
+                .getResource(STATIC_RECOURSE_PATH + requestPath.getRequestPath());
         return resourceUrl != null;
     }
 
     @Override
-    public HttpResponse doGet(final HttpRequest httpRequest) {
-        String resource = findResource(httpRequest.getRequestPath());
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        String resource = findResource(httpRequest.getRequestPath().getRequestPath()); //TODO: get열차 칙칙폭폭..
         Optional<ContentType> contentType = findResourceExtension(httpRequest.getRequestLine());
 
-        return contentType.map(type -> HttpResponseGenerator.generate(resource, type, HttpStatus.OK))
-                .orElseGet(() -> HttpResponseGenerator.generate(resource, null, HttpStatus.UNSUPPORTED_MEDIA_TYPE));
+        httpResponse.init(resource, contentType.orElse(null),
+                contentType.isPresent() ? HttpStatus.OK : HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Override
-    public HttpResponse doPost(final HttpRequest httpRequest) {
-        return HttpResponseGenerator.generate("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.init("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     private Optional<ContentType> findResourceExtension(final RequestLine requestLine) {

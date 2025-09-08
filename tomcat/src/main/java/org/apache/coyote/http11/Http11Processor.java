@@ -37,11 +37,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
-            final HttpResponse httpResponse = servletContainer.process(httpRequest);
+            final HttpResponse httpResponse = new HttpResponse();
+
+            servletContainer.process(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.combine());
             outputStream.flush();

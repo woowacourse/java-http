@@ -3,17 +3,40 @@ package org.apache.coyote.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.servlet.cookie.HttpCookie;
+import org.apache.catalina.servletContainer.session.Session;
+import org.apache.coyote.response.responseHeader.HttpHeaders;
 
 public class RequestHeader {
 
+    public static final String HEADER_SEPARATOR = ":";
     private final Map<String, String> headerValue;
 
     public RequestHeader(final List<String> headerLines) {
         this.headerValue = headerLines.stream()
-                .map(headerLine -> headerLine.split(":"))
+                .map(headerLine -> headerLine.split(HEADER_SEPARATOR))
                 .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
+                        keyValue -> HttpHeaders.find(keyValue[0]).getValue(),
                         keyValue -> keyValue[1]
                 ));
+    }
+
+    public int getBodyLength() {
+        if (headerValue.containsKey(HttpHeaders.CONTENT_LENGTH.getValue())) {
+            return Integer.parseInt(headerValue.get(HttpHeaders.CONTENT_LENGTH.getValue()).trim());
+        }
+        return 0;
+    }
+
+    public Session getSession() {
+        String cookie = headerValue.get(HttpHeaders.COOKIE.getValue());
+        HttpCookie httpCookie = new HttpCookie(cookie);
+
+        return httpCookie.getSession();
+    }
+
+    public boolean hasCookie() {
+        String cookie = headerValue.get(HttpHeaders.COOKIE.getValue());
+        return cookie != null;
     }
 }

@@ -7,6 +7,9 @@ public enum HttpStatus {
     ACCEPTED(202, "Accepted"),
     NO_CONTENT(204, "No Content"),
 
+    FOUND(302, "Found"),
+
+    UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type");

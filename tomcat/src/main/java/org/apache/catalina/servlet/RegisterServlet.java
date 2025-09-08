@@ -1,7 +1,6 @@
 package org.apache.catalina.servlet;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.model.User;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,9 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import org.apache.catalina.servletContainer.session.Session;
-import org.apache.catalina.servletContainer.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
@@ -20,28 +16,23 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class LoginServlet extends HttpServlet {
+public class RegisterServlet extends HttpServlet {
 
-    private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
     private static final String STATIC_RECOURSE_PATH = "static";
-    public static final String USER = "user";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return requestLine.isSame(LOGIN_PATH);
+        return requestLine.isSame(REGISTER_PATH);
     }
 
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (httpRequest.hasCookie()) {
-            if (isLoggedInUser(httpRequest, httpResponse))return;
-        }
-
         RequestPath requestPath = httpRequest.getRequestPath();
-        String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
 
+        String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
         httpResponse.init(resource, ContentType.HTML, HttpStatus.OK);
     }
 
@@ -57,37 +48,10 @@ public class LoginServlet extends HttpServlet {
             bodyValues.put(split[0], split[1]);
         }
 
-        final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
+        final RegisterController registerController = new RegisterController(new UserService());
 
-        try {
-            User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));
-
-            setCookie(httpRequest, httpResponse, user);
-            httpResponse.sendRedirect("/index.html");
-        } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
-            httpResponse.init(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-    private boolean isLoggedInUser(HttpRequest httpRequest, HttpResponse httpResponse) {
-        Session session = httpRequest.getSession(false);
-        Optional<Object> user = session.getAttribute(USER);
-
-        if (user.isPresent()) {
-            httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
-            return true;
-        }
-        return false;
-    }
-
-    private void setCookie(final HttpRequest httpRequest, final HttpResponse httpResponse, final User user) {
-        Session session = httpRequest.getSession(true);
-        session.setAttribute(USER, user);
-
-        SessionManager sessionManager = SessionManager.getInstance();
-        sessionManager.add(session);
-
-        httpResponse.setCookies(session.getId());
+        registerController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
+        httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
     }
 
     private String findResource(final String requestPath) {

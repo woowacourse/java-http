@@ -166,7 +166,7 @@ public class Http11Processor implements Runnable, Processor {
         String account = accountAndPassword.get(LoginParam.ACCOUNT);
         String password = accountAndPassword.get(LoginParam.PASSWORD);
 
-        User user = InMemoryUserRepository.findByAccount(account, password)
+        User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NoSuchUserException("[ERROR] no such user"));
 
         user.validatePasswordAndLog(password);

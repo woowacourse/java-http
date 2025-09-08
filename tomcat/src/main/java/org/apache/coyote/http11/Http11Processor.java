@@ -53,9 +53,29 @@ public class Http11Processor implements Runnable, Processor {
             handleRoot(response);
         } else if ("/login".equals(path)) {
             handleLogin(request, response);
+        } else if ("/register".equals(path)) {
+            handleRegister(request, response);
         } else {
             handleStaticResource(response, path);
         }
+    }
+
+    private void handleRegister(HttpRequest request, HttpResponse response) throws IOException {
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String account = request.getQueryParam("account");
+            String password = request.getQueryParam("password");
+            String email = request.getQueryParam("email");
+
+            if (account != null && password != null && email != null) {
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+                log.info("회원가입 완료: {}", user);
+                response.sendRedirect("/index.html");
+                return;
+            }
+        }
+
+        loadStaticResource(response, "/register.html");
     }
 
     private void handleRoot(HttpResponse response) throws IOException {

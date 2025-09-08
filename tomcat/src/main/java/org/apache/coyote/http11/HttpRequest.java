@@ -11,13 +11,15 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private final String method;
     private final String path;
     private final Map<String, String> queryParams;
+    private final Map<String, String> headers = new HashMap<>();
+    private final String body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String requestLine = reader.readLine();
-
         if (requestLine == null) {
             throw new BadRequestException("잘못된 요청 라인입니다.");
         }
@@ -25,8 +27,8 @@ public class HttpRequest {
         if (tokens.length != 3) {
             throw new BadRequestException("잘못된 요청 라인입니다.");
         }
+        this.method = tokens[0];
         String uri = tokens[1];
-
         if (uri.contains("?")) {
             int queryIndex = uri.indexOf("?");
             this.path = uri.substring(0, queryIndex);
@@ -34,7 +36,30 @@ public class HttpRequest {
             this.queryParams = parseQueryString(queryString);
         } else {
             this.path = uri;
-            this.queryParams = Map.of();
+            this.queryParams = new HashMap<>();
+        }
+
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(":");
+            if (colonIndex > 0) {
+                String key = line.substring(0, colonIndex).trim();
+                String value = line.substring(colonIndex + 1).trim();
+                headers.put(key, value);
+            }
+        }
+
+        if ("POST".equals(method)) {
+            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+            char[] buffer = new char[contentLength];
+            int read = reader.read(buffer, 0, contentLength);
+            this.body = new String(buffer, 0, read);
+
+            if ("application/x-www-form-urlencoded".equalsIgnoreCase(headers.get("Content-Type"))) {
+                queryParams.putAll(parseQueryString(body));
+            }
+        } else {
+            this.body = null;
         }
     }
 
@@ -54,11 +79,23 @@ public class HttpRequest {
         return params;
     }
 
+    public String getMethod() {
+        return method;
+    }
+
     public String getPath() {
         return path;
     }
 
     public String getQueryParam(String key) {
         return queryParams.get(key);
+    }
+
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

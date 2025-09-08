@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.http.request;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.http.common.HttpCookie;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 import org.apache.coyote.http11.http.common.startline.HttpMethod;
@@ -15,15 +17,18 @@ public class HttpRequest {
     private final HttpHeader httpHeader;
     private final HttpCookie httpCookie;
     private final HttpRequestBody httpRequestBody;
+    private final HttpSession httpSession;
 
     private HttpRequest(final HttpStartLine httpStartLine,
                         final HttpHeader httpHeader,
                         final HttpCookie httpCookie,
-                        final HttpRequestBody httpRequestBody) {
+                        final HttpRequestBody httpRequestBody,
+                        final HttpSession httpSession) {
         this.httpStartLine = httpStartLine;
         this.httpHeader = httpHeader;
         this.httpCookie = httpCookie;
         this.httpRequestBody = httpRequestBody;
+        this.httpSession = httpSession;
     }
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
@@ -33,7 +38,19 @@ public class HttpRequest {
         final HttpHeader httpHeader = HttpHeader.from(bufferedReader);
         final HttpCookie httpCookie = HttpCookie.from(httpHeader);
         final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
-        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody);
+        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, null);
+    }
+
+    public static HttpRequest from(final InputStream inputStream, final SessionManager sessionManager)
+            throws IOException {
+        validateNull(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        final HttpStartLine httpStartLine = HttpStartLine.from(bufferedReader);
+        final HttpHeader httpHeader = HttpHeader.from(bufferedReader);
+        final HttpCookie httpCookie = HttpCookie.from(httpHeader);
+        final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
+        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody,
+                sessionManager.findSession(httpCookie.getByName("JSESSIONID")));
     }
 
     private static void validateNull(final InputStream inputStream) {
@@ -69,5 +86,9 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return httpCookie;
+    }
+
+    public HttpSession getSession() {
+        return httpSession;
     }
 }

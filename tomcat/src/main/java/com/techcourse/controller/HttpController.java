@@ -33,14 +33,13 @@ public class HttpController {
         return HttpResponse.ok("js/scripts.js");
     }
 
-    public HttpResponse getLoginHtml(final HttpRequest httpRequest, final SessionManager sessionManager) {
+    public HttpResponse getLoginHtml(final HttpRequest httpRequest) {
         final HttpCookie cookie = httpRequest.getCookie();
         if (!cookie.containsName("JSESSIONID")) {
             return HttpResponse.ok("login.html");
         }
 
-        final String sessionId = cookie.getByName("JSESSIONID");
-        final HttpSession session = sessionManager.findSession(sessionId);
+        final HttpSession session = httpRequest.getSession();
         if (session == null) {
             return HttpResponse.ok("login.html");
         }
@@ -52,7 +51,7 @@ public class HttpController {
         return HttpResponse.found("index.html");
     }
 
-    public HttpResponse login(final String account, final String password, final SessionManager sessionManager) {
+    public HttpResponse login(final String account, final String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저입니다: %s".formatted(account)));
 
@@ -66,7 +65,7 @@ public class HttpController {
         httpResponse.setCookie("JSESSIONID", sessionId);
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
-        sessionManager.add(session);
+        SessionManager.getInstance().add(session);
         return httpResponse;
     }
 

@@ -54,35 +54,29 @@ public class HttpResponse {
     }
 
     private static HttpHeader createHeader(final HttpResponseBody responseBody, final String responseReturnValue) {
-
-        final Map<String, String> responseHeaderInfo = new HashMap<>();
+        final Map<String, List<String>> responseHeaderInfo = new HashMap<>();
         if (responseReturnValue == null) {
             return HttpHeader.from(responseHeaderInfo);
         }
 
-        responseHeaderInfo.put(HttpHeaderKey.CONTENT_TYPE.getValue(),
-                responseBody.getContentType().getFormat() + ";charset=utf-8");
+        responseHeaderInfo.putIfAbsent(HttpHeaderKey.CONTENT_TYPE.getValue(), new ArrayList<>());
+        responseHeaderInfo.get(HttpHeaderKey.CONTENT_TYPE.getValue())
+                .add(responseBody.getContentType().getFormat() + ";charset=utf-8");
 
         final Optional<byte[]> valueOptional = responseBody.getValue();
 
         if (valueOptional.isPresent()) {
-            responseHeaderInfo.put(HttpHeaderKey.CONTENT_LENGTH.getValue(),
-                    Integer.toString(responseBody.getByteLength()));
+            responseHeaderInfo.putIfAbsent(HttpHeaderKey.CONTENT_LENGTH.getValue(), new ArrayList<>());
+            responseHeaderInfo.get(HttpHeaderKey.CONTENT_LENGTH.getValue())
+                    .add(Integer.toString(responseBody.getByteLength()));
         }
 
         return HttpHeader.from(responseHeaderInfo);
     }
 
     public void setCookie(final String cookieName, final String cookieValue) {
-        if (header.containsKey(HttpHeaderKey.SET_COOKIE.getValue().toLowerCase())) {
-            String value = header.getValue(HttpHeaderKey.SET_COOKIE.getValue());
-            if (!value.contains(cookieName)) {
-                value = value + "; " + cookieName + "=" + cookieValue;
-                header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), value);
-            }
-        }
-        String value = cookieName + "=" + cookieValue;
-        header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), value);
+        String cookieHeaderValue = cookieName + "=" + cookieValue;
+        header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), cookieHeaderValue);
     }
 
     public String getResponseFormat() {

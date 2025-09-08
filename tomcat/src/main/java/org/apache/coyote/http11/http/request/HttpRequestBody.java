@@ -21,7 +21,7 @@ public class HttpRequestBody {
         if (httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase())) {
 
             final int contentLength = Integer.parseInt(
-                    httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase()));
+                    httpHeader.getFirstValue(HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase()));
             char[] bodyChars = new char[contentLength];
             int charsRead = bufferedReader.read(bodyChars, 0, contentLength);
             value = new String(bodyChars, 0, charsRead).getBytes(StandardCharsets.UTF_8);

@@ -142,12 +142,12 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> jsonValue = parseBodyValue(jsonBody);
         String account = jsonValue.get("account");
         String password = jsonValue.get("password");
-        final HttpResponse httpResponse = httpController.login(account, password, sessionManager);
+        final HttpResponse httpResponse = httpController.login(account, password);
         return httpResponse.getResponseFormat();
     }
 
     private String getLoginHtml(final HttpRequest httpRequest) {
-        final HttpResponse httpResponse = httpController.getLoginHtml(httpRequest, sessionManager);
+        final HttpResponse httpResponse = httpController.getLoginHtml(httpRequest);
         return httpResponse.getResponseFormat();
     }
 

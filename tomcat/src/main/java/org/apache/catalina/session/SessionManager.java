@@ -6,7 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
+    private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void add(final HttpSession session) {

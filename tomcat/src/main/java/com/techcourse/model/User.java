@@ -4,18 +4,18 @@ public class User {
 
     private final Long id;
     private final String account;
-    private final String password;
     private final String email;
+    private final String password;
 
-    public User(Long id, String account, String password, String email) {
+    public User(Long id, String account, String email, String password) {
         this.id = id;
         this.account = account;
-        this.password = password;
         this.email = email;
+        this.password = password;
     }
 
-    public User(String account, String password, String email) {
-        this(null, account, password, email);
+    public User(String account, String email, String password) {
+        this(null, account, email, password);
     }
 
     public boolean checkPassword(String password) {
@@ -24,6 +24,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     @Override

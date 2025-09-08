@@ -1,6 +1,7 @@
 package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.ConflictException;
 import com.techcourse.exception.NotFoundAccountException;
 import com.techcourse.exception.UnAuthorizedException;
 import com.techcourse.model.User;
@@ -17,11 +18,24 @@ public class UserService {
             log.info(user.toString());
             return;
         }
+        log.info("User login failed: {}", user.getAccount());
         throw new UnAuthorizedException("Login failed");
+    }
+
+    public static void register(final String account, final String email, final String password) {
+        User user = new User(account, password, email);
+        if (existsByAccount(account)) {
+            throw new ConflictException("Account already exists");
+        }
+        InMemoryUserRepository.save(user);
     }
 
     private static User findByAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NotFoundAccountException("Account not found"));
+    }
+
+    private static boolean existsByAccount(final String account) {
+        return InMemoryUserRepository.existsByAccount(account);
     }
 }

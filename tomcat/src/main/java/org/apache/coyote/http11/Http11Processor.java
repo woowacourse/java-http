@@ -8,6 +8,8 @@ import org.apache.coyote.http11.error.ErrorMapper;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.handler.HttpResourceHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.QueryParser;
+import org.apache.coyote.http11.handler.RegisterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final QueryParser queryParser;
     private final HttpRequestReader httpRequestReader;
     private final HttpResourceLoader httpResourceLoader;
     private final HttpResourceHandler httpResourceHandler;
@@ -25,12 +28,14 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.httpRequestReader = new HttpRequestReader();
+        this.queryParser = new QueryParser();
+        this.httpRequestReader = new HttpRequestReader(queryParser);
         this.httpResourceLoader = new HttpResourceLoader();
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
         this.resolver = new Resolver(httpResourceHandler)
                 .register("/login", new LoginHandler())
+                .register("/register", new RegisterHandler(httpResourceHandler, queryParser))
         ;
         this.errorMapper = new ErrorMapper(httpResourceLoader);
     }

@@ -6,7 +6,6 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -80,38 +79,52 @@ public class Http11Processor implements Runnable, Processor {
         final String queryString = requestInfo[1];
 
         if ("/login".equals(path)) {
-            if (!queryString.isEmpty()) {
-                return handleLoginRequest(queryString);
-            }
-            path += ".html";
+            return handleLoginPath(path, queryString);
         }
 
-        final byte[] bytes = readFile(path);
-        return generateOkResponse(path, bytes);
+        return serveStaticFile(path);
     }
 
-    private String handleLoginRequest(final String queryString) {
+    private String handleLoginPath(final String path, final String queryString) throws IOException, URISyntaxException {
+        if (!queryString.isEmpty()) {
+            return processLoginRequest(queryString);
+        }
+        return serveStaticFile(path + ".html");
+    }
+
+    private String processLoginRequest(final String queryString) {
         final Map<String, String> parameters = parseQueryString(queryString);
-        final String location;
-        if (login(parameters)) {
-            log.info("login successful");
-            location = "/index.html";
+        final boolean loginSuccess = authenticateUser(parameters);
 
-        }
-        else{
-            log.info("login failed");
-            location = "/401.html";
-        }
-        return generateRedirectResponse(location);
+        final String redirectLocation = loginSuccess ? "/index.html" : "/401.html";
+
+        return generateRedirectResponse(redirectLocation);
     }
 
-    private String generateRedirectResponse(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Type: text/html; charset=UTF-8 ",
-                "Content-Length: 0 ",
-                "\r\n");
+    private boolean authenticateUser(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElse(null);
+        if (user == null) {
+            return false;
+        }
+
+        if (user.checkPassword(password)) {
+            log.info("user: {}", user);
+            return true;
+        }
+        return false;
+    }
+
+    private String serveStaticFile(final String path) throws IOException, URISyntaxException {
+        final byte[] fileBytes = readFile(path);
+        return generateOkResponse(path, fileBytes);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {
@@ -126,26 +139,13 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private boolean login(final Map<String, String> parameters) {
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
-
-        if (account == null || password == null) {
-            return false;
-        }
-
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElse(null);
-
-        if (user == null) {
-            return false;
-        }
-
-        if (user.checkPassword(password)) {
-            log.info("user: {}", user);
-            return true;
-        }
-        return false;
+    private String generateRedirectResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Type: text/html; charset=UTF-8 ",
+                "Content-Length: 0 ",
+                "\r\n");
     }
 
     private byte[] readFile(final String path) throws IOException, URISyntaxException {
@@ -169,6 +169,9 @@ public class Http11Processor implements Runnable, Processor {
     private String getContentType(final String path) {
         if (path.endsWith(".css")) {
             return "text/css";
+        }
+        if (path.endsWith(".js")) {
+            return "application/javascript";
         }
         return "text/html";
     }

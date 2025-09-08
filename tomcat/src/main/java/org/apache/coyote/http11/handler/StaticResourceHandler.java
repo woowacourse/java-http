@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -50,23 +51,14 @@ public class StaticResourceHandler implements Handler {
     @Override
     public void handle(HttpRequest request, OutputStream outputStream) throws IOException {
         String resourcePath = request.path().replaceFirst(STATIC_REGEX, "");
-        resourcePath = normalizePath(resourcePath);
-        String fullPath = base + SUFFIX + resourcePath;
+        String normalizedResourcePath = normalizePath(resourcePath);
+        String fullPath = base + SUFFIX + normalizedResourcePath;
 
         try {
-            final byte[] bytes = loadResourceBytes(fullPath)
-                    .orElse(null);
-
-            if (bytes == null) {
-                Responses.notFound(outputStream, request.version());
-                return;
-            }
-
-            final String contentType = resolveContentType(resourcePath);
-            Responses.binary(outputStream, request.version(),
-                    HttpStatus.OK.getCode(), HttpStatus.OK.getReason(),
-                    contentType, bytes);
-
+            loadResourceBytes(fullPath).ifPresentOrElse(
+                    bytes -> respondBinary(outputStream, request.version(), resourcePath, bytes),
+                    () -> respondNotFound(outputStream, request.version())
+            );
         } catch (IOException e) {
             log.error("I/O error while serving static resource '{}': {}", request.path(), e.getMessage(), e);
             Responses.serverError(outputStream, request.version());
@@ -92,6 +84,25 @@ public class StaticResourceHandler implements Handler {
                 return Optional.empty();
             }
             return Optional.of(resourceStream.readAllBytes());
+        }
+    }
+
+    private void respondBinary(OutputStream out, String version, String resourcePath, byte[] bytes) {
+        try {
+            String contentType = resolveContentType(resourcePath);
+            Responses.binary(out, version,
+                    HttpStatus.OK.getCode(), HttpStatus.OK.getReason(),
+                    contentType, bytes);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void respondNotFound(OutputStream out, String version) {
+        try {
+            Responses.notFound(out, version);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

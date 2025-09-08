@@ -43,22 +43,14 @@ public class Http11Processor implements Runnable, Processor {
                 respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
                 return;
             }
-            if (!request.queries().isEmpty() && handleApiIfNeeded(request, outputStream)) {
+            if (request.hasQueries() && handleApiRequest(request, outputStream)) {
                 return;
             }
             String resourcePath = StaticResourcePathGenerator.generate(request.path());
-            if (resourcePath != null) {
-                byte[] resourceBody = readPathFile(resourcePath);
-                if (resourceBody != null) {
-                    respond(HttpResponse.of(
-                            "HTTP/1.1 200 OK",
-                            HttpContentTypeResolver.resolve(resourcePath),
-                            resourceBody
-                    ), outputStream);
-                    return;
-                }
+            if (handleStaticResourceRequest(resourcePath, outputStream)) {
+                return;
             }
-            if (request.queries().isEmpty() && handleApiIfNeeded(request, outputStream)) {
+            if (request.queries().isEmpty() && handleApiRequest(request, outputStream)) {
                 return;
             }
             respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
@@ -67,10 +59,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean handleApiIfNeeded(HttpRequest request, OutputStream outputStream) throws IOException {
+    private boolean handleStaticResourceRequest(String resourcePath, OutputStream outputStream) throws IOException {
+        if (resourcePath != null) {
+            byte[] resourceBody = readPathFile(resourcePath);
+            if (resourceBody != null) {
+                respond(HttpResponse.of(
+                        "HTTP/1.1 200 OK",
+                        HttpContentTypeResolver.resolve(resourcePath),
+                        resourceBody
+                ), outputStream);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
         if ("/login".equals(request.path())) {
             HttpResponse loginResponse = processLoginMemberInfo(request);
-            System.out.println(loginResponse.createHeader());
             respond(loginResponse, outputStream);
             return true;
         }

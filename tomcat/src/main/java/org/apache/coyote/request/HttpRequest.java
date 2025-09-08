@@ -20,4 +20,8 @@ public record HttpRequest(
     public Optional<String> getQueryValue(String key) {
         return Optional.ofNullable(queries.get(key));
     }
+
+    public boolean hasQueries() {
+        return !queries.isEmpty();
+    }
 }

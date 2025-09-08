@@ -160,7 +160,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // 나중에 HttpRequest 리팩터링에 사용하기 위해 남겨둠
-    private LoginDto parseLoginRequest(final String requestURL, final OutputStream outputStream) {
+    private void parseLoginRequest(final String requestURL, final OutputStream outputStream) {
         final int QUERY_KEY_INDEX = 0;
         final int QUERY_VALUE_INDEX = 1;
 
@@ -175,7 +175,6 @@ public class Http11Processor implements Runnable, Processor {
                     );
             final String account = queries.get("account");
             final String password = queries.get("password");
-            return new LoginDto(account, password);
         } catch (final NullPointerException
                        | ArrayIndexOutOfBoundsException
                        | PatternSyntaxException

@@ -30,7 +30,10 @@ public class RequestLine {
 
     public Map<String, String> getQueryValues() {
         final Map<String, String> values = new TreeMap<>();
-        int index = path.indexOf("?");
+        final int index = path.indexOf("?");
+        if (index == -1) {
+            return values;
+        }
         final String queryPath = path.substring(index + 1);
         final String[] queries = queryPath.split("&");
         for (final String query : queries) {

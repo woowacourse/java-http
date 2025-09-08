@@ -13,10 +13,6 @@ public class RequestBody {
     private final Map<String, String> parameters;
 
     public static RequestBody from(final String rawRequestBody) {
-        if (rawRequestBody.isBlank()) {
-            return new RequestBody(new HashMap<>());
-        }
-
         final String[] parameters = rawRequestBody.split(QUERY_PARAMETER_SEPARATOR);
         final Map<String, String> bodyParameters = Arrays.stream(parameters)
                 .map(param -> param.split(QUERY_PARAMETER_KEY_VALUE_SEPARATOR))
@@ -27,6 +23,10 @@ public class RequestBody {
                 ));
 
         return new RequestBody(bodyParameters);
+    }
+
+    public static RequestBody createEmptyBody() {
+        return new RequestBody(new HashMap<>());
     }
 
     public String getParameter(final String key) {

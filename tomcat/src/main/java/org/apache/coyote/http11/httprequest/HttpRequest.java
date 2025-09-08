@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.httprequest;
 
+import org.apache.coyote.http11.cookie.HttpCookie;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
@@ -23,5 +25,10 @@ public class HttpRequest {
 
     public String getStaticResourcePath() {
         return this.requestLine.getRequestPath();
+    }
+
+    public HttpCookie getCookie() {
+        String cookie = requestHeaders.getOrDefault("Cookie", "");
+        return HttpCookie.from(cookie);
     }
 }

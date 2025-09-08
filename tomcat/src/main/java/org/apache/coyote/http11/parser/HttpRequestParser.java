@@ -44,9 +44,11 @@ public class HttpRequestParser {
         return RequestHeaders.from(rawHeaders);
     }
 
-    private RequestBody parseRequestBody(final RequestHeaders requestHeaders)
-            throws IOException {
+    private RequestBody parseRequestBody(final RequestHeaders requestHeaders) throws IOException {
         final int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
+        if (contentLength == 0) {
+            return RequestBody.createEmptyBody();
+        }
         final char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         final String rawHttpRequestBody = new String(buffer);

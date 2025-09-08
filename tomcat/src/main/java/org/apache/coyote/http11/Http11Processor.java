@@ -18,6 +18,7 @@ import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,33 +55,25 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final HttpRequestParser requestParser = new HttpRequestParser(reader);
             final HttpRequest httpRequest = requestParser.readHttpRequest();
+            final SessionManager sessionManager = new SessionManager();
+            HttpResponse response;
 
             if (httpRequest.matches(HttpMethod.GET, "/")) {
-                handleWelcomePage(outputStream);
-                return;
+                response = handleWelcomePage();
+            } else if (httpRequest.matches(HttpMethod.GET, "/register")) {
+                response = handleRegisterGetRequest();
+            } else if (httpRequest.matches(HttpMethod.POST, "/register")) {
+                response = handleRegisterPostRequest(httpRequest);
+            } else if (httpRequest.matches(HttpMethod.GET, "/login")) {
+                response = handleLoginGetRequest();
+            } else if (httpRequest.matches(HttpMethod.POST, "/login")) {
+                response = handleLoginPostRequest(httpRequest);
+            } else {
+                response = handleStaticResourceGetRequest(httpRequest);
             }
 
-            if (httpRequest.matches(HttpMethod.GET, "/register")) {
-                handleRegisterGetRequest(outputStream);
-                return;
-            }
-
-            if (httpRequest.matches(HttpMethod.POST, "/register")) {
-                handleRegisterPostRequest(outputStream, httpRequest);
-                return;
-            }
-
-            if (httpRequest.matches(HttpMethod.GET, "/login")) {
-                handleLoginGetRequest(outputStream);
-                return;
-            }
-
-            if (httpRequest.matches(HttpMethod.POST, "/login")) {
-                handleLoginPostRequest(outputStream, httpRequest);
-                return;
-            }
-
-            handleStaticResourceGetRequest(outputStream, httpRequest);
+            sessionManager.setSessionCookie(httpRequest, response);
+            sendHttpResponse(response, outputStream);
         } catch (HttpStatusException e) {
             final HttpStatusCode statusCode = e.getStatusCode();
             final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(statusCode);
@@ -88,55 +81,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleWelcomePage(final OutputStream outputStream) throws IOException {
-        final HttpResponse response = HttpResponseParser.createWelcomeHttpResponse();
-        sendHttpResponse(response, outputStream);
+    private HttpResponse handleWelcomePage() {
+        return HttpResponseParser.createWelcomeHttpResponse();
     }
 
-    private void handleRegisterGetRequest(final OutputStream outputStream) throws IOException {
-        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
-                "/register.html");
-        sendHttpResponse(response, outputStream);
+    private HttpResponse handleRegisterGetRequest() throws IOException {
+        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/register.html");
     }
 
-    private void handleRegisterPostRequest(final OutputStream outputStream, final HttpRequest httpRequest)
-            throws IOException {
+    private HttpResponse handleRegisterPostRequest(final HttpRequest httpRequest) {
         final String account = httpRequest.getBodyParameter("account");
         final String password = httpRequest.getBodyParameter("password");
         final String email = httpRequest.getBodyParameter("email");
         userService.signup(account, password, email);
-        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-        sendHttpResponse(response, outputStream);
+        return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
     }
 
-    private void handleStaticResourceGetRequest(final OutputStream outputStream, final HttpRequest httpRequest)
-            throws IOException {
-        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
-                httpRequest.getStaticResourcePath());
-        sendHttpResponse(response, outputStream);
+    private HttpResponse handleStaticResourceGetRequest(final HttpRequest httpRequest) throws IOException {
+        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, httpRequest.getStaticResourcePath());
     }
 
-    private void handleLoginGetRequest(final OutputStream outputStream) throws IOException {
-        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
-        sendHttpResponse(response, outputStream);
+    private HttpResponse handleLoginGetRequest() throws IOException {
+        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
     }
 
-    private void handleLoginPostRequest(final OutputStream outputStream, final HttpRequest httpRequest)
-            throws IOException {
+    private HttpResponse handleLoginPostRequest(final HttpRequest httpRequest) throws IOException {
         final String account = httpRequest.getBodyParameter("account");
         final String password = httpRequest.getBodyParameter("password");
         Optional<User> user = userService.login(account, password);
 
         if (user.isEmpty()) {
-            final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(
-                    HttpStatusCode.UNAUTHORIZED);
-            sendHttpResponse(errorResponse, outputStream);
-            return;
+            return HttpResponseParser.parseToErrorResponse(HttpStatusCode.UNAUTHORIZED);
         }
 
-        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-        sendHttpResponse(response, outputStream);
         log.info("user: " + user.get());
+        return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
     }
 
     private void sendHttpResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {

@@ -19,4 +19,8 @@ public class HttpResponse {
                 responseHeaders.toResponseText(),
                 responseBody.toResponseText());
     }
+
+    public void addHeader(final String key, final String value) {
+        responseHeaders.add(key, value);
+    }
 }

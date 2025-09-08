@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httpresponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,11 @@ public class ResponseHeaders {
 
     public ResponseHeaders(final Map<String, List<String>> headers) {
         this.headers = headers;
+    }
+
+    public void add(final String key, final String value) {
+        headers.computeIfAbsent(key, k -> new ArrayList<>())
+                .add(value);
     }
 
     public String toResponseText() {

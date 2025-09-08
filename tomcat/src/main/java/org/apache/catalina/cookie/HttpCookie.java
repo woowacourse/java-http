@@ -38,10 +38,12 @@ public class HttpCookie {
         }
 
         return Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
+                .map(String::trim)
                 .filter(pair -> pair.contains(PAIR_DELIMITER))
                 .collect(Collectors.toMap(
                         pair -> pair.substring(0, pair.indexOf(PAIR_DELIMITER)),
-                        pair -> pair.substring(pair.indexOf(PAIR_DELIMITER) + 1)
+                        pair -> pair.substring(pair.indexOf(PAIR_DELIMITER) + 1),
+                        (existing, replacement) -> replacement
                 ));
     }
 }

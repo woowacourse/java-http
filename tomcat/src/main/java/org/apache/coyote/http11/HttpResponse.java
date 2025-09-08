@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public record HttpResponse(
@@ -25,5 +26,13 @@ public record HttpResponse(
         response.append(new String(body));
 
         return response.toString();
+    }
+
+    public static HttpResponse redirect(String location) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", location);
+        headers.put("Content-Length", "0");
+
+        return new HttpResponse(HttpStatus.FOUND, headers, new byte[0]);
     }
 }

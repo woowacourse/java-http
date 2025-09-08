@@ -8,7 +8,6 @@ import org.apache.coyote.http11.error.ErrorMapper;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.handler.HttpResourceHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.QueryParser;
 import org.apache.coyote.http11.handler.RegisterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

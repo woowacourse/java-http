@@ -34,11 +34,6 @@ public class HandlerDispatcher {
     private RequestHandler getRequestHandler(final Http11Request request, final Http11Response response) {
         return requestHandlers.stream().filter(requestHandler -> requestHandler.canHandle(request))
                 .findFirst()
-                .orElseThrow(() -> throwPathNotFoundException(response));
-    }
-
-    private PathNotFoundException throwPathNotFoundException(final Http11Response response) {
-        response.setState(HttpStatus.NOT_FOUND);
-        return new PathNotFoundException("No handler found for the request");
+                .orElseThrow(() -> new PathNotFoundException(response));
     }
 }

@@ -3,8 +3,9 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.domain.HttpMethod;
 
-public record RequestLine(String method,
+public record RequestLine(HttpMethod method,
                           String requestTarget,
                           String protocol) {
 
@@ -14,7 +15,7 @@ public record RequestLine(String method,
             throw new IllegalArgumentException("Invalid HTTP request line: " + requestLine);
         }
 
-        return new RequestLine(parts[0], parts[1], parts[2]);
+        return new RequestLine(HttpMethod.valueOf(parts[0]), parts[1], parts[2]);
     }
 
     public String parseResourcePath() {

@@ -1,9 +1,9 @@
 package org.apache.catalina;
 
 import org.apache.catalina.exception.MethodNotAllowedException;
+import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +15,8 @@ public abstract class AbstractController implements Controller {
     public String service(final Http11Request request, final Http11Response response) {
         //Todo: HTTP 매서드 매핑 방식 수정 필요 [2025-09-05 17:18:12]
         return switch (request.getMethod()) {
-            case "GET" -> toGet(request, response);
-            case "POST" -> toPost(request, response);
+            case HttpMethod.GET -> toGet(request, response);
+            case HttpMethod.POST -> toPost(request, response);
             default -> handlingUnsupportedMethod(request, response);
         };
     }
@@ -24,8 +24,7 @@ public abstract class AbstractController implements Controller {
     public String handlingUnsupportedMethod(final Http11Request request,
                                             final Http11Response response
     ) {
-        log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.getMethod(), request.getRequestTarget());
-        response.setState(HttpStatus.METHOD_NOT_ALLOWED);
-        throw new MethodNotAllowedException("Method Not Allowed");
+        log.warn("Method:{} Path:{} Method Not Allowed.", request.getMethod(), request.getRequestTarget());
+        throw new MethodNotAllowedException(response);
     }
 }

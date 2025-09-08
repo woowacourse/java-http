@@ -1,12 +1,16 @@
 package org.apache.catalina.exception;
 
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpStatus;
+
 public class PathNotFoundException extends Http4xxException {
 
-    public PathNotFoundException(String message) {
-        super(message);
+    public PathNotFoundException(Http11Response response) {
+        super("No handler found for the request", response, HttpStatus.NOT_FOUND);
     }
 
-    public PathNotFoundException(Exception e) {
-        super(e.getMessage());
+    public PathNotFoundException(Exception e, Http11Response response) {
+        super(e.getMessage(), response, HttpStatus.NOT_FOUND);
+
     }
 }

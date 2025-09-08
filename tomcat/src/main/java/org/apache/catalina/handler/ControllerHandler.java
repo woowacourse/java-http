@@ -1,6 +1,7 @@
 package org.apache.catalina.handler;
 
 import org.apache.catalina.Controller;
+import org.apache.catalina.exception.PathNotFoundException;
 import org.apache.catalina.resolver.ViewResolver;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -25,6 +26,9 @@ public class ControllerHandler implements RequestHandler {
     public void handle(final Http11Request request, final Http11Response response) {
         final String resourcePath = request.parseResourcePath();
         final Controller controller = handlerMapping.getController(resourcePath);
+        if (controller == null) {
+            throw new PathNotFoundException(response);
+        }
         controller.service(request, response);
         viewResolver.resolve(resourcePath, response);
     }

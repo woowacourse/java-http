@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.domain.HttpMethod;
 
 public record Http11Request(
         RequestLine requestLine,
@@ -36,7 +37,7 @@ public record Http11Request(
         return requestLine.parseQuery();
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.method();
     }
 

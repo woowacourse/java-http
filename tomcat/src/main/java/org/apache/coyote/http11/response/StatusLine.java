@@ -1,21 +1,16 @@
 package org.apache.coyote.http11.response;
 
-// <protocol> <status-code> <reason-phrase>
-public record StatusLine(String protocol, HttpStatus status) {
+import org.apache.coyote.http11.domain.HttpProtocol;
 
-    private static final String HTTP_1_1 = "HTTP/1.1";
+// <protocol> <status-code> <reason-phrase>
+public record StatusLine(HttpProtocol protocol, HttpStatus status) {
 
     public StatusLine() {
-        this(HTTP_1_1, HttpStatus.OK);
+        this(HttpProtocol.HTTP1_1, HttpStatus.OK);
     }
 
     public StatusLine(String protocol, int statusCode) {
-        this(protocol, HttpStatus.fromCode(statusCode));
-    }
-
-    public StatusLine(String protocol, HttpStatus status) {
-        this.protocol = protocol;
-        this.status = status;
+        this(HttpProtocol.valueOf(protocol), HttpStatus.fromCode(statusCode));
     }
 
     public byte[] getBytes() {

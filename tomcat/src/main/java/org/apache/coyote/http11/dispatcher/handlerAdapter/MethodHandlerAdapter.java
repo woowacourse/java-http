@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.dispatcher.handlerAdapter;
 
-import com.techcourse.Controller;
+import com.techcourse.RestController;
 import com.techcourse.Service;
+import com.techcourse.ViewController;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.dispatcher.HandlerMethod;
 import org.apache.coyote.http11.dispatcher.RouteKey;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 
 public class MethodHandlerAdapter implements HandlerAdapter {
 
@@ -19,12 +19,16 @@ public class MethodHandlerAdapter implements HandlerAdapter {
     }
 
     public static void init() {
-        Controller controller = new Controller(new Service());
-
+        RestController restController = new RestController(new Service());
         mappings.put(new RouteKey("GET", "/"),
-                new HandlerMethod(controller, method(controller, "hello")));
-        mappings.put(new RouteKey("POST", "/login"),
-                new HandlerMethod(controller, method(controller, "signIn", Map.class))
+                new HandlerMethod(restController, method(restController, "hello")));
+        mappings.put(new RouteKey("GET", "/login"),
+                new HandlerMethod(restController, method(restController, "signIn", Map.class))
+        );
+
+        ViewController viewController = new ViewController();
+        mappings.put(new RouteKey("GET", "/login"),
+                new HandlerMethod(viewController, method(viewController, "getLoginPage"))
         );
     }
 
@@ -44,7 +48,7 @@ public class MethodHandlerAdapter implements HandlerAdapter {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public Object handle(HttpRequest httpRequest) {
         String method = httpRequest.getMappingLine().getRequestMapping();
         String path = httpRequest.getMappingLine().getUrl();
         HandlerMethod handlerMethod = mappings.get(new RouteKey(method, path));

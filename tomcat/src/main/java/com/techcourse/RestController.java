@@ -5,11 +5,11 @@ import java.util.Map;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public class Controller {
+public class RestController {
 
     private final Service service;
 
-    public Controller(Service service) {
+    public RestController(Service service) {
         this.service = service;
     }
 

@@ -28,7 +28,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
-                "Hello world!");
+                "Hello World!");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -78,8 +78,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected1 = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n";
+        var expected1 = """
+                HTTP/1.1 200 OK \r
+                Content-Type: text/html;charset=utf-8 \r
+                """;
         var expected2 = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).contains(expected1);
         assertThat(socket.output()).contains(expected2);

@@ -12,15 +12,19 @@ public class DefaultController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(DefaultController.class);
 
     @Override
-    public void service(Http11Request request, Http11Response response) {
+    public String service(Http11Request request, Http11Response response) {
         log.info("Path:{}", request.parseResourcePath());
+        response.setBody("Hello World!".getBytes());
+        return "/";
     }
 
     @Override
-    public void toGet(Http11Request request, Http11Response response) {
+    public String toGet(Http11Request request, Http11Response response) {
+        return "/";
     }
 
     @Override
-    public void toPost(Http11Request request, Http11Response response) {
+    public String toPost(Http11Request request, Http11Response response) {
+        return "/";
     }
 }

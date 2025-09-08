@@ -21,7 +21,7 @@ public record StatusLine(String protocol, HttpStatus status) {
     public byte[] getBytes() {
         String sb = protocol + " "
                 + status.getStatusCode() + " "
-                + status.getReasonPhrase() + "\r\n";
+                + status.getReasonPhrase() + " \r\n";
         return sb.getBytes();
     }
 }

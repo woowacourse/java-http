@@ -45,7 +45,7 @@ public class HttpRequest {
     private byte[] getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
         String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
-            return null;
+            return new byte[0];
         }
 
         int length = Integer.parseInt(contentLength);

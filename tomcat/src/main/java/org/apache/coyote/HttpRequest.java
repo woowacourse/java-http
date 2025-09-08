@@ -49,7 +49,6 @@ public class HttpRequest {
         return uri;
     }
 
-
     public String getBody() {
         return body;
     }
@@ -90,7 +89,17 @@ public class HttpRequest {
             return EMPTY_BODY;
         }
 
-        int length = Integer.parseInt(contentLength);
+        int length;
+        try {
+            length = Integer.parseInt(contentLength);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Content-Length 값이 올바르지 않습니다: " + contentLength);
+        }
+
+        if (length < 0) {
+            throw new IllegalArgumentException("Content-Length는 음수일 수 없습니다: " + contentLength);
+        }
+
         if (length == 0) {
             return EMPTY_BODY;
         }

@@ -20,6 +20,16 @@ public class HttpHeaders {
                 : Optional.empty();
     }
 
+    public Optional<Integer> getInt(String key) {
+        return getFirst(key).flatMap(v -> {
+            try {
+                return Optional.of(Integer.parseInt(v.trim()));
+            } catch (NumberFormatException e) {
+                return Optional.empty();
+            }
+        });
+    }
+
     public List<String> getAll(String key) {
         return headers.getOrDefault(key, List.of());
     }

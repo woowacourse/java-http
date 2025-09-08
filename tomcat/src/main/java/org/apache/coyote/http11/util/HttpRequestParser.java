@@ -8,7 +8,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +37,47 @@ public final class HttpRequestParser {
         HttpRequestUri uri = parseUri(head.startLine);
         HttpHeaders headers = parseHeaders(head.headerLines);
         Map<String, String> queryParams = parseQueryString(uri.queryString());
-        return new HttpRequest(uri.method(), uri.path(), uri.version(), headers, queryParams);
+        Map<String, String> bodyParams = Map.of();
+
+        if (isMethodWithBody(uri.method())) {
+            int contentLength = headers.getFirst("Content-Length")
+                    .map(v -> {
+                        try { return Integer.parseInt(v.trim()); }
+                        catch (NumberFormatException e) { return 0; }
+                    })
+                    .orElse(0);
+            if (contentLength > 0) {
+                char[] buf = new char[contentLength];
+                int read = 0;
+                while (read < contentLength) {
+                    int n = head.bodyReader.read(buf, read, contentLength - read);
+                    if (n < 0) break;
+                    read += n;
+                }
+                String body = new String(buf, 0, read);
+
+                String contentType = headers.getFirst("Content-Type").orElse("").toLowerCase(Locale.ROOT);
+                if (contentType.startsWith("application/x-www-form-urlencoded")) {
+                    bodyParams = parseQueryString(body);
+                }
+            }
+        }
+
+        return new HttpRequest(
+                uri.method(),
+                uri.path(),
+                uri.version(),
+                headers,
+                queryParams,
+                bodyParams,
+                Map.of()
+        );
+    }
+
+    private static boolean isMethodWithBody(String method) {
+        return "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "PATCH".equalsIgnoreCase(method);
     }
 
     private static Head readHead(InputStream inputStream) throws IOException {

@@ -23,8 +23,15 @@ public class User {
         return new User(id, account, password, email);
     }
 
-    public boolean checkPassword(final String password) {
-        return this.password.equals(password);
+    public static User withoutId(final String account, final String password, final String email) {
+        return new User(null, account, password, email);
+    }
+
+    public void checkPassword(final String password) {
+        if (this.password.equals(password)) {
+            return;
+        }
+        throw new IllegalArgumentException("올바르지 않은 비밀번호입니다.");
     }
 
     public boolean isPersisted() { // TODO move to superClass

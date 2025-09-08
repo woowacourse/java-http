@@ -16,6 +16,7 @@ public class Http11Request {
     private final Map<String, String> queryParams;
     private final String httpVersion;
     private final Map<String, String> headers;
+    private final Http11Cookie cookie;
     private final String body;
 
     public static Http11Request create(final List<String> requestMessage) {
@@ -34,10 +35,15 @@ public class Http11Request {
         }
 
         final Map<String, String> headers = getHeaders(requestMessage);
+        Http11Cookie cookie = null;
+        if (headers.containsKey("Cookie")) {
+            cookie = Http11Cookie.create(headers.get("Cookie"));
+            headers.remove("cookie");
+        }
 
         final String body = getBody(requestMessage);
 
-        return new Http11Request(method, target, queryParams, httpVersion, headers, body);
+        return new Http11Request(method, target, queryParams, httpVersion, headers, cookie, body);
     }
 
     private static void validateFirstLineSize(final String[] firstLine) {
@@ -101,17 +107,18 @@ public class Http11Request {
         while (pointer < requestMessage.size()) {
             line = requestMessage.get(pointer++);
 
-            sb.append(line + "\n");
+            sb.append(line);
         }
         return sb.toString();
     }
 
-    private Http11Request(
+    public Http11Request(
             final String method,
             final String target,
             final Map<String, String> queryParams,
             final String httpVersion,
             final Map<String, String> headers,
+            final Http11Cookie cookie,
             final String body
     ) {
         this.method = method;
@@ -119,6 +126,7 @@ public class Http11Request {
         this.queryParams = queryParams;
         this.httpVersion = httpVersion;
         this.headers = headers;
+        this.cookie = cookie;
         this.body = body;
     }
 
@@ -127,6 +135,14 @@ public class Http11Request {
             return Optional.of(queryParams.get(key));
         }
         return Optional.empty();
+    }
+
+    public boolean hasCookie(final String cookieKeyName) {
+        if (cookie == null) {
+            return false;
+        }
+
+        return cookie.hasCookie(cookieKeyName);
     }
 
     public String getTarget() {

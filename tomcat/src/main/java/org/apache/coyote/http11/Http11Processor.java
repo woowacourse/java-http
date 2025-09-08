@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.security.SecureRandom;
 import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
@@ -129,12 +130,17 @@ public class Http11Processor implements Runnable, Processor {
             return createHtmlResponse(200, fileContent);
         }
 
-        if (existsUserByAccount(account.get(), password.get())) {
-            return handleHtmlRequest(302, "/index.html");
+        if (!existsUserByAccount(account.get(), password.get())) {
+            return handleHtmlRequest(401, "/401.html");
         }
 
-        return handleHtmlRequest(401, "/401.html");
+        return handleAuthorizedRequest(request);
+    }
 
+    private String generateToken() {
+        final byte[] randomBytes = new byte[32];
+        new SecureRandom().nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
@@ -154,9 +160,28 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
         }
 
-        InMemoryUserRepository.save(new User(account, email, password));
+        InMemoryUserRepository.save(new User(account, password, email));
 
-        return handleHtmlRequest(302, "/index.html");
+        return handleAuthorizedRequest(request);
+    }
+
+    private Http11Response handleAuthorizedRequest(final Http11Request request) throws IOException {
+        final Map<String, String> headers = new LinkedHashMap<>();
+
+        final String jSessionId = generateToken();
+
+        final byte[] indexFileContent = readFile("/index.html");
+        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(indexFileContent.length));
+        headers.put("Set-Cookie", String.format("JSESSIONID=%s", jSessionId));
+
+        return new Http11Response(
+                "HTTP/1.1",
+                302,
+                "OK",
+                headers,
+                indexFileContent
+        );
     }
 
     private Http11Response handleHtmlRequest(

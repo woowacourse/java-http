@@ -10,21 +10,21 @@ public class ControllerHandler implements RequestHandler {
     private final HandlerMapping handlerMapping;
     private final ViewResolver viewResolver;
 
-    public ControllerHandler(HandlerMapping handlerMapping, ViewResolver viewResolver) {
+    public ControllerHandler(final HandlerMapping handlerMapping, final ViewResolver viewResolver) {
         this.handlerMapping = handlerMapping;
         this.viewResolver = viewResolver;
     }
 
     @Override
-    public boolean canHandle(Http11Request request) {
+    public boolean canHandle(final Http11Request request) {
         return !request.parseResourcePath().contains(".")
                 && handlerMapping.existsController(request.parseResourcePath());
     }
 
     @Override
-    public void handle(Http11Request request, Http11Response response) {
-        String resourcePath = request.parseResourcePath();
-        Controller controller = handlerMapping.getController(resourcePath);
+    public void handle(final Http11Request request, final Http11Response response) {
+        final String resourcePath = request.parseResourcePath();
+        final Controller controller = handlerMapping.getController(resourcePath);
         controller.service(request, response);
         viewResolver.resolve(resourcePath, response);
     }

@@ -17,8 +17,8 @@ public record Http11Request(
     }
 
     public static Http11Request from(BufferedReader bufferedReader) throws IOException {
-        final var requestLine = bufferedReader.readLine();
-        final var headers = extractHeaderLines(bufferedReader);
+        final String requestLine = bufferedReader.readLine();
+        final List<String> headers = extractHeaderLines(bufferedReader);
         return new Http11Request(requestLine, headers, null);
     }
 

@@ -11,20 +11,20 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     private final ResourceLoader resourceLoader;
 
-    public StaticResourceRequestHandler(ResourceLoader resourceLoader) {
+    public StaticResourceRequestHandler(final ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
     @Override
-    public boolean canHandle(Http11Request request) {
+    public boolean canHandle(final Http11Request request) {
         return request.parseResourcePath().contains(".");
     }
 
     @Override
-    public void handle(Http11Request request, Http11Response response) {
-        String resourcePath = request.parseResourcePath();
+    public void handle(final Http11Request request, final Http11Response response) {
+        final String resourcePath = request.parseResourcePath();
         try {
-            byte[] responseBody = resourceLoader.getResponseBody(resourcePath);
+            final byte[] responseBody = resourceLoader.getResponseBody(resourcePath);
             response.setBody(responseBody);
         } catch (IOException e) {
             response.setState(HttpStatus.NOT_FOUND);

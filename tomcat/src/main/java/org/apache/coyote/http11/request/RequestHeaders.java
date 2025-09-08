@@ -9,7 +9,7 @@ public record RequestHeaders(LinkedHashMap<String, String> headers) {
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 
         for (String line : headerLines) {
-            final var header = line.split(":", 2);
+            final String[] header = line.split(":", 2);
             if (header.length == 2) {
                 headers.put(header[0].trim(), header[1].trim());
             }

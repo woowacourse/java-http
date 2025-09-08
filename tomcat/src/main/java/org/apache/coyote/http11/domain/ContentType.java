@@ -12,12 +12,12 @@ public enum ContentType {
     private final String extension;
     private final String value;
 
-    ContentType(String extension, String value) {
+    ContentType(final String extension, final String value) {
         this.extension = extension;
         this.value = value;
     }
 
-    public static ContentType fromPath(String resourcePath) {
+    public static ContentType fromPath(final String resourcePath) {
         final int lastDotIndex = resourcePath.lastIndexOf('.');
         if (lastDotIndex == -1) {
             return DEFAULT;

@@ -17,7 +17,7 @@ public class ExceptionHandler {
     }
 
     public void handle(final Exception e, final Http11Request request, final Http11Response response) {
-        String resourcePath = request.parseResourcePath();
+        final String resourcePath = request.parseResourcePath();
         log.error("Exception occurred while processing request for resource: {}", resourcePath, e);
         viewResolver.resolve(response.getState().getResourcePath(), response);
     }

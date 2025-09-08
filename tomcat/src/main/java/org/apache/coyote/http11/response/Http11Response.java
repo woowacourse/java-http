@@ -8,7 +8,7 @@ public class Http11Response {
     private static final String CONTENT_TYPE = "Content-Type";
 
     private StatusLine statusLine;
-    private ResponseHeaders headers;
+    private final ResponseHeaders headers;
     private ResponseBody body;
 
     public Http11Response() {
@@ -17,17 +17,17 @@ public class Http11Response {
         this.body = new ResponseBody(0);
     }
 
-    public void addHeader(String key, String value) {
+    public void addHeader(final String key, final String value) {
         headers.put(key, value);
     }
 
     public void setContentType(final String resourcePath) {
-        ContentType contentType = ContentType.fromPath(resourcePath);
+        final ContentType contentType = ContentType.fromPath(resourcePath);
         this.addHeader(CONTENT_TYPE, contentType.getValue());
     }
 
     public void setContentLength() {
-        int length = body.bytes().length;
+        final int length = body.bytes().length;
         this.addHeader(CONTENT_LENGTH, String.valueOf(length));
     }
 
@@ -40,7 +40,7 @@ public class Http11Response {
         return headers.getHeader();
     }
 
-    public void setState(HttpStatus state) {
+    public void setState(final HttpStatus state) {
         this.statusLine = new StatusLine(this.statusLine.protocol(), state);
     }
 
@@ -52,7 +52,7 @@ public class Http11Response {
         return body.bytes();
     }
 
-    public void setBody(byte[] body) {
+    public void setBody(final byte[] body) {
         this.body = new ResponseBody(body);
     }
 }

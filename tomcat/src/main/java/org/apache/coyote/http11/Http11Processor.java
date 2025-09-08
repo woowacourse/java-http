@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import org.apache.coyote.Adapter;
@@ -33,11 +35,11 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            final var httpRequest = Http11Request.from(bufferedReader);
-            final var httpResponse = new Http11Response();
+        try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            
+            final Http11Request httpRequest = Http11Request.from(bufferedReader);
+            final Http11Response httpResponse = new Http11Response();
             httpResponse.setContentType(httpRequest.parseResourcePath());
 
             adapter.service(httpRequest, httpResponse);
@@ -51,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
 
     private void writeResponse(final Http11Response httpResponse) throws IOException, URISyntaxException {
-        try (final var outputStream = connection.getOutputStream()) {
+        try (final OutputStream outputStream = connection.getOutputStream()) {
             outputStream.write(httpResponse.getResponseLine());
             outputStream.write(httpResponse.getHeader());
             outputStream.write(httpResponse.getBody());

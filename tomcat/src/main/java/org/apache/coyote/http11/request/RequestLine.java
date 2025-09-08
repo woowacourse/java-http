@@ -8,8 +8,8 @@ public record RequestLine(String method,
                           String requestTarget,
                           String protocol) {
 
-    public static RequestLine parse(String requestLine) {
-        String[] parts = requestLine.split(" ");
+    public static RequestLine parse(final String requestLine) {
+        final String[] parts = requestLine.split(" ");
         if (parts.length != 3) {
             throw new IllegalArgumentException("Invalid HTTP request line: " + requestLine);
         }
@@ -36,7 +36,7 @@ public record RequestLine(String method,
         final String[] splitPathQuery = pathQuery.split("&");
         final Map<String, String> queries = new HashMap<>();
         for (String query : splitPathQuery) {
-            String[] keyValue = query.split("=");
+            final String[] keyValue = query.split("=");
             if (keyValue.length != 2) {
                 return null;
             }

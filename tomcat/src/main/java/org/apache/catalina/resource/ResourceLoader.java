@@ -13,12 +13,12 @@ public abstract class ResourceLoader {
     private static final String STATIC_PATH = "static";
 
     public byte[] getResponseBody(final String resourcePath) throws IOException {
-        String path = this.resolve(resourcePath);
+        final String path = this.resolve(resourcePath);
         if (Objects.equals(path, "/")) {
             return "Hello World!".getBytes();
         }
 
-        InputStream resourceStream = getResourceAsStream(path);
+        final InputStream resourceStream = getResourceAsStream(path);
 
         if (resourceStream == null) {
             throw new IOException("Resource not found: " + path);
@@ -29,9 +29,9 @@ public abstract class ResourceLoader {
         }
     }
 
-    private InputStream getResourceAsStream(String resourcePath) {
+    private InputStream getResourceAsStream(final String resourcePath) {
         return getClass().getClassLoader().getResourceAsStream(STATIC_PATH + resourcePath);
     }
 
-    protected abstract String resolve(String resourcePath);
+    protected abstract String resolve(final String resourcePath);
 }

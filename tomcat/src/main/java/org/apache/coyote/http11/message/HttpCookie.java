@@ -1,13 +1,16 @@
 package org.apache.coyote.http11.message;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
 public class HttpCookie {
+    public static final String JSESSIONID = "JSESSIONID";
     private final Map<String, String> cookies = new HashMap<>();
+
+    public HttpCookie() {
+    }
 
     private HttpCookie(Map<String, String> cookies) {
         this.cookies.putAll(cookies);
@@ -18,22 +21,20 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public static HttpCookie of(String key, String value) {
-        Map<String, String> cookies = new HashMap<>();
-        cookies.put(key, value);
-        return new HttpCookie(cookies);
-    }
-
     public String get(String name) {
         return cookies.get(name);
     }
 
-    public boolean contains(String name) {
-        return cookies.containsKey(name);
+    public void addJSessionId(String value) {
+        cookies.put(JSESSIONID, value);
     }
 
-    public Map<String, String> getAll() {
-        return Collections.unmodifiableMap(cookies);
+    public boolean hasJSessionId() {
+        return cookies.containsKey(JSESSIONID);
+    }
+
+    public String getJsessionid() {
+        return cookies.get(JSESSIONID);
     }
 
     private static Map<String, String> parseHeader(HttpHeaders header) {

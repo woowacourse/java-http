@@ -1,6 +1,6 @@
 package org.apache.catalina.exception;
 
-public class PathNotFoundException extends RuntimeException {
+public class PathNotFoundException extends Http4xxException {
 
     public PathNotFoundException(String message) {
         super(message);

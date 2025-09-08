@@ -12,7 +12,7 @@ public class CoyoteAdapter implements Adapter {
     public CoyoteAdapter() {
         this.handlerDispatcher = new HandlerDispatcher(
                 ApplicationContext.REQUEST_HANDLERS,
-                ApplicationContext.VIEW_RESOLVER
+                ApplicationContext.EXCEPTION_HANDLER
         );
     }
 

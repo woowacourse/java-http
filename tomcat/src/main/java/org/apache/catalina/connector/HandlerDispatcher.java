@@ -1,39 +1,44 @@
 package org.apache.catalina.connector;
 
 import java.util.List;
+import org.apache.catalina.exception.ExceptionHandler;
+import org.apache.catalina.exception.Http4xxException;
+import org.apache.catalina.exception.PathNotFoundException;
 import org.apache.catalina.handler.RequestHandler;
-import org.apache.catalina.resolver.ViewResolver;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HandlerDispatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(HandlerDispatcher.class);
-
     private final List<RequestHandler> requestHandlers;
-    private final ViewResolver viewResolver;
+    private final ExceptionHandler exceptionHandler;
 
-    public HandlerDispatcher(List<RequestHandler> requestHandlers, ViewResolver viewResolver) {
+    public HandlerDispatcher(final List<RequestHandler> requestHandlers, final ExceptionHandler exceptionHandler) {
         this.requestHandlers = requestHandlers;
-        this.viewResolver = viewResolver;
+        this.exceptionHandler = exceptionHandler;
     }
 
     public void handle(final Http11Request request, final Http11Response response) {
         try {
-            RequestHandler requestHandler = getRequestHandler(request);
+            final RequestHandler requestHandler = getRequestHandler(request, response);
             requestHandler.handle(request, response);
+        } catch (Http4xxException e) {
+            exceptionHandler.handle(e, request, response);
         } catch (Exception e) {
-            log.warn("Not Found Request Path: {}", request.parseResourcePath(), e);
-            response.setState(404);
-            viewResolver.resolve("/404", response);
+            response.setState(HttpStatus.INTERNAL_SERVER_ERROR);
+            exceptionHandler.handle(e, request, response);
         }
     }
 
-    private RequestHandler getRequestHandler(Http11Request request) {
+    private RequestHandler getRequestHandler(final Http11Request request, final Http11Response response) {
         return requestHandlers.stream().filter(requestHandler -> requestHandler.canHandle(request))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No handler found for the request"));
+                .orElseThrow(() -> throwPathNotFoundException(response));
+    }
+
+    private PathNotFoundException throwPathNotFoundException(final Http11Response response) {
+        response.setState(HttpStatus.NOT_FOUND);
+        return new PathNotFoundException("No handler found for the request");
     }
 }

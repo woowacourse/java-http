@@ -40,8 +40,12 @@ public class Http11Response {
         return headers.getHeader();
     }
 
-    public void setState(int statusCode) {
-        this.statusLine = new StatusLine(this.statusLine.protocol(), statusCode);
+    public void setState(HttpStatus state) {
+        this.statusLine = new StatusLine(this.statusLine.protocol(), state);
+    }
+
+    public HttpStatus getState() {
+        return this.statusLine.status();
     }
 
     public byte[] getBody() {

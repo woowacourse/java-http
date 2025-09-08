@@ -1,9 +1,11 @@
 package org.apache.catalina.handler;
 
 import java.io.IOException;
+import org.apache.catalina.exception.PathNotFoundException;
 import org.apache.catalina.resource.ResourceLoader;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 
@@ -25,7 +27,8 @@ public class StaticResourceRequestHandler implements RequestHandler {
             byte[] responseBody = resourceLoader.getResponseBody(resourcePath);
             response.setBody(responseBody);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            response.setState(HttpStatus.NOT_FOUND);
+            throw new PathNotFoundException(e);
         }
     }
 }

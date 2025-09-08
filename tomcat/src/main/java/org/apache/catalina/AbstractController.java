@@ -1,7 +1,9 @@
 package org.apache.catalina;
 
+import org.apache.catalina.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,7 @@ public abstract class AbstractController implements Controller {
                                             final Http11Response response
     ) {
         log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.getMethod(), request.getRequestTarget());
-        response.setState(405);
-        return "/4xx.html";
+        response.setState(HttpStatus.METHOD_NOT_ALLOWED);
+        throw new MethodNotAllowedException("Method Not Allowed");
     }
 }

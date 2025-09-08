@@ -1,5 +1,6 @@
 package org.apache.controller;
 
+import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
@@ -8,7 +9,8 @@ public class RootController implements Controller {
 
     @Override
     public boolean isProcessableRequest(HttpRequest request) {
-        return request.getUri().equals("/");
+        return request.getMethod() == HttpMethod.GET
+                && request.getUri().equals("/");
     }
 
     @Override

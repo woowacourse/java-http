@@ -33,8 +33,8 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder location(String value) {
-        headers.put("Location", value);
+    public HttpResponseBuilder cookie(String key, String value) {
+        headers.put("Set-Cookie", "%s=%s;".formatted(key, value));
         return this;
     }
 

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -56,9 +57,16 @@ public class Http11Processor implements Runnable, Processor {
 
             int contentLength = 0;
             String line;
+            HttpCookie httpCookie = null;
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.isEmpty()) {
                     break;
+                }
+                if (line.toLowerCase().startsWith("cookie")) {
+                    String[] keyValue = line.split(":");
+                    if (keyValue.length == 2) {
+                        httpCookie = new HttpCookie(keyValue[1].trim());
+                    }
                 }
                 if (line.toLowerCase().startsWith("content-length")) { // request body의 길이
                     String[] keyValue = line.split(":");
@@ -82,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> queryParameters = getQueryParameters(requestUri);
 
             // 응답
-            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters, body);
+            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters, httpCookie, body);
             outputStream.write(response.toString().getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -111,6 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestMethod,
         String requestUriPath,
         Map<String, String> queryParameters,
+        HttpCookie httpCookie,
         String body
     ) throws IOException {
         if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
@@ -185,11 +194,15 @@ public class Http11Processor implements Runnable, Processor {
                     .body("")
                     .build();
             }
-            return HttpResponse.builder()
+            boolean noJSessionId = httpCookie == null || httpCookie.getCookie("JSESSIONID") == null;
+            HttpResponseBuilder httpResponseBuilder = HttpResponse.builder()
                 .status(HttpStatus.Found)
                 .header("Location", "/index.html")
-                .body("")
-                .build();
+                .body("");
+            if (noJSessionId) {
+                httpResponseBuilder.cookie("JSESSIONID", UUID.randomUUID().toString());
+            }
+            return httpResponseBuilder.build();
         }
         throw new IllegalArgumentException("invalid request %s".formatted(requestUriPath));
     }

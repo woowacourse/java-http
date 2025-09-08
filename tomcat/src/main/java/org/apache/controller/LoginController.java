@@ -3,7 +3,9 @@ package org.apache.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.http.Cookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -37,6 +39,7 @@ public class LoginController implements Controller {
 
         response.setStatusCode(StatusCode.FOUND);
         response.setHeader("Location", "/index.html");
+        response.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
     }
 
     private boolean authenticateUser(String account, String password) {

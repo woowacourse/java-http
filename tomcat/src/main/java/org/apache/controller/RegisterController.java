@@ -3,7 +3,9 @@ package org.apache.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.exception.InvalidRequestException;
+import org.apache.http.Cookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -19,7 +21,6 @@ public class RegisterController implements Controller {
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
-        System.out.println("올바른 처리");
         String account = request.getBody("account");
         String email = request.getBody("email");
         String password = request.getBody("password");
@@ -30,6 +31,7 @@ public class RegisterController implements Controller {
 
         response.setStatusCode(StatusCode.FOUND);
         response.setHeader("Location", "/index.html");
+        response.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
     }
 
     private void validateAlreadyAccountExistence(String account) {

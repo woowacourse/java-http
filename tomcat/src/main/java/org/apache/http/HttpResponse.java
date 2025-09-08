@@ -11,7 +11,8 @@ public class HttpResponse {
 
     private HttpVersion httpVersion;
     private StatusCode statusCode;
-    private Map<String, String> header = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
+    private List<Cookie> cookies = new ArrayList<>();
     private String body;
 
     public HttpResponse(HttpVersion httpVersion) {
@@ -20,14 +21,11 @@ public class HttpResponse {
 
     public String getMessage() {
         validateCanMakeMessage();
-        if (body == null || body.isEmpty()) {
-            return String.join("\r\n", makeStartLine(), makeHeaderLines());
+        String startAndHeader = String.join("\r\n", makeStartLine(), makeHeaderLines());
+        if (body != null && !body.isEmpty()) {
+            return String.join("\r\n", startAndHeader, "", body);
         }
-        return String.join("\r\n", makeStartLine(), makeHeaderLines(), "", body);
-    }
-
-    public void setHttpVersion(HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        return startAndHeader;
     }
 
     public void setStatusCode(StatusCode statusCode) {
@@ -35,48 +33,53 @@ public class HttpResponse {
     }
 
     public void setHeader(String key, String value) {
-        header.put(key, value);
+        headers.put(key, value);
+    }
+
+    public void setCookie(Cookie cookie) {
+        cookies.add(cookie);
     }
 
     public void setBody(String body) {
         this.body = body;
     }
 
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
-    }
-
-    public StatusCode getStatusCode() {
-        return statusCode;
-    }
-
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
     private String makeStartLine() {
-        return String.join(" ",
+        return String.format("%s %s %s ",
                 httpVersion.getValue(),
-                String.valueOf(statusCode.getCode()),
-                statusCode.getMessage(),
-                "");
+                statusCode.getCode(),
+                statusCode.getMessage());
     }
 
     private String makeHeaderLines() {
         List<String> headerLines = new ArrayList<>();
-        List<String> keys = header.keySet().stream().toList();
-        for (String key : keys) {
-            String value = header.get(key);
+        addCustomHeaderLine(headerLines);
+        addSetCookieHeaderLine(headerLines);
+        addContentLengthHeaderLine(headerLines);
+        return String.join("\r\n", headerLines);
+    }
+
+    private void addCustomHeaderLine(List<String> headerLines) {
+        List<String> customHeaderKeys = headers.keySet().stream().toList();
+        for (String key : customHeaderKeys) {
+            String value = headers.get(key);
             headerLines.add(key + ": " + value + " ");
         }
-        if (body != null) {
-            headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
+    }
+
+    private void addSetCookieHeaderLine(List<String> headerLines) {
+        if (cookies.isEmpty()) {
+            return;
         }
-        return String.join("\r\n", headerLines);
+        List<String> cookieLines = cookies.stream().map(Cookie::makeCookieLine).toList();
+        headerLines.add("Set-Cookie: " + String.join(" ", cookieLines));
+    }
+
+    private void addContentLengthHeaderLine(List<String> headerLines) {
+        if (body == null) {
+            return;
+        }
+        headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
     }
 
     private void validateCanMakeMessage() {

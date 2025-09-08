@@ -8,20 +8,19 @@ import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class ResponseHeader {
 
-    private final HttpRequest httpRequest;
+    private final List<String> headers;
 
-    public ResponseHeader(
-            final HttpRequest httpRequest
-    ) {
-        this.httpRequest = httpRequest;
+    private ResponseHeader(final List<String> headers) {
+        this.headers = headers;
     }
 
-    public String getHeader(
+    public static ResponseHeader build(
+            final HttpRequest httpRequest,
             final ResponseContent responseContent
     ) {
         final List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 " + responseContent.httpStatus().toString());
-        headers.add("Content-Type: " + getContentType() + ";charset=utf-8");
+
+        headers.add("Content-Type: " + getContentType(httpRequest) + ";charset=utf-8");
         headers.add("Content-Length: " + responseContent.body().getBytes(StandardCharsets.UTF_8).length);
 
         if (responseContent.location() != null) {
@@ -35,11 +34,10 @@ public class ResponseHeader {
             }
         }
 
-        headers.add("\r\n");
-        return String.join(" \r\n", headers);
+        return new ResponseHeader(headers);
     }
 
-    private String getContentType() {
+    private static String getContentType(final HttpRequest httpRequest) {
         if (httpRequest.getPath().endsWith(".css")) {
             return "text/css";
         }
@@ -50,5 +48,9 @@ public class ResponseHeader {
             return "image/svg+xml";
         }
         return "text/html";
+    }
+
+    public List<String> getHeaders() {
+        return this.headers;
     }
 }

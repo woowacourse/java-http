@@ -9,36 +9,26 @@ import com.techcourse.presentation.StaticResourceController;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestProcessor {
 
-    private static final Map<String, Function<String, Boolean>> controllers = new HashMap<>();
-    private static final Map<String, Supplier<Controller>> controllerFactory = new HashMap<>();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
-    static {
-        controllers.put("LoginController", LoginController::isResponsible);
-        controllers.put("StaticResourceController", StaticResourceController::isResponsible);
-
-        controllerFactory.put("LoginController", () -> new LoginController(new LoginService()));
-        controllerFactory.put("StaticResourceController", StaticResourceController::new);
+    public RequestProcessor() {
+        controllers.computeIfAbsent("LoginController", key -> new LoginController(new LoginService()));
+        controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
     }
 
     public String process(final String requestLine) {
         final ParsedResourcePath request = parse(requestLine);
 
-        final String className = controllers.entrySet().stream()
-                .filter(entry -> entry.getValue().apply(request.path()))
-                .map(Entry::getKey)
+        final Controller responsibleController = controllers.values().stream()
+                .filter(controller -> controller.isResponsible(request.path()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.path()));
 
-        final Controller controller = controllerFactory.get(className).get();
-        final ResponseWithType response = controller.getResource(request);
+        final ResponseWithType response = responsibleController.getResource(request);
 
         return createSuccessMessage(response);
     }

@@ -17,7 +17,19 @@ public class LoginController implements Controller {
         this.loginService = loginService;
     }
 
-    public static boolean isResponsible(final String path) {
+    public String login(final Map<String, String> params) {
+        if (params.size() != 2 || !params.containsKey("account") || !params.containsKey("password")) {
+            log.debug("요청 파라미터: {}", params);
+            throw new IllegalArgumentException("적절하지 않은 로그인 요청입니다.");
+        }
+
+        loginService.login(params.get("account"), params.get("password"));
+
+        return "/login.html";
+    }
+
+    @Override
+    public boolean isResponsible(final String path) {
         return path.startsWith(BASE_URL);
     }
 
@@ -30,16 +42,5 @@ public class LoginController implements Controller {
 
         final String filePath = login(request.params());
         return new StaticResourceController().getResource(new ParsedResourcePath(filePath, new HashMap<>()));
-    }
-
-    public String login(final Map<String, String> params) {
-        if (params.size() != 2 || !params.containsKey("account") || !params.containsKey("password")) {
-            log.debug("요청 파라미터: {}", params);
-            throw new IllegalArgumentException("적절하지 않은 로그인 요청입니다.");
-        }
-
-        loginService.login(params.get("account"), params.get("password"));
-
-        return "/login.html";
     }
 }

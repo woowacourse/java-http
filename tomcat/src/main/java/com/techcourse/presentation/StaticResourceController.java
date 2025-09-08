@@ -55,7 +55,8 @@ public class StaticResourceController implements Controller {
         log.debug("정적 자원 경로 등록 완료: {}", RESOURCES.keySet());
     }
 
-    public static boolean isResponsible(final String path) {
+    @Override
+    public boolean isResponsible(final String path) {
         return RESOURCES.containsKey(path);
     }
 

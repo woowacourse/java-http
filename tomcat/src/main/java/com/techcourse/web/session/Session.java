@@ -13,19 +13,27 @@ public class Session {
     private final Map<String, Object> values = new HashMap<>();
 
     public Object getAttribute(final String name) {
+        validateAttributeName(name);
         return values.get(name);
     }
 
     public void setAttribute(final String name, final Object value) {
+        validateAttributeName(name);
+        if (value == null) {
+            removeAttribute(name);
+            return;
+        }
         values.put(name, value);
     }
 
     public void removeAttribute(final String name) {
+        validateAttributeName(name);
         values.remove(name);
     }
 
-    public void invalidate() {
-        values.clear();
-        SessionManager.getInstance().remove(this);
+    private void validateAttributeName(final String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("속성 이름은 null이거나 비어있을 수 없습니다");
+        }
     }
 }

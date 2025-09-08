@@ -34,13 +34,13 @@ public class HttpResponse {
     @Override
     public String toString() {
         final StringBuilder response = new StringBuilder();
-        
+
         appendStatusLine(response);
         appendContentHeaders(response);
         appendCustomHeaders(response);
         appendCookies(response);
         appendBody(response);
-        
+
         return response.toString();
     }
 
@@ -52,7 +52,7 @@ public class HttpResponse {
 
     private void appendContentHeaders(final StringBuilder response) {
         final int contentLength = body == null ? 0 : body.getBytes(StandardCharsets.UTF_8).length;
-        
+
         response.append("Content-Type: ").append(type.getMimeType()).append(CRLF)
                 .append("Content-Length: ").append(contentLength).append(CRLF);
     }

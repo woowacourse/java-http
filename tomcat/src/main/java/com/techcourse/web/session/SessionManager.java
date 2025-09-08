@@ -34,6 +34,14 @@ public class SessionManager implements Manager {
     }
 
     public boolean isValidSession(final String sessionId) {
-        return sessionId != null && sessions.containsKey(sessionId);
+        return isNotNullOrEmpty(sessionId) && sessionExists(sessionId);
+    }
+
+    private boolean isNotNullOrEmpty(final String sessionId) {
+        return sessionId != null && !sessionId.trim().isEmpty();
+    }
+
+    private boolean sessionExists(final String sessionId) {
+        return sessions.containsKey(sessionId);
     }
 }

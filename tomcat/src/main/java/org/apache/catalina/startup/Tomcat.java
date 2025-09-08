@@ -8,7 +8,7 @@ import org.apache.catalina.connector.Connector;
 public class Tomcat {
 
     public void start() {
-        try (final Connector connector = new Connector();) {
+        try (final Connector connector = new Connector()) {
             connector.start();
 
             // make the application wait until we press any key.

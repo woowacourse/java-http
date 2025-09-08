@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
             requestUri = UriParser.extractPath(requestUri);
         }
         String extension = UriParser.extractExtension(requestUri);
-        return MimeType.fromExtension(extension);
+        return MimeType.fromExtensionString(extension);
     }
 
     private HttpResponse buildResponse(String requestUri, MimeType mimeType) throws IOException {

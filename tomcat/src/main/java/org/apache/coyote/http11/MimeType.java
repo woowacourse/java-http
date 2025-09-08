@@ -15,18 +15,18 @@ public enum MimeType {
         this.type = type;
     }
 
-    public static MimeType fromMimeTypeString(String type) {
+    public static MimeType fromMimeTypeString(String mimeTypeString) {
         for (MimeType mimeType : values()) {
-            if (mimeType.type.equalsIgnoreCase(type)) {
+            if (mimeType.type.equalsIgnoreCase(mimeTypeString.trim())) {
                 return mimeType;
             }
         }
         return null;
     }
 
-    public static MimeType fromExtension(String extension) {
+    public static MimeType fromExtensionString(String extensionString) {
         for (MimeType mimeType : values()) {
-            if (mimeType.extension.equalsIgnoreCase(extension)) {
+            if (mimeType.extension.equalsIgnoreCase(extensionString.trim())) {
                 return mimeType;
             }
         }

@@ -23,7 +23,8 @@ public class Http11Processor implements Runnable, Processor {
             new CssRequestHandler(),
             new JsRequestHandler(),
             new LoginRequestHandler(),
-            new RegisterGetRequestHandler()
+            new RegisterGetRequestHandler(),
+            new RegisterPostRequestHandler()
     );
 
     private final Socket connection;
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         if (contentLength > 0) {
             bufferedReader.read(body, 0, contentLength);
         }
-        
+
         return String.join("\r\n", headerLines)
                 + "\r\n\r\n"
                 + new String(body);

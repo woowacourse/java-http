@@ -1,9 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 
 public class RegisterPostRequestHandler implements HttpRequestHandler {
     @Override
@@ -14,24 +12,19 @@ public class RegisterPostRequestHandler implements HttpRequestHandler {
 
     @Override
     public String response(final HttpRequest httpRequest) {
-        URL resource = getClass().getClassLoader().getResource("static/register.html");
-        Path resourcePath = Path.of(resource.getPath());
+        String account = httpRequest.getParameter("account");
+        String password = httpRequest.getParameter("password");
+        String email = httpRequest.getParameter("email");
+        InMemoryUserRepository.save(new User(account, password, email));
 
-        byte[] bytes = readAllBytes(resourcePath);
-
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                new String(bytes));
+        return createRedirectResponse("http://localhost:8080/index.html");
     }
 
-    private byte[] readAllBytes(final Path resourcePath) {
-        try {
-            return Files.readAllBytes(resourcePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private String createRedirectResponse(final String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Length: " + 0 + " ",
+                "Location: " + redirectUrl + " ",
+                "");
     }
 }

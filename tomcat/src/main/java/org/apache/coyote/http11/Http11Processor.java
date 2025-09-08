@@ -151,22 +151,22 @@ public class Http11Processor implements Runnable, Processor {
                 .body("")
                 .build();
         }
-        throw new IllegalArgumentException("invalid request");
+        throw new IllegalArgumentException("invalid request %s".formatted(requestUriPath));
     }
 
     private void login(Map<String, String> keyValues) {
         String account = keyValues.get("account");
         String password = keyValues.get("password");
-        if (account != null && password != null) {
-            Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-            boolean isValidAccount = findUser.isPresent();
-            if (!isValidAccount) {
-                throw new UnAuthorizedException("Invalid account " + account);
-            }
-            User user = findUser.get();
-            log.atInfo().log("user: {}", user);
+        if (account == null || password == null) {
+            throw new UnAuthorizedException("account or password should be not null");
         }
-        throw new UnAuthorizedException("account or password should be not null");
+        Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+        boolean isValidAccount = findUser.isPresent();
+        if (!isValidAccount) {
+            throw new UnAuthorizedException("Invalid account " + account);
+        }
+        User user = findUser.get();
+        log.atInfo().log("user: {}", user);
     }
 
     private String readStaticFile(String filePath) throws IOException {

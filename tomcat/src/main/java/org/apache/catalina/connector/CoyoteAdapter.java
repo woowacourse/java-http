@@ -27,8 +27,8 @@ public class CoyoteAdapter implements Adapter {
             staticResourceHandler.handleStaticResource(response);
         } catch (Exception e) {
             log.error("Static resource handling failed", e);
-            response.setStatusCode(500);
-            response.setResourcePath("/500.html");
+            response.setState(500);
+//            response.setResourcePath("/500.html");
         }
     }
 }

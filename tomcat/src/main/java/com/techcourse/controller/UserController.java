@@ -18,7 +18,7 @@ public class UserController extends AbstractController {
             final var user = InMemoryUserRepository.findByAccount(account);
             user.ifPresent(value -> log.info("User found: {}", value));
         }
-        response.setResourcePath("/login.html");
+//        response.setResourcePath("/login.html");
     }
 
     @Override

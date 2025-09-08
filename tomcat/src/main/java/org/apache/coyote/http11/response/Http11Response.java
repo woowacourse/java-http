@@ -1,81 +1,54 @@
 package org.apache.coyote.http11.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.coyote.http11.domain.ContentType;
 
 public class Http11Response {
 
-    private int statusCode;
-    private String resourcePath;
-    private LinkedHashMap<String, String> headers;
-    private byte[] body;
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
 
-    public Http11Response(String resourcePath) {
-        this.statusCode = 200;
-        this.headers = new LinkedHashMap<>();
-        this.body = new byte[0];
-        this.resourcePath = resourcePath;
-    }
+    private StatusLine statusLine;
+    private ResponseHeaders headers;
+    private ResponseBody body;
 
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public LinkedHashMap<String, String> getHeaders() {
-        return headers;
-    }
-
-    public byte[] getBody() {
-        return body;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public void setHeaders(LinkedHashMap<String, String> headers) {
-        this.headers = headers;
-    }
-
-    public void setBody(byte[] body) {
-        this.body = body;
-    }
-
-    public void setResourcePath(String resourcePath) {
-        this.resourcePath = resourcePath;
-    }
-
-    public String getResourcePath() {
-        return resourcePath;
+    public Http11Response() {
+        this.statusLine = new StatusLine();
+        this.headers = new ResponseHeaders();
+        this.body = new ResponseBody(0);
     }
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 
+    public void setContentType(final String resourcePath) {
+        ContentType contentType = ContentType.fromPath(resourcePath);
+        this.addHeader(CONTENT_TYPE, contentType.getValue());
+    }
+
+    public void setContentLength() {
+        int length = body.bytes().length;
+        this.addHeader(CONTENT_LENGTH, String.valueOf(length));
+    }
+
+
     public byte[] getResponseLine() {
-        String requestLines = "HTTP/1.1 " + statusCode + " " + getStatusText() + " \r\n";
-        return requestLines.getBytes();
+        return statusLine.getBytes();
     }
 
     public byte[] getHeader() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            stringBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
-        }
-
-        stringBuilder.append("\r\n");
-        return stringBuilder.toString().getBytes();
+        return headers.getHeader();
     }
 
-    private String getStatusText() {
-        return switch (statusCode) {
-            case 200 -> "OK";
-            case 401 -> "Unauthorized";
-            case 404 -> "Not Found";
-            case 405 -> "Method Not Allowed";
-            case 500 -> "Internal Server Error";
-            default -> "Unknown Status";
-        };
+    public void setState(int statusCode) {
+        this.statusLine = new StatusLine(this.statusLine.protocol(), statusCode);
+    }
+
+    public byte[] getBody() {
+        return body.bytes();
+    }
+
+    public void setBody(byte[] body) {
+        this.body = new ResponseBody(body);
     }
 }

@@ -19,7 +19,8 @@ public class StaticResourceHandler {
 
     public void handleStaticResource(final Http11Response httpResponse)
             throws URISyntaxException, IOException {
-        final String resourcePath = httpResponse.getResourcePath();
+        //Todo: 정적파일 핸들링 개선 [2025-09-08 13:24:02]
+        final String resourcePath = RESOURCE_NOT_FOUND_PATH;
         if (resourcePath.equals("/")) {
             buildRootResponse(httpResponse);
             return;
@@ -36,7 +37,7 @@ public class StaticResourceHandler {
 
         if (resource == null) {
             log.warn("Static Resource Not Found: {}", resourcePath);
-            httpResponse.setStatusCode(404);
+            httpResponse.setState(404);
             resource = getResourceUrl(RESOURCE_NOT_FOUND_PATH);
         }
 

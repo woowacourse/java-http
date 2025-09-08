@@ -23,7 +23,7 @@ public abstract class AbstractController implements Controller {
                                           final Http11Response response
     ) {
         log.warn("Method:{} Path:{} 지원하지 않는 Method 입니다.", request.getMethod(), request.getRequestTarget());
-        response.setStatusCode(405);
-        response.setResourcePath("/4xx.html");
+        response.setState(405);
+        //Todo: ResponseBody 지정 [2025-09-08 13:22:19]
     }
 }

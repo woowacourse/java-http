@@ -49,7 +49,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            String uri = parseUri(br);
+            String[] urlComponents = parseUrlComponents(br);    // 첫 줄 읽음 POST /register HTTP/1.1
+            // 나머지 헤더 읽기 Response 만들어서 저장할까
+            // Host: localhost:8080
+            //Connection: keep-alive
+            //Content-Length: 80
+            //Content-Type: application/x-www-form-urlencoded
+            //Accept: */*
+            //
+            //account=gugu&password=password&email=hkkang%40woowahan.com
+            // 바디에 들어있음.
+
+            String httpMethod = urlComponents[0];
+            String uri = urlComponents[1];
             Path path = parsePath(uri);
             if (uri.startsWith("/login")) {
                 if (uri.contains("?")) {
@@ -63,6 +75,18 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 }
             }
+
+            if (httpMethod.equals("POST") && uri.startsWith("/register")) {
+                if(register(parseParameterMap(uri))){
+                    response.setHttpStatusCode(HttpStatusCode.FOUND);
+                    response.addHeader("Location", "/index.html");
+                    response.addHeader("Content-Type", getContentType(path));
+                    response.addHeader("Content-Length", response.getContentLength());
+                    sendResponse(outputStream);
+                    return;
+                }
+            }
+
             staticResourceResponse(path);
             sendResponse(outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
@@ -70,7 +94,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUri(BufferedReader br) throws IOException {
+    private boolean register(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return InMemoryUserRepository.findByAccount(account).isPresent();
+    }
+
+    private String[] parseUrlComponents(BufferedReader br) throws IOException {
         String requestLine = br.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException(INVALID_REQUEST_LINE.getMessage());
@@ -79,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
         if (parts.length < 3) {
             throw new IllegalArgumentException(INVALID_HTTP_REQUEST_FORMAT.getMessage());
         }
-        return parts[1];
+        return parts;
     }
 
     private Path parsePath(String uri) {

@@ -22,6 +22,13 @@ public class HttpCookie {
         this.cookie = cookie;
     }
 
+    public String getJsessionid(){
+        if (hasJsessionid()) {
+            return cookie.get("JSESSIONID");
+        }
+        return "";
+    }
+
     public boolean hasJsessionid() {
         return cookie.containsKey("JSESSIONID");
     }

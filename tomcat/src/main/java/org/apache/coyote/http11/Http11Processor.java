@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.session.HttpSession;
+import org.apache.coyote.session.HttpSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpSessionManager SESSION_MANAGER = new HttpSessionManager();
     private static final String OK = "200 OK";
     private static final String FOUND = "302 Found";
     private static final String BAD_REQUEST = "400 Bad Request";
@@ -97,6 +100,16 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if (httpMethod.equals("GET") && url.equals("/login")){
+                String sessionId = cookie.getJsessionid();
+                response = getResponse("static/login.html", OK);
+                if (sessionId != null && SESSION_MANAGER.containsKey(sessionId)) {
+                    response = getResponse("static/index.html", FOUND);
+                }
+                sendResponse(outputStream, response);
+                return;
+            }
+
             if (httpMethod.equals("GET") && !url.contains("?")) {
                 String staticUrl = "static" + url;
                 if (!url.contains(".")) {
@@ -147,7 +160,6 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = parseQueryParams(body.toString());
         String account = queryParams.get("account");
         String password = queryParams.get("password");
-
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty()) {
@@ -155,14 +167,21 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (user.get().checkPassword(password)) {
             log.info(user.toString());
-            if (!cookie.hasJsessionid()){
-                String jsessionid = UUID.randomUUID().toString();
-                String cookieHeaderValue = "JSESSIONID=" + jsessionid;
-                return getResponse("static/index.html", FOUND, cookieHeaderValue);
+
+            String jsessionid = cookie.getJsessionid();
+            if (jsessionid.isEmpty()) {
+                jsessionid = UUID.randomUUID().toString();
             }
-            return getResponse("static/index.html", FOUND);
+            HttpSession session = new HttpSession(jsessionid);
+            session.setAttribute("user", user);
+            SESSION_MANAGER.add(session);
+
+            String cookieHeaderValue = "JSESSIONID=" + jsessionid;
+
+            return getRedirectResponse("/index.html", FOUND, cookieHeaderValue);
         }
-        return getResponse("static/401.html", UNAUTHORIZED);
+
+        return getRedirectResponse("/401.html", UNAUTHORIZED, null);
     }
 
     private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {
@@ -193,19 +212,17 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String getResponse(String uri, String statusCode, String setCookie) throws IOException, URISyntaxException {
-        final var path = Paths.get(findUri(uri));
-        final var contentType = Files.probeContentType(path);
-        final byte[] responseBodyBytes = Files.readAllBytes(path);
-        final String responseBody = Files.readString(path);
+    private String getRedirectResponse(String location, String statusCode, String setCookie) throws IOException, URISyntaxException {
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("HTTP/1.1 ").append(statusCode).append("\r\n");
+        responseBuilder.append("Location: ").append(location).append("\r\n");
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBodyBytes.length + " ",
-                "Set-Cookie: " + setCookie,
-                "",
-                responseBody);
+        if (setCookie != null && !setCookie.isBlank()) {
+            responseBuilder.append("Set-Cookie: ").append(setCookie).append("\r\n");
+        }
+        responseBuilder.append("\r\n");
+
+        return responseBuilder.toString();
     }
 
     private URI findUri(String staticUrl) throws URISyntaxException {

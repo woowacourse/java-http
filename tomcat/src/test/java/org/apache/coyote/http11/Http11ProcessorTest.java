@@ -188,4 +188,43 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).matches("(?s).*Set-Cookie: JSESSIONID=([a-z0-9\\-]+).*");
     }
+
+    @Test
+    void loginSession() throws IOException {
+        // given
+        String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        final String loginRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var loginSocket = new StubSocket(loginRequest);
+        final Http11Processor loginProcessor = new Http11Processor(socket);
+        loginProcessor.process(loginSocket);
+
+        // then
+        var expected = "HTTP/1.1 200 OK ";
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+    }
+
 }

@@ -24,7 +24,7 @@ public class StaticFileHandler {
                 return new HttpResponse(HttpStatus.OK, ContentType.TEXT_CSS, responseBody);
             }
             return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, responseBody);
-        } catch (IOException | URISyntaxException exception) {
+        } catch (IOException | URISyntaxException | NullPointerException exception) {
             logger.error(exception.getMessage(), exception);
             return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, null);
         }
@@ -35,7 +35,7 @@ public class StaticFileHandler {
             URL resourceUrl = StaticFileHandler.class.getClassLoader().getResource("static/" + viewName + DEFAULT_EXTENSION_OF_STATIC_FILE);
             String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
             return new HttpResponse(status, ContentType.TEXT_HTML, responseBody);
-        } catch (IOException | URISyntaxException exception) {
+        } catch (IOException | URISyntaxException | NullPointerException exception) {
             logger.error(exception.getMessage(), exception);
             return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, null);
         }

@@ -63,7 +63,6 @@ public class Http11Processor implements Runnable, Processor {
         response.sendOk("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
-
     private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getQueryParam("account");
         String password = request.getQueryParam("password");
@@ -72,8 +71,11 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
             if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
                 log.info("로그인 성공: {}", userOptional.get());
+                response.sendRedirect("index.html");
             } else {
                 log.info("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.");
+                response.sendRedirect("/401.html");
+
             }
         }
 

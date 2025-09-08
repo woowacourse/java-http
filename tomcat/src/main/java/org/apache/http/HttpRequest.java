@@ -32,7 +32,7 @@ public class HttpRequest {
             this.version = HttpVersion.parse(startLinePart.get(2));
             this.queryStrings = parseQueryString(startLinePart.get(1));
             this.headers = readHeader(bufferedReader);
-            this.cookies = parseCookie(getHeader("Cookie"));
+            this.cookies = parseCookie(getHeader(HttpHeader.COOKIE.getValue()));
             this.body = readBody(bufferedReader);
         } catch (IOException e) {
             throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
@@ -99,11 +99,11 @@ public class HttpRequest {
 
     private Map<String, String> readBody(BufferedReader reader) throws IOException {
         Map<String, String> bodyRead = new HashMap<>();
-        if (!checkHeaderExistence("Content-Length")) {
+        if (!checkHeaderExistence(HttpHeader.CONTENT_LENGTH.getValue())) {
             return bodyRead;
         }
 
-        int contentLength = Integer.parseInt(getHeader("Content-Length"));
+        int contentLength = Integer.parseInt(getHeader(HttpHeader.CONTENT_LENGTH.getValue()));
         char[] buffer = new char[contentLength];
         int read = reader.read(buffer, 0, contentLength);
         String bodyText = new String(buffer, 0, read);

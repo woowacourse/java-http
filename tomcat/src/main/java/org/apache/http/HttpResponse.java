@@ -48,6 +48,11 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void setRedirection(String location) {
+        setStatusCode(StatusCode.FOUND);
+        setHeader(HttpHeader.LOCATION.getValue(), location);
+    }
+
     private String makeStartLine() {
         return String.format("%s %s %s ",
                 httpVersion.getValue(),
@@ -76,14 +81,20 @@ public class HttpResponse {
             return;
         }
         List<String> cookieLines = cookies.stream().map(Cookie::makeCookieLine).toList();
-        headerLines.add("Set-Cookie: " + String.join(" ", cookieLines));
+        String setCookieHeader = String.format("%s: %s",
+                HttpHeader.SET_COOKIE.getValue(),
+                String.join(" ", cookieLines));
+        headerLines.add(setCookieHeader);
     }
 
     private void addContentLengthHeaderLine(List<String> headerLines) {
         if (body == null) {
             return;
         }
-        headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
+        String contentLengthHeader = String.format("%s: %s",
+                HttpHeader.CONTENT_LENGTH.getValue(),
+                body.getBytes(StandardCharsets.UTF_8).length + " ");
+        headerLines.add(contentLengthHeader);
     }
 
     private void validateCanMakeMessage() {

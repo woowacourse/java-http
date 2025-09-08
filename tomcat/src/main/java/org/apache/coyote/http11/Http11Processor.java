@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
@@ -57,61 +56,87 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = requestParser.readHttpRequest();
 
             if (httpRequest.matches(HttpMethod.GET, "/")) {
-                final HttpResponse response = HttpResponseParser.createWelcomeHttpResponse();
-                sendHttpResponse(response, outputStream);
+                handleWelcomePage(outputStream);
                 return;
             }
 
             if (httpRequest.matches(HttpMethod.GET, "/register")) {
-                final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
-                        "/register.html");
-                sendHttpResponse(response, outputStream);
+                handleRegisterGetRequest(outputStream);
                 return;
             }
 
             if (httpRequest.matches(HttpMethod.POST, "/register")) {
-                final String account = httpRequest.getBodyParameter("account");
-                final String password = httpRequest.getBodyParameter("password");
-                final String email = httpRequest.getBodyParameter("email");
-
-                userService.signup(account, password, email);
-                final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-                sendHttpResponse(response, outputStream);
+                handleRegisterPostRequest(outputStream, httpRequest);
                 return;
             }
 
             if (httpRequest.matches(HttpMethod.GET, "/login")) {
-                final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
-                sendHttpResponse(response, outputStream);
+                handleLoginGetRequest(outputStream);
                 return;
             }
 
             if (httpRequest.matches(HttpMethod.POST, "/login")) {
-                final String account = httpRequest.getBodyParameter("account");
-                final String password = httpRequest.getBodyParameter("password");
-                final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-                if (user.isEmpty() || !user.get().checkPassword(password)) {
-                    final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(
-                            HttpStatusCode.UNAUTHORIZED);
-                    sendHttpResponse(errorResponse, outputStream);
-                }
-
-                final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-                sendHttpResponse(response, outputStream);
-                log.info("user: " + user);
+                handleLoginPostRequest(outputStream, httpRequest);
                 return;
             }
 
-            final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
-                    httpRequest.getStaticResourcePath());
-            sendHttpResponse(response, outputStream);
-
+            handleStaticResourceGetRequest(outputStream, httpRequest);
         } catch (HttpStatusException e) {
             final HttpStatusCode statusCode = e.getStatusCode();
             final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(statusCode);
             sendHttpResponse(errorResponse, outputStream);
         }
+    }
+
+    private void handleWelcomePage(final OutputStream outputStream) throws IOException {
+        final HttpResponse response = HttpResponseParser.createWelcomeHttpResponse();
+        sendHttpResponse(response, outputStream);
+    }
+
+    private void handleRegisterGetRequest(final OutputStream outputStream) throws IOException {
+        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
+                "/register.html");
+        sendHttpResponse(response, outputStream);
+    }
+
+    private void handleRegisterPostRequest(final OutputStream outputStream, final HttpRequest httpRequest)
+            throws IOException {
+        final String account = httpRequest.getBodyParameter("account");
+        final String password = httpRequest.getBodyParameter("password");
+        final String email = httpRequest.getBodyParameter("email");
+        userService.signup(account, password, email);
+        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
+        sendHttpResponse(response, outputStream);
+    }
+
+    private void handleStaticResourceGetRequest(final OutputStream outputStream, final HttpRequest httpRequest)
+            throws IOException {
+        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
+                httpRequest.getStaticResourcePath());
+        sendHttpResponse(response, outputStream);
+    }
+
+    private void handleLoginGetRequest(final OutputStream outputStream) throws IOException {
+        final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
+        sendHttpResponse(response, outputStream);
+    }
+
+    private void handleLoginPostRequest(final OutputStream outputStream, final HttpRequest httpRequest)
+            throws IOException {
+        final String account = httpRequest.getBodyParameter("account");
+        final String password = httpRequest.getBodyParameter("password");
+        Optional<User> user = userService.login(account, password);
+
+        if (user.isEmpty()) {
+            final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(
+                    HttpStatusCode.UNAUTHORIZED);
+            sendHttpResponse(errorResponse, outputStream);
+            return;
+        }
+
+        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
+        sendHttpResponse(response, outputStream);
+        log.info("user: " + user.get());
     }
 
     private void sendHttpResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {

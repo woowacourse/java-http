@@ -16,6 +16,7 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String requestURI;
     private final HttpHeaders httpHeaders;
+    private HttpCookie cookie;
     private String requestBody;
 
     public HttpRequest(final InputStream inputStream) throws IOException {
@@ -35,6 +36,11 @@ public class HttpRequest {
                 headerLines.add(line);
             }
             this.httpHeaders = new HttpHeaders(headerLines);
+
+            // Cookie
+            if (httpHeaders.contains(HttpHeaderField.COOKIE)) {
+                this.cookie = HttpRequestParser.parseHttpCookie(httpHeaders.get(HttpHeaderField.COOKIE));
+            }
 
             // Request Body
             if (httpHeaders.contains(HttpHeaderField.CONTENT_LENGTH)) {
@@ -63,5 +69,9 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public String getCookieValue(final String jsessionid) {
+        return cookie.getValue(jsessionid);
     }
 }

@@ -57,7 +57,11 @@ public enum HttpHeaderField {
     CONTENT_RANGE("Content-Range"),
     CONTENT_TYPE("Content-Type"),
     EXPIRES("Expires"),
-    LAST_MODIFIED("Last-Modified");
+    LAST_MODIFIED("Last-Modified"),
+
+    // Cookie
+    SET_COOKIE("Set-Cookie"),
+    COOKIE("Cookie");
 
     private String value;
 

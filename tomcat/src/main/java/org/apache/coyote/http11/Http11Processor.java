@@ -14,10 +14,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
+            final SessionManager sessionManager = SessionManager.getInstance();
             final HttpRequest httpRequest;
             try {
                 httpRequest = new HttpRequest(inputStream);
@@ -60,6 +62,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (requestURI.equals("/login") && method == HttpMethod.GET) {
+                final String sessionId = httpRequest.getCookieValue("JSESSIONID");
+                if (sessionManager.contains(sessionId)) {
+                    send302Response("/index.html", outputStream);
+                    return;
+                }
                 send200Response("/login.html", outputStream);
                 return;
             }
@@ -67,12 +74,22 @@ public class Http11Processor implements Runnable, Processor {
                 final String[] split = requestBody.split("&");
                 final String account = split[0].split("=")[1];
                 final String password = split[1].split("=")[1];
-                boolean loginSuccessful = isLoginSuccessful(account, password);
-                if (loginSuccessful) {
-                    send302ResponseWithCookie("/login", outputStream);
-                    return;
-                }
-                send401Response(outputStream);
+                InMemoryUserRepository.findByAccount(account).ifPresentOrElse(
+                        user -> {
+                            if (user.checkPassword(password)) {
+                                final String sessionId = UUID.randomUUID().toString();
+                                final Session session = new Session(sessionId);
+                                session.setAttribute("user", user);
+                                sessionManager.add(session);
+                                send302ResponseWithCookie("/login", sessionId, outputStream);
+                                return;
+                            }
+                            send401Response(outputStream);
+                        },
+                        () -> {
+                            send401Response(outputStream);
+                        }
+                );
                 return;
             }
             if (requestURI.equals("/register") && method == HttpMethod.GET) {
@@ -120,11 +137,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private void send302ResponseWithCookie(
             final String redirectResource,
+            final String sessionId,
             final OutputStream outputStream
     ) { // todo 3단계에 리팩터링 예정
         try {
             final String redirectResponse = create302HttpResponse(redirectResource);
-            final String cookieHeader = String.format("Set-Cookie: JSESSIONID=%s", UUID.randomUUID());
+            final String cookieHeader = String.format("Set-Cookie: JSESSIONID=%s\r\n", sessionId);
             final String response = String.join("\r\n", redirectResponse, cookieHeader);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -161,18 +179,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException e) {
             throw new UncheckedServletException(e);
         }
-    }
-
-    private boolean isLoginSuccessful(final String account, final String password) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return false;
-        }
-        if (!user.get().checkPassword(password)) {
-            return false;
-        }
-        log.info("로그인 성공: {}", user.get());
-        return true;
     }
 
     // 나중에 HttpRequest 리팩터링에 사용하기 위해 남겨둠

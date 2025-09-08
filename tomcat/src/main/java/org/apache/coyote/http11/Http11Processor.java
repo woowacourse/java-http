@@ -94,9 +94,46 @@ public class Http11Processor implements Runnable, Processor {
         if (method == HttpMethod.POST && path.equals("/login")) {
             return login(httpRequest);
         }
+        if (method == HttpMethod.GET && path.equals("/register")) {
+            return getRegisterHtml();
+        }
+        if (method == HttpMethod.POST && path.equals("/register")) {
+            return getRegister(httpRequest);
+        }
         throw new IllegalArgumentException("대상 경로 메서드가 존재하지 않습니다: %s".formatted(method + " " + path));
     }
 
+    private String getRegister(final HttpRequest httpRequest) {
+        final HttpRequestBody body = httpRequest.getBody();
+        byte[] bodyValue = body.getValue();
+        String bodyLine = new String(bodyValue, StandardCharsets.UTF_8);
+        Map<String, String> bodyElement = parseBodyValue(bodyLine);
+        String account = bodyElement.get("account");
+        String email = bodyElement.get("email");
+        String password = bodyElement.get("password");
+        final HttpResponse httpResponse = httpController.getRegister(account, email, password);
+        return httpResponse.getResponseFormat();
+    }
+
+    private Map<String, String> parseBodyValue(final String target) {
+        log.info("target: {}", target);
+        final Map<String, String> bodyValue = new HashMap<>();
+        final String[] elements = target.split("&");
+
+        for (String element : elements) {
+            final String[] values = element.split("=");
+            final String key = URLDecoder.decode(values[0], StandardCharsets.UTF_8);
+            final String value = URLDecoder.decode(values[1], StandardCharsets.UTF_8);
+            bodyValue.put(key, value);
+        }
+
+        return bodyValue;
+    }
+
+    private String getRegisterHtml() {
+        final HttpResponse httpResponse = httpController.getRegisterHtml();
+        return httpResponse.getResponseFormat();
+    }
 
     private String login(final HttpRequest httpRequest) {
         final HttpRequestBody body = httpRequest.getBody();

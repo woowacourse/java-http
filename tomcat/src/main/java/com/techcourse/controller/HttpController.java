@@ -2,6 +2,13 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.exception.UnauthorizedException;
+import org.apache.coyote.http11.http.common.HttpCookie;
+import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +70,14 @@ public class HttpController {
         return httpResponse;
     }
 
+    public HttpResponse getRegisterHtml() {
+        return HttpResponse.ok("register.html");
+    }
+
+    public HttpResponse getRegister(final String account, final String email, final String password) {
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return HttpResponse.found("index.html");
     }
 
     public HttpResponse getChartArea() {

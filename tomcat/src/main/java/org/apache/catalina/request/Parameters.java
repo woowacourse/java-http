@@ -48,7 +48,8 @@ public class Parameters {
                         pair -> URLDecoder.decode(
                                 pair.substring(pair.indexOf(PAIR_DELIMITER) + 1),
                                 StandardCharsets.UTF_8
-                        )
+                        ),
+                        (existing, replacement) -> existing
                 ));
     }
 

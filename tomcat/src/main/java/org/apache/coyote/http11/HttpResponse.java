@@ -53,10 +53,33 @@ public class HttpResponse {
         }
     }
     
+    public void sendRedirect(final String location) {
+        if (committed) {
+            throw new IllegalStateException("Response already committed");
+        }
+        
+        try {
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Location: " + location,
+                    "Content-Length: 0",
+                    "",
+                    "");
+                    
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            committed = true;
+        } catch (final IOException e) {
+            throw new RuntimeException("Failed to send redirect", e);
+        }
+    }
+    
     private String getReasonPhrase(final int status) {
         return switch (status) {
             case 200 -> "OK";
+            case 302 -> "Found";
             case 400 -> "Bad Request";
+            case 401 -> "Unauthorized";
             case 404 -> "Not Found";
             case 405 -> "Method Not Allowed";
             case 500 -> "Internal Server Error";

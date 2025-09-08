@@ -38,29 +38,39 @@ public class LoginServlet implements Servlet {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
 
-        if (account != null && password != null) {
-            processLogin(account, password);
+        if (account == null || password == null) {
+            // 파라미터 없으면 로그인 페이지 보여줌
+            final String loginHtml = readLoginPage();
+            response.write(loginHtml);
+            return;
         }
 
-        final String loginHtml = readLoginPage();
-        response.write(loginHtml);
+        if (processLogin(account, password)) {
+            // 로그인 성공 - index.html로 리다이렉트
+            response.sendRedirect("/index.html");
+            return;
+        }
+
+        // 로그인 실패 - 401.html로 리다이렉트
+        response.sendRedirect("/401.html");
     }
 
-    private void processLogin(final String account, final String password) {
+    private boolean processLogin(final String account, final String password) {
         final var userOptional = InMemoryUserRepository.findByAccount(account);
 
         if (userOptional.isEmpty()) {
             log.info("로그인 실패: 존재하지 않는 계정 - account: {}", account);
-            return;
+            return false;
         }
 
         final var user = userOptional.get();
         if (user.checkPassword(password)) {
             log.info("로그인 성공: 회원 조회 결과 - {}", user);
-            return;
+            return true;
         }
 
         log.info("로그인 실패: 비밀번호 불일치 - account: {}", account);
+        return false;
     }
 
     private String readLoginPage() {

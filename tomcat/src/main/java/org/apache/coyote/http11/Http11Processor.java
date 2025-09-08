@@ -42,48 +42,39 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final var requestLine = RequestLine.from(reader.readLine());
             var requestPath = requestLine.getPath();
-            final Map<String, String> queryParameters = requestLine.getQueryParameters();
+
+            if (requestLine.getMethod() == HttpMethod.POST) {
+                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
+                String redirectUrl = "/index.html";
+
+                if ("login".equals(requestPath)) {
+                    final var loginSuccess = checkLogin(parameters.get("account"), parameters.get("password"));
+                    if (!loginSuccess) {
+                        redirectUrl = "/401.html";
+                        log.info("login 실패: user account: " + parameters.get("account"));
+                    } else {
+                        log.info("login 성공: user account: " + parameters.get("account"));
+                    }
+                }
+
+                if ("register".equals(requestPath)) {
+                    final var newUser = new User(parameters.get("account"), parameters.get("password"),
+                            parameters.get("email"));
+                    InMemoryUserRepository.save(newUser);
+                    log.info("register 완료, newUser account: " + newUser.getAccount());
+                }
+
+                final Map<String, String> headers = Map.of("Location", redirectUrl);
+                final var response = buildHttpResponse("302 Found", "text/html", "", headers);
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             if (requestPath.isBlank() || "/".equals(requestPath)) {
                 requestPath = "index.html";
             }
-
             var statusCode = "200 OK";
-
-            if ("login".equals(requestPath) && requestLine.getMethod() == HttpMethod.POST) {
-                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
-
-                final var account = parameters.get("account");
-                final var password = parameters.get("password");
-
-                if(account != null && password != null) {
-
-                    final var loginSuccess = checkLogin(account, password);
-                    final var redirectUrl = loginSuccess ? "/index.html" : "/401.html";
-
-                    final Map<String, String> headers = Map.of("Location", redirectUrl);
-                    final var response = buildHttpResponse("302 Found", "text/html", "", headers);
-
-                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
-                    log.info("login 완료: user account: " + account);
-                    return;
-                }
-            }
-
-            if("register".equals(requestPath) && requestLine.getMethod() == HttpMethod.POST) {
-                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
-
-                final var newUser = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
-                InMemoryUserRepository.save(newUser);
-
-                Map<String, String> headers = Map.of("Location", "/index.html");
-                final var response = buildHttpResponse("302 Found", "text/html", "", headers);
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                log.info("register 완료, newUser account: " + newUser.getAccount());
-                return;
-            }
 
             var responseBody = readStaticFileContent(requestPath);
             if (responseBody == null) {
@@ -96,7 +87,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var contentType = ContentType.from(requestPath);
-            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody, Collections.emptyMap());
+            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody,
+                    Collections.emptyMap());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (Exception e) {
@@ -110,7 +102,8 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = "<h1>500 Internal Server Error</h1>";
                 }
 
-                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody, Collections.emptyMap());
+                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody,
+                        Collections.emptyMap());
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             } catch (IOException | URISyntaxException ex) {
@@ -127,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public boolean checkLogin(String account, String password) {
-        if(account == null || account.isBlank()) {
+        if (account == null || account.isBlank()) {
             return false;
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
@@ -154,7 +147,8 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(Paths.get(resource.toURI()));
     }
 
-    private String buildHttpResponse(String statusCode, String mimeType, String responseBody, Map<String, String> additionalResponseHeaders) throws IOException {
+    private String buildHttpResponse(String statusCode, String mimeType, String responseBody,
+                                     Map<String, String> additionalResponseHeaders) throws IOException {
         StringBuilder response = new StringBuilder();
 
         response.append("HTTP/1.1 ").append(statusCode).append("\r\n");

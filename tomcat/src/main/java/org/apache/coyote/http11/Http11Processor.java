@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -164,6 +163,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         if ("/login".equals(path)) {
+            if(isLoggedIn()) {
+                foundResponse("/index.html");
+                return;
+            }
             okResponse("/login.html");
             return;
         }
@@ -215,6 +218,7 @@ public class Http11Processor implements Runnable, Processor {
     private void loginInSession(final User user) {
         log.info("User{}", user);
         Session session = new Session(UUID.randomUUID().toString());
+        SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
         session.setAttribute("user", user);
         responseCookies.add("JSESSIONID=" + session.getId());
@@ -258,6 +262,7 @@ public class Http11Processor implements Runnable, Processor {
         if(httpCookie.hasNoSession()) {
             return false;
         }
+        SessionManager sessionManager = SessionManager.getInstance();
         Session session = sessionManager.findSession(httpCookie.getSessionId());
         if(session == null) {
             return false;

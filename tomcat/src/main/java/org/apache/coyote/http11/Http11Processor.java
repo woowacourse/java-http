@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.httpRequest.HttpRequest;
+import org.apache.coyote.http11.httpRequest.RequestParser;
 import org.apache.coyote.http11.httpResponse.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,25 +34,13 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestUri = getRequestUriFromHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = new HttpResponse(requestUri);
+            final HttpRequest httpRequest = RequestParser.parse(bufferedReader);
+            final HttpResponse httpResponse = new HttpResponse(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getRequestUriFromHttpRequest(final BufferedReader br) throws IOException {
-        final String firstLineOfHeader = br.readLine();
-        final String requestUri = firstLineOfHeader.split(" ")[1];
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-        }
-        return requestUri;
     }
 }

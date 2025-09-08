@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.HttpStatus;
 
-public class HttpResponseHeader {
+public class ResponseHeader {
 
     private final String requestUri;
 
-    public HttpResponseHeader(
+    public ResponseHeader(
             final String requestUri
     ) {
         this.requestUri = requestUri;

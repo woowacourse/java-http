@@ -80,6 +80,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void processLoginMemberInfo(HttpRequest httpRequest) {
         Map<String, String> queries = httpRequest.queries();
+        if (queries == null || queries.isEmpty()) {
+            return;
+        }
         String account = queries.get("account");
         String password = queries.get("password");
         if (account == null || password == null) {

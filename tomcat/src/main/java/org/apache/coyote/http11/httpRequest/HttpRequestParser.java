@@ -20,24 +20,24 @@ public class HttpRequestParser {
 
     public static HttpRequest parseHttpRequest(BufferedReader bufferedReader) {
         try {
-            String[] splittedRequestLine = parseRequestLine(bufferedReader);
-            HttpMethod method = HttpMethod.from(splittedRequestLine[0]);
-            String path = parsePath(splittedRequestLine[1]);
-            QueryStrings queryStrings = parseQueryStrings(splittedRequestLine[1]);
+            RequestLine requestLine = parseRequestLine(bufferedReader);
             HttpHeaders headers = parseHeaders(bufferedReader);
             HttpBody body = parseBody(headers, bufferedReader);
-            return new HttpRequest(method, path, queryStrings, headers, body);
+            return new HttpRequest(requestLine, headers, body);
         } catch (IOException | ArrayIndexOutOfBoundsException exception) {
             logger.error(exception.getMessage(), exception);
             return null;
         }
     }
 
-    private static String[] parseRequestLine(BufferedReader bufferedReader) throws IOException {
-        String requestLine = readOneLineOfInputStream(bufferedReader);
-        String[] methodAndUriAndProtocol = requestLine.split(" ");
-        validateMethodAndUriAndProtocol(methodAndUriAndProtocol);
-        return methodAndUriAndProtocol;
+    private static RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
+        String rawRequestLine = readOneLineOfInputStream(bufferedReader);
+        String[] splittedRequestLine = rawRequestLine.split(" ");
+        validateMethodAndUriAndProtocol(splittedRequestLine);
+        HttpMethod method = HttpMethod.from(splittedRequestLine[0]);
+        String path = parsePath(splittedRequestLine[1]);
+        QueryStrings queryStrings = parseQueryStrings(splittedRequestLine[1]);
+        return new RequestLine(method, path, queryStrings);
     }
 
     private static String readOneLineOfInputStream(BufferedReader bufferedReader) throws IOException {

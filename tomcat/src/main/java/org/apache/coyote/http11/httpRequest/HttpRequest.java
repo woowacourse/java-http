@@ -5,30 +5,26 @@ import org.apache.coyote.http11.general.HttpHeaders;
 
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String path;
-    private final QueryStrings queryStrings;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpBody body;
 
-    public HttpRequest(HttpMethod method, String path, QueryStrings queryStrings, HttpHeaders headers, HttpBody body) {
-        this.method = method;
-        this.path = path;
-        this.queryStrings = queryStrings;
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public boolean pathEquals(String path) {
-        return this.path.equals(path);
+        return this.requestLine.pathEquals(path);
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return this.requestLine.getMethod();
     }
 
     public String getPath() {
-        return this.path;
+        return this.requestLine.getPath();
     }
 
     public String getHeaderValueOf(String key) {

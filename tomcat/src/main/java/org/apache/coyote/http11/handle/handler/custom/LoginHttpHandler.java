@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpSession;
 import org.apache.coyote.http11.handle.HttpHandlerCondition;
@@ -63,10 +64,13 @@ public class LoginHttpHandler extends MultiConditionHandler {
         if (account == null || password == null) {
             throw new IllegalArgumentException("잘못된 로그인 바디 파라미터입니다. " + request.body());
         }
+
         final HttpHeaders responseHeaders = new HttpHeaders();
-        if (checkAuthorization(account, password)) {
+
+        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
             responseHeaders.addHeader("Location", "/index.html");
-            responseHeaders.addSession(new HttpSession());
+            setSession(responseHeaders, optionalUser.get());
             return new HttpResponse(
                     request.protocolVersion(),
                     HttpStatus.SEE_OTHER,
@@ -82,13 +86,14 @@ public class LoginHttpHandler extends MultiConditionHandler {
         );
     }
 
-    private boolean checkAuthorization(
-            final String account,
-            final String password
+    private void setSession(
+            final HttpHeaders responseHeaders,
+            final User user
     ) {
-        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-
-        return optionalUser.isPresent() && optionalUser.get().checkPassword(password);
+        final HttpSession session = new HttpSession();
+        session.setAttribute("user", user);
+        SessionManager.getInstance().add(session);
+        responseHeaders.setSessionId(session);
     }
 
     private Map<String, String> parseBodyByFormUrlEncoded(final String body) {

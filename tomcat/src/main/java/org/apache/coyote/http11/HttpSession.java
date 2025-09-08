@@ -15,6 +15,13 @@ public class HttpSession {
         this.id = String.valueOf(UUID.randomUUID());
     }
 
+    public void setAttribute(
+            final String key,
+            final Object value
+    ) {
+        values.put(key, value);
+    }
+
     public String getId() {
         return id;
     }

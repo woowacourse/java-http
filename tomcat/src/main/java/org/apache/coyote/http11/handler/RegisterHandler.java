@@ -5,17 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResourceLoader;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestLine;
 
 public class RegisterHandler implements HttpHandler {
 
-    private final HttpResourceHandler httpResourceHandler;
+    private final HttpResourceLoader httpResourceLoader;
     private final QueryParser queryParser;
 
-    public RegisterHandler(final HttpResourceHandler httpResourceHandler, final QueryParser queryParser) {
-        this.httpResourceHandler = httpResourceHandler;
+    public RegisterHandler(final HttpResourceLoader httpResourceLoader, final QueryParser queryParser) {
+        this.httpResourceLoader = httpResourceLoader;
         this.queryParser = queryParser;
     }
 
@@ -23,7 +24,7 @@ public class RegisterHandler implements HttpHandler {
     public HttpResponse handle(final HttpRequest request) throws Exception {
         RequestLine requestLine = request.requestLine();
         if (requestLine.method() == HttpMethod.GET) {
-            return httpResourceHandler.handle(request);
+            return httpResourceLoader.load(request.path());
         }
 
         String requestBody = new String(request.body());

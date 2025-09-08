@@ -34,8 +34,8 @@ public class Http11Processor implements Runnable, Processor {
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
         this.resolver = new Resolver(httpResourceHandler)
-                .register("/login", new LoginHandler())
-                .register("/register", new RegisterHandler(httpResourceHandler, queryParser))
+                .register("/login", new LoginHandler(httpResourceLoader, queryParser))
+                .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
         ;
         this.errorMapper = new ErrorMapper(httpResourceLoader);
     }

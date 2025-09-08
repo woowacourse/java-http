@@ -18,15 +18,16 @@ public class UserService {
             log.info(user.toString());
             return;
         }
-        log.info("User login failed: {}", user.getAccount());
+        log.info("User login failed: {}, {}", account, password);
         throw new UnAuthorizedException("Login failed");
     }
 
     public static void register(final String account, final String email, final String password) {
-        User user = new User(account, password, email);
+        User user = new User(account, email, password);
         if (existsByAccount(account)) {
             throw new ConflictException("Account already exists");
         }
+        log.info("User register: {}", user.getAccount());
         InMemoryUserRepository.save(user);
     }
 

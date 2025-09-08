@@ -9,21 +9,21 @@ import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.request.HttpRequest;
 
-public class getController {
+public class GetController {
 
     private final List<Controller> controllers;
 
-    public getController() {
-        this.controllers = initServlets();
+    public GetController() {
+        this.controllers = initControllers();
     }
 
-    public Optional<Controller> findServlet(final HttpRequest httpRequest) {
+    public Optional<Controller> findController(final HttpRequest httpRequest) {
         return controllers.stream()
                 .filter(controller -> controller.canHandle(httpRequest))
                 .findFirst();
     }
 
-    private List<Controller> initServlets() {
+    private List<Controller> initControllers() {
         return List.of(
                 new DefaultController(),
                 new StaticResourceController(),

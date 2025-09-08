@@ -14,6 +14,7 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 public class StaticResourceController extends AbstractController {
 
     private static final String STATIC_RECOURSE_PATH = "static";
+    public static final String EMPTY_BODY = "";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
@@ -26,7 +27,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String resource = findResource(httpRequest.getRequestPath().getRequestPath()); //TODO: get열차 칙칙폭폭..
+        String resource = findResource(httpRequest.getRequestPath().getRequestPath());
         Optional<ContentType> contentType = findResourceExtension(httpRequest.getRequestLine());
 
         httpResponse.init(resource, contentType.orElse(null),
@@ -35,7 +36,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.init("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
+        httpResponse.init(EMPTY_BODY, ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     private Optional<ContentType> findResourceExtension(final RequestLine requestLine) {

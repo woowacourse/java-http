@@ -8,6 +8,7 @@ import org.apache.coyote.response.responseLine.ResponseLine;
 
 public class HttpResponse {
 
+    public static final String CRLF = "\r\n";
     private ResponseLine responseLine;
     private ResponseHeader responseHeader;
     private ResponseBody responseBody;
@@ -19,7 +20,7 @@ public class HttpResponse {
     }
 
     public byte[] combine() {
-        String response = String.join("\r\n",
+        String response = String.join(CRLF,
                 responseLine.combine() + " ",
                 responseHeader.combine(),
                 "",

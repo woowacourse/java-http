@@ -1,12 +1,13 @@
 package org.apache.catalina.controller;
 
-import static org.apache.catalina.controller.param.QueryParam.getQueryParams;
+import static org.apache.catalina.controller.util.QueryParam.getQueryParams;
+import static org.apache.catalina.controller.util.ResourceFinder.INDEX_RESOURCE_PATH;
+import static org.apache.catalina.controller.util.ResourceFinder.UNAUTHORIZED_RESOURCE_PATH;
 import static org.apache.catalina.controller.util.ResourceFinder.findResource;
 
 import com.techcourse.model.User;
 import com.techcourse.restController.LoginRestController;
 import com.techcourse.service.UserService;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.session.Session;
@@ -22,6 +23,10 @@ public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
     public static final String USER = "user";
+    public static final String DOT = ".";
+
+    public static final String ACCOUNT = "account";
+    public static final String PASSWORD = "password";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
@@ -39,7 +44,7 @@ public class LoginController extends AbstractController {
         }
 
         RequestPath requestPath = httpRequest.getRequestPath();
-        String resource = findResource(requestPath.getRequestPath() + "." + ContentType.HTML);
+        String resource = findResource(requestPath.getRequestPath() + DOT + ContentType.HTML);
 
         httpResponse.init(resource, ContentType.HTML, HttpStatus.OK);
     }
@@ -50,15 +55,15 @@ public class LoginController extends AbstractController {
         Map<String, String> bodyValues = getQueryParams(requestBody);
 
         final LoginRestController loginRestController = new LoginRestController(
-                new UserService()); //TODO: Bean 구현 부분
+                new UserService());
 
         try {
-            User user = loginRestController.login(bodyValues.get("account"), bodyValues.get("password"));
+            User user = loginRestController.login(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD));
 
             setCookie(httpRequest, httpResponse, user);
-            httpResponse.sendRedirect("/index.html");
-        } catch (IllegalArgumentException e) { //TODO: ExceptionHandler
-            httpResponse.init(findResource("/401.html"), ContentType.HTML, HttpStatus.UNAUTHORIZED);
+            httpResponse.sendRedirect(INDEX_RESOURCE_PATH);
+        } catch (IllegalArgumentException e) {
+            httpResponse.init(findResource(UNAUTHORIZED_RESOURCE_PATH), ContentType.HTML, HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -67,7 +72,7 @@ public class LoginController extends AbstractController {
         Optional<Object> user = session.getAttribute(USER);
 
         if (user.isPresent()) {
-            httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
+            httpResponse.init(findResource(INDEX_RESOURCE_PATH), ContentType.HTML, HttpStatus.FOUND);
             return true;
         }
         return false;

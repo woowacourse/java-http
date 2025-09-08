@@ -9,10 +9,13 @@ import org.apache.catalina.controller.StaticResourceController;
 
 public class ResourceFinder {
 
-    private static final String STATIC_RECOURSE_PATH = "static";
+    public static final String INDEX_RESOURCE_PATH = "/index.html";
+    public static final String UNAUTHORIZED_RESOURCE_PATH = "/401.html";
+
+    private static final String STATIC_RESOURCE_PATH = "static";
 
     public static String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
+        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RESOURCE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

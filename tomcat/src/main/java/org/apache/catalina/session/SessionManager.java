@@ -24,9 +24,4 @@ public class SessionManager implements Manager {
     public Session findSession(final String id) {
         return SESSIONS.get(id);
     }
-
-    @Override
-    public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
-    }
 }

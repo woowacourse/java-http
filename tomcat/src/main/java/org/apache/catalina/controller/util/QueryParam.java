@@ -1,4 +1,4 @@
-package org.apache.catalina.controller.param;
+package org.apache.catalina.controller.util;
 
 import java.util.HashMap;
 import java.util.Map;

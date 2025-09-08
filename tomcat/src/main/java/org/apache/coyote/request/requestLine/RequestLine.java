@@ -11,6 +11,7 @@ public class RequestLine {
 
     private static final int REQUEST_LINE_SIZE = 3;
     private static final String REQUEST_LINE_SEPARATOR = " ";
+    public static final String PATH_SEPARATOR = "/";
 
     private final RequestMethod requestMethod;
     private final RequestPath requestPath; //todo: requestPath, protocolVersion 객체 만들기
@@ -41,7 +42,7 @@ public class RequestLine {
     }
 
     public boolean isDefaultPath() {
-        return this.requestPath.getRequestPath().equals("/");
+        return this.requestPath.getRequestPath().equals(PATH_SEPARATOR);
     }
 
     public RequestPath getRequestPath() {

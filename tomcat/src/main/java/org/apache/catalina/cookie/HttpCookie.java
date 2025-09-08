@@ -9,8 +9,11 @@ import org.apache.catalina.session.SessionManager;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
-    public static final String COOKIES_SEPARATOR = ";";
-    public static final String COOKIE_SEPARATOR = "=";
+    private static final String COOKIES_SEPARATOR = ";";
+    private static final String COOKIE_SEPARATOR = "=";
+
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
 
     private final Map<String, String> cookies;
 
@@ -24,8 +27,8 @@ public class HttpCookie {
         return httpCookies.stream()
                 .map(cookie -> cookie.split(COOKIE_SEPARATOR))
                 .collect(Collectors.toMap(
-                        keyValue -> keyValue[0].trim(),
-                        keyValue -> keyValue[1]
+                        keyValue -> keyValue[KEY_INDEX].trim(),
+                        keyValue -> keyValue[VALUE_INDEX]
                 ));
     }
 

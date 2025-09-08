@@ -18,10 +18,6 @@ public class Session {
         values.put(key, value);
     }
 
-    public void removeAttribute(final String key) {
-        values.remove(key);
-    }
-
     public String getId() {
         return id;
     }

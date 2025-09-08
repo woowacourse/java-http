@@ -9,14 +9,14 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 
 public class RequestMapping {
 
-    private final getController getController;
+    private final GetController getController;
 
     public RequestMapping() {
-        this.getController = new getController();
+        this.getController = new GetController();
     }
 
     public void process(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Optional<Controller> servlet = getController.findServlet(httpRequest);
+        Optional<Controller> servlet = getController.findController(httpRequest);
         if (servlet.isEmpty()) {
             httpResponse.init("", ContentType.HTML, HttpStatus.NOT_FOUND);
             return;

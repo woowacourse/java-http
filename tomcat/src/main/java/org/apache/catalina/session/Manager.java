@@ -6,6 +6,5 @@ public interface Manager {
 
     Session findSession(final String sessionId);
 
-    void remove(final Session session);
 }
 

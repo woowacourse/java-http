@@ -9,6 +9,8 @@ import org.apache.coyote.response.responseLine.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
+    public static final String EMPTY_BODY = "";
+
     @Override
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final RequestLine requestLine = httpRequest.getRequestLine();
@@ -23,7 +25,7 @@ public abstract class AbstractController implements Controller {
             return;
         }
 
-        httpResponse.init("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
+        httpResponse.init(EMPTY_BODY, ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse){};

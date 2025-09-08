@@ -64,11 +64,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    // TODO Controller로 분리
     private HttpResponse processRequest(InputStream inputStream) {
         final ServletResponse response = new ServletResponse(PROTOCOL);
-        try {
-            final ServletRequest request = new ServletRequest(new HttpRequest(inputStream));
+        final ServletRequest request = new ServletRequest(new HttpRequest(inputStream));
 
+        try {
             handleRequest(request, response);
         } catch (IllegalArgumentException e) {
             updateResponseWithError(BAD_REQUEST, response, e);
@@ -86,12 +87,10 @@ public class Http11Processor implements Runnable, Processor {
             response.sendRedirect("500.html");
             log.error("예상치 못한 서버 오류 발생", e);
         }
-        return response.toHttpResponse();
-    }
 
-    private void writeResponse(final HttpResponse response, OutputStream outputStream) throws IOException {
-        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+        checkSessionCreated(request, response);
+
+        return response.toHttpResponse();
     }
 
     private void handleRequest(ServletRequest request, ServletResponse response) {
@@ -104,9 +103,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void writeResponse(HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
     private void updateResponseWithError(HttpStatus status, ServletResponse response, Exception e) {
         response.setStatus(status);
         response.setBody(e.getMessage());
         response.setContentType("text/plain;charset=utf-8");
+    }
+
+    private void checkSessionCreated(ServletRequest request, ServletResponse response) {
+        if (request.isSessionCreated()) {
+            response.setCookie("JSESSIONID", request.getSession(false).getId());
+        }
     }
 }

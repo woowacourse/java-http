@@ -1,6 +1,9 @@
 package org.apache.catalina.request;
 
+import java.util.Objects;
 import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpRequest;
 
@@ -14,6 +17,7 @@ public class ServletRequest {
     private final HttpHeader headers;
     private final HttpCookie cookies;
     private final String body;
+    private Session session;
 
     public ServletRequest(HttpRequest request) {
         this.method = request.getMethod();
@@ -36,8 +40,35 @@ public class ServletRequest {
         return parameters.getParameter(name);
     }
 
-    public void setCookie(String name, String value){
-        cookies.setCookie(name, value);
+    public Session getSession(boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        final String sessionId = getCookie("JSESSIONID");
+        if (sessionId != null) {
+            Session existingSession = SessionManager.getInstance().findSession(sessionId);
+            if (existingSession != null) {
+                return existingSession;
+            }
+        }
+
+        if (create) {
+            return createNewSession();
+        }
+        return null;
+    }
+
+    public String getCookie(String name) {
+        return cookies.getCookie(name);
+    }
+
+    public boolean isSessionCreated() {
+        if (session == null) {
+            return false;
+        }
+
+        return !Objects.equals(getCookie("JSESSIONID"), session.getId());
     }
 
     private String parsePath(String uri) {
@@ -47,5 +78,14 @@ public class ServletRequest {
             return uri;
         }
         return uri.substring(0, queryIndex);
+    }
+
+    private Session createNewSession() {
+        final Session newSession = new Session();
+        SessionManager.getInstance().add(newSession);
+
+        this.session = newSession;
+
+        return newSession;
     }
 }

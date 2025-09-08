@@ -78,12 +78,26 @@ public class RequestHandler {
     }
 
     private String handlePost(final String path, final String body) {
+        if (path.startsWith("login")) {
+            Map<String, String> map = new HashMap<>();
+            for (String keyValue : body.split("&")) {
+                int index = keyValue.indexOf("=");
+                String key = keyValue.substring(0, index);
+                String value = keyValue.substring(index + 1);
+                map.put(key, value);
+            }
+            service.findUser(map);
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/index.html");
+            return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
+        }
+
         if (path.startsWith("register")) {
             Map<String, String> map = new HashMap<>();
             for (String keyValue : body.split("&")) {
                 int index = keyValue.indexOf("=");
                 String key = keyValue.substring(0, index);
-                String value = keyValue.substring(index);
+                String value = keyValue.substring(index + 1);
                 map.put(key, value);
             }
             service.registerUser(map.get("account"), map.get("password"), map.get("email"));

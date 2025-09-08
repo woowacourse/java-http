@@ -1,5 +1,7 @@
 package org.apache.catalina;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
@@ -11,20 +13,26 @@ public abstract class AbstractController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
-    @Override
-    public String service(final Http11Request request, final Http11Response response) {
-        //Todo: HTTP 매서드 매핑 방식 수정 필요 [2025-09-05 17:18:12]
-        return switch (request.getMethod()) {
-            case HttpMethod.GET -> toGet(request, response);
-            case HttpMethod.POST -> toPost(request, response);
-            default -> handlingUnsupportedMethod(request, response);
-        };
+    protected Map<HttpMethod, HttpMethodCommand> commands;
+
+    protected AbstractController() {
+        commands = new HashMap<>();
+        registerCommands();
     }
 
-    public String handlingUnsupportedMethod(final Http11Request request,
-                                            final Http11Response response
-    ) {
-        log.warn("Method:{} Path:{} Method Not Allowed.", request.getMethod(), request.getRequestTarget());
-        throw new MethodNotAllowedException(response);
+    protected abstract void registerCommands();
+
+    protected void addCommand(HttpMethod method, HttpMethodCommand command) {
+        commands.put(method, command);
+    }
+
+    @Override
+    public String service(final Http11Request request, final Http11Response response) {
+        log.debug("Request HTTP Method: {}", request.getMethod());
+        final HttpMethodCommand command = commands.get(request.getMethod());
+        if (command == null) {
+            throw new MethodNotAllowedException(response);
+        }
+        return command.execute(request, response);
     }
 }

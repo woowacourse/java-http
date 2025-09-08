@@ -153,7 +153,8 @@ public class Http11Processor implements Runnable, Processor {
             final Http11Session session = new Http11Session(sessionId);
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
-            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+            // TODO: CookieSecurityConfig를 통한 HttpOnly 기본, Secure/SameSite 설정 전략 등 고려하기
+            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
         }
     }
 

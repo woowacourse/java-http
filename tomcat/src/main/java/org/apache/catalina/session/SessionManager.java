@@ -20,7 +20,7 @@ public class SessionManager implements Manager {
 
     @Override
     public HttpSession findSession(final String id) {
-        if (!SESSIONS.containsKey(id)) {
+        if (id == null || !SESSIONS.containsKey(id)) {
             return null;
         }
         return SESSIONS.get(id);

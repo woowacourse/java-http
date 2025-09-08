@@ -49,11 +49,10 @@ public class HttpRequest {
         }
         final HttpHeader httpHeader = HttpHeader.from(headerLines);
         final HttpCookie httpCookie = HttpCookie.from(httpHeader);
+        final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
+        final HttpSession session = sessionManager.findSession(httpCookie.getByName("JSESSIONID"));
 
-        final HttpRequestBody httpRequestBody = HttpRequestBody.of(inputStream, httpHeader);
-
-        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody,
-                sessionManager.findSession(httpCookie.getByName("JSESSIONID")));
+        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, session);
     }
 
     private static void validateNull(final InputStream inputStream) {

@@ -45,11 +45,13 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             String uri = parseUri(br);
             if (uri.startsWith("/login")) {
-                handleLogin(uri);
-                respondStaticResource(Paths.get("/login.html"), outputStream);
+                if (uri.contains("?")) {
+                    login(uri);
+                }
+                respondStaticResource(HttpStatusCode.OK, Paths.get("/login.html"), outputStream);
                 return;
             }
-            respondStaticResource(Paths.get(uri), outputStream);
+            respondStaticResource(HttpStatusCode.OK, Paths.get(uri), outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
@@ -67,10 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         return parts[1];
     }
 
-    private void handleLogin(String uri) {
-        if (!uri.contains("?")) {
-            return;
-        }
+    private void login(String uri) {
         int index = uri.indexOf("?");
         String queryString = uri.substring(index + 1);
         Map<String, String> params = new HashMap<>();
@@ -93,10 +92,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+    private void respondStaticResource(HttpStatusCode httpStatusCode, Path path, OutputStream outputStream) throws IOException, URISyntaxException {
         String contentType = getContentType(path);
         final var responseBody = getResponseBodyFromStaticResource(path);
-        final var response = formatHttpResponse(contentType, responseBody);
+        final var response = formatHttpResponse(httpStatusCode, contentType, responseBody);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -120,9 +119,11 @@ public class Http11Processor implements Runnable, Processor {
         return Paths.get(getClass().getClassLoader().getResource("static" + path).toURI());
     }
 
-    private String formatHttpResponse(String contentType, String responseBody) {
+    private String formatHttpResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " +
+                        httpStatusCode.getCode() + " "
+                        + httpStatusCode.getMessage() + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

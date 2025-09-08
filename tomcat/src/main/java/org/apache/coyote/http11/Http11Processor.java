@@ -172,7 +172,7 @@ public class Http11Processor implements Runnable, Processor {
         String email = formData.get("email");
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return getResponse("static/index.html", BAD_REQUEST);
+            return getResponse("static/register.html", BAD_REQUEST);
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

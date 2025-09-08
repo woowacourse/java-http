@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -60,7 +62,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void loginSuccess() throws IOException {
         // given
         String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -80,10 +82,89 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 Found ";
-
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
+    @Test
+    void loginFail() throws IOException {
+        // given
+        String body = "account=gugu&password=pass";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 401 Unauthorized ";
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+    }
+
+    @Test
+    void registerSuccess() throws IOException {
+        // given
+        String body = "account=qqq&password=qqq&email=qq@test.com";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 200 OK ";
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+    }
+
+    @Test
+    void registerFail() throws IOException {
+        // given
+        InMemoryUserRepository.save(new User("gugu", "password", "gugu@test.com"));
+        String body = "account=gugu&password=password&email=gugu@test.com";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 400 Bad Request ";
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+    }
 
     @Test
     void cookie() throws IOException {

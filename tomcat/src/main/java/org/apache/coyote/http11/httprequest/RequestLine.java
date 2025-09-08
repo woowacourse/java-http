@@ -34,4 +34,8 @@ public class RequestLine {
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
     }
+
+    public boolean isMethodEqualsTo(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
 }

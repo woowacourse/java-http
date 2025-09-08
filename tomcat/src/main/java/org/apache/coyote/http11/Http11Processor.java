@@ -56,23 +56,20 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequestParser requestParser = new HttpRequestParser(reader);
             final HttpRequest httpRequest = requestParser.readHttpRequest();
 
-            // GET /
-            if (httpRequest.isPathEqualsTo("/")) {
+            if (httpRequest.matches(HttpMethod.GET, "/")) {
                 final HttpResponse response = HttpResponseParser.createWelcomeHttpResponse();
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
-            // GET /register
-            if (httpRequest.isPathEqualsTo("/register") && httpRequest.getHttpMethod() == HttpMethod.GET) {
+            if (httpRequest.matches(HttpMethod.GET, "/register")) {
                 final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
                         "/register.html");
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
-            // POST /register
-            if (httpRequest.isPathEqualsTo("/register") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+            if (httpRequest.matches(HttpMethod.POST, "/register")) {
                 final String account = httpRequest.getBodyParameter("account");
                 final String password = httpRequest.getBodyParameter("password");
                 final String email = httpRequest.getBodyParameter("email");
@@ -83,15 +80,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // GET /login
-            if (httpRequest.isPathEqualsTo("/login") && httpRequest.getHttpMethod() == HttpMethod.GET) {
+            if (httpRequest.matches(HttpMethod.GET, "/login")) {
                 final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
-            // POST /login
-            if (httpRequest.isPathEqualsTo("/login") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+            if (httpRequest.matches(HttpMethod.POST, "/login")) {
                 final String account = httpRequest.getBodyParameter("account");
                 final String password = httpRequest.getBodyParameter("password");
                 final Optional<User> user = InMemoryUserRepository.findByAccount(account);
@@ -108,7 +103,6 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // 이 외의 정적 요청
             final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
                     httpRequest.getStaticResourcePath());
             sendHttpResponse(response, outputStream);

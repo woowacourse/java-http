@@ -13,12 +13,8 @@ public class HttpRequest {
         this.httpRequestBody = httpRequestBody;
     }
 
-    public HttpMethod getHttpMethod() {
-        return this.requestLine.getHttpMethod();
-    }
-
-    public boolean isPathEqualsTo(final String requestPath) {
-        return this.requestLine.isPathEqualsTo(requestPath);
+    public boolean matches(final HttpMethod httpMethod, final String requestPath) {
+        return this.requestLine.isMethodEqualsTo(httpMethod) && this.requestLine.isPathEqualsTo(requestPath);
     }
 
     public String getBodyParameter(final String key) {

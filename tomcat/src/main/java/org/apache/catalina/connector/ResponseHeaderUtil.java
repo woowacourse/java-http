@@ -54,16 +54,22 @@ public final class ResponseHeaderUtil {
     private static void applyContentTypeFromAccept(HttpRequest httpRequest, HttpResponse httpResponse) {
         final HttpHeader header = httpRequest.header();
         if (header == null) {
+            defaultContentType(httpResponse);
             return;
         }
 
-        if (!header.containKey(CONTENT_TYPE)) {
-            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+        final String accept = header.get(ACCEPT);
+        if (accept == null) {
+            defaultContentType(httpResponse);
             return;
         }
 
-        final String accept = header.get(ACCEPT).split(",")[0];
-        httpResponse.addHeader(CONTENT_TYPE, accept);
+        final String contentType = accept.split(",")[0];
+        httpResponse.addHeader(CONTENT_TYPE, contentType);
+    }
+
+    private static void defaultContentType(HttpResponse httpResponse) {
+        httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
     }
 
     private static void processContentLength(HttpResponse httpResponse) {

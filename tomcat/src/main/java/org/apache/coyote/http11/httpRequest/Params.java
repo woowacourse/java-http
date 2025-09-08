@@ -4,18 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class Params {
-
-    private final Map<String, String> params;
-
-    private Params(
-            final Map<String, String> params
-    ) {
-        this.params = params;
-    }
+public record Params(Map<String, String> params) {
 
     public static Params parse(final String queryString) {
-        if(queryString == null || queryString.isBlank()) {
+        if (queryString == null || queryString.isBlank()) {
             return new Params(Map.of());
         }
 
@@ -29,6 +21,24 @@ public class Params {
         }
 
         return new Params(params);
+    }
+
+    public static Params parseFromCookie(final String cookieOfRequest) {
+        if (cookieOfRequest == null || cookieOfRequest.isBlank()) {
+            return new Params(Map.of());
+        }
+
+        final String[] cookiesOfRequest = cookieOfRequest.split("; ");
+        final Map<String, String> cookies = new HashMap<>();
+
+        for (String cookie : cookiesOfRequest) {
+            cookie = cookie.trim();
+            final String name = cookie.split("=")[0];
+            final String value = cookie.split("=")[1];
+            cookies.put(name, value);
+        }
+
+        return new Params(cookies);
     }
 
     public static Params empty() {

@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.apache.coyote.http11.httpRequest.HttpCookie;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,22 @@ public class ResponseBody {
     public ResponseContent getContent() throws IOException {
         final String path = httpRequest.getPath();
         if (path.equals("/")) {
-            return ResponseContent.success("Hello world!");
+            return ResponseContent.success("Hello world!", null);
         }
 
         if ("/login".equals(path)) {
             try {
+                final Optional<String> cookieOfRequest = httpRequest.findCookie();
+                HttpCookie httpCookie;
+                if (cookieOfRequest.isPresent()) {
+                    httpCookie = HttpCookie.parse(cookieOfRequest.get());
+
+                    final String body = getBodyFromStaticFile("/index.html");
+                    return ResponseContent.redirect(body, "/index.html", httpCookie);
+                } else {
+                    httpCookie = HttpCookie.create();
+                }
+
                 final String account = findValueFromParams("account");
                 final String password = findValueFromParams("password");
 
@@ -43,15 +55,15 @@ public class ResponseBody {
 
                     if (!user.checkPassword(password)) {
                         final String body = getBodyFromStaticFile("/401.html");
-                        return ResponseContent.redirect(body, "/401.html");
+                        return ResponseContent.redirect(body, "/401.html", null);
                     }
 
                     final String body = getBodyFromStaticFile("/index.html");
-                    return ResponseContent.redirect(body, "/index.html");
+                    return ResponseContent.redirect(body, "/index.html", httpCookie);
                 }
             } catch (IllegalArgumentException e) {
                 final String body = getBodyFromStaticFile("/login.html");
-                return ResponseContent.redirect(body, "/login.html");
+                return ResponseContent.redirect(body, "/login.html", null);
             }
 
         }
@@ -72,10 +84,10 @@ public class ResponseBody {
                 InMemoryUserRepository.save(user);
 
                 final String body = getBodyFromStaticFile("/index.html");
-                return ResponseContent.redirect(body, "/index.html");
+                return ResponseContent.redirect(body, "/index.html", null);
             } catch (IllegalArgumentException e) {
                 final String body = getBodyFromStaticFile("/register.html");
-                return ResponseContent.redirect(body, "/register.html");
+                return ResponseContent.redirect(body, "/register.html", null);
             }
         }
 
@@ -109,11 +121,11 @@ public class ResponseBody {
         }
 
         final String body = getBodyFromResource(resource);
-        return ResponseContent.success(body);
+        return ResponseContent.success(body, null);
     }
 
     private String findValueFromParams(final String name) {
-        return httpRequest.getParamsValueFromBody(name)
+        return httpRequest.findParamsValueFromBody(name)
                 .orElseThrow(() -> new IllegalArgumentException("파라미터의 키 값이 존재하지 않습니다: " + name));
     }
 }

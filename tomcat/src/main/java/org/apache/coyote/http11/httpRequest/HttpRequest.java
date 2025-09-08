@@ -1,17 +1,16 @@
 package org.apache.coyote.http11.httpRequest;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final RequestHeader headers;
     private final RequestBody requestBody;
 
     public HttpRequest(
             final RequestLine requestLine,
-            final Map<String, String> headers,
+            final RequestHeader headers,
             final RequestBody requestBody
     ) {
         this.requestLine = requestLine;
@@ -29,5 +28,9 @@ public class HttpRequest {
 
     public Optional<String> findParamsValueFromBody(final String name) {
         return this.requestBody.findParamsValue(name);
+    }
+
+    public Optional<String> findCookie() {
+        return headers.findValue("Cookie");
     }
 }

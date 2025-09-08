@@ -1,31 +1,38 @@
 package org.apache.coyote.http11.httpResponse;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.HttpStatus;
+import java.util.Map;
+import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class ResponseHeader {
 
-    private final String requestUri;
+    private final HttpRequest httpRequest;
 
     public ResponseHeader(
-            final String requestUri
+            final HttpRequest httpRequest
     ) {
-        this.requestUri = requestUri;
+        this.httpRequest = httpRequest;
     }
 
     public String getHeader(
-            final HttpStatus httpStatus,
-            final int contentLength,
-            final String location
+            final ResponseContent responseContent
     ) {
         final List<String> headers = new ArrayList<>();
-        headers.add("HTTP/1.1 " + httpStatus.toString());
+        headers.add("HTTP/1.1 " + responseContent.httpStatus().toString());
         headers.add("Content-Type: " + getContentType() + ";charset=utf-8");
-        headers.add("Content-Length: " + contentLength);
+        headers.add("Content-Length: " + responseContent.body().getBytes(StandardCharsets.UTF_8).length);
 
-        if (location != null) {
-            headers.add("Location: " + location);
+        if (responseContent.location() != null) {
+            headers.add("Location: " + responseContent.location());
+        }
+
+        if (responseContent.httpCookie() != null) {
+            Map<String, String> cookies = responseContent.httpCookie().getCookies();
+            for (String name : cookies.keySet()) {
+                headers.add("Set-Cookie: " + name + "=" + cookies.get(name) + ";");
+            }
         }
 
         headers.add("\r\n");
@@ -33,13 +40,13 @@ public class ResponseHeader {
     }
 
     private String getContentType() {
-        if (requestUri.endsWith(".css")) {
+        if (httpRequest.getPath().endsWith(".css")) {
             return "text/css";
         }
-        if (requestUri.equals(".js")) {
+        if (httpRequest.getPath().equals(".js")) {
             return "text/javascript";
         }
-        if (requestUri.equals("svg")) {
+        if (httpRequest.getPath().equals("svg")) {
             return "image/svg+xml";
         }
         return "text/html";

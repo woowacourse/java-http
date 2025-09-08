@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.util.HttpContentTypeResolver;
@@ -78,12 +77,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void processLoginMemberInfo(HttpRequest httpRequest) {
-        Map<String, String> queries = httpRequest.queries();
-        if (queries == null || queries.isEmpty()) {
-            return;
-        }
-        String account = queries.get("account");
-        String password = queries.get("password");
+        String account = httpRequest.getQueryValue("account")
+                .orElse(null);
+        String password = httpRequest.getQueryValue("password")
+                .orElse(null);
         if (account == null || password == null) {
             return;
         }

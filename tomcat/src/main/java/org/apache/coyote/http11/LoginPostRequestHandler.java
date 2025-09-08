@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
+import org.apache.catalina.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +32,26 @@ public class LoginPostRequestHandler implements HttpRequestHandler {
         }
 
         log.info("user = {}", user);
-        return createRedirectResponse("http://localhost:8080/index.html");
+        Session session = httpRequest.getSession(true);
+        session.setAttribute("loginUser", user);
+        return createRedirectResponse("http://localhost:8080/index.html", session);
     }
+
 
     private String createRedirectResponse(final String redirectUrl) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Length: " + 0 + " ",
                 "Location: " + redirectUrl + " ",
+                "");
+    }
+
+    private String createRedirectResponse(final String redirectUrl, final Session session) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Length: " + 0 + " ",
+                "Location: " + redirectUrl + " ",
+                "Set-Cookie: JSESSIONID=" + session.getId() + " ",
                 "");
     }
 }

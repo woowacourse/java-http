@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.dto;
 
-public record HttpRequestUrl(
+public record HttpRequestUri(
         String method,
         String path,
         String version,

@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.dto.HttpRequest;
-import org.apache.coyote.http11.dto.HttpRequestUrl;
+import org.apache.coyote.http11.dto.HttpRequestUri;
 
 public final class HttpRequestParser {
 
@@ -30,13 +30,13 @@ public final class HttpRequestParser {
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.ISO_8859_1));
-        HttpRequestUrl httpRequestUrl = readUri(reader);
+        HttpRequestUri httpRequestUri = readUri(reader);
         HttpHeaders headers = readHeaders(reader);
-        Map<String, String> queryParams = parseQueryString(httpRequestUrl.queryString());
-        return new HttpRequest(httpRequestUrl.method(), httpRequestUrl.path(), httpRequestUrl.version(), headers, queryParams);
+        Map<String, String> queryParams = parseQueryString(httpRequestUri.queryString());
+        return new HttpRequest(httpRequestUri.method(), httpRequestUri.path(), httpRequestUri.version(), headers, queryParams);
     }
 
-    private static HttpRequestUrl readUri(BufferedReader reader) throws IOException {
+    private static HttpRequestUri readUri(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         String[] parts = requestLine.split(HTTP_URL_DELIMITER);
 
@@ -48,7 +48,7 @@ public final class HttpRequestParser {
         String path = (queryStartIndex == -1) ? uri : uri.substring(0, queryStartIndex);
         String queryString = (queryStartIndex == -1) ? "" : uri.substring(queryStartIndex + 1);
 
-        return new HttpRequestUrl(method, path, version, queryString);
+        return new HttpRequestUri(method, path, version, queryString);
     }
 
     private static HttpHeaders readHeaders(BufferedReader reader) throws IOException {

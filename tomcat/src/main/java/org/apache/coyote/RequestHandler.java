@@ -32,6 +32,7 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/index", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/register.html", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/register", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/register", Method.POST), this::handleRegister);
         requestMappings.put(new RequestMapping("/css/styles.css", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/chart-area.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/js/scripts.js", Method.GET), this::handleStaticResource);
@@ -43,6 +44,19 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/login", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/login", Method.POST), this::handleLogin);
+    }
+
+    private HttpResponse handleRegister(HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getBody();
+        final String account = requestBody.getOrDefault("account", "");
+        final String password = requestBody.getOrDefault("password", "");
+        final String email = requestBody.getOrDefault("email", "");
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
+            return handleStaticResource(httpRequest);
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
     }
 
     public HttpResponse handleRequest(HttpRequest httpRequest) {

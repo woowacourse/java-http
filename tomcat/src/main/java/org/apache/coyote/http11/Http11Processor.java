@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // GET /login
-            if (requestPath.equals("/login") && !httpRequest.isQueryStringExists()) {
+            if (requestPath.equals("/login") && httpRequest.getHttpMethod() == HttpMethod.GET) {
                 final URL resource = getStaticResource("/login.html");
                 final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
@@ -94,8 +94,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // POST /login
-            if (requestPath.equals("/login") && httpRequest.isQueryStringExists()) {
-                final Map<String, String> parameters = httpRequest.getQueryParameters();
+            if (requestPath.equals("/login") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+                final Map<String, String> parameters = httpRequest.getRequestBody();
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
                 final Optional<User> user = InMemoryUserRepository.findByAccount(account);

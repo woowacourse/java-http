@@ -20,9 +20,7 @@ public class LoginRequestHandler implements HttpRequestHandler {
         Map<String, String> queryParameters = requestStartLine.queryParameters();
 
         return requestStartLine.requestMethod() == RequestMethod.GET &&
-                requestStartLine.requestUrl().startsWith("/login") &&
-                queryParameters.containsKey("account") &&
-                queryParameters.containsKey("password");
+                requestStartLine.requestUrl().startsWith("/login");
     }
 
     @Override
@@ -32,18 +30,23 @@ public class LoginRequestHandler implements HttpRequestHandler {
         Path resourcePath = Path.of(resource.getPath());
         byte[] bytes = readAllBytes(resourcePath);
 
-        Optional<User> foundUser = InMemoryUserRepository.findByAccount(getQueryParameters.get("account"));
-        if (foundUser.isEmpty()) {
-            log.info("존재하지 않는 user입니다.");
-            return createHttpResponse(bytes);
-        }
+        if (getQueryParameters.containsKey("account") && getQueryParameters.containsKey("password")) {
+            Optional<User> foundUser = InMemoryUserRepository.findByAccount(getQueryParameters.get("account"));
+            if (foundUser.isEmpty()) {
+                log.info("존재하지 않는 user입니다.");
+                return createSuccessResponse(bytes);
+            }
 
-        User user = foundUser.get();
-        if (user.checkPassword(getQueryParameters.get("password"))) {
+            User user = foundUser.get();
+            if (!user.checkPassword(getQueryParameters.get("password"))) {
+                log.info("비밀번호 틀림");
+            }
+
             log.info("user = {}", user);
+            return createRedirectResponse();
         }
 
-        return createHttpResponse(bytes);
+        return createSuccessResponse(bytes);
     }
 
     private byte[] readAllBytes(final Path resourcePath) {
@@ -54,12 +57,20 @@ public class LoginRequestHandler implements HttpRequestHandler {
         }
     }
 
-    private String createHttpResponse(final byte[] bytes) {
+    private String createSuccessResponse(final byte[] bytes) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + bytes.length + " ",
                 "",
                 new String(bytes));
+    }
+
+    private String createRedirectResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Length: " + 0 + " ",
+                "Location: http://localhost:8080/index.html ",
+                "");
     }
 }

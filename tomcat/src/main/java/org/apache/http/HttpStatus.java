@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.http;
 
 public enum HttpStatus {
     OK("OK", 200),

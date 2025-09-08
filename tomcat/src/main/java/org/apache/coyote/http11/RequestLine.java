@@ -12,7 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RequestLine {
 
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParameters;
     private final String protocolVersion;
@@ -26,7 +26,7 @@ public class RequestLine {
         if (requestLineParts.length != 3) {
             throw new IllegalStateException("잘못된 형식의 requestLine입니다: " + requestLine);
         }
-        String method = requestLineParts[0];
+        String methodString = requestLineParts[0];
         String requestUri = requestLineParts[1];
         String protocolVersion = requestLineParts[2];
 
@@ -37,7 +37,7 @@ public class RequestLine {
             queryParameters = extractQueryParameters(uriParts[1]);
         }
 
-        return new RequestLine(method, path.substring(1), queryParameters, protocolVersion);
+        return new RequestLine(HttpMethod.valueOf(methodString), path.substring(1), queryParameters, protocolVersion);
     }
 
     private static Map<String, String> extractQueryParameters(final String queryString) {

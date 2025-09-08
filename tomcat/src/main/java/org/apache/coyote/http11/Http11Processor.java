@@ -65,8 +65,26 @@ public class Http11Processor implements Runnable, Processor {
 
                     outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();
+                    log.info("login 완료: user account: " + account);
                     return;
                 }
+            }
+
+            if("register".equals(requestPath) && requestLine.getMethod() == HttpMethod.POST) {
+                RequestHeaders requestHeaders = RequestHeaders.from(reader);
+                String contentLength = requestHeaders.getHeader("Content-Length");
+                String requestBody = readRequestBody(reader, contentLength);
+                Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
+
+                User newUser = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
+                InMemoryUserRepository.save(newUser);
+
+                Map<String, String> headers = Map.of("Location", "/index.html");
+                final var response = buildHttpResponse("302 Found", "text/html", "", headers);
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                log.info("register 완료, newUser account: " + newUser.getAccount());
+                return;
             }
 
             var responseBody = readStaticFileContent(requestPath);
@@ -146,5 +164,18 @@ public class Http11Processor implements Runnable, Processor {
         response.append("\r\n"); // 헤더와 본문 구분
         response.append(responseBody);
         return response.toString();
+    }
+
+    private String readRequestBody(BufferedReader reader, String contentLengthHeader) throws IOException {
+        if (contentLengthHeader == null || contentLengthHeader.isBlank()) {
+            return "";
+        }
+        final int contentLength = Integer.parseInt(contentLengthHeader);
+        if (contentLength <= 0) {
+            return "";
+        }
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

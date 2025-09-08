@@ -12,8 +12,12 @@ import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.constant.RequestLine;
 import org.apache.coyote.http11.constant.ResourcePath;
 import org.apache.coyote.util.StreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResponseGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(ResponseGenerator.class);
 
     private ResponseGenerator() {
 
@@ -32,7 +36,7 @@ public class ResponseGenerator {
             final String path = resourcePathValue.substring(0, startIndex);
             final String queryString = resourcePathValue.substring(startIndex + 1);
             final Map<String, String> parsedQueryString = parseQueryString(queryString);
-            processQueryString(path, parsedQueryString);
+            processRequestByQueryString(path, parsedQueryString);
             final HttpStatus statusCode = HttpStatus.OK;
             final ContentType contentType = ContentType.HTML;
             final String body = readFile(path + ".html");
@@ -47,17 +51,17 @@ public class ResponseGenerator {
                 TODO: 정적파일이 아닌 경우 로직을 실행시키고 응답을 반환한다.
              */
         }
-        return null;
+        return new HttpResponse(HttpStatus.BAD_REQUEST, ContentType.TEXT, null);
     }
 
-    private static void processQueryString(String path, Map<String, String> queryStrings) {
+    private static void processRequestByQueryString(String path, Map<String, String> queryStrings) {
         if (path.equals("/login")) {
             final User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
             if (!user.checkPassword(queryStrings.get("password"))) {
                 throw new IllegalArgumentException("올바르지 않은 패스워드입니다.");
             }
-            System.out.println(String.format("user : %s", user));
+            log.info(String.format("user: %s", user));
         }
     }
 
@@ -76,7 +80,7 @@ public class ResponseGenerator {
     private static String readFile(String path) {
         final String resourcePath = String.format("static/%s", path);
         try (InputStream resourceAsStream = Application.class.getClassLoader().getResourceAsStream(resourcePath)) {
-            return StreamReader.readAllLine(resourceAsStream);
+            return StreamReader.readFile(resourceAsStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -4,22 +4,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class StreamReader {
 
-    private StreamReader() {
+    public static String readFile(InputStream inputStream) throws IOException {
+        Objects.requireNonNull(inputStream);
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
 
-    public static String readAllLine(InputStream inputStream) throws IOException {
-        if (inputStream == null) {
-            return null;
-        }
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        final StringBuilder content = new StringBuilder();
-        while (reader.ready()) {
-            content.append(reader.readLine());
-            content.append('\n');
-        }
-        return content.toString();
+    public static String readRequest(InputStream inputStream) throws IOException {
+        Objects.requireNonNull(inputStream);
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return reader.lines().takeWhile(line -> !line.isEmpty()).collect(Collectors.joining("\r\n"));
     }
 }

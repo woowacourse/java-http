@@ -6,6 +6,7 @@ import com.techcourse.presentation.LoginController;
 import com.techcourse.presentation.ParsedResourcePath;
 import com.techcourse.presentation.ResponseWithType;
 import com.techcourse.presentation.StaticResourceController;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,7 +62,7 @@ public class RequestProcessor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + response.contentType() + ";charset=utf-8 ",
-                "Content-Length: " + response.body().getBytes().length + " ",
+                "Content-Length: " + response.body().getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 response.body());
     }

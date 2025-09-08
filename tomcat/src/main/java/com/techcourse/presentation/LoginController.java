@@ -12,9 +12,11 @@ public class LoginController implements Controller {
     private static final String BASE_URL = "/login";
 
     private final LoginService loginService;
+    private final StaticResourceController staticResourceController;
 
-    public LoginController(final LoginService loginService) {
+    public LoginController(final LoginService loginService, final StaticResourceController staticResourceController) {
         this.loginService = loginService;
+        this.staticResourceController = staticResourceController;
     }
 
     public String login(final Map<String, String> params) {
@@ -41,6 +43,6 @@ public class LoginController implements Controller {
         }
 
         final String filePath = login(request.params());
-        return new StaticResourceController().getResource(new ParsedResourcePath(filePath, new HashMap<>()));
+        return staticResourceController.getResource(new ParsedResourcePath(filePath, new HashMap<>()));
     }
 }

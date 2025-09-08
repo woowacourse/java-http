@@ -16,8 +16,12 @@ public class RequestProcessor {
     private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestProcessor() {
-        controllers.computeIfAbsent("LoginController", key -> new LoginController(new LoginService()));
         controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
+        final var staticResourceController = (StaticResourceController) controllers.get("StaticResourceController");
+        controllers.computeIfAbsent(
+                "LoginController",
+                key -> new LoginController(new LoginService(), staticResourceController)
+        );
     }
 
     public String process(final String requestLine) {

@@ -11,7 +11,7 @@ public class Response {
 
     private Map<String, String> headers;
 
-    private String body;
+    private String body = "";
 
     private HttpStatusCode httpStatusCode;
 
@@ -53,6 +53,10 @@ public class Response {
 
     public String getBody() {
         return body;
+    }
+
+    public String getContentLength() {
+        return String.valueOf(body.getBytes().length);
     }
 
 }

@@ -128,7 +128,6 @@ public class HttpRequest {
             return SessionManager.getInstance().createSession();
         }
         String jsessionId = getCookie("JSESSIONID");
-        System.out.println(jsessionId);
         return SessionManager.getInstance().findSession(jsessionId);
     }
 

@@ -32,11 +32,11 @@ public class HttpResponse {
         headers.put("Content-Length", new ArrayList<>(List.of(String.valueOf(body.length))));
 
         StringBuilder sb = new StringBuilder();
-        sb.append(httpVersion).append(" ").append(status).append(" ").append(reasonPhrase).append("\r\n");
+        sb.append(httpVersion).append(" ").append(status).append(" ").append(reasonPhrase).append(" \r\n");
         for (Map.Entry<String, List<String>> e : headers.entrySet()) {
             String name = e.getKey();
             for (String v : e.getValue()) {
-                sb.append(name).append(": ").append(v).append("\r\n");
+                sb.append(name).append(": ").append(v).append(" \r\n");
             }
         }
         sb.append("\r\n");

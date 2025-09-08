@@ -66,7 +66,9 @@ public class Http11Processor implements Runnable, Processor {
                     if (loggedIn) {
                         response.redirect("/index.html");
                     } else {
-                        response.redirect("/login.html");
+                        response.writeText("Hello world!", "text/html;charset=utf-8");
+                        response.writeResponse(outputStream);
+                        return;
                     }
                     response.writeResponse(outputStream);
                     return;

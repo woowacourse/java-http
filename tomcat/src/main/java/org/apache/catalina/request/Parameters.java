@@ -1,5 +1,7 @@
 package org.apache.catalina.request;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class Parameters {
         parameters.putAll(parseFormBody(body, contentType));
     }
 
-    public String getParameter(String name){
+    public String getParameter(String name) {
         return parameters.get(name);
     }
 
@@ -39,8 +41,14 @@ public class Parameters {
         return Arrays.stream(paramString.split(PARAM_DELIMITER))
                 .filter(pair -> pair.contains(PAIR_DELIMITER))
                 .collect(Collectors.toMap(
-                        pair -> pair.substring(0, pair.indexOf(PAIR_DELIMITER)),
-                        pair -> pair.substring(pair.indexOf(PAIR_DELIMITER) + 1)
+                        pair -> URLDecoder.decode(
+                                pair.substring(0, pair.indexOf(PAIR_DELIMITER)),
+                                StandardCharsets.UTF_8
+                        ),
+                        pair -> URLDecoder.decode(
+                                pair.substring(pair.indexOf(PAIR_DELIMITER) + 1),
+                                StandardCharsets.UTF_8
+                        )
                 ));
     }
 

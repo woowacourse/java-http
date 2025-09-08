@@ -53,7 +53,7 @@ public class ApiRouter {
             }
             return httpResponse;
         }
-        HttpResponse httpResponse = StaticFileHandler.handleDefault(controllerResponse.content());
+        HttpResponse httpResponse = StaticFileHandler.handleDefault(controllerResponse.status(), controllerResponse.content());
         for (Entry<String, String> header : controllerResponse.headers().getHeaders().entrySet()) {
             httpResponse.addHeader(header.getKey(), header.getValue());
         }

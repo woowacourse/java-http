@@ -30,11 +30,11 @@ public class StaticFileHandler {
         }
     }
 
-    public static HttpResponse handleDefault(String viewName) {
+    public static HttpResponse handleDefault(HttpStatus status, String viewName) {
         try {
             URL resourceUrl = StaticFileHandler.class.getClassLoader().getResource("static/" + viewName + DEFAULT_EXTENSION_OF_STATIC_FILE);
             String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
-            return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, responseBody);
+            return new HttpResponse(status, ContentType.TEXT_HTML, responseBody);
         } catch (IOException | URISyntaxException exception) {
             logger.error(exception.getMessage(), exception);
             return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, null);

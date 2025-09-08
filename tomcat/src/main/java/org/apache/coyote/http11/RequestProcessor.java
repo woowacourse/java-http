@@ -7,28 +7,40 @@ import com.techcourse.presentation.ParsedResourcePath;
 import com.techcourse.presentation.ResponseWithType;
 import com.techcourse.presentation.StaticResourceController;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestProcessor {
 
-    private static final Map<String, Controller> controllers = new LinkedHashMap<>();
+    private static final List<String> priority = new ArrayList<>();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestProcessor() {
-        controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
+        controllers.computeIfAbsent("StaticResourceController", key -> {
+            priority.add(key);
+            return new StaticResourceController();
+        });
+
         final var staticResourceController = (StaticResourceController) controllers.get("StaticResourceController");
+
         controllers.computeIfAbsent(
                 "LoginController",
-                key -> new LoginController(new LoginService(), staticResourceController)
+                key -> {
+                    priority.add(key);
+                    return new LoginController(new LoginService(), staticResourceController);
+                }
         );
     }
 
     public String process(final String requestLine) {
         final ParsedResourcePath request = parse(requestLine);
 
-        final Controller responsibleController = controllers.values().stream()
+        final Controller responsibleController = priority.stream()
+                .map(controllers::get)
                 .filter(controller -> controller.isResponsible(request.path()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.path()));

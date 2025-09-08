@@ -26,16 +26,43 @@ public class HttpController {
         return HttpResponse.ok("js/scripts.js");
     }
 
+    public HttpResponse getLoginHtml(final HttpRequest httpRequest, final SessionManager sessionManager) {
+        final HttpCookie cookie = httpRequest.getCookie();
+        if (!cookie.containsName("JSESSIONID")) {
+            return HttpResponse.ok("login.html");
+        }
 
-    public HttpResponse login(final String account, final String password) {
+        final String sessionId = cookie.getByName("JSESSIONID");
+        final HttpSession session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            return HttpResponse.ok("login.html");
+        }
+
+        final User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return HttpResponse.ok("login.html");
+        }
+        return HttpResponse.found("index.html");
+    }
+
+    public HttpResponse login(final String account, final String password, final SessionManager sessionManager) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다: %s".formatted(account)));
 
-        if (user.checkPassword(password)) {
-            log.info("user : {}", user);
+        if (!user.checkPassword(password)) {
+            throw new UnauthorizedException();
         }
 
-        return HttpResponse.ok("login.html");
+        log.info("user : {}", user);
+        final HttpResponse httpResponse = HttpResponse.found("index.html");
+        String sessionId = UUID.randomUUID().toString();
+        httpResponse.setCookie("JSESSIONID", sessionId);
+        Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return httpResponse;
+    }
+
     }
 
     public HttpResponse getChartArea() {

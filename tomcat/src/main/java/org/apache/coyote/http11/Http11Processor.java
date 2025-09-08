@@ -5,9 +5,16 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.http.common.startline.HttpMethod;
 import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.request.HttpRequestBody;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +25,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpController httpController;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.httpController = new HttpController();
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -49,7 +58,15 @@ public class Http11Processor implements Runnable, Processor {
     private String findTargetMethod(final HttpRequest httpRequest) throws IOException, URISyntaxException {
         HttpMethod method = httpRequest.getMethod();
         String path = httpRequest.getPath();
+        try {
+            return handleTargetMethod(httpRequest, method, path);
+        } catch (UnauthorizedException e) {
+            log.error("UnauthorizedException catch: {} {}", method, path, e);
+            return HttpResponse.unauthorized().getResponseFormat();
+        }
+    }
 
+    private String handleTargetMethod(final HttpRequest httpRequest, final HttpMethod method, final String path) {
         if (method == HttpMethod.GET && path.equals("/")) {
             return helloWorld();
         }
@@ -74,14 +91,26 @@ public class Http11Processor implements Runnable, Processor {
         if (method == HttpMethod.GET && path.equals("/login")) {
             return getLoginHtml(httpRequest);
         }
+        if (method == HttpMethod.POST && path.equals("/login")) {
+            return login(httpRequest);
+        }
         throw new IllegalArgumentException("대상 경로 메서드가 존재하지 않습니다: %s".formatted(method + " " + path));
     }
 
-    private String getLoginHtml(final HttpRequest httpRequest) {
-        final String account = httpRequest.getTargetQueryParameter("account");
-        final String password = httpRequest.getTargetQueryParameter("password");
 
-        final HttpResponse httpResponse = httpController.login(account, password);
+    private String login(final HttpRequest httpRequest) {
+        final HttpRequestBody body = httpRequest.getBody();
+        byte[] bodyValue = body.getValue();
+        String jsonBody = new String(bodyValue, StandardCharsets.UTF_8);
+        Map<String, String> jsonValue = parseBodyValue(jsonBody);
+        String account = jsonValue.get("account");
+        String password = jsonValue.get("password");
+        final HttpResponse httpResponse = httpController.login(account, password, sessionManager);
+        return httpResponse.getResponseFormat();
+    }
+
+    private String getLoginHtml(final HttpRequest httpRequest) {
+        final HttpResponse httpResponse = httpController.getLoginHtml(httpRequest, sessionManager);
         return httpResponse.getResponseFormat();
     }
 

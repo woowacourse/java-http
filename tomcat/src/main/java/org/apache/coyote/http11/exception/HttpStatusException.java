@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.exception;
 
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 
 public class HttpStatusException extends RuntimeException {
 

@@ -56,6 +56,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeaders.put("Set-Cookie", sessionCookie.toHeaderString());
             }
 
+            //=========== POST 요청 처리 ============
             if (requestLine.getMethod() == HttpMethod.POST) {
                 final var contentLength = requestHeaders.getHeader("Content-Length");
                 final var requestBody = readRequestBody(reader, contentLength);
@@ -65,10 +66,10 @@ public class Http11Processor implements Runnable, Processor {
                 if ("login".equals(requestLine.getPath())) {
                     String account = parameters.get("account");
                     String password = parameters.get("password");
-                    final Optional<User> optionalUser = findUserByAccount(account, password);
+                    final Optional<User> optionalUser = findUserByAccount(account);
                     if (optionalUser.isPresent()) {
                         User user = optionalUser.get();
-                        if(user.checkPassword(password)) {
+                        if (user.checkPassword(password)) {
                             session.setAttribute("user", user);
                             log.info("로그인 성공 account: {}", account);
                         }
@@ -79,8 +80,11 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if ("register".equals(requestLine.getPath())) {
-                    final var newUser = new User(parameters.get("account"), parameters.get("password"),
-                            parameters.get("email"));
+                    final var newUser = new User(
+                            parameters.get("account"),
+                            parameters.get("password"),
+                            parameters.get("email")
+                    );
                     InMemoryUserRepository.save(newUser);
                     log.info("Registered new user: {}", newUser.getAccount());
                 }
@@ -92,10 +96,21 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            //=========== GET 요청 처리 ============
             var requestPath = requestLine.getPath();
+
+            if ("/login".equals(requestPath) && session.getAttribute("user") != null) {
+                responseHeaders.put("Location", "/index.html");
+                final var response = buildHttpResponse("302 Found", "text/html", "", responseHeaders);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             if (requestPath.isBlank() || "/".equals(requestPath)) {
                 requestPath = "index.html";
             }
+
             var statusCode = "200 OK";
 
             var responseBody = readStaticFileContent(requestPath);
@@ -134,8 +149,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public Optional<User> findUserByAccount(String account, String password) {
-        if (account == null || account.isBlank() || password == null) {
+    public Optional<User> findUserByAccount(String account) {
+        if (account == null || account.isBlank()) {
             return Optional.empty();
         }
         return InMemoryUserRepository.findByAccount(account);

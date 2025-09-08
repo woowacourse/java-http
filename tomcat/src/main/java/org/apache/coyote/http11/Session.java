@@ -30,8 +30,6 @@ public class Session implements HttpSession {
         final var creationTime = System.currentTimeMillis();
         final var session = new Session(sessionManager, id, creationTime, false);
         sessionManager.add(session);
-        System.out.println("session: " + session);
-        System.out.println("sessionManager: " + sessionManager);
         return session;
     }
 

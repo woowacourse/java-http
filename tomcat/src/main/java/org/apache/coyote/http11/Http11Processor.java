@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private final RequestProcessor requestProcessor = new RequestProcessor();
 
     private final Socket connection;
 
@@ -29,12 +30,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final String request = StreamReader.readRequest(inputStream);
-            if (request == null || request.isEmpty()) {
+            final HttpRequest httpRequest = StreamReader.readRequest(inputStream);
+            if (httpRequest == null) {
                 return;
             }
-            final HttpRequest httpRequest = HttpRequest.from(request);
-            final HttpResponse response = ResponseGenerator.generateResponse(httpRequest);
+            final HttpResponse response = requestProcessor.generateResponse(httpRequest);
             outputStream.write(response.convertByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

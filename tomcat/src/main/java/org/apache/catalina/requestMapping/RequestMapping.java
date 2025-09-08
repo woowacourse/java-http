@@ -1,22 +1,22 @@
-package org.apache.catalina.servletContainer;
+package org.apache.catalina.requestMapping;
 
 import java.util.Optional;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class ServletContainer {
+public class RequestMapping {
 
-    private final ServletMapper servletMapper;
+    private final getController getController;
 
-    public ServletContainer() {
-        this.servletMapper = new ServletMapper();
+    public RequestMapping() {
+        this.getController = new getController();
     }
 
     public void process(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Optional<Servlet> servlet = servletMapper.findServlet(httpRequest);
+        Optional<Controller> servlet = getController.findServlet(httpRequest);
         if (servlet.isEmpty()) {
             httpResponse.init("", ContentType.HTML, HttpStatus.NOT_FOUND);
             return;

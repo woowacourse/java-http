@@ -1,9 +1,9 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
-public interface Servlet {
+public interface Controller {
 
     boolean canHandle(final HttpRequest httpRequest);
 

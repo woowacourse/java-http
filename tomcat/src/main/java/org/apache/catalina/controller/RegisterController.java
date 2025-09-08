@@ -1,6 +1,5 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.controller;
 
-import com.techcourse.controller.RegisterController;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,7 +15,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class RegisterServlet extends HttpServlet {
+public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PATH = "/register";
     private static final String STATIC_RECOURSE_PATH = "static";
@@ -48,14 +47,14 @@ public class RegisterServlet extends HttpServlet {
             bodyValues.put(split[0], split[1]);
         }
 
-        final RegisterController registerController = new RegisterController(new UserService());
+        final com.techcourse.controller.RegisterController registerController = new com.techcourse.controller.RegisterController(new UserService());
 
         registerController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
         httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);
     }
 
     private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
+        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

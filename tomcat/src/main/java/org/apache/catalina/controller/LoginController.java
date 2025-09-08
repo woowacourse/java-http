@@ -1,6 +1,5 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.controller;
 
-import com.techcourse.controller.LoginController;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.IOException;
@@ -11,8 +10,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.catalina.servletContainer.session.Session;
-import org.apache.catalina.servletContainer.session.SessionManager;
+import org.apache.catalina.requestMapping.session.Session;
+import org.apache.catalina.requestMapping.session.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.requestLine.RequestLine;
 import org.apache.coyote.request.requestLine.RequestPath;
@@ -20,7 +19,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class LoginServlet extends HttpServlet {
+public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
     private static final String STATIC_RECOURSE_PATH = "static";
@@ -57,7 +56,7 @@ public class LoginServlet extends HttpServlet {
             bodyValues.put(split[0], split[1]);
         }
 
-        final LoginController loginController = new LoginController(new UserService()); //TODO: Bean 구현 부분
+        final com.techcourse.controller.LoginController loginController = new com.techcourse.controller.LoginController(new UserService()); //TODO: Bean 구현 부분
 
         try {
             User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));
@@ -91,7 +90,7 @@ public class LoginServlet extends HttpServlet {
     }
 
     private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
+        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

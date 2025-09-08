@@ -1,4 +1,4 @@
-package org.apache.catalina.servletContainer.session;
+package org.apache.catalina.requestMapping.session;
 
 public interface Manager {
 

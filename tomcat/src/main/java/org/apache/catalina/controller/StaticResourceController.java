@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,7 +13,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class StaticResourceServlet extends HttpServlet {
+public class StaticResourceController extends AbstractController {
 
     private static final String STATIC_RECOURSE_PATH = "static";
 
@@ -21,7 +21,7 @@ public class StaticResourceServlet extends HttpServlet {
     public boolean canHandle(final HttpRequest httpRequest) {
         RequestPath requestPath = httpRequest.getRequestPath();
 
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader()
+        URL resourceUrl = StaticResourceController.class.getClassLoader()
                 .getResource(STATIC_RECOURSE_PATH + requestPath.getRequestPath());
         return resourceUrl != null;
     }
@@ -46,7 +46,7 @@ public class StaticResourceServlet extends HttpServlet {
     }
 
     private String findResource(final String requestPath) {
-        URL resourceUrl = StaticResourceServlet.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
+        URL resourceUrl = StaticResourceController.class.getClassLoader().getResource(STATIC_RECOURSE_PATH + requestPath);
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

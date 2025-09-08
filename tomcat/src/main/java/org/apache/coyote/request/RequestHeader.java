@@ -3,8 +3,8 @@ package org.apache.coyote.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlet.cookie.HttpCookie;
-import org.apache.catalina.servletContainer.session.Session;
+import org.apache.catalina.controller.cookie.HttpCookie;
+import org.apache.catalina.requestMapping.session.Session;
 import org.apache.coyote.response.responseHeader.HttpHeaders;
 
 public class RequestHeader {

@@ -1,10 +1,10 @@
-package org.apache.catalina.servlet.cookie;
+package org.apache.catalina.controller.cookie;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.catalina.servletContainer.session.Session;
-import org.apache.catalina.servletContainer.session.SessionManager;
+import org.apache.catalina.requestMapping.session.Session;
+import org.apache.catalina.requestMapping.session.SessionManager;
 
 public class HttpCookie {
 

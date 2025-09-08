@@ -39,14 +39,9 @@ public class StaticResourceHandler implements Handler {
     @Override
     public boolean canHandle(HttpRequest request) {
         String path = request.path().replaceFirst(STATIC_REGEX, "");
-        if (path.isEmpty()) {
-            path = defaultDocument;
-        }
+        path = normalizePath(path);
         if (path.contains(INVALID_PATH_SEQUENCE)) {
             return false;
-        }
-        if (path.startsWith(SUFFIX)) {
-            path = path.substring(1);
         }
         String fullPath = base + SUFFIX + path;
         return getClass().getClassLoader().getResource(fullPath) != null;
@@ -55,12 +50,7 @@ public class StaticResourceHandler implements Handler {
     @Override
     public void handle(HttpRequest request, OutputStream outputStream) throws IOException {
         String resourcePath = request.path().replaceFirst(STATIC_REGEX, "");
-        if (resourcePath.isEmpty()) {
-            resourcePath = defaultDocument;
-        }
-        if (resourcePath.startsWith(SUFFIX)) {
-            resourcePath = resourcePath.substring(1);
-        }
+        resourcePath = normalizePath(resourcePath);
         String fullPath = base + SUFFIX + resourcePath;
 
         try {
@@ -84,6 +74,16 @@ public class StaticResourceHandler implements Handler {
             log.error("Unexpected error while serving static resource '{}': {}", request.path(), e.getMessage(), e);
             Responses.serverError(outputStream, request.version());
         }
+    }
+
+    private String normalizePath(String path) {
+        if (path.startsWith(SUFFIX)) {
+            path = path.substring(1);
+        }
+        if (path.isEmpty()) {
+            path = defaultDocument;
+        }
+        return path;
     }
 
     private Optional<byte[]> loadResourceBytes(String fullPath) throws IOException {

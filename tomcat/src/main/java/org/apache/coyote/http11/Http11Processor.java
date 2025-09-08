@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.Processor;
 import org.apache.coyote.ResourceLoader;
 import org.apache.coyote.ResponseBuilder;
@@ -38,36 +39,47 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            final String requestLine = bufferedReader.readLine();
-            final String requestUri = extractRequestUri(requestLine);
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final HttpRequest request = getHttpRequest(bufferedReader);
 
             byte[] responseBody;
-            if (requestUri.contains("?")) {
-                final Map<String, String> queryParams = extractQueryParams(requestUri);
+            if (request.uri().contains("?")) {
+                final Map<String, String> queryParams = extractQueryParams(request.uri());
                 responseBody = service.findUser(queryParams);
             } else {
-                responseBody = ResourceLoader.get(requestUri);
+                responseBody = ResourceLoader.get(request.uri());
             }
 
-            final Map<String, String> headers = new HashMap<>();
-            while (bufferedReader.ready()) {
-                String line = bufferedReader.readLine();
-                if (line.contains(HEADER_DELIMITER)) {
-                    String[] headerParts = line.split(HEADER_DELIMITER);
-                    headers.put(headerParts[0], headerParts[1]);
-                }
-            }
-
-            final var response = responseBuilder.build(requestUri, responseBody);
+            final var response = responseBuilder.build(request.uri(), responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest getHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final String requestLine = bufferedReader.readLine();
+        final String requestMethod = extractRequestMethod(requestLine);
+        final String requestUri = extractRequestUri(requestLine);
+
+        final Map<String, String> headers = new HashMap<>();
+        while (bufferedReader.ready()) {
+            String line = bufferedReader.readLine();
+            if (line.contains(HEADER_DELIMITER)) {
+                String[] headerParts = line.split(HEADER_DELIMITER);
+                headers.put(headerParts[0], headerParts[1]);
+            }
+        }
+
+        return new HttpRequest(requestMethod, requestUri, headers);
+    }
+
+    private String extractRequestMethod(final String requestLine) {
+        return requestLine.split(" ")[0];
     }
 
     private String extractRequestUri(final String header) {

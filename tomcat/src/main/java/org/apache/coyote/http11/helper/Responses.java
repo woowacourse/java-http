@@ -21,13 +21,6 @@ public final class Responses {
         out.flush();
     }
 
-    public static void html(OutputStream out, String version, int code, String reason, String body) throws IOException {
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-        writeHead(out, version, code, reason, "text/html;charset=utf-8", bytes.length);
-        out.write(bytes);
-        out.flush();
-    }
-
     public static void binary(OutputStream out, String version, int code, String reason, String contentType, byte[] bytes) throws IOException {
         writeHead(out, version, code, reason, contentType, bytes.length);
         out.write(bytes);

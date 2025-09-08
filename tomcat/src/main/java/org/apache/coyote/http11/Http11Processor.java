@@ -1,11 +1,16 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.dto.RequestInfo;
+import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.RequestLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -13,9 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-
+    private final RequestRouter requestRouter;
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestRouter = new RequestRouter();
+
     }
 
     @Override
@@ -27,16 +34,15 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            final String requestLine = reader.readLine();
+            if (requestLine == null || requestLine.isEmpty()) {
+                return;
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = createResponse(requestLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -44,4 +50,10 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private String createResponse(final String requestLine) throws IOException {
+        RequestInfo requestInfo = RequestLineParser.parse(requestLine);
+        return requestRouter.handleRoute(requestInfo.method(),requestInfo.path(),requestInfo.queryParams());
+    }
+
 }

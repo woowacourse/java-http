@@ -1,6 +1,7 @@
-package org.apache.catalina.domain;
+package org.apache.catalina.domain.response;
 
 import com.http.enums.HttpStatus;
+import org.apache.catalina.domain.request.HttpRequest;
 
 public final class ResponseStartLine {
     private String version;

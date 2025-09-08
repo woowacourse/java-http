@@ -2,13 +2,14 @@ package org.apache.catalina.servlet;
 
 import com.http.enums.HttpStatus;
 import com.http.servlet.LoginServlet;
+import com.http.servlet.RegisterServlet;
 import com.techcourse.exception.HttpStatusException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.domain.request.HttpRequest;
+import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.servlet.impl.DefaultServlet;
 import org.apache.coyote.http11.ResponseProcessor;
 import org.slf4j.Logger;
@@ -26,14 +27,16 @@ public final class HttpServletContainer {
 
     static {
         handlers.put("/login", new LoginServlet());
+        handlers.put("/register", new RegisterServlet());
     }
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {
         final String path = request.requestStartLine().path();
 
         try {
-            handlers.getOrDefault(path, defaultServlet).handle(request, response);
+            handlers.getOrDefault(path, defaultServlet).service(request, response);
         } catch (HttpStatusException e) {
+            log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
             processResponse(request, response, e);
             return;
         } catch (FileNotFoundException e) {
@@ -41,6 +44,7 @@ public final class HttpServletContainer {
         } catch (IllegalArgumentException e) {
             response.setStatus(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            log.error("서버 오류 발생 = {}", e.getMessage(), e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -49,7 +53,7 @@ public final class HttpServletContainer {
 
     private static void processResponse(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (response.getStatus() != HttpStatus.OK) {
+        if (response.getStatus().isError()) {
             log.debug("에러 페이지 접근 status : {}", response.getStatus());
             ResponseProcessor.handleErrorPage(request, response);
             return;

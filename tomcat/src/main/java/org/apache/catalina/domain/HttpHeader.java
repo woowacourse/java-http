@@ -3,8 +3,15 @@ package org.apache.catalina.domain;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.domain.cookie.HttpCookie;
+import org.apache.catalina.domain.cookie.HttpCookies;
 
 public record HttpHeader(Map<String, String> headers) {
+
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String COOKIE = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
 
     public HttpHeader() {
         this(new LinkedHashMap<>());
@@ -36,6 +43,18 @@ public record HttpHeader(Map<String, String> headers) {
         headers.put(key, value);
     }
 
+    private static String normalizeHeaderKey(String key) {
+        String[] tokens = key.split("-");
+        StringBuilder builder = new StringBuilder();
+        for (String token : tokens) {
+            builder.append(Character.toUpperCase(token.charAt(0)))
+                    .append(token.substring(1).toLowerCase())
+                    .append("-");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
+    }
+
     public void put(String key, String value) {
         final String headerKey = normalizeHeaderKey(key);
         if (headers.containsKey(headerKey)) {
@@ -55,23 +74,38 @@ public record HttpHeader(Map<String, String> headers) {
                 .anyMatch(k -> normalizeHeaderKey(k).equals(normalizeHeaderKey(key)));
     }
 
-    private static String normalizeHeaderKey(String key) {
-        String[] tokens = key.split("-");
-        StringBuilder builder = new StringBuilder();
-        for (String token : tokens) {
-            builder.append(Character.toUpperCase(token.charAt(0)))
-                    .append(token.substring(1).toLowerCase())
-                    .append("-");
+    public int getContentLength() {
+        if (!containKey(CONTENT_LENGTH)) {
+            return 0;
         }
-        builder.deleteCharAt(builder.length() - 1);
-        return builder.toString();
+        return Integer.parseInt(get(CONTENT_LENGTH));
     }
 
-    public boolean isEmpty() {
-        return headers.isEmpty();
+    public String getContentType() {
+        if (!containKey(CONTENT_LENGTH)) {
+            throw new IllegalArgumentException("Content-Length header is missing");
+        }
+        return get(CONTENT_TYPE);
     }
 
-    public boolean containsKey(String key) {
-        return containKey(key);
+    public boolean hasCookie() {
+        return containKey(COOKIE);
+    }
+
+    public HttpCookies getCookies() {
+        if (hasCookie()) {
+            return HttpCookies.from(get(COOKIE));
+        }
+
+        return new HttpCookies();
+    }
+
+    public void addSetCookie(HttpCookie cookie) {
+        final String headerKey = normalizeHeaderKey(SET_COOKIE);
+        if (headers.containsKey(headerKey)) {
+            headers.compute(headerKey, (k, existingValue) -> existingValue + ", " + cookie.toString());
+            return;
+        }
+        headers.put(headerKey, cookie.toString());
     }
 }

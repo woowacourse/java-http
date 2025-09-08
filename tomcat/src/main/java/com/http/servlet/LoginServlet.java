@@ -6,8 +6,9 @@ import com.techcourse.exception.UnAuthorizedException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.domain.Session;
+import org.apache.catalina.domain.request.HttpRequest;
+import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
@@ -18,21 +19,38 @@ public class LoginServlet implements HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException {
-        final Map<String, String> queryStrings = request.queryStrings();
+    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        // 이미 로그인된 상태인지 확인
+        final Session session = request.getSession(false); // 세션이 없으면 null 반환
+        final User user = getUser(session);
+        if (session != null && user != null) {
+            // 이미 로그인된 상태면 index.html로 리다이렉트
+            response.setStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/index.html");
+            log.info("로그인된 사용자입니다. account={}, sessionId={}", user.getAccount(), session.getId());
+            return;
+        }
 
-        String account = queryStrings.get("account");
-        String password = queryStrings.get("password");
-        processLogin(account, password, response);
-
+        // 로그인되지 않은 상태면 로그인 페이지 표시
         final String fileName = request.requestStartLine().path() + ".html";
         final byte[] loginHtml = FileParser.loadStaticResourceByFileName(fileName);
         response.setBody(loginHtml);
     }
 
-    private void processLogin(String account, String password, HttpResponse httpResponse) {
-        if (account == null && password == null) {
-            return;
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) {
+        log.debug("request = {}", request);
+        final Map<String, String> form = request.parseBody();
+
+        String account = form.get("account");
+        String password = form.get("password");
+        processLogin(request, account, password, response);
+    }
+
+    private void processLogin(HttpRequest request, String account, String password, HttpResponse httpResponse) {
+        if (account == null || password == null) {
+            log.error("account or password is null");
+            throw new UnAuthorizedException("인증이 필요합니다.");
         }
 
         User user = InMemoryUserRepository.findByAccount(account)
@@ -42,8 +60,20 @@ public class LoginServlet implements HttpServlet {
             throw new UnAuthorizedException("잘못된 인증입니다.");
         }
 
-        log.info("user : {} ", user);
+        // 세션 생성 및 사용자 정보 저장
+        Session session = request.getSession(true);
+        session.setAttribute("user", user);
         httpResponse.setStatus(HttpStatus.FOUND);
         httpResponse.addHeader("Location", "/index.html");
+
+        log.info("로그인 성공 아이디={}, 세션ID={}", account, session.getId());
+    }
+
+    private User getUser(Session session) {
+        if (session == null) {
+            return null;
+        }
+
+        return (User) session.getAttribute("user");
     }
 }

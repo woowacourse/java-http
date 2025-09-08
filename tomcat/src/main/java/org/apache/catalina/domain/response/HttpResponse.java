@@ -1,7 +1,11 @@
-package org.apache.catalina.domain;
+package org.apache.catalina.domain.response;
 
 import com.http.enums.HttpStatus;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.catalina.domain.HttpHeader;
+import org.apache.catalina.domain.cookie.HttpCookie;
+import org.apache.catalina.domain.request.HttpRequest;
 
 public final class HttpResponse {
 
@@ -35,6 +39,10 @@ public final class HttpResponse {
         this.header.put(key, value);
     }
 
+    public void addSetCookie(HttpCookie cookie) {
+        this.header.addSetCookie(cookie);
+    }
+
     public Map<String, String> getHeaders() {
         return header.headers();
     }
@@ -59,4 +67,8 @@ public final class HttpResponse {
         this.body = body;
     }
 
+    public void sendError(HttpStatus httpStatus, String message) {
+        setStatus(httpStatus);
+        this.body = message.getBytes(StandardCharsets.UTF_8);
+    }
 }

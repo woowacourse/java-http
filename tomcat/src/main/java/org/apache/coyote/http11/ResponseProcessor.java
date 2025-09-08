@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import com.http.enums.HttpStatus;
 import java.io.IOException;
 import org.apache.catalina.connector.ResponseHeaderUtil;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import org.apache.catalina.domain.request.HttpRequest;
+import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.util.FileParser;
 
 public final class ResponseProcessor {
@@ -16,6 +16,7 @@ public final class ResponseProcessor {
 
     public static void handle(HttpRequest request, HttpResponse response) {
         response.setVersion(getVersion(request));
+
         ResponseHeaderUtil.handle(request, response);
     }
 

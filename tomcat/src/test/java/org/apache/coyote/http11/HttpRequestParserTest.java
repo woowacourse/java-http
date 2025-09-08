@@ -1,15 +1,14 @@
 package org.apache.coyote.http11;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.apache.catalina.domain.HttpRequest;
+import org.apache.catalina.domain.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestParserTest {
@@ -29,12 +28,12 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.requestStartLine().method());
-        assertEquals("/index.html", result.requestStartLine().path());
-        assertEquals("HTTP/1.1", result.requestStartLine().version());
-        assertEquals("localhost:8080", result.header().get("Host"));
-        assertEquals("Mozilla/5.0", result.header().get("User-Agent"));
-        assertTrue(result.queryStrings().isEmpty());
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.requestStartLine().path()).isEqualTo("/index.html");
+        assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
+        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
+        assertThat(result.header().headers()).containsEntry("User-Agent", "Mozilla/5.0");
+        assertThat(result.queryStrings()).isEmpty();
     }
 
     @Test
@@ -52,13 +51,13 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.requestStartLine().method());
-        assertEquals("/login", result.requestStartLine().path());
-        assertEquals("HTTP/1.1", result.requestStartLine().version());
-        assertEquals("admin", result.queryStrings().get("account"));
-        assertEquals("123", result.queryStrings().get("password"));
-        assertEquals("localhost:8080", result.header().get("Host"));
-        assertEquals("text/html", result.header().get("Content-Type"));
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.requestStartLine().path()).isEqualTo("/login");
+        assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
+        assertThat(result.queryStrings()).containsEntry("account", "admin");
+        assertThat(result.queryStrings()).containsEntry("password", "123");
+        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
+        assertThat(result.header().headers()).containsEntry("Content-Type", "text/html");
     }
 
     @Test
@@ -77,13 +76,13 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("POST", result.requestStartLine().method());
-        assertEquals("/api/users", result.requestStartLine().path());
-        assertEquals("HTTP/1.1", result.requestStartLine().version());
-        assertEquals("localhost:8080", result.header().get("Host"));
-        assertEquals("application/json", result.header().get("Content-Type"));
-        assertEquals("25", result.header().get("Content-Length"));
-        assertTrue(result.queryStrings().isEmpty());
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
+        assertThat(result.requestStartLine().path()).isEqualTo("/api/users");
+        assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
+        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
+        assertThat(result.header().headers()).containsEntry("Content-Type", "application/json");
+        assertThat(result.header().headers()).containsEntry("Content-Length", "25");
+        assertThat(result.queryStrings()).isEmpty();
     }
 
     @Test
@@ -99,11 +98,11 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.requestStartLine().method());
-        assertEquals("/simple", result.requestStartLine().path());
-        assertEquals("HTTP/1.1", result.requestStartLine().version());
-        assertTrue(result.header().isEmpty());
-        assertTrue(result.queryStrings().isEmpty());
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.requestStartLine().path()).isEqualTo("/simple");
+        assertThat(result.requestStartLine().version()).isEqualTo("HTTP/1.1");
+        assertThat(result.header().headers()).isEmpty();
+        assertThat(result.queryStrings()).isEmpty();
     }
 
     @Test
@@ -120,11 +119,11 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("GET", result.requestStartLine().method());
-        assertEquals("/search", result.requestStartLine().path());
-        assertEquals("java", result.queryStrings().get("q"));
-        assertEquals("1", result.queryStrings().get("page"));
-        assertEquals("10", result.queryStrings().get("size"));
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.requestStartLine().path()).isEqualTo("/search");
+        assertThat(result.queryStrings()).containsEntry("q", "java");
+        assertThat(result.queryStrings()).containsEntry("page", "1");
+        assertThat(result.queryStrings()).containsEntry("size", "10");
     }
 
     @Test
@@ -133,10 +132,8 @@ class HttpRequestParserTest {
         BufferedReader reader = new BufferedReader(new StringReader(""));
 
         // when & then
-        assertThrows(
-                BadRequestException.class,
-                () -> HttpRequestParser.parse(reader)
-        );
+        assertThatThrownBy(() -> HttpRequestParser.parse(reader))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -153,8 +150,8 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertTrue(result.queryStrings().isEmpty());
-        assertEquals("/home", result.requestStartLine().path());
+        assertThat(result.queryStrings()).isEmpty();
+        assertThat(result.requestStartLine().path()).isEqualTo("/home");
     }
 
     @Test
@@ -173,9 +170,9 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("localhost:8080", result.header().get("Host"));
-        assertEquals("text/html", result.header().get("Content-Type"));
-        assertFalse(result.header().containsKey("InvalidHeader"));
+        assertThat(result.header().headers()).containsEntry("Host", "localhost:8080");
+        assertThat(result.header().headers()).containsEntry("Content-Type", "text/html");
+        assertThat(result.header().headers()).doesNotContainKey("InvalidHeader");
     }
 
     @Test
@@ -192,8 +189,93 @@ class HttpRequestParserTest {
         HttpRequest result = HttpRequestParser.parse(reader);
 
         // then
-        assertEquals("value", result.queryStrings().get("valid"));
-        assertEquals("value2", result.queryStrings().get("another"));
-        assertFalse(result.queryStrings().containsKey("invalid"));
+        assertThat(result.queryStrings()).containsEntry("valid", "value");
+        assertThat(result.queryStrings()).containsEntry("another", "value2");
+        assertThat(result.queryStrings()).doesNotContainKey("invalid");
+    }
+
+    @Test
+    void POST_요청_body_파싱() throws IOException {
+        // given
+        String httpRequest = """
+                POST /api/users HTTP/1.1
+                Host: localhost:8080
+                Content-Type: application/json
+                Content-Length: 24
+                
+                {"name":"john","age":25}""";
+        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        // when
+        HttpRequest result = HttpRequestParser.parse(reader);
+
+        // then
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
+        assertThat(result.requestStartLine().path()).isEqualTo("/api/users");
+        assertThat(result.header().headers()).containsEntry("Content-Type", "application/json");
+        assertThat(result.body().content()).isEqualTo("{\"name\":\"john\",\"age\":25}");
+    }
+
+    @Test
+    void POST_요청_form_data_body_파싱() throws IOException {
+        // given
+        String httpRequest = """
+                POST /login HTTP/1.1
+                Host: localhost:8080
+                Content-Type: application/x-www-form-urlencoded
+                Content-Length: 26
+                
+                account=admin&password=123""";
+        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        // when
+        HttpRequest result = HttpRequestParser.parse(reader);
+
+        // then
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
+        assertThat(result.requestStartLine().path()).isEqualTo("/login");
+        assertThat(result.header().headers()).containsEntry("Content-Type", "application/x-www-form-urlencoded");
+        assertThat(result.body().content()).isEqualTo("account=admin&password=123");
+    }
+
+    @Test
+    void Content_Length가_0인_POST_요청_파싱() throws IOException {
+        // given
+        String httpRequest = """
+                POST /api/ping HTTP/1.1
+                Host: localhost:8080
+                Content-Type: application/json
+                Content-Length: 0
+                
+                """;
+        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        // when
+        HttpRequest result = HttpRequestParser.parse(reader);
+
+        // then
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.POST);
+        assertThat(result.requestStartLine().path()).isEqualTo("/api/ping");
+        assertThat(result.header().headers()).containsEntry("Content-Length", "0");
+        assertThat(result.body().content()).isEmpty();
+    }
+
+    @Test
+    void Content_Length가_없는_GET_요청_body_파싱() throws IOException {
+        // given
+        String httpRequest = """
+                GET /api/users HTTP/1.1
+                Host: localhost:8080
+                
+                """;
+        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        // when
+        HttpRequest result = HttpRequestParser.parse(reader);
+
+        // then
+        assertThat(result.requestStartLine().method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.requestStartLine().path()).isEqualTo("/api/users");
+        assertThat(result.body().content()).isEmpty();
     }
 }

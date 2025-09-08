@@ -8,10 +8,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.domain.HttpHeader;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.RequestStartLine;
+import org.apache.catalina.domain.request.HttpRequest;
+import org.apache.catalina.domain.request.HttpRequestBody;
+import org.apache.catalina.domain.request.RequestStartLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HttpRequestParser {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
     private HttpRequestParser() {
     }
@@ -21,9 +26,10 @@ public final class HttpRequestParser {
 
         final RequestStartLine requestStartLine = RequestStartLine.from(requestLines);
         final Map<String, String> queryStrings = parseQueryStrings(requestLines);
-        final HttpHeader httpHeader = HttpHeader.from(requestLines);
+        final HttpHeader header = HttpHeader.from(requestLines);
+        final HttpRequestBody body = new HttpRequestBody(parseBody(reader, header));
 
-        return new HttpRequest(requestStartLine, queryStrings, httpHeader);
+        return new HttpRequest(requestStartLine, queryStrings, header, body);
     }
 
     private static List<String> parseRequestLines(BufferedReader reader) throws IOException {
@@ -53,4 +59,17 @@ public final class HttpRequestParser {
                 .filter(query -> query.length == 2)
                 .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
+
+    private static String parseBody(BufferedReader reader, HttpHeader httpHeader) throws IOException {
+        final int contentLength = httpHeader.getContentLength();
+
+        if (contentLength == 0) {
+            return "";
+        }
+
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
+
+}

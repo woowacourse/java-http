@@ -5,7 +5,8 @@ import java.util.Map;
 
 public class ResponseEntity {
 
-    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String DEFAULT_ENCODING_TYPE = "charset=utf-8";
     private final HttpResponse httpResponse;
 
     private ResponseEntity(HttpResponse httpResponse) {
@@ -45,7 +46,7 @@ public class ResponseEntity {
             body = new byte[0];
         }
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
+        headers.put("Content-Type", contentType + ";" + DEFAULT_ENCODING_TYPE);
         headers.put("Content-Length", String.valueOf(body.length));
 
         return new HttpResponse(httpStatus, headers, body);

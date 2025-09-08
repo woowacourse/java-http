@@ -8,6 +8,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.httpRequest.HttpCookie;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.slf4j.Logger;
@@ -35,14 +37,21 @@ public class ResponseBody {
         if ("/login".equals(path)) {
             try {
                 final Optional<String> cookieOfRequest = httpRequest.findCookie();
+                Session session;
                 HttpCookie httpCookie;
+
                 if (cookieOfRequest.isPresent()) {
                     httpCookie = HttpCookie.parse(cookieOfRequest.get());
+                    final String sessionId = httpCookie.getCookies().get("JSESSIONID");
+                    if (sessionId != null) {
+                        session = SessionManager.findSession(sessionId);
 
-                    final String body = getBodyFromStaticFile("/index.html");
-                    return ResponseContent.redirect(body, "/index.html", httpCookie);
-                } else {
-                    httpCookie = HttpCookie.create();
+                        final User user = (User) session.getAttribute("user");
+                        if (user != null) {
+                            final String body = getBodyFromStaticFile("/index.html");
+                            return ResponseContent.redirect(body, "/index.html", httpCookie);
+                        }
+                    }
                 }
 
                 final String account = findValueFromParams("account");
@@ -58,6 +67,11 @@ public class ResponseBody {
                         return ResponseContent.redirect(body, "/401.html", null);
                     }
 
+                    session = Session.create();
+                    session.setAttribute("user", user);
+                    SessionManager.add(session);
+                    httpCookie = HttpCookie.create(session.getSessionId());
+
                     final String body = getBodyFromStaticFile("/index.html");
                     return ResponseContent.redirect(body, "/index.html", httpCookie);
                 }
@@ -65,7 +79,6 @@ public class ResponseBody {
                 final String body = getBodyFromStaticFile("/login.html");
                 return ResponseContent.redirect(body, "/login.html", null);
             }
-
         }
 
         if ("/register".equals(path)) {

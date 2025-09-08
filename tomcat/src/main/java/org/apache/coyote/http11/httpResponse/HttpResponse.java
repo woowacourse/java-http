@@ -18,9 +18,9 @@ public class HttpResponse {
 
     public byte[] getBytes() throws IOException {
         final ResponseContent content = responseBody.getContent();
-        final String body = content.body();
 
         final String header = responseHeader.getHeader(content);
+        final String body = content.body();
 
         return (header + body).getBytes(StandardCharsets.UTF_8);
     }

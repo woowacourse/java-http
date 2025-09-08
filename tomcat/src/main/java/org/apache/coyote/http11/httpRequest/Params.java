@@ -33,8 +33,14 @@ public record Params(Map<String, String> params) {
 
         for (String cookie : cookiesOfRequest) {
             cookie = cookie.trim();
-            final String name = cookie.split("=")[0];
-            final String value = cookie.split("=")[1];
+            String[] tokens = cookie.split("=", 2);
+
+            if (tokens.length < 2) {
+                continue;
+            }
+
+            final String name = tokens[0];
+            final String value = tokens[1];
             cookies.put(name, value);
         }
 

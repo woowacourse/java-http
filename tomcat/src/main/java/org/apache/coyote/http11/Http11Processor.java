@@ -21,9 +21,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -90,9 +91,11 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
         String queryString = requestUri.substring(index + 1);
-        return Arrays.stream(queryString.split("&"))
+        Map<String, String> queryParameters = new HashMap<>();
+        Arrays.stream(queryString.split("&"))
             .map(parameter -> parameter.split("="))
-            .collect(toUnmodifiableMap(keyValue -> keyValue[0], keyValue -> keyValue[1]));
+            .forEach(keyValue -> queryParameters.put(keyValue[0], keyValue.length == 2 ? keyValue[1] : null));
+        return Collections.unmodifiableMap(queryParameters);
     }
 
     private String getResponseBody(String requestUriPath, Map<String, String> keyValues) throws IOException {
@@ -118,6 +121,7 @@ public class Http11Processor implements Runnable, Processor {
             User user = findUser.get();
             log.atInfo().log("user: {}", user);
         }
+        throw new IllegalArgumentException("account or password is required");
     }
 
     private String readStaticFile(String filePath) throws IOException {

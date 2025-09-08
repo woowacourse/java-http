@@ -144,14 +144,11 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createRedirectionResponse(final String responseBody, final String location) {
+    private String createRedirectionResponse(final String location) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: " + location,
-                "Content-Type: " + TEXT_HTML_CHARSET_UTF_8,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
     }
 
     private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {

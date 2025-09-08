@@ -21,7 +21,7 @@ public class HttpResponse {
     public String getMessage() {
         validateCanMakeMessage();
         if (body == null || body.isEmpty()) {
-            return String.join("\r\n", makeStartLine(), makeHeaderLines(), "", body);
+            return String.join("\r\n", makeStartLine(), makeHeaderLines());
         }
         return String.join("\r\n", makeStartLine(), makeHeaderLines(), "", body);
     }
@@ -73,7 +73,9 @@ public class HttpResponse {
             String value = header.get(key);
             headerLines.add(key + ": " + value + " ");
         }
-        headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
+        if (body != null) {
+            headerLines.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ");
+        }
         return String.join("\r\n", headerLines);
     }
 

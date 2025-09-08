@@ -2,7 +2,8 @@ package org.apache.http;
 
 public enum StatusCode {
 
-    OK(200, "OK");
+    OK(200, "OK"),
+    FOUND(302, "FOUND");
 
     private final int code;
     private final String message;

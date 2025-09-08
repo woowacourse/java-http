@@ -1,5 +1,7 @@
 package org.apache.coyote.httpResponse;
 
+import org.apache.coyote.Cookie;
+
 public class HttpResponse {
 
     private final HttpResponseHeader responseHeader;
@@ -30,5 +32,10 @@ public class HttpResponse {
             final String value
     ) {
         responseHeader.addHeader(key, value);
+    }
+
+    public void addCookie(final Cookie cookie){
+        String cookieValue = cookie.getKey()+"="+cookie.getValue();
+        responseHeader.addHeader("Set-Cookie",cookieValue);
     }
 }

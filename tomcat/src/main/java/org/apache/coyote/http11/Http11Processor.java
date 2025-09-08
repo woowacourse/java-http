@@ -5,15 +5,11 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.HttpStatusException;
@@ -22,13 +18,13 @@ import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 import org.apache.coyote.http11.parser.HttpRequestParser;
+import org.apache.coyote.http11.parser.HttpResponseParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String RESOURCE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
     private final UserService userService;
@@ -62,15 +58,15 @@ public class Http11Processor implements Runnable, Processor {
 
             // GET /
             if (httpRequest.isPathEqualsTo("/")) {
-                final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
+                final HttpResponse response = HttpResponseParser.createWelcomeHttpResponse();
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
             // GET /register
             if (httpRequest.isPathEqualsTo("/register") && httpRequest.getHttpMethod() == HttpMethod.GET) {
-                final URL resource = getStaticResource("/register.html");
-                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+                final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
+                        "/register.html");
                 sendHttpResponse(response, outputStream);
                 return;
             }
@@ -82,15 +78,14 @@ public class Http11Processor implements Runnable, Processor {
                 final String email = httpRequest.getBodyParameter("email");
 
                 userService.signup(account, password, email);
-                final HttpResponse response = getRedirectHttpResponse("/index.html");
+                final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
             // GET /login
             if (httpRequest.isPathEqualsTo("/login") && httpRequest.getHttpMethod() == HttpMethod.GET) {
-                final URL resource = getStaticResource("/login.html");
-                final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+                final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
                 sendHttpResponse(response, outputStream);
                 return;
             }
@@ -102,75 +97,32 @@ public class Http11Processor implements Runnable, Processor {
                 final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
                 if (user.isEmpty() || !user.get().checkPassword(password)) {
-                    final HttpStatusCode statusCode = HttpStatusCode.UNAUTHORIZED;
-                    final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
-                    final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
+                    final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(
+                            HttpStatusCode.UNAUTHORIZED);
                     sendHttpResponse(errorResponse, outputStream);
                 }
 
-                final HttpResponse response = getRedirectHttpResponse("/index.html");
+                final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
                 sendHttpResponse(response, outputStream);
                 log.info("user: " + user);
                 return;
             }
 
             // 이 외의 정적 요청
-            final URL resource = getStaticResource(httpRequest.getStaticResourcePath());
-            final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
+            final HttpResponse response = HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK,
+                    httpRequest.getStaticResourcePath());
             sendHttpResponse(response, outputStream);
 
         } catch (HttpStatusException e) {
             final HttpStatusCode statusCode = e.getStatusCode();
-            final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
-            final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
+            final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(statusCode);
             sendHttpResponse(errorResponse, outputStream);
         }
     }
 
-    private URL getStaticResource(final String path) {
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
-        if (resource == null) {
-            throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
-        }
-        return resource;
-    }
-
-    private byte[] readFile(final URL resource) throws IOException {
-        return Files.readAllBytes(new File(resource.getFile()).toPath());
-    }
-
-    private HttpResponse getHttpResponse(final HttpStatusCode statusCode, final URL resource) throws IOException {
-        final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
-                statusCode.getStatusMessage());
-        final byte[] responseBody = readFile(resource);
-        final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Content-Type", getContentType(resource));
-        responseHeaders.put("Content-Length", String.valueOf(responseBody.length));
-
-        return new HttpResponse(responseLine, responseHeaders, responseBody);
-    }
-
-    private HttpResponse getRedirectHttpResponse(final String location) {
-        final HttpStatusCode statusCode = HttpStatusCode.FOUND;
-        final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
-                statusCode.getStatusMessage());
-        final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Content-Type", "text/html; charset=UTF-8");
-        responseHeaders.put("Content-Length", "0");
-        responseHeaders.put("Location", location);
-
-        return new HttpResponse(responseLine, responseHeaders, new byte[0]);
-    }
-
     private void sendHttpResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {
-        final String parsedResponse = response.parseHttpResponse();
+        final String parsedResponse = response.toResponseText();
         outputStream.write(parsedResponse.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
-    }
-
-    private String getContentType(final URL resource) {
-        final int extensionIndex = resource.getPath().lastIndexOf(RESOURCE_EXTENSION_SEPARATOR);
-        final String responseResourceExtension = resource.getPath().substring(extensionIndex + 1);
-        return HttpResponse.getContentType(responseResourceExtension);
     }
 }

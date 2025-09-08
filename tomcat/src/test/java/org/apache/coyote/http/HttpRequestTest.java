@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,10 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/path");
         assertThat(request.getVersion()).isEqualTo("1.1");
+        assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
     }
 
     @Test
@@ -42,7 +44,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/path");
         assertThat(request.getVersion()).isEqualTo("1.1");
     }
@@ -62,7 +64,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/path");
         assertThat(request.getVersion()).isEqualTo("1.1");
     }
@@ -83,7 +85,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("POST");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(request.getPath()).isEqualTo("/api/login");
         assertThat(request.getVersion()).isEqualTo("1.1");
     }
@@ -103,7 +105,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/path");
         assertThat(request.getVersion()).isEqualTo("1.1");
     }
@@ -123,7 +125,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/login");
         assertThat(request.getVersion()).isEqualTo("1.1");
         assertThat(request.getQueryParam("account")).isEqualTo("gugu");
@@ -140,11 +142,10 @@ class HttpRequestTest {
                 "",
                 "");
 
-        // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
-
-        // then
-        assertThat(request).isNull();
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(rawRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청의 첫 번째 줄은");
     }
 
     @Test
@@ -152,7 +153,83 @@ class HttpRequestTest {
     void parseInvalidRequestLineWithInsufficientTokens() {
         // given
         final String rawRequest = String.join("\r\n",
-                "GET",
+                "GET HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(rawRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청의 첫 번째 줄은 3개의 부분을 포함해야 합니다");
+    }
+
+    @Test
+    @DisplayName("빈 요청 문자열")
+    void parseEmptyRequest() {
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청은 null이거나 비어있을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("null 요청 문자열")
+    void parseNullRequest() {
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청은 null이거나 비어있을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("POST 요청 본문 파싱")
+    void parsePostRequestBody() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 52",
+                "",
+                "account=user&password=1234&email=user%40example.com");
+
+        // when
+        final HttpRequest request = HttpRequest.from(rawRequest);
+
+        // then
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(request.getBodyParam("account")).isEqualTo("user");
+        assertThat(request.getBodyParam("password")).isEqualTo("1234");
+        assertThat(request.getBodyParam("email")).isEqualTo("user@example.com");
+    }
+
+    @Test
+    @DisplayName("쿠키 파싱")
+    void parseCookies() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=ABC123; theme=dark; lang=ko",
+                "",
+                "");
+
+        // when
+        final HttpRequest request = HttpRequest.from(rawRequest);
+
+        // then
+        assertThat(request.getCookie("JSESSIONID")).isEqualTo("ABC123");
+        assertThat(request.getCookie("theme")).isEqualTo("dark");
+        assertThat(request.getCookie("lang")).isEqualTo("ko");
+    }
+
+    @Test
+    @DisplayName("쿠키가 없는 요청")
+    void parseRequestWithoutCookies() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "",
                 "");
@@ -161,26 +238,25 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNull();
+        assertThat(request.getCookie("JSESSIONID")).isEmpty();
+        assertThat(request.getCookie("nonexistent")).isEmpty();
     }
 
     @Test
-    @DisplayName("빈 요청 문자열")
-    void parseEmptyRequest() {
+    @DisplayName("URL 디코딩이 포함된 쿼리 파라미터")
+    void parseQueryParamsWithUrlDecoding() {
+        // given  
+        final String rawRequest = String.join("\r\n",
+                "GET /search?q=hello%20world&email=test%40example.com HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
         // when
-        final HttpRequest request = HttpRequest.from("");
+        final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNull();
-    }
-
-    @Test
-    @DisplayName("null 요청 문자열")
-    void parseNullRequest() {
-        // when
-        final HttpRequest request = HttpRequest.from(null);
-
-        // then
-        assertThat(request).isNull();
+        assertThat(request.getQueryParam("q")).isEqualTo("hello world");
+        assertThat(request.getQueryParam("email")).isEqualTo("test@example.com");
     }
 }

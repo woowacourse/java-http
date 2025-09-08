@@ -37,6 +37,10 @@ public class SessionManager implements Manager {
         return isNotNullOrEmpty(sessionId) && sessionExists(sessionId);
     }
 
+    public void clear() {
+        sessions.clear();
+    }
+
     private boolean isNotNullOrEmpty(final String sessionId) {
         return sessionId != null && !sessionId.trim().isEmpty();
     }

@@ -17,9 +17,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final String request = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -31,9 +31,9 @@ class Http11ProcessorTest {
 
         // then
         final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -45,9 +45,9 @@ class Http11ProcessorTest {
     void index() throws IOException {
         // given
         final String request = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -59,9 +59,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        final String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -156,7 +156,7 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("HTTP/1.1 200 OK");
+        assertThat(output).contains("HTTP/1.1");
         assertThat(output).contains("Not Found");
     }
 

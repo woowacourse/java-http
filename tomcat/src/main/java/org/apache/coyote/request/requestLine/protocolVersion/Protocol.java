@@ -7,7 +7,7 @@ public enum Protocol {
     HTTP,
     HTTPS;
 
-    public static Protocol from(String inputProtocol) {
+    public static Protocol from(final String inputProtocol) {
         return Arrays.stream(Protocol.values())
                 .filter(protocol -> protocol.name().equals(inputProtocol))
                 .findAny()

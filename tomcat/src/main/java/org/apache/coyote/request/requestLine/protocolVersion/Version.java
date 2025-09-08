@@ -9,7 +9,7 @@ public class Version {
 
     private String version;
 
-    public static Version from(String version) {
+    public static Version from(final String version) {
         validateVersion(version);
         return new Version(version);
     }
@@ -18,11 +18,11 @@ public class Version {
         return new Version(HTTP_1_VERSION);
     }
 
-    private Version(String version) {
+    private Version(final String version) {
         this.version = version;
     }
 
-    private static void validateVersion(String version) {
+    private static void validateVersion(final String version) {
         if (version == null || !VERSION_PATTERN.matcher(version).matches()) {
             throw new IllegalArgumentException("[ERROR] 프로토콜의 버전이 잘못되었습니다.");
         }

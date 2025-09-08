@@ -9,16 +9,16 @@ public class ProtocolVersion {
     private Protocol protocol;
     private Version version;
 
-    public static ProtocolVersion from(String protocolVersion) {
+    public static ProtocolVersion from(final String protocolVersion) {
         final String[] splitProtocolVersion = protocolVersion.split(PROTOCOL_VERSION_SEPARATOR);
         return new ProtocolVersion(Protocol.from(splitProtocolVersion[PROTOCOL_INDEX]), Version.from(splitProtocolVersion[VERSION_INDEX]));
     }
 
-    public static ProtocolVersion of(Protocol protocol, Version version) {
+    public static ProtocolVersion of(final Protocol protocol, final Version version) {
         return new ProtocolVersion(protocol, version);
     }
 
-    private ProtocolVersion(Protocol protocol, Version version) {
+    private ProtocolVersion(final Protocol protocol, final Version version) {
         this.protocol = protocol;
         this.version = version;
     }

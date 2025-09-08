@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.cookie.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,11 +71,15 @@ public class Http11Processor implements Runnable, Processor {
             StringBuilder header = new StringBuilder();
             String line;
             int contentLength = 0;
+            String cookieHeader = "";
             while ((line = br.readLine()) != null && !line.isBlank()) {
                 header.append(line).append("\r\n");
                 if (line.startsWith("Content-Length:")) {
                     String lengthStr = line.substring("Content-Length:".length()).trim();
                     contentLength = Integer.parseInt(lengthStr);
+                }
+                if (line.startsWith("Cookie: ")) {
+                    cookieHeader = line.substring("Cookie:".length()).trim();
                 }
             }
 
@@ -84,6 +90,7 @@ public class Http11Processor implements Runnable, Processor {
                 body.append(bodyChars);
             }
 
+            HttpCookie cookie = new HttpCookie(cookieHeader);
             if (url.equals("/")) {
                 response = sendDefaultResource();
                 sendResponse(outputStream, response);
@@ -101,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod.equals("POST")&& url.equals("/login")) {
-                response = loginUserResponse(body);
+                response = loginUserResponse(body, cookie);
                 sendResponse(outputStream, response);
                 return;
             }
@@ -120,20 +127,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {
-        Map<String, String> formData = parseQueryParams(body.toString());
-        String account = formData.get("account");
-        String password = formData.get("password");
-        String email = formData.get("email");
-
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return getResponse("static/index.html", BAD_REQUEST);
-        }
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return getResponse("static/index.html", OK);
-    }
-
     private String sendDefaultResource() throws IOException {
         final var responseBody = "Hello world!";
         return String.join("\r\n",
@@ -150,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String loginUserResponse(StringBuilder body) throws URISyntaxException, IOException {
+    private String loginUserResponse(StringBuilder body, HttpCookie cookie) throws URISyntaxException, IOException {
         Map<String, String> queryParams = parseQueryParams(body.toString());
         String account = queryParams.get("account");
         String password = queryParams.get("password");
@@ -162,9 +155,28 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (user.get().checkPassword(password)) {
             log.info(user.toString());
+            if (!cookie.hasJsessionid()){
+                String jsessionid = UUID.randomUUID().toString();
+                String cookieHeaderValue = "JSESSIONID=" + jsessionid;
+                return getResponse("static/index.html", FOUND, cookieHeaderValue);
+            }
             return getResponse("static/index.html", FOUND);
         }
         return getResponse("static/401.html", UNAUTHORIZED);
+    }
+
+    private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {
+        Map<String, String> formData = parseQueryParams(body.toString());
+        String account = formData.get("account");
+        String password = formData.get("password");
+        String email = formData.get("email");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return getResponse("static/index.html", BAD_REQUEST);
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return getResponse("static/index.html", OK);
     }
 
     private String getResponse(String uri, String statusCode) throws IOException, URISyntaxException {
@@ -177,6 +189,21 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBodyBytes.length + " ",
+                "",
+                responseBody);
+    }
+
+    private String getResponse(String uri, String statusCode, String setCookie) throws IOException, URISyntaxException {
+        final var path = Paths.get(findUri(uri));
+        final var contentType = Files.probeContentType(path);
+        final byte[] responseBodyBytes = Files.readAllBytes(path);
+        final String responseBody = Files.readString(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBodyBytes.length + " ",
+                "Set-Cookie: " + setCookie,
                 "",
                 responseBody);
     }

@@ -6,7 +6,6 @@ import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.HttpStatus.NOT_FOUND;
 
 import com.techcourse.exception.UnauthorizedException;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.DefaultHandler;
 import com.techcourse.handler.LoginHandler;
 import com.techcourse.handler.RegisterHandler;
@@ -60,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = processRequest(inputStream);
 
             writeResponse(response, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

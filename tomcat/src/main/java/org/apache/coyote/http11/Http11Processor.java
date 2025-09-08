@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -50,17 +49,19 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             var statusCode = "200 OK";
-            Map<String, String> additionalResponseHeaders = new HashMap<>();
 
-            if ("login".equals(requestPath)) {
-                var account = queryParameters.get("account");
-                var password = queryParameters.get("password");
+            if ("login".equals(requestPath) && requestLine.getMethod() == HttpMethod.POST) {
+                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
+
+                final var account = parameters.get("account");
+                final var password = parameters.get("password");
 
                 if(account != null && password != null) {
+
                     final var loginSuccess = checkLogin(account, password);
                     final var redirectUrl = loginSuccess ? "/index.html" : "/401.html";
 
-                    Map<String, String> headers = Map.of("Location", redirectUrl);
+                    final Map<String, String> headers = Map.of("Location", redirectUrl);
                     final var response = buildHttpResponse("302 Found", "text/html", "", headers);
 
                     outputStream.write(response.getBytes(StandardCharsets.UTF_8));
@@ -71,12 +72,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if("register".equals(requestPath) && requestLine.getMethod() == HttpMethod.POST) {
-                RequestHeaders requestHeaders = RequestHeaders.from(reader);
-                String contentLength = requestHeaders.getHeader("Content-Length");
-                String requestBody = readRequestBody(reader, contentLength);
-                Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
+                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
 
-                User newUser = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
+                final var newUser = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
                 InMemoryUserRepository.save(newUser);
 
                 Map<String, String> headers = Map.of("Location", "/index.html");
@@ -98,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var contentType = ContentType.from(requestPath);
-            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody, additionalResponseHeaders);
+            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody, Collections.emptyMap());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (Exception e) {
@@ -119,6 +117,13 @@ public class Http11Processor implements Runnable, Processor {
                 log.error("500 에러 전송 실패: " + ex.getMessage(), ex);
             }
         }
+    }
+
+    private Map<String, String> getFormRequestBodyParameters(BufferedReader reader) throws IOException {
+        final var requestHeaders = RequestHeaders.from(reader);
+        final var contentLength = requestHeaders.getHeader("Content-Length");
+        final var requestBody = readRequestBody(reader, contentLength);
+        return RequestBodyUtils.parseFormUrlEncoded(requestBody);
     }
 
     public boolean checkLogin(String account, String password) {

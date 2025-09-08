@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest == null) {
                 statusLine = "HTTP/1.1 400 Bad Request";
                 contentType = "text/html;charset=utf-8";
-                body = readPathFile("static/400.html");
+                body = readPathFile("static/404.html");
                 response(statusLine, contentType, body, outputStream);
                 return;
             }

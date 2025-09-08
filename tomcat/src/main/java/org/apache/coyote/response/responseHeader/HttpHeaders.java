@@ -22,6 +22,7 @@ public enum HttpHeaders {
     SEC_FETCH_MODE("Sec-Fetch-Mode"),
     SEC_FETCH_SITE("Sec-Fetch-Site"),
     SEC_FETCH_USER("Sec-Fetch-User"),
+    SEC_PURPOSE("Sec-Purpose"),
 
     UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
     USER_AGENT("User-Agent"),

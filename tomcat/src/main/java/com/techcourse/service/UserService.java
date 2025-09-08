@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.general.Cookies;
 import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
+import org.apache.coyote.http11.httpRequest.CookieParser;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
 import org.slf4j.Logger;
@@ -36,15 +38,11 @@ public class UserService {
     }
 
     private String findSessionId(HttpRequest httpRequest) {
-        String cookie = httpRequest.getHeaderValueOf("Cookie");
-        if (cookie == null) {
+        Cookies cookies = CookieParser.parseFromHttpRequest(httpRequest);
+        if (cookies.isEmpty()) {
             return null;
         }
-        String[] splittedCookie = cookie.split("; ");
-        return Arrays.stream(splittedCookie)
-            .filter(splitted -> splitted.split("=")[0].equals("JSESSIONID"))
-            .findFirst()
-            .orElse(null);
+        return cookies.get("JSESSIONID");
     }
 
     public ControllerResponse login(HttpRequest httpRequest) {

@@ -42,10 +42,6 @@ public class HttpRequest {
         final String bodyPart = parts.length > 1 ? parts[1] : "";
 
         final String[] headerLines = headerPart.split(CRLF);
-        if (headerLines.length == 0) {
-            throw new IllegalArgumentException("HTTP 헤더는 비어있을 수 없습니다");
-        }
-
         final String[] requestLineParts = parseFirstHeaderLine(headerLines[0]);
 
         final HttpMethod method = HttpMethod.from(requestLineParts[HTTP_METHOD_INDEX]);
@@ -210,7 +206,12 @@ public class HttpRequest {
 
     private void appendRequestLine(final StringBuilder sb) {
         final String protocol = "%s%s".formatted(HTTP_PREFIX, version);
-        sb.append(String.format("%s %s %s %s", method, path, protocol, CRLF));
+        sb.append(method)
+                .append(" ")
+                .append(path)
+                .append(" ")
+                .append(protocol)
+                .append(CRLF);
     }
 
     private void appendHeaders(final StringBuilder sb) {

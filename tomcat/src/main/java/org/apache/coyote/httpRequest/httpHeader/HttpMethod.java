@@ -1,4 +1,4 @@
-package org.apache.coyote.httpHeader;
+package org.apache.coyote.httpRequest.httpHeader;
 
 import java.util.Arrays;
 

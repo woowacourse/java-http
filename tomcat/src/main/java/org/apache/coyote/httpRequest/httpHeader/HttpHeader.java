@@ -1,4 +1,4 @@
-package org.apache.coyote.httpHeader;
+package org.apache.coyote.httpRequest.httpHeader;
 
 import java.util.List;
 import java.util.Map;
@@ -23,5 +23,9 @@ public class HttpHeader {
 
     public Map<String, String> getQueries() {
         return requestLine.getQueryValues();
+    }
+
+    public String getHeader(final String key) {
+        return headers.getOrDefault(key, null);
     }
 }

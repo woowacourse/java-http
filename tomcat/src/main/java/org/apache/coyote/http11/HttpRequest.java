@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,7 +93,13 @@ public class HttpRequest {
         int contentLength = Integer.parseInt(contentLengthValue.trim());
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        this.body = new String(buffer);
+        String tempBody = new String(buffer);
+
+        String contentType = headers.get("Content-Type");
+        if (contentType != null && contentType.equals("x-www-form-urlencoded")) {
+            tempBody = URLDecoder.decode(tempBody, StandardCharsets.UTF_8);
+        }
+        this.body = tempBody;
     }
 
     public String getMethod() {

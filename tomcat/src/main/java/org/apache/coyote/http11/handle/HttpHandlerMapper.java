@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handle;
 
 import java.util.Set;
 import org.apache.coyote.http11.handle.handler.custom.LoginHttpHandler;
+import org.apache.coyote.http11.handle.handler.custom.RegisterHttpHandler;
 import org.apache.coyote.http11.handle.handler.resource.CssHttpHandler;
 import org.apache.coyote.http11.handle.handler.DefaultHttpHandler;
 import org.apache.coyote.http11.handle.handler.resource.HtmlHttpHandler;
@@ -18,7 +19,8 @@ public class HttpHandlerMapper {
             HtmlHttpHandler.getInstance(),
             CssHttpHandler.getInstance(),
             JsHttpHandler.getInstance(),
-            LoginHttpHandler.getInstance()
+            LoginHttpHandler.getInstance(),
+            RegisterHttpHandler.getInstance()
     );
 
     private HttpHandlerMapper() {

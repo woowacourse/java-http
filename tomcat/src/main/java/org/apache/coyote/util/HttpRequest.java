@@ -11,10 +11,6 @@ public record HttpRequest(
 ) {
 
     public Optional<String> getQueryValue(String key) {
-        try {
-            return Optional.of(queries.get(key));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(queries.get(key));
     }
 }

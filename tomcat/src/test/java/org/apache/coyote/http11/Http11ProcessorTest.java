@@ -61,7 +61,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_success() throws IOException {
+    void login_success_redirect(){
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -77,15 +77,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String resourcsString = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 " +
                 HttpStatusCode.FOUND.getCode() + " " +
                 HttpStatusCode.FOUND.getMessage() + " \r\n" +
+                "Location: /index.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourcsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourcsString;
+                "Content-Length: " + 0 + " \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

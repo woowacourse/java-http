@@ -45,6 +45,9 @@ public class StaticResourceHandler implements Handler {
         if (path.contains(INVALID_PATH_SEQUENCE)) {
             return false;
         }
+        if (path.startsWith(SUFFIX)) {
+            path = path.substring(1);
+        }
         String fullPath = base + SUFFIX + path;
         return getClass().getClassLoader().getResource(fullPath) != null;
     }
@@ -54,6 +57,9 @@ public class StaticResourceHandler implements Handler {
         String resourcePath = request.path().replaceFirst(STATIC_REGEX, "");
         if (resourcePath.isEmpty()) {
             resourcePath = defaultDocument;
+        }
+        if (resourcePath.startsWith(SUFFIX)) {
+            resourcePath = resourcePath.substring(1);
         }
         String fullPath = base + SUFFIX + resourcePath;
 

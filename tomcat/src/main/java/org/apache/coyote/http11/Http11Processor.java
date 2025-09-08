@@ -157,6 +157,10 @@ public class Http11Processor implements Runnable, Processor {
         if (path == null || path.isEmpty() || "/".equals(path)) {
             return null;
         }
+        path = path.replaceAll("/{2,}", "/");
+        if (path.contains("..")) {
+            return null;
+        }
         int q = path.indexOf('?');
         if (q >= 0) {
             path = path.substring(0, q);

@@ -276,7 +276,7 @@ class Http11ProcessorTest {
         void testRegisterSuccess() {
             // given
             final String newAccount = "norang";
-            final String requestBody = String.format("account=%s&password=password&email=hkkang%%40woowahan.com",
+            final String requestBody = String.format("account=%s&email=hkkang%%40woowahan.com&password=password",
                     newAccount);
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
@@ -286,7 +286,7 @@ class Http11ProcessorTest {
                     "Content-Type: application/x-www-form-urlencoded",
                     "Accept: */*",
                     "",
-                    String.format("account=%s&password=password&email=hkkang%%40woowahan.com", newAccount));
+                    requestBody);
 
             final StubSocket socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

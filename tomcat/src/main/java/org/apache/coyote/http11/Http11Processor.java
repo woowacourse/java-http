@@ -81,8 +81,8 @@ public class Http11Processor implements Runnable, Processor {
             if (requestURI.equals("/register") && method == HttpMethod.POST) {
                 final String[] split = requestBody.split("&");
                 final String account = split[0].split("=")[1];
-                final String password = split[1].split("=")[1];
-                final String email = split[2].split("=")[1].replace("%40", "@");
+                final String email = split[1].split("=")[1].replace("%40", "@");
+                final String password = split[2].split("=")[1];
                 InMemoryUserRepository.save(new User(account, password, email));
                 send302Response("/index.html", outputStream);
                 return;

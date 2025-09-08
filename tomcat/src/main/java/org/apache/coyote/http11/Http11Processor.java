@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -33,7 +32,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -57,20 +55,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 요청 헤더 파싱
+            String requestMethod = requestLine.split(" ")[0];
             String requestUri = requestLine.split(" ")[1];
             String requestUriPath = getRequestUriPath(requestUri);
             Map<String, String> queryParameters = getQueryParameters(requestUri);
 
             // 응답
-            String responseBody = getResponseBody(requestUriPath, queryParameters);
-            String contentType = getContentType(requestUriPath);
-            final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: %s;charset=utf-8 ".formatted(contentType),
-                "Content-Length: " + responseBody.getBytes(UTF_8).length + " ",
-                "",
-                responseBody);
-            outputStream.write(response.getBytes(UTF_8));
+            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters);
+            outputStream.write(response.toString().getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -98,15 +90,68 @@ public class Http11Processor implements Runnable, Processor {
         return Collections.unmodifiableMap(queryParameters);
     }
 
-    private String getResponseBody(String requestUriPath, Map<String, String> keyValues) throws IOException {
-        if (requestUriPath.equals("/")) {
-            return "Hello world!";
+    private HttpResponse getHttpResponse(
+        String requestMethod,
+        String requestUriPath,
+        Map<String, String> queryParameters
+    ) throws IOException {
+        if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
+            String responseBody = "Hello world!";
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/html;charset=utf-8")
+                .build();
         }
-        if (requestUriPath.equals("/login")) {
-            login(keyValues);
-            return readStaticFile("/login.html");
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".css")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/css;charset=utf-8")
+                .build();
         }
-        return readStaticFile(requestUriPath);
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".html")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/html;charset=utf-8")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".js")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/javascript;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.equals("/login") && queryParameters.isEmpty()) {
+            String responseBody = readStaticFile("/login.html");
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/html;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.equals("/login")) {
+            try {
+                login(queryParameters);
+            } catch (UnAuthorizedException e) {
+                return HttpResponse.builder()
+                    .status(HttpStatus.Found)
+                    .header("Location", "/401.html")
+                    .body("")
+                    .build();
+            }
+            return HttpResponse.builder()
+                .status(HttpStatus.Found)
+                .header("Location", "/index.html")
+                .body("")
+                .build();
+        }
+        throw new IllegalArgumentException("invalid request");
     }
 
     private void login(Map<String, String> keyValues) {
@@ -116,12 +161,12 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
             boolean isValidAccount = findUser.isPresent();
             if (!isValidAccount) {
-                throw new IllegalArgumentException("Invalid account " + account);
+                throw new UnAuthorizedException("Invalid account " + account);
             }
             User user = findUser.get();
             log.atInfo().log("user: {}", user);
         }
-        throw new IllegalArgumentException("account or password is required");
+        throw new UnAuthorizedException("account or password should be not null");
     }
 
     private String readStaticFile(String filePath) throws IOException {
@@ -131,24 +176,5 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("리소스가 존재하지 않습니다. " + staticFilePath);
         }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private String getContentType(String requestUriPath) throws IOException {
-        if (requestUriPath.equals("/")) {
-            return "text/html";
-        }
-        if (requestUriPath.equals("/login")) {
-            return "text/html";
-        }
-        if (requestUriPath.endsWith(".css")) {
-            return "text/css";
-        }
-        if (requestUriPath.endsWith(".html")) {
-            return "text/html";
-        }
-        if (requestUriPath.endsWith(".js")) {
-            return "text/javascript";
-        }
-        throw new IllegalArgumentException("지원하지 않는 요청 uri 입니다. " + requestUriPath);
     }
 }

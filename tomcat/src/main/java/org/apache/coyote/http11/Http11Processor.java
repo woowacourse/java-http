@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -122,6 +121,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpCookie httpCookie,
         String body
     ) throws IOException {
+        Session session = getSession(httpCookie);
         if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
             String responseBody = "Hello world!";
             return HttpResponse.builder()
@@ -176,6 +176,16 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
         }
         if (requestMethod.equals("GET") && requestUriPath.equals("/login")) {
+            if (session != null) {
+                Object user = session.getAttribute("user");
+                if (user != null) {
+                    return HttpResponse.builder()
+                        .status(HttpStatus.Found)
+                        .header("Location", "/index.html")
+                        .body("")
+                        .build();
+                }
+            }
             String responseBody = readStaticFile("/login.html");
             return HttpResponse.builder()
                 .status(HttpStatus.OK)
@@ -186,7 +196,12 @@ public class Http11Processor implements Runnable, Processor {
         if (requestMethod.equals("POST") && requestUriPath.equals("/login")) {
             try {
                 Map<String, String> formData = parseQueryParameters(body);
-                login(formData);
+                User loginUser = login(formData);
+                if (session == null) {
+                    session = new Session();
+                    SessionManager.getInstance().add(session);
+                }
+                session.addAttribute("user", loginUser);
             } catch (UnAuthorizedException e) {
                 return HttpResponse.builder()
                     .status(HttpStatus.Found)
@@ -194,17 +209,26 @@ public class Http11Processor implements Runnable, Processor {
                     .body("")
                     .build();
             }
-            boolean noJSessionId = httpCookie == null || httpCookie.getCookie("JSESSIONID") == null;
-            HttpResponseBuilder httpResponseBuilder = HttpResponse.builder()
+            return HttpResponse.builder()
                 .status(HttpStatus.Found)
                 .header("Location", "/index.html")
-                .body("");
-            if (noJSessionId) {
-                httpResponseBuilder.cookie("JSESSIONID", UUID.randomUUID().toString());
-            }
-            return httpResponseBuilder.build();
+                .body("")
+                .cookie("JSESSIONID", session.getId())
+                .build();
         }
         throw new IllegalArgumentException("invalid request %s".formatted(requestUriPath));
+    }
+
+    private Session getSession(HttpCookie httpCookie) {
+        if (httpCookie == null) {
+            return null;
+        }
+        if (httpCookie.getCookie("JSESSIONID") == null) {
+            return null;
+        }
+        String jsessionid = httpCookie.getCookie("JSESSIONID");
+        SessionManager sessionManager = SessionManager.getInstance();
+        return sessionManager.findSession(jsessionid);
     }
 
     private Map<String, String> parseQueryParameters(String queryString) {
@@ -227,7 +251,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("user register account {} and email {}", user, password, email);
     }
 
-    private void login(Map<String, String> queryParameters) {
+    private User login(Map<String, String> queryParameters) {
         String account = queryParameters.get("account");
         String password = queryParameters.get("password");
         if (account == null || password == null) {
@@ -236,6 +260,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
         User user = findUser.orElseThrow(() -> new UnAuthorizedException("Invalid account " + account));
         log.atInfo().log("user: {}", user);
+        return user;
     }
 
     private String readStaticFile(String filePath) throws IOException {

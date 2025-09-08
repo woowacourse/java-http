@@ -1,13 +1,10 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.controller.Controller;
 import org.apache.controller.LoginController;
@@ -16,7 +13,6 @@ import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.exception.SocketReadException;
 import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -71,24 +67,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest makeRequest(InputStream inputStream) {
-        List<String> message = readRequestMessage(inputStream);
-        return new HttpRequest(message);
+        return new HttpRequest(inputStream);
     }
 
     private HttpResponse makeResponse(HttpVersion httpVersion) {
         return new HttpResponse(httpVersion);
-    }
-
-    private List<String> readRequestMessage(InputStream inputStream) {
-        try {
-            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
-            List<String> message = new ArrayList<>();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            message.add(bufferedReader.readLine());
-            return message;
-        } catch (IOException e) {
-            throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
-        }
     }
 
     private void writeResponseMessage(HttpResponse response, OutputStream outputStream) {

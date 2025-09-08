@@ -2,8 +2,10 @@ package com.techcourse.servlet;
 
 import com.techcourse.application.LoginService;
 import com.techcourse.application.dto.LoginRequest;
+import com.techcourse.exception.BusinessException;
 import com.techcourse.servlet.util.StaticFileLoader;
 import java.io.IOException;
+import java.util.Map;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.ContentType;
@@ -17,12 +19,17 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getQueryParams().get("account");
-        String password = request.getQueryParams().get("password");
+        Map<String, String> bodyParams = request.getBodyParams();
+        String account = bodyParams.get("account");
+        String password = bodyParams.get("password");
 
         try {
             loginService.login(new LoginRequest(account, password));
-            response.setStatus(HttpStatus.OK);
+            response.setStatus(HttpStatus.SEE_OTHER);
+            response.addToHeader("Location", "/index.html");
+        } catch (BusinessException e) {
+            response.setStatus(HttpStatus.SEE_OTHER);
+            response.addToHeader("Location", "/401.html");
         } catch (Exception e) {
             ServletExceptionHandler.getInstance().handle(response, e);
         }
@@ -32,7 +39,7 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
             byte[] content = StaticFileLoader.loadStaticFile(LOGIN_PAGE);
-            response.setContentType(ContentType.getContentTypeFrom(LOGIN_PAGE));
+            response.setContentType(ContentType.fromPath(LOGIN_PAGE));
             response.appendToBody(content);
         } catch (IOException e) {
             ServletExceptionHandler.getInstance().handle(response, e);

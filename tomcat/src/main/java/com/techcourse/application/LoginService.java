@@ -13,11 +13,18 @@ public class LoginService {
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
     public void login(LoginRequest request) {
+        log.warn("account: " + request.account());
+        log.warn("password: " + request.password());
         User user = InMemoryUserRepository.findByAccount(request.account())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (user.checkPassword(request.password())) {
-            log.info(user.toString());
+        validatePassword(request, user);
+        log.info(user.toString());
+    }
+
+    private void validatePassword(LoginRequest request, User user) {
+        if (!user.checkPassword(request.password())) {
+            throw new BusinessException(ErrorCode.PASSWORD_NOT_MATCHED);
         }
     }
 }

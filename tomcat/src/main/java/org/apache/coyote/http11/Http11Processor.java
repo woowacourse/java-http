@@ -54,6 +54,27 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IllegalArgumentException("invalid http request");
             }
 
+            int contentLength = 0;
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    break;
+                }
+                if (line.toLowerCase().startsWith("content-length")) { // request body의 길이
+                    String[] keyValue = line.split(":");
+                    if (keyValue.length == 2) {
+                        contentLength = Integer.parseInt(keyValue[1].trim());
+                    }
+                }
+            }
+
+            String body = "";
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                bufferedReader.read(bodyChars, 0, contentLength);
+                body = new String(bodyChars);
+            }
+
             // 요청 헤더 파싱
             String requestMethod = requestLine.split(" ")[0];
             String requestUri = requestLine.split(" ")[1];
@@ -61,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> queryParameters = getQueryParameters(requestUri);
 
             // 응답
-            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters);
+            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters, body);
             outputStream.write(response.toString().getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -83,17 +104,14 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
         String queryString = requestUri.substring(index + 1);
-        Map<String, String> queryParameters = new HashMap<>();
-        Arrays.stream(queryString.split("&"))
-            .map(parameter -> parameter.split("="))
-            .forEach(keyValue -> queryParameters.put(keyValue[0], keyValue.length == 2 ? keyValue[1] : null));
-        return Collections.unmodifiableMap(queryParameters);
+        return parseQueryParameters(queryString);
     }
 
     private HttpResponse getHttpResponse(
         String requestMethod,
         String requestUriPath,
-        Map<String, String> queryParameters
+        Map<String, String> queryParameters,
+        String body
     ) throws IOException {
         if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
             String responseBody = "Hello world!";
@@ -127,7 +145,28 @@ public class Http11Processor implements Runnable, Processor {
                 .body(responseBody)
                 .build();
         }
-        if (requestMethod.equals("GET") && requestUriPath.equals("/login") && queryParameters.isEmpty()) {
+        if (requestMethod.equals("GET") && requestUriPath.equals("/register")) {
+            String responseBody = readStaticFile("/register.html");
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/html;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("POST") && requestUriPath.equals("/register")) {
+            try {
+                Map<String, String> formData = parseQueryParameters(body);
+                register(formData);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            }
+            return HttpResponse.builder()
+                .status(HttpStatus.Found)
+                .header("Location", "/index.html")
+                .body("")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.equals("/login")) {
             String responseBody = readStaticFile("/login.html");
             return HttpResponse.builder()
                 .status(HttpStatus.OK)
@@ -135,9 +174,10 @@ public class Http11Processor implements Runnable, Processor {
                 .body(responseBody)
                 .build();
         }
-        if (requestMethod.equals("GET") && requestUriPath.equals("/login")) {
+        if (requestMethod.equals("POST") && requestUriPath.equals("/login")) {
             try {
-                login(queryParameters);
+                Map<String, String> formData = parseQueryParameters(body);
+                login(formData);
             } catch (UnAuthorizedException e) {
                 return HttpResponse.builder()
                     .status(HttpStatus.Found)
@@ -154,18 +194,34 @@ public class Http11Processor implements Runnable, Processor {
         throw new IllegalArgumentException("invalid request %s".formatted(requestUriPath));
     }
 
-    private void login(Map<String, String> keyValues) {
-        String account = keyValues.get("account");
-        String password = keyValues.get("password");
+    private Map<String, String> parseQueryParameters(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+        Arrays.stream(queryString.split("&"))
+            .map(parameter -> parameter.split("="))
+            .forEach(keyValue -> queryParameters.put(keyValue[0], keyValue.length == 2 ? keyValue[1] : null));
+        return Collections.unmodifiableMap(queryParameters);
+    }
+
+    private void register(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+        String email = queryParameters.get("email");
+        if (account == null || password == null || email == null) {
+            throw new IllegalArgumentException("account and password and email should be not null");
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("user register account {} and email {}", user, password, email);
+    }
+
+    private void login(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
         if (account == null || password == null) {
             throw new UnAuthorizedException("account or password should be not null");
         }
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-        boolean isValidAccount = findUser.isPresent();
-        if (!isValidAccount) {
-            throw new UnAuthorizedException("Invalid account " + account);
-        }
-        User user = findUser.get();
+        User user = findUser.orElseThrow(() -> new UnAuthorizedException("Invalid account " + account));
         log.atInfo().log("user: {}", user);
     }
 

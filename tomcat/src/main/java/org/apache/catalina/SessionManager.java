@@ -23,9 +23,6 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(final String id) throws IOException {
-        if (!SESSIONS.containsKey(id)) {
-            throw new IOException("올바르지 않은 Session ID입니다.");
-        }
         return SESSIONS.get(id);
     }
 

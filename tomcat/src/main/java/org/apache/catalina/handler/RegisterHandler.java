@@ -1,7 +1,5 @@
 package org.apache.catalina.handler;
 
-import static org.reflections.Reflections.log;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
@@ -9,8 +7,12 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegisterHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
 
     public HttpResponse handle(HttpRequest request) {
         if (request.getMethod().equals("GET")) {

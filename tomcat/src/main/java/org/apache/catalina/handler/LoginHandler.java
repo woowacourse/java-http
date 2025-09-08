@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
@@ -31,18 +30,17 @@ public class LoginHandler {
 
     private HttpResponse getLoginPage(HttpRequest request) {
         String sessionId = request.getCookie("JSESSIONID");
-        if (sessionId == null) {
+        Session session = (sessionId != null)
+                ? SessionManager.getInstance().findSession(sessionId)
+                : null;
+
+        if (sessionId == null || session == null || session.getUser() == null) {
             return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, "/login.html");
         }
 
-        Session session = SessionManager.getInstance().findSession(sessionId);
-        if (session != null && session.getUser() != null) {
-            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
-            response.setLocation("/index.html");
-            return response;
-        }
-
-        return new HttpResponse(HttpStatusCode.UNAUTHORIZED, ContentType.HTML, "/401.html");
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+        response.setLocation("/index.html");
+        return response;
     }
 
     private HttpResponse login(HttpRequest request) {
@@ -54,20 +52,17 @@ public class LoginHandler {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("로그인 성공! 아이디: {}", user.get().getAccount());
             HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
-            String sessionId = setUserSession(user.get());
+            setUserSession(request, user.get());
             response.setLocation("/index.html");
-            response.addCookie("JSESSIONID", sessionId);
             return response;
         }
 
         return new HttpResponse(HttpStatusCode.UNAUTHORIZED, ContentType.HTML, "/401.html");
     }
 
-    private String setUserSession(User user) {
-        Session session = new Session(UUID.randomUUID().toString());
-        session.setAttribute("user", user);
+    private void setUserSession(HttpRequest request, User user) {
         SessionManager sessionManager = SessionManager.getInstance();
-        sessionManager.add(session);
-        return session.getId();
+        Session session = sessionManager.findSession(request.getCookie("JSESSIONID"));
+        session.setAttribute("user", user);
     }
 }

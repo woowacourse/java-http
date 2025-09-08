@@ -198,7 +198,7 @@ class Http11ProcessorTest {
 
     }
 
-    @DisplayName("GET /login? : 로그인 테스트")
+    @DisplayName("POST /login : 로그인 테스트")
     @Nested
     class LoginTest {
 
@@ -206,12 +206,16 @@ class Http11ProcessorTest {
         @Test
         void testLoginSuccess() {
             // given
+            final String requestBody = String.format("account=gugu&password=password");
             final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=password HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    String.format("Content-Length: %d", requestBody.getBytes().length),
+                    "Content-Type: application/x-www-form-urlencoded",
+                    "Accept: */*",
                     "",
-                    "");
+                    requestBody);
 
             final StubSocket socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
@@ -228,16 +232,20 @@ class Http11ProcessorTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
 
-        @DisplayName("GET /login?: 로그인 정보가 저장된 정보와 일치하지 않으면 401을 반환한다.")
+        @DisplayName("로그인 정보가 저장된 정보와 일치하지 않으면 401을 반환한다.")
         @Test
         void testLoginFail() throws IOException {
             // given
+            final String requestBody = String.format("account=gugu&password=invalidPassword");
             final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    String.format("Content-Length: %d", requestBody.getBytes().length),
+                    "Content-Type: application/x-www-form-urlencoded",
+                    "Accept: */*",
                     "",
-                    "");
+                    requestBody);
 
             final StubSocket socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
@@ -257,94 +265,6 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
-
-        @DisplayName("유효하지 않은 쿼리 파라미터일 경우 500을 반환한다.")
-        @Test
-        void testInvalidLoginQuery() throws IOException {
-            // given
-            final String httpRequest = String.join("\r\n",
-                    "GET /login?invalid=query HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "");
-
-            final StubSocket socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
-
-            // when
-            processor.process(socket);
-
-            // then
-            final URL resource = getClass().getClassLoader().getResource("static/500.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            final String expected = String.join("\r\n",
-                    "HTTP/1.1 500 Internal Server Error ",
-                    "Content-Type: text/html; charset=utf-8 ",
-                    String.format("Content-Length: %s ", responseBody.getBytes().length),
-                    "",
-                    responseBody);
-
-            assertThat(socket.output()).isEqualTo(expected);
-        }
-
-        @DisplayName("로그인 쿼리에서 account 파라미터가 없으면 500을 반환한다.")
-        @Test
-        void testLoginWithoutAccount() throws IOException {
-            // given
-            final String httpRequest = String.join("\r\n",
-                    "GET /login?password=password HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "");
-
-            final StubSocket socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
-
-            // when
-            processor.process(socket);
-
-            // then
-            final URL resource = getClass().getClassLoader().getResource("static/500.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            final String expected = String.join("\r\n",
-                    "HTTP/1.1 500 Internal Server Error ",
-                    "Content-Type: text/html; charset=utf-8 ",
-                    String.format("Content-Length: %s ", responseBody.getBytes().length),
-                    "",
-                    responseBody);
-
-            assertThat(socket.output()).isEqualTo(expected);
-        }
-
-        @DisplayName("로그인 쿼리에서 password 파라미터가 없으면 500을 반환한다.")
-        @Test
-        void testLoginWithoutPassword() throws IOException {
-            // given
-            final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "");
-
-            final StubSocket socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
-
-            // when
-            processor.process(socket);
-
-            // then
-            final URL resource = getClass().getClassLoader().getResource("static/500.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            final String expected = String.join("\r\n",
-                    "HTTP/1.1 500 Internal Server Error ",
-                    "Content-Type: text/html; charset=utf-8 ",
-                    String.format("Content-Length: %s ", responseBody.getBytes().length),
-                    "",
-                    responseBody);
-
-            assertThat(socket.output()).isEqualTo(expected);
-        }
-
     }
 
     @DisplayName("POST /register: 회원가입 테스트")
@@ -356,11 +276,13 @@ class Http11ProcessorTest {
         void testRegisterSuccess() {
             // given
             final String newAccount = "norang";
+            final String requestBody = String.format("account=%s&password=password&email=hkkang%%40woowahan.com",
+                    newAccount);
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Content-Length: 80",
+                    String.format("Content-Length: %d", requestBody.getBytes().length),
                     "Content-Type: application/x-www-form-urlencoded",
                     "Accept: */*",
                     "",
@@ -375,7 +297,7 @@ class Http11ProcessorTest {
             // then
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/register.html ",
+                    "Location: http://localhost:8080/index.html ",
                     "Content-Length: 0 ");
             assertAll(
                     () -> assertThat(InMemoryUserRepository.findByAccount(newAccount)).isPresent(),

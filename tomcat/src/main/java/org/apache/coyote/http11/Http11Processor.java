@@ -58,8 +58,20 @@ public class Http11Processor implements Runnable, Processor {
                 send200Response("/index.html", outputStream);
                 return;
             }
-            if (requestURI.equals("/login")) {
+            if (requestURI.equals("/login") && method == HttpMethod.GET) {
                 send200Response("/login.html", outputStream);
+                return;
+            }
+            if (requestURI.startsWith("/login") && method == HttpMethod.POST) {
+                final String[] split = requestBody.split("&");
+                final String account = split[0].split("=")[1];
+                final String password = split[1].split("=")[1];
+                boolean loginSuccessful = isLoginSuccessful(account, password);
+                if (loginSuccessful) {
+                    send302Response("/login", outputStream);
+                    return;
+                }
+                send401Response(outputStream);
                 return;
             }
             if (requestURI.equals("/register") && method == HttpMethod.GET) {
@@ -72,16 +84,7 @@ public class Http11Processor implements Runnable, Processor {
                 final String password = split[1].split("=")[1];
                 final String email = split[2].split("=")[1].replace("%40", "@");
                 InMemoryUserRepository.save(new User(account, password, email));
-                send302Response("/register.html", outputStream);
-                return;
-            }
-            if (requestURI.startsWith("/login?")) {
-                boolean loginSuccessful = isLoginSuccessful(requestURI, outputStream);
-                if (loginSuccessful) {
-                    send302Response("/login", outputStream);
-                    return;
-                }
-                send401Response(outputStream);
+                send302Response("/index.html", outputStream);
                 return;
             }
             send200Response(requestURI, outputStream);
@@ -144,19 +147,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean isLoginSuccessful(final String requestURL, final OutputStream outputStream) {
-        final LoginDto loginDto = parseLoginRequest(requestURL, outputStream);
-        final Optional<User> user = InMemoryUserRepository.findByAccount(loginDto.account());
+    private boolean isLoginSuccessful(final String account, final String password) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             return false;
         }
-        if (!user.get().checkPassword(loginDto.password())) {
+        if (!user.get().checkPassword(password)) {
             return false;
         }
-        log.info("user: {}", user.get());
+        log.info("로그인 성공: {}", user.get());
         return true;
     }
 
+    // 나중에 HttpRequest 리팩터링에 사용하기 위해 남겨둠
     private LoginDto parseLoginRequest(final String requestURL, final OutputStream outputStream) {
         final int QUERY_KEY_INDEX = 0;
         final int QUERY_VALUE_INDEX = 1;

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,179 +42,146 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final SessionManager sessions = SessionManager.getInstance();
             final Http11Request request = new Http11Request(inputStream);
-
+            final String path = extractPath(request.getUri());
             final String method = request.getMethod();
-            final String uri = request.getUri();
-            final String version = request.getVersion();
 
-            String path = uri;
-            Map<String, String> queryParams = new LinkedHashMap<>();
-            if (uri.contains("?")) {
-                int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                String queryString = uri.substring(index + 1);
-                queryParams = parseQueryString(queryString);
-            }
-
-            final Map<String, String> requestHeaders = request.getHeaders();
-            final String requestBody = request.getBody();
-
-            final Map<String, String> responseHeaders = new LinkedHashMap<>();
             String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
+            final Map<String, String> responseHeaders = new LinkedHashMap<>();
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
             if ("/logout".equals(path)) {
-                Http11Cookie cookie = request.getCookie();
-                if (cookie.isContainsSessionId()) {
-                    sessions.remove(cookie.getSessionId());
-                }
-                statusLine = "HTTP/1.1 302 Found";
-                responseHeaders.put("Location", "/index.html");
-                responseHeaders.put("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
+                statusLine = handleLogout(request, responseHeaders);
                 responseBody = "";
             } else if ("GET".equals(method)) {
-                if ("/register".equals(path)) {
-                    responseBody = readFileFromClasspath("static/register.html");
-                } else if ("/login".equals(path) || "/login.html".equals(path)) {
-                    Http11Cookie cookie = request.getCookie();
-                    if (cookie.isNotContainsSessionId()) {
-                        responseBody = readFileFromClasspath("static/login.html");
-                    } else if (cookie.isContainsSessionId()) {
-                        if (sessions.containsSession(cookie.getSessionId())) {
-                            statusLine = "HTTP/1.1 302 Found";
-                            responseHeaders.put("Location", "/index.html");
-                        } else {
-                            responseBody = readFileFromClasspath("static/login.html");
-                        }
-                    }
-                } else if (!"/".equals(path)) {
-                    final String resourcePath = "static" + path;
-                    responseBody = readFileFromClasspath(resourcePath);
-                }
-            }
-
-            if ("POST".equals(method)) {
-                if ("/register".equals(path)) {
-                    Map<String, String> params = new HashMap<>();
-                    String[] pairs = requestBody.split("&");
-
-                    for (String pair : pairs) {
-                        String[] keyValue = pair.split("=", 2);
-                        if (keyValue.length == 2) {
-                            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                            params.put(key, value);
-                        }
-                    }
-
-                    User user = new User(params.get("account"), params.get("password"), params.get("email"));
-                    log.info("User saved: {}", user);
-                    InMemoryUserRepository.save(user);
-
-                    statusLine = "HTTP/1.1 302 Found";
-                    if (requestHeaders.containsKey("Cookie")) {
-                        Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
-                        if (cookie.isNotContainsSessionId()) {
-                            String sessionId = UUID.randomUUID().toString();
-                            Http11Session session = new Http11Session(sessionId);
-                            session.setAttribute("user", user);
-                            sessions.add(session);
-                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
-                        }
-                    } else {
-                        String sessionId = UUID.randomUUID().toString();
-                        Http11Session session = new Http11Session(sessionId);
-                        session.setAttribute("user", user);
-                        sessions.add(session);
-                        responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
-                    }
-                    responseHeaders.put("Location", "/index.html");
-                }
-
-                if ("/login".equals(path)) {
-                    Map<String, String> params = new HashMap<>();
-                    String[] pairs = requestBody.split("&");
-
-                    for (String pair : pairs) {
-                        String[] keyValue = pair.split("=", 2);
-                        if (keyValue.length == 2) {
-                            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                            params.put(key, value);
-                        }
-                    }
-
-                    final User user = InMemoryUserRepository.findByAccount(params.get("account"))
-                            .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));                    log.info("User saved: {}", user);
-
-                    if (user.checkPassword(params.get("password"))) {
-                        statusLine = "HTTP/1.1 302 Found";
-                        if (requestHeaders.containsKey("Cookie")) {
-                            Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
-                            if (cookie.isContainsSessionId()) {
-                                if (!sessions.containsSession(cookie.getSessionId())) {
-                                    String sessionId = UUID.randomUUID().toString();
-                                    Http11Session session = new Http11Session(sessionId);
-                                    session.setAttribute("user", user);
-                                    sessions.add(session);
-                                    responseHeaders.put("Set-Cookie", "JSESSIONID=" +sessionId);
-                                }
-                            }
-                            String sessionId = UUID.randomUUID().toString();
-                            Http11Session session = new Http11Session(sessionId);
-                            session.setAttribute("user", user);
-                            sessions.add(session);
-                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
-                        } else {
-                            String sessionId = UUID.randomUUID().toString();
-                            Http11Session session = new Http11Session(sessionId);
-                            session.setAttribute("user", user);
-                            sessions.add(session);
-                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
-                        }
-                        responseHeaders.put("Location", "/index.html");
-                    } else {
-                        statusLine = "HTTP/1.1 302 Found";
-                        responseHeaders.put("Location", "/401.html");
-                    }
-                }
+                Entry<String, String> getResult = handleGetRequest(path, request, responseHeaders);
+                statusLine = getResult.getKey();
+                responseBody = getResult.getValue();
+            } else if ("POST".equals(method)) {
+                statusLine = handlePostRequest(path, request, responseHeaders);
+                responseBody = "";
             }
 
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-
             final String response = buildResponse(statusLine, responseHeaders, responseBody);
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        final Map<String, String> queryParams = new LinkedHashMap<>();
-        if (queryString == null || queryString.isEmpty()) {
-            log.error("query string is empty");
-            return queryParams;
+    private String handleLogout(final Http11Request request, final Map<String, String> responseHeaders) {
+        final Http11Cookie cookie = request.getCookie();
+        if (cookie.isContainsSessionId()) {
+            SessionManager.getInstance().remove(cookie.getSessionId());
+        }
+        responseHeaders.put("Location", "/index.html");
+        responseHeaders.put("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
+        return "HTTP/1.1 302 Found";
+    }
+
+    private Entry<String, String> handleGetRequest(final String path, final Http11Request request, 
+                                                   final Map<String, String> responseHeaders) {
+        String statusLine = "HTTP/1.1 200 OK";
+        String responseBody;
+
+        if ("/register".equals(path)) {
+            responseBody = readFileFromClasspath("static/register.html");
+        } else if ("/login".equals(path) || "/login.html".equals(path)) {
+            final Http11Cookie cookie = request.getCookie();
+            if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
+                statusLine = "HTTP/1.1 302 Found";
+                responseHeaders.put("Location", "/index.html");
+                responseBody = "";
+            } else {
+                responseBody = readFileFromClasspath("static/login.html");
+            }
+        } else if (!"/".equals(path)) {
+            responseBody = readFileFromClasspath("static" + path);
+        } else {
+            responseBody = "Hello world!";
         }
 
-        final String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-            final String[] keyValue = pair.split("=");
-            queryParams.put(keyValue[0], keyValue[1]);
+        return new AbstractMap.SimpleEntry<>(statusLine, responseBody);
+    }
+
+    private String handlePostRequest(final String path, final Http11Request request, 
+                                     final Map<String, String> responseHeaders) {
+        final Map<String, String> params = parseRequestBody(request.getBody());
+
+        if ("/register".equals(path)) {
+            final User user = new User(params.get("account"), params.get("password"), params.get("email"));
+            InMemoryUserRepository.save(user);
+            log.info("User saved: {}", user);
+            createSessionAndSetCookie(user, request, responseHeaders);
+            responseHeaders.put("Location", "/index.html");
+            return "HTTP/1.1 302 Found";
         }
-        return queryParams;
+
+        if ("/login".equals(path)) {
+            final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                    .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
+
+            if (user.checkPassword(params.get("password"))) {
+                createSessionAndSetCookie(user, request, responseHeaders);
+                responseHeaders.put("Location", "/index.html");
+                return "HTTP/1.1 302 Found";
+            } else {
+                responseHeaders.put("Location", "/401.html");
+                return "HTTP/1.1 302 Found";
+            }
+        }
+        return "HTTP/1.1 404 Not Found";
+    }
+
+    private void createSessionAndSetCookie(final User user, final Http11Request request, 
+                                           final Map<String, String> responseHeaders) {
+        final Http11Cookie cookie = request.getCookie();
+        if (cookie.isNotContainsSessionId() || !SessionManager.getInstance().containsSession(cookie.getSessionId())) {
+            final String sessionId = UUID.randomUUID().toString();
+            final Http11Session session = new Http11Session(sessionId);
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+        }
+    }
+
+    private String extractPath(final String uri) {
+        if (uri == null || uri.isEmpty()) {
+            return "/";
+        }
+        if (uri.contains("?")) {
+            return uri.substring(0, uri.indexOf("?"));
+        }
+        return uri;
+    }
+
+    private Map<String, String> parseRequestBody(final String requestBody) {
+        if (requestBody == null || requestBody.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> params = new HashMap<>();
+        final String[] pairs = requestBody.split("&");
+        for (String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                params.put(key, value);
+            }
+        }
+        return params;
     }
 
     private String readFileFromClasspath(String resourcePath) {
-        InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
-        StringBuilder fileContents = new StringBuilder();
+        final InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
         if (input == null) {
             log.error("resource not found: {}", resourcePath);
-            return fileContents.toString();
+            return "";
         }
+        final StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -221,6 +189,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         } catch (IOException e) {
             log.error("Failed to read file: {}", resourcePath, e);
+            return "";
         }
         return fileContents.toString();
     }

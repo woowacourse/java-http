@@ -32,7 +32,7 @@ public class HttpRequest {
             parseQueryParam(startLinePart.get(1));
 
             readHeader(bufferedReader);
-            if (checkQueryStringExistence("Content-Length")) {
+            if (checkHeaderExistence("Content-Length")) {
                 readBody(bufferedReader);
             }
         } catch (IOException e) {
@@ -42,6 +42,10 @@ public class HttpRequest {
 
     public boolean checkQueryStringExistence(String key) {
         return queryString.containsKey(key);
+    }
+
+    public boolean checkHeaderExistence(String key) {
+        return header.containsKey(key);
     }
 
     public HttpMethod getMethod() {
@@ -62,6 +66,10 @@ public class HttpRequest {
 
     public String getHeader(String key) {
         return header.get(key);
+    }
+
+    public String getBody(String key) {
+        return body.get(key);
     }
 
     private List<String> readStartLine(BufferedReader reader) throws IOException {
@@ -87,10 +95,12 @@ public class HttpRequest {
         String bodyText = new String(buffer, 0, read);
         String decoded = URLDecoder.decode(bodyText, StandardCharsets.UTF_8);
 
-        List<String> queryStringParts = List.of(decoded.split("&"));
-        for (String queryStringPart : queryStringParts) {
-            List<String> keyValue = List.of(queryStringPart.split("="));
-            body.put(keyValue.getFirst(), keyValue.getLast());
+        List<String> bodyParts = List.of(decoded.split("&"));
+        for (String bodyPart : bodyParts) {
+            List<String> keyValue = List.of(bodyPart.split("="));
+            String key = keyValue.getFirst().trim();
+            String value = keyValue.getLast().trim();
+            body.put(key, value);
         }
     }
 

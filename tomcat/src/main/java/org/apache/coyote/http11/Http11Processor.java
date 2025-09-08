@@ -62,16 +62,30 @@ public class Http11Processor implements Runnable, Processor {
             if (httpMethod == HttpMethod.POST && path.contains("/login")) {
                 final boolean isValidLogin = isValidLogin(httpRequest);
                 if (isValidLogin) {
-                    responseRedirectHome(outputStream);
+                    responseRedirectPage(outputStream,"/index.html");
                     return;
                 }
                 responseErrorPage(outputStream, "/401.html");
                 return;
             }
 
+            if (httpMethod == HttpMethod.POST && path.contains("/register")) {
+                boolean isRegistered = registerMember(httpRequest);
+                if(isRegistered) {
+                    responseRedirectPage(outputStream,"/index.html");
+                    return;
+                }
+                responseRedirectPage(outputStream,"/register.html");
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && path.contains("/register")) {
+                responseHtml(outputStream, "register");
+            }
+
             if (httpMethod == HttpMethod.GET && path.contains("/login")) {
                 printMemberLog(httpHeader);
-                responseLoginHtml(outputStream);
+                responseHtml(outputStream, "login");
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
@@ -93,6 +107,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean registerMember(final HttpRequest httpRequest) {
+        HttpBody httpBody = httpRequest.getHttpBody();
+        String account = httpBody.getData("account");
+        String email = httpBody.getData("email");
+        String password = httpBody.getData("password");
+        if (account == null || email == null || password == null) {
+            return false;
+        }
+        boolean isAlreadyRegister = InMemoryUserRepository.findByAccount(account)
+                .isPresent();
+        if(isAlreadyRegister) return false;
+        User user = new User(account,password,email);
+        InMemoryUserRepository.save(user);
+        return true;
+    }
+
     private boolean isValidLogin(final HttpRequest httpRequest) {
         HttpBody httpBody = httpRequest.getHttpBody();
         String account = httpBody.getData("account");
@@ -103,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
         if (user != null && user.checkPassword(password)) {
-            log.info("user : {}", user);
+            log.info("로그인 성공 user : {}", user);
             return true;
         }
         return false;
@@ -142,14 +172,17 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseRedirectHome(final OutputStream outputStream) throws IOException {
+    private void responseRedirectPage(
+            final OutputStream outputStream,
+            final String redirectPage
+    ) throws IOException {
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
                 StatusCode.FOUND,
                 null
         );
         httpResponse.addHeader("Content-Length", "0");
-        httpResponse.addHeader("Location", "/index.html");
+        httpResponse.addHeader("Location", redirectPage);
 
         final String response = httpResponse.getResponse();
 
@@ -157,8 +190,11 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseLoginHtml(final OutputStream outputStream) throws URISyntaxException, IOException {
-        final String body = getStaticResponseBody("static/login.html");
+    private void responseHtml(
+            final OutputStream outputStream,
+            final String path
+    ) throws URISyntaxException, IOException {
+        final String body = getStaticResponseBody("static/" + path + ".html");
 
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",

@@ -72,7 +72,7 @@ public class LoginController extends AbstractController {
         Optional<Object> user = session.getAttribute(USER);
 
         if (user.isPresent()) {
-            httpResponse.init(findResource(INDEX_RESOURCE_PATH), ContentType.HTML, HttpStatus.FOUND);
+            httpResponse.sendRedirect(INDEX_RESOURCE_PATH);
             return true;
         }
         return false;

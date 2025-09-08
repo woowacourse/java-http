@@ -47,6 +47,6 @@ public class RegisterController extends AbstractController {
                 new UserService());
 
         registerRestController.register(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD), bodyValues.get(EMAIL));
-        httpResponse.init(findResource(INDEX_RESOURCE_PATH), ContentType.HTML, HttpStatus.FOUND);
+        httpResponse.sendRedirect(INDEX_RESOURCE_PATH);
     }
 }

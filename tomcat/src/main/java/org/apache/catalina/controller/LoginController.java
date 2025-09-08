@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
             bodyValues.put(split[0], split[1]);
         }
 
-        final com.techcourse.controller.LoginController loginController = new com.techcourse.controller.LoginController(new UserService()); //TODO: Bean 구현 부분
+        final com.techcourse.restController.LoginController loginController = new com.techcourse.restController.LoginController(new UserService()); //TODO: Bean 구현 부분
 
         try {
             User user = loginController.login(bodyValues.get("account"), bodyValues.get("password"));

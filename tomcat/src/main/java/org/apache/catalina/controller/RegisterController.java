@@ -47,7 +47,7 @@ public class RegisterController extends AbstractController {
             bodyValues.put(split[0], split[1]);
         }
 
-        final com.techcourse.controller.RegisterController registerController = new com.techcourse.controller.RegisterController(new UserService());
+        final com.techcourse.restController.RegisterController registerController = new com.techcourse.restController.RegisterController(new UserService());
 
         registerController.register(bodyValues.get("account"), bodyValues.get("password"), bodyValues.get("email"));
         httpResponse.init(findResource("/index.html"), ContentType.HTML, HttpStatus.FOUND);

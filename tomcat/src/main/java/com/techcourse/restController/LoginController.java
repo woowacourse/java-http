@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package com.techcourse.restController;
 
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;

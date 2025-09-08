@@ -19,23 +19,27 @@ public class HttpRequestParser {
         }
         String method = httpLine[0];
         String path = parsePath(httpLine[1]);
-        Map<String, String> queries = parseQueries(httpLine[1]);
+        Map<String, String> queries = new HashMap<>();
+        Map<String, String> getQueries = parseQueries(httpLine[1]);
+        if (getQueries != null) {
+            queries.putAll(getQueries);
+        }
         String version = httpLine[2];
-
-        Map<String, String> bodyParams = new HashMap<>();
-        Map<String, String> finalQueries = queries;
         int contentLength = 0;
         String line;
-        while ((line = br.readLine()) != null && !line.isEmpty()) {
-            if (line.toLowerCase().startsWith("content-length:")) {
+        while (!(line = br.readLine()).isEmpty()) {
+            if (line.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
             }
         }
-        if ("POST".equals(method) && contentLength > 0) {
-            bodyParams = parseBody(inputStream, contentLength);
-            finalQueries = bodyParams;
+        if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
+            char[] bodyChars = new char[contentLength];
+            br.read(bodyChars, 0, contentLength);
+            String body = new String(bodyChars);
+            Map<String, String> postQueries = parseQueryString(body);
+            queries.putAll(postQueries);
         }
-        return new HttpRequest(method, path, version, finalQueries);
+        return new HttpRequest(method, path, version, queries);
     }
 
     private static String[] readHttpLine(BufferedReader br) throws IOException {

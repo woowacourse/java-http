@@ -10,12 +10,12 @@ import org.apache.http.StatusCode;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 
-public class LoginPageController implements Controller {
+public class RegisterRedirectionController implements Controller {
 
     @Override
     public boolean isProcessableRequest(HttpRequest request) {
         return request.getMethod() == HttpMethod.GET
-                && request.getUri().equals("/login")
+                && request.getUri().equals("/register")
                 && request.checkCookieExistence("JSESSIONID");
     }
 
@@ -35,4 +35,3 @@ public class LoginPageController implements Controller {
                 .isPresent();
     }
 }
-

@@ -10,6 +10,8 @@ import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
 
 public class RegisterController implements Controller {
 
@@ -29,9 +31,10 @@ public class RegisterController implements Controller {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
+        String sessionId = makeSession(user);
         response.setStatusCode(StatusCode.FOUND);
         response.setHeader("Location", "/index.html");
-        response.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
+        response.setCookie(new Cookie("JSESSIONID", sessionId));
     }
 
     private void validateAlreadyAccountExistence(String account) {
@@ -39,5 +42,11 @@ public class RegisterController implements Controller {
         if (user.isPresent()) {
             throw new InvalidRequestException("이미 존재하는 유저입니다.");
         }
+    }
+
+    private String makeSession(User user) {
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.add(new Session(sessionId, user));
+        return sessionId;
     }
 }

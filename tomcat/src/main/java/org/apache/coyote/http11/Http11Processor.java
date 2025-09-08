@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.controller.Controller;
 import org.apache.controller.LoginController;
-import org.apache.controller.LoginPageController;
+import org.apache.controller.LoginRedirectionController;
 import org.apache.controller.RegisterController;
+import org.apache.controller.RegisterRedirectionController;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
@@ -27,8 +28,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final StaticFileController staticFileController = new StaticFileController();
     private static final List<Controller> controllers = List.of(
             new LoginController(),
-            new LoginPageController(),
+            new LoginRedirectionController(),
             new RegisterController(),
+            new RegisterRedirectionController(),
             new RootController());
 
     private final Socket connection;

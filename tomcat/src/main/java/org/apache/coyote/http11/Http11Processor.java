@@ -47,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = getRequestUri(bufferedReader);
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
 
-            String contentType = resolveContentType(requestUri, requestHeaders);
-            HttpResponse response = buildResponse(requestUri, contentType);
+            MimeType mimeType = resolveMimeType(requestUri, requestHeaders);
+            HttpResponse response = buildResponse(requestUri, mimeType);
 
             sendResponse(outputStream, response);
 
@@ -62,26 +62,24 @@ public class Http11Processor implements Runnable, Processor {
         return startLine.split(" ")[1];
     }
 
-    private String resolveContentType(String requestUri, Map<String, String> requestHeaders) {
-        String contentType = HeaderParser.extractPrimaryContentType(requestHeaders);
-        if (!contentType.isEmpty()) {
-            return contentType;
+    private MimeType resolveMimeType(String requestUri, Map<String, String> requestHeaders) {
+        String acceptHeaderValue = HeaderParser.extractPrimaryMimeType(requestHeaders);
+        MimeType mimeType = MimeType.fromMimeTypeString(acceptHeaderValue);
+
+        if (mimeType != null) {
+            return mimeType;
         }
 
         if (UriParser.hasQuery(requestUri)) {
             requestUri = UriParser.extractPath(requestUri);
         }
         String extension = UriParser.extractExtension(requestUri);
-        if (!extension.isEmpty()) {
-            return extension;
-        }
-
-        return "html";
+        return MimeType.fromExtension(extension);
     }
 
-    private HttpResponse buildResponse(String requestUri, String contentType) throws IOException {
+    private HttpResponse buildResponse(String requestUri, MimeType mimeType) throws IOException {
         if (UriParser.isRootPath(requestUri)) {
-            return HttpResponse.of(HttpStatus.OK, contentType, "Hello world!");
+            return HttpResponse.of(HttpStatus.OK, mimeType, "Hello world!");
         }
 
         String path = requestUri;
@@ -90,42 +88,42 @@ public class Http11Processor implements Runnable, Processor {
             String queryString = UriParser.extractQueryString(requestUri);
             Map<String, String> queryParams = QueryParamsParser.parse(queryString);
             if (path.equals("/login")) {
-                return handleLogin(queryParams, contentType);
+                return handleLogin(queryParams, mimeType);
             }
         }
 
-        Path filePath = getFilePath(path, contentType);
+        Path filePath = getFilePath(path, mimeType);
         String responseBody = new String(Files.readAllBytes(filePath));
-        return HttpResponse.of(HttpStatus.OK, contentType, responseBody);
+        return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
     }
 
-    private Path getFilePath(String path, String contentType) {
+    private Path getFilePath(String path, MimeType mimeType) {
         if (UriParser.extractExtension(path).isEmpty()) {
-            path += EXTENSION_SEPARATOR + contentType;
+            path += EXTENSION_SEPARATOR + mimeType;
         }
         URL resource = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
         return new File(resource.getFile()).toPath();
     }
 
-    private HttpResponse handleLogin(Map<String, String> queryParams, String contentType) {
+    private HttpResponse handleLogin(Map<String, String> queryParams, MimeType mimeType) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> handleSuccess(user, contentType))
-                .orElseGet(() -> handleFailure(account, contentType));
+                .map(user -> handleSuccess(user, mimeType))
+                .orElseGet(() -> handleFailure(account, mimeType));
     }
 
-    private HttpResponse handleSuccess(User user, String contentType) {
+    private HttpResponse handleSuccess(User user, MimeType mimeType) {
         log.info("login success: {}", user);
-        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, contentType, "");
+        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
         httpResponse.addHeader("Location", "/index.html");
         return httpResponse;
     }
 
-    private HttpResponse handleFailure(String account, String contentType) {
+    private HttpResponse handleFailure(String account, MimeType mimeType) {
         log.info("login failure: account= {}", account);
-        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, contentType, "");
+        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
         httpResponse.addHeader("Location", "/401.html");
         return httpResponse;
     }

@@ -10,7 +10,6 @@ public class HeaderParser {
     public static final String HEADER_DELIMITER = ":";
     public static final String MEDIA_TYPE_DELIMITER = ",";
     public static final String ACCEPT_HEADER = "Accept";
-    public static final String TYPE_SUBTYPE_DELIMITER = "/";
 
     public static Map<String, String> parse(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
@@ -23,12 +22,11 @@ public class HeaderParser {
         return headers;
     }
 
-    public static String extractPrimaryContentType(Map<String, String> headers) {
+    public static String extractPrimaryMimeType(Map<String, String> headers) {
         if (!headers.containsKey(ACCEPT_HEADER)) {
             return "";
         }
         String acceptHeaderValue = headers.get(ACCEPT_HEADER);
-        String primaryMediaType = acceptHeaderValue.split(MEDIA_TYPE_DELIMITER)[0];
-        return primaryMediaType.split(TYPE_SUBTYPE_DELIMITER)[1];
+        return acceptHeaderValue.split(MEDIA_TYPE_DELIMITER)[0];
     }
 }

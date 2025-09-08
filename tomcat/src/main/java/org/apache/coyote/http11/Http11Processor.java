@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
 
@@ -41,36 +44,44 @@ public class Http11Processor implements Runnable, Processor {
              var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final var requestLine = RequestLine.from(reader.readLine());
-            var requestPath = requestLine.getPath();
+            final var requestHeaders = RequestHeaders.from(reader);
+            final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
+            final Map<String, String> responseHeaders = new HashMap<>();
+
+            if (requestCookies.getCookie("JSESSIONID") == null) {
+                final var sessionCookie = new ResponseCookie("JSESSIONID", UUID.randomUUID().toString());
+                responseHeaders.put("Set-Cookie", sessionCookie.toHeaderString());
+            }
 
             if (requestLine.getMethod() == HttpMethod.POST) {
-                final Map<String, String> parameters = getFormRequestBodyParameters(reader);
+                final var contentLength = requestHeaders.getHeader("Content-Length");
+                final var requestBody = readRequestBody(reader, contentLength);
+                final Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
                 String redirectUrl = "/index.html";
 
-                if ("login".equals(requestPath)) {
+                if ("/login".equals(requestLine.getPath())) {
                     final var loginSuccess = checkLogin(parameters.get("account"), parameters.get("password"));
                     if (!loginSuccess) {
                         redirectUrl = "/401.html";
-                        log.info("login 실패: user account: " + parameters.get("account"));
-                    } else {
-                        log.info("login 성공: user account: " + parameters.get("account"));
                     }
+                    log.info("로그인 시도 account: {}", parameters.get("account"));
                 }
 
-                if ("register".equals(requestPath)) {
+                if ("/register".equals(requestLine.getPath())) {
                     final var newUser = new User(parameters.get("account"), parameters.get("password"),
                             parameters.get("email"));
                     InMemoryUserRepository.save(newUser);
-                    log.info("register 완료, newUser account: " + newUser.getAccount());
+                    log.info("Registered new user: {}", newUser.getAccount());
                 }
 
-                final Map<String, String> headers = Map.of("Location", redirectUrl);
-                final var response = buildHttpResponse("302 Found", "text/html", "", headers);
+                responseHeaders.put("Location", redirectUrl);
+                final var response = buildHttpResponse("302 Found", "text/html", "", responseHeaders);
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
 
+            var requestPath = requestLine.getPath();
             if (requestPath.isBlank() || "/".equals(requestPath)) {
                 requestPath = "index.html";
             }
@@ -88,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var contentType = ContentType.from(requestPath);
             final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody,
-                    Collections.emptyMap());
+                    responseHeaders);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (Exception e) {
@@ -112,15 +123,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getFormRequestBodyParameters(BufferedReader reader) throws IOException {
-        final var requestHeaders = RequestHeaders.from(reader);
-        final var contentLength = requestHeaders.getHeader("Content-Length");
-        final var requestBody = readRequestBody(reader, contentLength);
-        return RequestBodyUtils.parseFormUrlEncoded(requestBody);
-    }
-
     public boolean checkLogin(String account, String password) {
-        if (account == null || account.isBlank()) {
+        if (account == null || account.isBlank() || password == null) {
             return false;
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
@@ -132,9 +136,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private URL getResourceFrom(String requestPath) {
-        var resource = getClass().getClassLoader().getResource("static/" + requestPath);
+        var resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + requestPath);
         if (resource == null) {
-            resource = getClass().getClassLoader().getResource("static/" + requestPath + ".html");
+            resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + requestPath + ".html");
         }
         return resource;
     }

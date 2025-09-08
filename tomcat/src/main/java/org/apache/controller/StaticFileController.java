@@ -21,14 +21,17 @@ public class StaticFileController implements Controller {
 
     @Override
     public boolean isProcessableRequest(HttpRequest request) {
-        String uri = getUriFromRequest(request);
+        if (request.getUri().isEmpty() || request.getUri().equals("/")) {
+            return false;
+        }
+        String uri = addDefaultExtension(request.getUri());
         return isExistResource(uri);
     }
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
         try {
-            String uri = getUriFromRequest(request);
+            String uri = addDefaultExtension(request.getUri());
             validateInvalidUri(uri);
 
             URL resource = findResourceUrl(uri);
@@ -44,8 +47,7 @@ public class StaticFileController implements Controller {
         }
     }
 
-    private String getUriFromRequest(HttpRequest request) {
-        String uri = request.getUri();
+    private String addDefaultExtension(String uri) {
         List<String> uriPart = List.of(uri.split("/"));
         if (uriPart.getLast().contains(".")) {
             return uri;

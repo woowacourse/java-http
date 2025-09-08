@@ -35,7 +35,7 @@ public class HttpRequest {
             this.version = HttpVersion.parse(startLinePart.get(2));
             this.queryStrings = parseQueryString(startLinePart.get(1));
             this.headers = readHeader(bufferedReader);
-            this.cookies = parseCookie(getHeader(HttpHeader.COOKIE.getValue()));
+            this.cookies = parseCookie();
             this.body = readBody(bufferedReader);
         } catch (IOException e) {
             throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
@@ -102,6 +102,7 @@ public class HttpRequest {
 
     private Map<String, String> readBody(BufferedReader reader) throws IOException {
         Map<String, String> bodyRead = new HashMap<>();
+
         if (!checkHeaderExistence(HttpHeader.CONTENT_LENGTH.getValue())) {
             return bodyRead;
         }
@@ -129,6 +130,7 @@ public class HttpRequest {
 
     private Map<String, String> parseQueryString(String uriLine) {
         Map<String, String> queryStringRead = new HashMap<>();
+
         if (!hasQueryParam(uriLine)) {
             return queryStringRead;
         }
@@ -143,8 +145,15 @@ public class HttpRequest {
         return queryStringRead;
     }
 
-    private Map<String, Cookie> parseCookie(String cookieHeader) {
+    private Map<String, Cookie> parseCookie() {
         Map<String, Cookie> cookieRead = new HashMap<>();
+
+        boolean cookieHeaderExistence = checkHeaderExistence(HttpHeader.COOKIE.getValue());
+        if (!cookieHeaderExistence) {
+            return cookieRead;
+        }
+
+        String cookieHeader = getHeader(HttpHeader.COOKIE.getValue());
         List<String> cookieLines = List.of(cookieHeader.split(";"));
         for (String cookieLine : cookieLines) {
             List<String> cookieKeyValue = List.of(cookieLine.split("="));

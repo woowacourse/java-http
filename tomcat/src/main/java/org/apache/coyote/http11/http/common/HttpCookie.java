@@ -15,19 +15,39 @@ public class HttpCookie {
 
     public static HttpCookie from(final HttpHeader httpHeader) {
         final HttpCookie httpCookie = new HttpCookie();
-        Optional<String> cookieOptional = httpHeader.getCookie();
+        final Optional<String> cookieOptional = httpHeader.getCookie();
+
         if (cookieOptional.isEmpty()) {
             return httpCookie;
         }
-        String rawCookie = cookieOptional.get();
-        String[] cookies = rawCookie.trim().split(";");
-        for (String cookie : cookies) {
-            String[] cookieElement = cookie.split("=");
-            String cookieName = cookieElement[0].trim();
-            String cookieValue = cookieElement[1].trim();
-            httpCookie.addCookie(cookieName, cookieValue);
+
+        final String rawCookie = cookieOptional.get();
+        final String[] cookies = rawCookie.trim().split(";");
+
+        for (final String cookie : cookies) {
+            parseAndAddCookie(cookie, httpCookie);
         }
+
         return httpCookie;
+    }
+
+    private static void parseAndAddCookie(final String cookieElementLine, final HttpCookie httpCookie) {
+        if (cookieElementLine == null || cookieElementLine.isBlank()) {
+            return;
+        }
+        final String[] cookieElement = cookieElementLine.split("=", 2);
+
+        if (cookieElement.length != 2) {
+            return;
+        }
+
+        final String cookieName = cookieElement[0].trim();
+        final String cookieValue = cookieElement[1].trim();
+
+        if (cookieName.isEmpty()) {
+            return;
+        }
+        httpCookie.addCookie(cookieName, cookieValue);
     }
 
     public void addCookie(final String name, final String value) {

@@ -59,15 +59,13 @@ public class HttpResponse {
             return HttpHeader.from(responseHeaderInfo);
         }
 
-        responseHeaderInfo.putIfAbsent(HttpHeaderKey.CONTENT_TYPE.getValue(), new ArrayList<>());
-        responseHeaderInfo.get(HttpHeaderKey.CONTENT_TYPE.getValue())
+        responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_TYPE.getValue(), k -> new ArrayList<>())
                 .add(responseBody.getContentType().getFormat() + ";charset=utf-8");
 
         final Optional<byte[]> valueOptional = responseBody.getValue();
 
         if (valueOptional.isPresent()) {
-            responseHeaderInfo.putIfAbsent(HttpHeaderKey.CONTENT_LENGTH.getValue(), new ArrayList<>());
-            responseHeaderInfo.get(HttpHeaderKey.CONTENT_LENGTH.getValue())
+            responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_LENGTH.getValue(), k -> new ArrayList<>())
                     .add(Integer.toString(responseBody.getByteLength()));
         }
 

@@ -75,8 +75,7 @@ public class HttpHeader {
             final String headerValue = requestPayload.substring(headerSplitIndex + 1).trim();
 
             validateHeaderFormat(headerKey, headerValue);
-            httpHeaderInfo.computeIfAbsent(headerKey, k -> new ArrayList<>());
-            httpHeaderInfo.get(headerKey).add(headerValue);
+            httpHeaderInfo.computeIfAbsent(headerKey, k -> new ArrayList<>()).add(headerValue);
         }
         return httpHeaderInfo;
     }

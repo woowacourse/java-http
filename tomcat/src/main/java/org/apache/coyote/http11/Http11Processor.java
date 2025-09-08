@@ -30,7 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.httpController = new HttpController();
-        this.sessionManager = new SessionManager();
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = HttpRequest.from(inputStream);
+            HttpRequest httpRequest = HttpRequest.from(inputStream, sessionManager);
 
             String response = findTargetMethod(httpRequest);
 

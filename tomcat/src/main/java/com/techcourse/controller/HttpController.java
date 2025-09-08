@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.exception.UnauthorizedException;
-import org.apache.coyote.http11.http.common.HttpCookie;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -34,11 +33,6 @@ public class HttpController {
     }
 
     public HttpResponse getLoginHtml(final HttpRequest httpRequest) {
-        final HttpCookie cookie = httpRequest.getCookie();
-        if (!cookie.containsName("JSESSIONID")) {
-            return HttpResponse.ok("login.html");
-        }
-
         final HttpSession session = httpRequest.getSession();
         if (session == null) {
             return HttpResponse.ok("login.html");

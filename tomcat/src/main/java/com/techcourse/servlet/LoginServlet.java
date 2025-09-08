@@ -30,18 +30,28 @@ public class LoginServlet implements Servlet {
             return;
         }
 
+        if ("POST".equals(request.getMethod())) {
+            handlePost(request, response);
+            return;
+        }
+
         response.setStatus(405);
         response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
     }
 
     private void handleGet(final HttpRequest request, final HttpResponse response) {
+        // GET 요청시에는 로그인 페이지만 보여줌
+        final String loginHtml = readLoginPage();
+        response.write(loginHtml);
+    }
+
+    private void handlePost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
 
         if (account == null || password == null) {
-            // 파라미터 없으면 로그인 페이지 보여줌
-            final String loginHtml = readLoginPage();
-            response.write(loginHtml);
+            // 파라미터 없으면 다시 로그인 페이지로
+            response.sendRedirect("/login");
             return;
         }
 

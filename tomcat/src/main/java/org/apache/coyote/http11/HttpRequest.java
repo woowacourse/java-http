@@ -4,6 +4,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,5 +90,26 @@ public class HttpRequest {
 
     public String getCookieValue(final String name) {
         return cookies.getValue(name);
+    }
+
+    public Session getSession() {
+        return getSession(true);
+    }
+
+    public Session getSession(final boolean create) {
+        final String sessionId = getCookieValue("JSESSIONID");
+        
+        if (sessionId != null) {
+            final Session session = SessionManager.getInstance().findSession(sessionId);
+            if (session != null) {
+                return session;
+            }
+        }
+        
+        if (create) {
+            return SessionManager.getInstance().createSession();
+        }
+        
+        return null;
     }
 }

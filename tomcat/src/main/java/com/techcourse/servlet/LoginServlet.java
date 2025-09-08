@@ -1,15 +1,16 @@
 package com.techcourse.servlet;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -41,7 +42,15 @@ public class LoginServlet implements Servlet {
     }
 
     private void handleGet(final HttpRequest request, final HttpResponse response) {
-        // GET 요청시에는 로그인 페이지만 보여줌
+        // 이미 로그인된 상태인지 체크
+        final Session session = request.getSession(false);
+        if (session != null && getUser(session) != null) {
+            // 이미 로그인됨 - "/"로 리다이렉트
+            response.sendRedirect("/");
+            return;
+        }
+
+        // 로그인 안 됨 - 로그인 페이지 보여줌
         final String loginHtml = readLoginPage();
         response.write(loginHtml);
     }
@@ -55,37 +64,32 @@ public class LoginServlet implements Servlet {
             return;
         }
 
-        if (processLogin(account, password)) {
-            // JSESSIONID 쿠키가 없으면 새로 생성
-            String sessionId = request.getCookieValue("JSESSIONID");
-            if (sessionId == null) {
-                sessionId = UUID.randomUUID().toString();
-                response.addCookie("JSESSIONID", sessionId);
-            }
-            
-            response.sendRedirect("/index.html");
-            return;
-        }
-
-        response.sendRedirect("/401.html");
-    }
-
-    private boolean processLogin(final String account, final String password) {
         final var userOptional = InMemoryUserRepository.findByAccount(account);
 
         if (userOptional.isEmpty()) {
             log.info("로그인 실패: 존재하지 않는 계정 - account: {}", account);
-            return false;
+            response.sendRedirect("/401.html");
+            return;
         }
 
         final var user = userOptional.get();
         if (user.checkPassword(password)) {
             log.info("로그인 성공: 회원 조회 결과 - {}", user);
-            return true;
+
+            // 세션에 사용자 정보 저장
+            final Session session = request.getSession(true);
+            session.setAttribute("user", user);
+            response.addCookie("JSESSIONID", session.getId());
+            response.sendRedirect("/");
+            return;
         }
 
         log.info("로그인 실패: 비밀번호 불일치 - account: {}", account);
-        return false;
+        response.sendRedirect("/401.html");
+    }
+
+    private User getUser(final Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private String readLoginPage() {

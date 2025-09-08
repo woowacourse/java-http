@@ -14,7 +14,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.HttpStatusException;
@@ -22,6 +21,7 @@ import org.apache.coyote.http11.httprequest.HttpMethod;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,19 +57,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleRequest(final BufferedReader reader, final OutputStream outputStream) throws IOException {
         try {
-            final HttpRequest httpRequest = new HttpRequest(reader);
-            httpRequest.parseHttpRequest();
-            final String requestPath = httpRequest.getRequestPath();
+            final HttpRequestParser requestParser = new HttpRequestParser(reader);
+            final HttpRequest httpRequest = requestParser.readHttpRequest();
 
             // GET /
-            if (requestPath.equals("/")) {
+            if (httpRequest.isPathEqualsTo("/")) {
                 final HttpResponse response = HttpResponse.createWelcomeHttpResponse();
                 sendHttpResponse(response, outputStream);
                 return;
             }
 
             // GET /register
-            if (requestPath.equals("/register") && httpRequest.getHttpMethod() == HttpMethod.GET) {
+            if (httpRequest.isPathEqualsTo("/register") && httpRequest.getHttpMethod() == HttpMethod.GET) {
                 final URL resource = getStaticResource("/register.html");
                 final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
@@ -77,11 +76,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // POST /register
-            if (requestPath.equals("/register") && httpRequest.getHttpMethod() == HttpMethod.POST) {
-                Map<String, String> parameters = httpRequest.getRequestBody();
-                final String account = parameters.get("account");
-                final String password = parameters.get("password");
-                final String email = parameters.get("email");
+            if (httpRequest.isPathEqualsTo("/register") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+                final String account = httpRequest.getBodyParameter("account");
+                final String password = httpRequest.getBodyParameter("password");
+                final String email = httpRequest.getBodyParameter("email");
 
                 userService.signup(account, password, email);
                 final HttpResponse response = getRedirectHttpResponse("/index.html");
@@ -90,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // GET /login
-            if (requestPath.equals("/login") && httpRequest.getHttpMethod() == HttpMethod.GET) {
+            if (httpRequest.isPathEqualsTo("/login") && httpRequest.getHttpMethod() == HttpMethod.GET) {
                 final URL resource = getStaticResource("/login.html");
                 final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
@@ -98,10 +96,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // POST /login
-            if (requestPath.equals("/login") && httpRequest.getHttpMethod() == HttpMethod.POST) {
-                final Map<String, String> parameters = httpRequest.getRequestBody();
-                final String account = parameters.get("account");
-                final String password = parameters.get("password");
+            if (httpRequest.isPathEqualsTo("/login") && httpRequest.getHttpMethod() == HttpMethod.POST) {
+                final String account = httpRequest.getBodyParameter("account");
+                final String password = httpRequest.getBodyParameter("password");
                 final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
                 if (user.isEmpty() || !user.get().checkPassword(password)) {
@@ -118,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 이 외의 정적 요청
-            final URL resource = getStaticResource(httpRequest.getRequestPath());
+            final URL resource = getStaticResource(httpRequest.getStaticResourcePath());
             final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
             sendHttpResponse(response, outputStream);
 

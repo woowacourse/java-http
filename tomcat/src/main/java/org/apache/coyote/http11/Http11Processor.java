@@ -3,9 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
+import java.util.LinkedList;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dispatcher.DispatcherHandler;
+import org.apache.coyote.http11.dispatcher.handlerAdapter.HandlerAdapter;
 import org.apache.coyote.http11.dispatcher.handlerAdapter.MethodHandlerAdapter;
 import org.apache.coyote.http11.dispatcher.handlerAdapter.StaticResourceHandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -35,7 +36,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            DispatcherHandler dispatcherHandler = new DispatcherHandler(List.of(new StaticResourceHandlerAdapter(), new MethodHandlerAdapter()));
+
+            LinkedList<HandlerAdapter> handlerAdapters = new LinkedList<>();
+            handlerAdapters.add(new MethodHandlerAdapter());
+            handlerAdapters.add(new StaticResourceHandlerAdapter());
+
+            DispatcherHandler dispatcherHandler = new DispatcherHandler(handlerAdapters);
             HttpResponse httpResponse = dispatcherHandler.doService(httpRequest);
 
             outputStream.write(httpResponse.toBytes());

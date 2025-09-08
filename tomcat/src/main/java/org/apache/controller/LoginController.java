@@ -9,7 +9,6 @@ import org.apache.http.Cookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusCode;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 import org.slf4j.Logger;
@@ -36,14 +35,12 @@ public class LoginController implements Controller {
 
         boolean isAuthenticated = authenticateUser(user, password);
         if (!isAuthenticated) {
-            response.setStatusCode(StatusCode.FOUND);
-            response.setHeader("Location", "/401.html");
+            response.setRedirection("/401.html");
             return;
         }
 
         String sessionId = makeSession(user.get());
-        response.setStatusCode(StatusCode.FOUND);
-        response.setHeader("Location", "/index.html");
+        response.setRedirection("/index.html");
         response.setCookie(new Cookie("JSESSIONID", sessionId));
     }
 
@@ -54,7 +51,6 @@ public class LoginController implements Controller {
     }
 
     private boolean authenticateUser(Optional<User> user, String password) {
-        user.ifPresent(value -> log.info("user : {}", value.toString()));
         return user.isPresent() && user.get().checkPassword(password);
     }
 

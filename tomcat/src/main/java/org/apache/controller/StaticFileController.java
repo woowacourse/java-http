@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.exception.InvalidRequestException;
 import org.apache.exception.RequestProcessingException;
 import org.apache.http.ContentType;
+import org.apache.http.HttpHeader;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
@@ -35,7 +36,7 @@ public class StaticFileController implements Controller {
             String responseBody = Files.readString(path);
 
             response.setStatusCode(StatusCode.OK);
-            response.setHeader("Content-Type", getFileExtension(path).getValue());
+            response.setHeader(HttpHeader.CONTENT_TYPE.getValue(), getFileExtension(path).getValue());
             response.setBody(responseBody);
 
         } catch (IOException | URISyntaxException | IllegalArgumentException exception) {

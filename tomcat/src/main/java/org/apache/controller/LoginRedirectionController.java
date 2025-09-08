@@ -6,7 +6,6 @@ import org.apache.http.Cookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusCode;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 
@@ -24,8 +23,7 @@ public class LoginRedirectionController implements Controller {
         Cookie cookie = request.getCookie("JSESSIONID");
         Session session = SessionManager.findSession(cookie.getValue());
         if (session != null && isValidUser(session.getUser())) {
-            response.setStatusCode(StatusCode.FOUND);
-            response.setHeader("Location", "/index.html");
+            response.setRedirection("/index.html");
         }
     }
 

@@ -9,7 +9,6 @@ import org.apache.http.Cookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusCode;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 
@@ -32,8 +31,7 @@ public class RegisterController implements Controller {
         InMemoryUserRepository.save(user);
 
         String sessionId = makeSession(user);
-        response.setStatusCode(StatusCode.FOUND);
-        response.setHeader("Location", "/index.html");
+        response.setRedirection("/index.html");
         response.setCookie(new Cookie("JSESSIONID", sessionId));
     }
 

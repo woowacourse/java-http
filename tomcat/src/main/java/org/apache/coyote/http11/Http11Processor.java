@@ -34,9 +34,64 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var request = bufferedReader.readLine();
-            final var method = request.split(" ")[0];
-            final var endpoint = request.split(" ")[1];
+
+            final var requestLine = bufferedReader.readLine();
+            final var method = requestLine.split(" ")[0];
+            final var endpoint = requestLine.split(" ")[1];
+
+            String line;
+            int contentLength = 0;
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.split(":")[1].trim());
+                }
+            }
+
+            if (method.equals("POST") && endpoint.startsWith("/login")) {
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                final var requestBody = new String(buffer);
+
+                String[] params = requestBody.split("&");
+                String account = null;
+                String password = null;
+
+                for (String param : params) {
+                    String[] keyValue = param.split("=");
+                    if (keyValue[0].equals("account")) {
+                        account = keyValue[1];
+                    } else if (keyValue[0].equals("password")) {
+                        password = keyValue[1];
+                    }
+                }
+
+                final var user = InMemoryUserRepository.findByAccount(account);
+                if (user.isPresent() && user.get().getAccount().equals(account)
+                        && user.get().checkPassword(password)) {
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 302 FOUND ",
+                            "Location: /index.html ",
+                            "",
+                            "");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                } else {
+                    final var path = Path.of(getClass().getResource("/static" + "/login.html").getPath());
+                    final var responseBody = new String(Files.readAllBytes(path));
+
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 401 Unauthorized ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+            }
 
             if (method.equals("GET") && endpoint.equals("/")) {
                 final var responseBody = "Hello world!";
@@ -70,16 +125,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("GET") && endpoint.startsWith("/login")) {
-                final var index = endpoint.indexOf("?");
-                final var queryString = endpoint.substring(index + 1);
-
-                final var account = queryString.split("&")[0].split("=")[1];
-
-                final var user = InMemoryUserRepository.findByAccount(account);
-                log.info("user : {}", user);
-
                 final var urlPath = Path.of(getClass().getResource("/static" + "/login.html").getPath());
-
                 final var responseBody = new String(Files.readAllBytes(urlPath));
 
                 final var response = String.join("\r\n",

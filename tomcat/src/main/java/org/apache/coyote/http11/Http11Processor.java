@@ -100,6 +100,10 @@ public class Http11Processor implements Runnable, Processor {
             }
         } else if (!"/".equals(path)) {
             responseBody = readFileFromClasspath("static" + path);
+            if (responseBody.isEmpty()) {
+                statusLine = "HTTP/1.1 404 Not Found";
+                responseBody = readFileFromClasspath("static/404.html");
+            }
         } else {
             responseBody = "Hello world!";
         }

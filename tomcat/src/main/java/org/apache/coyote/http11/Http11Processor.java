@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,22 +40,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String request = buildRequest(inputStream);
-            final String[] requestLines = request.split(CRLF, -1);
-            if (requestLines.length == 0 || requestLines[0].isEmpty()) {
-                log.error("request is empty");
-                return;
-            }
+            final Http11Request request = new Http11Request(inputStream);
 
-            final String[] requestLineContents = requestLines[0].split(" ");
-            if (requestLineContents.length < 3) {
-                log.error("request line is not enough");
-                return;
-            }
-
-            final String method = requestLineContents[0];
-            final String uri = requestLineContents[1];
-            final String version = requestLineContents[2];
+            final String method = request.getMethod();
+            final String uri = request.getUri();
+            final String version = request.getVersion();
 
             String path = uri;
             Map<String, String> queryParams = new LinkedHashMap<>();
@@ -64,27 +55,72 @@ public class Http11Processor implements Runnable, Processor {
                 queryParams = parseQueryString(queryString);
             }
 
+            final Map<String, String> requestHeaders = request.getHeaders();
+            final String requestBody = request.getBody();
+
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
             String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
             if ("GET".equals(method)) {
-                if ("/login".equals(path)) {
+                if ("/register".equals(path)) {
+                    responseBody = readFileFromClasspath("static/register.html");
+                } else if ("/login".equals(path)) {
                     if (queryParams.isEmpty()) {
                         responseBody = readFileFromClasspath("static/login.html");
-                    } else {
-                        if (handleLogin(queryParams)) {
-                            statusLine = "HTTP/1.1 302 Found";
-                            responseHeaders.put("Location", "/index.html");
-                        } else {
-                            statusLine = "HTTP/1.1 302 Found";
-                            responseHeaders.put("Location", "/401.html");
-                        }
                     }
                 } else if (!"/".equals(path)) {
                     final String resourcePath = "static" + path;
                     responseBody = readFileFromClasspath(resourcePath);
+                }
+            }
+
+            if ("POST".equals(method)) {
+                if ("/register".equals(path)) {
+                    Map<String, String> params = new HashMap<>();
+                    String[] pairs = requestBody.split("&");
+
+                    for (String pair : pairs) {
+                        String[] keyValue = pair.split("=", 2);
+                        if (keyValue.length == 2) {
+                            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                            params.put(key, value);
+                        }
+                    }
+
+                    User user = new User(params.get("account"), params.get("password"), params.get("email"));
+                    log.info("User saved: {}", user);
+                    InMemoryUserRepository.save(user);
+
+                    statusLine = "HTTP/1.1 302 Found";
+                    responseHeaders.put("Location", "/index.html");
+                }
+
+                if ("/login".equals(path)) {
+                    Map<String, String> params = new HashMap<>();
+                    String[] pairs = requestBody.split("&");
+
+                    for (String pair : pairs) {
+                        String[] keyValue = pair.split("=", 2);
+                        if (keyValue.length == 2) {
+                            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                            params.put(key, value);
+                        }
+                    }
+
+                    final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                            .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));                    log.info("User saved: {}", user);
+
+                    if (user.checkPassword(params.get("password"))) {
+                        statusLine = "HTTP/1.1 302 Found";
+                        responseHeaders.put("Location", "/index.html");
+                    } else {
+                        statusLine = "HTTP/1.1 302 Found";
+                        responseHeaders.put("Location", "/401.html");
+                    }
                 }
             }
 
@@ -96,23 +132,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String buildRequest(InputStream inputStream) {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        final StringBuilder requestBuilder = new StringBuilder();
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                requestBuilder.append(line).append(CRLF);
-                if (line.isEmpty()) {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return requestBuilder.toString();
     }
 
     private Map<String, String> parseQueryString(String queryString) {
@@ -128,25 +147,6 @@ public class Http11Processor implements Runnable, Processor {
             queryParams.put(keyValue[0], keyValue[1]);
         }
         return queryParams;
-    }
-
-    private boolean handleLogin(Map<String, String> queryParams) {
-        try {
-            final String account = queryParams.get("account");
-            final String password = queryParams.get("password");
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
-
-            if (user.checkPassword(password)) {
-                log.info("user: {}", user);
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return false;
-        }
     }
 
     private String readFileFromClasspath(String resourcePath) {

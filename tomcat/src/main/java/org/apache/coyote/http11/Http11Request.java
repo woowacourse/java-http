@@ -1,0 +1,64 @@
+package org.apache.coyote.http11;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class Http11Request {
+
+    private String method;
+    private String uri;
+    private String version;
+    private Map<String, String> headers;
+    private String body;
+
+    public Http11Request(final InputStream inputStream) throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String[] requestLine = reader.readLine().split(" ");
+        this.method = requestLine[0];
+        this.uri = requestLine[1];
+        this.version = requestLine[2];
+
+        Map<String, String> map = new LinkedHashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] parts = line.split(":", 2);
+            if (parts.length == 2) {
+                map.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+        this.headers = map;
+
+        if (map.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(map.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            this.body = new String(buffer);
+        } else {
+            this.body = "";
+        }
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+}

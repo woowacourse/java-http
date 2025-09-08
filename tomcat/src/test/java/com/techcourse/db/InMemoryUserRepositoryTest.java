@@ -2,6 +2,7 @@ package com.techcourse.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.techcourse.model.User;
 import java.util.Optional;
@@ -14,8 +15,10 @@ class InMemoryUserRepositoryTest {
     @DisplayName("기본 사용자 gugu를 조회할 수 있다")
     void findByAccount_existing() {
         final Optional<User> found = InMemoryUserRepository.findByAccount("gugu");
-        assertThat(found).isPresent();
-        assertThat(found.get().getAccount()).isEqualTo("gugu");
+        assertSoftly(softly -> {
+            softly.assertThat(found).isPresent();
+            found.ifPresent(u -> softly.assertThat(u.getAccount()).isEqualTo("gugu"));
+        });
     }
 
     @Test
@@ -32,9 +35,11 @@ class InMemoryUserRepositoryTest {
 
         final User saved = InMemoryUserRepository.save(toSave);
 
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getAccount()).isEqualTo(account);
-        assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+        assertSoftly(softly -> {
+            softly.assertThat(saved.getId()).isNotNull();
+            softly.assertThat(saved.getAccount()).isEqualTo(account);
+            softly.assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+        });
     }
 
     @Test
@@ -55,8 +60,9 @@ class InMemoryUserRepositoryTest {
 
         final User saved = InMemoryUserRepository.save(persisted);
 
-        assertThat(saved.getId()).isEqualTo(9999L);
-        assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+        assertSoftly(softly -> {
+            softly.assertThat(saved.getId()).isEqualTo(9999L);
+            softly.assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+        });
     }
 }
-

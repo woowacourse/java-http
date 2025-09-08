@@ -1,6 +1,7 @@
 package com.techcourse.web.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +26,10 @@ class SessionManagerTest {
         final SessionManager instance2 = SessionManager.getInstance();
 
         // then
-        assertThat(instance1).isSameAs(instance2);
-        assertThat(instance1).isSameAs(sessionManager);
+        assertSoftly(softly -> {
+            softly.assertThat(instance1).isSameAs(instance2);
+            softly.assertThat(instance1).isSameAs(sessionManager);
+        });
     }
 
     @Test
@@ -41,9 +44,13 @@ class SessionManagerTest {
 
         // then
         final Optional<Session> foundSession = sessionManager.find(sessionId);
-        assertThat(foundSession).isPresent();
-        assertThat(foundSession.get()).isSameAs(session);
-        assertThat(foundSession.get().getId()).isEqualTo(sessionId);
+        assertSoftly(softly -> {
+            softly.assertThat(foundSession).isPresent();
+            foundSession.ifPresent(s -> {
+                softly.assertThat(s).isSameAs(session);
+                softly.assertThat(s.getId()).isEqualTo(sessionId);
+            });
+        });
     }
 
     @Test
@@ -60,13 +67,15 @@ class SessionManagerTest {
         sessionManager.add(session3);
 
         // then
-        assertThat(sessionManager.find(session1.getId())).isPresent();
-        assertThat(sessionManager.find(session2.getId())).isPresent();
-        assertThat(sessionManager.find(session3.getId())).isPresent();
-        
-        assertThat(sessionManager.find(session1.getId()).get()).isSameAs(session1);
-        assertThat(sessionManager.find(session2.getId()).get()).isSameAs(session2);
-        assertThat(sessionManager.find(session3.getId()).get()).isSameAs(session3);
+        assertSoftly(softly -> {
+            softly.assertThat(sessionManager.find(session1.getId())).isPresent();
+            softly.assertThat(sessionManager.find(session2.getId())).isPresent();
+            softly.assertThat(sessionManager.find(session3.getId())).isPresent();
+
+            sessionManager.find(session1.getId()).ifPresent(s -> softly.assertThat(s).isSameAs(session1));
+            sessionManager.find(session2.getId()).ifPresent(s -> softly.assertThat(s).isSameAs(session2));
+            sessionManager.find(session3.getId()).ifPresent(s -> softly.assertThat(s).isSameAs(session3));
+        });
     }
 
     @Test
@@ -182,12 +191,14 @@ class SessionManagerTest {
         sessionManager.add(session3);
 
         // then
-        assertThat(session1.getId()).isNotNull();
-        assertThat(session2.getId()).isNotNull();
-        assertThat(session3.getId()).isNotNull();
-        
-        assertThat(session1.getId()).isNotEqualTo(session2.getId());
-        assertThat(session2.getId()).isNotEqualTo(session3.getId());
-        assertThat(session1.getId()).isNotEqualTo(session3.getId());
+        assertSoftly(softly -> {
+            softly.assertThat(session1.getId()).isNotNull();
+            softly.assertThat(session2.getId()).isNotNull();
+            softly.assertThat(session3.getId()).isNotNull();
+
+            softly.assertThat(session1.getId()).isNotEqualTo(session2.getId());
+            softly.assertThat(session2.getId()).isNotEqualTo(session3.getId());
+            softly.assertThat(session1.getId()).isNotEqualTo(session3.getId());
+        });
     }
 }

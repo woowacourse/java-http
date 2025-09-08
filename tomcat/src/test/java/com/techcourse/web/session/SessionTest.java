@@ -2,6 +2,7 @@ package com.techcourse.web.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,14 +25,17 @@ class SessionTest {
         final Session session2 = new Session();
 
         // when & then
-        assertThat(session1.getId()).isNotNull();
-        assertThat(session2.getId()).isNotNull();
-        assertThat(session1.getId()).isNotEqualTo(session2.getId());
-        
-        // UUID 형식인지 확인 (36자리, 하이픈 포함)
-        assertThat(session1.getId()).hasSize(36);
-        assertThat(session2.getId()).hasSize(36);
-        assertThat(session1.getId()).matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        assertSoftly(softly -> {
+            softly.assertThat(session1.getId()).isNotNull();
+            softly.assertThat(session2.getId()).isNotNull();
+            softly.assertThat(session1.getId()).isNotEqualTo(session2.getId());
+
+            // UUID 형식인지 확인 (36자리, 하이픈 포함)
+            softly.assertThat(session1.getId()).hasSize(36);
+            softly.assertThat(session2.getId()).hasSize(36);
+            softly.assertThat(session1.getId())
+                    .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        });
     }
 
     @Test
@@ -58,14 +62,16 @@ class SessionTest {
         final Boolean isAdmin = true;
 
         // when
-        session.setAttribute("username", username);
-        session.setAttribute("age", age);
-        session.setAttribute("isAdmin", isAdmin);
+        assertSoftly(softly -> {
+            session.setAttribute("username", username);
+            session.setAttribute("age", age);
+            session.setAttribute("isAdmin", isAdmin);
 
-        // then
-        assertThat(session.getAttribute("username")).isEqualTo(username);
-        assertThat(session.getAttribute("age")).isEqualTo(age);
-        assertThat(session.getAttribute("isAdmin")).isEqualTo(isAdmin);
+            // then
+            assertThat(session.getAttribute("username")).isEqualTo(username);
+            assertThat(session.getAttribute("age")).isEqualTo(age);
+            assertThat(session.getAttribute("isAdmin")).isEqualTo(isAdmin);
+        });
     }
 
     @Test
@@ -82,8 +88,10 @@ class SessionTest {
 
         // then
         final Object retrievedValue = session.getAttribute(attributeName);
-        assertThat(retrievedValue).isEqualTo(newValue);
-        assertThat(retrievedValue).isNotEqualTo(initialValue);
+        assertSoftly(softly -> {
+            softly.assertThat(retrievedValue).isEqualTo(newValue);
+            softly.assertThat(retrievedValue).isNotEqualTo(initialValue);
+        });
     }
 
     @Test
@@ -103,7 +111,7 @@ class SessionTest {
         final String attributeName = "username";
         final String attributeValue = "gugu";
         session.setAttribute(attributeName, attributeValue);
-        
+
         // 속성이 설정되었는지 확인
         assertThat(session.getAttribute(attributeName)).isEqualTo(attributeValue);
 
@@ -129,7 +137,7 @@ class SessionTest {
         // given
         final String attributeName = "username";
         session.setAttribute(attributeName, "gugu");
-        
+
         // 속성이 설정되었는지 확인
         assertThat(session.getAttribute(attributeName)).isEqualTo("gugu");
 
@@ -154,13 +162,15 @@ class SessionTest {
     @DisplayName("빈 속성 이름으로 설정 시 예외 발생")
     void setAttributeWithEmptyName() {
         // when & then
-        assertThatThrownBy(() -> session.setAttribute("", "value"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> session.setAttribute("", "value"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
 
-        assertThatThrownBy(() -> session.setAttribute("   ", "value"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+            softly.assertThatThrownBy(() -> session.setAttribute("   ", "value"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        });
     }
 
     @Test
@@ -176,13 +186,15 @@ class SessionTest {
     @DisplayName("빈 속성 이름으로 조회 시 예외 발생")
     void getAttributeWithEmptyName() {
         // when & then
-        assertThatThrownBy(() -> session.getAttribute(""))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> session.getAttribute(""))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
 
-        assertThatThrownBy(() -> session.getAttribute("   "))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+            softly.assertThatThrownBy(() -> session.getAttribute("   "))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        });
     }
 
     @Test
@@ -198,13 +210,15 @@ class SessionTest {
     @DisplayName("빈 속성 이름으로 제거 시 예외 발생")
     void removeAttributeWithEmptyName() {
         // when & then
-        assertThatThrownBy(() -> session.removeAttribute(""))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> session.removeAttribute(""))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
 
-        assertThatThrownBy(() -> session.removeAttribute("   "))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+            softly.assertThatThrownBy(() -> session.removeAttribute("   "))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("속성 이름은 null이거나 비어있을 수 없습니다");
+        });
     }
 
     @Test
@@ -223,10 +237,12 @@ class SessionTest {
         session.setAttribute("double", doubleValue);
 
         // then
-        assertThat(session.getAttribute("string")).isEqualTo(stringValue);
-        assertThat(session.getAttribute("integer")).isEqualTo(intValue);
-        assertThat(session.getAttribute("boolean")).isEqualTo(boolValue);
-        assertThat(session.getAttribute("double")).isEqualTo(doubleValue);
+        assertSoftly(softly -> {
+            softly.assertThat(session.getAttribute("string")).isEqualTo(stringValue);
+            softly.assertThat(session.getAttribute("integer")).isEqualTo(intValue);
+            softly.assertThat(session.getAttribute("boolean")).isEqualTo(boolValue);
+            softly.assertThat(session.getAttribute("double")).isEqualTo(doubleValue);
+        });
     }
 
     @Test
@@ -241,8 +257,10 @@ class SessionTest {
         session.setAttribute("map", mapValue);
 
         // then
-        assertThat(session.getAttribute("list")).isEqualTo(listValue);
-        assertThat(session.getAttribute("map")).isEqualTo(mapValue);
+        assertSoftly(softly -> {
+            softly.assertThat(session.getAttribute("list")).isEqualTo(listValue);
+            softly.assertThat(session.getAttribute("map")).isEqualTo(mapValue);
+        });
     }
 
     @Test

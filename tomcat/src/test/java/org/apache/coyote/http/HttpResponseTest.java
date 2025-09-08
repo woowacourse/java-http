@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,10 +22,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 12");
-        assertThat(responseString).contains("Hello World!");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 12");
+            softly.assertThat(responseString).contains("Hello World!");
+        });
     }
 
     @Test
@@ -41,9 +44,11 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Content-Length: 21");
-        assertThat(responseString).contains(jsonBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Content-Length: 21");
+            softly.assertThat(responseString).contains(jsonBody);
+        });
     }
 
     @Test
@@ -60,9 +65,11 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 204 No Content");
-        assertThat(responseString).contains("Content-Length: 0");
-        assertThat(responseString).endsWith("\r\n");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 204 No Content");
+            softly.assertThat(responseString).contains("Content-Length: 0");
+            softly.assertThat(responseString).endsWith("\r\n");
+        });
     }
 
     @Test
@@ -79,9 +86,11 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 204 No Content");
-        assertThat(responseString).contains("Content-Length: 0");
-        assertThat(responseString).endsWith("\r\n");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 204 No Content");
+            softly.assertThat(responseString).contains("Content-Length: 0");
+            softly.assertThat(responseString).endsWith("\r\n");
+        });
     }
 
     @Test
@@ -98,10 +107,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Content-Type: text/css");
-        assertThat(responseString).contains("Content-Length: 19");
-        assertThat(responseString).contains(cssBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Content-Type: text/css");
+            softly.assertThat(responseString).contains("Content-Length: 19");
+            softly.assertThat(responseString).contains(cssBody);
+        });
     }
 
     @Test
@@ -118,10 +129,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Content-Type: application/javascript");
-        assertThat(responseString).contains("Content-Length: 21");
-        assertThat(responseString).contains(jsBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Content-Type: application/javascript");
+            softly.assertThat(responseString).contains("Content-Length: 21");
+            softly.assertThat(responseString).contains(jsBody);
+        });
     }
 
     @Test
@@ -138,10 +151,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 404 Not Found");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 20");
-        assertThat(responseString).contains(errorBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 404 Not Found");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 20");
+            softly.assertThat(responseString).contains(errorBody);
+        });
     }
 
     @Test
@@ -158,10 +173,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 500 Internal Server Error");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 21");
-        assertThat(responseString).contains(errorBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 500 Internal Server Error");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 21");
+            softly.assertThat(responseString).contains(errorBody);
+        });
     }
 
     @Test
@@ -174,10 +191,11 @@ class HttpResponseTest {
 
         // when & then
         final HttpResponse response10 = new HttpResponse("1.0", status, contentType, body);
-        assertThat(response10.toString()).contains("HTTP/1.0 200 OK");
-
         final HttpResponse response11 = new HttpResponse("1.1", status, contentType, body);
-        assertThat(response11.toString()).contains("HTTP/1.1 200 OK");
+        assertSoftly(softly -> {
+            softly.assertThat(response10.toString()).contains("HTTP/1.0 200 OK");
+            softly.assertThat(response11.toString()).contains("HTTP/1.1 200 OK");
+        });
     }
 
     @Test
@@ -194,10 +212,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 16"); // UTF-8로 "안녕하세요!" = 16 bytes
-        assertThat(responseString).contains(koreanBody);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 16"); // UTF-8로 "안녕하세요!" = 16 bytes
+            softly.assertThat(responseString).contains(koreanBody);
+        });
     }
 
     @Test
@@ -214,10 +234,12 @@ class HttpResponseTest {
         final String responseString = response.toString();
 
         // then
-        assertThat(responseString).contains("HTTP/1.1 200 OK\r\n");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8\r\n");
-        assertThat(responseString).contains("Content-Length: 4\r\n");
-        assertThat(responseString).contains("\r\n\r\nTest"); // 헤더 끝과 본문 구분
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK\r\n");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8\r\n");
+            softly.assertThat(responseString).contains("Content-Length: 4\r\n");
+            softly.assertThat(responseString).contains("\r\n\r\nTest"); // 헤더 끝과 본문 구분
+        });
     }
 
     @Test
@@ -236,11 +258,13 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Set-Cookie: JSESSIONID=ABC123");
-        assertThat(responseString).contains("Set-Cookie: theme=dark");
-        assertThat(responseString).contains("Content-Length: 5");
-        assertThat(responseString).contains(body);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Set-Cookie: JSESSIONID=ABC123");
+            softly.assertThat(responseString).contains("Set-Cookie: theme=dark");
+            softly.assertThat(responseString).contains("Content-Length: 5");
+            softly.assertThat(responseString).contains(body);
+        });
     }
 
     @Test
@@ -258,10 +282,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).contains("Set-Cookie: username=gugu");
-        assertThat(responseString).contains("Content-Length: 7");
-        assertThat(responseString).contains(body);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).contains("Set-Cookie: username=gugu");
+            softly.assertThat(responseString).contains("Content-Length: 7");
+            softly.assertThat(responseString).contains(body);
+        });
     }
 
     @Test
@@ -278,10 +304,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 200 OK");
-        assertThat(responseString).doesNotContain("Set-Cookie:");
-        assertThat(responseString).contains("Content-Length: 10");
-        assertThat(responseString).contains(body);
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
+            softly.assertThat(responseString).doesNotContain("Set-Cookie:");
+            softly.assertThat(responseString).contains("Content-Length: 10");
+            softly.assertThat(responseString).contains(body);
+        });
     }
 
     @Test
@@ -296,10 +324,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 302 Found");
-        assertThat(responseString).contains("Location: /dashboard");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 0");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 302 Found");
+            softly.assertThat(responseString).contains("Location: /dashboard");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 0");
+        });
     }
 
     @Test
@@ -314,10 +344,12 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 302 Found");
-        assertThat(responseString).contains("Location: https://www.example.com/login");
-        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
-        assertThat(responseString).contains("Content-Length: 0");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 302 Found");
+            softly.assertThat(responseString).contains("Location: https://www.example.com/login");
+            softly.assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(responseString).contains("Content-Length: 0");
+        });
     }
 
     @Test
@@ -333,9 +365,11 @@ class HttpResponseTest {
 
         // then
         final String responseString = response.toString();
-        assertThat(responseString).contains("HTTP/1.1 302 Found");
-        assertThat(responseString).contains("Location: /index");
-        assertThat(responseString).contains("Set-Cookie: session=new_session_id");
-        assertThat(responseString).contains("Content-Length: 0");
+        assertSoftly(softly -> {
+            softly.assertThat(responseString).contains("HTTP/1.1 302 Found");
+            softly.assertThat(responseString).contains("Location: /index");
+            softly.assertThat(responseString).contains("Set-Cookie: session=new_session_id");
+            softly.assertThat(responseString).contains("Content-Length: 0");
+        });
     }
 }

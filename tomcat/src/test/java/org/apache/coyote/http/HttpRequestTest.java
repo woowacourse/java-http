@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,13 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
-        assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+            softly.assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
+        });
     }
 
     @Test
@@ -43,10 +46,12 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -63,10 +68,12 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -84,10 +91,12 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(request.getPath()).isEqualTo("/api/login");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+            softly.assertThat(request.getPath()).isEqualTo("/api/login");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -104,10 +113,12 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -124,12 +135,14 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/login");
-        assertThat(request.getVersion()).isEqualTo("1.1");
-        assertThat(request.getQueryParam("account")).isEqualTo("gugu");
-        assertThat(request.getQueryParam("password")).isEqualTo("password");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/login");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+            softly.assertThat(request.getQueryParam("account")).isEqualTo("gugu");
+            softly.assertThat(request.getQueryParam("password")).isEqualTo("password");
+        });
     }
 
     @Test
@@ -198,10 +211,12 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(request.getBodyParam("account")).isEqualTo("user");
-        assertThat(request.getBodyParam("password")).isEqualTo("1234");
-        assertThat(request.getBodyParam("email")).isEqualTo("user@example.com");
+        assertSoftly(softly -> {
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+            softly.assertThat(request.getBodyParam("account")).isEqualTo("user");
+            softly.assertThat(request.getBodyParam("password")).isEqualTo("1234");
+            softly.assertThat(request.getBodyParam("email")).isEqualTo("user@example.com");
+        });
     }
 
     @Test
@@ -219,9 +234,11 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request.getCookie("JSESSIONID")).isEqualTo("ABC123");
-        assertThat(request.getCookie("theme")).isEqualTo("dark");
-        assertThat(request.getCookie("lang")).isEqualTo("ko");
+        assertSoftly(softly -> {
+            softly.assertThat(request.getCookie("JSESSIONID")).isEqualTo("ABC123");
+            softly.assertThat(request.getCookie("theme")).isEqualTo("dark");
+            softly.assertThat(request.getCookie("lang")).isEqualTo("ko");
+        });
     }
 
     @Test
@@ -238,8 +255,10 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request.getCookie("JSESSIONID")).isEmpty();
-        assertThat(request.getCookie("nonexistent")).isEmpty();
+        assertSoftly(softly -> {
+            softly.assertThat(request.getCookie("JSESSIONID")).isEmpty();
+            softly.assertThat(request.getCookie("nonexistent")).isEmpty();
+        });
     }
 
     @Test
@@ -256,7 +275,9 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawRequest);
 
         // then
-        assertThat(request.getQueryParam("q")).isEqualTo("hello world");
-        assertThat(request.getQueryParam("email")).isEqualTo("test@example.com");
+        assertSoftly(softly -> {
+            softly.assertThat(request.getQueryParam("q")).isEqualTo("hello world");
+            softly.assertThat(request.getQueryParam("email")).isEqualTo("test@example.com");
+        });
     }
 }

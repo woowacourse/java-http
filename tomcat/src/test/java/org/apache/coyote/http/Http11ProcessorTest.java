@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,8 +88,10 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("Content-Type: text/css");
-        assertThat(output).contains("HTTP/1.1 200 OK");
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("Content-Type: text/css");
+            softly.assertThat(output).contains("HTTP/1.1 200 OK");
+        });
     }
 
     @Test
@@ -110,8 +113,10 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("Content-Type: application/javascript");
-        assertThat(output).contains("HTTP/1.1 200 OK");
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("Content-Type: application/javascript");
+            softly.assertThat(output).contains("HTTP/1.1 200 OK");
+        });
     }
 
     @Test
@@ -133,8 +138,10 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("HTTP/1.1 200 OK");
-        assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+        });
     }
 
     @Test
@@ -156,8 +163,10 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("HTTP/1.1");
-        assertThat(output).contains("Not Found");
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1");
+            softly.assertThat(output).contains("Not Found");
+        });
     }
 
     @Test
@@ -179,7 +188,9 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("HTTP/1.1 200 OK");
-        assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+        });
     }
 }

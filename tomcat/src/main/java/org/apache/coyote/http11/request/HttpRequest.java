@@ -15,7 +15,6 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
-    private final Map<String, String> queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -48,7 +47,6 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.queryParams = requestLine.getQueryParams();
     }
 
     public RequestLine getRequestLine() {
@@ -72,7 +70,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return requestLine.getQueryParams();
     }
 
     public String getBody() {

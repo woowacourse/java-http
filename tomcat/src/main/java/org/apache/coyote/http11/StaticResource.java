@@ -29,5 +29,4 @@ public class StaticResource {
     public byte[] readFile() throws IOException {
         return Files.readAllBytes(new File(this.resource.getFile()).toPath());
     }
-
 }

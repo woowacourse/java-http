@@ -91,7 +91,6 @@ public class HttpResponseParser {
                 .add(value);
     }
 
-
     private static String getContentType(final String extension) {
         final String mimeType = MIME_TYPES.get(extension);
         if (mimeType == null) {

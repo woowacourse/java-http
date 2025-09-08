@@ -15,6 +15,10 @@ public class Location {
         return new Location(EMPTY_LOCATION);
     }
 
+    public boolean isEmpty() {
+        return value.isEmpty();
+    }
+
     public String toHttpHeaderFormat() {
         return String.format(HTTP_HEADER_FORMAT, value);
     }

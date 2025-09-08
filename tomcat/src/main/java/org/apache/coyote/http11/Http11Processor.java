@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.handler.RegisterRequestHandler;
 import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpCookie;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.request.RequestBody;
@@ -106,15 +107,17 @@ public class Http11Processor implements Runnable, Processor {
         HttpVersion httpVersion = httpRequest.getHttpVersion();
 
         if (httpRequest.isRootPath()) {
-            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.helloWorld());
+            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(), ResponseBody.helloWorld());
         }
 
         String fileName = FileUtil.createFileName(httpRequest.getFilePath());
 
         if ("/static/favicon.ico".equals(fileName)) {
-            return HttpResponse.noContent(httpVersion, ContentType.IMAGE_X_ICON, ResponseBody.empty());
+            return HttpResponse.noContent(httpVersion, ContentType.IMAGE_X_ICON, HttpCookie.empty(),
+                    ResponseBody.empty());
         }
 
-        return HttpResponse.ok(httpVersion, httpRequest.getContentType(), ResponseBody.createBy(httpRequest));
+        return HttpResponse.ok(httpVersion, httpRequest.getContentType(), HttpCookie.empty(),
+                ResponseBody.createBy(httpRequest));
     }
 }

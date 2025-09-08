@@ -2,6 +2,7 @@ package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpCookie;
 import com.techcourse.http.common.HttpMethod;
 import com.techcourse.http.common.HttpVersion;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class HttpRequest {
     private final RequestParams requestParams;
     private final ContentType contentType;
     private final RequestHeader requestHeader;
+    private final HttpCookie httpCookie;
     private final RequestBody requestBody;
     private final HttpVersion httpVersion;
 
@@ -35,6 +37,7 @@ public class HttpRequest {
                        final RequestParams requestParams,
                        final ContentType contentType,
                        final RequestHeader requestHeader,
+                       final HttpCookie httpCookie,
                        final RequestBody requestBody,
                        final HttpVersion httpVersion
     ) {
@@ -43,6 +46,7 @@ public class HttpRequest {
         this.requestParams = requestParams;
         this.contentType = contentType;
         this.requestHeader = requestHeader;
+        this.httpCookie = httpCookie;
         this.requestBody = requestBody;
         this.httpVersion = httpVersion;
     }
@@ -63,10 +67,12 @@ public class HttpRequest {
 
         RequestParams requestParams = RequestParams.from(queryString);
         ContentType contentType = extractContentType(path);
+        HttpCookie httpCookie = HttpCookie.from(requestHeader.getCookie());
 
         HttpVersion httpVersion = HttpVersion.from(requestProtocolVersion);
 
-        return new HttpRequest(httpMethod, path, requestParams, contentType, requestHeader, requestBody, httpVersion);
+        return new HttpRequest(httpMethod, path, requestParams, contentType, requestHeader, httpCookie, requestBody,
+                httpVersion);
     }
 
     private static String[] splitRequestLine(final String requestLine) {
@@ -141,6 +147,10 @@ public class HttpRequest {
         return path.equals(ROOT_PATH);
     }
 
+    public boolean hasEmptySessionId() {
+        return httpCookie.hasEmptySessionId();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
@@ -151,6 +161,10 @@ public class HttpRequest {
 
     public ContentType getContentType() {
         return contentType;
+    }
+
+    public String getJSessionId() {
+        return httpCookie.getJSessionId();
     }
 
     public Map<String, String> getRequestBody() {

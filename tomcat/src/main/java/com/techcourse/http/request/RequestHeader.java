@@ -43,10 +43,21 @@ public class RequestHeader {
         return values.containsKey("Content-Length");
     }
 
+    public boolean hasCookieKey() {
+        return values.containsKey("Cookie");
+    }
+
     public int getContentLength() {
         if (!hasContentLengthKey()) {
             throw new UncheckedServletException("content가 없습니다.");
         }
         return Integer.parseInt(values.get("Content-Length"));
+    }
+
+    public String getCookie() {
+        if (!hasCookieKey()) {
+            return "";
+        }
+        return values.get("Cookie");
     }
 }

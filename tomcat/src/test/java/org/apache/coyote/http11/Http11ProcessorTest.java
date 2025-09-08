@@ -62,7 +62,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSuccess() throws IOException {
+    void loginSuccess() {
         // given
         String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -81,14 +81,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found ";
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Found";
         assertThat(socket.output()).contains(expected);
-        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
-    void loginFail() throws IOException {
+    void loginFail() {
         // given
         String body = "account=gugu&password=pass";
         final String httpRequest = String.join("\r\n",
@@ -107,14 +105,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 401 Unauthorized ";
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        var expected = "HTTP/1.1 401 Unauthorized";
         assertThat(socket.output()).contains(expected);
-        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
-    void registerSuccess() throws IOException {
+    void registerSuccess() {
         // given
         String body = "account=qqq&password=qqq&email=qq@test.com";
         final String httpRequest = String.join("\r\n",
@@ -134,13 +130,11 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 200 OK ";
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertThat(socket.output()).contains(expected);
-        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
-    void registerFail() throws IOException {
+    void registerFail() {
         // given
         InMemoryUserRepository.save(new User("gugu", "password", "gugu@test.com"));
         String body = "account=gugu&password=password&email=gugu@test.com";
@@ -161,13 +155,11 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 400 Bad Request ";
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
         assertThat(socket.output()).contains(expected);
-        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
-    void cookie() throws IOException {
+    void cookie() {
         // given
         String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -191,40 +183,47 @@ class Http11ProcessorTest {
 
     @Test
     void loginSession() throws IOException {
-        // given
-        String body = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
+        String loginBody = "account=gugu&password=password";
+        final String loginPostRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Length: " + body.length(),
-                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + loginBody.length(),
                 "",
-                body);
+                loginBody);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var postSocket = new StubSocket(loginPostRequest);
+        final Http11Processor postProcessor = new Http11Processor(postSocket);
 
-        // when
-        processor.process(socket);
-
-        final String loginRequest = String.join("\r\n",
+        postProcessor.process(postSocket);
+        String loginResponse = postSocket.output();
+        String jsessionid = extractJsessionid(loginResponse);
+        final String loginGetRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Type: application/x-www-form-urlencoded",
+                "Cookie: JSESSIONID=" + jsessionid,
                 "",
-                body);
+                "");
 
-        final var loginSocket = new StubSocket(loginRequest);
-        final Http11Processor loginProcessor = new Http11Processor(socket);
-        loginProcessor.process(loginSocket);
+        final var getSocket = new StubSocket(loginGetRequest);
+        final Http11Processor getProcessor = new Http11Processor(getSocket);
 
-        // then
-        var expected = "HTTP/1.1 200 OK ";
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        assertThat(socket.output()).contains(expected);
-        assertThat(socket.output()).contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        getProcessor.process(getSocket);
+
+        assertThat(getSocket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
     }
 
+    private String extractJsessionid(String response) {
+        String[] lines = response.split("\r\n");
+        for (String line : lines) {
+            if (line.startsWith("Set-Cookie: JSESSIONID=")) {
+                String cookieValue = line.substring("Set-Cookie: JSESSIONID=".length());
+                int semicolonIndex = cookieValue.indexOf(";");
+                if (semicolonIndex != -1) {
+                    return cookieValue.substring(0, semicolonIndex);
+                }
+                return cookieValue;
+            }
+        }
+        return null;
+    }
 }

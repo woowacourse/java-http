@@ -102,9 +102,10 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpMethod.equals("GET") && url.equals("/login")){
                 String sessionId = cookie.getJsessionid();
-                response = getResponse("static/login.html", OK);
                 if (sessionId != null && SESSION_MANAGER.containsKey(sessionId)) {
-                    response = getResponse("static/index.html", FOUND);
+                    response = getRedirectResponse("/index.html", FOUND, null);
+                } else {
+                    response = getResponse("static/login.html", OK);
                 }
                 sendResponse(outputStream, response);
                 return;

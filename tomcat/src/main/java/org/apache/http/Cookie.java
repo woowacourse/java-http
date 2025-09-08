@@ -13,4 +13,12 @@ public class Cookie {
     public String makeCookieLine() {
         return key + "=" + value + ";";
     }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

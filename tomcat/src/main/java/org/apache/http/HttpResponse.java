@@ -28,6 +28,10 @@ public class HttpResponse {
         return startAndHeader;
     }
 
+    public boolean isProcessed() {
+        return statusCode != null && !headers.isEmpty();
+    }
+
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;
     }

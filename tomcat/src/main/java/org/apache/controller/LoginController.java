@@ -10,6 +10,8 @@ import org.apache.http.HttpMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusCode;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,21 +32,35 @@ public class LoginController implements Controller {
         String account = request.getQueryString("account");
         String password = request.getQueryString("password");
 
-        boolean isAuthenticated = authenticateUser(account, password);
+        Optional<User> user = getUser(account);
+
+        boolean isAuthenticated = authenticateUser(user, password);
         if (!isAuthenticated) {
             response.setStatusCode(StatusCode.FOUND);
             response.setHeader("Location", "/401.html");
             return;
         }
 
+        String sessionId = makeSession(user.get());
         response.setStatusCode(StatusCode.FOUND);
         response.setHeader("Location", "/index.html");
-        response.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
+        response.setCookie(new Cookie("JSESSIONID", sessionId));
     }
 
-    private boolean authenticateUser(String account, String password) {
+    private Optional<User> getUser(String account) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         user.ifPresent(value -> log.info("user : {}", value.toString()));
+        return user;
+    }
+
+    private boolean authenticateUser(Optional<User> user, String password) {
+        user.ifPresent(value -> log.info("user : {}", value.toString()));
         return user.isPresent() && user.get().checkPassword(password);
+    }
+
+    private String makeSession(User user) {
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.add(new Session(sessionId, user));
+        return sessionId;
     }
 }

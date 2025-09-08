@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ public class HttpRequest {
     private final Map<String, String> queryStrings;
     private final HttpVersion version;
     private final Map<String, String> headers;
-    private final List<Cookie> cookies;
+    private final Map<String, Cookie> cookies;
     private final Map<String, String> body;
 
     public HttpRequest(InputStream inputStream) {
@@ -48,6 +47,10 @@ public class HttpRequest {
         return headers.containsKey(key);
     }
 
+    public boolean checkCookieExistence(String key) {
+        return cookies.containsKey(key);
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -66,6 +69,10 @@ public class HttpRequest {
 
     public String getHeader(String key) {
         return headers.get(key);
+    }
+
+    public Cookie getCookie(String key) {
+        return cookies.get(key);
     }
 
     public String getBody(String key) {
@@ -133,14 +140,14 @@ public class HttpRequest {
         return queryStringRead;
     }
 
-    private List<Cookie> parseCookie(String cookieHeader) {
-        List<Cookie> cookieRead = new ArrayList<>();
+    private Map<String, Cookie> parseCookie(String cookieHeader) {
+        Map<String, Cookie> cookieRead = new HashMap<>();
         List<String> cookieLines = List.of(cookieHeader.split(";"));
         for (String cookieLine : cookieLines) {
             List<String> cookieKeyValue = List.of(cookieLine.split("="));
             String key = cookieKeyValue.getFirst().trim();
             String value = cookieKeyValue.getLast().trim();
-            cookieRead.add(new Cookie(key, value));
+            cookieRead.put(key, new Cookie(key, value));
         }
         return cookieRead;
     }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handle.handler.custom;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -11,7 +12,6 @@ import org.apache.coyote.http11.handle.handler.MultiConditionHandler;
 import org.apache.coyote.http11.handle.handler.resource.HtmlHttpHandler;
 import org.apache.coyote.http11.reqeust.HttpMethod;
 import org.apache.coyote.http11.reqeust.HttpRequest;
-import org.apache.coyote.http11.reqeust.QueryParameters;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -26,7 +26,8 @@ public class LoginHttpHandler extends MultiConditionHandler {
     private final HtmlHttpHandler htmlHttpHandler = HtmlHttpHandler.getInstance();
 
     private final Map<HttpHandlerCondition, Function<HttpRequest, HttpResponse>> handlerMethodMapper = Map.of(
-            new HttpHandlerCondition(HttpMethod.GET, "/login"), this::handleGetLogin
+            new HttpHandlerCondition(HttpMethod.GET, "/login"), this::handleGetLogin,
+            new HttpHandlerCondition(HttpMethod.POST, "/login"), this::handlePostLogin
     );
 
     private LoginHttpHandler() {
@@ -38,11 +39,6 @@ public class LoginHttpHandler extends MultiConditionHandler {
     }
 
     private HttpResponse handleGetLogin(final HttpRequest request) {
-        final QueryParameters queryParameters = request.queryParameters();
-        if (hasLoginQueryParameters(queryParameters)) {
-            return handleLogin(request, queryParameters);
-        }
-
         return htmlHttpHandler.handle(
                 "/login.html",
                 request.protocolVersion(),
@@ -50,18 +46,23 @@ public class LoginHttpHandler extends MultiConditionHandler {
         );
     }
 
-    private boolean hasLoginQueryParameters(final QueryParameters queryParameters) {
-        return queryParameters.containsParam("account") && queryParameters.containsParam("password");
+    private HttpResponse handlePostLogin(final HttpRequest request) {
+        final Map<String, String> bodyParameters = parseBodyByFormUrlEncoded(request.body());
+
+        return handleLogin(request, bodyParameters);
     }
+
 
     private HttpResponse handleLogin(
             final HttpRequest request,
-            final QueryParameters queryParameters
+            final Map<String, String> bodyParameters
     ) {
-        final String account = queryParameters.getParameter("account");
-        final String password = queryParameters.getParameter("password");
+        final String account = bodyParameters.get("account");
+        final String password = bodyParameters.get("password");
+        if (account == null || password == null) {
+            throw new IllegalArgumentException("잘못된 로그인 바디 파라미터입니다. " + request.body());
+        }
         final HttpHeaders responseHeaders = new HttpHeaders();
-
         if (checkAuthorization(account, password)) {
             responseHeaders.addHeader("Location", "/index.html");
             return new HttpResponse(
@@ -86,6 +87,22 @@ public class LoginHttpHandler extends MultiConditionHandler {
         final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
         return optionalUser.isPresent() && optionalUser.get().checkPassword(password);
+    }
+
+    private Map<String, String> parseBodyByFormUrlEncoded(final String body) {
+        if (body == null || body.isBlank()) {
+            return Map.of();
+        }
+        final Map<String, String> bodyParameters = new HashMap<>();
+        final String[] keyValues = body.split("&");
+        for (final String keyValue : keyValues) {
+            final String[] split = keyValue.split("=", 2);
+            final String key = split[0];
+            final String value = split[1];
+            bodyParameters.put(key, value);
+        }
+
+        return bodyParameters;
     }
 
     public static LoginHttpHandler getInstance() {

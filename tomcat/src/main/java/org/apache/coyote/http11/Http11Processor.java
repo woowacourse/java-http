@@ -80,6 +80,9 @@ public class Http11Processor implements Runnable, Processor {
             respond(loginResponse, outputStream);
             return true;
         }
+        if ("/register".equals(request.path())) {
+            HttpResponse registerResponse = processRegisterMember(request);
+        }
         return false;
     }
 
@@ -97,6 +100,11 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.info("User: {}", user.get());
         return HttpResponse.redirect("/index.html");
+    }
+
+    private HttpResponse processRegisterMember(HttpRequest request) {
+        // TODO: 회원가입 처리
+
     }
 
     private byte[] readPathFile(String requestPath) {

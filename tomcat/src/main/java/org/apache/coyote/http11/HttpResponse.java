@@ -10,7 +10,7 @@ public class HttpResponse {
     
     private final OutputStream outputStream;
     private String contentType = "text/html;charset=utf-8";
-    private int status = 200;
+    private HttpStatus status = HttpStatus.OK;
     private boolean committed = false;
     private final Map<String, String> cookies = new HashMap<>();
     
@@ -25,11 +25,15 @@ public class HttpResponse {
         this.contentType = contentType;
     }
     
-    public void setStatus(final int status) {
+    public void setStatus(final HttpStatus status) {
         if (committed) {
             throw new IllegalStateException("Response already committed");
         }
         this.status = status;
+    }
+    
+    public void setStatus(final int statusCode) {
+        setStatus(HttpStatus.fromCode(statusCode));
     }
     
     public void addCookie(final String name, final String value) {
@@ -45,7 +49,6 @@ public class HttpResponse {
         }
         
         try {
-            final String reasonPhrase = getReasonPhrase(status);
             final byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
             
             final StringBuilder cookieHeaders = new StringBuilder();
@@ -58,7 +61,7 @@ public class HttpResponse {
                 Content-Type: %s\r
                 Content-Length: %d\r
                 %s\r
-                %s""".formatted(status, reasonPhrase, contentType, contentBytes.length, cookieHeaders.toString(), content);
+                %s""".formatted(status.getCode(), status.getReasonPhrase(), contentType, contentBytes.length, cookieHeaders.toString(), content);
                     
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -92,19 +95,6 @@ public class HttpResponse {
         } catch (final IOException e) {
             throw new RuntimeException("Failed to send redirect", e);
         }
-    }
-    
-    private String getReasonPhrase(final int status) {
-        return switch (status) {
-            case 200 -> "OK";
-            case 302 -> "Found";
-            case 400 -> "Bad Request";
-            case 401 -> "Unauthorized";
-            case 404 -> "Not Found";
-            case 405 -> "Method Not Allowed";
-            case 500 -> "Internal Server Error";
-            default -> "Unknown";
-        };
     }
     
     public boolean isCommitted() {

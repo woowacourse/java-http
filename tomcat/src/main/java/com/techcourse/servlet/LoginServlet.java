@@ -14,6 +14,7 @@ import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class LoginServlet implements Servlet {
             return;
         }
 
-        response.setStatus(405);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
         response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
     }
 

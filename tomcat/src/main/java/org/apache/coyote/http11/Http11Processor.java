@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.Service;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,8 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.Processor;
-import org.apache.coyote.ResourceLoader;
-import org.apache.coyote.ResponseBuilder;
+import org.apache.coyote.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HEADER_DELIMITER = ": ";
 
     private final Socket connection;
-    private final ResponseBuilder responseBuilder;
-    private final Service service;
+    private final RequestHandler requestHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.responseBuilder = new ResponseBuilder();
-        this.service = new Service();
+        this.requestHandler = new RequestHandler();
     }
 
     @Override
@@ -43,16 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final HttpRequest request = getHttpRequest(bufferedReader);
-
-            byte[] responseBody;
-            if (request.uri().contains("?")) {
-                final Map<String, String> queryParams = extractQueryParams(request.uri());
-                responseBody = service.findUser(queryParams);
-            } else {
-                responseBody = ResourceLoader.get(request.uri());
-            }
-
-            final var response = responseBuilder.build(request.uri(), "200 OK", responseBody, null);
+            final var response = requestHandler.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,21 +72,5 @@ public class Http11Processor implements Runnable, Processor {
     private String extractRequestUri(final String header) {
         return header.split(" ")[1];
     }
-
-    private Map<String, String> extractQueryParams(final String uri) {
-        Map<String, String> queryParams = new HashMap<>();
-
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
-
-        for (String query : queries) {
-            String[] keyValues = query.split("=");
-            String key = keyValues[0];
-            String value = keyValues[1];
-            queryParams.put(key, value);
-        }
-
-        return queryParams;
-    }
 }
+

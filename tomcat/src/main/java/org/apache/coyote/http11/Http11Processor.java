@@ -50,24 +50,20 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
             String uri = parseUri(br);
+            Path path = parsePath(uri);
             if (uri.startsWith("/login")) {
                 if (uri.contains("?")) {
-                    login(uri);
+                    if (login(parseParameterMap(uri))) {
+                        response.setHttpStatusCode(HttpStatusCode.FOUND);
+                        response.addHeader("Location", "/index.html");
+                        response.addHeader("Content-Type", getContentType(path));
+                        response.addHeader("Content-Length", response.getContentLength());
+                        sendResponse(outputStream);
+                        return;
+                    }
                 }
-                response.setHttpStatusCode(HttpStatusCode.OK);
-                response.addHeader("Content-Type", getContentType(Paths.get(uri)));
-                String body = getStaticResource(Paths.get("/login.html"));
-                response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-                response.setBody(body);
-                sendResponse(outputStream);
-                return;
             }
-
-            response.setHttpStatusCode(HttpStatusCode.OK);
-            response.addHeader("Content-Type", getContentType(Paths.get(uri)) + ";charset=utf-8");
-            String body = getStaticResource(Paths.get(uri));
-            response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-            response.setBody(body);
+            staticResourceResponse(path);
             sendResponse(outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -86,17 +82,22 @@ public class Http11Processor implements Runnable, Processor {
         return parts[1];
     }
 
-    private void login(String uri) {
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
+    private Path parsePath(String uri) {
+        int idx = uri.indexOf('?');
+        if (idx == -1) {
+            return Paths.get(uri);
+        }
+        return Paths.get(uri.substring(0, idx));
+    }
+
+    private Map<String, String> parseParameterMap(String uri) {
+        if (!uri.contains("?")) {
+            throw new IllegalArgumentException(INVALID_QUERY_STRING.getMessage());
+        }
+        String queryString = uri.split("\\?")[1];
         Map<String, String> params = new HashMap<>();
         parseQueryString(queryString, params);
-
-        String account = params.get("account");
-        String password = params.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
-        user.logUserInfo(password, log);
+        return params;
     }
 
     private void parseQueryString(String queryString, Map<String, String> params) {
@@ -109,10 +110,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean login(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
+        user.logUserInfo(password, log);
+        return user.checkPassword(password);
+    }
+
     private void sendResponse(OutputStream outputStream) throws IOException, URISyntaxException {
         String httpFormatResponse = formatHttpResponse();
         outputStream.write(httpFormatResponse.getBytes());
         outputStream.flush();
+    }
+
+    private void staticResourceResponse(Path path) throws IOException, URISyntaxException {
+        response.setHttpStatusCode(HttpStatusCode.OK);
+        response.addHeader("Content-Type", getContentType(path));
+        response.setBody(getStaticResource(path));
+        response.addHeader("Content-Length", response.getContentLength());
     }
 
     private String getContentType(Path path) throws IOException {
@@ -120,17 +137,21 @@ public class Http11Processor implements Runnable, Processor {
         if (contentType == null) {
             contentType = "text/html";
         }
-        return contentType;
+        return contentType + ";charset=utf-8";
     }
 
     private String getStaticResource(Path path) throws IOException, URISyntaxException {
         if (path.equals(Path.of("\\"))) {
             return "Hello world!";
         }
-        return new String(Files.readAllBytes(getStaticPath(path)));
+        Path staticPath = getStaticPath(path);
+        return new String(Files.readAllBytes(staticPath));
     }
 
     private Path getStaticPath(Path path) throws URISyntaxException {
+        if (!path.toString().contains(".")) {
+            path = Path.of(path + ".html");
+        }
         return Paths.get(getClass().getClassLoader().getResource("static" + path).toURI());
     }
 

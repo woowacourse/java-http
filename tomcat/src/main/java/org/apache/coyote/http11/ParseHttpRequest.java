@@ -6,8 +6,11 @@ public record ParseHttpRequest(
         String method,
         String httpRequest,
         Map<String, String> requestBody,
-        HttpCookies cookies
+        HttpCookies cookies,
+        Session session
 ) {
+
+    private static Session session;
 
     public ParseHttpRequest addRequestBody(Map<String, String> requestBody) {
         return new ParseHttpRequest(method, httpRequest, requestBody, cookies);
@@ -15,5 +18,9 @@ public record ParseHttpRequest(
 
     public ParseHttpRequest addCookies(Map<String, String> cookies) {
         return new ParseHttpRequest(method, httpRequest, requestBody, new HttpCookies(cookies));
+    }
+
+    public ParseHttpRequest addSession(Session session) {
+        return new ParseHttpRequest(method, httpRequest, requestBody, cookies, session);
     }
 }

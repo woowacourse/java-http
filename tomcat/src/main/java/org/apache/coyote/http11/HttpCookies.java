@@ -47,4 +47,8 @@ public class HttpCookies {
         }
         return stringBuilder.toString();
     }
+
+    public String getSessionId() {
+        return cookies.get(JSESSIONID);
+    }
 }

@@ -20,9 +20,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Http11GetProcessor http11GetProcessor;
+    private final SessionManager sessionManager;
 
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
         this.http11GetProcessor = new Http11GetProcessor();
         this.connection = connection;
     }
@@ -40,6 +42,10 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             ParseHttpRequest httpRequests = readRequestFromReader(bufferedReader);
+
+            Session session = getSession(httpRequests.cookies()
+                    .getSessionId());
+            httpRequests.addSession(session);
 
             ContentParseResult parseResult = http11GetProcessor.parse(httpRequests);
             byte[] parsedContent = parseResult.getParseContent();
@@ -61,6 +67,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Session getSession(String sessionId) throws IOException {
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            sessionManager.add(new Session(sessionId));
+            return sessionManager.findSession(sessionId);
+        }
+        return session;
     }
 
     private ParseHttpRequest readRequestFromReader(final BufferedReader bufferedReader) throws IOException {

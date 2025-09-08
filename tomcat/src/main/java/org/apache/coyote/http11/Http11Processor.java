@@ -48,6 +48,8 @@ public class Http11Processor implements Runnable, Processor {
                             "\r\n",
                             parseResult.getHttpResponseStatus(),
                             parseResult.getAdditionalResponse(),
+                            httpRequests.cookies()
+                                    .getCookieResponse(),
                             "Content-Length: " + parsedContent.length + " ",
                             "",
                             new String(parsedContent)
@@ -68,16 +70,52 @@ public class Http11Processor implements Runnable, Processor {
             String[] lineSplit = buffer.split(" ");
 
             if (isReqeustExist(buffer) && lineSplit.length >= 2) {
-                parseHttpRequest = new ParseHttpRequest(parseMethod(buffer), parseContentPath(buffer), new HashMap<>());
+                parseHttpRequest = new ParseHttpRequest(
+                        parseMethod(buffer),
+                        parseContentPath(buffer),
+                        new HashMap<>(),
+                        new HttpCookies(new HashMap<>())
+                );
                 break;
             }
         }
+
+        Map<String, String> cookies = parseCookie(bufferedReader);
+        parseHttpRequest = parseHttpRequest.addCookies(cookies);
 
         if (AcceptableRequest.isPost(parseHttpRequest.method())) {
             Map<String, String> requestBody = parseBody(bufferedReader);
             return parseHttpRequest.addRequestBody(requestBody);
         }
         return parseHttpRequest;
+    }
+
+    private Map<String, String> parseCookie(BufferedReader bufferedReader) throws IOException {
+        String buffer;
+        while ((buffer = bufferedReader.readLine()) == null) {
+            if (!buffer.contains("Cookie: ")) {
+                continue;
+            }
+
+            String[] cookieKeyValues = buffer.replace("Cookie: ", "")
+                    .replace(" ", "")
+                    .split(";");
+
+            return createCookieKeyValue(cookieKeyValues);
+        }
+
+        return new HashMap<>();
+    }
+
+    private Map<String, String> createCookieKeyValue(String[] cookieKeyValues) {
+        Map<String, String> cookieKeyValueMap = new HashMap<>();
+
+        for (String cookieKeyValue : cookieKeyValues) {
+            String[] splitedKeyValue = cookieKeyValue.split("=");
+            cookieKeyValueMap.put(splitedKeyValue[0], splitedKeyValue[1]);
+        }
+
+        return cookieKeyValueMap;
     }
 
     private Map<String, String> parseBody(BufferedReader bufferedReader) throws IOException {

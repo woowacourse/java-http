@@ -5,10 +5,15 @@ import java.util.Map;
 public record ParseHttpRequest(
         String method,
         String httpRequest,
-        Map<String, String> requestBody
+        Map<String, String> requestBody,
+        HttpCookies cookies
 ) {
 
     public ParseHttpRequest addRequestBody(Map<String, String> requestBody) {
-        return new ParseHttpRequest(method, httpRequest, requestBody);
+        return new ParseHttpRequest(method, httpRequest, requestBody, cookies);
+    }
+
+    public ParseHttpRequest addCookies(Map<String, String> cookies) {
+        return new ParseHttpRequest(method, httpRequest, requestBody, new HttpCookies(cookies));
     }
 }

@@ -30,6 +30,7 @@ public class HttpServices {
         if (AcceptableRequest.isGet(method)) {
             return httpService.doGet(query);
         }
+        
         if (AcceptableRequest.isPost(method)) {
             return httpService.doPost(requestBody);
         }

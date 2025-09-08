@@ -73,16 +73,25 @@ public class HttpQueryParameter {
         }
     }
 
-    public String getValue(final String target) {
-        if (target == null) {
-            throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
-        }
-
+    public boolean contains(final String target) {
+        validateTargetKey(target);
         final String targetKey = target.trim();
+        return queryParameterInfo.containsKey(targetKey);
+    }
 
-        if (!queryParameterInfo.containsKey(targetKey)) {
+    public String getValue(final String target) {
+        validateTargetKey(target);
+        
+        final String targetKey = target.trim();
+        if (!contains(targetKey)) {
             throw new IllegalArgumentException("존재하지 않는 query parameter key 입니다: %s".formatted(target));
         }
         return queryParameterInfo.get(targetKey);
+    }
+
+    private void validateTargetKey(final String target) {
+        if (target == null) {
+            throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
+        }
     }
 }

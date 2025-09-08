@@ -25,18 +25,31 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok() {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1,
-                HttpStatus.OK);
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
         final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
         final HttpHeader httpHeader = createHeader(httpResponseBody, null);
         return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
     public static HttpResponse ok(final String responseBodyValue) {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1,
-                HttpStatus.OK);
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
         final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName(responseBodyValue);
         final HttpHeader httpHeader = createHeader(httpResponseBody, responseBodyValue);
+        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    }
+
+    public static HttpResponse found(final String targetPath) {
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.FOUND);
+        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
+        final HttpHeader httpHeader = createHeader(httpResponseBody, null);
+        httpHeader.addHeader(HttpHeaderKey.LOCATION.getValue(), targetPath);
+        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    }
+
+    public static HttpResponse unauthorized() {
+        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.UNAUTHORIZED);
+        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName("401.html");
+        final HttpHeader httpHeader = createHeader(httpResponseBody, null);
         return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
@@ -58,6 +71,18 @@ public class HttpResponse {
         }
 
         return HttpHeader.from(responseHeaderInfo);
+    }
+
+    public void setCookie(final String cookieName, final String cookieValue) {
+        if (header.containsKey(HttpHeaderKey.SET_COOKIE.getValue().toLowerCase())) {
+            String value = header.getValue(HttpHeaderKey.SET_COOKIE.getValue());
+            if (!value.contains(cookieName)) {
+                value = value + "; " + cookieName + "=" + cookieValue;
+                header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), value);
+            }
+        }
+        String value = cookieName + "=" + cookieValue;
+        header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), value);
     }
 
     public String getResponseFormat() {

@@ -66,6 +66,10 @@ public class HttpStartLine {
         return path.getRootPath();
     }
 
+    public boolean containsTargetQueryParameter(final String target) {
+        return path.containsQueryParameter(target);
+    }
+
     public String getTargetQueryParameter(final String target) {
         return path.getTargetQueryParameter(target);
     }

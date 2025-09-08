@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.http.common.header;
 
+import http.HttpHeaderKey;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
 
 public class HttpHeader {
@@ -13,7 +15,7 @@ public class HttpHeader {
     private final Map<String, String> httpHeaderInfo;
 
     private HttpHeader(final Map<String, String> httpHeaderInfo) {
-        this.httpHeaderInfo = Map.copyOf(httpHeaderInfo);
+        this.httpHeaderInfo = new HashMap<>(httpHeaderInfo);
     }
 
     public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
@@ -88,6 +90,16 @@ public class HttpHeader {
         }
     }
 
+    public void addHeader(final String headerKey, final String headerValue) {
+        if (headerKey == null) {
+            throw new IllegalArgumentException("header key는 null일 수 없습니다");
+        }
+        if (headerValue == null) {
+            throw new IllegalArgumentException("header value는 null일 수 없습니다");
+        }
+        httpHeaderInfo.put(headerKey, headerValue);
+    }
+
     public boolean containsKey(String target) {
         return httpHeaderInfo.containsKey(target);
     }
@@ -105,5 +117,12 @@ public class HttpHeader {
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .toList();
+    }
+
+    public Optional<String> getCookie() {
+        if (!httpHeaderInfo.containsKey(HttpHeaderKey.COOKIE.getValue().toLowerCase())) {
+            return Optional.empty();
+        }
+        return Optional.of(httpHeaderInfo.get(HttpHeaderKey.COOKIE.getValue().toLowerCase()));
     }
 }

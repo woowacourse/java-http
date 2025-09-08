@@ -16,13 +16,12 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(Http11Processor.class);
+    private static final RequestHandler requestHandler = new RequestHandler();
 
     private final Socket connection;
-    private final RequestHandler requestHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestHandler = new RequestHandler();
     }
 
     @Override

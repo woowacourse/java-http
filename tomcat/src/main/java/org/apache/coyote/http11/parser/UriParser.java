@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.parser;
 
 public class UriParser {
+
     public static final String QUERY_SEPARATOR = "?";
     public static final String ROOT_PATH = "/";
     public static final String EXTENSION_SEPARATOR = ".";

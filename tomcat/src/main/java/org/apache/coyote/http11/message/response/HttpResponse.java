@@ -11,6 +11,12 @@ public class HttpResponse {
     private HttpHeaders headers = HttpHeaders.init();
     private HttpBody body = HttpBody.init();
 
+    public void init() {
+        status = HttpStatus.OK;
+        headers = HttpHeaders.init();
+        body = HttpBody.init();
+    }
+
     public void appendToBody(byte[] additionalContent) {
         body = body.append(additionalContent);
     }
@@ -19,20 +25,12 @@ public class HttpResponse {
         body = body.append(additionalText);
     }
 
-    public int getStatusCode() {
-        return status.getCode();
+    public void setContentType(ContentType contentType) {
+        headers.add("Content-Type", contentType.getMimeType());
     }
 
-    public String getReasonPhrase() {
-        return status.getReasonPhrase();
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
-    public HttpBody getBody() {
-        return body;
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 
     public void writeTo(OutputStream output) throws IOException {
@@ -41,7 +39,6 @@ public class HttpResponse {
         output.write(getBodyBytes());
     }
 
-    // 헤더만 문자열로 변환
     private String getHeaderText() {
         StringBuilder sb = new StringBuilder();
         sb.append("HTTP/1.1 ")
@@ -55,22 +52,7 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    // 바디를 바이트 배열로 변환
     private byte[] getBodyBytes() {
         return body.getBytes();
-    }
-
-    public void setContentType(ContentType contentType) {
-        headers.add("Content-Type", contentType.getMimeType());
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
-    public void init() {
-        status = HttpStatus.OK;
-        headers = HttpHeaders.init();
-        body = HttpBody.init();
     }
 }

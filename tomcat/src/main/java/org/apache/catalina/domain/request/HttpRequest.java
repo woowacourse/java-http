@@ -22,6 +22,10 @@ public record HttpRequest(
 
     public Map<String, String> parseBody() {
         final String contentType = header.getContentType();
+        if (contentType == null) {
+            throw new HttpStatusException("Content-Type header is missing",
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        }
 
         if (contentType.startsWith(URL_ENCODED)) {
             return body.parseFormData();

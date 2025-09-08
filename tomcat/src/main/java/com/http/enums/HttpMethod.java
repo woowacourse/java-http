@@ -8,6 +8,10 @@ public enum HttpMethod {
     POST;
 
     public static HttpMethod from(String value) {
+        if (value == null) {
+            throw new BadRequestException("HTTP Method는 null 일 수 없습니다.");
+        }
+
         try {
             return HttpMethod.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {

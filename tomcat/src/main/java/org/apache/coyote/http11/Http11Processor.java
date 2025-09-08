@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.BadRequestException;
+import com.techcourse.exception.HttpStatusException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,9 +55,21 @@ public class Http11Processor implements Runnable, Processor {
             
             HttpServletContainer.handle(request, response);
             return response;
-        } catch (BadRequestException | IllegalArgumentException e) {
+        } catch (HttpStatusException e) {
+            log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
+            processResponse(null, response, e);
+            return response;
+        } catch (IllegalStateException | IllegalArgumentException e) {
             ResponseProcessor.handleBadRequest(null, response);
             return response;
         }
+    }
+
+    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatusException exception)
+            throws IOException {
+        log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
+
+        response.setStatus(exception.getHttpStatus());
+        ResponseProcessor.handleErrorPage(request, response);
     }
 }

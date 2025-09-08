@@ -36,9 +36,7 @@ public final class HttpServletContainer {
         try {
             handlers.getOrDefault(path, defaultServlet).service(request, response);
         } catch (HttpStatusException e) {
-            log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
-            processResponse(request, response, e);
-            return;
+            throw e;
         } catch (FileNotFoundException e) {
             response.setStatus(HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -60,13 +58,5 @@ public final class HttpServletContainer {
         }
 
         ResponseProcessor.handle(request, response);
-    }
-
-    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatusException exception)
-            throws IOException {
-        log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
-
-        response.setStatus(exception.getHttpStatus());
-        ResponseProcessor.handleErrorPage(request, response);
     }
 }

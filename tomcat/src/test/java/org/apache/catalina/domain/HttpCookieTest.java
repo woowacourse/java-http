@@ -8,29 +8,19 @@ import org.junit.jupiter.api.Test;
 
 class HttpCookieTest {
 
-    @DisplayName("toCookieString 메서드: name=value 형식의 문자열을 반환한다")
+    @DisplayName("toString 메서드: name=value 형식의 문자열을 반환한다")
     @Test
-    void toCookieString() {
+    void toStringTest1() {
         // given
         HttpCookie cookie = new HttpCookie("sessionId", "abc123");
 
         // when
-        String result = cookie.toCookieString();
+        String result = cookie.toString();
 
         // then
         assertThat(result).isEqualTo("sessionId=abc123");
     }
 
-    @DisplayName("toString 메서드: toCookieString과 동일한 결과를 반환한다")
-    @Test
-    void toString_sameAsToCookieString() {
-        // given
-        HttpCookie cookie = new HttpCookie("userId", "456");
-
-        // when & then
-        assertThat(cookie.toString()).hasToString(cookie.toCookieString());
-        assertThat(cookie.toString()).hasToString("userId=456");
-    }
 
     @DisplayName("sameName 메서드: 동일한 이름의 쿠키인지 확인한다")
     @Test

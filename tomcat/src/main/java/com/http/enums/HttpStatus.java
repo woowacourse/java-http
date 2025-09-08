@@ -8,6 +8,7 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     CONFLICT(409, "Conflict"),
+    LENGTH_REQUIRED(411, "Length Required"),
     UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 

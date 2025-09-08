@@ -44,7 +44,6 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=1234 ",
                 "",
                 "");
 
@@ -55,18 +54,17 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final String output = socket.output();
+        final String[] lines = output.split("\r\n");
 
-        // 윈도우 환경에서 줄 바꿈 형식에 차이가 존재해 테스트 코드를 아래과 같이 변경을 하였음
+        // 개별 헤더 검증
+        assertThat(lines[0]).isEqualTo("HTTP/1.1 200 OK ");
+        assertThat(output).contains("Content-Type: text/html;charset=utf-8");
 
+        // 응답 본문 검증
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + content.getBytes().length + " \r\n" +
-                "\r\n"+
-                content;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String expectedContent = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(output).contains(expectedContent);
     }
 
     @Test

@@ -1,8 +1,8 @@
 package org.apache.catalina.manager;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.catalina.domain.Session;
 import org.apache.catalina.domain.cookie.HttpCookie;
@@ -14,7 +14,7 @@ public class SessionManager implements Manager {
 
     public static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(Session session) {
@@ -77,9 +77,20 @@ public class SessionManager implements Manager {
     }
 
     private static boolean isStaticResource(String path) {
-        return path.endsWith(".css") || path.endsWith(".js");
+        return path.endsWith(".css") ||
+                path.endsWith(".js") ||
+                path.endsWith(".html") ||
+                path.endsWith(".png") ||
+                path.endsWith(".jpg") ||
+                path.endsWith(".jpeg") ||
+                path.endsWith(".svg") ||
+                path.endsWith(".gif") ||
+                path.endsWith(".ico") ||
+                path.endsWith(".woff") ||
+                path.endsWith(".woff2") ||
+                path.endsWith(".ttf") ||
+                path.endsWith(".eot");
     }
-
     public static String extractSessionIdFromCookie(HttpCookies cookies) {
         if (cookies.hasCookie(SESSION_COOKIE_NAME)) {
             return cookies.getCookie(SESSION_COOKIE_NAME).value();

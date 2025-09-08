@@ -11,29 +11,32 @@ public record HttpCookies(List<HttpCookie> cookies) {
 
     public static HttpCookies from(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isBlank()) {
-            return new HttpCookies(List.of());
+            return new HttpCookies(new ArrayList<>());
         }
 
-        String[] cookiePairs = cookieHeader.split("; ");
-        List<HttpCookie> cookies = new java.util.ArrayList<>();
+        String[] cookiePairs = cookieHeader.split(";");
+        List<HttpCookie> cookies = new ArrayList<>();
 
+        parseCookies(cookiePairs, cookies);
+
+        return new HttpCookies(cookies);
+    }
+
+    private static void parseCookies(String[] cookiePairs, List<HttpCookie> cookies) {
         for (String pair : cookiePairs) {
             pair = pair.trim();
             if (pair.isEmpty()) {
                 continue;
             }
-            
+
             String[] kv = pair.split("=", 2);
             if (kv.length == 2) {
                 cookies.add(new HttpCookie(kv[0].trim(), kv[1].trim()));
-                continue;
             }
             if (kv.length == 1) {
                 cookies.add(new HttpCookie(kv[0].trim(), ""));
             }
         }
-
-        return new HttpCookies(cookies);
     }
 
     public HttpCookie getCookie(String name) {

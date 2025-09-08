@@ -2,6 +2,7 @@ package com.http.servlet;
 
 import com.http.enums.HttpStatus;
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.HttpStatusException;
 import com.techcourse.exception.UnAuthorizedException;
 import com.techcourse.model.User;
 import java.io.IOException;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 public class LoginServlet implements HttpServlet {
 
+    private static final String LOGIN_FILE_NAME = "login.html";
+
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
@@ -27,13 +30,12 @@ public class LoginServlet implements HttpServlet {
             // 이미 로그인된 상태면 index.html로 리다이렉트
             response.setStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/index.html");
-            log.info("로그인된 사용자입니다. account={}, sessionId={}", user.getAccount(), session.getId());
+            log.info("로그인된 사용자입니다. account={}", user.getAccount());
             return;
         }
 
         // 로그인되지 않은 상태면 로그인 페이지 표시
-        final String fileName = request.requestStartLine().path() + ".html";
-        final byte[] loginHtml = FileParser.loadStaticResourceByFileName(fileName);
+        final byte[] loginHtml = FileParser.loadStaticResourceByFileName(LOGIN_FILE_NAME);
         response.setBody(loginHtml);
     }
 
@@ -50,7 +52,7 @@ public class LoginServlet implements HttpServlet {
     private void processLogin(HttpRequest request, String account, String password, HttpResponse httpResponse) {
         if (account == null || password == null) {
             log.error("account or password is null");
-            throw new UnAuthorizedException("인증이 필요합니다.");
+            throw new HttpStatusException("account or password is null", HttpStatus.BAD_REQUEST);
         }
 
         User user = InMemoryUserRepository.findByAccount(account)

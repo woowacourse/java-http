@@ -2,7 +2,6 @@ package org.apache.catalina.domain.response;
 
 import com.http.enums.HttpStatus;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.apache.catalina.domain.HttpHeader;
 import org.apache.catalina.domain.cookie.HttpCookie;
 import org.apache.catalina.domain.request.HttpRequest;
@@ -43,8 +42,8 @@ public final class HttpResponse {
         this.header.addSetCookie(cookie);
     }
 
-    public Map<String, String> getHeaders() {
-        return header.headers();
+    public String getHeaderString() {
+        return header.toHeaderString();
     }
 
     public HttpStatus getStatus() {

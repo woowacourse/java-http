@@ -11,9 +11,24 @@ class HttpCookiesTest {
 
     @DisplayName("from 메서드: 쿠키 헤더 문자열을 파싱하여 HttpCookies 객체를 생성한다")
     @Test
-    void from_parseCookieHeader() {
+    void from_parseCookieHeaderTest1() {
         // given
         String cookieHeader = "sessionId=abc123; userId=456; theme=dark";
+
+        // when
+        HttpCookies cookies = HttpCookies.from(cookieHeader);
+
+        // then
+        assertThat(cookies.getCookie("sessionId").value()).isEqualTo("abc123");
+        assertThat(cookies.getCookie("userId").value()).isEqualTo("456");
+        assertThat(cookies.getCookie("theme").value()).isEqualTo("dark");
+    }
+
+    @DisplayName("from 메서드: ;가 붙어도 정상적으로 파싱한다")
+    @Test
+    void from_parseCookieHeaderTest2() {
+        // given
+        String cookieHeader = "sessionId=abc123;userId=456;theme=dark";
 
         // when
         HttpCookies cookies = HttpCookies.from(cookieHeader);

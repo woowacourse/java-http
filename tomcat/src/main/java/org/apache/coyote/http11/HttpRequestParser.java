@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.http.enums.HttpMethod;
+import com.http.enums.HttpStatus;
+import com.techcourse.exception.HttpStatusException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,12 +14,8 @@ import org.apache.catalina.domain.HttpHeader;
 import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.request.HttpRequestBody;
 import org.apache.catalina.domain.request.RequestStartLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class HttpRequestParser {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
     private HttpRequestParser() {
     }
@@ -27,7 +26,7 @@ public final class HttpRequestParser {
         final RequestStartLine requestStartLine = RequestStartLine.from(requestLines);
         final Map<String, String> queryStrings = parseQueryStrings(requestLines);
         final HttpHeader header = HttpHeader.from(requestLines);
-        final HttpRequestBody body = new HttpRequestBody(parseBody(reader, header));
+        final HttpRequestBody body = new HttpRequestBody(parseBody(reader, requestStartLine, header));
 
         return new HttpRequest(requestStartLine, queryStrings, header, body);
     }
@@ -60,8 +59,21 @@ public final class HttpRequestParser {
                 .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
 
-    private static String parseBody(BufferedReader reader, HttpHeader httpHeader) throws IOException {
+    private static String parseBody(BufferedReader reader, RequestStartLine requestStartLine, HttpHeader httpHeader)
+            throws IOException {
+        // POST 요청이 아닌 경우 빈 문자열 반환
+        if (requestStartLine.method() != HttpMethod.POST) {
+            return "";
+        }
+
+        if (httpHeader.hasNotContentLength()) {
+            throw new HttpStatusException("Length Required", HttpStatus.LENGTH_REQUIRED);
+        }
+
         final int contentLength = httpHeader.getContentLength();
+        if (contentLength < 0) {
+            throw new HttpStatusException("Invalid Content-Length", HttpStatus.BAD_REQUEST);
+        }
 
         if (contentLength == 0) {
             return "";

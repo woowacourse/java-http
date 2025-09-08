@@ -43,9 +43,9 @@ class HttpHeaderTest {
         HttpCookies cookies = header.getCookies();
 
         // then
-        assertThat(cookies.getCookie("sessionId").toCookieString()).isEqualTo("sessionId=abc123");
-        assertThat(cookies.getCookie("userId").toCookieString()).isEqualTo("userId=456");
-        assertThat(cookies.getCookie("theme").toCookieString()).isEqualTo("theme=dark");
+        assertThat(cookies.getCookie("sessionId")).hasToString("sessionId=abc123");
+        assertThat(cookies.getCookie("userId")).hasToString("userId=456");
+        assertThat(cookies.getCookie("theme")).hasToString("theme=dark");
     }
 
     @DisplayName("getCookies 메서드: 단일 쿠키가 있는 경우")
@@ -59,7 +59,7 @@ class HttpHeaderTest {
         HttpCookies cookies = header.getCookies();
 
         // then
-        assertThat(cookies.getCookie("sessionId").toCookieString()).isEqualTo("sessionId=xyz789");
+        assertThat(cookies.getCookie("sessionId")).hasToString("sessionId=xyz789");
     }
 
     @DisplayName("hasCookie 메서드: 쿠키가 있는 경우 true를 반환한다")

@@ -1,10 +1,9 @@
 package org.apache.catalina.domain.cookie;
 
-public record HttpCookie(String name, String value) {
-
-    public String toCookieString() {
-        return name + "=" + value;
-    }
+public record HttpCookie(
+        String name,
+        String value
+) {
 
     public boolean sameName(String name) {
         return this.name.equals(name);
@@ -12,6 +11,7 @@ public record HttpCookie(String name, String value) {
 
     @Override
     public String toString() {
-        return toCookieString();
+        return name + "=" + value;
     }
 }
+

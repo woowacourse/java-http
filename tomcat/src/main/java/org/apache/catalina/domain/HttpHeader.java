@@ -74,6 +74,10 @@ public record HttpHeader(Map<String, String> headers) {
                 .anyMatch(k -> normalizeHeaderKey(k).equals(normalizeHeaderKey(key)));
     }
 
+    public boolean hasNotContentLength() {
+        return !containKey(CONTENT_LENGTH);
+    }
+
     public int getContentLength() {
         if (!containKey(CONTENT_LENGTH)) {
             return 0;
@@ -82,7 +86,7 @@ public record HttpHeader(Map<String, String> headers) {
     }
 
     public String getContentType() {
-        if (!containKey(CONTENT_LENGTH)) {
+        if (!containKey(CONTENT_TYPE)) {
             throw new IllegalArgumentException("Content-Length header is missing");
         }
         return get(CONTENT_TYPE);
@@ -107,5 +111,12 @@ public record HttpHeader(Map<String, String> headers) {
             return;
         }
         headers.put(headerKey, cookie.toString());
+    }
+
+    public String toHeaderString() {
+        StringBuilder builder = new StringBuilder();
+        headers.forEach((key, value) ->
+                builder.append(key).append(": ").append(value).append(" ").append("\r\n"));
+        return builder.toString();
     }
 }

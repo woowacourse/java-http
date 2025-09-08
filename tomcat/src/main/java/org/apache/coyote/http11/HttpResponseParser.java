@@ -25,10 +25,7 @@ public final class HttpResponseParser {
     }
 
     private static String parseHeader(HttpResponse httpResponse) {
-        StringBuilder builder = new StringBuilder();
-        httpResponse.getHeaders()
-                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" ").append(CRLF));
-        return builder.toString();
+        return httpResponse.getHeaderString();
     }
 
     private static byte[] concatBytes(byte[] a, byte[] b) {

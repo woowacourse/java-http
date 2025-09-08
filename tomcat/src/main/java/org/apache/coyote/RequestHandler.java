@@ -45,10 +45,14 @@ public class RequestHandler {
     }
 
     public HttpResponse handleRequest(HttpRequest httpRequest) {
-        for (var entry : requestMappings.entrySet()) {
-            if (entry.getKey().isSupported(httpRequest)) {
-                return entry.getValue().apply(httpRequest);
+        try {
+            for (var entry : requestMappings.entrySet()) {
+                if (entry.getKey().isSupported(httpRequest)) {
+                    return entry.getValue().apply(httpRequest);
+                }
             }
+        } catch (UnauthorizedException e) {
+            return responseUnauthorizedView();
         }
         return responseNotFoundView();
     }
@@ -71,19 +75,24 @@ public class RequestHandler {
         if (account.isBlank() || password.isBlank()) {
             return handleStaticResource(httpRequest);
         }
-        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() ->
-                new IllegalArgumentException("회원이 존재하지 않습니다. : " + account));
+        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UnauthorizedException::new);
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + account);
+            throw new UnauthorizedException();
         }
         log.info("회원 조회 성공 : {}", user);
-        return handleStaticResource(httpRequest);
+        return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
     }
 
     private HttpResponse responseNotFoundView() {
         final byte[] body = readFile(Path.of("static", "404.html").toString());
         return HttpResponse.of(ResponseStatus.NOT_FOUND, ContentType.HTML, body);
     }
+
+    private HttpResponse responseUnauthorizedView() {
+        final byte[] body = readFile(Path.of("static", "401.html").toString());
+        return HttpResponse.of(ResponseStatus.UNAUTHORIZED, ContentType.HTML, body);
+    }
+
 
     private String getStaticFilePath(HttpRequest httpRequest) {
         final var staticFilePath = "static" + httpRequest.getPath();

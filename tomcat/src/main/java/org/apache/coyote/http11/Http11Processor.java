@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
+        String sessionId = request.getCookies().get("JSESSIONID");
+
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+            response.setCookie("JSESSIONID", sessionId);
+        }
         String path = request.getPath();
 
         if ("/".equals(path)) {

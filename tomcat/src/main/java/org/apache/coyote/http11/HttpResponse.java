@@ -59,4 +59,8 @@ public class HttpResponse {
         final var bodyBytes = "500 Internal Server Error".getBytes(StandardCharsets.UTF_8);
         sendResponse("500 Internal Server Error", "text/html;charset=utf-8", bodyBytes);
     }
+
+    public void setCookie(String name, String value) {
+        addHeader("Set-Cookie", name + "=" + value);
+    }
 }

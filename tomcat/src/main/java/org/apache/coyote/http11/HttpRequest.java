@@ -16,6 +16,7 @@ public class HttpRequest {
     private final Map<String, String> queryParams;
     private final Map<String, String> headers = new HashMap<>();
     private final String body;
+    private final HttpCookie cookies;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -61,6 +62,7 @@ public class HttpRequest {
         } else {
             this.body = null;
         }
+        this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
     private Map<String, String> parseQueryString(String queryString) {
@@ -97,5 +99,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
     }
 }

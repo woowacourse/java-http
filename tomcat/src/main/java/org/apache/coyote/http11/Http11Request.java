@@ -131,7 +131,7 @@ public class Http11Request {
     }
 
     public Map<String, String> getBodyByContentType(final String contentType) {
-        if (contentType.equals("application/x-www-form-urlencoded")) {
+        if (!contentType.equals("application/x-www-form-urlencoded")) {
             throw new IllegalArgumentException("Request Content-Type should be application/x-www-form-urlencoded");
         }
 
@@ -160,12 +160,11 @@ public class Http11Request {
         return Optional.empty();
     }
 
-    public boolean hasCookie(final String cookieKeyName) {
+    public Optional<String> findCookie(final String cookieName) {
         if (cookie == null) {
-            return false;
+            return Optional.empty();
         }
-
-        return cookie.hasCookie(cookieKeyName);
+        return cookie.findCookie(cookieName);
     }
 
     public String getTarget() {
@@ -178,5 +177,6 @@ public class Http11Request {
 
     public String getBody() {
         return body;
+
     }
 }

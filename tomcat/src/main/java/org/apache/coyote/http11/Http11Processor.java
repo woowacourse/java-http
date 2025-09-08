@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_FILE_LOCATION = "static";
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -120,25 +122,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response handleLoginRequest(final Http11Request request) throws IOException {
-        final byte[] fileContent = readFile("/login.html");
-
         final Optional<String> account = request.findQueryParam("account");
         final Optional<String> password = request.findQueryParam("password");
+        final Optional<String> sessionId = request.findCookie("JSESSIONID");
+
+        if (sessionId.isPresent()) {
+            final Session session = sessionManager.findSession(sessionId.get());
+            if (session != null) {
+                return handleHtmlRequest(302, "/index.html");
+            }
+        }
 
         if (account.isEmpty() || password.isEmpty()) {
+            final byte[] fileContent = readFile("/login.html");
+
             return createHtmlResponse(200, fileContent);
         }
 
-        if (!existsUserByAccount(account.get(), password.get())) {
+        final Optional<User> userOrEmpty = findUserByAccount(account.get(), password.get());
+        if (userOrEmpty.isEmpty()) {
             return handleHtmlRequest(401, "/401.html");
         }
 
-        return handleAuthorizedRequest(request);
-    }
-
-    private String generateSessionID() {
-        final UUID uuid = UUID.randomUUID();
-        return uuid.toString();
+        final User user = userOrEmpty.get();
+        return handleAuthorizedRequest(user, request);
     }
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
@@ -156,20 +163,25 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
         }
 
-        InMemoryUserRepository.save(new User(account, password, email));
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
 
-        return handleAuthorizedRequest(request);
+        return handleAuthorizedRequest(user, request);
     }
 
-    private Http11Response handleAuthorizedRequest(final Http11Request request) throws IOException {
-        final Map<String, String> headers = new LinkedHashMap<>();
-
-        final String jSessionId = generateSessionID();
-
+    private Http11Response handleAuthorizedRequest(final User user, final Http11Request request) throws IOException {
         final byte[] indexFileContent = readFile("/index.html");
+
+        final String sessionId = generateSessionID();
+
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+
+        final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/html;charset=utf-8");
         headers.put("Content-Length", String.valueOf(indexFileContent.length));
-        headers.put("Set-Cookie", String.format("JSESSIONID=%s", jSessionId));
+        headers.put("Set-Cookie", String.format("JSESSIONID=%s", sessionId));
 
         return new Http11Response(
                 "HTTP/1.1",
@@ -254,21 +266,26 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private boolean existsUserByAccount(final String account, final String password) {
+    private String generateSessionID() {
+        final UUID uuid = UUID.randomUUID();
+        return uuid.toString();
+    }
+
+    private Optional<User> findUserByAccount(final String account, final String password) {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {
             log.warn("User not found : account = {}", account);
-            return false;
+            return Optional.empty();
         }
 
         final User user = userOrEmpty.get();
         if (!user.checkPassword(password)) {
             log.warn("Wrong password : account = {}", account);
-            return false;
+            return Optional.empty();
         }
 
         log.info("User found : {}", user);
-        return true;
+        return Optional.of(user);
     }
 }

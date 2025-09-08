@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Cookie {
     private final Map<String, String> cookies;
@@ -29,7 +30,10 @@ public class Http11Cookie {
         this.cookies = cookies;
     }
 
-    public boolean hasCookie(final String cookieKeyName) {
-        return cookies.containsKey(cookieKeyName);
+    public Optional<String> findCookie(final String cookieName) {
+        if (cookies.containsKey(cookieName)) {
+            return Optional.of(cookies.get(cookieName));
+        }
+        return Optional.empty();
     }
 }

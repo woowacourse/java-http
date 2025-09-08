@@ -174,6 +174,7 @@ class Http11ProcessorTest {
                     "GET /nonexistent.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    "",
                     "");
 
             final StubSocket socket = new StubSocket(httpRequest);
@@ -209,6 +210,7 @@ class Http11ProcessorTest {
                     "GET /login?account=gugu&password=password HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    "",
                     "");
 
             final StubSocket socket = new StubSocket(httpRequest);
@@ -234,6 +236,7 @@ class Http11ProcessorTest {
                     "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
+                    "",
                     "");
 
             final StubSocket socket = new StubSocket(httpRequest);

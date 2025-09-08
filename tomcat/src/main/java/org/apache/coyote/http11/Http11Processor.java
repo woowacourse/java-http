@@ -3,20 +3,16 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.PatternSyntaxException;
@@ -47,29 +43,16 @@ public class Http11Processor implements Runnable, Processor {
                 final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
-
-            // 전체 과정 IOException 처리 필요
-            final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-            // 첫째 줄
-            final String firstLine = httpRequestReader.readLine();
-            final RequestLine requestLine = new RequestLine(firstLine);
-            // 헤더
-            List<String> headerLines = new ArrayList<>();
-            String line;
-            while (!(line = httpRequestReader.readLine()).equals("")) {
-                headerLines.add(line);
+            final HttpRequest httpRequest;
+            try {
+                httpRequest = new HttpRequest(inputStream);
+            } catch (final IOException e) {
+                send500Response(outputStream);
+                throw new UncheckedServletException(e);
             }
-            final HttpHeaders requestHeaders = new HttpHeaders(headerLines);
-            // 본문
-            final int contentLength = Integer.parseInt(
-                    requestHeaders.get(HttpHeaderField.CONTENT_LENGTH)); // todo null check 필요
-            final char[] buffer = new char[contentLength];
-            httpRequestReader.read(buffer, 0, contentLength);
-            String requestBody = new String(buffer);
-
-            final String requestURI = requestLine.getRequestURI();
-            final HttpMethod method = requestLine.getMethod();
-            log.info(requestURI);
+            final String requestURI = httpRequest.getRequestURI();
+            final HttpMethod method = httpRequest.getMethod();
+            final String requestBody = httpRequest.getRequestBody();
 
             if (requestURI.equals("/") || requestURI.equals("/index.html")) {
                 send200Response("/index.html", outputStream);
@@ -157,19 +140,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (final IOException e) {
-            throw new UncheckedServletException(e);
-        }
-    }
-
-    private String parseRequestURL(final InputStream inputStream, final OutputStream outputStream) {
-        final int REQUEST_URL_INDEX = 1;
-
-        final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-        try {
-            final String requestLine = httpRequestReader.readLine();
-            return requestLine.split(" ")[REQUEST_URL_INDEX];
-        } catch (final NullPointerException | ArrayIndexOutOfBoundsException | IOException e) {
-            send500Response(outputStream);
             throw new UncheckedServletException(e);
         }
     }

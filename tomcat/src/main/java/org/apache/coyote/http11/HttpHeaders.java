@@ -32,4 +32,8 @@ public class HttpHeaders {
     public String get(final HttpHeaderField target) {
         return fields.get(target);
     }
+
+    public boolean contains(final HttpHeaderField target) {
+        return fields.containsKey(target);
+    }
 }

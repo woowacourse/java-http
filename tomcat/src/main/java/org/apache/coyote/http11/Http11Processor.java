@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.HttpStatusException;
 import org.slf4j.Logger;
@@ -58,18 +60,43 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (requestPath.equals("/login")) {
+            if (requestPath.equals("/login") && !httpRequest.isQueryStringExists()) {
                 final URL resource = getStaticResource("/login.html");
                 final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
                 sendHttpResponse(response, outputStream);
-                logUserInformationIfExists(httpRequest);
+            }
+
+            if (requestPath.equals("/login") && httpRequest.isQueryStringExists()) {
+                final Map<String, String> parameters = httpRequest.getQueryParameters();
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+                final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                if (user.isEmpty() || !user.get().checkPassword(password)) {
+                    final HttpStatusCode statusCode = HttpStatusCode.UNAUTHORIZED;
+                    final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
+                    final HttpResponse errorResponse = getHttpResponse(statusCode, resource);
+                    sendHttpResponse(errorResponse, outputStream);
+                }
+
+                final HttpStatusCode statusCode = HttpStatusCode.FOUND;
+                final String responseLine = String.format("HTTP/1.1 %s %s", statusCode.getStatusCode(),
+                        statusCode.getStatusMessage());
+                final LinkedHashMap<String, String> responseHeaders = new LinkedHashMap<>();
+                responseHeaders.put("Content-Type", "text/html; charset=UTF-8");
+                responseHeaders.put("Content-Length", "0");
+                responseHeaders.put("Location", "/index.html");
+                HttpResponse response = new HttpResponse(responseLine, responseHeaders, new byte[0]);
+
+                sendHttpResponse(response, outputStream);
+                log.info("user: " + user);
                 return;
             }
 
             final URL resource = getStaticResource(httpRequest.getRequestPath());
             final HttpResponse response = getHttpResponse(HttpStatusCode.OK, resource);
             sendHttpResponse(response, outputStream);
-            
+
         } catch (HttpStatusException e) {
             final HttpStatusCode statusCode = e.getStatusCode();
             final URL resource = getStaticResource("/" + statusCode.getStatusCode() + ".html");
@@ -84,20 +111,6 @@ public class Http11Processor implements Runnable, Processor {
             throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
         }
         return resource;
-    }
-
-    private void logUserInformationIfExists(final HttpRequest httpRequest) {
-        if (httpRequest.isQueryStringExists()) {
-            final Map<String, String> parameters = httpRequest.getQueryParameters();
-            final String account = parameters.get("account");
-            final String password = parameters.get("password");
-            InMemoryUserRepository.findByAccount(account)
-                    .ifPresent(user -> {
-                        if (user.checkPassword(password)) {
-                            log.info("user: " + user);
-                        }
-                    });
-        }
     }
 
     private byte[] readFile(final URL resource) throws IOException {

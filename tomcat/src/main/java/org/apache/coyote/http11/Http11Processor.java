@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             final String path = httpHeader.getPurePath();
 
             if (httpMethod == HttpMethod.GET && path.equals("/")) {
-                HttpResponse httpResponse = responseHome();
+                final HttpResponse httpResponse = responseHome();
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
@@ -80,17 +80,17 @@ public class Http11Processor implements Runnable, Processor {
             if (httpMethod == HttpMethod.POST && path.contains("/register")) {
                 final boolean isRegistered = registerMember(httpRequest);
                 if (isRegistered) {
-                    HttpResponse httpResponse = responseRedirectPage("/index.html");
+                    final HttpResponse httpResponse = responseRedirectPage("/index.html");
                     writeResponse(outputStream, httpResponse.getResponse());
                     return;
                 }
-                HttpResponse httpResponse = responseErrorPage("/register.html");
+                final HttpResponse httpResponse = responseErrorPage("/register.html");
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.contains("/register")) {
-                HttpResponse httpResponse = responseHtml("register");
+                final HttpResponse httpResponse = responseHtml("register");
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
@@ -98,34 +98,34 @@ public class Http11Processor implements Runnable, Processor {
             if (httpMethod == HttpMethod.GET && path.contains("/login")) {
                 String jsessionid = httpHeader.getCookie("JSESSIONID");
                 if (jsessionid != null && sessionManager.findSession(jsessionid) != null) {
-                    HttpResponse httpResponse = responseRedirectPage("/index.html");
+                    final HttpResponse httpResponse = responseRedirectPage("/index.html");
                     writeResponse(outputStream, httpResponse.getResponse());
                 }
                 printMemberLog(httpHeader);
-                HttpResponse httpResponse = responseHtml("login");
+                final HttpResponse httpResponse = responseHtml("login");
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".html")) {
-                HttpResponse httpResponse = responseHtml(httpHeader);
+                final HttpResponse httpResponse = responseHtml(httpHeader);
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".css")) {
-                HttpResponse httpResponse = responseCss(httpHeader);
+                final HttpResponse httpResponse = responseCss(httpHeader);
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
             if (httpMethod == HttpMethod.GET && path.endsWith(".js")) {
-                HttpResponse httpResponse = responseJs(httpHeader);
+                final HttpResponse httpResponse = responseJs(httpHeader);
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
 
-            HttpResponse httpResponse = responseErrorPage("/404.html");
+            final HttpResponse httpResponse = responseErrorPage("/404.html");
             writeResponse(outputStream, httpResponse.getResponse());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -155,6 +155,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+
         return true;
     }
 
@@ -177,8 +178,10 @@ public class Http11Processor implements Runnable, Processor {
             sessionManager.add(session);
             httpResponse.addCookie(new Cookie("JSESSIONID", sessionId));
             log.info("로그인 성공 user : {}", user);
+
             return true;
         }
+
         return false;
     }
 
@@ -204,6 +207,7 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+
         return httpResponse;
     }
 
@@ -215,6 +219,7 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Length", "0");
         httpResponse.addHeader("Location", redirectPage);
+
         return httpResponse;
     }
 
@@ -227,6 +232,7 @@ public class Http11Processor implements Runnable, Processor {
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+
         return httpResponse;
     }
 
@@ -237,9 +243,9 @@ public class Http11Processor implements Runnable, Processor {
                 StatusCode.OK,
                 body
         );
-
         httpResponse.addHeader("Content-Type", "text/css;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+
         return httpResponse;
     }
 
@@ -314,10 +320,10 @@ public class Http11Processor implements Runnable, Processor {
         final int contentLength = Integer.parseInt(contentLengthValue);
         final char[] chars = new char[contentLength];
         bufferedReader.read(chars, 0, contentLength);
-        final String email = new String(chars);
-        final String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
+        final String body = new String(chars);
+        final String decodedBody = URLDecoder.decode(body, StandardCharsets.UTF_8);
 
-        return new HttpBody(decodedEmail, ContentType.findContentType(contentType));
+        return new HttpBody(decodedBody, ContentType.findContentType(contentType));
     }
 
     private String getStaticResponseBody(final String httpHeader) throws URISyntaxException, IOException {

@@ -42,6 +42,9 @@ public enum ContentType {
     }
 
     public String getResponseHeader() {
+        if(this == HTML || this == JS || this == CSS) {
+            return "Content-Type: " + mimeTypes.getFirst() + ";charset=utf-8";
+        }
         return "Content-Type: " + mimeTypes.getFirst();
     }
 

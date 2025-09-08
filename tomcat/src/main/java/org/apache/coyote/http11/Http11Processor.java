@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.techcourse.exception.ErrorMessage.*;
 
@@ -27,7 +29,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private Response response;
+
     public Http11Processor(final Socket connection) {
+        response = new Response();
+        response.setProtocolVersion("HTTP/1.1");
         this.connection = connection;
     }
 
@@ -48,10 +54,21 @@ public class Http11Processor implements Runnable, Processor {
                 if (uri.contains("?")) {
                     login(uri);
                 }
-                respondStaticResource(HttpStatusCode.OK, Paths.get("/login.html"), outputStream);
+                response.setHttpStatusCode(HttpStatusCode.OK);
+                response.addHeader("Content-Type", getContentType(Paths.get(uri)));
+                String body = getStaticResource(Paths.get("/login.html"));
+                response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+                response.setBody(body);
+                sendResponse(outputStream);
                 return;
             }
-            respondStaticResource(HttpStatusCode.OK, Paths.get(uri), outputStream);
+
+            response.setHttpStatusCode(HttpStatusCode.OK);
+            response.addHeader("Content-Type", getContentType(Paths.get(uri)) + ";charset=utf-8");
+            String body = getStaticResource(Paths.get(uri));
+            response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+            response.setBody(body);
+            sendResponse(outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
@@ -92,11 +109,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(HttpStatusCode httpStatusCode, Path path, OutputStream outputStream) throws IOException, URISyntaxException {
-        String contentType = getContentType(path);
-        final var responseBody = getResponseBodyFromStaticResource(path);
-        final var response = formatHttpResponse(httpStatusCode, contentType, responseBody);
-        outputStream.write(response.getBytes());
+    private void sendResponse(OutputStream outputStream) throws IOException, URISyntaxException {
+        String httpFormatResponse = formatHttpResponse();
+        outputStream.write(httpFormatResponse.getBytes());
         outputStream.flush();
     }
 
@@ -108,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
         return contentType;
     }
 
-    private String getResponseBodyFromStaticResource(Path path) throws IOException, URISyntaxException {
+    private String getStaticResource(Path path) throws IOException, URISyntaxException {
         if (path.equals(Path.of("\\"))) {
             return "Hello world!";
         }
@@ -119,14 +134,17 @@ public class Http11Processor implements Runnable, Processor {
         return Paths.get(getClass().getClassLoader().getResource("static" + path).toURI());
     }
 
-    private String formatHttpResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
+    private String formatHttpResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 " +
-                        httpStatusCode.getCode() + " "
-                        + httpStatusCode.getMessage() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                response.getProtocolVersion() + " " +
+                        response.getStatusCode() + " " +
+                        response.getStatusMessage() + " ",
+                response.getHeaders()
+                        .entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                        .collect(Collectors.joining("\r\n")),
+                "\r\n" + response.getBody()
+        );
     }
 }

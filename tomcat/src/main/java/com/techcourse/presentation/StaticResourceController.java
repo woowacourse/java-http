@@ -44,7 +44,7 @@ public class StaticResourceController implements Controller {
         try (final Stream<Path> files = Files.walk(basePath)) {
             files.filter(Files::isRegularFile)
                     .forEach(path -> {
-                        final String pathName = path.toString().split(BASE_DIRECTORY_NAME)[1];
+                        final String pathName = "/" + basePath.relativize(path);
                         RESOURCE_PATHS.computeIfAbsent(pathName, key -> path);
                     });
         } catch (IOException e) {

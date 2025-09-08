@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.resolver;
 
+import static org.apache.coyote.http11.HttpConstants.INDEX_PAGE;
+import static org.apache.coyote.http11.HttpConstants.SLASH;
+
 import java.util.Set;
 
 public final class PathResolver {
@@ -10,8 +13,8 @@ public final class PathResolver {
     }
 
     public static String resolve(final String route) {
-        if (route == null || route.isBlank() || "/".equals(route)) {
-            return "index.html";
+        if (route == null || route.isBlank() || route.equals(SLASH)) {
+            return INDEX_PAGE;
         }
 
         String resolved = route;

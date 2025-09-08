@@ -1,5 +1,12 @@
 package org.apache.coyote.http11.parser;
 
+import static org.apache.coyote.http11.HttpConstants.COLON;
+import static org.apache.coyote.http11.HttpConstants.CONTENT_LENGTH_HEADER;
+import static org.apache.coyote.http11.HttpConstants.COOKIE_HEADER;
+import static org.apache.coyote.http11.HttpConstants.EMPTY;
+import static org.apache.coyote.http11.HttpConstants.QUESTION;
+import static org.apache.coyote.http11.HttpConstants.SPACE;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,13 +22,7 @@ import org.apache.coyote.http11.dto.RequestLine;
 
 public final class HttpRequestParser {
 
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String COOKIE_HEADER = "Cookie";
-    private static final String QUESTION = "?";
-    private static final String EMPTY = "";
-    private static final String COLON = ":";
-    private static final String REQUEST_LINE_DELIMITER = " ";
-
+    private static final String REQUEST_LINE_DELIMITER = SPACE;
 
     private HttpRequestParser() {
     }

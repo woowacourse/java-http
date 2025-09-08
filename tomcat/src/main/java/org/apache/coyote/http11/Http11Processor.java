@@ -1,5 +1,12 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpConstants.CONTENT_LENGTH_HEADER;
+import static org.apache.coyote.http11.HttpConstants.CONTENT_TYPE_HEADER;
+import static org.apache.coyote.http11.HttpConstants.COOKIE_JSESSIONID;
+import static org.apache.coyote.http11.HttpConstants.DEFAULT_PROTOCOL;
+import static org.apache.coyote.http11.HttpConstants.EQUAL;
+import static org.apache.coyote.http11.HttpConstants.SET_COOKIE_HEADER;
+
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,13 +30,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
-    private static final String COOKIE_JSESSIONID = "JSESSIONID";
-    private static final String SEMICOLON = ";";
-    private static final String EQUAL = "=";
 
     private final Socket connection;
 
@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
     // 3.1 HTTP 응답 생성 및 헤더 설정
     private HttpResponse buildHttpResponse(final HttpRequest request, final HandlerResult result) {
         final HttpResponse response = new HttpResponse(DEFAULT_PROTOCOL, result.status(), new LinkedHashMap<>());
-        response.addHeader(CONTENT_TYPE_HEADER, result.mimeType() + SEMICOLON + result.mimeParameter());
+        response.addHeader(CONTENT_TYPE_HEADER, result.contentType().value());
         response.addHeader(CONTENT_LENGTH_HEADER, String.valueOf(result.body().length));
 
         // 핸들러별 추가 헤더 설정 (e.g. LoginHandler의 302 Location)

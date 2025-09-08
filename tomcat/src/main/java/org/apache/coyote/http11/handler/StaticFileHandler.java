@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.HandlerResult.DEFAULT_MIME_TYPE;
+import static org.apache.coyote.http11.HttpConstants.NOT_FOUND_PAGE;
+import static org.apache.coyote.http11.HttpConstants.SERVER_ERROR_PAGE;
+import static org.apache.coyote.http11.HttpConstants.SLASH;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,10 +15,7 @@ import org.apache.coyote.http11.resolver.PathResolver;
 
 public class StaticFileHandler implements Handler {
 
-    private static final String SLASH = "/";
     private static final String STATIC_ROOT = "static";
-    private static final String NOT_FOUND_PAGE = "404.html";
-    private static final String SERVER_ERROR_PAGE = "500.html";
 
     @Override
     public HandlerResult doHandle(final HttpRequest request) {
@@ -28,7 +28,6 @@ public class StaticFileHandler implements Handler {
             if (served != null) {
                 return served;
             }
-
             return handleNotFound();    // 404 Page
         } catch (final IOException e) {
             return handleServerError(); // 500 Page
@@ -48,16 +47,17 @@ public class StaticFileHandler implements Handler {
             return null;
         }
 
-        // 3. MIME 타입 판별
-        String mimeType = Files.probeContentType(filePath);
-        if (mimeType == null) {
-            mimeType = DEFAULT_MIME_TYPE;
-        }
+        // 3. ContentType 판별
+        final ContentType contentType = ContentType.fromPath(resourcePath);
 
         // 4. 파일 내용 읽기
         final byte[] body = Files.readAllBytes(filePath);
 
-        return HandlerResult.ok(mimeType, body);
+        return HandlerResult.builder()
+                .status(Status.OK)
+                .contentType(contentType)
+                .body(body)
+                .build();
     }
 
     // 404 Not Found 처리
@@ -66,11 +66,20 @@ public class StaticFileHandler implements Handler {
             final String resourcePath = STATIC_ROOT + SLASH + NOT_FOUND_PAGE;
             final HandlerResult result = tryServe(resourcePath);
             if (result != null) {
-                return HandlerResult.notFound(result.mimeType(), result.body());
+                return HandlerResult.builder()
+                        .status(Status.NOT_FOUND)
+                        .contentType(ContentType.HTML)
+                        .body(result.body())
+                        .build();
             }
         } catch (final IOException ignored) {
         }
-        return HandlerResult.notFound("404 Not Found");
+
+        return HandlerResult.builder()
+                .status(Status.NOT_FOUND)
+                .contentType(ContentType.TEXT)
+                .body(Status.NOT_FOUND.line().getBytes(StandardCharsets.UTF_8))
+                .build();
     }
 
     // 500 Server Error 처리
@@ -79,10 +88,19 @@ public class StaticFileHandler implements Handler {
             final String resourcePath = STATIC_ROOT + SLASH + SERVER_ERROR_PAGE;
             final HandlerResult result = tryServe(resourcePath);
             if (result != null) {
-                return HandlerResult.serverError(result.mimeType(), result.body());
+                return HandlerResult.builder()
+                        .status(Status.INTERNAL_ERROR)
+                        .contentType(ContentType.HTML)
+                        .body(result.body())
+                        .build();
             }
         } catch (final IOException ignored) {
         }
-        return HandlerResult.serverError("500 Internal Server Error");
+
+        return HandlerResult.builder()
+                .status(Status.INTERNAL_ERROR)
+                .contentType(ContentType.TEXT)
+                .body(Status.INTERNAL_ERROR.line().getBytes(StandardCharsets.UTF_8))
+                .build();
     }
 }

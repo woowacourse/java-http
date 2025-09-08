@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.parser;
 
+import static org.apache.coyote.http11.HttpConstants.AMPERSAND;
+import static org.apache.coyote.http11.HttpConstants.EMPTY;
+import static org.apache.coyote.http11.HttpConstants.EQUAL;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class QueryStringParser {
-
-    private static final String AMPERSAND = "&";
-    private static final String EQUAL = "=";
-    private static final String EMPTY = "";
 
     private QueryStringParser() {
     }

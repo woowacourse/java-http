@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.parser;
 
+import static org.apache.coyote.http11.HttpConstants.EMPTY;
+import static org.apache.coyote.http11.HttpConstants.EQUAL;
+import static org.apache.coyote.http11.HttpConstants.SEMICOLON;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.dto.HttpCookie;
 
 public class HttpCookieParser {
-
-    private static final String SEMICOLON = ";";
-    private static final String EQUAL = "=";
-    private static final String EMPTY = "";
 
     private HttpCookieParser() {
     }

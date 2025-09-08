@@ -13,11 +13,12 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    public void login(LoginRequest request) {
+    public User login(LoginRequest request) {
         User user = InMemoryUserRepository.findByAccount(request.account())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         validatePassword(request, user);
+        return user;
     }
 
     public void register(RegisterRequest request) {
@@ -29,5 +30,11 @@ public class AuthService {
         if (!user.checkPassword(request.password())) {
             throw new BusinessException(ErrorCode.PASSWORD_NOT_MATCHED);
         }
+    }
+
+    public void loginCheck(String account) {
+        log.info("account: " + account);
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }

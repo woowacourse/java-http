@@ -108,7 +108,12 @@ public class HttpRequest {
 
     public boolean hasJSessionCookie() {
         HttpCookie cookie = HttpCookie.from(headers);
-        return cookie.contains("JSESSIONID");
+        return cookie.hasJSessionId();
+    }
+
+    public String getJSessionId() {
+        HttpCookie cookie = HttpCookie.from(headers);
+        return cookie.getJsessionid();
     }
 
     private Map<String, String> parseFormUrlEncoded(String body) {
@@ -121,14 +126,5 @@ public class HttpRequest {
             }
         }
         return params;
-    }
-
-    private static String[] getRequestLineTokens(String[] lines) {
-        String requestLine = lines[0];
-        String[] requestLineTokens = requestLine.split(" ");
-        if (requestLineTokens.length != REQUEST_LINE_ELEMENT_COUNT) {
-            throw new IllegalArgumentException("Invalid Request Line : " + requestLine);
-        }
-        return requestLineTokens;
     }
 }

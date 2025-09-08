@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -79,21 +80,38 @@ public class Http11Processor implements Runnable, Processor {
         final String queryString = requestInfo[1];
 
         if ("/login".equals(path)) {
-            handleLogin(queryString);
+            if (!queryString.isEmpty()) {
+                return handleLoginRequest(queryString);
+            }
             path += ".html";
         }
 
         final byte[] bytes = readFile(path);
-        return generateResponse(path, bytes);
+        return generateOkResponse(path, bytes);
     }
 
-    private void handleLogin(final String queryString) {
+    private String handleLoginRequest(final String queryString) {
         final Map<String, String> parameters = parseQueryString(queryString);
+        final String location;
         if (login(parameters)) {
             log.info("login successful");
-            return;
+            location = "/index.html";
+
         }
-        log.info("login failed");
+        else{
+            log.info("login failed");
+            location = "/401.html";
+        }
+        return generateRedirectResponse(location);
+    }
+
+    private String generateRedirectResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Type: text/html; charset=UTF-8 ",
+                "Content-Length: 0 ",
+                "\r\n");
     }
 
     private Map<String, String> parseQueryString(final String queryString) {
@@ -136,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(filePath);
     }
 
-    private String generateResponse(final String path, final byte[] bytes) {
+    private String generateOkResponse(final String path, final byte[] bytes) {
         final String responseBody = new String(bytes);
         final String contentType = getContentType(path);
 

@@ -13,7 +13,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.parser.HeaderParser;
 import org.apache.coyote.http11.parser.QueryParamsParser;
@@ -49,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
 
             String contentType = resolveContentType(requestUri, requestHeaders);
-            String response = generateResponse(requestUri, contentType);
+            HttpResponse response = buildResponse(requestUri, contentType);
 
             sendResponse(outputStream, response);
 
@@ -80,9 +79,9 @@ public class Http11Processor implements Runnable, Processor {
         return "html";
     }
 
-    private String generateResponse(String requestUri, String contentType) throws IOException {
+    private HttpResponse buildResponse(String requestUri, String contentType) throws IOException {
         if (UriParser.isRootPath(requestUri)) {
-            return buildResponse("Hello world!", contentType);
+            return HttpResponse.of(HttpStatus.OK, contentType, "Hello world!");
         }
 
         String path = requestUri;
@@ -91,13 +90,13 @@ public class Http11Processor implements Runnable, Processor {
             String queryString = UriParser.extractQueryString(requestUri);
             Map<String, String> queryParams = QueryParamsParser.parse(queryString);
             if (path.equals("/login")) {
-                findUserByAccountParam(queryParams);
+                return handleLogin(queryParams, contentType);
             }
         }
 
         Path filePath = getFilePath(path, contentType);
         String responseBody = new String(Files.readAllBytes(filePath));
-        return buildResponse(responseBody, contentType);
+        return HttpResponse.of(HttpStatus.OK, contentType, responseBody);
     }
 
     private Path getFilePath(String path, String contentType) {
@@ -108,22 +107,31 @@ public class Http11Processor implements Runnable, Processor {
         return new File(resource.getFile()).toPath();
     }
 
-    private void findUserByAccountParam(Map<String, String> queryParams) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-        System.out.println("user = " + user);
+    private HttpResponse handleLogin(Map<String, String> queryParams, String contentType) {
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(user -> handleSuccess(user, contentType))
+                .orElseGet(() -> handleFailure(account, contentType));
     }
 
-    private String buildResponse(String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + "text/" + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private HttpResponse handleSuccess(User user, String contentType) {
+        log.info("login success: {}", user);
+        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, contentType, "");
+        httpResponse.addHeader("Location", "/index.html");
+        return httpResponse;
     }
 
-    private void sendResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+    private HttpResponse handleFailure(String account, String contentType) {
+        log.info("login failure: account= {}", account);
+        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, contentType, "");
+        httpResponse.addHeader("Location", "/401.html");
+        return httpResponse;
+    }
+
+    private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toHttpResponseString().getBytes());
         outputStream.flush();
     }
 }

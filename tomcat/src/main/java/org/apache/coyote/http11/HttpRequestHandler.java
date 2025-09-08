@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public interface HttpRequestHandler {
 
-    boolean support(RequestStartLine requestStartLine);
+    boolean support(HttpRequest httpRequest);
 
-    String response(RequestStartLine requestStartLine);
+    String response(HttpRequest httpRequest);
 }

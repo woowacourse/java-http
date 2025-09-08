@@ -5,10 +5,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class RegisterGetRequestHandler implements HttpRequestHandler {
+public class RegisterPostRequestHandler implements HttpRequestHandler {
     @Override
     public boolean support(final HttpRequest httpRequest) {
-        return httpRequest.getRequestMethod() == RequestMethod.GET &&
+        return httpRequest.getRequestMethod() == RequestMethod.POST &&
                 httpRequest.getRequestUrl().equals("/register");
     }
 

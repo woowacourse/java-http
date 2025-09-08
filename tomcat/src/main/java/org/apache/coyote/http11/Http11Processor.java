@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -44,34 +45,43 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream();
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            RequestStartLine requestStartLine = createRequestStartLine(bufferedReader.readLine());
-            handle(requestStartLine, outputStream);
+            String rawHttpRequest = readRawHttpRequest(bufferedReader);
+            handle(HttpRequest.from(rawHttpRequest), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handle(final RequestStartLine requestStartLine, final OutputStream outputStream) throws IOException {
+    private String readRawHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
+        }
+        int contentLength = headerLines.stream()
+                .filter(l -> l.toLowerCase().startsWith("content-length"))
+                .map(l -> Integer.parseInt(l.split(":")[1].trim()))
+                .findFirst()
+                .orElse(0);
+
+        char[] body = new char[contentLength];
+        if (contentLength > 0) {
+            bufferedReader.read(body, 0, contentLength);
+        }
+        
+        return String.join("\r\n", headerLines)
+                + "\r\n\r\n"
+                + new String(body);
+    }
+
+    private void handle(final HttpRequest httpRequest, final OutputStream outputStream) throws IOException {
         for (HttpRequestHandler handler : httpRequestHandlers) {
-            if (handler.support(requestStartLine)) {
-                String response = handler.response(requestStartLine);
+            if (handler.support(httpRequest)) {
+                String response = handler.response(httpRequest);
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
         }
-    }
-
-    private RequestStartLine createRequestStartLine(final String startLine) {
-        String[] startLines = startLine.split(" ");
-        String requestMethod = startLines[0];
-        String requestUrl = startLines[1];
-        String requestHttpVersion = startLines[2];
-
-        return new RequestStartLine(
-                RequestMethod.valueOf(requestMethod),
-                requestUrl,
-                requestHttpVersion
-        );
     }
 }

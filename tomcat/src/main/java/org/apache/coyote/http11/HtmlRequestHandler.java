@@ -7,14 +7,14 @@ import java.nio.file.Path;
 
 public class HtmlRequestHandler implements HttpRequestHandler {
     @Override
-    public boolean support(final RequestStartLine requestStartLine) {
-        return requestStartLine.requestMethod() == RequestMethod.GET &&
-                requestStartLine.requestUrl().endsWith(".html");
+    public boolean support(final HttpRequest httpRequest) {
+        return httpRequest.getRequestMethod() == RequestMethod.GET &&
+                httpRequest.getRequestUrl().endsWith(".html");
     }
 
     @Override
-    public String response(final RequestStartLine requestStartLine) {
-        URL resource = getClass().getClassLoader().getResource("static" + requestStartLine.requestUrl());
+    public String response(final HttpRequest httpRequest) {
+        URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getRequestUrl());
         Path resourcePath = Path.of(resource.getPath());
 
         byte[] bytes = readAllBytes(resourcePath);

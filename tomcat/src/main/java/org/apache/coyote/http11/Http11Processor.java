@@ -55,42 +55,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response findResponse(final Http11Request request) throws IOException {
-        final String requestTarget = request.getTarget();
-
-        if (requestTarget.equals("/")) {
-            final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
-
-            return createHtmlResponse(defaultResponseBytes);
-        }
-        if (requestTarget.contains("/login")) {
-            final byte[] fileContent = readFile("/login.html");
-
-            final String account = request.findQueryParam("account");
-            final String password = request.findQueryParam("password");
-
-            validateUserByAccount(account, password);
-
-            return createHtmlResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".html")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createHtmlResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".css")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createCssResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".js")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createJsResponse(fileContent);
-        }
-        throw new NoSuchFileException(requestTarget);
-    }
-
     private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -104,6 +68,68 @@ public class Http11Processor implements Runnable, Processor {
         return Http11Request.create(requestMessage);
     }
 
+    private Http11Response findResponse(final Http11Request request) throws IOException {
+        final String requestTarget = request.getTarget();
+
+        if (requestTarget.equals("/")) {
+            final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
+            return createHtmlResponse(200, defaultResponseBytes);
+        }
+        if (requestTarget.contains("/login")) {
+            return handleLoginRequest(request);
+        }
+        if (requestTarget.endsWith(".html")) {
+            return handleHtmlRequest(200, requestTarget);
+        }
+        if (requestTarget.endsWith(".css")) {
+            return handleCssRequest(requestTarget);
+        }
+        if (requestTarget.endsWith(".js")) {
+            return handleJsResponse(requestTarget);
+        }
+        throw new NoSuchFileException(requestTarget);
+    }
+
+    private Http11Response handleLoginRequest(final Http11Request request) throws IOException {
+        final byte[] fileContent = readFile("/login.html");
+
+        final Optional<String> account = request.findQueryParam("account");
+        final Optional<String> password = request.findQueryParam("password");
+
+        if (account.isEmpty() || password.isEmpty()) {
+            return createHtmlResponse(200, fileContent);
+        }
+
+        if (existsUserByAccount(account.get(), password.get())) {
+            return handleHtmlRequest(302, "/index.html");
+        }
+
+        return handleHtmlRequest(401, "/401.html");
+
+    }
+
+    private Http11Response handleHtmlRequest(
+            final int statusCode,
+            final String requestTarget
+    ) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return createHtmlResponse(statusCode, fileContent);
+    }
+
+    private Http11Response handleCssRequest(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return createCssResponse(fileContent);
+    }
+
+    private Http11Response handleJsResponse(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return createJsResponse(fileContent);
+    }
+
     private byte[] readFile(final String location) throws IOException {
         try (final InputStream fileInputStream = new FileInputStream(getClass().getClassLoader().getResource(STATIC_FILE_LOCATION + location).getPath())) {
             return fileInputStream.readAllBytes();
@@ -112,31 +138,35 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void validateUserByAccount(final String account, final String password) {
+    private boolean existsUserByAccount(final String account, final String password) {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {
             log.warn("User not found : account = {}", account);
-            return;
+            return false;
         }
 
         final User user = userOrEmpty.get();
         if (!user.checkPassword(password)) {
             log.warn("Wrong password : account = {}", account);
-            return;
+            return false;
         }
 
         log.info("User found : {}", user);
+        return true;
     }
 
-    private Http11Response createHtmlResponse(final byte[] body) {
+    private Http11Response createHtmlResponse(
+            final int statusCode,
+            final byte[] body
+    ) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/html;charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.length));
 
         return new Http11Response(
                 "HTTP/1.1",
-                200,
+                statusCode,
                 "OK",
                 headers,
                 body
@@ -157,7 +187,7 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private  Http11Response createJsResponse(final byte[] body) {
+    private Http11Response createJsResponse(final byte[] body) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", "application/javascript;charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.length));

@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Request {
 
@@ -106,11 +108,11 @@ public class Http11Request {
         this.body = body;
     }
 
-    public String findQueryParam(final String key) {
+    public Optional<String> findQueryParam(final String key) {
         if (queryParams.containsKey(key)) {
-            return queryParams.get(key);
+            return Optional.of(queryParams.get(key));
         }
-        throw new IllegalArgumentException("No Query Parameter : " + key);
+        return Optional.empty();
     }
 
     public String getTarget() {

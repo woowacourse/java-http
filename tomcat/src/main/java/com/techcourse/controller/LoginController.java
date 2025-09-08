@@ -1,12 +1,12 @@
 package com.techcourse.controller;
 
-import com.techcourse.application.LoginService;
+import com.techcourse.application.AuthService;
 import com.techcourse.application.dto.LoginRequest;
 
 public class LoginController {
-    private final LoginService loginService = new LoginService();
+    private final AuthService authService = new AuthService();
 
     public void login(LoginRequest request) {
-        loginService.login(request);
+        authService.login(request);
     }
 }

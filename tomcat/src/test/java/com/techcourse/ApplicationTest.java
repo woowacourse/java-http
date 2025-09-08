@@ -3,6 +3,11 @@ package com.techcourse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.techcourse.servlet.HelloWorldServlet;
+import com.techcourse.servlet.HomeServlet;
+import com.techcourse.servlet.LoginServlet;
+import com.techcourse.servlet.RegisterServlet;
+import com.techcourse.servlet.StaticResourceServlet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -19,10 +24,11 @@ class ApplicationTest {
     @BeforeAll
     static void setUpServlets() {
         ServletContainer servletContainer = ServletContainer.getInstance();
-        servletContainer.add("/", new com.techcourse.servlet.HelloWorldServlet());
-        servletContainer.add("/index.html", new com.techcourse.servlet.HomeServlet());
-        servletContainer.add("/login", new com.techcourse.servlet.LoginServlet());
-        servletContainer.setFallBackServlet(new com.techcourse.servlet.StaticResourceServlet());
+        servletContainer.add("/", new HelloWorldServlet());
+        servletContainer.add("/index.html", new HomeServlet());
+        servletContainer.add("/login", new LoginServlet());
+        servletContainer.add("/register", new RegisterServlet());
+        servletContainer.setFallBackServlet(new StaticResourceServlet());
     }
 
     @Nested
@@ -121,7 +127,7 @@ class ApplicationTest {
             // given
             String account = "gugu";
             String password = "password";
-            String requestBody = "account=" + account + "&password=" + password + "&email=hkkang%40woowahan.com";
+            String requestBody = "account=" + account + "&password=" + password;
 
             String httpRequest =
                     "POST /login HTTP/1.1\r\n" +
@@ -152,7 +158,7 @@ class ApplicationTest {
             // given
             String account = "gugu";
             String password = "otherPassword";
-            String requestBody = "account=" + account + "&password=" + password + "&email=hkkang%40woowahan.com";
+            String requestBody = "account=" + account + "&password=" + password;
 
             String httpRequest =
                     "POST /login HTTP/1.1\r\n" +
@@ -210,6 +216,73 @@ class ApplicationTest {
                     () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
                     () -> assertThat(output).contains("Content-Length: " + bodyBytes.length),
                     () -> assertThat(output).endsWith(body)
+            );
+        }
+    }
+
+    @Nested
+    class register_경로_케이스 {
+
+        @Test
+        void get() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /register HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, ServletContainer.getInstance());
+
+            // when
+            processor.process(socket);
+
+            // static/register.html 읽기
+            URL resource = getClass().getClassLoader().getResource("static/register.html");
+            byte[] bodyBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+            String body = new String(bodyBytes);
+            String output = socket.output();
+
+            // then
+            assertAll(
+                    () -> assertThat(output).startsWith("HTTP/1.1 200 OK"),
+                    () -> assertThat(output).contains("Content-Type: text/html;charset=utf-8"),
+                    () -> assertThat(output).contains("Content-Length: " + bodyBytes.length),
+                    () -> assertThat(output).endsWith(body)
+            );
+        }
+
+        @Test
+        void post_회원가입_성공() {
+            // given
+            String account = "ed";
+            String password = "1234";
+            String email = "ed@gmail.com";
+            String requestBody = "account=" + account + "&password=" + password + "&email=" + email;
+
+            String httpRequest =
+                    "POST /register HTTP/1.1\r\n" +
+                            "Host: localhost:8080\r\n" +
+                            "Connection: keep-alive\r\n" +
+                            "Content-Length: " + requestBody.length() + "\r\n" +
+                            "Content-Type: application/x-www-form-urlencoded\r\n" +
+                            "Accept: */*\r\n" +
+                            "\r\n" +
+                            requestBody;
+
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, ServletContainer.getInstance());
+
+            // when
+            processor.process(socket);
+            String output = socket.output();
+
+            // then
+            assertAll(
+                    () -> assertThat(output).startsWith("HTTP/1.1 303 See Other"),
+                    () -> assertThat(output).contains("Location: /index.html")
             );
         }
     }

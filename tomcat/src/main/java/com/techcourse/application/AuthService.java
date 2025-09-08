@@ -1,6 +1,7 @@
 package com.techcourse.application;
 
 import com.techcourse.application.dto.LoginRequest;
+import com.techcourse.application.dto.RegisterRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.BusinessException;
 import com.techcourse.exception.ErrorCode;
@@ -8,18 +9,20 @@ import com.techcourse.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginService {
+public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     public void login(LoginRequest request) {
-        log.warn("account: " + request.account());
-        log.warn("password: " + request.password());
         User user = InMemoryUserRepository.findByAccount(request.account())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         validatePassword(request, user);
-        log.info(user.toString());
+    }
+
+    public void register(RegisterRequest request) {
+        User user = new User(request.account(), request.password(), request.email());
+        InMemoryUserRepository.save(user);
     }
 
     private void validatePassword(LoginRequest request, User user) {

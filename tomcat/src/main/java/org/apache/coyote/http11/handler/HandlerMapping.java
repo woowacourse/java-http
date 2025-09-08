@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.HelloController;
 import com.techcourse.controller.LoginController;
+import com.techcourse.service.LoginService;
 import java.util.List;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -11,7 +12,7 @@ public class HandlerMapping {
 
     private final List<Controller> controllers = List.of(
             new HelloController(),
-            new LoginController()
+            new LoginController(new LoginService())
     );
 
     public Optional<Controller> getController(HttpRequest httpRequest) {

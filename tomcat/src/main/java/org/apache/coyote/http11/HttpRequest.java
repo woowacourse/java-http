@@ -17,10 +17,21 @@ public class HttpRequest {
     private final Map<String, String> parameters;
 
     public HttpRequest(final String method, final String uri, final String queryString) {
+        this(method, uri, queryString, null);
+    }
+
+    public HttpRequest(final String method, final String uri, final String queryString, final String body) {
         this.method = method;
         this.uri = uri;
         this.queryString = queryString;
-        this.parameters = parseParameters(queryString);
+        this.parameters = new HashMap<>();
+
+        parameters.putAll(parseParameters(queryString));
+
+        // POST 요청이면 body도 파싱
+        if ("POST".equals(method) && body != null) {
+            parameters.putAll(parseParameters(body));
+        }
     }
 
     private Map<String, String> parseParameters(final String queryString) {

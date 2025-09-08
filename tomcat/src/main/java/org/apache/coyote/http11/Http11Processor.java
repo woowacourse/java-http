@@ -41,6 +41,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            final SessionManager sessions = SessionManager.getInstance();
             final Http11Request request = new Http11Request(inputStream);
 
             final String method = request.getMethod();
@@ -67,9 +68,17 @@ public class Http11Processor implements Runnable, Processor {
             if ("GET".equals(method)) {
                 if ("/register".equals(path)) {
                     responseBody = readFileFromClasspath("static/register.html");
-                } else if ("/login".equals(path)) {
-                    if (queryParams.isEmpty()) {
+                } else if ("/login".equals(path) || "/login.html".equals(path)) {
+                    Http11Cookie cookie = request.getCookie();
+                    if (cookie.isNotContainsSessionId()) {
                         responseBody = readFileFromClasspath("static/login.html");
+                    } else if (cookie.isContainsSessionId()) {
+                        if (sessions.containsSession(cookie.getSessionId())) {
+                            statusLine = "HTTP/1.1 302 Found";
+                            responseHeaders.put("Location", "/index.html");
+                        } else {
+                            responseBody = readFileFromClasspath("static/login.html");
+                        }
                     }
                 } else if (!"/".equals(path)) {
                     final String resourcePath = "static" + path;
@@ -99,10 +108,18 @@ public class Http11Processor implements Runnable, Processor {
                     if (requestHeaders.containsKey("Cookie")) {
                         Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
                         if (cookie.isNotContainsSessionId()) {
-                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                            String sessionId = UUID.randomUUID().toString();
+                            Http11Session session = new Http11Session(sessionId);
+                            session.setAttribute("user", user);
+                            sessions.add(session);
+                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
                         }
                     } else {
-                        responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                        String sessionId = UUID.randomUUID().toString();
+                        Http11Session session = new Http11Session(sessionId);
+                        session.setAttribute("user", user);
+                        sessions.add(session);
+                        responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
                     }
                     responseHeaders.put("Location", "/index.html");
                 }
@@ -127,11 +144,26 @@ public class Http11Processor implements Runnable, Processor {
                         statusLine = "HTTP/1.1 302 Found";
                         if (requestHeaders.containsKey("Cookie")) {
                             Http11Cookie cookie = new Http11Cookie(requestHeaders.get("Cookie"));
-                            if (cookie.isNotContainsSessionId()) {
-                                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                            if (cookie.isContainsSessionId()) {
+                                if (!sessions.containsSession(cookie.getSessionId())) {
+                                    String sessionId = UUID.randomUUID().toString();
+                                    Http11Session session = new Http11Session(sessionId);
+                                    session.setAttribute("user", user);
+                                    sessions.add(session);
+                                    responseHeaders.put("Set-Cookie", "JSESSIONID=" +sessionId);
+                                }
                             }
+                            String sessionId = UUID.randomUUID().toString();
+                            Http11Session session = new Http11Session(sessionId);
+                            session.setAttribute("user", user);
+                            sessions.add(session);
+                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
                         } else {
-                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                            String sessionId = UUID.randomUUID().toString();
+                            Http11Session session = new Http11Session(sessionId);
+                            session.setAttribute("user", user);
+                            sessions.add(session);
+                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
                         }
                         responseHeaders.put("Location", "/index.html");
                     } else {

@@ -14,6 +14,7 @@ public class Http11Request {
     private String version;
     private Map<String, String> headers;
     private String body;
+    private Http11Cookie cookie;
 
     public Http11Request(final InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -40,6 +41,8 @@ public class Http11Request {
         } else {
             this.body = "";
         }
+
+        this.cookie = new Http11Cookie(map.getOrDefault("Cookie", null));
     }
 
     public String getMethod() {
@@ -60,5 +63,9 @@ public class Http11Request {
 
     public String getBody() {
         return body;
+    }
+
+    public Http11Cookie getCookie() {
+        return cookie;
     }
 }

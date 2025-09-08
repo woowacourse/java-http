@@ -33,6 +33,14 @@ public class Http11Cookie {
         return !isContainsSessionId();
     }
 
+    public String getSessionId() {
+        if (isContainsSessionId()) {
+            return cookies.get("JSESSIONID");
+        } else  {
+            return null;
+        }
+    }
+
     public Map<String, String> getCookies() {
         return cookies;
     }

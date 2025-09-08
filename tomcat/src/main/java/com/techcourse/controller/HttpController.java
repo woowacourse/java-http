@@ -54,10 +54,10 @@ public class HttpController {
 
     public HttpResponse login(final String account, final String password, final SessionManager sessionManager) {
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다: %s".formatted(account)));
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저입니다: %s".formatted(account)));
 
         if (!user.checkPassword(password)) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("유효하지 않는 password입니다.: %s".formatted(user.getAccount()));
         }
 
         log.info("user : {}", user);

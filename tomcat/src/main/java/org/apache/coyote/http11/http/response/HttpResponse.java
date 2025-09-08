@@ -49,7 +49,7 @@ public class HttpResponse {
     public static HttpResponse unauthorized() {
         final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.UNAUTHORIZED);
         final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName("401.html");
-        final HttpHeader httpHeader = createHeader(httpResponseBody, null);
+        final HttpHeader httpHeader = createHeader(httpResponseBody, "401.html");
         return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 

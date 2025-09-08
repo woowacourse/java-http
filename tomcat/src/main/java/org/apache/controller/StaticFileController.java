@@ -16,20 +16,21 @@ import org.apache.http.StatusCode;
 
 public class StaticFileController implements Controller {
 
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
+
     @Override
     public boolean isProcessableRequest(HttpRequest request) {
-        URL resource = findResourceUrl(request.getUri());
-        return resource != null;
+        String uri = getUriFromRequest(request);
+        return isExistResource(uri);
     }
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
         try {
-            URL resource = findResourceUrl(request.getUri());
-            if (resource == null) {
-                throw new RequestProcessingException("URI가 올바르지 않습니다.");
-            }
+            String uri = getUriFromRequest(request);
+            validateInvalidUri(uri);
 
+            URL resource = findResourceUrl(uri);
             Path path = Paths.get(resource.toURI());
             String responseBody = Files.readString(path);
 
@@ -42,14 +43,35 @@ public class StaticFileController implements Controller {
         }
     }
 
+    private String getUriFromRequest(HttpRequest request) {
+        String uri = request.getUri();
+        List<String> uriPart = List.of(uri.split("/"));
+        if (uriPart.getLast().contains(".")) {
+            return uri;
+        }
+        return uri + DEFAULT_FILE_EXTENSION;
+    }
+
     private URL findResourceUrl(String uri) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resourceUrl = classLoader.getResource("static" + uri);
+        if (resourceUrl == null) {
+            throw new RequestProcessingException("존재하지 않는 리소스 주소입니다.");
+        }
+        return resourceUrl;
+    }
+
+    private void validateInvalidUri(String uri) {
         List<String> uriPart = List.of(uri.split("/"));
         if (uriPart.contains(".") || uriPart.contains("..")) {
-            throw new InvalidRequestException("올바르지 않은 리소스 주소입니다.");
+            throw new InvalidRequestException("부적절한 리소스 주소입니다.");
         }
+    }
 
+    private boolean isExistResource(String uri) {
         ClassLoader classLoader = getClass().getClassLoader();
-        return classLoader.getResource("static" + uri);
+        URL resourceUrl = classLoader.getResource("static" + uri);
+        return resourceUrl != null;
     }
 
     private ContentType getFileExtension(Path path) {

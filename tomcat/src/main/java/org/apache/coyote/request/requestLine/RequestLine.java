@@ -1,6 +1,7 @@
 package org.apache.coyote.request.requestLine;
 
 import java.util.List;
+import org.apache.coyote.request.requestLine.protocolVersion.ProtocolVersion;
 
 public class RequestLine {
 
@@ -13,7 +14,7 @@ public class RequestLine {
 
     private final RequestMethod requestMethod;
     private final RequestPath requestPath; //todo: requestPath, protocolVersion 객체 만들기
-    private final String protocolVersion;
+    private final ProtocolVersion protocolVersion;
 
     public RequestLine(final String requestLine) {
         final List<String> requestLines = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
@@ -22,7 +23,7 @@ public class RequestLine {
         this.requestMethod = RequestMethod.from(requestLines.get(REQUEST_METHOD_INDEX));
 
         this.requestPath = RequestPath.from(requestLines.get(REQUEST_PATH_INDEX));
-        this.protocolVersion = requestLines.get(PROTOCOL_VERSION_INDEX);
+        this.protocolVersion = ProtocolVersion.from(requestLines.get(PROTOCOL_VERSION_INDEX));
     }
 
     private void validateRequestLines(final List<String> requestLines) {

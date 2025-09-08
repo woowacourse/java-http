@@ -20,8 +20,8 @@ public class HttpResponse {
 
     public byte[] combine() {
         String response = String.join("\r\n",
-                responseLine.toCombine() + " ",
-                responseHeader.toCombine(),
+                responseLine.combine() + " ",
+                responseHeader.combine(),
                 "",
                 responseBody.getBody());
 

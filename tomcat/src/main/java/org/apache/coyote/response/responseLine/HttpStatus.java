@@ -22,7 +22,7 @@ public enum HttpStatus {
         this.statusMessage = statusMessage;
     }
 
-    public String toCombine() {
+    public String combine() {
         return statusCode + " " + statusMessage;
     }
 }

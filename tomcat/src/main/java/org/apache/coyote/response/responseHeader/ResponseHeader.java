@@ -38,7 +38,7 @@ public class ResponseHeader {
         headers.put(HttpHeaders.SET_COOKIE.getValue(), cookies);
     }
 
-    public String toCombine() {
+    public String combine() {
         return headers.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + HEADER_COMBINATOR + entry.getValue() + " ")

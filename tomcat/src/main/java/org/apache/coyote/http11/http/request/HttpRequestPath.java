@@ -44,7 +44,9 @@ public class HttpRequestPath {
     }
 
     public boolean containsQueryParameter(final String target) {
-        return queryParameter.contains(target);
+        validateNullTargetQueryParameter(target);
+        final String targetQueryParameterKey = target.trim();
+        return queryParameter.contains(targetQueryParameterKey);
     }
 
     public String getTargetQueryParameter(final String target) {

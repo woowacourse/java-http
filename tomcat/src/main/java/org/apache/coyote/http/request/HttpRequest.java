@@ -2,6 +2,7 @@ package org.apache.coyote.http.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http.cookie.HttpCookie;
 
 public class HttpRequest {
 
@@ -43,6 +44,10 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public HttpCookie getCookies() {
+        return HttpCookie.parse(headers.get("Cookie"));
     }
 
     public boolean hasBody() {

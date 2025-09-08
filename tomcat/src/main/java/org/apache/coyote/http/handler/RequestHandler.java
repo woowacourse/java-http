@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http.cookie.HttpCookie;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
@@ -11,7 +12,7 @@ public class RequestHandler {
 
     public HttpResponse handleRequest(HttpRequest request) {
         return switch (request.getMethod() + " " + request.getEndpoint()) {
-            case String s when s.equals("GET /") -> handleHome();
+            case String s when s.equals("GET /") -> handleHome(request);
             case String s when s.equals("GET /css/styles.css") -> handleStaticFile("/css/styles.css", "text/css");
             case String s when s.startsWith("GET /login") -> handleStaticFile("/login.html", "text/html");
             case String s when s.startsWith("POST /login") -> handleLogin(request);
@@ -21,7 +22,11 @@ public class RequestHandler {
         };
     }
 
-    private HttpResponse handleHome() {
+    private HttpResponse handleHome(HttpRequest request) {
+        if (!request.getCookies().hasJSessionId()) {
+            final var sessionId = HttpCookie.generateJSessionId();
+            return HttpResponse.okWithCookie("Hello world!", "text/html", "JSESSIONID", sessionId);
+        }
         return HttpResponse.ok("Hello world!", "text/html");
     }
 
@@ -42,15 +47,10 @@ public class RequestHandler {
 
         final var user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            return HttpResponse.redirect("/index.html");
+            final var sessionId = HttpCookie.generateJSessionId();
+            return HttpResponse.redirectWithCookie("/index.html", "JSESSIONID", sessionId);
         } else {
-            try {
-                final var path = Path.of(getClass().getResource("/static/login.html").getPath());
-                final var content = new String(Files.readAllBytes(path));
-                return HttpResponse.unauthorized(content);
-            } catch (Exception e) {
-                return HttpResponse.unauthorized("Login failed");
-            }
+            return handleStaticFile("/login.html", "text/html");
         }
     }
 
@@ -60,8 +60,18 @@ public class RequestHandler {
         final var password = params.get("password");
         final var email = params.get("email");
 
+        if (account == null || password == null || email == null) {
+            return handleStaticFile("/register.html", "text/html");
+        }
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return handleStaticFile("/register.html", "text/html");
+        }
+
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return HttpResponse.redirect("/index.html");
+
+        final var sessionId = HttpCookie.generateJSessionId();
+        return HttpResponse.redirectWithCookie("/index.html", "JSESSIONID", sessionId);
     }
 }

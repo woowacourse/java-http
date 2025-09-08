@@ -3,6 +3,7 @@ package org.apache.coyote.http.response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import org.apache.coyote.http.cookie.HttpCookie;
 
 public class HttpResponse {
 
@@ -24,8 +25,25 @@ public class HttpResponse {
         return new HttpResponse(200, headers, body);
     }
 
+    public static HttpResponse okWithCookie(String body, String contentType, String cookieName, String cookieValue) {
+        Map<String, String> headers = Map.of(
+                "Content-Type", contentType + ";charset=utf-8",
+                "Content-Length", String.valueOf(body.getBytes().length),
+                "Set-Cookie", HttpCookie.createSetCookieHeader(cookieName, cookieValue)
+        );
+        return new HttpResponse(200, headers, body);
+    }
+    
     public static HttpResponse redirect(String location) {
         return new HttpResponse(302, Map.of("Location", location), "");
+    }
+
+    public static HttpResponse redirectWithCookie(String location, String cookieName, String cookieValue) {
+        Map<String, String> headers = Map.of(
+                "Location", location,
+                "Set-Cookie", HttpCookie.createSetCookieHeader(cookieName, cookieValue)
+        );
+        return new HttpResponse(302, headers, "");
     }
 
     public static HttpResponse unauthorized(String body) {

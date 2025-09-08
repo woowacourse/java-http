@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,6 +15,31 @@ import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @DisplayName("빈 HTTP 요청일 경우 500을 반환한다.")
+    @Test
+    void testEmptyHttpRequest() throws IOException {
+        // given
+        final String httpRequest = "";
+
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 500 Internal Server Error ",
+                "Content-Type: text/html; charset=utf-8 ",
+                String.format("Content-Length: %s ", responseBody.getBytes().length),
+                "",
+                responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 
     @DisplayName("정적 리소스 GET 요청 테스트")
     @Nested
@@ -107,6 +134,37 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        @DisplayName("GET /register : 상태코드 200과 register.html을 반환한다.")
+        @Test
+        void register() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final String expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    String.format("Content-Length: %s ", responseBody.getBytes().length),
+                    "",
+                    responseBody);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
 
         @DisplayName("존재하지 않는 리소스를 요청하면 404를 반환한다.")
         @Test
@@ -283,31 +341,44 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
     }
 
-    @DisplayName("빈 HTTP 요청일 경우 500을 반환한다.")
-    @Test
-    void testEmptyHttpRequest() throws IOException {
-        // given
-        final String httpRequest = "";
+    @DisplayName("POST /register: 회원가입 테스트")
+    @Nested
+    class RegisterTest {
 
-        final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        @DisplayName("회원 가입을 성공하면 새로운 유저를 생성하고 /index.html 경로로 302 응답을 보낸다.")
+        @Test
+        void testRegisterSuccess() {
+            // given
+            final String newAccount = "norang";
+            final String httpRequest = String.join("\r\n",
+                    "POST /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 80",
+                    "Content-Type: application/x-www-form-urlencoded",
+                    "Accept: */*",
+                    "",
+                    String.format("account=%s&password=password&email=hkkang%%40woowahan.com", newAccount));
 
-        // when
-        processor.process(socket);
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/500.html");
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 500 Internal Server Error ",
-                "Content-Type: text/html; charset=utf-8 ",
-                String.format("Content-Length: %s ", responseBody.getBytes().length),
-                "",
-                responseBody);
+            // when
+            processor.process(socket);
 
-        assertThat(socket.output()).isEqualTo(expected);
+            // then
+            final String expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/register.html ",
+                    "Content-Length: 0 ");
+            assertAll(
+                    () -> assertThat(InMemoryUserRepository.findByAccount(newAccount)).isPresent(),
+                    () -> assertThat(socket.output()).isEqualTo(expected)
+            );
+        }
     }
 
     @Test

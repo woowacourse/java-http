@@ -14,7 +14,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.PatternSyntaxException;
@@ -45,18 +47,53 @@ public class Http11Processor implements Runnable, Processor {
                 final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final String requestURL = parseRequestURL(inputStream, outputStream);
 
-            if (requestURL.equals("/") || requestURL.equals("/index.html")) {
+            // 전체 과정 IOException 처리 필요
+            final BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
+            // 첫째 줄
+            final String firstLine = httpRequestReader.readLine();
+            final RequestLine requestLine = new RequestLine(firstLine);
+            // 헤더
+            List<String> headerLines = new ArrayList<>();
+            String line;
+            while (!(line = httpRequestReader.readLine()).equals("")) {
+                headerLines.add(line);
+            }
+            final HttpHeaders requestHeaders = new HttpHeaders(headerLines);
+            // 본문
+            final int contentLength = Integer.parseInt(
+                    requestHeaders.get(HttpHeaderField.CONTENT_LENGTH)); // todo null check 필요
+            final char[] buffer = new char[contentLength];
+            httpRequestReader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer);
+
+            final String requestURI = requestLine.getRequestURI();
+            final HttpMethod method = requestLine.getMethod();
+            log.info(requestURI);
+
+            if (requestURI.equals("/") || requestURI.equals("/index.html")) {
                 send200Response("/index.html", outputStream);
                 return;
             }
-            if (requestURL.equals("/login")) {
+            if (requestURI.equals("/login")) {
                 send200Response("/login.html", outputStream);
                 return;
             }
-            if (requestURL.startsWith("/login?")) {
-                boolean loginSuccessful = isLoginSuccessful(requestURL, outputStream);
+            if (requestURI.equals("/register") && method == HttpMethod.GET) {
+                send200Response("/register.html", outputStream);
+                return;
+            }
+            if (requestURI.equals("/register") && method == HttpMethod.POST) {
+                final String[] split = requestBody.split("&");
+                final String account = split[0].split("=")[1];
+                final String password = split[1].split("=")[1];
+                final String email = split[2].split("=")[1].replace("%40", "@");
+                InMemoryUserRepository.save(new User(account, password, email));
+                send302Response("/register.html", outputStream);
+                return;
+            }
+            if (requestURI.startsWith("/login?")) {
+                boolean loginSuccessful = isLoginSuccessful(requestURI, outputStream);
                 if (loginSuccessful) {
                     send302Response("/login", outputStream);
                     return;
@@ -64,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
                 send401Response(outputStream);
                 return;
             }
-            send200Response(requestURL, outputStream);
+            send200Response(requestURI, outputStream);
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

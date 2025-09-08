@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.apache.controller.Controller;
@@ -16,7 +13,6 @@ import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
@@ -57,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             processResourceLoadRequest(request, response);
             validateRequestProcess(response);
 
-            writeResponseMessage(response, outputStream);
+            response.writeMessage(outputStream);
 
         } catch (InvalidRequestException e) {
             log.info(e.getMessage(), e);
@@ -68,16 +64,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             //TODO: 500 예외응답을 구성해보자.  (2025-09-5, 금, 1:34)
-        }
-    }
-
-    private void writeResponseMessage(HttpResponse response, OutputStream outputStream) {
-        String message = response.getMessage();
-        try {
-            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
         }
     }
 

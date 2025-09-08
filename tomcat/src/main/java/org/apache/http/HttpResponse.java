@@ -1,11 +1,14 @@
 package org.apache.http;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.exception.RequestProcessingException;
+import org.apache.exception.SocketWriteException;
 
 public class HttpResponse {
 
@@ -19,13 +22,14 @@ public class HttpResponse {
         this.httpVersion = httpVersion;
     }
 
-    public String getMessage() {
-        validateCanMakeMessage();
-        String startAndHeader = String.join("\r\n", makeStartLine(), makeHeaderLines());
-        if (body != null && !body.isEmpty()) {
-            return String.join("\r\n", startAndHeader, "", body);
+    public void writeMessage(OutputStream outputStream) {
+        String message = getMessage();
+        try {
+            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
         }
-        return startAndHeader;
     }
 
     public boolean isProcessed() {
@@ -101,5 +105,14 @@ public class HttpResponse {
         if (httpVersion == null || statusCode == null) {
             throw new RequestProcessingException("주요 응답 필드가 비어있어 응답 메세지를 생성할 수 없습니다.");
         }
+    }
+
+    private String getMessage() {
+        validateCanMakeMessage();
+        String startAndHeader = String.join("\r\n", makeStartLine(), makeHeaderLines());
+        if (body != null && !body.isEmpty()) {
+            return String.join("\r\n", startAndHeader, "", body);
+        }
+        return startAndHeader;
     }
 }

@@ -35,7 +35,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(outputStream);
             try {
                 HttpRequest request = new HttpRequest(inputStream);
-                String path = request.getPath();
                 dispatchRequest(request, response);
             } catch (BadRequestException e) {
                 response.sendBadRequest();
@@ -49,17 +48,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
         String sessionId = request.getCookies().get("JSESSIONID");
+        Session session = SessionManager.findSession(sessionId);
 
-        if (sessionId == null) {
-            sessionId = UUID.randomUUID().toString();
-            response.setCookie("JSESSIONID", sessionId);
+        if (session == null) {
+            String newSessionId = UUID.randomUUID().toString();
+            session = new Session(newSessionId);
+            SessionManager.add(session);
+            response.setCookie("JSESSIONID", newSessionId);
         }
         String path = request.getPath();
-
         if ("/".equals(path)) {
             handleRoot(response);
         } else if ("/login".equals(path)) {
-            handleLogin(request, response);
+            handleLogin(request, response, session);
         } else if ("/register".equals(path)) {
             handleRegister(request, response);
         } else {
@@ -90,19 +91,29 @@ public class Http11Processor implements Runnable, Processor {
         response.sendOk("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
+    private void handleLogin(HttpRequest request, HttpResponse response, Session session) throws IOException {
+        if ("GET".equals(request.getMethod()) && session.getAttribute("user") != null) {
+            response.sendRedirect("/index.html");
+            return;
+        }
 
-        if (account != null && password != null) {
-            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-            if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
-                log.info("로그인 성공: {}", userOptional.get());
-                response.sendRedirect("index.html");
-            } else {
-                log.info("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.");
-                response.sendRedirect("/401.html");
+        if ("POST".equals(request.getMethod())) {
+            String account = request.getQueryParam("account");
+            String password = request.getQueryParam("password");
 
+            if (account != null && password != null) {
+                Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+                if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
+                    User user = userOptional.get();
+                    log.info("로그인 성공: {}", user);
+                    session.setAttribute("user", user);
+                    response.sendRedirect("/index.html");
+                    return;
+                } else {
+                    log.info("로그인 실패: 아이디 또는 비밀번호 불일치");
+                    response.sendRedirect("/401.html");
+                    return;
+                }
             }
         }
 

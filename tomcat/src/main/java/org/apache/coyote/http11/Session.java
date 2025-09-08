@@ -7,6 +7,7 @@ public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
+    private boolean isInvalidated = false;
 
     public Session(String id) {
         this.id = id;
@@ -17,18 +18,18 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-
+        return values.get(name);
     }
 
     public void setAttribute(final String name, final Object value) {
-
+        values.put(name, value);
     }
 
     public void removeAttribute(final String name) {
-
+        values.remove(name);
     }
 
     public void invalidate() {
-
+        this.isInvalidated = true;
     }
 }

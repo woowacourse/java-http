@@ -2,7 +2,9 @@ package org.apache.coyote.http11.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.parser.ContentParseResult;
+import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.parser.RequestResult;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,8 +14,12 @@ import java.util.Map;
 public class SignService implements HttpService {
 
     @Override
-    public ContentParseResult doGet(Map<String, String> query) throws IOException {
-        return new ContentParseResult(getSignupHtml(), "text/html;charset=utf-8 ");
+    public RequestResult doGet(
+            Map<String, String> query,
+            HttpCookies cookies,
+            Session session
+    ) throws IOException {
+        return new RequestResult(getSignupHtml(), "text/html;charset=utf-8 ");
     }
 
     private byte[] getSignupHtml() throws IOException {
@@ -25,7 +31,11 @@ public class SignService implements HttpService {
     }
 
     @Override
-    public ContentParseResult doPost(Map<String, String> query) throws IOException {
+    public RequestResult doPost(
+            Map<String, String> query,
+            HttpCookies cookies,
+            Session session
+    ) throws IOException {
         String account = query.get("account");
         String password = query.get("password");
         String email = query.get("email");
@@ -35,11 +45,11 @@ public class SignService implements HttpService {
         }
 
         if (InMemoryUserRepository.existByAccount(account)) {
-            return new ContentParseResult(getErrorHtml(), "text/html;charset=utf-8 ");
+            return new RequestResult(getErrorHtml(), "text/html;charset=utf-8 ");
         }
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return new ContentParseResult(getRedirectHtml(), "text/html;charset=utf-8 ");
+        return new RequestResult(getRedirectHtml(), "text/html;charset=utf-8 ");
     }
 
     private byte[] getErrorHtml() throws IOException {

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.parser;
 
-public class ContentParseResult {
+public class RequestResult {
 
     private static final String DEAFULT_HTTP_RESOPNSE_STATUS = "HTTP/1.1 200 OK ";
 
@@ -8,13 +8,13 @@ public class ContentParseResult {
     private final String additionalResponse;
     private final String httpResponseStatus;
 
-    public ContentParseResult(byte[] parsedContent, String additionalResponse) {
+    public RequestResult(byte[] parsedContent, String additionalResponse) {
         this.parsedContent = parsedContent;
         this.additionalResponse = additionalResponse;
         this.httpResponseStatus = DEAFULT_HTTP_RESOPNSE_STATUS;
     }
 
-    public ContentParseResult(byte[] parsedContent, String additionalResponse, String httpResponseStatus) {
+    public RequestResult(byte[] parsedContent, String additionalResponse, String httpResponseStatus) {
         this.parsedContent = parsedContent;
         this.additionalResponse = additionalResponse;
         this.httpResponseStatus = httpResponseStatus;

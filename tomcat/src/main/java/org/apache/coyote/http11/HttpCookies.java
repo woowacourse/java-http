@@ -30,10 +30,6 @@ public class HttpCookies {
     public String getCookieResponse() {
         StringBuilder stringBuilder = new StringBuilder(SET_COOKIE_PREFIX);
 
-        if (!isSetCookieNeed) {
-            return "";
-        }
-
         for (String key : cookies.keySet()) {
             String value = cookies.get(key);
             stringBuilder.append(key)
@@ -43,8 +39,9 @@ public class HttpCookies {
         }
 
         if (stringBuilder.lastIndexOf(";") != -1) {
-            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(";"));
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf("; "));
         }
+        
         return stringBuilder.toString();
     }
 

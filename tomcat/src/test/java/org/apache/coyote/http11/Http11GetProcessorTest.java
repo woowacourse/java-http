@@ -14,7 +14,7 @@ class Http11GetProcessorTest {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
         org.assertj.core.api.Assertions
-                .assertThat(http11GetProcessor.parse("/index.html")
+                .assertThat(http11GetProcessor.doRequest("/index.html")
                         .getParseContent())
                 .hasSizeGreaterThan(0);
     }
@@ -24,7 +24,7 @@ class Http11GetProcessorTest {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
         org.assertj.core.api.Assertions
-                .assertThatThrownBy(() -> http11GetProcessor.parse("GET /hello.html"))
+                .assertThatThrownBy(() -> http11GetProcessor.doRequest("GET /hello.html"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -32,7 +32,7 @@ class Http11GetProcessorTest {
     void get_요청을_처리할_수_있다() {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
-        Assertions.assertDoesNotThrow(() -> http11GetProcessor.parse("/login?account=gugu&password=password"));
+        Assertions.assertDoesNotThrow(() -> http11GetProcessor.doRequest("/login?account=gugu&password=password"));
     }
 
     @Test
@@ -40,7 +40,7 @@ class Http11GetProcessorTest {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
         org.assertj.core.api.Assertions
-                .assertThatThrownBy(() -> http11GetProcessor.parse("/login?account=tuda&password=password"))
+                .assertThatThrownBy(() -> http11GetProcessor.doRequest("/login?account=tuda&password=password"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

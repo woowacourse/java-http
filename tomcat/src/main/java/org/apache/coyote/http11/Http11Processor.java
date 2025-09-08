@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.parser.ContentParseResult;
 import org.apache.coyote.http11.parser.Http11GetProcessor;
+import org.apache.coyote.http11.parser.RequestResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,13 +19,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Http11GetProcessor http11GetProcessor;
+    private final Http11GetProcessor http11RequestProcessor;
     private final SessionManager sessionManager;
 
+    private int contentLength = 0;
 
     public Http11Processor(final Socket connection, SessionManager sessionManager) {
         this.sessionManager = sessionManager;
-        this.http11GetProcessor = new Http11GetProcessor();
+        this.http11RequestProcessor = new Http11GetProcessor();
         this.connection = connection;
     }
 
@@ -45,15 +46,16 @@ public class Http11Processor implements Runnable, Processor {
 
             Session session = getSession(httpRequests.cookies()
                     .getSessionId());
-            httpRequests.addSession(session);
 
-            ContentParseResult parseResult = http11GetProcessor.parse(httpRequests);
-            byte[] parsedContent = parseResult.getParseContent();
+            httpRequests = httpRequests.addSession(session);
+
+            RequestResult requestResult = http11RequestProcessor.doRequest(httpRequests);
+            byte[] parsedContent = requestResult.getParseContent();
 
             byte[] response = String.join(
                             "\r\n",
-                            parseResult.getHttpResponseStatus(),
-                            parseResult.getAdditionalResponse(),
+                            requestResult.getHttpResponseStatus(),
+                            requestResult.getAdditionalResponse(),
                             httpRequests.cookies()
                                     .getCookieResponse(),
                             "Content-Length: " + parsedContent.length + " ",
@@ -81,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
     private ParseHttpRequest readRequestFromReader(final BufferedReader bufferedReader) throws IOException {
         String buffer = "";
         ParseHttpRequest parseHttpRequest = null;
-        while (!(buffer = bufferedReader.readLine()).isEmpty()) {
+        while ((buffer = bufferedReader.readLine()) != null) {
             String[] lineSplit = buffer.split(" ");
 
             if (isReqeustExist(buffer) && lineSplit.length >= 2) {
@@ -89,7 +91,8 @@ public class Http11Processor implements Runnable, Processor {
                         parseMethod(buffer),
                         parseContentPath(buffer),
                         new HashMap<>(),
-                        new HttpCookies(new HashMap<>())
+                        new HttpCookies(new HashMap<>()),
+                        new Session(null)
                 );
                 break;
             }
@@ -102,12 +105,18 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> requestBody = parseBody(bufferedReader);
             return parseHttpRequest.addRequestBody(requestBody);
         }
+
         return parseHttpRequest;
     }
 
     private Map<String, String> parseCookie(BufferedReader bufferedReader) throws IOException {
+
         String buffer;
-        while ((buffer = bufferedReader.readLine()) == null) {
+        while (!(buffer = bufferedReader.readLine()).isEmpty()) {
+            if (buffer.split("Content-Length: ").length != 1) {
+                contentLength = Integer.parseInt(buffer.split("Content-Length: ")[1]);
+            }
+
             if (!buffer.contains("Cookie: ")) {
                 continue;
             }
@@ -134,7 +143,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = 0;
         String buffer;
         Map<String, String> map = new HashMap<>();
         while (!(buffer = bufferedReader.readLine()).isEmpty()) {
@@ -154,6 +162,9 @@ public class Http11Processor implements Runnable, Processor {
         String[] requestBodies = requestBody.split("&");
 
         for (String s : requestBodies) {
+            if (s.isEmpty()) {
+                continue;
+            }
             String[] keyValues = s.split("=");
             map.put(keyValues[0], keyValues[1]);
         }

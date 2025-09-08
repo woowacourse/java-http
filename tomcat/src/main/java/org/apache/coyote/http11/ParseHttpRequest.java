@@ -10,14 +10,12 @@ public record ParseHttpRequest(
         Session session
 ) {
 
-    private static Session session;
-
     public ParseHttpRequest addRequestBody(Map<String, String> requestBody) {
-        return new ParseHttpRequest(method, httpRequest, requestBody, cookies);
+        return new ParseHttpRequest(method, httpRequest, requestBody, cookies, session);
     }
 
     public ParseHttpRequest addCookies(Map<String, String> cookies) {
-        return new ParseHttpRequest(method, httpRequest, requestBody, new HttpCookies(cookies));
+        return new ParseHttpRequest(method, httpRequest, requestBody, new HttpCookies(cookies), session);
     }
 
     public ParseHttpRequest addSession(Session session) {

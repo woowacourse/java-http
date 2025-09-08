@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.parser;
 
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.ParseHttpRequest;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.service.HttpServices;
 
 import java.io.IOException;
@@ -16,10 +18,17 @@ public class Http11GetProcessor {
         parsers = List.of(new HtmlParser(), new CssParser(), new Http11RequestServiceProcessor(new HttpServices()));
     }
 
-    public ContentParseResult parse(ParseHttpRequest httpRequest) throws IOException {
+    public RequestResult doRequest(ParseHttpRequest httpRequest) throws IOException {
         Map<String, String> queryFinder = parseQueries(httpRequest.httpRequest());
         String contentPath = parseContentPath(httpRequest.httpRequest());
-        return getContentParseResult(contentPath, queryFinder, httpRequest.method(), httpRequest.requestBody());
+        return getContentParseResult(
+                contentPath,
+                queryFinder,
+                httpRequest.method(),
+                httpRequest.requestBody(),
+                httpRequest.cookies(),
+                httpRequest.session()
+        );
     }
 
     private String parseContentPath(String httpRequest) {
@@ -39,9 +48,9 @@ public class Http11GetProcessor {
     private Map<String, String> parseQuery(String[] requestSplit) {
         Map<String, String> queryFinder = new HashMap<>();
         String queryPart = requestSplit[1];
-        String[] querysArray = queryPart.split("&");
+        String[] queryArray = queryPart.split("&");
 
-        for (String query : querysArray) {
+        for (String query : queryArray) {
             String[] keyValues = query.split("=");
             queryFinder.put(keyValues[0], keyValues[1]);
         }
@@ -53,11 +62,13 @@ public class Http11GetProcessor {
         return requestSplit.length >= 2;
     }
 
-    private ContentParseResult getContentParseResult(
+    private RequestResult getContentParseResult(
             String request,
             final Map<String, String> query,
             String method,
-            Map<String, String> requestBody
+            Map<String, String> requestBody,
+            HttpCookies cookies,
+            Session session
     ) throws IOException {
         if (request.isBlank()) {
             throw new IllegalArgumentException("처리할 수 없는 요청입니다");
@@ -68,7 +79,7 @@ public class Http11GetProcessor {
                 continue;
             }
 
-            return contentParser.parseContent(request, query, method, requestBody);
+            return contentParser.parseContent(request, query, method, requestBody, cookies, session);
         }
 
         throw new IllegalArgumentException("처리할 수 없는 요청입니다");

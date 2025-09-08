@@ -64,7 +64,7 @@ public class HttpRequest {
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             int colonIndex = line.indexOf(HEADER_DELIMITER);
             if (colonIndex != -1) {
-                String headerName = line.substring(0, colonIndex).trim();
+                String headerName = line.substring(0, colonIndex).trim().toLowerCase();
                 String headerValue = line.substring(colonIndex + 1).trim();
                 headers.add(headerName, headerValue);
             }

@@ -44,7 +44,7 @@ class HttpServletTest {
     @Test
     void GET_요청_시_doGet_메소드를_호출한다() {
         // given && when
-        when(httpRequest.getHttpMethod()).thenReturn(HttpMethod.GET);
+        when(httpRequest.getMethod()).thenReturn(HttpMethod.GET);
         testHttpServlet.service(httpRequest, null);
 
         // then
@@ -55,7 +55,7 @@ class HttpServletTest {
     @Test
     void POST_요청_시_doPost_메소드를_호출한다() {
         // given && when
-        when(httpRequest.getHttpMethod()).thenReturn(HttpMethod.GET);
+        when(httpRequest.getMethod()).thenReturn(HttpMethod.GET);
         testHttpServlet.service(httpRequest, null);
 
         // then
@@ -66,7 +66,7 @@ class HttpServletTest {
     @Test
     void 지원하지_않는_HTTP_메소드_요청_시_아무것도_호출하지_않는다() {
         // given && when
-        when(httpRequest.getHttpMethod()).thenReturn(HttpMethod.GET);
+        when(httpRequest.getMethod()).thenReturn(HttpMethod.GET);
         testHttpServlet.service(httpRequest, null);
 
         // then

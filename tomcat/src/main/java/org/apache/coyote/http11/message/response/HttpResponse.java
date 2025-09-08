@@ -33,6 +33,10 @@ public class HttpResponse {
         this.status = status;
     }
 
+    public void addToHeader(String name, String value) {
+        headers.add(name, value);
+    }
+
     public void writeTo(OutputStream output) throws IOException {
         headers.add("Content-Length", String.valueOf(body.length()));
         output.write(getHeaderText().getBytes(StandardCharsets.ISO_8859_1));

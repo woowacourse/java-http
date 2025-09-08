@@ -39,9 +39,22 @@ public class HttpHeaders {
         headers.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
     }
 
+    public boolean contains(String key) {
+        return headers.containsKey(key);
+    }
+
     public List<String> get(String name) {
         return new ArrayList<>(headers.getOrDefault(name, Collections.emptyList()));
     }
+
+    public String getFirst(String name) {
+        List<String> values = headers.get(name);
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.getFirst();
+    }
+
 
     public List<String> getLines() {
         List<String> lines = new ArrayList<>();

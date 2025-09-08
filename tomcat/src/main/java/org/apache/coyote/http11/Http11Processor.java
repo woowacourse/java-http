@@ -41,12 +41,7 @@ public class Http11Processor implements Runnable, Processor {
                         new InputStreamReader(connection.getInputStream(), StandardCharsets.ISO_8859_1));
                 var writer = connection.getOutputStream()
         ) {
-            String requestLine = reader.readLine();
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
-            }
-
-            HttpRequest request = HttpRequest.from(requestLine);
+            HttpRequest request = HttpRequest.from(reader);
             HttpResponse response = new HttpResponse();
             Servlet servlet = servletContainer.getServletBy(request.getRequestPath());
             servlet.service(request, response);

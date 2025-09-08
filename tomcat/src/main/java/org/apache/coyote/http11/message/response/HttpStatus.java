@@ -16,6 +16,7 @@ public enum HttpStatus {
     // 3xx Redirection
     MOVED_PERMANENTLY(301, "Moved Permanently"),
     FOUND(302, "Found"),
+    SEE_OTHER(303, "See Other"),
     NOT_MODIFIED(304, "Not Modified"),
 
     // 4xx Client Error

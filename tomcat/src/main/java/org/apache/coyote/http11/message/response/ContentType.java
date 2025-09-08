@@ -11,6 +11,7 @@ public enum ContentType {
     JPEG(".jpeg", "image/jpeg"),
     GIF(".gif", "image/gif"),
     PLAIN(".txt", "text/plain;charset=utf-8"),
+    FORM_URLENCODED(null, "application/x-www-form-urlencoded"),
     DEFAULT(null, "application/octet-stream");
 
     private final String extension;
@@ -27,9 +28,19 @@ public enum ContentType {
 
     //TODO: 널/대소문자/쿼리스트링 케이스 처리하기  (2025-09-7, 일, 17:24)
     // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895296
-    public static ContentType getContentTypeFrom(String path) {
+    public static ContentType fromPath(String path) {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.extension != null && path.endsWith(contentType.extension))
+                .findFirst()
+                .orElse(DEFAULT);
+    }
+
+    public static ContentType fromMimeType(String mimeType) {
+        if (mimeType == null) {
+            return DEFAULT;
+        }
+        return Arrays.stream(values())
+                .filter(ct -> ct.mimeType.equalsIgnoreCase(mimeType))
                 .findFirst()
                 .orElse(DEFAULT);
     }

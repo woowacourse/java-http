@@ -7,7 +7,7 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 public abstract class HttpServlet implements Servlet {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        HttpMethod method = request.getHttpMethod();
+        HttpMethod method = request.getMethod();
         if (method == HttpMethod.GET) {
             doGet(request, response);
             return;

@@ -14,7 +14,7 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
             byte[] content = StaticFileLoader.loadStaticFile(HOME_PAGE);
-            response.setContentType(ContentType.getContentTypeFrom(HOME_PAGE));
+            response.setContentType(ContentType.fromPath(HOME_PAGE));
             response.appendToBody(content);
         } catch (IOException e) {
             ServletExceptionHandler.getInstance().handle(response, e);

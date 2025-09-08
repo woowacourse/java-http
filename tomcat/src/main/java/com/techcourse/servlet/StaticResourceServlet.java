@@ -14,10 +14,12 @@ public class StaticResourceServlet extends HttpServlet {
         try {
             String path = request.getRequestPath();
             byte[] content = StaticFileLoader.loadStaticFile(STATIC_DIR + path);
-            response.setContentType(ContentType.getContentTypeFrom(path));
+            response.setContentType(ContentType.fromPath(path));
             response.appendToBody(content);
         } catch (Exception e) {
             ServletExceptionHandler.getInstance().handle(response, e);
         }
     }
+
+
 }

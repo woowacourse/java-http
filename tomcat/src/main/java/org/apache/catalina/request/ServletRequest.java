@@ -47,7 +47,7 @@ public class ServletRequest {
 
         final String sessionId = getCookie("JSESSIONID");
         if (sessionId != null) {
-            Session existingSession = SessionManager.getInstance().findSession(sessionId);
+            final Session existingSession = SessionManager.getInstance().findSession(sessionId);
             if (existingSession != null) {
                 return existingSession;
             }
@@ -72,7 +72,7 @@ public class ServletRequest {
     }
 
     private String parsePath(String uri) {
-        int queryIndex = uri.indexOf(PATH_DELIMITER);
+        final int queryIndex = uri.indexOf(PATH_DELIMITER);
 
         if (queryIndex == -1) {
             return uri;

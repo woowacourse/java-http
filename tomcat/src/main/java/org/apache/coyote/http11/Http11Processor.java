@@ -1,9 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.HttpStatus.BAD_REQUEST;
-import static org.apache.coyote.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.HttpStatus.METHOD_NOT_ALLOWED;
-import static org.apache.coyote.HttpStatus.NOT_FOUND;
 
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.handler.DefaultHandler;
@@ -37,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpRequestHandler defaultHandler;
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
         this.handlerMap = new HashMap<>();
         handlerMap.put("/", new RootHandler());
@@ -54,9 +52,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            HttpResponse response = processRequest(inputStream);
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            final HttpResponse response = processRequest(inputStream);
 
             writeResponse(response, outputStream);
         } catch (Exception e) {

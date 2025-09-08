@@ -20,11 +20,15 @@ public class HttpCookie {
         this.cookies = new HashMap<>();
     }
 
-    public Map<String, String> getCookies(){
-         return new HashMap<>(cookies);
+    public String getCookie(String name) {
+        return cookies.get(name);
     }
 
-    public void setCookie(String name, String value){
+    public Map<String, String> getCookies() {
+        return new HashMap<>(cookies);
+    }
+
+    public void setCookie(String name, String value) {
         cookies.put(name, value);
     }
 

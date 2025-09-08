@@ -3,12 +3,14 @@ package org.apache.coyote;
 import com.techcourse.Service;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RequestHandler {
 
     private final ResponseBuilder responseBuilder;
     private final Service service;
+    private final List<String> views = List.of("login", "register");
 
     public RequestHandler() {
         this.responseBuilder = new ResponseBuilder();
@@ -27,6 +29,11 @@ public class RequestHandler {
         Map<String, String> queryParams = null;
         if (uri.contains("?")) {
             queryParams = extractQueryParams(uri);
+        }
+
+        if (views.contains(path) && queryParams == null) {
+            responseBody = ResourceLoader.get(uri + ".html");
+            return responseBuilder.build(uri + ".html", "200 OK", responseBody, null);
         }
 
         return handlePath(path, queryParams);
@@ -50,6 +57,15 @@ public class RequestHandler {
     }
 
     private String handlePath(final String path, final Map<String, String> queryParams) {
+        if (path.startsWith("login")) {
+            final var responseBody = service.findUser(queryParams);
+            final int index = path.indexOf("?");
+            final String filePath = path.substring(0, index);
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/index.html");
+            return responseBuilder.build(filePath + ".html", "302 Found", responseBody, headers);
+        }
+
         return responseBuilder.build(path, "", new byte[0], null);
     }
 }

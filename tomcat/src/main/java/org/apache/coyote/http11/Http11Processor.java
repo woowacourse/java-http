@@ -61,33 +61,61 @@ public class Http11Processor implements Runnable, Processor {
 
         final List<String> requestMessage = new ArrayList<>();
         String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+        while ((line = bufferedReader.readLine()) != null) {
             requestMessage.add(line);
+            if (line.isEmpty()) {
+                break;
+            }
+        }
+
+        final Optional<String> contentLengthHeader = requestMessage.stream()
+                .filter(l -> l.startsWith("Content-Length:"))
+                .map(l -> l.split(":")[1].trim())
+                .findFirst();
+
+        if (contentLengthHeader.isPresent()) {
+            final int contentLength = Integer.parseInt(contentLengthHeader.get());
+            final char[] bodyChars = new char[contentLength];
+            bufferedReader.read(bodyChars, 0, contentLength);
+            requestMessage.add(new String(bodyChars));
         }
 
         return Http11Request.create(requestMessage);
     }
 
     private Http11Response findResponse(final Http11Request request) throws IOException {
+        final String requestMethod = request.getMethod();
         final String requestTarget = request.getTarget();
 
-        if (requestTarget.equals("/")) {
-            final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
+        if (requestMethod.equals("GET")) {
+            if (requestTarget.equals("/"))  {
+                final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
-            return createHtmlResponse(200, defaultResponseBytes);
+                return createHtmlResponse(200, defaultResponseBytes);
+            }
+            if (requestTarget.contains("/login")) {
+                return handleLoginRequest(request);
+            }
+            if (requestTarget.endsWith("/register")) {
+                return handleRegisterRequest(request);
+            }
+            if (requestTarget.endsWith(".html")) {
+                return handleHtmlRequest(200, requestTarget);
+            }
+            if (requestTarget.endsWith(".css")) {
+                return handleCssRequest(requestTarget);
+            }
+            if (requestTarget.endsWith(".js")) {
+                return handleJsResponse(requestTarget);
+            }
         }
-        if (requestTarget.contains("/login")) {
-            return handleLoginRequest(request);
+
+        if (requestMethod.equals("POST")) {
+            if (requestTarget.endsWith("/register")) {
+                return handleRegisterRequest(request);
+            }
         }
-        if (requestTarget.endsWith(".html")) {
-            return handleHtmlRequest(200, requestTarget);
-        }
-        if (requestTarget.endsWith(".css")) {
-            return handleCssRequest(requestTarget);
-        }
-        if (requestTarget.endsWith(".js")) {
-            return handleJsResponse(requestTarget);
-        }
+
         throw new NoSuchFileException(requestTarget);
     }
 
@@ -107,6 +135,28 @@ public class Http11Processor implements Runnable, Processor {
 
         return handleHtmlRequest(401, "/401.html");
 
+    }
+
+    private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
+        if (request.getMethod().equals("GET")) {
+            return handleHtmlRequest(200, "/register.html");
+        }
+
+        final String body = request.getBody();
+
+        final Map<String, String> urlEncodedResponseBody = getUrlEncodedBody(body);
+
+        final String account = urlEncodedResponseBody.get("account");
+        final String email = urlEncodedResponseBody.get("email");
+        final String password = urlEncodedResponseBody.get("password");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
+        }
+
+        InMemoryUserRepository.save(new User(account, email, password));
+
+        return handleHtmlRequest(302, "/index.html");
     }
 
     private Http11Response handleHtmlRequest(
@@ -199,5 +249,23 @@ public class Http11Processor implements Runnable, Processor {
                 headers,
                 body
         );
+    }
+
+    private static Map<String, String> getUrlEncodedBody(final String body) {
+        final Map<String, String> urlEncodedResponseBody = new HashMap<>();
+        if (body == null || body.isEmpty()) {
+            throw new IllegalArgumentException("Fill the register form");
+        }
+
+        final String[] pairs = body.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
+                continue;
+            }
+            throw new IllegalArgumentException(String.format("Wrong x-www-form-urlencoded response : %s", pair));
+        }
+        return urlEncodedResponseBody;
     }
 }

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,8 @@ public class Http11Request {
 
     private static final String HEADER_DELIMITER = ": ";
 
+    private static int pointer;
+
     private final String method;
     private final String target;
     private final Map<String, String> queryParams;
@@ -18,8 +19,7 @@ public class Http11Request {
     private final String body;
 
     public static Http11Request create(final List<String> requestMessage) {
-        int pointer = 0;
-
+        pointer = 0;
         final String[] firstLine = requestMessage.get(pointer++).split(" ");
         validateFirstLineSize(firstLine);
 
@@ -33,9 +33,11 @@ public class Http11Request {
             target = target.substring(0, queryParamStartIndex);
         }
 
-        final Map<String, String> headers = getHeaders(requestMessage, pointer);
+        final Map<String, String> headers = getHeaders(requestMessage);
 
-        return new Http11Request(method, target, queryParams, httpVersion, headers, null);
+        final String body = getBody(requestMessage);
+
+        return new Http11Request(method, target, queryParams, httpVersion, headers, body);
     }
 
     private static void validateFirstLineSize(final String[] firstLine) {
@@ -71,8 +73,7 @@ public class Http11Request {
     }
 
     private static Map<String, String> getHeaders(
-            final List<String> requestMessage,
-            int pointer
+            final List<String> requestMessage
     ) {
         String line;
         final Map<String, String> headers = new HashMap<>();
@@ -90,6 +91,19 @@ public class Http11Request {
             headers.put(headerLine[0], headerLine[1]);
         }
         return headers;
+    }
+
+    private static String getBody(
+            final List<String> requestMessage
+    ) {
+        String line;
+        final StringBuilder sb = new StringBuilder();
+        while (pointer < requestMessage.size()) {
+            line = requestMessage.get(pointer++);
+
+            sb.append(line + "\n");
+        }
+        return sb.toString();
     }
 
     private Http11Request(
@@ -117,5 +131,13 @@ public class Http11Request {
 
     public String getTarget() {
         return target;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

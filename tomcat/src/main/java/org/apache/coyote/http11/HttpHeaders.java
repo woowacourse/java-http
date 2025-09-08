@@ -15,6 +15,10 @@ public class HttpHeaders {
         headers.put(name, value);
     }
 
+    public void addSession(final HttpSession session) {
+        headers.put("Set-Cookie", HttpSession.SESSION_TYPE + "=" +session.getId() + "; ");
+    }
+
     public String getHeader(final String name) {
         return headers.get(name);
     }

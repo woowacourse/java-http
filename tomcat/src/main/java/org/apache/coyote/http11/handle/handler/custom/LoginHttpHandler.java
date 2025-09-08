@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpSession;
 import org.apache.coyote.http11.handle.HttpHandlerCondition;
 import org.apache.coyote.http11.handle.handler.MultiConditionHandler;
 import org.apache.coyote.http11.handle.handler.resource.HtmlHttpHandler;
@@ -65,6 +66,7 @@ public class LoginHttpHandler extends MultiConditionHandler {
         final HttpHeaders responseHeaders = new HttpHeaders();
         if (checkAuthorization(account, password)) {
             responseHeaders.addHeader("Location", "/index.html");
+            responseHeaders.addSession(new HttpSession());
             return new HttpResponse(
                     request.protocolVersion(),
                     HttpStatus.SEE_OTHER,

@@ -14,12 +14,13 @@ class HttpBodyTest {
         String bodyString = "Hello, world!";
 
         // when
-        HttpBody httpBody = HttpBody.from(bodyString);
+        HttpBody httpResponseBody = HttpBody.from(bodyString);
 
         // then
         assertAll(
-                () -> assertThat(httpBody.toText()).isEqualTo(bodyString),
-                () -> assertThat(httpBody.length()).isEqualTo(bodyString.getBytes(StandardCharsets.UTF_8).length)
+                () -> assertThat(httpResponseBody.toText()).isEqualTo(bodyString),
+                () -> assertThat(httpResponseBody.length()).isEqualTo(
+                        bodyString.getBytes(StandardCharsets.UTF_8).length)
         );
     }
 
@@ -30,24 +31,24 @@ class HttpBodyTest {
         byte[] bodyBytes = bodyString.getBytes(StandardCharsets.UTF_8);
 
         // when
-        HttpBody httpBody = HttpBody.from(bodyBytes);
+        HttpBody httpResponseBody = HttpBody.from(bodyBytes);
 
         // then
         assertAll(
-                () -> assertThat(httpBody.toText()).isEqualTo(bodyString),
-                () -> assertThat(httpBody.length()).isEqualTo(bodyBytes.length)
+                () -> assertThat(httpResponseBody.toText()).isEqualTo(bodyString),
+                () -> assertThat(httpResponseBody.length()).isEqualTo(bodyBytes.length)
         );
     }
 
     @Test
     void 빈_HttpBody를_생성한다() {
         // when
-        HttpBody httpBody = HttpBody.empty();
+        HttpBody httpResponseBody = HttpBody.empty();
 
         // then
         assertAll(
-                () -> assertThat(httpBody.toText()).isEmpty(),
-                () -> assertThat(httpBody.length()).isZero()
+                () -> assertThat(httpResponseBody.toText()).isEmpty(),
+                () -> assertThat(httpResponseBody.length()).isZero()
         );
     }
 
@@ -55,10 +56,10 @@ class HttpBodyTest {
     void toText는_바디를_문자열로_변환한다() {
         // given
         String expected = "some content";
-        HttpBody httpBody = HttpBody.from(expected);
+        HttpBody httpResponseBody = HttpBody.from(expected);
 
         // when
-        String actual = httpBody.toText();
+        String actual = httpResponseBody.toText();
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -68,10 +69,10 @@ class HttpBodyTest {
     void length는_바디의_길이를_반환한다() {
         // given
         String content = "some content";
-        HttpBody httpBody = HttpBody.from(content);
+        HttpBody httpResponseBody = HttpBody.from(content);
 
         // when
-        int length = httpBody.length();
+        int length = httpResponseBody.length();
 
         // then
         assertThat(length).isEqualTo(content.getBytes(StandardCharsets.UTF_8).length);

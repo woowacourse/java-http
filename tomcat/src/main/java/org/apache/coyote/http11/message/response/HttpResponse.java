@@ -7,14 +7,16 @@ import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
-    private final HttpStatus status;
-    private final HttpHeaders headers;
-    private final HttpBody body;
+    private HttpStatus status = HttpStatus.OK;
+    private HttpHeaders headers = HttpHeaders.init();
+    private HttpBody body = HttpBody.init();
 
-    public HttpResponse(HttpStatus status, HttpHeaders headers, HttpBody body) {
-        this.status = status;
-        this.headers = headers;
-        this.body = body;
+    public void appendToBody(byte[] additionalContent) {
+        body = body.append(additionalContent);
+    }
+
+    public void appendToBody(String additionalText) {
+        body = body.append(additionalText);
     }
 
     public int getStatusCode() {
@@ -34,6 +36,7 @@ public class HttpResponse {
     }
 
     public void writeTo(OutputStream output) throws IOException {
+        headers.add("Content-Length", String.valueOf(body.length()));
         output.write(getHeaderText().getBytes(StandardCharsets.ISO_8859_1));
         output.write(getBodyBytes());
     }
@@ -55,5 +58,19 @@ public class HttpResponse {
     // 바디를 바이트 배열로 변환
     private byte[] getBodyBytes() {
         return body.getBytes();
+    }
+
+    public void setContentType(ContentType contentType) {
+        headers.add("Content-Type", contentType.getMimeType());
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void init() {
+        status = HttpStatus.OK;
+        headers = HttpHeaders.init();
+        body = HttpBody.init();
     }
 }

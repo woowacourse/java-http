@@ -6,7 +6,7 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 
 public abstract class HttpServlet implements Servlet {
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) {
         HttpMethod method = request.getHttpMethod();
         if (method == HttpMethod.GET) {
             doGet(request, response);
@@ -21,9 +21,9 @@ public abstract class HttpServlet implements Servlet {
         //TODO: 다른 HttpMethod 분기 작성  (2025-09-7, 일, 23:59)
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
     }
 }

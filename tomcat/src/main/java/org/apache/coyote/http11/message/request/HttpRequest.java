@@ -3,7 +3,6 @@ package org.apache.coyote.http11.message.request;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.exception.InvalidRequestLineException;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
@@ -69,7 +68,7 @@ public class HttpRequest {
         String requestLine = lines[0];
         String[] requestLineTokens = requestLine.split(" ");
         if (requestLineTokens.length != REQUEST_LINE_ELEMENT_COUNT) {
-            throw new InvalidRequestLineException(requestLine);
+            throw new IllegalArgumentException("Invalid Request Line : " + requestLine);
         }
         return requestLineTokens;
     }

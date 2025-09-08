@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.exception.StatusCodeNotExistsException;
 
 public enum HttpStatus {
     // 1xx Informational
@@ -55,6 +54,6 @@ public enum HttpStatus {
         return Arrays.stream(values())
                 .filter(httpStatus -> httpStatus.code == code)
                 .findAny()
-                .orElseThrow(() -> new StatusCodeNotExistsException(code));
+                .orElseThrow(() -> new IllegalArgumentException("Status Code Not Exists : " + code));
     }
 }

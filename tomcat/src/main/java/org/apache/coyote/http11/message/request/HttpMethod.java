@@ -2,7 +2,6 @@ package org.apache.coyote.http11.message.request;
 
 import java.util.Arrays;
 import java.util.Objects;
-import org.apache.coyote.http11.exception.UnsupportedHttpMethodException;
 
 public enum HttpMethod {
     GET,
@@ -17,6 +16,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> Objects.equals(httpMethod.name(), name.toUpperCase()))
                 .findAny()
-                .orElseThrow(() -> new UnsupportedHttpMethodException(name));
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported Method : " + name));
     }
 }

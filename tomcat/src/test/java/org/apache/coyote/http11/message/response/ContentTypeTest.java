@@ -12,7 +12,7 @@ class ContentTypeTest {
         String path = "index.html";
 
         // when
-        String actual = ContentType.getMimeTypeFrom(path);
+        String actual = ContentType.getContentTypeFrom(path);
 
         // then
         assertThat(actual).isEqualTo(ContentType.HTML.getMimeType());
@@ -24,7 +24,7 @@ class ContentTypeTest {
         String path = "index.test";
 
         // when
-        String actual = ContentType.getMimeTypeFrom(path);
+        String actual = ContentType.getContentTypeFrom(path);
 
         // then
         assertThat(actual).isEqualTo(ContentType.DEFAULT.getMimeType());

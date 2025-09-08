@@ -12,6 +12,10 @@ public class HttpHeaders {
     private HttpHeaders() {
     }
 
+    public static HttpHeaders init() {
+        return new HttpHeaders();
+    }
+
     public static HttpHeaders fromLines(List<String> lines) {
         HttpHeaders httpHeaders = new HttpHeaders();
         for (String line : lines) {
@@ -27,6 +31,7 @@ public class HttpHeaders {
         }
         return httpHeaders;
     }
+
 
     //TODO: 여기에도 sanitize 적용하기  (2025-09-7, 일, 17:22)
     // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895285

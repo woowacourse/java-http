@@ -54,7 +54,7 @@ public class Parameters {
     }
 
     private Map<String, String> parseFormBody(String body, String contentType) {
-        if (contentType == null || !contentType.contains(FORM_URLENCODED)) {
+        if (body == null || contentType == null || !contentType.contains(FORM_URLENCODED)) {
             return Collections.emptyMap();
         }
 

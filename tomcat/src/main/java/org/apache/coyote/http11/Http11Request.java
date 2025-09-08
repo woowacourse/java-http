@@ -130,6 +130,29 @@ public class Http11Request {
         this.body = body;
     }
 
+    public Map<String, String> getBodyByContentType(final String contentType) {
+        if (contentType.equals("application/x-www-form-urlencoded")) {
+            throw new IllegalArgumentException("Request Content-Type should be application/x-www-form-urlencoded");
+        }
+
+        final Map<String, String> urlEncodedResponseBody = new HashMap<>();
+
+        if (body == null || body.isEmpty()) {
+            return urlEncodedResponseBody;
+        }
+
+        final String[] pairs = body.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
+                continue;
+            }
+            throw new IllegalArgumentException(String.format("Wrong x-www-form-urlencoded request : %s", pair));
+        }
+        return urlEncodedResponseBody;
+    }
+
     public Optional<String> findQueryParam(final String key) {
         if (queryParams.containsKey(key)) {
             return Optional.of(queryParams.get(key));

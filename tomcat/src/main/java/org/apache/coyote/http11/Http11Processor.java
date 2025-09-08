@@ -148,9 +148,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleHtmlRequest(200, "/register.html");
         }
 
-        final String body = request.getBody();
-
-        final Map<String, String> urlEncodedResponseBody = getUrlEncodedBody(body);
+        final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
 
         final String account = urlEncodedResponseBody.get("account");
         final String email = urlEncodedResponseBody.get("email");
@@ -213,24 +211,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean existsUserByAccount(final String account, final String password) {
-        final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
-
-        if (userOrEmpty.isEmpty()) {
-            log.warn("User not found : account = {}", account);
-            return false;
-        }
-
-        final User user = userOrEmpty.get();
-        if (!user.checkPassword(password)) {
-            log.warn("Wrong password : account = {}", account);
-            return false;
-        }
-
-        log.info("User found : {}", user);
-        return true;
-    }
-
     private Http11Response createHtmlResponse(
             final int statusCode,
             final byte[] body
@@ -276,21 +256,21 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private static Map<String, String> getUrlEncodedBody(final String body) {
-        final Map<String, String> urlEncodedResponseBody = new HashMap<>();
-        if (body == null || body.isEmpty()) {
-            throw new IllegalArgumentException("Fill the register form");
+    private boolean existsUserByAccount(final String account, final String password) {
+        final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
+
+        if (userOrEmpty.isEmpty()) {
+            log.warn("User not found : account = {}", account);
+            return false;
         }
 
-        final String[] pairs = body.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
-                continue;
-            }
-            throw new IllegalArgumentException(String.format("Wrong x-www-form-urlencoded response : %s", pair));
+        final User user = userOrEmpty.get();
+        if (!user.checkPassword(password)) {
+            log.warn("Wrong password : account = {}", account);
+            return false;
         }
-        return urlEncodedResponseBody;
+
+        log.info("User found : {}", user);
+        return true;
     }
 }

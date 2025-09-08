@@ -91,8 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 log.info("user: {}", user);
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
-                final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                final String response = createRedirectionResponse(responseBody, "/index.html");
+                final String response = createRedirectionResponse("/index.html");
                 writeAndFlush(outputStream, response);
                 return;
             }

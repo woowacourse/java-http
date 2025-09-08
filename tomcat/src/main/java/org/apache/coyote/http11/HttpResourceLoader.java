@@ -8,14 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.dto.ResourceResult;
 
-public class HttpResponseBuilder {
+public class HttpResourceLoader {
 
     private static final String ROOT = "/";
+    private static final String STATIC = "static/";
 
-    public HttpResponse build(final String path) throws IOException {
+    public HttpResponse load(final String path) throws IOException {
         String formattedPath = formatPath(path);
-
-        ResourceResult resourceResult = loadResource(formattedPath);
+        ResourceResult resourceResult = getResourceResult(formattedPath);
         HttpStatus status = findStatus(resourceResult);
 
         Map<String, String> headers = new LinkedHashMap<>();
@@ -35,12 +35,12 @@ public class HttpResponseBuilder {
         return path;
     }
 
-    private ResourceResult loadResource(String path) throws IOException {
+    private ResourceResult getResourceResult(final String path) throws IOException {
         if (ROOT.equals(path)) {
             return ResourceResult.found(MimeType.HTML.mimeType(), "Hello world!".getBytes());
         }
 
-        final URL resource = getClass().getClassLoader().getResource("static/" + path);
+        final URL resource = getClass().getClassLoader().getResource(STATIC + path);
         if (resource == null) {
             return ResourceResult.notFound();
         }

@@ -15,16 +15,20 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final byte[] body;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    private HttpRequest(MappingLine mappingLine, Map<String, String> headers, byte[] body) {
+        this.mappingLine = mappingLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public static HttpRequest from(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         MappingLine mappingLine = new MappingLine(bufferedReader);
         Map<String, String> headers = getHeaders(bufferedReader);
         byte[] body = getBody(headers, bufferedReader);
 
-        this.mappingLine = mappingLine;
-        this.headers = headers;
-        this.body = body;
+        return new HttpRequest(mappingLine, headers, body);
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
@@ -42,7 +46,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private byte[] getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+    private static byte[] getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
         String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return new byte[0];

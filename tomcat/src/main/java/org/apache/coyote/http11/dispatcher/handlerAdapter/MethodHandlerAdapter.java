@@ -22,7 +22,7 @@ public class MethodHandlerAdapter implements HandlerAdapter {
         RestController restController = new RestController(new Service());
         mappings.put(new RouteKey("GET", "/"),
                 new HandlerMethod(restController, method(restController, "hello")));
-        mappings.put(new RouteKey("GET", "/login"),
+        mappings.put(new RouteKey("POST", "/login"),
                 new HandlerMethod(restController, method(restController, "signIn", Map.class))
         );
 
@@ -42,14 +42,14 @@ public class MethodHandlerAdapter implements HandlerAdapter {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        String method = httpRequest.getMappingLine().getRequestMapping();
+        String method = httpRequest.getMappingLine().getMethod();
         String path = httpRequest.getMappingLine().getUrl();
         return mappings.containsKey(new RouteKey(method, path));
     }
 
     @Override
     public Object handle(HttpRequest httpRequest) {
-        String method = httpRequest.getMappingLine().getRequestMapping();
+        String method = httpRequest.getMappingLine().getMethod();
         String path = httpRequest.getMappingLine().getUrl();
         HandlerMethod handlerMethod = mappings.get(new RouteKey(method, path));
         return handlerMethod.invoke(httpRequest);

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.slf4j.Logger;
@@ -32,11 +31,10 @@ public class ResponseBody {
             return ResponseContent.success("Hello world!");
         }
 
-        final Map<String, String> params = httpRequest.getParamsFromBody();
-        if (!params.isEmpty()) {
-            if ("/login".equals(path)) {
-                final String account = params.get("account");
-                final String password = params.get("password");
+        if ("/login".equals(path)) {
+            try {
+                final String account = findValueFromParams("account");
+                final String password = findValueFromParams("password");
 
                 final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
                 if (userOrEmpty.isPresent()) {
@@ -51,12 +49,18 @@ public class ResponseBody {
                     final String body = getBodyFromStaticFile("/index.html");
                     return ResponseContent.redirect(body, "/index.html");
                 }
+            } catch (IllegalArgumentException e) {
+                final String body = getBodyFromStaticFile("/login.html");
+                return ResponseContent.redirect(body, "/login.html");
             }
 
-            if ("/register".equals(path)) {
-                final String account = params.get("account");
-                final String email = params.get("email");
-                final String password = params.get("password");
+        }
+
+        if ("/register".equals(path)) {
+            try {
+                final String account = findValueFromParams("account");
+                final String password = findValueFromParams("password");
+                final String email = findValueFromParams("email");
 
                 final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
                 if (userOrEmpty.isPresent()) {
@@ -69,6 +73,9 @@ public class ResponseBody {
 
                 final String body = getBodyFromStaticFile("/index.html");
                 return ResponseContent.redirect(body, "/index.html");
+            } catch (IllegalArgumentException e) {
+                final String body = getBodyFromStaticFile("/register.html");
+                return ResponseContent.redirect(body, "/register.html");
             }
         }
 
@@ -103,5 +110,10 @@ public class ResponseBody {
 
         final String body = getBodyFromResource(resource);
         return ResponseContent.success(body);
+    }
+
+    private String findValueFromParams(final String name) {
+        return httpRequest.getParamsValueFromBody(name)
+                .orElseThrow(() -> new IllegalArgumentException("파라미터의 키 값이 존재하지 않습니다: " + name));
     }
 }

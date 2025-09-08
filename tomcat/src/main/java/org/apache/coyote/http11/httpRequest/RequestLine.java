@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.httpRequest;
 
-import java.util.Map;
+import java.util.Optional;
 
 public class RequestLine {
 
@@ -32,7 +32,7 @@ public class RequestLine {
         return this.uri.getPath();
     }
 
-    public Map<String, String> getParams() {
-        return this.uri.getParams();
+    public Optional<String> findParamsValue(final String name) {
+        return this.uri.findParamsValue(name);
     }
 }

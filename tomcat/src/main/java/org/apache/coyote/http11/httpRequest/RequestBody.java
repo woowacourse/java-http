@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.httpRequest;
 
-import java.util.Map;
+import java.util.Optional;
 
 public class RequestBody {
 
     private final Params params;
 
-    public RequestBody(
+    private RequestBody(
             final Params params
     ) {
         this.params = params;
@@ -20,7 +20,7 @@ public class RequestBody {
         return new RequestBody(Params.empty());
     }
 
-    public Map<String, String> getParams() {
-        return this.params.getParams();
+    public Optional<String> findParamsValue(final String name) {
+        return this.params.findValue(name);
     }
 }

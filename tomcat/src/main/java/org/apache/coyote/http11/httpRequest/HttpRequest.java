@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpRequest;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -22,7 +23,11 @@ public class HttpRequest {
         return this.requestLine.getPath();
     }
 
-    public Map<String, String> getParamsFromBody() {
-        return this.requestBody.getParams();
+    public Optional<String> findParamsValueFromUri(final String name) {
+        return this.requestLine.findParamsValue(name);
+    }
+
+    public Optional<String> findParamsValueFromBody(final String name) {
+        return this.requestBody.findParamsValue(name);
     }
 }

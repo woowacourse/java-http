@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Params {
 
@@ -34,7 +35,7 @@ public class Params {
         return new Params(Map.of());
     }
 
-    public Map<String, String> getParams() {
-        return this.params;
+    public Optional<String> findValue(final String name) {
+        return Optional.ofNullable(params.get(name));
     }
 }

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.httpRequest;
 
-import java.util.Map;
+import java.util.Optional;
 
 public class Uri {
 
@@ -34,7 +34,7 @@ public class Uri {
         return this.path;
     }
 
-    public Map<String, String> getParams() {
-        return this.params.getParams();
+    public Optional<String> findParamsValue(final String name) {
+        return this.params.findValue(name);
     }
 }

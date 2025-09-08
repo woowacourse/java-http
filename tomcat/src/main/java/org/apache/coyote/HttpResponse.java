@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,6 @@ public class HttpResponse {
     }
 
     private void setContentLength() {
-        headers.setContentLength(String.valueOf(body.getBytes().length));
+        headers.setContentLength(String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 }

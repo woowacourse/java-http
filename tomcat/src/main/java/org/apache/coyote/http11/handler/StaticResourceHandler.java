@@ -56,7 +56,7 @@ public class StaticResourceHandler implements Handler {
 
         try {
             loadResourceBytes(fullPath).ifPresentOrElse(
-                    bytes -> respondBinary(outputStream, request.version(), resourcePath, bytes),
+                    bytes -> respondBinary(outputStream, request.version(), normalizedResourcePath, bytes),
                     () -> respondNotFound(outputStream, request.version())
             );
         } catch (IOException e) {

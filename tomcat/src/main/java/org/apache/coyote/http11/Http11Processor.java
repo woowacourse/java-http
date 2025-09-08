@@ -54,15 +54,29 @@ public class Http11Processor implements Runnable, Processor {
         final String requestUri = extractRequestUri(requestLine);
 
         final Map<String, String> headers = new HashMap<>();
-        while (bufferedReader.ready()) {
-            String line = bufferedReader.readLine();
+
+        String line = bufferedReader.readLine();
+        while (line != null && !line.isEmpty()) {
             if (line.contains(HEADER_DELIMITER)) {
                 String[] headerParts = line.split(HEADER_DELIMITER);
                 headers.put(headerParts[0], headerParts[1]);
             }
+            line = bufferedReader.readLine();
         }
 
-        return new HttpRequest(requestMethod, requestUri, headers);
+        String contentLength = headers.get("Content-Length");
+
+        if (contentLength == null) {
+            return new HttpRequest(requestMethod, requestUri, headers, null);
+        }
+
+        StringBuilder bodyBuilder = new StringBuilder();
+        int length = Integer.parseInt(contentLength);
+        char[] bodyChars = new char[length];
+        int read = bufferedReader.read(bodyChars, 0, length);
+        bodyBuilder.append(bodyChars, 0, read);
+
+        return new HttpRequest(requestMethod, requestUri, headers, bodyBuilder.toString());
     }
 
     private String extractRequestMethod(final String requestLine) {

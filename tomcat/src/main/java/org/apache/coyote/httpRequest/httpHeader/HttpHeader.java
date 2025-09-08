@@ -27,17 +27,17 @@ public class HttpHeader {
         return requestLine.getQueryValues();
     }
 
-    public boolean hasCookie(final String key) {
+    public String getCookie(final String key) {
         List<Cookie> cookies = getCookies();
         if (cookies.isEmpty()) {
-            return false;
+            return null;
         }
         for (final Cookie cookie : cookies) {
             if (cookie.getKey().equals(key)) {
-                return true;
+                return cookie.getValue();
             }
         }
-        return false;
+        return null;
     }
 
     private List<Cookie> getCookies() {

@@ -21,6 +21,10 @@ public class Service {
                 "}").getBytes();
     }
 
+    public void registerUser(final String account, final String password, final String email) {
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
+
     private User findUserByAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));

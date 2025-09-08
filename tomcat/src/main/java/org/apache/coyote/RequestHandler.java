@@ -31,12 +31,20 @@ public class RequestHandler {
             queryParams = extractQueryParams(uri);
         }
 
-        if (views.contains(path) && queryParams == null) {
+        if (views.contains(path) && queryParams == null && request.body() == null) {
             responseBody = ResourceLoader.get(uri + ".html");
             return responseBuilder.build(uri + ".html", "200 OK", responseBody, null);
         }
 
-        return handlePath(path, queryParams);
+        if (request.method().equals("GET")) {
+            return handleGet(path, queryParams);
+        }
+
+        if (request.method().equals("POST")) {
+            return handlePost(path, request.body());
+        }
+
+        return null;
     }
 
     private Map<String, String> extractQueryParams(final String uri) {
@@ -56,7 +64,7 @@ public class RequestHandler {
         return queryParams;
     }
 
-    private String handlePath(final String path, final Map<String, String> queryParams) {
+    private String handleGet(final String path, final Map<String, String> queryParams) {
         if (path.startsWith("login")) {
             final var responseBody = service.findUser(queryParams);
             final int index = path.indexOf("?");
@@ -64,6 +72,24 @@ public class RequestHandler {
             final Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/index.html");
             return responseBuilder.build(filePath + ".html", "302 Found", responseBody, headers);
+        }
+
+        return responseBuilder.build(path, "", new byte[0], null);
+    }
+
+    private String handlePost(final String path, final String body) {
+        if (path.startsWith("register")) {
+            Map<String, String> map = new HashMap<>();
+            for (String keyValue : body.split("&")) {
+                int index = keyValue.indexOf("=");
+                String key = keyValue.substring(0, index);
+                String value = keyValue.substring(index);
+                map.put(key, value);
+            }
+            service.registerUser(map.get("account"), map.get("password"), map.get("email"));
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/index.html");
+            return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
         }
 
         return responseBuilder.build(path, "", new byte[0], null);

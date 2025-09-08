@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,33 +12,65 @@ import java.util.Map;
 public class HttpRequestParser {
 
     public HttpRequest parse(InputStream inputStream) {
-        final List<String> httpRequestMessages = getHttpRequestLines(inputStream);
-        final String[] requestLine = httpRequestMessages.getFirst().split(" ");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+        final List<String> httpRequestMessages = getHttpRequestHeaders(reader);
+        final String[] requestLine = httpRequestMessages.getFirst().split(" ");
         final var method = parseMethod(requestLine);
         final var path = parsePath(requestLine);
         final var queryParameter = parseQuaryParameter(requestLine);
         final var httpVersion = parseHttpVersion(requestLine);
         final var contentType = parseAccept(httpRequestMessages);
+        final var contentLength = parseContentLength(httpRequestMessages);
+
+        final Map<String, String> body = new HashMap<>();
+        if (contentLength != 0) {
+            parseBody(body, httpRequestMessages.getLast());
+        }
 
         return new HttpRequest(
                 method,
                 path,
                 httpVersion,
                 contentType,
-                queryParameter
+                contentLength,
+                queryParameter,
+                body
         );
     }
 
-    private List<String> getHttpRequestLines(InputStream inputStream) {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final List<String> httpRequestLines = bufferedReader.lines()
-                .takeWhile(line -> !line.isBlank())
-                .toList();
-        if (httpRequestLines.isEmpty()) {
+    private List<String> getHttpRequestHeaders(BufferedReader reader) {
+        final List<String> httpRequestLines = new ArrayList<>();
+        try {
+            String line;
+            while ((line = reader.readLine()) != null && !line.isBlank()) {
+                httpRequestLines.add(line);
+            }
+            if (httpRequestLines.isEmpty()) {
+                throw new IllegalArgumentException("잘못된 요청입니다.");
+            }
+
+            httpRequestLines.add("");
+
+            int contentLength = parseContentLength(httpRequestLines);
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                reader.read(bodyChars, 0, contentLength);
+                httpRequestLines.add(new String(bodyChars));
+            }
+        } catch (IOException ex) {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         }
         return httpRequestLines;
+    }
+
+    private int parseContentLength(List<String> headers) {
+        for (String line : headers) {
+            if (line.startsWith("Content-Length:")) {
+                return Integer.parseInt(line.substring("Content-Length:".length()).trim());
+            }
+        }
+        return 0;
     }
 
     private Method parseMethod(String[] requestLine) {
@@ -87,5 +121,15 @@ public class HttpRequestParser {
             }
         }
         return ContentType.ALL;
+    }
+
+    private Map<String, String> parseBody(Map<String, String> body, String httpRequestBody) {
+        for (String pair : httpRequestBody.split("&")) {
+            String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                body.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return body;
     }
 }

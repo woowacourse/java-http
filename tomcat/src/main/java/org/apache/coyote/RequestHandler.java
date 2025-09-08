@@ -40,8 +40,9 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/assets/img/error-404-monochrome.svg", Method.GET),
                 this::handleStaticResource);
 
-        requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleLogin);
-        requestMappings.put(new RequestMapping("/login", Method.GET), this::handleLogin);
+        requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/login", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/login", Method.POST), this::handleLogin);
     }
 
     public HttpResponse handleRequest(HttpRequest httpRequest) {
@@ -70,8 +71,9 @@ public class RequestHandler {
     }
 
     private HttpResponse handleLogin(HttpRequest httpRequest) {
-        final String account = httpRequest.getQueryParameterValue("account");
-        final String password = httpRequest.getQueryParameterValue("password");
+        Map<String, String> requestBody = httpRequest.getBody();
+        final String account = requestBody.getOrDefault("account", "");
+        final String password = requestBody.getOrDefault("password", "");
         if (account.isBlank() || password.isBlank()) {
             return handleStaticResource(httpRequest);
         }

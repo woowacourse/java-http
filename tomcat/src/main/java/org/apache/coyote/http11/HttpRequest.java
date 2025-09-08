@@ -8,18 +8,24 @@ public class HttpRequest {
     private final String path;
     private final HttpVersion httpVersion;
     private final ContentType contentType;
+    private final int contentLength;
     private final Map<String, String> queryParameter;
+    private final Map<String, String> body;
 
     public HttpRequest(Method method,
                        String path,
                        HttpVersion httpVersion,
                        ContentType contentType,
-                       Map<String, String> queryParameter) {
+                       int contentLength,
+                       Map<String, String> queryParameter,
+                       Map<String, String> body) {
         this.method = method;
         this.path = path;
         this.httpVersion = httpVersion;
         this.contentType = contentType;
+        this.contentLength = contentLength;
         this.queryParameter = queryParameter;
+        this.body = body;
     }
 
     public Method getMethod() {
@@ -42,6 +48,10 @@ public class HttpRequest {
         return value;
     }
 
+    public Map<String, String> getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" +
@@ -49,7 +59,9 @@ public class HttpRequest {
                 ", path='" + path + '\'' +
                 ", httpVersion=" + httpVersion +
                 ", contentType=" + contentType +
+                ", contentLength=" + contentLength +
                 ", queryParameter=" + queryParameter +
+                ", body=" + body +
                 '}';
     }
 }

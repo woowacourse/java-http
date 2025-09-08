@@ -10,18 +10,8 @@ public class MappingLine { // GET /endPoint HTTP/1.1
 
     private final String requestMapping; // GET //-
     private final String url; // /endPoint
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
     private final String protocol; // HTTP/1.1
-
-    private MappingLine(String requestMapping, String url, String protocol) {
-        this.requestMapping = requestMapping;
-        this.url = url;
-        this.protocol = protocol;
-    }
-
-    public MappingLine(String[] parts) {
-        this(parts[0], parts[1], parts[2]);
-    }
 
     public MappingLine(BufferedReader bufferedReader) throws IOException {
         String[] parsedRequestLine = parseRequestLine(bufferedReader);

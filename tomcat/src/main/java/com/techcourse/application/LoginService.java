@@ -14,7 +14,7 @@ public class LoginService {
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 사용자가 존재하지 않습니다."));
 
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("일치하는 사용자가 존재하지 않습니다.");
         }
 
         log.info("user: {}", user);

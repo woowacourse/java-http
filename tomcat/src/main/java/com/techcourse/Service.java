@@ -1,0 +1,19 @@
+package com.techcourse;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.util.Map;
+
+public class Service {
+
+    public User getUser(Map<String, String> loginRequest) {
+        User user = InMemoryUserRepository.findByAccount(loginRequest.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("User not found : " + loginRequest.get("account")));
+
+        if (user.checkPassword(loginRequest.get("password"))) {
+            return user;
+        }
+
+        throw new IllegalArgumentException("invalid password");
+    }
+}

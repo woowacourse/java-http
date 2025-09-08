@@ -7,6 +7,7 @@ public enum HttpSplitFormat {
     QUERY_PARAMETER_START("?"),
     QUERY_PARAMETER("&"),
     QUERY_PARAMETER_ELEMENT("="),
+    COOKIE_ELEMENT(";"),
     ;
 
     private final String value;

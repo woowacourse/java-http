@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http.common;
 
+import http.HttpHeaderKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,14 +16,14 @@ public class HttpCookie {
 
     public static HttpCookie from(final HttpHeader httpHeader) {
         final HttpCookie httpCookie = new HttpCookie();
-        final Optional<String> cookieOptional = httpHeader.getCookie();
+        final Optional<String> cookieOptional = httpHeader.getFirstValue(HttpHeaderKey.COOKIE.getValue());
 
         if (cookieOptional.isEmpty()) {
             return httpCookie;
         }
 
         final String rawCookie = cookieOptional.get();
-        final String[] cookies = rawCookie.trim().split(";");
+        final String[] cookies = rawCookie.trim().split(HttpSplitFormat.COOKIE_ELEMENT.getValue());
 
         for (final String cookie : cookies) {
             parseAndAddCookie(cookie, httpCookie);

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.http.common.HttpCookie;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
@@ -31,24 +33,25 @@ public class HttpRequest {
         this.httpSession = httpSession;
     }
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        validateNull(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final HttpStartLine httpStartLine = HttpStartLine.from(bufferedReader);
-        final HttpHeader httpHeader = HttpHeader.from(bufferedReader);
-        final HttpCookie httpCookie = HttpCookie.from(httpHeader);
-        final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
-        return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, null);
-    }
 
     public static HttpRequest from(final InputStream inputStream, final SessionManager sessionManager)
             throws IOException {
         validateNull(inputStream);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final HttpStartLine httpStartLine = HttpStartLine.from(bufferedReader);
-        final HttpHeader httpHeader = HttpHeader.from(bufferedReader);
+
+        final String startLine = bufferedReader.readLine();
+        final HttpStartLine httpStartLine = HttpStartLine.from(startLine);
+
+        List<String> headerLines = new ArrayList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
+        }
+        final HttpHeader httpHeader = HttpHeader.from(headerLines);
         final HttpCookie httpCookie = HttpCookie.from(httpHeader);
-        final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
+
+        final HttpRequestBody httpRequestBody = HttpRequestBody.of(inputStream, httpHeader);
+
         return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody,
                 sessionManager.findSession(httpCookie.getByName("JSESSIONID")));
     }

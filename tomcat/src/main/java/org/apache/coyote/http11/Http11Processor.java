@@ -20,8 +20,9 @@ public class Http11Processor implements Runnable, Processor {
             new HomeHttpRequestHandler(),
             new HtmlRequestHandler(),
             new CssRequestHandler(),
+            new JsRequestHandler(),
             new LoginRequestHandler(),
-            new JsRequestHandler()
+            new RegisterGetRequestHandler()
     );
 
     private final Socket connection;

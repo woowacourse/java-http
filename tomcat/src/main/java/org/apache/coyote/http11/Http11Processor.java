@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.ErrorMessage;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
@@ -53,32 +54,24 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
             request = new Request(br);
-
             String httpMethod = request.getHttpMethod();
             String uri = request.getUrl();
-
             Path path = parsePath(uri);
 
             if (uri.startsWith("/login")) {
-                if (uri.contains("?")) {
-                    if (login(parseQueryParameter(uri))) {
-                        response.setHttpStatusCode(HttpStatusCode.FOUND);
-                        response.addHeader("Location", "/index.html");
-                        response.addHeader("Content-Type", getContentType(path));
-                        response.addHeader("Content-Length", response.getContentLength());
-                        sendResponse(outputStream);
-                        return;
-                    }
+                if (httpMethod.equals("POST")) {
+                    requestBodyLogin(path, outputStream);
+                    return;
+                }
+                if(uri.contains("?")){
+                    queryParameterLogin(uri, path, outputStream);
+                    return;
                 }
             }
 
             if (httpMethod.equals("POST") && uri.startsWith("/register")) {
-                if(register(parseQueryString(request.getBody()))){
-                    response.setHttpStatusCode(HttpStatusCode.FOUND);
-                    response.addHeader("Location", "/index.html");
-                    response.addHeader("Content-Type", getContentType(path));
-                    response.addHeader("Content-Length", response.getContentLength());
-                    sendResponse(outputStream);
+                if (register(parseQueryString(request.getBody()))) {
+                    redirectToIndexPage(path, outputStream);
                     return;
                 }
             }
@@ -90,6 +83,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void requestBodyLogin(Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+        if (login(parseQueryString(request.getBody()))) {
+            redirectToIndexPage(path, outputStream);
+            return;
+        }
+        throw new IllegalArgumentException(INVALID_PASSWORD.getMessage());
+    }
+
+    private void queryParameterLogin(String uri, Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+        if (login(parseQueryParameter(uri))) {
+            redirectToIndexPage(path, outputStream);
+            return;
+        }
+        throw new IllegalArgumentException(INVALID_PASSWORD.getMessage());
+    }
+
+    private void redirectToIndexPage(Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.addHeader("Location", "/index.html");
+        response.addHeader("Content-Type", getContentType(path));
+        response.addHeader("Content-Length", response.getContentLength());
+        sendResponse(outputStream);
+    }
+
     private boolean register(Map<String, String> params) {
         String account = params.get("account");
         String password = params.get("password");
@@ -98,7 +115,6 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
         return InMemoryUserRepository.findByAccount(account).isPresent();
     }
-
 
     private Path parsePath(String uri) {
         int idx = uri.indexOf('?');

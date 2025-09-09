@@ -44,6 +44,7 @@ public class Request {
         char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
         body = new String(buffer);
+        log.info("body :"+body);
     }
 
     private String[] parseRequestLine(BufferedReader br) throws IOException {

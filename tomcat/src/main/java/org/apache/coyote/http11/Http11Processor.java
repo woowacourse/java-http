@@ -15,7 +15,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8 ";
 
     private final Socket connection;
+    private String sessionId;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -55,7 +58,12 @@ public class Http11Processor implements Runnable, Processor {
                 if (line.startsWith("Content-Length")) {
                     contentLength = getContentLengthBy(line);
                 }
+                if (line.startsWith("Cookie")) {
+                    String cookieValue = line.split(":")[1];
+                    sessionId = cookieValue.split("=")[1];
+                }
             }
+
             final String startLine = headerLines.get(0);
             final String[] startLineParts = startLine.split(" ");
             final String httpMethod = startLineParts[0];
@@ -78,6 +86,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod.equals("GET") && endPoint.equals("/login")) {
+                final Session session = SessionManager.find(sessionId);
+                if (session != null) {
+                    final String response = createRedirectionResponse("/index.html");
+                    writeAndFlush(outputStream, response);
+                    return;
+                }
+
                 final URL resource = getClass().getClassLoader().getResource("static" + endPoint + ".html");
                 validateNullResource(resource);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
@@ -105,6 +120,10 @@ public class Http11Processor implements Runnable, Processor {
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
                 final Cookie cookie = HttpCookie.createCookie();
+                Session session = new Session(cookie.getValue());
+                session.setAttribute("user", user);
+
+                SessionManager.add(session);
                 final String response = createRedirectionResponse("/index.html", cookie);
                 writeAndFlush(outputStream, response);
                 return;
@@ -127,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 final User user = createUser(account, email, password);
                 InMemoryUserRepository.save(user);
-                final String response = createRedirectionResponse("/index.html", null);
+                final String response = createRedirectionResponse("/index.html");
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -198,6 +217,13 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
     }
 
+    private String createRedirectionResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location,
+                "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
+    }
+
     private User createUser(String account, String email, String password) {
         Long id = 1L;
         return new User(++id, account, email, password);
@@ -207,4 +233,32 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
+
+    private static class Session {
+
+        private final String id;
+        private final Map<String, Object> values = new HashMap<>();
+
+        public Session(final String id) {
+            this.id = id;
+        }
+
+        public void setAttribute(final String name, final Object value) {
+            values.put(name, value);
+        }
+    }
+
+    private static class SessionManager {
+
+        private static final Map<String, Session> SESSIONS = new HashMap<>();
+
+        public static void add(final Session session) {
+            SESSIONS.put(session.id, session);
+        }
+
+        public static Session find(final String sessionId) {
+            return SESSIONS.get(sessionId);
+        }
+    }
 }
+

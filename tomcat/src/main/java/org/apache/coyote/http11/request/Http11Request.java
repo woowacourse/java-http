@@ -13,17 +13,30 @@ public record Http11Request(
         RequestBody body
 ) {
 
-    public Http11Request(String requestLine, List<String> headers, byte[] body) {
-        this(RequestLine.parse(requestLine), RequestHeaders.parse(headers), RequestBody.parse(body));
-    }
+    public static Http11Request from(final BufferedReader bufferedReader) throws IOException {
+        final String line = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.parse(line);
 
-    public static Http11Request from(BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
         final List<String> headers = extractHeaderLines(bufferedReader);
-        return new Http11Request(requestLine, headers, null);
+        final RequestHeaders requestHeaders = RequestHeaders.parse(headers);
+
+        final int contentLength = requestHeaders.getContentLength();
+        final String body = readBody(bufferedReader, contentLength);
+        final RequestBody requestBody = RequestBody.parse(body);
+
+        return new Http11Request(requestLine, requestHeaders, requestBody);
     }
 
-    private static List<String> extractHeaderLines(BufferedReader bufferedReader) {
+    private static String readBody(final BufferedReader bufferedReader, final int length) throws IOException {
+        if (length <= 0) {
+            return "";
+        }
+        char[] bodyChars = new char[length];
+        bufferedReader.read(bodyChars, 0, length);
+        return new String(bodyChars);
+    }
+
+    private static List<String> extractHeaderLines(final BufferedReader bufferedReader) {
         return bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
                 .collect(Collectors.toList());

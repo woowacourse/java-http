@@ -1,7 +1,8 @@
 package org.apache.catalina.context;
 
 import com.techcourse.controller.DefaultController;
-import com.techcourse.controller.UserController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.Controller;
@@ -18,7 +19,8 @@ import org.apache.catalina.resource.ViewResourceLoader;
 public class ApplicationContext {
 
     public final static Map<String, Controller> controllerMap = Map.of(
-            "/login", new UserController(),
+            "/login", new LoginController(),
+            "/register", new RegisterController(),
             "/", new DefaultController()
     );
 

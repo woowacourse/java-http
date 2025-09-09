@@ -17,4 +17,8 @@ public record RequestHeaders(LinkedHashMap<String, String> headers) {
 
         return new RequestHeaders(headers);
     }
+
+    public int getContentLength() {
+        return headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
+    }
 }

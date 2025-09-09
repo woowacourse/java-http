@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +43,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Http11Request request = new Http11Request(inputStream);
+            final Http11Request request;
+            try {
+                request = new Http11Request(inputStream);
+            } catch (Http11ParseException e) {
+                sendErrorResponse(outputStream);
+                return;
+            }
+
             final String path = extractPath(request.getUri());
             final String method = request.getMethod();
 
@@ -70,6 +78,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendErrorResponse(OutputStream outputStream)
+            throws IOException {
+        String statusLine = "HTTP/1.1 400 Bad Request"; // TODO: 별도의 핸들러로 관리
+        String responseBody = readFileFromClasspath("static/400.html");
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", MediaType.HTML.getMimeType());
+        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        final String response = buildResponse(statusLine, responseHeaders, responseBody);
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private String handleLogout(final Http11Request request, final Map<String, String> responseHeaders) {

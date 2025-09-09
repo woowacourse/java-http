@@ -17,12 +17,18 @@ public class Http11Request {
     private String body;
     private Http11Cookie cookie;
 
-    public Http11Request(final InputStream inputStream) throws IOException {
+    public Http11Request(final InputStream inputStream) throws IOException, Http11ParseException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String[] requestLine = reader.readLine().split(" ");
-        this.method = requestLine[0];
-        this.uri = requestLine[1];
-        this.version = requestLine[2];
+        String requestLine = reader.readLine();
+        String[] requestLineParts = requestLine.split(" ");
+
+        if (requestLineParts.length != 3) {
+            throw new Http11ParseException(ParseError.INVALID_REQUEST_LINE);
+        }
+
+        this.method = requestLineParts[0];
+        this.uri = requestLineParts[1];
+        this.version = requestLineParts[2];
 
         Map<String, String> map = new LinkedHashMap<>();
         String line;

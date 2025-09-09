@@ -26,4 +26,8 @@ public enum MediaType {
                 .map(type -> type.mimeType)
                 .orElse(HTML.mimeType); // TODO: 기본값 변경
     }
+
+    public String getMimeType() {
+        return mimeType;
+    }
 }

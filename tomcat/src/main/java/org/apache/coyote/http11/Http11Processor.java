@@ -100,6 +100,7 @@ public class Http11Processor implements Runnable, Processor {
                 if (jsessionid != null && sessionManager.findSession(jsessionid) != null) {
                     final HttpResponse httpResponse = responseRedirectPage("/index.html");
                     writeResponse(outputStream, httpResponse.getResponse());
+                    return;
                 }
                 printMemberLog(httpHeader);
                 final HttpResponse httpResponse = responseHtml("login");

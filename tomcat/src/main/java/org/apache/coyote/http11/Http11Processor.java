@@ -3,17 +3,16 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,12 +33,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
-            String requestStartLine = bufferedReader.readLine();
-            HttpRequestUrl url = new HttpRequestUrl(requestStartLine.split(" ")[1]);
+            HttpRequest request = new HttpRequest(inputStream);
 
-            String response = getResponse(url);
+            String response = getResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -48,21 +45,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequestUrl url) throws IOException {
+    private String getResponse(HttpRequest request) throws IOException {
         try {
-            if (url.equalPath("/")) {
-                return create200Response("Hello world!", ContentType.TEXT_PLAIN);
-            }
-            if (url.equalPath("/login")) {
-                String account = url.getParameter("account");
-                String password = url.getParameter("password");
-                if (account != null && password != null) {
-                    validateAccount(account, password);
+            if (request.equalPath("/")) {
+                if (request.equalMethod(HttpMethod.GET)) {
+                    return create200Response("Hello world!", ContentType.TEXT_PLAIN);
                 }
-                return createStaticResourceResponse("/login.html");
             }
-            if (url.isStaticResourcePath()) {
-                return createStaticResourceResponse(url.getPath());
+            if (request.equalPath("/login")) {
+                if (request.equalMethod(HttpMethod.GET)) {
+                    return createStaticResourceResponse("/login.html");
+                }
+                if (request.equalMethod(HttpMethod.POST)) {
+                    return login(request);
+                }
+            }
+            if (request.isStaticResourcePath()) {
+                if (request.equalMethod(HttpMethod.GET)) {
+                    return createStaticResourceResponse(request.getPath());
+                }
             }
             return create404Response();
         } catch (RuntimeException e) {
@@ -80,18 +81,19 @@ public class Http11Processor implements Runnable, Processor {
         return create200Response(Files.readString(staticResource), ContentType.of(fileExtension));
     }
 
-    private void validateAccount(String account, String password) {
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+    private String login(HttpRequest request) {
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(request.getBody("account"));
         if (optionalUser.isEmpty()) {
             log.info("존재하지 않는 유저입니다.");
-            return;
+            return create302Response("/401.html");
         }
         User user = optionalUser.get();
-        if (!user.checkPassword(password)) {
+        if (!user.checkPassword(request.getBody("password"))) {
             log.info("비밀번호가 일치하지 않습니다.");
-            return;
+            return create302Response("/401.html");
         }
         log.info(user.toString());
+        return create302Response("/index.html");
     }
 
     private Path getStaticResource(String url) {
@@ -109,6 +111,13 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + body.getBytes().length + " ",
                 "",
                 body);
+    }
+
+    private String create302Response(String path) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + path,
+                "");
     }
 
     private String create404Response() throws IOException {

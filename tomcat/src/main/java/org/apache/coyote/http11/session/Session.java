@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.session;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Session {
@@ -9,7 +10,7 @@ public class Session {
 
     public Session(final String id, final Map<String, Object> values) {
         this.id = id;
-        this.values = values;
+        this.values = new HashMap<>(values);
     }
 
     public String getId() {

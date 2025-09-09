@@ -5,6 +5,7 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.AbstractController;
+import org.apache.coyote.http11.domain.HttpCookies;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -33,6 +34,9 @@ public class LoginController extends AbstractController {
             final Optional<User> user = InMemoryUserRepository.findByAccount(account);
             if (user.isPresent() && user.get().checkPassword(password)) {
                 log.info("User found: {}", user.get());
+                if (request.isCookiesEmpty()) {
+                    response.addCookie(new HttpCookies());
+                }
                 response.setState(HttpStatus.Found);
                 return "/index";
             }

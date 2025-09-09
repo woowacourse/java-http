@@ -57,4 +57,8 @@ public record Http11Request(
     public String getRequestTarget() {
         return requestLine.requestTarget();
     }
+
+    public boolean isCookiesEmpty() {
+        return headers.getCookies() == null;
+    }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.domain.ContentType;
+import org.apache.coyote.http11.domain.HttpCookies;
 
 public class Http11Response {
 
@@ -19,6 +20,10 @@ public class Http11Response {
 
     public void addHeader(final String key, final String value) {
         headers.put(key, value);
+    }
+
+    public void addCookie(final HttpCookies cookies) {
+        headers.put(cookies);
     }
 
     public void setContentType(final String resourcePath) {

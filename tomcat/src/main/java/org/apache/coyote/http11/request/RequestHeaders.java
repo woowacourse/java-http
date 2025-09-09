@@ -2,13 +2,14 @@ package org.apache.coyote.http11.request;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.apache.coyote.http11.domain.HttpCookies;
 
 public record RequestHeaders(LinkedHashMap<String, String> headers) {
 
     public static RequestHeaders parse(final List<String> headerLines) {
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        final LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 
-        for (String line : headerLines) {
+        for (final String line : headerLines) {
             final String[] header = line.split(":", 2);
             if (header.length == 2) {
                 headers.put(header[0].trim(), header[1].trim());
@@ -19,6 +20,16 @@ public record RequestHeaders(LinkedHashMap<String, String> headers) {
     }
 
     public int getContentLength() {
-        return headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
+        final String contentLength = "Content-Length";
+        return headers.containsKey(contentLength) ? Integer.parseInt(headers.get(contentLength)) : 0;
+    }
+
+    public HttpCookies getCookies() {
+        final String cookieName = "Cookie";
+        if (headers.containsKey(cookieName)) {
+            String cookie = headers.get(cookieName);
+            return HttpCookies.parse(cookie);
+        }
+        return null;
     }
 }

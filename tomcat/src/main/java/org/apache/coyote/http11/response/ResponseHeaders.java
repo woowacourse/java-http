@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.domain.HttpCookies;
 
 public record ResponseHeaders(LinkedHashMap<String, String> headers) {
 
@@ -13,8 +14,12 @@ public record ResponseHeaders(LinkedHashMap<String, String> headers) {
         headers.put(key, value);
     }
 
+    public void put(HttpCookies cookies) {
+        headers.put("Set-Cookie", cookies.getJsessionid());
+    }
+
     public byte[] getHeader() {
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             stringBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }

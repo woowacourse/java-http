@@ -2,8 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.MimeTypeResolver;
 import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.util.MimeTypeResolver;
 import org.apache.coyote.util.ResourceUtil;
 
 public class StaticResourceHandler implements RequestHandler {

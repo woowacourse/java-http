@@ -1,4 +1,4 @@
-package org.apache.coyote.util;
+package org.apache.coyote.http11.response;
 
 import java.util.Map;
 

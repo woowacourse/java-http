@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.HttpController;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -9,6 +11,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.UnauthorizedException;
@@ -143,6 +147,7 @@ public class Http11Processor implements Runnable, Processor {
         String account = jsonValue.get("account");
         String password = jsonValue.get("password");
         final HttpResponse httpResponse = httpController.login(account, password);
+        handleSessionCreation(httpResponse);
         return httpResponse.getResponseFormat();
     }
 
@@ -184,5 +189,18 @@ public class Http11Processor implements Runnable, Processor {
     private String helloWorld() {
         final HttpResponse httpResponse = httpController.helloWorld();
         return httpResponse.getResponseFormat();
+    }
+
+    private void handleSessionCreation(final HttpResponse httpResponse) {
+        Object userAttribute = httpResponse.getAttribute("session_user");
+        if (userAttribute instanceof User) {
+            final String sessionId = UUID.randomUUID().toString();
+            final HttpSession session = new Session(sessionId);
+
+            session.setAttribute("user", userAttribute);
+            sessionManager.add(session);
+
+            httpResponse.setCookie("JSESSIONID", sessionId);
+        }
     }
 }

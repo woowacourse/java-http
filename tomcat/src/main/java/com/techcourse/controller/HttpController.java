@@ -4,8 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -57,9 +55,8 @@ public class HttpController {
         final HttpResponse httpResponse = HttpResponse.found("index.html");
         String sessionId = UUID.randomUUID().toString();
         httpResponse.setCookie("JSESSIONID", sessionId);
-        Session session = new Session(sessionId);
-        session.setAttribute("user", user);
-        SessionManager.INSTANCE.add(session);
+
+        httpResponse.addAttribute("session_user", user);
         return httpResponse;
     }
 

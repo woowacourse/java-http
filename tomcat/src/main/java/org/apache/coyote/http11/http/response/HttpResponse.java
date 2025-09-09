@@ -15,6 +15,7 @@ public class HttpResponse {
     private final HttpStatusLine responseLine;
     private final HttpHeader header;
     private final HttpResponseBody responseBody;
+    private final Map<String, Object> sessionAttributes;
 
     private HttpResponse(final HttpStatusLine responseLine,
                          final HttpHeader header,
@@ -22,6 +23,7 @@ public class HttpResponse {
         this.responseLine = responseLine;
         this.header = header;
         this.responseBody = responseBody;
+        this.sessionAttributes = new HashMap<>();
     }
 
     public static HttpResponse ok() {
@@ -72,11 +74,6 @@ public class HttpResponse {
         return HttpHeader.from(responseHeaderInfo);
     }
 
-    public void setCookie(final String cookieName, final String cookieValue) {
-        String cookieHeaderValue = cookieName + "=" + cookieValue;
-        header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), cookieHeaderValue);
-    }
-
     public String getResponseFormat() {
         final List<String> responseLines = getResponseLines();
         return String.join("\r\n", responseLines.toArray(String[]::new));
@@ -95,5 +92,18 @@ public class HttpResponse {
         formatLine.add("");
         formatLine.add(new String(responseBodyValue.get(), StandardCharsets.UTF_8));
         return formatLine;
+    }
+
+    public void addAttribute(final String key, final Object value) {
+        sessionAttributes.put(key, value);
+    }
+
+    public Object getAttribute(String key) {
+        return this.sessionAttributes.get(key);
+    }
+
+    public void setCookie(final String cookieName, final String cookieValue) {
+        String cookieHeaderValue = cookieName + "=" + cookieValue;
+        header.addHeader(HttpHeaderKey.SET_COOKIE.getValue(), cookieHeaderValue);
     }
 }

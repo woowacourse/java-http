@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.vo.HttpCookie;
 import org.apache.coyote.http11.vo.HttpRequest;
 import org.apache.coyote.http11.vo.HttpResponse;
 import org.apache.coyote.http11.vo.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -79,18 +81,26 @@ public class Http11Processor implements Runnable, Processor {
         }
         final var headers = getHeaders(headerLines);
 
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        if (reader.read(buffer, 0, contentLength) == -1) {
-            throw new EOFException();
+        if (headers.containsKey("Content-Length")) {
+            final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            if (reader.read(buffer, 0, contentLength) == -1) {
+                throw new EOFException();
+            }
+            final String body = new String(buffer);
+            return new HttpRequest(
+                    firstLine.getFirst(),
+                    firstLine.get(1),
+                    getHeaders(headerLines),
+                    body
+            );
         }
-        final String body = new String(buffer);
 
         return new HttpRequest(
                 firstLine.getFirst(),
                 firstLine.get(1),
                 getHeaders(headerLines),
-                body
+                ""
         );
     }
 
@@ -175,7 +185,20 @@ public class Http11Processor implements Runnable, Processor {
 
             if (user.get().checkPassword(password)) {
                 log.info("user : {}", user);
-                return new HttpResponse("text/html", HttpStatus.FOUND, readStaticFileByName("index.html"));
+                final var httpResponse = new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("index.html"));
+                if (request.headers().containsKey("Cookie")) {
+                    final var requestCookie = new HttpCookie(request.headers().get("Cookie"));
+                    if (requestCookie.containsKey("JSESSIONID")) {
+                        return httpResponse;
+                    }
+                }
+
+                final var uuid = UUID.randomUUID();
+                final var cookie = new HttpCookie();
+                cookie.add("JSESSIONID", uuid.toString());
+
+                httpResponse.setCookie(cookie);
+                return httpResponse;
             }
             return new HttpResponse("text/html", HttpStatus.UNAUTHORIZED, readStaticFileByName("401.html"));
         }
@@ -284,14 +307,30 @@ public class Http11Processor implements Runnable, Processor {
      * @return response body text
      */
     private String getHttpResponse(final HttpResponse response) {
+        return String.join("\r\n",
+                getHeaderString(response),
+                "",
+                response.body()
+        );
+    }
+
+    private String getHeaderString(final HttpResponse response) {
         final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", response.getStatusCode(), response.getStatusReason());
         final var contentTypeHeader = String.format("Content-Type: %s;charset=utf-8 ", response.mediaType());
+        final var contentLengthHeader = String.format("Content-Length: %d ", response.body().getBytes().length);
+        if (response.headers().isEmpty()) {
+            return String.join("\r\n",
+                    responseInfoHeader,
+                    contentTypeHeader,
+                    contentLengthHeader
+            );
+        }
+        final var customHeaders = response.getHeaderString();
         return String.join("\r\n",
                 responseInfoHeader,
                 contentTypeHeader,
-                "Content-Length: " + response.body().getBytes().length + " ",
-                "",
-                response.body()
+                contentLengthHeader,
+                customHeaders
         );
     }
 

@@ -64,12 +64,14 @@ class Http11ProcessorTest {
     @Test
     void success_login() {
         // given
+        final var body = "account=gugu&password=password";
         final String request = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(request);
         final var processor = new Http11Processor(socket);
@@ -78,19 +80,21 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("HTTP/1.1 302 Found");
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
     }
 
     @DisplayName("유효하지 않은 id, password 입력 시 401")
     @Test
     void error_login() {
         // given
+        final var body = "account=&password=";
         final String request = String.join("\r\n",
-                "GET /login?account=&password= HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(request);
         final var processor = new Http11Processor(socket);

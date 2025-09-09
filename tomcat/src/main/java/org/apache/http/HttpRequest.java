@@ -158,9 +158,9 @@ public class HttpRequest {
         String cookieHeader = getHeader(HttpHeader.COOKIE.getValue());
         List<String> cookieLines = List.of(cookieHeader.split(";"));
         for (String cookieLine : cookieLines) {
-            List<String> cookieKeyValue = List.of(cookieLine.split("="));
-            String key = cookieKeyValue.getFirst().trim();
-            String value = cookieKeyValue.getLast().trim();
+            int index = cookieLine.indexOf("=");
+            String key = cookieLine.substring(0, index).trim();
+            String value = cookieLine.substring(index + 1).trim();
             cookieRead.put(key, new Cookie(key, value));
         }
         return cookieRead;

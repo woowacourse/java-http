@@ -1,6 +1,5 @@
 package org.apache.coyote.cookie;
 
-import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +7,7 @@ import java.util.UUID;
 public class HttpCookie {
     private static final String JSESSIONID = "JSESSIONID";
 
-    private final Map<String, User> sessionStorage = new HashMap<>();
-    private Map<String, String> cookies = new HashMap<>();
+    private final Map<String, String> cookies = new HashMap<>();
 
     public HttpCookie(String cookieHeader) {
         if (cookieHeader != null && !cookieHeader.isEmpty()) {
@@ -25,11 +23,9 @@ public class HttpCookie {
         return cookies.get(JSESSIONID);
     }
 
-    public String generateJSESSIONID(User user) {
+    public String generateJSESSIONID() {
         UUID uuid = UUID.randomUUID();
-        String sessionId = uuid.toString();
-        sessionStorage.put(sessionId, user);
-        return sessionId;
+        return uuid.toString();
     }
 
     private void parseCookies(String cookieHeader) {

@@ -2,16 +2,12 @@ package org.apache.coyote.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Map;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.PageRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class UserRegisterHandler implements RequestHandler{
-    private static final Logger log = LoggerFactory.getLogger(UserRegisterHandler.class);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";

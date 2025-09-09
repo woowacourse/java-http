@@ -26,7 +26,7 @@ public class UserLoginHandler implements RequestHandler{
     public String handle(final String method, final String path, final Map<String,String> queryParams, final HttpCookie httpCookie
     ) {
         if (method.equals(GET_METHOD_REQUEST)) {
-            return handleLoginGet(queryParams,httpCookie);
+            return handleLoginGet(httpCookie);
         }
         if (method.equals(POST_METHOD_REQUEST)) {
             return handleLoginPost(queryParams, httpCookie);
@@ -34,7 +34,7 @@ public class UserLoginHandler implements RequestHandler{
         throw new IllegalArgumentException("정의되지 않는 Method 입니다.");
     }
 
-    private String handleLoginGet(Map<String, String> queryParams, HttpCookie httpCookie) {
+    private String handleLoginGet(HttpCookie httpCookie) {
         if (httpCookie.hasJSESSIONID()) {
             try {
                 Session session = sessionManager.findSession(httpCookie.getSessionId());
@@ -54,7 +54,7 @@ public class UserLoginHandler implements RequestHandler{
                     .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
 
             checkUserPassword(user, queryParams.get(PASSWORD));
-            String sessionId = httpCookie.generateJSESSIONID(user);
+            String sessionId = httpCookie.generateJSESSIONID();
             Session session = new Session(sessionId);
             session.setAttribute("user",user);
             sessionManager.add(session);

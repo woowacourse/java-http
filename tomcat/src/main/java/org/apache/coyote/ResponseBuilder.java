@@ -39,10 +39,10 @@ public class ResponseBuilder {
         }
     }
 
-    public String build(final String requestUri, final String status, final byte[] body, final Map<String, String> headers) {
+    public String build(final String requestUri, final HttpStatus status, final byte[] body, final Map<String, String> headers) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("HTTP/1.1 ").append(status).append(" \r\n");
+        builder.append("HTTP/1.1 ").append(status.getName()).append(" \r\n");
 
         if (requestUri != null) {
             String contentType = getContentType(requestUri);

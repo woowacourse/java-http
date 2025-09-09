@@ -22,17 +22,12 @@ public class RequestHandler {
     }
 
     public String handle(final HttpRequest request) throws IOException {
-        String uri = request.uri();
-        String path = uri.substring(1);
-
         if (request.method().equals("GET")) {
             return handleGet(request);
         }
-
         if (request.method().equals("POST")) {
-            return handlePost(path, request.body());
+            return handlePost(request);
         }
-
         return null;
     }
 
@@ -41,69 +36,66 @@ public class RequestHandler {
 
         if (uri.contains(".")) {
             final byte[] body = ResourceLoader.get(uri);
-            return responseBuilder.build(uri, "200 OK", body, null);
+            return responseBuilder.build(uri, HttpStatus.OK, body, null);
         }
         if (viewPaths.contains(uri) && request.queryParams() == null && request.body() == null) {
             final byte[] body = ResourceLoader.get(uri + ".html");
-            return responseBuilder.build(uri + ".html", "200 OK", body, null);
+            return responseBuilder.build(uri + ".html", HttpStatus.OK, body, null);
         }
-        return responseBuilder.build("", "403 Forbidden", null, null);
+        return responseBuilder.build("", HttpStatus.FORBIDDEN, null, null);
     }
 
-    private String handlePost(final String path, final String body) {
-        if (path.startsWith("login")) {
-            Map<String, String> map = new HashMap<>();
-            for (String keyValue : body.split("&")) {
-                int index = keyValue.indexOf("=");
-                String key = keyValue.substring(0, index);
-                String value = keyValue.substring(index + 1);
-                map.put(key, value);
-            }
+    private String handlePost(final HttpRequest request) {
+        if (request.body() == null) {
+            return responseBuilder.build(null, HttpStatus.BAD_REQUEST, null, null);
+        }
 
-            User user;
+        Map<String, String> body = new HashMap<>();
+
+        for (String keyValue : request.body().split("&")) {
+            int index = keyValue.indexOf("=");
+            String key = keyValue.substring(0, index);
+            String value = keyValue.substring(index + 1);
+            body.put(key, value);
+        }
+
+        if (request.uri().startsWith("/login")) {
             try {
-                user = service.findUser(map);
+                User user = service.findUser(body);
+                UUID uuid = createSession(user);
+
+                final Map<String, String> headers = new HashMap<>();
+                headers.put("Set-Cookie", "JSESSIONID=" + uuid);
+                headers.put("Location", "/index.html");
+
+                return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
             } catch (IllegalArgumentException e) {
                 final Map<String, String> headers = new HashMap<>();
                 headers.put("Location", "/401.html");
-                return responseBuilder.build(null, "302 Found", new byte[0], headers);
+                return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
             }
+        }
+
+        if (request.uri().startsWith("/register")) {
+            User user = service.registerUser(body.get("account"), body.get("password"), body.get("email"));
+            UUID uuid = createSession(user);
 
             final Map<String, String> headers = new HashMap<>();
-            UUID uuid = UUID.randomUUID();
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             headers.put("Location", "/index.html");
 
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session loginSession = new Session(uuid.toString());
-            loginSession.setAttribute("user", user);
-            sessionManager.add(new Session(uuid.toString()));
-
-            return responseBuilder.build(null, "302 Found", null, headers);
+            return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
         }
 
-        if (path.startsWith("register")) {
-            Map<String, String> map = new HashMap<>();
-            for (String keyValue : body.split("&")) {
-                int index = keyValue.indexOf("=");
-                String key = keyValue.substring(0, index);
-                String value = keyValue.substring(index + 1);
-                map.put(key, value);
-            }
-            User user = service.registerUser(map.get("account"), map.get("password"), map.get("email"));
-            final Map<String, String> headers = new HashMap<>();
-            UUID uuid = UUID.randomUUID();
-            headers.put("Set-Cookie", "JSESSIONID=" + uuid);
-            headers.put("Location", "/index.html");
+        return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
+    }
 
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session loginSession = new Session(uuid.toString());
-            loginSession.setAttribute("user", user);
-            sessionManager.add(new Session(uuid.toString()));
-
-            return responseBuilder.build(null, "302 Found", null, headers);
-        }
-
-        return responseBuilder.build(path, "", null, null);
+    private UUID createSession(final User user) {
+        UUID uuid = UUID.randomUUID();
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session loginSession = new Session(uuid.toString());
+        loginSession.setAttribute("user", user);
+        sessionManager.add(loginSession);
+        return uuid;
     }
 }

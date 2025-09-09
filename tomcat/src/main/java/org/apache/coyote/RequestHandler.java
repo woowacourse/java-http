@@ -81,7 +81,16 @@ public class RequestHandler {
                 String value = keyValue.substring(index + 1);
                 map.put(key, value);
             }
-            User user = service.findUser(map);
+
+            User user;
+            try {
+                user = service.findUser(map);
+            } catch (IllegalArgumentException e) {
+                final Map<String, String> headers = new HashMap<>();
+                headers.put("Location", "/401.html");
+                return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
+            }
+
             final Map<String, String> headers = new HashMap<>();
             UUID uuid = UUID.randomUUID();
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);

@@ -12,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.util.ErrorResponder;
 import org.apache.coyote.http11.util.HttpRequestIO;
 import org.apache.coyote.http11.util.HttpResponseWriter;
+import org.apache.coyote.http11.util.SessionSupport;
 import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
             final Map<String, String> responseHeaders = new HashMap<>();
 
-            var session = manager.findSession(requestCookies.getCookie("JSESSIONID"));
-            if (session == null) {
-                session = Session.create(manager);
-                final var sessionCookie = new ResponseCookie("JSESSIONID", session.getId());
-                responseHeaders.put("Set-Cookie", sessionCookie.toHeaderString());
-            }
+            var session = SessionSupport.findSessionOrCreate(manager, requestCookies, responseHeaders);
 
             //=========== POST 요청 처리 ============
             if (requestLine.getMethod() == HttpMethod.POST) {
@@ -63,13 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                     final var password = parameters.get("password");
                     final Optional<User> optionalUser = findUserByAccount(account);
                     if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                        final var oldSession = session;
-                        session = Session.create(manager);
-                        final var rotatedCookie = new ResponseCookie("JSESSIONID", session.getId());
-                        responseHeaders.put("Set-Cookie", rotatedCookie.toHeaderString());
-                        session.setAttribute("user", optionalUser.get());
-                        oldSession.invalidate();
-
+                        SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), responseHeaders);
                         log.info("로그인 성공 account: {}", account);
                     } else {
                         redirectUrl = "/401.html";

@@ -23,7 +23,6 @@ public class RequestRouter {
 
     public String handleRoute(final String method,final  String path, final Map<String, String> queryParams) {
         final String requestType = determineRequestType(path,queryParams);
-
         switch (requestType) {
             case LOGIN_REQUEST:
                 return userLoginProcessor.handle(method, path, queryParams);
@@ -33,7 +32,8 @@ public class RequestRouter {
     }
 
     private String determineRequestType(final String path, final Map<String, String> queryParams) {
-        if(queryParams != null){
+        if(!queryParams.isEmpty()){
+            log.info(queryParams.toString());
             if (path.startsWith("/login")) {
                 return LOGIN_REQUEST;
             }

@@ -27,8 +27,4 @@ public class Session {
     public void removeAttribute(final String name) {
         values.remove(name);
     }
-
-    public void invalidate() {
-        
-    }
 }

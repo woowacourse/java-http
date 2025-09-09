@@ -5,7 +5,6 @@ import org.apache.coyote.http11.Session;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager{
 

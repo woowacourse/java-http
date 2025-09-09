@@ -93,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
             if (requestTarget.equals("/"))  {
                 final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
-                return createHtmlResponse(200, defaultResponseBytes);
+                return Http11Response.createHtmlResponse(HttpStatus.OK, defaultResponseBytes);
             }
             if (requestTarget.contains("/login")) {
                 return handleLoginRequest(request);
@@ -102,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
                 return handleRegisterRequest(request);
             }
             if (requestTarget.endsWith(".html")) {
-                return handleHtmlRequest(200, requestTarget);
+                return handleHtmlRequest(HttpStatus.OK, requestTarget);
             }
             if (requestTarget.endsWith(".css")) {
                 return handleCssRequest(requestTarget);
@@ -129,19 +129,19 @@ public class Http11Processor implements Runnable, Processor {
         if (sessionId.isPresent()) {
             final Session session = sessionManager.findSession(sessionId.get());
             if (session != null) {
-                return handleHtmlRequest(302, "/index.html");
+                return handleHtmlRequest(HttpStatus.FOUND, "/index.html");
             }
         }
 
         if (account.isEmpty() || password.isEmpty()) {
             final byte[] fileContent = readFile("/login.html");
 
-            return createHtmlResponse(200, fileContent);
+            return Http11Response.createHtmlResponse(HttpStatus.OK, fileContent);
         }
 
         final Optional<User> userOrEmpty = findUserByAccount(account.get(), password.get());
         if (userOrEmpty.isEmpty()) {
-            return handleHtmlRequest(401, "/401.html");
+            return handleHtmlRequest(HttpStatus.BAD_REQUEST, "/401.html");
         }
 
         final User user = userOrEmpty.get();
@@ -150,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
         if (request.getMethod().equals("GET")) {
-            return handleHtmlRequest(200, "/register.html");
+            return handleHtmlRequest(HttpStatus.OK, "/register.html");
         }
 
         final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
@@ -179,38 +179,30 @@ public class Http11Processor implements Runnable, Processor {
         sessionManager.add(session);
 
         final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(indexFileContent.length));
         headers.put("Set-Cookie", String.format("JSESSIONID=%s", sessionId));
 
-        return new Http11Response(
-                "HTTP/1.1",
-                302,
-                "OK",
-                headers,
-                indexFileContent
-        );
+        return Http11Response.createHtmlResponse(HttpStatus.FOUND, headers, indexFileContent);
     }
 
     private Http11Response handleHtmlRequest(
-            final int statusCode,
+            final HttpStatus status,
             final String requestTarget
     ) throws IOException {
         final byte[] fileContent = readFile(requestTarget);
 
-        return createHtmlResponse(statusCode, fileContent);
+        return Http11Response.createHtmlResponse(status, fileContent);
     }
 
     private Http11Response handleCssRequest(final String requestTarget) throws IOException {
         final byte[] fileContent = readFile(requestTarget);
 
-        return createCssResponse(fileContent);
+        return Http11Response.createCssResponse(HttpStatus.OK, fileContent);
     }
 
     private Http11Response handleJsResponse(final String requestTarget) throws IOException {
         final byte[] fileContent = readFile(requestTarget);
 
-        return createJsResponse(fileContent);
+        return Http11Response.createJsResponse(HttpStatus.OK, fileContent);
     }
 
     private byte[] readFile(final String location) throws IOException {
@@ -221,57 +213,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response createHtmlResponse(
-            final int statusCode,
-            final byte[] body
-    ) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                statusCode,
-                "OK",
-                headers,
-                body
-        );
-    }
-
-    private Http11Response createCssResponse(final byte[] body) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/css;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                200,
-                "OK",
-                headers,
-                body
-        );
-    }
-
-    private Http11Response createJsResponse(final byte[] body) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "application/javascript;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                200,
-                "OK",
-                headers,
-                body
-        );
-    }
-
     private String generateSessionID() {
         final UUID uuid = UUID.randomUUID();
         return uuid.toString();
     }
 
-    private Optional<User> findUserByAccount(final String account, final String password) {
+    private Optional<User> findUserByAccount(
+            final String account,
+            final String password
+    ) {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {

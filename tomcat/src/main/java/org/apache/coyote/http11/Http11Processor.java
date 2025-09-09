@@ -63,7 +63,13 @@ public class Http11Processor implements Runnable, Processor {
                     final var password = parameters.get("password");
                     final Optional<User> optionalUser = findUserByAccount(account);
                     if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+                        final var oldSession = session;
+                        session = Session.create(manager);
+                        final var rotatedCookie = new ResponseCookie("JSESSIONID", session.getId());
+                        responseHeaders.put("Set-Cookie", rotatedCookie.toHeaderString());
                         session.setAttribute("user", optionalUser.get());
+                        oldSession.invalidate();
+
                         log.info("로그인 성공 account: {}", account);
                     } else {
                         redirectUrl = "/401.html";

@@ -139,6 +139,10 @@ public class Http11Processor implements Runnable, Processor {
         return parseResponse(httpStatusCode, contentType, responseBody);
     }
 
+    private String generateRedirectResponse(final int httpStatusCode, final String location) {
+        return parseResponse(httpStatusCode, location);
+    }
+
     private String generateErrorResponse(final int httpStatusCode) {
         try {
             if (!HTTP_STATUS_CODES.containsKey(httpStatusCode)) {
@@ -171,6 +175,14 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
+    private String parseResponse(final int httpStatusCode, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "");
+    }
+
     private String extractExtension(final String resourceName) {
         int dotIndex = resourceName.lastIndexOf(".");
         if (dotIndex == -1) {
@@ -192,12 +204,11 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
-            final URL resource = getResourceUrl("/index.html");
-            sendResponse(generateResponse(302, resource), outputStream);
+            sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
             return;
         }
 
-        sendResponse(generateErrorResponse(401), outputStream);
+        sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
     }
 
     private void sendResponse(final String response, final OutputStream outputStream) throws IOException {

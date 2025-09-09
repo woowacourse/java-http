@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.httpresponse;
 
+import org.apache.coyote.http11.cookie.HttpCookie;
+
 public class HttpResponse {
 
     private final ResponseLine responseLine;
@@ -20,7 +22,7 @@ public class HttpResponse {
                 responseBody.toResponseText());
     }
 
-    public void addHeader(final String key, final String value) {
-        responseHeaders.add(key, value);
+    public void setCookie(final HttpCookie cookie) {
+        cookie.addToResponseHeaders(responseHeaders);
     }
 }

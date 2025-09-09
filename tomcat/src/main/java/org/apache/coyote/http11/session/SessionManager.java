@@ -3,9 +3,12 @@ package org.apache.coyote.http11.session;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class SessionManager {
 
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    
     private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
@@ -18,6 +21,10 @@ public class SessionManager {
         final Session session = new Session(sessionId, values);
         add(session);
         return session;
+    }
+
+    public HttpCookie createSessionCookie(Session session) {
+        return HttpCookie.of(SESSION_COOKIE_NAME, session.getId());
     }
 
     public void add(final Session session) {

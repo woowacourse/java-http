@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.httprequest.RequestHeaders;
+import org.apache.coyote.http11.httpresponse.ResponseHeaders;
 
 public class HttpCookie {
 
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String REQUEST_HEADER_COOKIE_NAME = "Cookie";
+    private static final String RESPONSE_HEADER_COOKIE_NAME = "Set-Cookie";
 
     private final Map<String, String> cookies;
 
@@ -29,6 +31,14 @@ public class HttpCookie {
             cookies.put(key, value);
         }
         return new HttpCookie(cookies);
+    }
+
+    public static HttpCookie of(final String cookieName, final String cookieValue) {
+        return new HttpCookie(Map.of(cookieName, cookieValue));
+    }
+
+    public void addToResponseHeaders(final ResponseHeaders responseHeaders) {
+        cookies.forEach((key, value) -> responseHeaders.add(RESPONSE_HEADER_COOKIE_NAME, key + "=" + value));
     }
 
     public Optional<String> get(final String key) {

@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String path = extractPath(request.getUri());
-            final String method = request.getMethod();
+            final Http11Method method = request.getMethod();
 
             String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
@@ -62,11 +62,11 @@ public class Http11Processor implements Runnable, Processor {
             if ("/logout".equals(path)) {
                 statusLine = handleLogout(request, responseHeaders);
                 responseBody = "";
-            } else if ("GET".equals(method)) {
+            } else if (Http11Method.GET.equals(method)) {
                 Entry<String, String> getResult = handleGetRequest(path, request, responseHeaders);
                 statusLine = getResult.getKey();
                 responseBody = getResult.getValue();
-            } else if ("POST".equals(method)) {
+            } else if (Http11Method.POST.equals(method)) {
                 statusLine = handlePostRequest(path, request, responseHeaders);
                 responseBody = "";
             }

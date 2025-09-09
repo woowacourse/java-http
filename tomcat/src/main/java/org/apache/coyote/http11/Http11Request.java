@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Http11Request {
 
-    private String method;
+    private Http11Method method;
     private String uri;
     private String version;
     private Map<String, String> headers;
@@ -26,7 +26,7 @@ public class Http11Request {
             throw new Http11ParseException(ParseError.INVALID_REQUEST_LINE);
         }
 
-        this.method = requestLineParts[0];
+        this.method = Http11Method.from(requestLineParts[0]);
         this.uri = requestLineParts[1];
         this.version = requestLineParts[2];
 
@@ -52,7 +52,7 @@ public class Http11Request {
         this.cookie = new Http11Cookie(map.getOrDefault("Cookie", null));
     }
 
-    public String getMethod() {
+    public Http11Method getMethod() {
         return method;
     }
 

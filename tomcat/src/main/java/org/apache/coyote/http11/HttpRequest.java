@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -108,9 +110,9 @@ public class HttpRequest {
 
     private static void putParameters(String queryStrings, Map<String, String> parameters) {
         for (String queryString : queryStrings.split("&")) {
-            String[] strings = queryString.split("=");
-            String key = strings[0];
-            String value = strings[1];
+            String[] strings = queryString.split("=", 2);
+            String key = URLDecoder.decode(strings[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(strings[1], StandardCharsets.UTF_8);
             parameters.put(key, value);
         }
     }

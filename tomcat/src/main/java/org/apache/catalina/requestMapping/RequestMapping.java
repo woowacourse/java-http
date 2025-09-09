@@ -16,12 +16,12 @@ public class RequestMapping {
     }
 
     public void process(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Optional<Controller> servlet = getController.findController(httpRequest);
-        if (servlet.isEmpty()) {
+        Optional<Controller> controller = getController.findController(httpRequest);
+        if (controller.isEmpty()) {
             httpResponse.init("", ContentType.HTML, HttpStatus.NOT_FOUND);
             return;
         }
 
-        servlet.get().service(httpRequest, httpResponse);
+        controller.get().service(httpRequest, httpResponse);
     }
 }

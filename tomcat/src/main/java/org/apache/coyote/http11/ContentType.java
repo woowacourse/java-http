@@ -16,7 +16,11 @@ public enum ContentType {
         this.extension = extension;
     }
 
-    public static String getMimeType(final String path) {
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public static String fromPath(final String path) {
         final String extension = getExtension(path);
         return Arrays.stream(values())
                 .filter(type -> type.extension.equals(extension))

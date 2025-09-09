@@ -3,7 +3,10 @@ package org.apache.coyote.http11.http.request;
 import http.HttpHeaderKey;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 
@@ -37,6 +40,25 @@ public class HttpRequestBody {
             }
         }
         return new HttpRequestBody(body);
+    }
+
+    public Map<String, String> getBodyElement() {
+        String bodyLine = new String(value, StandardCharsets.UTF_8);
+        return parseBodyValue(bodyLine);
+    }
+
+    private Map<String, String> parseBodyValue(final String target) {
+        final Map<String, String> bodyValue = new HashMap<>();
+        final String[] elements = target.split("&");
+
+        for (String element : elements) {
+            final String[] values = element.split("=");
+            final String key = URLDecoder.decode(values[0], StandardCharsets.UTF_8);
+            final String value = URLDecoder.decode(values[1], StandardCharsets.UTF_8);
+            bodyValue.put(key, value);
+        }
+
+        return bodyValue;
     }
 
     private static void validateNotNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {

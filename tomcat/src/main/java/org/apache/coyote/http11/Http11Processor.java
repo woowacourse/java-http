@@ -7,10 +7,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -18,7 +14,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.http.common.startline.HttpMethod;
 import org.apache.coyote.http11.http.request.HttpRequest;
-import org.apache.coyote.http11.http.request.HttpRequestBody;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,30 +103,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getRegister(final HttpRequest httpRequest) {
-        final HttpRequestBody body = httpRequest.getBody();
-        byte[] bodyValue = body.getValue();
-        String bodyLine = new String(bodyValue, StandardCharsets.UTF_8);
-        Map<String, String> bodyElement = parseBodyValue(bodyLine);
-        String account = bodyElement.get("account");
-        String email = bodyElement.get("email");
-        String password = bodyElement.get("password");
-        final HttpResponse httpResponse = httpController.getRegister(account, email, password);
+        final HttpResponse httpResponse = httpController.getRegister(httpRequest);
         return httpResponse.getResponseFormat();
-    }
-
-    private Map<String, String> parseBodyValue(final String target) {
-        log.info("target: {}", target);
-        final Map<String, String> bodyValue = new HashMap<>();
-        final String[] elements = target.split("&");
-
-        for (String element : elements) {
-            final String[] values = element.split("=");
-            final String key = URLDecoder.decode(values[0], StandardCharsets.UTF_8);
-            final String value = URLDecoder.decode(values[1], StandardCharsets.UTF_8);
-            bodyValue.put(key, value);
-        }
-
-        return bodyValue;
     }
 
     private String getRegisterHtml() {
@@ -140,15 +113,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String login(final HttpRequest httpRequest) {
-        final HttpRequestBody body = httpRequest.getBody();
-        byte[] bodyValue = body.getValue();
-        String jsonBody = new String(bodyValue, StandardCharsets.UTF_8);
-        Map<String, String> jsonValue = parseBodyValue(jsonBody);
-        String account = jsonValue.get("account");
-        String password = jsonValue.get("password");
-        final HttpResponse httpResponse = httpController.login(account, password);
+        final HttpResponse httpResponse = httpController.login(httpRequest);
         handleSessionCreation(httpResponse);
         return httpResponse.getResponseFormat();
+    }
+
+    private void handleSessionCreation(final HttpResponse httpResponse) {
+        Object userAttribute = httpResponse.getAttribute("session_user");
+        if (userAttribute instanceof User) {
+            final String sessionId = UUID.randomUUID().toString();
+            final HttpSession session = new Session(sessionId);
+
+            session.setAttribute("user", userAttribute);
+            sessionManager.add(session);
+
+            httpResponse.setCookie("JSESSIONID", sessionId);
+        }
     }
 
     private String getLoginHtml(final HttpRequest httpRequest) {
@@ -189,18 +169,5 @@ public class Http11Processor implements Runnable, Processor {
     private String helloWorld() {
         final HttpResponse httpResponse = httpController.helloWorld();
         return httpResponse.getResponseFormat();
-    }
-
-    private void handleSessionCreation(final HttpResponse httpResponse) {
-        Object userAttribute = httpResponse.getAttribute("session_user");
-        if (userAttribute instanceof User) {
-            final String sessionId = UUID.randomUUID().toString();
-            final HttpSession session = new Session(sessionId);
-
-            session.setAttribute("user", userAttribute);
-            sessionManager.add(session);
-
-            httpResponse.setCookie("JSESSIONID", sessionId);
-        }
     }
 }

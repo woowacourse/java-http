@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.http.request.HttpRequest;
@@ -43,7 +44,11 @@ public class HttpController {
         return HttpResponse.ok("login.html");
     }
 
-    public HttpResponse login(final String account, final String password) {
+    public HttpResponse login(final HttpRequest httpRequest) {
+        final Map<String, String> bodyElement = httpRequest.getBodyElement();
+        final String account = bodyElement.get("account");
+        final String password = bodyElement.get("password");
+
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저입니다: %s".formatted(account)));
 
@@ -64,7 +69,13 @@ public class HttpController {
         return HttpResponse.ok("register.html");
     }
 
-    public HttpResponse getRegister(final String account, final String email, final String password) {
+    public HttpResponse getRegister(final HttpRequest httpRequest) {
+        final Map<String, String> bodyElement = httpRequest.getBodyElement();
+
+        final String account = bodyElement.get("account");
+        final String email = bodyElement.get("email");
+        final String password = bodyElement.get("password");
+
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return HttpResponse.found("index.html");

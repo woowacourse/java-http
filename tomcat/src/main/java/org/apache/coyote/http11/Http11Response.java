@@ -32,7 +32,10 @@ public record Http11Response(
         }
 
         // Content-Length
-        int contentLength = (content != null ? content.length : 0);
+        int contentLength=0;
+        if (content != null) {
+            contentLength = content.length;
+        }
         sb.append(CONTENT_LENGTH).append(contentLength).append(DELIMITER);
 
         // Location 헤더

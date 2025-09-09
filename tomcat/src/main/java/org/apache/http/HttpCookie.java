@@ -11,8 +11,10 @@ public class HttpCookie {
         String[] cookieParts = cookie.split(";");
         Map<String, String> cookieKeysAndValues = new HashMap<>();
         for (String cookiePart : cookieParts) {
-            String[] cookieKeyAndValue = cookiePart.split("=");
-            cookieKeysAndValues.put(cookieKeyAndValue[0], cookieKeyAndValue[1]);
+            if (cookiePart.contains("=")) {
+                String[] cookieKeyAndValue = cookiePart.trim().split("=");
+                cookieKeysAndValues.put(cookieKeyAndValue[0].trim(), cookieKeyAndValue[1].trim());
+            }
         }
 
         this.jSessionId = cookieKeysAndValues.get("JSESSIONID");
@@ -22,11 +24,15 @@ public class HttpCookie {
         return jSessionId == null;
     }
 
-    public String getjSessionId() {
+    public String getKeyAndJSessionID() {
         return "JSESSIONID=" + jSessionId;
     }
 
     public void setjSessionId(String sessionId) {
         this.jSessionId = sessionId;
+    }
+
+    public String getJSessionId() {
+        return this.jSessionId;
     }
 }

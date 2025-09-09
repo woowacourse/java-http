@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     public boolean isProcessable(final String path) {
@@ -34,7 +37,20 @@ public class LoginController implements Controller {
 
     private Map<String, Object> login(final Map<String, String> requests) throws URISyntaxException, IOException {
 
+        // 로그인된 상태에서 로그인 페이지에 접근하면 index 페이지로 리다이렉트
         if (requests.get("Method").equals("GET")) {
+            if (requests.containsKey("Cookie")) {
+                HttpCookie httpCookie = new HttpCookie();
+                httpCookie.parseCookie(requests.get("Cookie"));
+
+                String jsessionID = httpCookie.getJSessionId();
+                Session session = sessionManager.findSession(jsessionID);
+
+                if (session != null && session.getAttribute("user") != null) {
+                    return makeResponseBody(" ", HttpStatus.FOUND, httpCookie);
+                }
+            }
+
             return makeResponseBody("/login", HttpStatus.OK, null);
         }
 
@@ -48,9 +64,20 @@ public class LoginController implements Controller {
             return makeResponseBody("/login", HttpStatus.UNAUTHORIZED, null);
         }
 
-        if (user.checkPassword(password)) {
+        if (user.checkPassword(password)) { // 로그인 성공 시,
             HttpCookie cookie = new HttpCookie();
-            cookie.setjSessionId(UUID.randomUUID().toString());
+
+            // UUID를 id로 세션을 만들고
+            String sessionId = UUID.randomUUID().toString();
+
+            // 유저 정보 넣고
+            Session session = new Session(sessionId);
+            session.setAttribute("user", user);
+
+            // 세션 매니저에 넣음
+            sessionManager.add(session);
+
+            cookie.setjSessionId(sessionId);
             log.info("user: {}", user);
 
             return makeResponseBody(" ", HttpStatus.FOUND, cookie);
@@ -85,9 +112,8 @@ public class LoginController implements Controller {
         responseBody.put("status", httpStatus);
         responseBody.put("cookie", httpCookie);
 
-        // 302 Found: 리다이렉션이므로 응답 본문(body)이 필요 없음. 즉시 반환.
         if (httpStatus == HttpStatus.FOUND) {
-            responseBody.put("responseBody", ""); // 본문을 비워줌
+            responseBody.put("responseBody", "");
             return responseBody;
         }
 

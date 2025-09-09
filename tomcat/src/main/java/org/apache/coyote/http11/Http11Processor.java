@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         headers.append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n");
 
         if (httpCookie != null) {
-            headers.append("Set-Cookie: ").append(httpCookie.getjSessionId()).append("\r\n");
+            headers.append("Set-Cookie: ").append(httpCookie.getKeyAndJSessionID()).append("\r\n");
         }
 
         if (httpStatus == HttpStatus.FOUND) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Map;
 
 public class HttpRequest {
@@ -10,6 +12,7 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> query;
     private final byte[] body;
+    private final Map<String, String> form;
 
     public HttpRequest(
             String method,
@@ -17,7 +20,8 @@ public class HttpRequest {
             String version,
             Map<String, String> headers,
             Map<String, String> query,
-            byte[] body
+            byte[] body,
+            Map<String, String> form
     ) {
         this.method = method;
         this.uri = uri;
@@ -25,6 +29,7 @@ public class HttpRequest {
         this.headers = headers;
         this.query = query;
         this.body = body;
+        this.form = form;
     }
 
     public String method() {
@@ -53,5 +58,13 @@ public class HttpRequest {
 
     public String header(String name) {
         return headers.get(name.toLowerCase());
+    }
+
+    public String getStringBody() {
+        return new String(body, UTF_8);
+    }
+
+    public String getForm(String key) {
+        return form.get(key);
     }
 }

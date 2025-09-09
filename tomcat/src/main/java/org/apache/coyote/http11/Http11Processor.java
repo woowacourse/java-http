@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,12 +11,12 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,32 +42,66 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String[] tokens = readStartLine(br, outputStream);
-            if (tokens == null) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            HttpRequest request = HttpRequest.from(br);
+            if (request == null) {
                 return;
             }
 
-            String rawUri = tokens[1].trim();
-            int queryIndex = rawUri.indexOf("?");
+            HttpRequestStartLine startLine = request.getStartLine();
+            String method = startLine.getHttpMethod();
+            String uri = request.getUri();
 
-            String uri = makeUri(rawUri, queryIndex);
-            Map<String, List<String>> queryParameters = makeQueryParameters(rawUri, queryIndex);
+            HttpResponse response = new HttpResponse();
 
-            if (uri.equals("/") || uri.isEmpty()) {
-                String responseBody = "Hello world!";
-                writeResponse(outputStream, "text/html;charset=utf-8", responseBody.getBytes());
-                return;
+            // 1. 로그인 여부 확인
+            Session session = request.getSession(false);
+            User loginUser = getUser(session);
+            boolean loggedIn = (loginUser != null);
+
+            // 2. GET 요청 Route
+            if ("GET".equals(method)) {
+                if (uri.equals("/") || uri.isEmpty()) {
+                    if (loggedIn) {
+                        response.redirect("/index.html");
+                    } else {
+                        response.writeText("Hello world!", "text/html;charset=utf-8");
+                        response.writeResponse(outputStream);
+                        return;
+                    }
+                    response.writeResponse(outputStream);
+                    return;
+                }
+                if (uri.equals("/login.html")) {
+                    if (loggedIn) {
+                        response.redirect("/index.html");
+                        response.writeResponse(outputStream);
+                        return;
+                    }
+                }
+                if (isStatic(uri)) {
+                    handleStatic(uri, response);
+                    response.writeResponse(outputStream);
+                    return;
+                }
             }
 
+            // 3. POST login & register 요청 Route
             if (uri.equals("/login")) {
-                handleLogin(outputStream, queryParameters);
+                handleLogin(request, response);
+                response.writeResponse(outputStream);
                 return;
             }
-
-            if (uri.endsWith(".html") || uri.endsWith(".css")) {
-                handleStatic(uri, outputStream);
+            if (uri.equals("/register")) {
+                handleRegister(request, response);
+                response.writeResponse(outputStream);
+                return;
             }
+            // 4. 나머지
+            response.setStatus(404, "Not Found");
+            response.writeText("No Route", "text/html;charset=utf-8");
+            response.writeResponse(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -74,94 +109,93 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String[] readStartLine(final BufferedReader br, final OutputStream outputStream) throws IOException {
-        String line = br.readLine();
-        if (line == null || line.isBlank()) {
-            writeError(outputStream, 400, "Bad Request", "Request line is empty");
-            return null;
-        }
-
-        String[] tokens = line.trim().split(" ");
-        if (tokens.length != 3) {
-            writeError(outputStream, 400, "Bad Request", "Invalid request line");
-            return null;
-        }
-        return tokens;
+    private static boolean isStatic(final String uri) {
+        return uri.endsWith(".html") || uri.endsWith(".css") || uri.endsWith(".js");
     }
 
-    private String makeUri(final String rawUri, final int queryIndex) {
-        return (queryIndex >= 0) ? rawUri.substring(0, queryIndex) : rawUri;
-    }
 
-    private Map<String, List<String>> makeQueryParameters(final String rawUri, final int queryIndex) {
-        String rawQueryParameters = (queryIndex >= 0) ? rawUri.substring(queryIndex + 1) : "";
-        return parseQueryParameters(rawQueryParameters);
-    }
-
-    private Map<String, List<String>> parseQueryParameters(final String queryParameters) {
-        Map<String, List<String>> parameters = new HashMap<>();
-        if (queryParameters == null || queryParameters.isEmpty()) {
-            return parameters;
-        }
-        String[] split = queryParameters.split("&");
-        for (String pair : split) {
-            int eq = pair.indexOf("=");
-
-            String key = pair.substring(0, eq);
-            String value = pair.substring(eq + 1);
-
-            parameters.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-        }
-        return parameters;
-    }
-
-    private void handleStatic(String uri, final OutputStream outputStream) throws IOException, URISyntaxException {
-        uri = "static/" + uri.substring(1);
-        URL url = getClass().getClassLoader().getResource(uri);
-        if (url == null) {
-            writeError(outputStream, 404, "Not Found", "Requested resource was not found on the server.");
+    private void handleLogin(final HttpRequest request, final HttpResponse response) {
+        String method = request.getStartLine().getHttpMethod();
+        if ("GET".equals(method)) {
+            response.redirect("/login.html");
             return;
         }
-        Path absolutePath = Path.of(url.toURI());
-        if (!Files.exists(absolutePath)) {
-            writeError(outputStream, 500, "Internal Server Error", "File not found");
-            return;
-        }
-        byte[] responseBodyBytes = Files.readAllBytes(absolutePath);
-        String contentType = guessContentType(absolutePath.toString());
-        writeResponse(outputStream, contentType, responseBodyBytes);
-    }
-
-    private void handleLogin(
-            final OutputStream outputStream,
-            final Map<String, List<String>> queryParameters
-    )
-            throws IOException, URISyntaxException {
+        Map<String, List<String>> queryParameters = request.getParameters();
         String account = getFirst(queryParameters, "account");
         String password = getFirst(queryParameters, "password");
 
-        if (account != null && password != null) {
-            InMemoryUserRepository.findByAccount(account).ifPresentOrElse(
-                    user -> {
-                        try {
-                            user.checkPassword(password);
-                            log.info("Login OK - account {}", account);
-                        } catch (UncheckedServletException e) {
-                            log.info("Login FAILED - invalid password {}", account);
-                        }
-                    },
-                    () -> log.info("Login FAILED - no sush account {}", account)
-            );
-        }
-        String resourcePath = "static/login.html";
-        URL url = getClass().getClassLoader().getResource(resourcePath);
-        if (url == null) {
-            writeError(outputStream, 400, "Bad Request", "Invalid request line");
+        if (account == null || password == null) {
+            response.redirect("/login.html");
             return;
         }
-        Path absoluteLogin = Path.of(url.toURI());
-        byte[] loginBytes = Files.readAllBytes(absoluteLogin);
-        writeResponse(outputStream, "text/html;charset=utf-8", loginBytes);
+
+        boolean success = InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
+
+        if (success) {
+            log.info("Login OK - account {}", account);
+            Session session = request.getSession(true);
+            InMemoryUserRepository.findByAccount(account).ifPresent(u -> session.setAttribute("user", u));
+
+            String jsessionId = session.getId();
+            String setCookie = HttpCookie.buildSetCookieHeader(jsessionId);
+            response.addSetCookie(setCookie);
+
+            response.redirect("/index.html");
+            return;
+        }
+
+        log.info("Login FAILED - invalid password {}", account);
+        response.redirect("/401.html");
+    }
+
+    private void handleRegister(final HttpRequest request, final HttpResponse response) {
+        String method = request.getStartLine().getHttpMethod();
+        if ("GET".equals(method)) {
+            response.redirect("/register.html");
+            return;
+        }
+
+        Map<String, List<String>> queryParameters = request.getParameters();
+        String account = getFirst(queryParameters, "account");
+        String email = getFirst(queryParameters, "email");
+        String password = getFirst(queryParameters, "password");
+
+        if (account != null && email != null && password != null) {
+            InMemoryUserRepository.save(new User(account, password, email));
+            log.info("Register OK - account {}", account);
+
+            Session session = request.getSession(true);
+            session.setAttribute("user", new User(account, password, email));
+            String setCookie = HttpCookie.buildSetCookieHeader(session.getId());
+            response.addSetCookie(setCookie);
+
+            response.redirect("/index.html");
+            return;
+        }
+
+        response.redirect("/register.html");
+    }
+
+    private void handleStatic(final String uri, final HttpResponse response) throws IOException, URISyntaxException {
+        String cp = "static/" + (uri.startsWith("/") ? uri.substring(1) : uri);
+        URL url = getClass().getClassLoader().getResource(cp);
+        if (url == null) {
+            response.setStatus(404, "Not Found");
+            response.writeText("Requested resource was not found on the server.", "text/plain;charset=utf-8");
+            return;
+        }
+        Path absolutePath = Path.of(url.toURI());
+        if (!Files.exists(absolutePath) || Files.isDirectory(absolutePath)) {
+            response.setStatus(500, "Internal Server Error");
+            response.writeText("File not found", "text/plain;charset=utf-8");
+            return;
+        }
+        byte[] bytes = Files.readAllBytes(absolutePath);
+        String contentType = guessContentType(absolutePath.toString());
+        response.setContentType(contentType != null ? contentType : "application/octet-stream");
+        response.setBody(bytes);
     }
 
     private String getFirst(final Map<String, List<String>> map, final String key) {
@@ -172,35 +206,6 @@ public class Http11Processor implements Runnable, Processor {
         return list.getFirst();
     }
 
-    private void writeError(
-            final OutputStream outputStream,
-            final int code,
-            final String phase,
-            final String message
-    ) throws IOException {
-        String response = "HTTP/1.1 " + code + " " + phase + "\r\n"
-                + "Content-Type: text/html;charset=utf-8 " + "\r\n"
-                + "Content-Length: " + message.getBytes().length + " " + "\r\n"
-                + "Connection: close " + "\r\n"
-                + "\r\n";
-        outputStream.write(response.getBytes());
-        outputStream.write(message.getBytes());
-        outputStream.flush();
-    }
-
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String contentType,
-            final byte[] bytes
-    ) throws IOException {
-        String response = "HTTP/1.1 200 OK " + "\r\n"
-                + "Content-Type: " + contentType + " " + "\r\n"
-                + "Content-Length: " + bytes.length + " " + "\r\n"
-                + "\r\n";
-        outputStream.write(response.getBytes());
-        outputStream.write(bytes);
-        outputStream.flush();
-    }
 
     private String guessContentType(final String target) {
         if (target.endsWith(".html")) {
@@ -212,6 +217,16 @@ public class Http11Processor implements Runnable, Processor {
         if (target.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
+        if (target.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
         return null;
+    }
+
+    private User getUser(Session session) {
+        if (session == null) {
+            return null;
+        }
+        return (User) session.getAttribute("user");
     }
 }

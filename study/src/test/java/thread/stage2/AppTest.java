@@ -32,7 +32,7 @@ class AppTest {
 
         for (final var thread : threads) {
             thread.start();
-            Thread.sleep(50);
+            Thread.sleep(50); // 50ms 간격으로 스레드 10개 시작 (한 번 스레드가 시작하면 500ms동안 점유함)
         }
 
         for (final var thread : threads) {

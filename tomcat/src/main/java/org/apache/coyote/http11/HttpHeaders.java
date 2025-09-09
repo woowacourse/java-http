@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpHeaders {
+
+    private static final String HEADER_SEPARATOR = ":";
+
     private final Map<String, String> headers = new HashMap<>();
 
     public void put(String key, String value) {
@@ -20,13 +23,20 @@ public class HttpHeaders {
         HttpHeaders headers = new HttpHeaders();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-            if (colonIndex > 0) {
-                String key = line.substring(0, colonIndex).trim();
-                String value = line.substring(colonIndex + 1).trim();
-                headers.put(key, value);
-            }
+            parseHeaderLine(line, headers);
         }
         return headers;
+    }
+
+    private static void parseHeaderLine(String line, HttpHeaders headers) {
+        int colonIndex = line.indexOf(HEADER_SEPARATOR);
+        if (colonIndex <= 0) {
+            return;
+        }
+        String key = line.substring(0, colonIndex).trim();
+        String value = line.substring(colonIndex + 1).trim();
+        if (!key.isEmpty() && !value.isEmpty()) {
+            headers.put(key, value);
+        }
     }
 }

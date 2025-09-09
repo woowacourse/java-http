@@ -5,22 +5,25 @@ import java.util.Map;
 
 public class Headers {
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> data = new HashMap<>();
 
     public void put(String key, String value) {
-        headers.put(key, value);
+        data.put(key, value);
+    }
+
+    public void clear() {
+        data.clear();
     }
 
     @Override
     public String toString() {
+        if (data.isEmpty()) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
-        for (var set : headers.entrySet()) {
-            sb.append(set.getKey()).append(": ").append(set.getValue()).append(System.lineSeparator());
+        for (var set : data.entrySet()) {
+            sb.append(set.getKey()).append(": ").append(set.getValue());
         }
         return sb.toString();
-    }
-
-    public void clear() {
-        headers.clear();
     }
 }

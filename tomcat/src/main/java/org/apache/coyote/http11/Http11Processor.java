@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
+    private final SessionHandler sessionHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionHandler = new SessionHandler();
     }
 
     @Override
@@ -47,8 +48,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
-        Session session = findOrCreateSession(request, response);
         String path = request.getPath();
+        Session session = sessionHandler.getSession(request, response);
         if ("/".equals(path)) {
             handleRoot(response);
         } else if ("/login".equals(path)) {
@@ -58,21 +59,6 @@ public class Http11Processor implements Runnable, Processor {
         } else {
             handleStaticResource(response, path);
         }
-    }
-
-    private Session findOrCreateSession(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookies().get("JSESSIONID");
-        Session session = null;
-        if (sessionId != null) {
-            session = SessionManager.getSession(sessionId);
-        }
-        if (session == null) {
-            String newSessionId = UUID.randomUUID().toString();
-            session = new Session(newSessionId);
-            SessionManager.add(session);
-            response.setCookie("JSESSIONID", newSessionId);
-        }
-        return session;
     }
 
     private void handleRegister(HttpRequest request, HttpResponse response) throws IOException {

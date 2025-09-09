@@ -64,7 +64,7 @@
     - 회원가입을 완료하면 `index.html`로 리다이렉트한다.
     - 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경해야 한다.
 
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
     - 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
     - HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.
     - 세션을 구현하기 전에 먼저 쿠키를 구현해본다.
@@ -87,9 +87,9 @@
       Content-Type: text/html;charset=utf-8;
     ```
 
-- [ ] Session 구현하기
+- [x] Session 구현하기
     - 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
     - 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장해야 한다.
-    - 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
+    - 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 `index.html` 페이지로 리다이렉트 처리한다.
 
 

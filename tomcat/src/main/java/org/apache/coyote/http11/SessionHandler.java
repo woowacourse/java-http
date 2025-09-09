@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class SessionHandler {
@@ -7,15 +8,9 @@ public class SessionHandler {
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     public Session getSession(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookies().get(SESSION_COOKIE_NAME);
-        if (sessionId == null) {
-            return createNewSession(response);
-        }
-        Session session = SessionManager.getSession(sessionId);
-        if (session == null) {
-            return createNewSession(response);
-        }
-        return session;
+        return Optional.ofNullable(request.getCookies().get(SESSION_COOKIE_NAME))
+                .map(SessionManager::getSession)
+                .orElseGet(() -> createNewSession(response));
     }
 
     private Session createNewSession(HttpResponse response) {

@@ -84,11 +84,10 @@ public class HttpRequestParser {
         String key;
         String value = "";
         int separatorIdx = pair.indexOf('=');
+        key = pair;
         if (separatorIdx >= 0) {
             key = pair.substring(0, separatorIdx);
             value = pair.substring(separatorIdx + 1);
-        } else {
-            key = pair;
         }
         queries.put(key, value);
     }
@@ -102,9 +101,10 @@ public class HttpRequestParser {
         for (String pair : pairs) {
             String[] keyValue = pair.split("=", 2);
             String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-            String value = keyValue.length > 1
-                    ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
-                    : "";
+            String value = "";
+            if (keyValue.length > 1) {
+                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            }
             queryMap.put(key, value);
         }
         return queryMap;

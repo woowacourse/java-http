@@ -237,6 +237,59 @@ class Http11ProcessorTest {
         assertThat(output).contains("Set-Cookie: JSESSIONID=");
     }
 
+    @DisplayName("JSESSIONID 쿠키가 있으면 Set-Cookie 헤더를 포함하지 않고 응답한다.")
+    @Test
+    void hasJSessionId() {
+        // given
+        final var httpRequest = """
+                GET /index.html HTTP/1.1\r
+                Host: localhost:8080\r
+                Cookie: JSESSIONID=1234\r
+                \r
+                """;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertThat(output).doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
+    @DisplayName("로그인한 사용자가 /login 요청 시 index.html로 리다이렉트한다.")
+    @Test
+    void login_with_jSessionId() {
+        // given
+        final var user = com.techcourse.db.InMemoryUserRepository.findByAccount("gugu").get();
+        final var session = new org.apache.catalina.session.Session("1234");
+        session.setAttribute("user", user);
+        final var sessionManager = new org.apache.catalina.session.SessionManager();
+        sessionManager.add(session);
+
+        final var httpRequest = """
+                GET /login HTTP/1.1\r
+                Host: localhost:8080\r
+                Cookie: JSESSIONID=1234\r
+                \r
+                """;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).startsWith("HTTP/1.1 302 Found"),
+                () -> assertThat(output).contains("Location: /index.html")
+        );
+
+        sessionManager.remove(session);
+    }
+
     private byte[] readFileBytes(final String path) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(path);
         return Files.readAllBytes(new File(resource.getFile()).toPath());

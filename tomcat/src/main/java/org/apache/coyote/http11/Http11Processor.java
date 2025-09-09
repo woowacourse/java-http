@@ -13,7 +13,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
+    private final Manager manager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.manager = new SessionManager();
     }
 
     @Override
@@ -51,12 +55,19 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Request parseRequest(final InputStream inputStream) throws IOException {
         final String requestLineString = readLine(inputStream);
         if (requestLineString.isBlank()) {
-            return Http11Request.createInvalid();
+            return Http11Request.createInvalid(manager);
         }
         final var requestLine = parseRequestLine(requestLineString);
         final var headers = parseHeaders(inputStream);
         final String body = parseBody(inputStream, headers);
-        return new Http11Request(requestLine.method(), requestLine.path(), requestLine.queryParams(), headers, body);
+        return new Http11Request(
+                requestLine.method(),
+                requestLine.path(),
+                requestLine.queryParams(),
+                headers,
+                body,
+                manager
+        );
     }
 
     private String readLine(final InputStream inputStream) throws IOException {
@@ -130,8 +141,8 @@ public class Http11Processor implements Runnable, Processor {
         final var response = getResponse(httpRequest);
         final var cookie = httpRequest.getHttpCookie();
         if (!cookie.hasCookie("JSESSIONID")) {
-            final var jSessionId = UUID.randomUUID().toString();
-            response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+            final var session = httpRequest.getSession(true);
+            response.addCookie("JSESSIONID=" + session.getId());
         }
         return response;
     }
@@ -153,30 +164,39 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response handleLoginRequest(final Http11Request httpRequest) {
         if (httpRequest.isPost()) {
             final var params = parseUrlEncodedParams(httpRequest.getBody());
-            if (isLoginSuccessful(params)) {
+            final Optional<User> userOptional = isLoginSuccessful(params);
+            if (userOptional.isPresent()) {
+                final var user = userOptional.get();
+                final var session = httpRequest.getSession(true);
+                session.setAttribute("user", user);
                 return Http11Response.redirect("/index.html");
             }
             return Http11Response.redirect("/401.html");
         }
+
+        final Session session = httpRequest.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            return Http11Response.redirect("/index.html");
+        }
         return serveStaticFile("/login.html");
     }
 
-    private boolean isLoginSuccessful(final Map<String, String> params) {
+    private Optional<User> isLoginSuccessful(final Map<String, String> params) {
         if (!params.containsKey("account") || !params.containsKey("password")) {
-            return false;
+            return Optional.empty();
         }
         final String account = params.get("account");
         final String password = params.get("password");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
         final var user = userOptional.get();
         if (!user.checkPassword(password)) {
-            return false;
+            return Optional.empty();
         }
         log.info("login success: {}", user);
-        return true;
+        return Optional.of(user);
     }
 
     private Http11Response handleRegisterRequest(final Http11Request httpRequest) {

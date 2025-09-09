@@ -5,10 +5,10 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponseStatus;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseStatus;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

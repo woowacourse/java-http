@@ -5,10 +5,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestMethod;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponseStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestMethod;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseStatus;
 
 public abstract class AbstractController implements Controller{
 

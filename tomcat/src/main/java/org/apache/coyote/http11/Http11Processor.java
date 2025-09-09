@@ -5,6 +5,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
@@ -6,6 +6,7 @@ import com.techcourse.controller.SignupController;
 import com.techcourse.controller.StaticController;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

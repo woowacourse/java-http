@@ -13,6 +13,11 @@ import org.slf4j.LoggerFactory;
 public class RegisterHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
+    private static final RegisterHandler INSTANCE = new RegisterHandler();
+
+    public static RegisterHandler getInstance() {
+        return INSTANCE;
+    }
 
     public HttpResponse handle(HttpRequest request) {
         if (request.getMethod().equals("GET")) {

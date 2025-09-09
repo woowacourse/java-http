@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            RequestMappingHandler requestMappingHandler = new RequestMappingHandler();
+            RequestMappingHandler requestMappingHandler = RequestMappingHandler.getInstance();
 
             HttpRequest request = getHttpRequest(inputStream);
             HttpResponse response = requestMappingHandler.request(request);

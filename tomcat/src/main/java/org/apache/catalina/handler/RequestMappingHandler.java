@@ -10,6 +10,12 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class RequestMappingHandler {
 
+    private static final RequestMappingHandler INSTANCE = new RequestMappingHandler();
+
+    public static RequestMappingHandler getInstance() {
+        return INSTANCE;
+    }
+
     public HttpResponse request(HttpRequest request) {
         if (request.getPath().equals("/")) {
             HttpResponse response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
@@ -32,14 +38,12 @@ public class RequestMappingHandler {
             return response;
         }
         if (request.getPath().equals("/login")) {
-            LoginHandler loginHandler = new LoginHandler();
-            HttpResponse response = loginHandler.handle(request);
+            HttpResponse response = LoginHandler.getInstance().handle(request);
             setSession(request, response);
             return response;
         }
         if (request.getPath().equals("/register")) {
-            RegisterHandler registerHandler = new RegisterHandler();
-            HttpResponse response = registerHandler.handle(request);
+            HttpResponse response = RegisterHandler.getInstance().handle(request);
             setSession(request, response);
             return response;
         }

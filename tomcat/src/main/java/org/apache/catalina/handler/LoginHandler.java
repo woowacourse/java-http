@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final LoginHandler INSTANCE = new LoginHandler();
+
+    public static LoginHandler getInstance() {
+        return INSTANCE;
+    }
 
     public HttpResponse handle(HttpRequest request) {
         if (request.getMethod().equals("GET")) {

@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.httprequest;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.parser.HttpRequestParser;
 
 public class HttpRequest {
 
@@ -8,11 +11,14 @@ public class HttpRequest {
     private final RequestHeaders requestHeaders;
     private final RequestBody httpRequestBody;
 
-    public HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,
-                       final RequestBody httpRequestBody) {
-        this.requestLine = requestLine;
-        this.requestHeaders = requestHeaders;
-        this.httpRequestBody = httpRequestBody;
+    public static HttpRequest of(final BufferedReader reader) throws IOException {
+        final HttpRequestParser httpRequestParser = new HttpRequestParser(reader);
+
+        final RequestLine requestLine = httpRequestParser.parseRequestLine();
+        final RequestHeaders requestHeaders = httpRequestParser.parseRequestHeaders();
+        final RequestBody requestBody = httpRequestParser.parseRequestBody(requestHeaders);
+
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     public boolean matches(final HttpMethod httpMethod, final String requestPath) {
@@ -29,5 +35,12 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return HttpCookie.from(requestHeaders);
+    }
+
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,
+                        final RequestBody httpRequestBody) {
+        this.requestLine = requestLine;
+        this.requestHeaders = requestHeaders;
+        this.httpRequestBody = httpRequestBody;
     }
 }

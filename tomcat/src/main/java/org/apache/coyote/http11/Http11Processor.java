@@ -18,7 +18,6 @@ import org.apache.coyote.http11.httprequest.HttpMethod;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
-import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.http11.parser.HttpResponseParser;
 import org.apache.coyote.http11.parser.SessionParser;
 import org.apache.coyote.http11.session.Session;
@@ -59,8 +58,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleRequest(final BufferedReader reader, final OutputStream outputStream) throws IOException {
         try {
-            final HttpRequestParser requestParser = new HttpRequestParser(reader);
-            final HttpRequest httpRequest = requestParser.readHttpRequest();
+            final HttpRequest httpRequest = HttpRequest.of(reader);
             HttpResponse response;
 
             if (httpRequest.matches(HttpMethod.GET, "/")) {

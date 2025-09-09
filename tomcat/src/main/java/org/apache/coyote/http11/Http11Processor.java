@@ -60,6 +60,16 @@ public class Http11Processor implements Runnable, Processor {
                     return login(request);
                 }
             }
+            if (request.equalPath("/register")) {
+                System.out.println("hello");
+                if (request.equalMethod(HttpMethod.GET)) {
+                    return createStaticResourceResponse("/register.html");
+                }
+                if (request.equalMethod(HttpMethod.POST)) {
+                    System.out.println("hello2");
+                    return register(request);
+                }
+            }
             if (request.isStaticResourcePath()) {
                 if (request.equalMethod(HttpMethod.GET)) {
                     return createStaticResourceResponse(request.getPath());
@@ -93,6 +103,12 @@ public class Http11Processor implements Runnable, Processor {
             return create302Response("/401.html");
         }
         log.info(user.toString());
+        return create302Response("/index.html");
+    }
+
+    private String register(HttpRequest request) {
+        User user = new User(request.getBody("account"), request.getBody("password"), request.getBody("email"));
+        InMemoryUserRepository.save(user);
         return create302Response("/index.html");
     }
 

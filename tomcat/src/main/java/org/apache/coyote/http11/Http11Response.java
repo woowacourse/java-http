@@ -8,8 +8,12 @@ import java.util.Map;
 
 public class Http11Response {
 
+    private static final String HTTP11_VERSION = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
+    private static final String JS_CONTENT_TYPE = "application/javascript;charset=utf-8";
 
     private final String httpVersion;
     private final int httpStatusCode;
@@ -17,36 +21,62 @@ public class Http11Response {
     private final Map<String, String> headers;
     private final String body;
 
-    public Http11Response(
+    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final Map<String, String> headers, final byte[] body) {
+        return new Http11Response(
+                HTTP11_VERSION,
+                httpStatus,
+                headers,
+                HTML_CONTENT_TYPE,
+                body
+        );
+    }
+
+    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final byte[] body) {
+        return new Http11Response(
+                HTTP11_VERSION,
+                httpStatus,
+                new LinkedHashMap<>(),
+                HTML_CONTENT_TYPE,
+                body
+        );
+    }
+
+    public static Http11Response createCssResponse(final HttpStatus httpStatus, final byte[] body) {
+        return new Http11Response(
+                HTTP11_VERSION,
+                httpStatus,
+                new LinkedHashMap<>(),
+                CSS_CONTENT_TYPE,
+                body
+        );
+    }
+
+    public static Http11Response createJsResponse(final HttpStatus httpStatus, final byte[] body) {
+        return new Http11Response(
+                HTTP11_VERSION,
+                httpStatus,
+                new LinkedHashMap<>(),
+                JS_CONTENT_TYPE,
+                body
+        );
+    }
+
+    private Http11Response(
             final String httpVersion,
             final HttpStatus httpStatus,
             final Map<String, String> headers,
             final String contentType,
             final byte[] body
     ) {
-        this.httpVersion = httpVersion;
-        this.httpStatusCode = httpStatus.getCode();
-        this.httpStatusMessage = httpStatus.getMessage();
+        this(
+                httpVersion,
+                httpStatus.getCode(),
+                httpStatus.getMessage(),
+                headers,
+                new String(body, StandardCharsets.UTF_8)
+        );
         headers.put(CONTENT_TYPE, contentType);
         headers.put(CONTENT_LENGTH, String.valueOf(body.length));
-        this.headers = headers;
-        this.body = new String(body, StandardCharsets.UTF_8);
-    }
-
-    public Http11Response(
-            final String httpVersion,
-            final HttpStatus httpStatus,
-            final String contentType,
-            final byte[] body
-    ) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        this.httpVersion = httpVersion;
-        this.httpStatusCode = httpStatus.getCode();
-        this.httpStatusMessage = httpStatus.getMessage();
-        headers.put(CONTENT_TYPE, contentType);
-        headers.put(CONTENT_LENGTH, String.valueOf(body.length));
-        this.headers = headers;
-        this.body = new String(body, StandardCharsets.UTF_8);
     }
 
     private Http11Response(
@@ -61,43 +91,6 @@ public class Http11Response {
         this.httpStatusMessage = httpStatusMessage;
         this.headers = headers;
         this.body = body;
-    }
-
-    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                "HTTP/1.1",
-                httpStatus,
-                "text/html;charset=utf-8",
-                body
-        );
-    }
-
-    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final Map<String, String> headers, final byte[] body) {
-        return new Http11Response(
-                "HTTP/1.1",
-                httpStatus,
-                headers,
-                "text/html;charset=utf-8",
-                body
-        );
-    }
-
-    public static Http11Response createCssResponse(final HttpStatus httpStatus,  final byte[] body) {
-        return new Http11Response(
-                "HTTP/1.1",
-                httpStatus,
-                "text/css;charset=utf-8",
-                body
-        );
-    }
-
-    public static Http11Response createJsResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                "HTTP/1.1",
-                httpStatus,
-                "application/javascript;charset=utf-8",
-                body
-        );
     }
 
     public byte[] toMessage() {
@@ -117,6 +110,6 @@ public class Http11Response {
                 headerString,
                 "",
                 body
-                );
+        );
     }
 }

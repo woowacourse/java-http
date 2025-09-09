@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.util.Cookie;
+import org.apache.coyote.util.Session;
 import org.apache.coyote.util.SessionManager;
 import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.util.request.HttpRequest;
@@ -48,11 +49,11 @@ public class Http11Processor implements Runnable, Processor {
             if (request.hasQueries() && handleApiRequest(request, outputStream)) {
                 return;
             }
-            String resourcePath = StaticResourcePathGenerator.generate(request.path());
+            String resourcePath = StaticResourcePathGenerator.generate(request.getPath());
             if (handleStaticResourceRequest(resourcePath, outputStream)) {
                 return;
             }
-            if (request.queries().isEmpty() && handleApiRequest(request, outputStream)) {
+            if (request.getQueries().isEmpty() && handleApiRequest(request, outputStream)) {
                 return;
             }
             respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
@@ -77,12 +78,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
-        if ("/login".equals(request.path())) {
+        if ("/login".equals(request.getPath())) {
             HttpResponse loginResponse = processLoginMemberInfo(request);
             respondWithSession(loginResponse, outputStream, request);
             return true;
         }
-        if ("/register".equals(request.path()) && "POST".equals(request.method())) {
+        if ("/register".equals(request.getPath()) && "POST".equals(request.getMethod())) {
             HttpResponse registerResponse = processRegisterMember(request);
             respondWithSession(registerResponse, outputStream, request);
             return true;
@@ -91,6 +92,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processLoginMemberInfo(HttpRequest httpRequest) {
+        if ("GET".equals(httpRequest.getMethod())) {
+            Session existingSession = httpRequest.getSession(false);
+            if (existingSession != null && getUser(existingSession) != null) {
+                return HttpResponse.redirect("/index.html");
+            }
+        }
         String account = httpRequest.getQueryValue("account")
                 .orElse(null);
         String password = httpRequest.getQueryValue("password")
@@ -98,12 +105,17 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || password == null) {
             return HttpResponse.redirect("401.html");
         }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
+        Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
+        if (userOpt.isEmpty() || !userOpt.get().checkPassword(password)) {
             return HttpResponse.redirect("401.html");
         }
-        log.info("User: {}", user.get());
-        return HttpResponse.redirect("/index.html");
+        User user = userOpt.get();
+        final Session session = httpRequest.getSession(true);
+        session.setAttribute("user", user);
+        HttpResponse response = HttpResponse.redirect("/index.html");
+        response.addCookie(SessionManager.JSESSIONID, session.getId());
+        log.info("User: {}", user);
+        return response;
     }
 
     private HttpResponse processRegisterMember(HttpRequest request) {
@@ -147,5 +159,9 @@ public class Http11Processor implements Runnable, Processor {
             httpResponse.addCookie(SessionManager.JSESSIONID, sessionId);
         }
         respond(httpResponse, outputStream);
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 }

@@ -13,13 +13,13 @@ public class HttpRequestPath {
     }
 
     public static HttpRequestPath from(final String path) {
-        validateNull(path);
+        validateNotNull(path);
         final String rootPath = removeQueryParameterLine(path);
         final HttpQueryParameter queryParameter = HttpQueryParameter.from(path);
         return new HttpRequestPath(rootPath, queryParameter);
     }
 
-    private static void validateNull(final String path) {
+    private static void validateNotNull(final String path) {
         if (path == null) {
             throw new IllegalArgumentException("path는 null일 수 없습니다");
         }
@@ -33,7 +33,7 @@ public class HttpRequestPath {
         return path.substring(0, queryParameterStartIndex);
     }
 
-    private void validateNullTargetQueryParameter(final String target) {
+    private void validateNotNullTargetQueryParameter(final String target) {
         if (target == null) {
             throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
         }
@@ -44,13 +44,13 @@ public class HttpRequestPath {
     }
 
     public boolean containsQueryParameter(final String target) {
-        validateNullTargetQueryParameter(target);
+        validateNotNullTargetQueryParameter(target);
         final String targetQueryParameterKey = target.trim();
         return queryParameter.contains(targetQueryParameterKey);
     }
 
     public String getTargetQueryParameter(final String target) {
-        validateNullTargetQueryParameter(target);
+        validateNotNullTargetQueryParameter(target);
         final String targetQueryParameterKey = target.trim();
         return queryParameter.getValue(targetQueryParameterKey);
     }

@@ -22,7 +22,7 @@ public class HttpStartLine {
     }
 
     public static HttpStartLine from(final String httpRequestLine) {
-        validateNull(httpRequestLine);
+        validateNotNull(httpRequestLine);
         final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
         validateFormat(httpRequestElements);
         final HttpMethod method = HttpMethod.findMethod(httpRequestElements[0].trim());
@@ -31,7 +31,7 @@ public class HttpStartLine {
         return new HttpStartLine(method, path, version);
     }
 
-    private static void validateNull(final String httpRequestLine) {
+    private static void validateNotNull(final String httpRequestLine) {
         if (httpRequestLine == null) {
             throw new IllegalArgumentException("유효하지 않은 Http request line 형식입니다");
         }

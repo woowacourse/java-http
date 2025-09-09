@@ -17,7 +17,7 @@ public class HttpRequestBody {
 
     public static HttpRequestBody of(final BufferedReader bufferedReader, final HttpHeader httpHeader)
             throws IOException {
-        validateNull(bufferedReader, httpHeader);
+        validateNotNull(bufferedReader, httpHeader);
 
         Optional<String> contentLengthOpt = httpHeader.getFirstValue(
                 HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase());
@@ -39,7 +39,7 @@ public class HttpRequestBody {
         return new HttpRequestBody(body);
     }
 
-    private static void validateNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {
+    private static void validateNotNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {
         if (bufferedReader == null) {
             throw new IllegalArgumentException("BufferedReader는 null일 수 없습니다");
         }

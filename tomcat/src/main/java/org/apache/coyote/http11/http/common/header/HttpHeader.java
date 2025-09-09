@@ -16,22 +16,22 @@ public class HttpHeader {
     }
 
     public static HttpHeader from(final List<String> headerLines) {
-        validateNull(headerLines);
+        validateNotNull(headerLines);
         return new HttpHeader(parseHeaderLines(headerLines));
     }
 
     public static HttpHeader from(final Map<String, List<String>> httpHeaderInfo) {
-        validateNull(httpHeaderInfo);
+        validateNotNull(httpHeaderInfo);
         return new HttpHeader(httpHeaderInfo);
     }
 
-    private static void validateNull(final List<String> headerLines) {
+    private static void validateNotNull(final List<String> headerLines) {
         if (headerLines == null) {
             throw new IllegalArgumentException("headerLines는 null일 수 없습니다.");
         }
     }
 
-    private static void validateNull(final Map<String, List<String>> httpHeaderInfo) {
+    private static void validateNotNull(final Map<String, List<String>> httpHeaderInfo) {
         if (httpHeaderInfo == null) {
             throw new IllegalArgumentException("httpHeaderInfo는 null일 수 없습니다.");
         }

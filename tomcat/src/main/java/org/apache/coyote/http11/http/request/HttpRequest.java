@@ -36,7 +36,7 @@ public class HttpRequest {
 
     public static HttpRequest from(final InputStream inputStream, final SessionManager sessionManager)
             throws IOException {
-        validateNull(inputStream);
+        validateNotNull(inputStream);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         final String startLine = bufferedReader.readLine();
@@ -55,7 +55,7 @@ public class HttpRequest {
         return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, session);
     }
 
-    private static void validateNull(final InputStream inputStream) {
+    private static void validateNotNull(final InputStream inputStream) {
         if (inputStream == null) {
             throw new IllegalArgumentException("inputStream은 null일 수 없습니다.");
         }

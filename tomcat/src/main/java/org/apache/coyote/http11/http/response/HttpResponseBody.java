@@ -25,7 +25,7 @@ public class HttpResponseBody {
     }
 
     public static HttpResponseBody withString(String value) {
-        validateNull(value);
+        validateNotNull(value);
         return new HttpResponseBody(value.getBytes(StandardCharsets.UTF_8), ContentTypeValue.HTML);
     }
 
@@ -46,7 +46,7 @@ public class HttpResponseBody {
         }
     }
 
-    private static void validateNull(final String value) {
+    private static void validateNotNull(final String value) {
         if (value == null) {
             throw new IllegalArgumentException("문자열은 null일 수 없습니다");
         }

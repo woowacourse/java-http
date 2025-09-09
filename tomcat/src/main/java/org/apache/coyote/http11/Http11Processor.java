@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -35,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = new HttpRequest(inputStream);
+            HttpRequest request = new HttpRequest(inputStream, sessionManager);
 
             String response = getResponse(request);
 
@@ -55,6 +58,9 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (request.equalPath("/login")) {
                 if (request.equalMethod(HttpMethod.GET)) {
+                    if (request.getSession() != null) {
+                        return create302Response("/index.html");
+                    }
                     return createStaticResourceResponse("/login.html");
                 }
                 if (request.equalMethod(HttpMethod.POST)) {
@@ -62,10 +68,12 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             if (request.equalPath("/register")) {
+                System.out.println("hello");
                 if (request.equalMethod(HttpMethod.GET)) {
                     return createStaticResourceResponse("/register.html");
                 }
                 if (request.equalMethod(HttpMethod.POST)) {
+                    System.out.println("hello2");
                     return register(request);
                 }
             }
@@ -102,8 +110,10 @@ public class Http11Processor implements Runnable, Processor {
             return create302Response("/401.html");
         }
         log.info(user.toString());
-        if (request.getCookie("JSESSIONID") == null) {
-            return create302LoginResponse("/index.html", UUID.randomUUID());
+        if (request.getSession() == null) {
+            String sessionId = UUID.randomUUID().toString();
+            sessionManager.add(new Session(sessionId));
+            return create302LoginResponse("/index.html", sessionId);
         }
         return create302Response("/index.html");
     }
@@ -138,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private String create302LoginResponse(String path, UUID sessionId) {
+    private String create302LoginResponse(String path, String sessionId) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Set-Cookie: JSESSIONID=" + sessionId,

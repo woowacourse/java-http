@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +20,9 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> cookies;
     private final Map<String, String> body;
+    private final Session session;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    public HttpRequest(InputStream inputStream, SessionManager sessionManager) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestStartLine = bufferedReader.readLine();
         String url = requestStartLine.split(" ")[1];
@@ -32,6 +36,7 @@ public class HttpRequest {
         }
         this.headers = readHeaders(bufferedReader);
         this.cookies = readCookies(headers);
+        this.session = sessionManager.findSession(getCookie("JSESSIONID"));
         if (headers.containsKey("Content-Length")) {
             this.body = readBody(bufferedReader, Integer.parseInt(headers.get("Content-Length")));
         } else {
@@ -99,5 +104,9 @@ public class HttpRequest {
 
     public String getCookie(String key) {
         return cookies.get(key);
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

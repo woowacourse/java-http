@@ -58,6 +58,10 @@ public class RequestHandler {
         }
         Manager sessionManager = SessionManager.getInstance();
         Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            final byte[] body = ResourceLoader.get(request.uri() + ".html");
+            return responseBuilder.build(request.uri() + ".html", HttpStatus.OK, body, null);
+        }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Location", "/index.html");
         return responseBuilder.build(null, HttpStatus.FOUND, null, headers);

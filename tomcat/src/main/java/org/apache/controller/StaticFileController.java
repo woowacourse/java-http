@@ -3,6 +3,8 @@ package org.apache.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,7 +67,8 @@ public class StaticFileController implements Controller {
     }
 
     private void validateInvalidUri(String uri) {
-        List<String> uriPart = List.of(uri.split("/"));
+        String decodedUri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+        List<String> uriPart = List.of(decodedUri.split("/"));
         if (uriPart.contains(".") || uriPart.contains("..")) {
             throw new InvalidRequestException("부적절한 리소스 주소입니다.");
         }

@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.dispatcher.handlerAdapter;
 
-import com.techcourse.RestController;
-import com.techcourse.Service;
-import com.techcourse.ViewController;
+import com.techcourse.controller.RestController;
+import com.techcourse.controller.ViewController;
+import com.techcourse.db.SessionManager;
+import com.techcourse.service.Service;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +20,7 @@ public class MethodHandlerAdapter implements HandlerAdapter {
     }
 
     public static void init() {
-        RestController restController = new RestController(new Service());
+        RestController restController = new RestController(new Service(), SessionManager.getInstance());
         mappings.put(new RouteKey("GET", "/"),
                 new HandlerMethod(restController, method(restController, "hello")));
         mappings.put(new RouteKey("POST", "/login"),

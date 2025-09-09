@@ -22,22 +22,24 @@ public class InMemoryUserRepository {
     }
 
     public static User save(final User user) {
-        if (existsByAccount(user.getAccount())) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-        }
+        final String account = user.getAccount();
 
         if (user.isPersisted()) {
-            DATABASE.put(user.getAccount(), user);
+            DATABASE.put(account, user);
             return user;
         }
 
-        final User persisted = User.withId(
-                ID_GENERATOR.getAndIncrement(),
-                user.getAccount(),
-                user.getPassword(),
-                user.getEmail());
-        DATABASE.put(persisted.getAccount(), persisted);
-        return persisted;
+        return DATABASE.compute(account, (key, existing) -> {
+            if (existing == null) {
+                return User.withId(
+                        ID_GENERATOR.getAndIncrement(),
+                        account,
+                        user.getPassword(),
+                        user.getEmail());
+            }
+
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다");
+        });
     }
 
     public static Optional<User> findByAccount(final String account) {

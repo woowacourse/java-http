@@ -32,6 +32,6 @@ class HttpVersionTest {
         // when & then
         assertThatThrownBy(() -> HttpVersion.from(protocolString))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 http method 입니다.");
+                .hasMessage("존재하지 않는 http version 입니다.");
     }
 }

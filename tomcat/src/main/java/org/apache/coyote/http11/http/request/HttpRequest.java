@@ -42,17 +42,22 @@ public class HttpRequest {
         final String startLine = bufferedReader.readLine();
         final HttpStartLine httpStartLine = HttpStartLine.from(startLine);
 
-        List<String> headerLines = new ArrayList<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
+        List<String> headerLines = readHeaderLines(bufferedReader);
         final HttpHeader httpHeader = HttpHeader.from(headerLines);
         final HttpCookie httpCookie = HttpCookie.from(httpHeader);
         final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
         final HttpSession session = sessionManager.findSession(httpCookie.getByName("JSESSIONID"));
 
         return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, session);
+    }
+
+    private static List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
+        }
+        return headerLines;
     }
 
     private static void validateNotNull(final InputStream inputStream) {
@@ -79,7 +84,12 @@ public class HttpRequest {
     }
 
     public String getTargetQueryParameter(final String target) {
-        return httpStartLine.getTargetQueryParameter(target);
+        if (target == null) {
+            throw new IllegalArgumentException("찾으려는 query parameter key는 null일 수 없습니다.");
+        }
+        String cleanTarget = target.trim();
+
+        return httpStartLine.getTargetQueryParameter(cleanTarget);
     }
 
     public HttpRequestBody getBody() {

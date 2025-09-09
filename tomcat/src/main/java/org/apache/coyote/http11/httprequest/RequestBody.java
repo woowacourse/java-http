@@ -1,9 +1,7 @@
 package org.apache.coyote.http11.httprequest;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RequestBody {
 
@@ -14,13 +12,16 @@ public class RequestBody {
 
     public static RequestBody from(final String rawRequestBody) {
         final String[] parameters = rawRequestBody.split(QUERY_PARAMETER_SEPARATOR);
-        final Map<String, String> bodyParameters = Arrays.stream(parameters)
-                .map(param -> param.split(QUERY_PARAMETER_KEY_VALUE_SEPARATOR))
-                .collect(Collectors.toMap(
-                        param -> param[0],
-                        param -> param[1],
-                        (oldValue, newValue) -> newValue
-                ));
+        final Map<String, String> bodyParameters = new HashMap<>();
+        for (String parameter : parameters) {
+            final String[] keyAndValue = parameter.split(QUERY_PARAMETER_KEY_VALUE_SEPARATOR);
+            final String key = keyAndValue[0];
+            String value = "";
+            if (keyAndValue.length == 2) {
+                value = keyAndValue[1];
+            }
+            bodyParameters.put(key, value);
+        }
 
         return new RequestBody(bodyParameters);
     }

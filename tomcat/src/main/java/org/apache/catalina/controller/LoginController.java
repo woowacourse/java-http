@@ -6,7 +6,7 @@ import static org.apache.catalina.controller.util.ResourceFinder.UNAUTHORIZED_RE
 import static org.apache.catalina.controller.util.ResourceFinder.findResource;
 
 import com.techcourse.model.User;
-import com.techcourse.restController.LoginRestController;
+import com.techcourse.apiController.LoginApiController;
 import com.techcourse.service.UserService;
 import java.util.Map;
 import java.util.Optional;
@@ -28,10 +28,10 @@ public class LoginController extends AbstractController {
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
 
-    private final LoginRestController loginRestController;
+    private final LoginApiController loginApiController;
 
     public LoginController() {
-        this.loginRestController = new LoginRestController(new UserService());
+        this.loginApiController = new LoginApiController(new UserService());
     }
 
     @Override
@@ -61,7 +61,7 @@ public class LoginController extends AbstractController {
         Map<String, String> bodyValues = getQueryParams(requestBody);
 
         try {
-            User user = loginRestController.login(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD));
+            User user = loginApiController.login(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD));
 
             setCookie(httpRequest, httpResponse, user);
             httpResponse.sendRedirect(INDEX_RESOURCE_PATH);

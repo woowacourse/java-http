@@ -4,7 +4,7 @@ import static org.apache.catalina.controller.util.QueryParam.getQueryParams;
 import static org.apache.catalina.controller.util.ResourceFinder.INDEX_RESOURCE_PATH;
 import static org.apache.catalina.controller.util.ResourceFinder.findResource;
 
-import com.techcourse.restController.RegisterRestController;
+import com.techcourse.apiController.RegisterApiController;
 import com.techcourse.service.UserService;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
@@ -23,10 +23,10 @@ public class RegisterController extends AbstractController {
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
 
-    private final RegisterRestController registerRestController;
+    private final RegisterApiController registerApiController;
 
     public RegisterController() {
-        this.registerRestController = new RegisterRestController(new UserService());
+        this.registerApiController = new RegisterApiController(new UserService());
     }
 
     @Override
@@ -49,7 +49,7 @@ public class RegisterController extends AbstractController {
         final String requestBody = httpRequest.getRequestBody().getBody();
         Map<String, String> bodyValues = getQueryParams(requestBody);
 
-        registerRestController.register(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD), bodyValues.get(EMAIL));
+        registerApiController.register(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD), bodyValues.get(EMAIL));
         httpResponse.sendRedirect(INDEX_RESOURCE_PATH);
     }
 }

@@ -1,12 +1,12 @@
-package com.techcourse.restController;
+package com.techcourse.apiController;
 
 import com.techcourse.service.UserService;
 
-public class RegisterRestController {
+public class RegisterApiController {
 
     private final UserService userService;
 
-    public RegisterRestController(final UserService userService) {
+    public RegisterApiController(final UserService userService) {
         this.userService = userService;
     }
 

@@ -9,11 +9,13 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.Cookie;
+import org.apache.coyote.util.SessionManager;
+import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
 import org.apache.coyote.util.response.HttpContentTypeResolver;
 import org.apache.coyote.util.response.HttpResponse;
-import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,12 +79,12 @@ public class Http11Processor implements Runnable, Processor {
     private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
         if ("/login".equals(request.path())) {
             HttpResponse loginResponse = processLoginMemberInfo(request);
-            respond(loginResponse, outputStream);
+            respondWithSession(loginResponse, outputStream, request);
             return true;
         }
         if ("/register".equals(request.path()) && "POST".equals(request.method())) {
             HttpResponse registerResponse = processRegisterMember(request);
-            respond(registerResponse, outputStream);
+            respondWithSession(registerResponse, outputStream, request);
             return true;
         }
         return false;
@@ -105,7 +107,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processRegisterMember(HttpRequest request) {
-        // TODO: 회원가입 처리
         String account = request.getQueryValue("account")
                 .orElse(null);
         String email = request.getQueryValue("email")
@@ -136,5 +137,15 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(httpResponse.createHeader().getBytes());
         outputStream.write(httpResponse.getBody());
         outputStream.flush();
+    }
+
+    private void respondWithSession(HttpResponse httpResponse, OutputStream outputStream, HttpRequest request)
+            throws IOException {
+        Cookie cookie = request.getCookie();
+        if (!SessionManager.hasValidSessionId(cookie)) {
+            String sessionId = SessionManager.generateSessionId();
+            httpResponse.addCookie(SessionManager.JSESSIONID, sessionId);
+        }
+        respond(httpResponse, outputStream);
     }
 }

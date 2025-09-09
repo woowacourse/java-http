@@ -17,9 +17,12 @@ public enum ContentType {
     ;
 
     public static final String HEADER_NAME = "content-type";
+    public static final String CHARSET_NAME = "charset";
     public static final String HTML_EXTENSION = ".html";
     public static final String CSS_EXTENSION = ".css";
     public static final String JS_EXTENSION = ".js";
+    public static final String CONTENT_TYPE_SEPARATOR = ";";
+    public static final ContentType DEFAULT_CONTENT_TYPE = ContentType.HTML;
 
     private final String mimeType;
     private final Charset defaultCharset;
@@ -35,7 +38,7 @@ public enum ContentType {
             return JAVASCRIPT;
         }
 
-        return getDefault();
+        return DEFAULT_CONTENT_TYPE;
     }
 
     public static ContentType fromHeader(final String contentTypeHeader) {
@@ -43,7 +46,7 @@ public enum ContentType {
             return HTML;
         }
 
-        final String mimeType = contentTypeHeader.split(";")[0].trim().toLowerCase();
+        final String mimeType = contentTypeHeader.split(CONTENT_TYPE_SEPARATOR)[0].trim().toLowerCase();
 
         for (final ContentType type : ContentType.values()) {
             if (type.getMimeType().equalsIgnoreCase(mimeType)) {
@@ -51,10 +54,6 @@ public enum ContentType {
             }
         }
 
-        return getDefault();
-    }
-
-    public static ContentType getDefault() {
-        return HTML;
+        return DEFAULT_CONTENT_TYPE;
     }
 }

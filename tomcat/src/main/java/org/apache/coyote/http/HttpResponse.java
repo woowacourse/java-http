@@ -1,9 +1,14 @@
 package org.apache.coyote.http;
 
+import static org.apache.coyote.http.ContentType.CHARSET_NAME;
+import static org.apache.coyote.http.ContentType.CONTENT_TYPE_SEPARATOR;
 import static org.apache.coyote.http.HttpConstants.CRLF;
+import static org.apache.coyote.http.HttpConstants.HEADER_VALUE_SEPARATOR;
+import static org.apache.coyote.http.HttpConstants.KEY_VALUE_SEPARATOR;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
@@ -55,27 +60,55 @@ public class HttpResponse {
     private void appendContentHeaders(final StringBuilder response) {
         final int contentLength = body == null ? 0 : body.getBytes(StandardCharsets.UTF_8).length;
 
-        response.append(ContentType.HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
-                .append(" ").append(type.getMimeType()).append(CRLF)
-                .append(HttpConstants.CONTENT_LENGTH_HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+        response.append(formatHeaderName(ContentType.HEADER_NAME)).append(HEADER_VALUE_SEPARATOR)
+                .append(" ").append(type.getMimeType()).append(CONTENT_TYPE_SEPARATOR)
+                .append(CHARSET_NAME).append(KEY_VALUE_SEPARATOR).append(type.getDefaultCharset().name().toLowerCase())
+                .append(CRLF)
+                .append(formatHeaderName(HttpConstants.CONTENT_LENGTH_HEADER_NAME))
+                .append(HEADER_VALUE_SEPARATOR)
                 .append(" ").append(contentLength).append(CRLF);
     }
 
     private void appendCustomHeaders(final StringBuilder response) {
         headers.forEach((key, value) ->
-                response.append(key).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+                response.append(formatHeaderName(key)).append(HEADER_VALUE_SEPARATOR)
                         .append(" ").append(value).append(CRLF));
     }
 
     private void appendCookies(final StringBuilder response) {
         cookies.forEach((name, value) ->
-                response.append(SET_COOKIE_HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
-                        .append(" ").append(name).append(HttpConstants.KEY_VALUE_SEPARATOR).append(value).append(CRLF));
+                response.append(SET_COOKIE_HEADER_NAME).append(HEADER_VALUE_SEPARATOR)
+                        .append(" ").append(name).append(KEY_VALUE_SEPARATOR).append(value).append(CRLF));
     }
 
     private void appendBody(final StringBuilder response) {
         final String bodyContent = body == null ? "" : body;
         response.append(CRLF)
                 .append(bodyContent);
+    }
+
+    private String formatHeaderName(final String name) {
+        if (name == null) {
+            return "";
+        }
+        final String lower = name.trim().toLowerCase(Locale.ROOT);
+        if (lower.isEmpty()) {
+            return "";
+        }
+
+        final String[] parts = lower.split("-");
+        final StringBuilder sb = new StringBuilder(lower.length());
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) {
+                sb.append('-');
+            }
+            final String p = parts[i];
+            if (p.isEmpty()) {
+                continue; // 연속 하이픈 방어
+            }
+            sb.append(Character.toUpperCase(p.charAt(0)))
+                    .append(p.substring(1));
+        }
+        return sb.toString();
     }
 }

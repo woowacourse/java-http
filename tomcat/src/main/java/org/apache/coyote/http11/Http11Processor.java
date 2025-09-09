@@ -51,7 +51,24 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String response = handleRequest(requestInfo);
+            final Map<String, String> requestHeaders = new HashMap<>();
+            String line;
+            while((line = reader.readLine()) != null && !line.isEmpty()) {
+                final String[] headerParts = line.split(": ", 2);
+                if (headerParts.length == 2) {
+                    requestHeaders.put(headerParts[0], headerParts[1]);
+                }
+            }
+
+            String requestBody = "";
+            if("POST".equals(requestInfo[0]) && requestHeaders.containsKey("Content-Length")) {
+                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
+
+            final String response = handleRequest(requestInfo, requestBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -66,37 +83,54 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
 
+        final String method = requestLineArray[0];
         final String uri = requestLineArray[1];
-        final int index = uri.indexOf("?");
-        final String path = (index != -1) ? uri.substring(0, index) : uri;
-        final String queryString = (index != -1) ? uri.substring(index + 1) : "";
 
-        return new String[]{path, queryString};
+        return new String[]{method, uri};
     }
 
-    private String handleRequest(final String[] requestInfo) throws IOException, URISyntaxException {
-        String path = requestInfo[0];
-        final String queryString = requestInfo[1];
+    private String handleRequest(final String[] requestInfo, final String requestBody) throws IOException, URISyntaxException {
+        String method = requestInfo[0];
+        String path = requestInfo[1];
 
         if ("/login".equals(path)) {
-            return handleLoginPath(path, queryString);
+            return handleLogin(method, requestBody);
+        }
+        if("/register".equals(path)) {
+            return handleRegister(method, requestBody);
         }
 
         return serveStaticFile(path);
     }
 
-    private String handleLoginPath(final String path, final String queryString) throws IOException, URISyntaxException {
-        if (!queryString.isEmpty()) {
-            return processLoginRequest(queryString);
+    private String handleLogin(final String method, final String requestBody) throws IOException, URISyntaxException {
+        if("POST".equals(method)) {
+            return processLogin(requestBody);
         }
-        return serveStaticFile(path + ".html");
+        return serveStaticFile( "/login.html");
     }
 
-    private String processLoginRequest(final String queryString) {
-        final Map<String, String> parameters = parseQueryString(queryString);
+    private String handleRegister(final String method, final String requestBody) throws IOException, URISyntaxException {
+        if("POST".equals(method)) {
+            return processRegister(requestBody);
+        }
+        return serveStaticFile("/register.html");
+    }
+
+    private String processLogin(final String requestBody) {
+        final Map<String, String> parameters = parseFormData(requestBody);
         final boolean loginSuccess = authenticateUser(parameters);
 
         final String redirectLocation = loginSuccess ? "/index.html" : "/401.html";
+
+        return generateRedirectResponse(redirectLocation);
+    }
+
+    private String processRegister(final String requestBody) {
+        final Map<String, String> parameters = parseFormData(requestBody);
+        final boolean registerSuccess = registerUser(parameters);
+
+        final String redirectLocation = registerSuccess ? "/index.html" : "/register.html";
 
         return generateRedirectResponse(redirectLocation);
     }
@@ -122,15 +156,36 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
+    private boolean registerUser(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+        final String email = parameters.get("email");
+
+        if(account == null || password == null || email == null) {
+            return false;
+        }
+
+        if(InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return false;
+        }
+        try{
+            final User newUser = new User(account, password, email);
+            InMemoryUserRepository.save(newUser);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
     private String serveStaticFile(final String path) throws IOException, URISyntaxException {
         final byte[] fileBytes = readFile(path);
         return generateOkResponse(path, fileBytes);
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
+    private Map<String, String> parseFormData(final String formData) {
         final Map<String, String> parameters = new HashMap<>();
-        if (queryString != null && !queryString.isEmpty()) {
-            final String[] pairs = queryString.split("&");
+        if (formData != null && !formData.isEmpty()) {
+            final String[] pairs = formData.split("&");
             for (final String pair : pairs) {
                 final String[] keyValue = pair.split("=");
                 parameters.put(keyValue[0], keyValue[1]);

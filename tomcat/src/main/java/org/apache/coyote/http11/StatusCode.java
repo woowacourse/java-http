@@ -5,6 +5,12 @@ public enum StatusCode {
     CREATED(201, "Created"),
     NO_CONTENT(204, "No Content"),
 
+    MOVED_PERMANENTLY(301, "Moved Permanently"),
+    FOUND(302, "Found"),
+    NOT_MODIFIED(304, "Not Modified"),
+    TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+    PERMANENT_REDIRECT(308, "Permanent Redirect"),
+
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     FORBIDDEN(403, "Forbidden"),

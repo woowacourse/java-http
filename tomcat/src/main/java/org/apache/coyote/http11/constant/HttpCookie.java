@@ -14,7 +14,22 @@ public class HttpCookie {
         }
     }
 
+    public boolean containsJSessionId() {
+        return cookies.containsKey("JSESSIONID");
+    }
+
+    public String getJSessionId() {
+        if (!cookies.containsKey("JSESSIONID")) {
+            throw new IllegalStateException("JSESSIONID가 존재하지 않습니다.");
+        }
+        return cookies.get("JSESSIONID");
+    }
+
     public String get(String key) {
         return cookies.get(key);
+    }
+
+    public String getCookieString() {
+        return null;
     }
 }

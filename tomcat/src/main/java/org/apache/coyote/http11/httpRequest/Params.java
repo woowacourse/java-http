@@ -4,7 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public record Params(Map<String, String> params) {
+public class Params {
+
+    private final Map<String, String> params;
+
+    public Params(final Map<String, String> params) {
+        this.params = params;
+    }
 
     public static Params parse(final String queryString) {
         if (queryString == null || queryString.isBlank()) {
@@ -53,5 +59,9 @@ public record Params(Map<String, String> params) {
 
     public Optional<String> findValue(final String name) {
         return Optional.ofNullable(params.get(name));
+    }
+
+    public Map<String, String> getParams() {
+        return this.params;
     }
 }

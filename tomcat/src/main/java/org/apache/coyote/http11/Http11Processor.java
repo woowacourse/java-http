@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.error.ErrorMapper;
 import org.apache.coyote.http11.handler.GreetingHandler;
 import org.apache.coyote.http11.handler.HttpHandler;
@@ -25,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpResponseWriter httpResponseWriter;
     private final Resolver resolver;
     private final ErrorMapper errorMapper;
+    private final HttpCookie httpCookie;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -33,9 +35,10 @@ public class Http11Processor implements Runnable, Processor {
         this.httpResourceLoader = new HttpResourceLoader();
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
+        this.httpCookie = new HttpCookie();
         this.resolver = new Resolver(httpResourceHandler)
                 .register("/", new GreetingHandler())
-                .register("/login", new LoginHandler(httpResourceLoader, queryParser))
+                .register("/login", new LoginHandler(httpResourceLoader, queryParser, httpCookie))
                 .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
         ;
         this.errorMapper = new ErrorMapper(httpResourceLoader);

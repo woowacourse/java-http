@@ -3,6 +3,7 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
+import com.techcourse.http.common.HttpCookie;
 import com.techcourse.http.common.HttpMethod;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
@@ -11,6 +12,7 @@ import com.techcourse.http.response.Location;
 import com.techcourse.http.response.ResponseBody;
 import com.techcourse.model.User;
 import java.util.Map;
+import java.util.UUID;
 
 public class RegisterRequestHandler {
 
@@ -24,15 +26,28 @@ public class RegisterRequestHandler {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
 
         if (httpMethod == HttpMethod.GET) { // 회원 가입 페이지를 보여줄 때
-            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
+            return handleGetHttpMethod(httpRequest);
         }
         if (httpMethod == HttpMethod.POST) { // 회원 가입 버튼을 누를 때
-            Map<String, String> requestParams = httpRequest.getRequestParams();
-            registerUser(requestParams);
-
-            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON);
+            return handlePostHttpMethod(httpRequest);
         }
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
+    }
+
+    private HttpResponse handleGetHttpMethod(HttpRequest httpRequest) {
+        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
+                ResponseBody.createBy(httpRequest));
+    }
+
+    private HttpResponse handlePostHttpMethod(HttpRequest httpRequest) {
+        Map<String, String> requestParams = httpRequest.getRequestParams();
+        registerUser(requestParams);
+
+        HttpCookie responseCookie = HttpCookie.empty();
+        if (httpRequest.hasEmptySessionId()) {
+            responseCookie.addSessionId(String.valueOf(UUID.randomUUID()));
+        }
+        return HttpResponse.found(httpVersion, new Location("/index.html"), responseCookie);
     }
 
     private void registerUser(Map<String, String> requestParams) {

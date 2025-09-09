@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,8 @@ public class HttpRequestParser {
         HttpMethod method = HttpMethod.from(splittedRequestLine[0]);
         String path = parsePath(splittedRequestLine[1]);
         QueryStrings queryStrings = parseQueryStrings(splittedRequestLine[1]);
-        return new RequestLine(method, path, queryStrings);
+        HttpProtocolVersion protocolVersion = HttpProtocolVersion.from(splittedRequestLine[2]);
+        return new RequestLine(method, path, queryStrings, protocolVersion);
     }
 
     private static String readOneLineOfInputStream(BufferedReader bufferedReader) throws IOException {

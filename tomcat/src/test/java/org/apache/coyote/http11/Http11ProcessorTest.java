@@ -62,7 +62,7 @@ class Http11ProcessorTest {
     void get_login_page() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /login.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

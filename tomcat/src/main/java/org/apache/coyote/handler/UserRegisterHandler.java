@@ -15,14 +15,22 @@ public class UserRegisterHandler implements RequestHandler{
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String POST_METHOD_REQUEST = "post";
+    private static final String POST_METHOD_REQUEST = "POST";
+    private static final String GET_METHOD_REQUEST = "GET";
 
     @Override
     public String handle(final String method, final String path, final Map<String, String> queryParams, HttpCookie cookie) {
+        if (method.equals(GET_METHOD_REQUEST)) {
+            return handleRegisterGet();
+        }
         if (method.equals(POST_METHOD_REQUEST)) {
             return handleRegisterPost(method, queryParams);
         }
         throw new IllegalArgumentException("회원가입중 문제가 발생했습니다.");
+    }
+
+    private String handleRegisterGet() {
+        return PageRenderer.createStaticFileResponse(HttpStatus.OK.getStatusCode(), "/register.html");
     }
 
     private String handleRegisterPost(String method, Map<String, String> queryParams) {

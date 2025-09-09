@@ -1,27 +1,62 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
-    private final OutputStream outputStream;
+    private int status = 200;
+    private String reason = "OK";
+    private final Map<String, String> headers = new LinkedHashMap<>();
+    private byte[] body = new byte[0];
+    private boolean committed = false;
 
-    public HttpResponse(final OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public static byte[] bytes(String string) {
+        return string.getBytes(StandardCharsets.UTF_8);
     }
 
-    public void sendResponse(byte[] body, ContentType contentType, HttpStatus httpStatus) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getReasonPhrase() + " ",
-                "Content-Type: " + contentType.getValue() + " ",
-                "Content-Length: " + body.length + " ",
-                "",
-                "");
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
-        outputStream.flush();
+    public void setStatus(
+            int status,
+            String reason
+    ) {
+        this.status = status;
+        this.reason = reason;
+    }
+
+    public void setHeader(
+            String name,
+            String value
+    ) {
+        headers.put(name, value);
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body != null ? body : new byte[0];
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public byte[] getBody() {
+        return body;
+    }
+
+    public boolean isCommitted() {
+        return committed;
+    }
+
+    void markCommitted() {
+        committed = true;
     }
 }
 

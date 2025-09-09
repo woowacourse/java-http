@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    NOT_FOUND(404, "NOT FOUND");
+    NOT_FOUND(404, "NOT FOUND"),
+    INTERVAL_SERVER_ERROR(500, "Interval Server Error");
 
     private final int statusCode;
     private final String reasonPhrase;

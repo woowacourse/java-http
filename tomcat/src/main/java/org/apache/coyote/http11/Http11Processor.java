@@ -12,10 +12,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final LoginController loginController = new LoginController();
-    private final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
+    private final Router router = new Router();
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -26,18 +25,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse(outputStream);
-            String requestUri = httpRequest.getUri();
+    public void process(Socket connection) {
+        try (final var inputStream = new Http11InputBuffer(connection.getInputStream());
+             final var outputStream = new Http11OutputBuffer(connection.getOutputStream())) {
 
-            if (requestUri.equals("/login") && !httpRequest.getQuery().isEmpty()) {
-                loginController.login(httpRequest, httpResponse);
-                return;
+            HttpRequest httpRequest = new HttpRequestParser().parse(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
+            try {
+                router.handle(httpRequest, httpResponse);
+            } catch (Throwable throwable) {
+                log.error("Handler error", throwable);
+                httpResponse.setStatus(
+                        HttpStatus.INTERVAL_SERVER_ERROR.getStatusCode(),
+                        HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()
+                );
+                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
+                httpResponse.setBody(HttpResponse.bytes(HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()));
             }
-            staticResourceHandler.serveStatic(httpRequest, httpResponse);
+            outputStream.commitAndWrite(httpResponse);
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

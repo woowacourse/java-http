@@ -18,7 +18,9 @@ public class LoginController {
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NoSuchElementException::new);
-        System.out.println(user.getAccount());
-        System.out.println("password :" + user.checkPassword(password));
+
+        if (user.checkPassword(password)) {
+            System.out.println("로그인 성공");
+        }
     }
 }

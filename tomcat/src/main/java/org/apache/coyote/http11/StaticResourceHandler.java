@@ -5,18 +5,24 @@ import java.io.InputStream;
 
 public class StaticResourceHandler {
 
-    public void serveStatic(
-            final HttpRequest httpRequest,
-            final HttpResponse httpResponse
+    public void serve(
+            HttpRequest httpRequest,
+            HttpResponse httpResponse
     ) throws IOException {
-        final String filePath = processFilePath(httpRequest.getUri());
+        final String filePath = processFilePath(httpRequest.uri());
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream("static/" + filePath)) {
             if (fileInputStream == null) {
-                httpResponse.sendResponse(new byte[0], ContentType.HTML, HttpStatus.NOT_FOUND);
+                httpResponse.setStatus(
+                        HttpStatus.NOT_FOUND.getStatusCode(),
+                        HttpStatus.NOT_FOUND.getReasonPhrase()
+                );
+                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
+                httpResponse.setBody(HttpResponse.bytes("Not Found"));
                 return;
             }
             byte[] body = fileInputStream.readAllBytes();
-            httpResponse.sendResponse(body, getContentType(filePath), HttpStatus.OK);
+            httpResponse.setHeader("Content-Type", ContentType.fromPath(filePath).getMimeType());
+            httpResponse.setBody(body);
         }
     }
 
@@ -28,18 +34,5 @@ public class StaticResourceHandler {
             return filePath + ".html";
         }
         return filePath;
-    }
-
-    private ContentType getContentType(final String filePath) throws IOException {
-        if (filePath.endsWith(".html")) {
-            return ContentType.HTML;
-        }
-        if (filePath.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-        if (filePath.endsWith(".js")) {
-            return ContentType.JAVASCRIPT;
-        }
-        throw new IOException("지원하지 않는 파일 형식입니다.");
     }
 }

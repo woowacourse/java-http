@@ -313,4 +313,12 @@ public class Http11Processor implements Runnable, Processor {
 
         return cookieSession;
     }
+
+    private int toInt(String contentLength) {
+        try {
+            return Integer.parseInt(contentLength);
+        } catch (NumberFormatException | NullPointerException e) {
+            throw new IllegalArgumentException("[ERROR] invalid content length");
+        }
+    }
 }

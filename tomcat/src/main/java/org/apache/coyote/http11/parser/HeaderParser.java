@@ -2,8 +2,6 @@ package org.apache.coyote.http11.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +17,8 @@ public class HeaderParser {
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] split = line.split(HEADER_DELIMITER, 2);
-            String key = URLDecoder.decode(split[0], StandardCharsets.UTF_8).trim();
-            String value = URLDecoder.decode(split[1], StandardCharsets.UTF_8).trim();
+            String key = split[0].trim();
+            String value = split[1].trim();
             headers.put(key, value);
         }
         return headers;

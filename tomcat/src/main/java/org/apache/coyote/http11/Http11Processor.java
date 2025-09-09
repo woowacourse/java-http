@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -45,7 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
@@ -112,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse serveStaticPath(final String path, final MimeType mimeType) throws IOException {
         final Path filePath = getFilePath(path, mimeType);
-        final String responseBody = new String(Files.readAllBytes(filePath));
+        final String responseBody = Files.readString(filePath, StandardCharsets.UTF_8);
         return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
     }
 
@@ -186,16 +188,16 @@ public class Http11Processor implements Runnable, Processor {
         return jsessionId;
     }
 
-    private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-        outputStream.write(response.toHttpResponseString().getBytes());
-        outputStream.flush();
-    }
-
     private boolean isLoggedIn(Map<String, String> requestHeaders) {
         String cookieHeader = requestHeaders.get("Cookie");
         Cookie cookie = Cookie.fromHeader(cookieHeader);
         String jsessionId = cookie.get("JSESSIONID");
         Session session = SessionManager.getInstance().findSession(jsessionId);
         return session != null && session.getAttribute("user") != null;
+    }
+
+    private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toHttpResponseString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

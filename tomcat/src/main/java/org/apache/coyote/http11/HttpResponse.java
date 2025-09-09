@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class HttpResponse {
             headers.put(CONTENT_TYPE_HEADER, mimeType.getType() + ";charset=utf-8");
         }
         if (!body.isEmpty()) {
-            headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.getBytes().length));
+            headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.getBytes(StandardCharsets.UTF_8).length));
         }
     }
 

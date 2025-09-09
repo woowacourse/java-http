@@ -15,6 +15,7 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
+    private final Map<String, String> cookies;
     private final Map<String, String> body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -27,14 +28,23 @@ public class HttpRequest {
         this.path = splitUrl[0];
         this.queryParams = new HashMap<>();
         if (splitUrl.length == 2) {
-            this.queryParams.putAll(parseQueryString(splitUrl[1]));
+            this.queryParams.putAll(parseKeyValuePairs(splitUrl[1], "&"));
         }
         this.headers = readHeaders(bufferedReader);
+        this.cookies = readCookies(headers);
         if (headers.containsKey("Content-Length")) {
             this.body = readBody(bufferedReader, Integer.parseInt(headers.get("Content-Length")));
         } else {
             this.body = null;
         }
+    }
+
+    private Map<String, String> readCookies(Map<String, String> headers) {
+        if (!headers.containsKey("Cookie")) {
+            return Map.of();
+        }
+        String value = headers.get("Cookie");
+        return parseKeyValuePairs(value, "; ");
     }
 
     private Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {
@@ -50,11 +60,11 @@ public class HttpRequest {
     private Map<String, String> readBody(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] body = new char[contentLength];
         bufferedReader.read(body, 0, contentLength);
-        return parseQueryString(new String(body));
+        return parseKeyValuePairs(new String(body), "&");
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        return Arrays.stream(queryString.split("&")).map(s -> s.split("=", 2))
+    private Map<String, String> parseKeyValuePairs(String input, String pairDelimiter) {
+        return Arrays.stream(input.split(pairDelimiter)).map(s -> s.split("=", 2))
                 .filter(keyValue -> keyValue.length == 2)
                 .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
     }
@@ -81,5 +91,13 @@ public class HttpRequest {
 
     public String getBody(String key) {
         return body.get(key);
+    }
+
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
+    public String getCookie(String key) {
+        return cookies.get(key);
     }
 }

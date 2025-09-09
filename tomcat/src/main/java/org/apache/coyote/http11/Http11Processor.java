@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -61,12 +62,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             if (request.equalPath("/register")) {
-                System.out.println("hello");
                 if (request.equalMethod(HttpMethod.GET)) {
                     return createStaticResourceResponse("/register.html");
                 }
                 if (request.equalMethod(HttpMethod.POST)) {
-                    System.out.println("hello2");
                     return register(request);
                 }
             }
@@ -103,6 +102,9 @@ public class Http11Processor implements Runnable, Processor {
             return create302Response("/401.html");
         }
         log.info(user.toString());
+        if (request.getCookie("JSESSIONID") == null) {
+            return create302LoginResponse("/index.html", UUID.randomUUID());
+        }
         return create302Response("/index.html");
     }
 
@@ -132,6 +134,14 @@ public class Http11Processor implements Runnable, Processor {
     private String create302Response(String path) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Location: " + path,
+                "");
+    }
+
+    private String create302LoginResponse(String path, UUID sessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Set-Cookie: JSESSIONID=" + sessionId,
                 "Location: " + path,
                 "");
     }

@@ -6,7 +6,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.LoginHandler;
+import org.apache.coyote.controller.RegisterHandler;
 import org.apache.coyote.controller.StaticFileHandler;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +35,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final Http11Request request = new Http11Request(inputStream);
             String path = request.getPath();
+            SessionManager sessionManager = new SessionManager();//TODO: SessionManager 생성 시점 고민
 
             Http11Response response;
             if (path.startsWith("/login")) {
-                response = LoginHandler.getResponse(request);
+                response = LoginHandler.getResponse(request, sessionManager);
+            } else if (path.startsWith("/register")) {
+                response = RegisterHandler.getResponse(request, sessionManager);
             } else {
-                response = StaticFileHandler.getResponse(request);
+                response = StaticFileHandler.getResponse(request, sessionManager);
             }
 
             outputStream.write(response.getResponseHeader().getBytes(StandardCharsets.UTF_8));
-            outputStream.write(response.getResponseBody());
+            if (response.getResponseBody() != null) {
+                outputStream.write(response.getResponseBody());
+            }
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

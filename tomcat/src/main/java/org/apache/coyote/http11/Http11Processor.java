@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.parser.HeaderParser;
 import org.apache.coyote.http11.parser.QueryParamsParser;
@@ -49,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             MimeType mimeType = resolveMimeType(requestLine.getPath(), requestHeaders);
 
             if (requestLine.getMethod().equalsIgnoreCase("GET")) {
-                HttpResponse response = buildResponse(requestLine.getPath(), mimeType);
+                HttpResponse response = buildResponse(requestLine.getPath(), mimeType, requestHeaders);
                 sendResponse(outputStream, response);
             }
 
@@ -83,7 +84,8 @@ public class Http11Processor implements Runnable, Processor {
         return MimeType.fromExtensionString(extension);
     }
 
-    private HttpResponse buildResponse(String requestUri, MimeType mimeType) throws IOException {
+    private HttpResponse buildResponse(String requestUri, MimeType mimeType, Map<String, String> requestHeaders)
+            throws IOException {
         if (UriParser.isRootPath(requestUri)) {
             return HttpResponse.of(HttpStatus.OK, mimeType, "Hello world!");
         }
@@ -94,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
             String queryString = UriParser.extractQueryString(requestUri);
             Map<String, String> queryParams = QueryParamsParser.parse(queryString);
             if (path.equals("/login")) {
-                return handleLogin(queryParams, mimeType);
+                return handleLogin(queryParams, mimeType, requestHeaders);
             }
         }
 
@@ -111,19 +113,26 @@ public class Http11Processor implements Runnable, Processor {
         return new File(resource.getFile()).toPath();
     }
 
-    private HttpResponse handleLogin(Map<String, String> queryParams, MimeType mimeType) {
+    private HttpResponse handleLogin(Map<String, String> queryParams, MimeType mimeType,
+                                     Map<String, String> requestHeaders) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
-                    log.info("login success: account= {}", account);
-                    return redirectTo("/index.html", mimeType);
+                    return handleLoginSuccess(account, mimeType, requestHeaders);
                 })
                 .orElseGet(() -> {
                     log.info("login failure: account= {}", account);
                     return redirectTo("/401.html", mimeType);
                 });
+    }
+
+    private HttpResponse handleLoginSuccess(String account, MimeType mimeType, Map<String, String> requestHeaders) {
+        log.info("login success: account= {}", account);
+        HttpResponse httpResponse = redirectTo("/index.html", mimeType);
+        handleCookie(requestHeaders, httpResponse);
+        return httpResponse;
     }
 
     private HttpResponse handleRegister(Map<String, String> queryParams, MimeType mimeType) {
@@ -140,6 +149,19 @@ public class Http11Processor implements Runnable, Processor {
         HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
         httpResponse.addHeader("Location", location);
         return httpResponse;
+    }
+
+    private void handleCookie(Map<String, String> requestHeaders, HttpResponse httpResponse) {
+        String cookieHeader = requestHeaders.get("Cookie");
+        Cookie cookie = Cookie.fromHeader(cookieHeader);
+
+        String jsessionId = cookie.get("JSESSIONID");
+
+        if (jsessionId == null) {
+            jsessionId = UUID.randomUUID().toString();
+            cookie.add("JSESSIONID", jsessionId);
+            httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jsessionId);
+        }
     }
 
     private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {

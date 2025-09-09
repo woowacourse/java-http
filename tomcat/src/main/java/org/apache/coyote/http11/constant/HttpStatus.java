@@ -6,7 +6,10 @@ public enum HttpStatus {
     ACCEPTED(202, "ACCEPTED"),
     NO_CONTENT(204, "NO_CONTENT"),
 
+    FOUND(302, "FOUND"),
+
     BAD_REQUEST(400, "BAD_REQUEST"),
+    UNAUTHORIZED(401, "UNAUTHORIZED"),
     NOT_FOUND(404, "NOT_FOUND");
 
     final int code;

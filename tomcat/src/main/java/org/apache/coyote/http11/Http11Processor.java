@@ -2,16 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.catalina.handler.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -54,43 +50,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void respond(HttpResponse response, OutputStream outputStream) throws IOException, URISyntaxException {
-        final var responseText = createHttpResponse(response);
+        final var responseText = response.createString();
         outputStream.write(responseText.getBytes());
         outputStream.flush();
-    }
-
-    private String createHttpResponse(HttpResponse response) throws IOException, URISyntaxException {
-        String responseBody = getResponseBody(response.getBody());
-        String headerString = response.headersToString();
-        StringBuilder responseBuilder = createResponseString(response, headerString, responseBody);
-        return responseBuilder.toString();
-    }
-
-    private StringBuilder createResponseString(HttpResponse response, String headerString, String responseBody) {
-        StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append("HTTP/1.1 ")
-                .append(response.getStatusCode().getValue()).append(" ")
-                .append(response.getStatusCode()).append(" \r\n");
-        if (headerString != null) {
-            responseBuilder.append(headerString).append(" \r\n");
-        }
-        responseBuilder.append("Content-Type: ").append(response.getContentType()).append(" \r\n");
-        responseBuilder.append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n\r\n");
-        responseBuilder.append(responseBody);
-        return responseBuilder;
-    }
-
-    private String getResponseBody(String path) throws IOException, URISyntaxException {
-        URL resource = getResource(path);
-        if (resource == null || Files.isDirectory(Path.of(resource.toURI()))) {
-            return "Hello world!";
-        }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private URL getResource(String path) {
-        return getClass()
-                .getClassLoader()
-                .getResource("static" + path);
     }
 }

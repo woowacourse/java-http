@@ -46,14 +46,22 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = words[1].split("\\?")[0];
             HttpMethod httpMethod = HttpMethod.from(words[0]);
             QueryParameters params = parseParameters(words[1]);
+            ContentType contentType = ContentType.HTML;
 
             if (requestPath.equals("/login")) {
                 requestPath = "/login.html";
                 login(params);
             }
 
+            if (requestPath.endsWith(".css")) {
+                contentType = ContentType.CSS;
+            }
+            if (requestPath.endsWith(".js")) {
+                contentType = ContentType.JAVASCRIPT;
+            }
+
             final var responseBody = getStaticPage(requestPath);
-            final var response = buildResponse(responseBody);
+            final var response = buildResponse(contentType, responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -67,11 +75,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponse(String responseBody) {
+    private String buildResponse(ContentType contentType, String responseBody) {
         int bodyLength = getBodyLength(responseBody);
         final var response = String.join("\r\n",
             "HTTP/1.1 200 OK",
-            "Content-Type: text/html;charset=utf-8",
+            "Content-Type: " + contentType.getType() + ";charset=utf-8",
             "Content-Length: " + bodyLength,
             "",
             responseBody);

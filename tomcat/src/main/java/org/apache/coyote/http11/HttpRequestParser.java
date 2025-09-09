@@ -12,8 +12,12 @@ public class HttpRequestParser {
         final String requestLine = reader.readLine();
 
         final String[] parts = requestLine.split(" ");
+
+        validateRequestLine(parts, requestLine);
+
         final String method = parts[0];
         String requestUri = parts[1];
+        String version = parts[2];
 
         String path = requestUri;
         Map<String, String> queryParams = new HashMap<>();
@@ -25,7 +29,13 @@ public class HttpRequestParser {
             queryParams = parseQueryString(queryString);
         }
 
-        return new HttpRequest(method, path, queryParams);
+        return new HttpRequest(method, path, queryParams, version);
+    }
+
+    private void validateRequestLine(String[] parts, String requestLine) {
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Invalid HTTP request line: " + requestLine);
+        }
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

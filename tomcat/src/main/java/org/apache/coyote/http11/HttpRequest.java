@@ -70,11 +70,7 @@ public class HttpRequest {
     }
 
     public String getQueryParameterValue(String key) {
-        String value = queryParameter.get(key);
-        if (value == null || value.isBlank()) {
-            return "";
-        }
-        return value;
+        return queryParameter.getOrDefault(key, "");
     }
 
     public boolean hasCookie(String key) {

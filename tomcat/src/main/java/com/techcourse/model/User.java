@@ -14,6 +14,13 @@ public class User {
         this.email = email;
     }
 
+    public static User copyWithId(
+            final Long id,
+            final User user
+    ) {
+        return new User(id, user.account, user.password, user.email);
+    }
+
     public User(String account, String password, String email) {
         this(null, account, password, email);
     }
@@ -24,14 +31,6 @@ public class User {
 
     public String getAccount() {
         return account;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     @Override

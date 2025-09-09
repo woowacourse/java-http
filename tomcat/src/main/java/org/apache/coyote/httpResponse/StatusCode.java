@@ -2,7 +2,11 @@ package org.apache.coyote.httpResponse;
 
 public enum StatusCode {
 
-    OK(200, "OK");
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    BAD_REQUEST(400, "BadRequest"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "NotFound");
 
     private final int code;
     private final String message;

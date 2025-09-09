@@ -23,8 +23,7 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(String id) {
-        Session session = SESSIONS.get(id);
-        return session;
+        return SESSIONS.get(id);
     }
 
     @Override

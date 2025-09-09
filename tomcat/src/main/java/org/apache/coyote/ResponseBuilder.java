@@ -3,7 +3,6 @@ package org.apache.coyote;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ResponseBuilder {
 
@@ -41,29 +40,24 @@ public class ResponseBuilder {
     }
 
     public String build(final String requestUri, final String status, final byte[] body, final Map<String, String> headers) {
-        String contentType = getContentType(requestUri);
+        StringBuilder builder = new StringBuilder();
 
-        if (headers == null) {
-            return String.join("\r\n",
-                    "HTTP/1.1 " + status + " ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    new String(body));
+        builder.append("HTTP/1.1 ").append(status).append(" \r\n");
+
+        String contentType = getContentType(requestUri);
+        builder.append("Content-Type: ").append(contentType).append(" \r\n");
+
+        if (body != null) {
+            builder.append("Content-Length: ").append(body.length).append(" \r\n");
+        }
+        if (headers != null) {
+            headers.forEach((key, value) -> builder.append(key).append(": ").append(value));
         }
 
-        String responseHeaders = headers.entrySet()
-                .stream()
-                .map(set -> set.getKey() + ": " + set.getValue())
-                .collect(Collectors.joining("\r\n"));
+        builder.append("\r\n");
+        builder.append(new String(body));
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + body.length + " ",
-                responseHeaders,
-                "",
-                new String(body));
+        return builder.toString();
     }
 
     private String getContentType(final String uri) {

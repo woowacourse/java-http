@@ -24,9 +24,7 @@ public record ResponseContent(
         return new ResponseContent(HttpStatus.FOUND, body, location, httpCookie);
     }
 
-    public static ResponseContent error(
-            final String body
-    ) {
+    public static ResponseContent error(final String body) {
         return new ResponseContent(HttpStatus.NOT_FOUND, body, null, null);
     }
 }

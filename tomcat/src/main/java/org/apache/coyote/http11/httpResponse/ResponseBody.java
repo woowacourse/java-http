@@ -22,9 +22,7 @@ public class ResponseBody {
 
     private final HttpRequest httpRequest;
 
-    public ResponseBody(
-            final HttpRequest httpRequest
-    ) {
+    public ResponseBody(final HttpRequest httpRequest) {
         this.httpRequest = httpRequest;
     }
 

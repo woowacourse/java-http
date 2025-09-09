@@ -7,9 +7,7 @@ public class RequestHeader {
 
     private final Map<String, String> headers;
 
-    public RequestHeader(
-            final Map<String, String> headers
-    ) {
+    public RequestHeader(final Map<String, String> headers) {
         this.headers = headers;
     }
 

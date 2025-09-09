@@ -7,9 +7,7 @@ public class HttpCookie {
 
     private final Params cookies;
 
-    private HttpCookie(
-            final Params cookies
-    ) {
+    private HttpCookie(final Params cookies) {
         this.cookies = cookies;
     }
 

@@ -6,9 +6,7 @@ public class RequestBody {
 
     private final Params params;
 
-    private RequestBody(
-            final Params params
-    ) {
+    private RequestBody(final Params params) {
         this.params = params;
     }
 

@@ -8,9 +8,7 @@ import java.util.Optional;
 
 public class RequestParser {
 
-    public static HttpRequest parse(
-            final BufferedReader br
-    ) throws IOException {
+    public static HttpRequest parse(final BufferedReader br) throws IOException {
         final RequestLine requestLine = RequestLine.parse(br.readLine());
 
         final RequestHeader requestHeader = getRequestHeader(br);
@@ -19,9 +17,7 @@ public class RequestParser {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    private static RequestHeader getRequestHeader(
-            final BufferedReader br
-    ) throws IOException {
+    private static RequestHeader getRequestHeader(final BufferedReader br) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null) {

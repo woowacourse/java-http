@@ -28,8 +28,4 @@ public final class Cookie {
     public Optional<String> get(String name) {
         return Optional.ofNullable(values.get(name));
     }
-
-    public boolean has(String name) {
-        return values.containsKey(name);
-    }
 }

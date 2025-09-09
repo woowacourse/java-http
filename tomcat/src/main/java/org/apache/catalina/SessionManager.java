@@ -22,10 +22,6 @@ public class SessionManager {
         return UUID.randomUUID().toString();
     }
 
-    public static boolean hasValidSessionId(Cookie cookie) {
-        return cookie.has(JSESSIONID);
-    }
-
     public static String getSessionId(Cookie cookie) {
         return cookie.get(JSESSIONID).orElse(null);
     }

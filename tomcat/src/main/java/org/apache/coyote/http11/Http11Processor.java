@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.coyote.Processor;
 import org.apache.catalina.core.ApplicationProcessor;
 import org.apache.catalina.util.StaticResourcePathGenerator;
+import org.apache.coyote.Processor;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
 import org.apache.coyote.util.response.HttpContentTypeResolver;
@@ -15,10 +15,6 @@ import org.apache.coyote.util.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Coyote 영역의 HTTP/1.1 프로토콜 처리기
- * 네트워크 I/O와 HTTP 프로토콜 처리에만 집중
- */
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -45,18 +41,13 @@ public class Http11Processor implements Runnable, Processor {
                 respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
                 return;
             }
-            
-            // API 요청은 Catalina의 ApplicationProcessor로 위임
             if (handleApiRequest(request, outputStream)) {
                 return;
             }
-            
-            // 정적 리소스 처리
             String resourcePath = StaticResourcePathGenerator.generate(request.getPath());
             if (handleStaticResourceRequest(resourcePath, outputStream)) {
                 return;
             }
-            
             respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -78,18 +69,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean handleStaticResourceRequest(String resourcePath, OutputStream outputStream) throws IOException {
-        if (resourcePath != null) {
-            byte[] resourceBody = readPathFile(resourcePath);
-            if (resourceBody != null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 200 OK",
-                        HttpContentTypeResolver.resolve(resourcePath),
-                        resourceBody
-                ), outputStream);
-                return true;
-            }
+        if (resourcePath == null) {
+            return false;
         }
-        return false;
+        byte[] resourceBody = readPathFile(resourcePath);
+        if (resourceBody != null) {
+            return false;
+        }
+        respond(HttpResponse.of(
+                "HTTP/1.1 200 OK",
+                HttpContentTypeResolver.resolve(resourcePath),
+                resourceBody
+        ), outputStream);
+        return true;
     }
 
     private byte[] readPathFile(String requestPath) {

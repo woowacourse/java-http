@@ -35,10 +35,6 @@ public class HttpRequest {
         return Optional.ofNullable(queries.get(key));
     }
 
-    public Cookie getCookie() {
-        return cookie;
-    }
-
     public Session getSession(boolean create) {
         SessionManager sessionManager = SessionManager.getInstance();
         String sessionId = SessionManager.getSessionId(cookie);

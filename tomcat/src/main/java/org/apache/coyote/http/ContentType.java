@@ -35,6 +35,26 @@ public enum ContentType {
             return JAVASCRIPT;
         }
 
+        return getDefault();
+    }
+
+    public static ContentType fromHeader(final String contentTypeHeader) {
+        if (contentTypeHeader == null || contentTypeHeader.isEmpty()) {
+            return HTML;
+        }
+
+        final String mimeType = contentTypeHeader.split(";")[0].trim().toLowerCase();
+
+        for (final ContentType type : ContentType.values()) {
+            if (type.getMimeType().equalsIgnoreCase(mimeType)) {
+                return type;
+            }
+        }
+
+        return getDefault();
+    }
+
+    public static ContentType getDefault() {
         return HTML;
     }
 }

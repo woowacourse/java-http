@@ -107,7 +107,7 @@ public class HttpRequestHeader {
     }
 
     public ContentType getContentType() {
-        return ContentType.valueOf(getHeader(ContentType.HEADER_NAME));
+        return ContentType.fromHeader(getHeader(ContentType.HEADER_NAME));
     }
 
     public HttpMethod getMethod() {

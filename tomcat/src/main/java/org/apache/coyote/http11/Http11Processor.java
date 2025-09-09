@@ -4,6 +4,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.vo.HttpRequest;
+import org.apache.coyote.http11.vo.HttpResponse;
+import org.apache.coyote.http11.vo.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +45,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             try {
                 final var httpRequest = getHttpRequest(inputStream);
-                final var responseBody = getResponseBody(httpRequest);
-                final var response = getHttpResponse(httpRequest.uri(), 200, responseBody);
+                final var response = getResponse(httpRequest);
+                final var httpResponse = getHttpResponse(response);
 
-                outputStream.write(response.getBytes());
+                outputStream.write(httpResponse.getBytes());
                 outputStream.flush();
             } catch (FileNotFoundException | IllegalArgumentException e) {
                 final var responseBody = readNotFoundFile();
-                final var response = getHttpResponse(404, responseBody);
-                outputStream.write(response.getBytes());
+                final var httpResponse = getHttpResponse(responseBody);
+                outputStream.write(httpResponse.getBytes());
                 outputStream.flush();
             }
         } catch (IOException | UncheckedServletException e) {
@@ -95,26 +98,34 @@ public class Http11Processor implements Runnable, Processor {
     /**
      * handle request and get response body
      * @param request HTTP request
-     * @return response body text
+     * @return response
      * @throws FileNotFoundException occurs when couldn't find target file
      * @throws IOException occurs when there are invalid bytes in file
      */
-    private String getResponseBody(final HttpRequest request) throws FileNotFoundException, IOException {
+    private HttpResponse getResponse(final HttpRequest request) throws FileNotFoundException, IOException {
         final var method = request.method();
         final var uri = request.uri();
 
         // handler mapping
         // 1. / 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.equals("/")) {
-            return "Hello world!";
+            return new HttpResponse("text/html", HttpStatus.OK, "Hello world!");
         }
         // 2. static file 요청인 경우
         if (method.equalsIgnoreCase("GET") && isStaticFileUri(uri)) {
-            return readStaticFileByName(uri);
+            // TODO:
+            final var extension = getFileExtension(uri);
+            if (extension.equals("css") || extension.equals("html")) {
+                return new HttpResponse("text/" + extension, HttpStatus.OK, readStaticFileByName(uri));
+            }
+            if (extension.equals("js")) {
+                return new HttpResponse("text/javascript", HttpStatus.OK, readStaticFileByName(uri));
+            }
+            return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName(uri));
         }
         // 3. login 화면 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
-            return readStaticFileByName("login.html");
+            return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("login.html"));
         }
         // 4. login API 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.startsWith("/login")) {
@@ -129,14 +140,16 @@ public class Http11Processor implements Runnable, Processor {
             final var account = queryParams.get("account");
             final var password = queryParams.get("password");
 
-            InMemoryUserRepository.findByAccount(account)
-                    .ifPresent((user) -> {
-                        if (user.checkPassword(password)) {
-                            log.info("user : {}", user);
-                        }
-                    });
+            final var user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                return new HttpResponse("text/html", HttpStatus.UNAUTHORIZED, readStaticFileByName("401.html"));
+            }
 
-            return readStaticFileByName("/login.html");
+            if (user.get().checkPassword(password)) {
+                log.info("user : {}", user);
+                return new HttpResponse("text/html", HttpStatus.FOUND, readStaticFileByName("index.html"));
+            }
+            return new HttpResponse("text/html", HttpStatus.UNAUTHORIZED, readStaticFileByName("401.html"));
         }
         throw new IllegalArgumentException();
     }
@@ -149,15 +162,29 @@ public class Http11Processor implements Runnable, Processor {
     private Map<String, String> getQueryParams(final String queryString) {
         final Map<String, String> result = new HashMap<>();
 
+        if (queryString.isBlank()) {
+            return Map.of(); // nullable
+        }
+
         final var split = Arrays.stream(queryString.split("&")).toList();
         for (String param : split) {
+            if (!param.contains("=")) {
+                throw new IllegalArgumentException();
+            }
+
             final var pair = Arrays.stream(param.split("=")).toList();
-            // TODO: pair size != 2 예외
+            if (pair.size() >= 3 || pair.isEmpty()) {
+                throw new IllegalArgumentException();
+            }
+
             final var key = pair.getFirst().trim();
-            final var value = pair.get(1).trim();
+            var value = pair.getLast().trim();
+            if (pair.size() == 1 && param.indexOf("=") == param.length() - 1) {
+                value = "";
+            }
             result.put(key, value);
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     /**
@@ -197,11 +224,10 @@ public class Http11Processor implements Runnable, Processor {
     /**
      * get '404 not found' html content
      * @return not found html file's text content
-     * @throws IOException occurs when there are invalid bytes in file
      */
-    private String readNotFoundFile() {
+    private HttpResponse readNotFoundFile() {
         try {
-            return readContent("static/404.html");
+            return new HttpResponse("text/html", HttpStatus.NOT_FOUND, readStaticFileByName("404.html"));
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
@@ -226,47 +252,19 @@ public class Http11Processor implements Runnable, Processor {
 
     /**
      * get HTTP response
-     * @param content request content
-     * @param status status code
-     * @param responseBody response body
+     * @param response Http response
      * @return response body text
      */
-    private String getHttpResponse(final String content, final int status, final String responseBody) {
-        // TODO: status, status code enum
-        String statusCode = "";
-        if (status == 200) statusCode = "OK";
-        if (status == 404) statusCode = "NOT FOUND";
-        final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", status, statusCode);
-
-        final var fileExtension = getFileExtension(content);
-        final var contentTypeHeader = String.format("Content-Type: text/%s;charset=utf-8 ", fileExtension);
+    private String getHttpResponse(final HttpResponse response) {
+        final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", response.getStatusCode(), response.getStatusReason());
+        final var contentTypeHeader = String.format("Content-Type: %s;charset=utf-8 ", response.mediaType());
         return String.join("\r\n",
                 responseInfoHeader,
                 contentTypeHeader,
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: " + response.body().getBytes().length + " ",
                 "",
-                responseBody);
-    }
-
-    /**
-     * get HTTP response
-     * @param status status code
-     * @param responseBody response body
-     * @return response body text
-     */
-    private String getHttpResponse(final int status, final String responseBody) {
-        // TODO: status, status code enum
-        String statusCode = "";
-        if (status == 200) statusCode = "OK";
-        if (status == 400) statusCode = "NOT FOUND";
-        final var responseInfoHeader = String.format("HTTP/1.1 %d %s ", status, statusCode);
-
-        return String.join("\r\n",
-                responseInfoHeader,
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                response.body()
+        );
     }
 
     /**
@@ -276,17 +274,11 @@ public class Http11Processor implements Runnable, Processor {
      */
     private String getFileExtension(String target) {
         // TODO: 확장자별 content type 매핑
-        String fileExtension = "html";
+        String fileExtension = "application/json";
 
-        final var slashIndex = target.lastIndexOf("/");
-        String fileName = target;
-        if (slashIndex >= 0) {
-            fileName = target.substring(slashIndex + 1);
-        }
-
-        final var dotIndex = fileName.lastIndexOf(".");
-        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
-            fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
+        final var dotIndex = target.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < target.length() - 1) {
+            fileExtension = target.substring(dotIndex + 1).toLowerCase();
         }
         return fileExtension;
     }

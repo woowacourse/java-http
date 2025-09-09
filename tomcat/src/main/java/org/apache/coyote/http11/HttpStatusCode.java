@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatusCode {
 
     OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
     NOTFOUND(404, "Not Found"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
@@ -14,12 +16,11 @@ public enum HttpStatusCode {
     private int status;
     private String statusCode;
 
-    public static String getStatusCode(int status) {
-        for (var statusCode : HttpStatusCode.values()) {
-            if (statusCode.status == status) {
-                return statusCode.statusCode;
-            }
-        }
-        throw new IllegalArgumentException("Unrecognized status code.");
+    public int getStatus() {
+        return status;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
     }
 }

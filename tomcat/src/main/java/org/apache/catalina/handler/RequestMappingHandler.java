@@ -17,38 +17,29 @@ public class RequestMappingHandler {
     }
 
     public HttpResponse request(HttpRequest request) {
+        HttpResponse response = new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html");
+
         if (request.getPath().equals("/")) {
-            HttpResponse response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
-            setSession(request, response);
-            return response;
+            response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
         }
         if (request.getPath().endsWith(".html")) {
-            HttpResponse response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
-            setSession(request, response);
-            return response;
+            response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
         }
         if (request.getPath().endsWith(".css")) {
-            HttpResponse response = new HttpResponse(HttpStatusCode.OK, ContentType.CSS, request.getPath());
-            setSession(request, response);
-            return response;
+            response = new HttpResponse(HttpStatusCode.OK, ContentType.CSS, request.getPath());
         }
         if (request.getPath().endsWith(".js")) {
-            HttpResponse response = new HttpResponse(HttpStatusCode.OK, ContentType.JAVASCRIPT, request.getPath());
-            setSession(request, response);
-            return response;
+            response = new HttpResponse(HttpStatusCode.OK, ContentType.JAVASCRIPT, request.getPath());
         }
         if (request.getPath().equals("/login")) {
-            HttpResponse response = LoginHandler.getInstance().handle(request);
-            setSession(request, response);
-            return response;
+            response = LoginHandler.getInstance().handle(request);
         }
         if (request.getPath().equals("/register")) {
-            HttpResponse response = RegisterHandler.getInstance().handle(request);
-            setSession(request, response);
-            return response;
+            response = RegisterHandler.getInstance().handle(request);
         }
 
-        return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html");
+        setSession(request, response);
+        return response;
     }
 
     private void setSession(HttpRequest request, HttpResponse response) {

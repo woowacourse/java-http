@@ -34,12 +34,12 @@ public class RegisterRequestHandler {
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
     }
 
-    private HttpResponse handleGetHttpMethod(HttpRequest httpRequest) {
+    private HttpResponse handleGetHttpMethod(final HttpRequest httpRequest) {
         return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
                 ResponseBody.createBy(httpRequest));
     }
 
-    private HttpResponse handlePostHttpMethod(HttpRequest httpRequest) {
+    private HttpResponse handlePostHttpMethod(final HttpRequest httpRequest) {
         Map<String, String> requestParams = httpRequest.getRequestParams();
         registerUser(requestParams);
 
@@ -50,7 +50,7 @@ public class RegisterRequestHandler {
         return HttpResponse.found(httpVersion, new Location("/index.html"), responseCookie);
     }
 
-    private void registerUser(Map<String, String> requestParams) {
+    private void registerUser(final Map<String, String> requestParams) {
         String account = requestParams.get("account");
         String password = requestParams.get("password");
         String email = requestParams.get("email");

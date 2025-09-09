@@ -33,7 +33,7 @@ public record RequestBody(
         return requestBodyMap;
     }
 
-    private static void validateKeyValuePair(String[] keyValuePair) {
+    private static void validateKeyValuePair(final String[] keyValuePair) {
         if (keyValuePair.length != 2) {
             throw new UncheckedServletException("request body의 형식은 'key=value' 이여야 합니다.");
         }

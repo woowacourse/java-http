@@ -114,7 +114,7 @@ public class HttpRequest {
         return EMPTY;
     }
 
-    private static int findQueryStringDelimiterIndex(String uri) {
+    private static int findQueryStringDelimiterIndex(final String uri) {
         int firstIndex = uri.indexOf(QUERY_STRING_DELIMITER);
         int lastIndex = uri.lastIndexOf(QUERY_STRING_DELIMITER);
 

@@ -46,7 +46,7 @@ public class LoginRequestHandler {
                 ResponseBody.createBy(httpRequest));
     }
 
-    private HttpResponse createGetLoginResponseBySession(HttpRequest httpRequest) {
+    private HttpResponse createGetLoginResponseBySession(final HttpRequest httpRequest) {
         Optional<Session> session = SessionRepository.findById(httpRequest.getJSessionId());
 
         if (session.isPresent()) {

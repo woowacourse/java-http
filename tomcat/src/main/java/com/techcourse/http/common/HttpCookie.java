@@ -34,7 +34,7 @@ public class HttpCookie {
         return httpCookieMap;
     }
 
-    private static void validateKeyValuePair(String[] keyValuePair) {
+    private static void validateKeyValuePair(final String[] keyValuePair) {
         if (keyValuePair.length != 2) {
             throw new UncheckedServletException("쿠키의 형식은 'key=value' 이여야 합니다.");
         }

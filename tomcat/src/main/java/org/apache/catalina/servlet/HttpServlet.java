@@ -2,7 +2,9 @@ package org.apache.catalina.servlet;
 
 import org.apache.coyote.http11.message.request.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.ContentType;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpStatus;
 
 public abstract class HttpServlet implements Servlet {
     @Override
@@ -18,12 +20,22 @@ public abstract class HttpServlet implements Servlet {
             return;
         }
 
-        //TODO: 다른 HttpMethod 분기 작성  (2025-09-7, 일, 23:59)
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
+        response.setContentType(ContentType.PLAIN);
+        response.appendToBody("501 Not Implemented".getBytes());
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
+        send405Error(response);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
+        send405Error(response);
+    }
+
+    private void send405Error(HttpResponse response) {
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setContentType(ContentType.PLAIN);
+        response.appendToBody("405 Method Not Allowed".getBytes());
     }
 }

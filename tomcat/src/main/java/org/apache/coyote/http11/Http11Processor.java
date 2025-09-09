@@ -9,11 +9,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.HttpRequestParser;
-import org.apache.coyote.response.HttpContentTypeResolver;
-import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.StaticResourcePathGenerator;
+import org.apache.coyote.util.request.HttpRequest;
+import org.apache.coyote.util.request.HttpRequestParser;
+import org.apache.coyote.util.response.HttpContentTypeResolver;
+import org.apache.coyote.util.response.HttpResponse;
+import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.util.response;
 
 import java.util.Locale;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.util.response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,11 +41,11 @@ public class HttpResponse {
 
     public String createHeader() {
         StringBuilder builder = new StringBuilder();
-        builder.append(statusLine).append("\r\n");
-        builder.append("Content-Type: ").append(contentType).append("\r\n");
-        builder.append("Content-Length: ").append(body.length).append("\r\n");
+        builder.append(statusLine).append(" \r\n");
+        builder.append("Content-Type: ").append(contentType).append(" \r\n");
+        builder.append("Content-Length: ").append(body.length).append(" \r\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
         builder.append("\r\n");
         return builder.toString();
@@ -53,8 +53,8 @@ public class HttpResponse {
 
     public static HttpResponse redirect(String location) {
         HttpResponse response = new HttpResponse(
-                "HTTP/1.1 302 Found",
-                "text/plain;charset=utf-8",
+                "HTTP/1.1 302 Found ",
+                "text/plain;charset=utf-8 ",
                 "".getBytes()
         );
         response.addHeader("Location", location);

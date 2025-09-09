@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> requestHeaders = new HashMap<>();
             String line;
-            while((line = reader.readLine()) != null && !line.isEmpty()) {
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 final String[] headerParts = line.split(": ", 2);
                 if (headerParts.length == 2) {
                     requestHeaders.put(headerParts[0], headerParts[1]);
@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String requestBody = "";
-            if("POST".equals(requestInfo[0]) && requestHeaders.containsKey("Content-Length")) {
+            if ("POST".equals(requestInfo[0]) && requestHeaders.containsKey("Content-Length")) {
                 int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
@@ -91,16 +91,16 @@ public class Http11Processor implements Runnable, Processor {
         return new String[]{method, uri};
     }
 
-    private String handleRequest(final String[] requestInfo, final Map<String, String> requestHeaders, final String requestBody) throws IOException, URISyntaxException {
-        String method = requestInfo[0];
-        String path = requestInfo[1];
+    private String handleRequest(final String[] requestInfo, final Map<String, String> requestHeaders,
+                                 final String requestBody) throws IOException, URISyntaxException {
+        final String method = requestInfo[0];
+        final String path = requestInfo[1];
 
-        HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
-        String existingJSessionId = cookie.getJSessionId();
+        final HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
+        final String existingJSessionId = cookie.getJSessionId();
 
-        Session session = (existingJSessionId != null) ? sessionManager.findSession(existingJSessionId) : null;
-        User user = (session!=null) ? (User) session.getAttribute("user") : null;
-
+        final Session session = (existingJSessionId != null) ? sessionManager.findSession(existingJSessionId) : null;
+        final User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if ("/login".equals(path)) {
             if (user != null && "GET".equals(method)) {
@@ -108,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return handleLogin(method, requestBody);
         }
-        if("/register".equals(path)) {
+        if ("/register".equals(path)) {
             return handleRegister(method, requestBody);
         }
 
@@ -116,14 +116,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleLogin(final String method, final String requestBody) throws IOException, URISyntaxException {
-        if("POST".equals(method)) {
+        if ("POST".equals(method)) {
             return processLogin(requestBody);
         }
         return serveStaticFile("/login.html", null);
     }
 
-    private String handleRegister(final String method, final String requestBody) throws IOException, URISyntaxException {
-        if("POST".equals(method)) {
+    private String handleRegister(final String method, final String requestBody)
+            throws IOException, URISyntaxException {
+        if ("POST".equals(method)) {
             return processRegister(requestBody);
         }
         return serveStaticFile("/register.html", null);
@@ -133,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> parameters = parseFormData(requestBody);
         final boolean loginSuccess = authenticateUser(parameters);
 
-        if(loginSuccess) {
+        if (loginSuccess) {
             final String jSessionId = UUID.randomUUID().toString();
             final User user = InMemoryUserRepository.findByAccount(parameters.get("account")).get();
 
@@ -182,23 +183,24 @@ public class Http11Processor implements Runnable, Processor {
         final String password = parameters.get("password");
         final String email = parameters.get("email");
 
-        if(account == null || password == null || email == null) {
+        if (account == null || password == null || email == null) {
             return false;
         }
 
-        if(InMemoryUserRepository.findByAccount(account).isPresent()) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return false;
         }
-        try{
+        try {
             final User newUser = new User(account, password, email);
             InMemoryUserRepository.save(newUser);
             return true;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
-    private String serveStaticFile(final String path, final String existingJSessionId) throws IOException, URISyntaxException {
+    private String serveStaticFile(final String path, final String existingJSessionId)
+            throws IOException, URISyntaxException {
         final byte[] fileBytes = readFile(path);
 
         String jSessionId = existingJSessionId;

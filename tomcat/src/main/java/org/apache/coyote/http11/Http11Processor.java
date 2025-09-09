@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.techcourse.exception.ErrorMessage.*;
 
@@ -27,7 +29,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private Response response;
+
     public Http11Processor(final Socket connection) {
+        response = new Response();
+        response.setProtocolVersion("HTTP/1.1");
         this.connection = connection;
     }
 
@@ -43,21 +49,61 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            String uri = parseUri(br);
+            String[] urlComponents = parseUrlComponents(br);    // 첫 줄 읽음 POST /register HTTP/1.1
+            // 나머지 헤더 읽기 Response 만들어서 저장할까
+            // Host: localhost:8080
+            //Connection: keep-alive
+            //Content-Length: 80
+            //Content-Type: application/x-www-form-urlencoded
+            //Accept: */*
+            //
+            //account=gugu&password=password&email=hkkang%40woowahan.com
+            // 바디에 들어있음.
+
+            String httpMethod = urlComponents[0];
+            String uri = urlComponents[1];
+            Path path = parsePath(uri);
             if (uri.startsWith("/login")) {
                 if (uri.contains("?")) {
-                    login(uri);
+                    if (login(parseParameterMap(uri))) {
+                        response.setHttpStatusCode(HttpStatusCode.FOUND);
+                        response.addHeader("Location", "/index.html");
+                        response.addHeader("Content-Type", getContentType(path));
+                        response.addHeader("Content-Length", response.getContentLength());
+                        sendResponse(outputStream);
+                        return;
+                    }
                 }
-                respondStaticResource(HttpStatusCode.OK, Paths.get("/login.html"), outputStream);
-                return;
             }
-            respondStaticResource(HttpStatusCode.OK, Paths.get(uri), outputStream);
+
+            if (httpMethod.equals("POST") && uri.startsWith("/register")) {
+                if(register(parseParameterMap(uri))){
+                    response.setHttpStatusCode(HttpStatusCode.FOUND);
+                    response.addHeader("Location", "/index.html");
+                    response.addHeader("Content-Type", getContentType(path));
+                    response.addHeader("Content-Length", response.getContentLength());
+                    sendResponse(outputStream);
+                    return;
+                }
+            }
+
+            staticResourceResponse(path);
+            sendResponse(outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String parseUri(BufferedReader br) throws IOException {
+    private boolean register(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return InMemoryUserRepository.findByAccount(account).isPresent();
+    }
+
+    private String[] parseUrlComponents(BufferedReader br) throws IOException {
         String requestLine = br.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException(INVALID_REQUEST_LINE.getMessage());
@@ -66,20 +112,25 @@ public class Http11Processor implements Runnable, Processor {
         if (parts.length < 3) {
             throw new IllegalArgumentException(INVALID_HTTP_REQUEST_FORMAT.getMessage());
         }
-        return parts[1];
+        return parts;
     }
 
-    private void login(String uri) {
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
+    private Path parsePath(String uri) {
+        int idx = uri.indexOf('?');
+        if (idx == -1) {
+            return Paths.get(uri);
+        }
+        return Paths.get(uri.substring(0, idx));
+    }
+
+    private Map<String, String> parseParameterMap(String uri) {
+        if (!uri.contains("?")) {
+            throw new IllegalArgumentException(INVALID_QUERY_STRING.getMessage());
+        }
+        String queryString = uri.split("\\?")[1];
         Map<String, String> params = new HashMap<>();
         parseQueryString(queryString, params);
-
-        String account = params.get("account");
-        String password = params.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
-        user.logUserInfo(password, log);
+        return params;
     }
 
     private void parseQueryString(String queryString, Map<String, String> params) {
@@ -92,12 +143,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(HttpStatusCode httpStatusCode, Path path, OutputStream outputStream) throws IOException, URISyntaxException {
-        String contentType = getContentType(path);
-        final var responseBody = getResponseBodyFromStaticResource(path);
-        final var response = formatHttpResponse(httpStatusCode, contentType, responseBody);
-        outputStream.write(response.getBytes());
+    private boolean login(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
+        user.logUserInfo(password, log);
+        return user.checkPassword(password);
+    }
+
+    private void sendResponse(OutputStream outputStream) throws IOException, URISyntaxException {
+        String httpFormatResponse = formatHttpResponse();
+        outputStream.write(httpFormatResponse.getBytes());
         outputStream.flush();
+    }
+
+    private void staticResourceResponse(Path path) throws IOException, URISyntaxException {
+        response.setHttpStatusCode(HttpStatusCode.OK);
+        response.addHeader("Content-Type", getContentType(path));
+        response.setBody(getStaticResource(path));
+        response.addHeader("Content-Length", response.getContentLength());
     }
 
     private String getContentType(Path path) throws IOException {
@@ -105,28 +170,35 @@ public class Http11Processor implements Runnable, Processor {
         if (contentType == null) {
             contentType = "text/html";
         }
-        return contentType;
+        return contentType + ";charset=utf-8";
     }
 
-    private String getResponseBodyFromStaticResource(Path path) throws IOException, URISyntaxException {
+    private String getStaticResource(Path path) throws IOException, URISyntaxException {
         if (path.equals(Path.of("\\"))) {
             return "Hello world!";
         }
-        return new String(Files.readAllBytes(getStaticPath(path)));
+        Path staticPath = getStaticPath(path);
+        return new String(Files.readAllBytes(staticPath));
     }
 
     private Path getStaticPath(Path path) throws URISyntaxException {
+        if (!path.toString().contains(".")) {
+            path = Path.of(path + ".html");
+        }
         return Paths.get(getClass().getClassLoader().getResource("static" + path).toURI());
     }
 
-    private String formatHttpResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
+    private String formatHttpResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 " +
-                        httpStatusCode.getCode() + " "
-                        + httpStatusCode.getMessage() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                response.getProtocolVersion() + " " +
+                        response.getStatusCode() + " " +
+                        response.getStatusMessage() + " ",
+                response.getHeaders()
+                        .entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                        .collect(Collectors.joining("\r\n")),
+                "\r\n" + response.getBody()
+        );
     }
 }

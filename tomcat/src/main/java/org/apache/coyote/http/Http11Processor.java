@@ -6,6 +6,7 @@ import com.techcourse.web.session.Session;
 import com.techcourse.web.session.SessionManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,27 +55,26 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(bufferedInputStream, StandardCharsets.ISO_8859_1));
-
-        final HttpRequestHeader requestHeader = readRequestHeader(reader);
+        final HttpRequestHeader requestHeader = readRequestHeader(bufferedInputStream);
         final HttpRequestBody requestBody = readRequestBody(bufferedInputStream, requestHeader);
 
         return HttpRequest.from(requestHeader, requestBody);
     }
 
-    private HttpRequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
-        final StringBuilder headerBuilder = new StringBuilder();
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            headerBuilder.append(line).append("\r\n");
-            if (line.isEmpty()) {
+    private HttpRequestHeader readRequestHeader(final BufferedInputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream(512);
+        int a = -1, b = -1, c = -1, d;
+        while ((d = inputStream.read()) != -1) {
+            buffer.write(d);
+            if (a == '\r' && b == '\n' && c == '\r' && d == '\n') {
                 break;
             }
+            a = b;
+            b = c;
+            c = d;
         }
-
-        return HttpRequestHeader.from(headerBuilder.toString());
+        final String rawHeader = buffer.toString(StandardCharsets.ISO_8859_1);
+        return HttpRequestHeader.from(rawHeader);
     }
 
     private HttpRequestBody readRequestBody(final InputStream inputStream, final HttpRequestHeader header)

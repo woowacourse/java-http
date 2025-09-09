@@ -32,10 +32,11 @@ public final class HttpParser {
             }
             log.info("모든 요청 헤더 파싱 완료");
 
+            Cookies cookies = Cookies.createFromRawValues(requestHeaders.remove("Cookie"));
             RequestBody requestBody = extractRequestBody(bufferedReader, requestHeaders.get("Content-Length"));
             log.info("요청 바디 파싱 완료");
 
-            return HttpRequest.of(requestLine, requestHeaders, requestBody);
+            return HttpRequest.of(requestLine, requestHeaders, cookies, requestBody);
         } catch (IOException e) {
             throw new RuntimeException("HttpRequest 파싱에 실패했습니다.", e);
         }

@@ -5,17 +5,20 @@ import java.util.Map;
 public record HttpRequest(
         RequestLine requestLine,
         Map<String, String> requestHeaders,
+        Cookies cookies,
         RequestBody requestBody
 ) {
 
     public static HttpRequest of(
             final RequestLine requestLine,
             final Map<String, String> requestHeaders,
+            final Cookies cookies,
             final RequestBody requestBody
     ) {
         return new HttpRequest(
                 requestLine,
                 requestHeaders,
+                cookies,
                 requestBody
         );
     }
@@ -52,5 +55,9 @@ public record HttpRequest(
 
     public String getRequestValue(final String requestKey) {
         return requestBody.getValue(requestKey);
+    }
+
+    public Cookie getCookie(final String cookieName) {
+        return cookies.getCookie(cookieName);
     }
 }

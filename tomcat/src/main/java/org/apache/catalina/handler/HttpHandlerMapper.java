@@ -3,6 +3,7 @@ package org.apache.catalina.handler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.HttpSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,7 @@ public class HttpHandlerMapper {
 
     static {
         HttpHandler staticHandler = new StaticHandler();
-        HttpHandler loginHandler = new AuthHandler();
+        HttpHandler loginHandler = new AuthHandler(new HttpSessionManager());
         MAPPER.put(staticHandler.getAllPath(), staticHandler);
         MAPPER.put(loginHandler.getAllPath(), loginHandler);
     }

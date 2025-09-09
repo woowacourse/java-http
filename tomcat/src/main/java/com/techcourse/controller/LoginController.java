@@ -21,6 +21,7 @@ public class LoginController extends AbstractController {
         Session session = request.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
             response.sendRedirect(HttpResponseStatus.FOUND, "/index.html");
+            return;
         }
         serveStaticFile("/login.html", response, "text/html;charset=utf-8");
     }

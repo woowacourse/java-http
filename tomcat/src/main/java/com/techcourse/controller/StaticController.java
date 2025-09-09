@@ -20,6 +20,7 @@ public class StaticController extends AbstractController{
 
         if (request.endsWith(".js")) {
             serveStaticFile(request.getPath(), response, "text/javascript;charset=utf-8");
+            return;
         }
 
         final byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);

@@ -33,6 +33,10 @@ public class HttpCookie {
         return joiner.toString();
     }
 
+    public String getJsessionId() {
+        return cookies.get("JSESSIONID");
+    }
+
     private static Map<String, String> getCookies(final HttpHeaders headers) {
         final Map<String, String> cookies = new HashMap<>();
         final List<String> cookieValues = headers.getHeaders("Cookie");

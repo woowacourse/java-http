@@ -75,6 +75,11 @@ public class HttpRequest {
         return cookie.contains("JSESSIONID");
     }
 
+    public String getJsessionId() {
+        HttpCookie cookie = HttpCookie.from(headers);
+        return cookie.getJsessionId();
+    }
+
     private static HttpRequest parse(final BufferedReader reader) throws IOException {
         final String requestLine = reader.readLine();
 

@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.message.HttpCookie;
@@ -16,12 +16,16 @@ import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.StatusLine;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+
+    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     public boolean canHandle(final HttpRequest request) {
@@ -32,8 +36,22 @@ public class LoginHandler implements Handler {
     public HttpResponse handle(final HttpRequest request) throws IOException {
         final String httpVersion = request.getVersion();
 
-        final String account = request.getQueryParams().get("account");
-        final String password = request.getQueryParams().get("password");
+        if (request.equalMethod("GET") && request.hasSessionCookie()) {
+            Session session = sessionManager.findSession(request.getJsessionId());
+            if (session != null && session.getAttribute("user") != null) {
+                return redirectResponse(httpVersion, "/index.html");
+            }
+        }
+
+        final Map<String, String> params;
+        if (request.equalMethod("POST")) {
+            params = request.getFormParams();
+        } else {
+            params = request.getQueryParams();
+        }
+
+        final String account = params.get("account");
+        final String password = params.get("password");
 
         if (account == null || password == null) {
             return loginPageResponse(httpVersion, "/login.html");
@@ -44,7 +62,16 @@ public class LoginHandler implements Handler {
         if (authenticatedUser.isPresent()) {
             final User user = authenticatedUser.get();
             log.info("user : {}", user);
-            return loginRedirectResponse(request, "/index.html");
+
+            if (request.hasSessionCookie()) {
+                final Session session = sessionManager.findSession(request.getJsessionId());
+
+                if (session != null && session.getAttribute("user") != null) {
+                    return redirectResponse(httpVersion, "/index.html");
+                }
+            }
+
+            return loginRedirectResponse(httpVersion, "/index.html", user);
         }
 
         return redirectResponse(httpVersion, "/401.html");
@@ -75,15 +102,15 @@ public class LoginHandler implements Handler {
         );
     }
 
-    private HttpResponse loginRedirectResponse(final HttpRequest request, final String location) {
+    private HttpResponse loginRedirectResponse(final String httpVersion, final String location, final User user) {
         final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("location", location);
         headers.addHeader("Content-Length", "0");
 
-        addSessionCookie(request, headers);
+        addSessionCookie(headers, user);
 
         return new HttpResponse(
-                new StatusLine(request.getVersion(), StatusCode.FOUND),
+                new StatusLine(httpVersion, StatusCode.FOUND),
                 headers,
                 new byte[0]
         );
@@ -101,11 +128,12 @@ public class LoginHandler implements Handler {
         );
     }
 
-    private void addSessionCookie(final HttpRequest request, final HttpHeaders headers) {
-        if (!request.hasSessionCookie()) {
-            final String sessionId = UUID.randomUUID().toString();
-            final HttpCookie cookie = HttpCookie.of("JSESSIONID", sessionId);
-            headers.addHeader("Set-Cookie", cookie.toHeaderCookie());
-        }
+    private void addSessionCookie(final HttpHeaders headers, final User user) {
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+
+        final HttpCookie cookie = HttpCookie.of("JSESSIONID", session.getId());
+        headers.addHeader("Set-Cookie", cookie.toHeaderCookie());
     }
 }

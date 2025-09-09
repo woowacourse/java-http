@@ -11,8 +11,7 @@ public class SignupController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        request.setPath("/register.html");
-        serveStaticFile(request.getPath(), response, "text/html;charset=utf-8");
+        serveStaticFile("/register.html", response, "text/html;charset=utf-8");
     }
 
     @Override

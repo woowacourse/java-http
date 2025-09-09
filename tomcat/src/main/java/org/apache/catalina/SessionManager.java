@@ -34,9 +34,9 @@ public class SessionManager implements Manager {
     }
 
     private void checkExistence(String id) {
-        SESSIONS.keySet().stream()
-                .filter(key -> key.equals(id))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("id 에 해당하는 세션이 존재하지 않습니다."));
+        boolean contains = SESSIONS.containsKey(id);
+        if (!contains) {
+            throw new IllegalArgumentException("id 에 해당하는 세션이 존재하지 않습니다.");
+        }
     }
 }

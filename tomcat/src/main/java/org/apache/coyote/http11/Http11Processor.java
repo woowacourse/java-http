@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Request;
 import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private Request request;
+
     private Response response;
 
     public Http11Processor(final Socket connection) {
@@ -49,23 +52,16 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            String[] urlComponents = parseUrlComponents(br);    // 첫 줄 읽음 POST /register HTTP/1.1
-            // 나머지 헤더 읽기 Response 만들어서 저장할까
-            // Host: localhost:8080
-            //Connection: keep-alive
-            //Content-Length: 80
-            //Content-Type: application/x-www-form-urlencoded
-            //Accept: */*
-            //
-            //account=gugu&password=password&email=hkkang%40woowahan.com
-            // 바디에 들어있음.
+            request = new Request(br);
 
-            String httpMethod = urlComponents[0];
-            String uri = urlComponents[1];
+            String httpMethod = request.getHttpMethod();
+            String uri = request.getUrl();
+
             Path path = parsePath(uri);
+
             if (uri.startsWith("/login")) {
                 if (uri.contains("?")) {
-                    if (login(parseParameterMap(uri))) {
+                    if (login(parseQueryParameter(uri))) {
                         response.setHttpStatusCode(HttpStatusCode.FOUND);
                         response.addHeader("Location", "/index.html");
                         response.addHeader("Content-Type", getContentType(path));
@@ -77,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod.equals("POST") && uri.startsWith("/register")) {
-                if(register(parseParameterMap(uri))){
+                if(register(parseQueryString(request.getBody()))){
                     response.setHttpStatusCode(HttpStatusCode.FOUND);
                     response.addHeader("Location", "/index.html");
                     response.addHeader("Content-Type", getContentType(path));
@@ -103,17 +99,6 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 
-    private String[] parseUrlComponents(BufferedReader br) throws IOException {
-        String requestLine = br.readLine();
-        if (requestLine == null || requestLine.isEmpty()) {
-            throw new IllegalArgumentException(INVALID_REQUEST_LINE.getMessage());
-        }
-        String[] parts = requestLine.split(" ");
-        if (parts.length < 3) {
-            throw new IllegalArgumentException(INVALID_HTTP_REQUEST_FORMAT.getMessage());
-        }
-        return parts;
-    }
 
     private Path parsePath(String uri) {
         int idx = uri.indexOf('?');
@@ -123,17 +108,16 @@ public class Http11Processor implements Runnable, Processor {
         return Paths.get(uri.substring(0, idx));
     }
 
-    private Map<String, String> parseParameterMap(String uri) {
+    private Map<String, String> parseQueryParameter(String uri) {
         if (!uri.contains("?")) {
             throw new IllegalArgumentException(INVALID_QUERY_STRING.getMessage());
         }
         String queryString = uri.split("\\?")[1];
-        Map<String, String> params = new HashMap<>();
-        parseQueryString(queryString, params);
-        return params;
+        return parseQueryString(queryString);
     }
 
-    private void parseQueryString(String queryString, Map<String, String> params) {
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> params = new HashMap<>();
         String[] pairs = queryString.split("&");
         for (String pair : pairs) {
             String[] parts = pair.split("=");
@@ -141,6 +125,7 @@ public class Http11Processor implements Runnable, Processor {
                 params.put(parts[0], parts[1]);
             }
         }
+        return params;
     }
 
     private boolean login(Map<String, String> params) {

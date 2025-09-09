@@ -31,9 +31,19 @@ public class Request {
             url = requestLineTokens[1];
             protocolVersion = requestLineTokens[2];
             parseRequestHeaders(br);
+            if (httpMethod.equalsIgnoreCase("post")){
+               parseBody(br);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void parseBody(BufferedReader br) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length").trim());
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        body = new String(buffer);
     }
 
     private String[] parseRequestLine(BufferedReader br) throws IOException {
@@ -55,9 +65,6 @@ public class Request {
             int delimiter = line.indexOf(":");
             addHeader(line.substring(0, delimiter), line.substring(delimiter+1));
         }
-//        while((line = br.readLine()) != null && !line.isEmpty()) {
-//            body = line;
-//        }
     }
 
     public void addHeader(String key, String val) {

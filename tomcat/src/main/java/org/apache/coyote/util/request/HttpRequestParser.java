@@ -93,12 +93,6 @@ public class HttpRequestParser {
         queries.put(key, value);
     }
 
-    private static Map<String, String> parseBody(InputStream inputStream, int contentLength) throws IOException {
-        byte[] bodyBytes = inputStream.readNBytes(contentLength);
-        String body = new String(bodyBytes, StandardCharsets.UTF_8);
-        return parseQueryString(body);
-    }
-
     public static Map<String, String> parseQueryString(String query) {
         Map<String, String> queryMap = new HashMap<>();
         if (query == null || query.isBlank()) {

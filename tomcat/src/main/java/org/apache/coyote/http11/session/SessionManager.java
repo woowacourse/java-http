@@ -6,9 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
+    private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public SessionManager() {
+    public static SessionManager getInstance() {
+        return INSTANCE;
     }
 
     public Session createAndSaveSession(final Map<String, Object> values) {
@@ -28,5 +30,8 @@ public class SessionManager {
 
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    private SessionManager() {
     }
 }

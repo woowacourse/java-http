@@ -14,7 +14,7 @@ public class SessionParser {
         if (sessionId.isEmpty()) {
             return Optional.empty();
         }
-        final SessionManager sessionManager = new SessionManager();
+        final SessionManager sessionManager = SessionManager.getInstance();
         return Optional.ofNullable(sessionManager.findSession(sessionId.get()));
     }
 }

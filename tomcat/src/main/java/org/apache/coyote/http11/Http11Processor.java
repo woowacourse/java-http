@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.userService = new UserService();
-        this.sessionManager = new SessionManager();
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override

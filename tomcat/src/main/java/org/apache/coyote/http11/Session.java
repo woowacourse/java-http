@@ -8,28 +8,29 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Manager;
 
 public class Session implements HttpSession {
 
-    private final SessionManager sessionManager;
+    private final Manager manager;
 
     private final String id;
     private final Map<String, Object> attributes = new HashMap<>();
     private final long creationTime;
     private boolean invalidated = false;
 
-    private Session(SessionManager sessionManager, String id, long creationTime, boolean invalidated) {
-        this.sessionManager = sessionManager;
+    private Session(Manager manager, String id, long creationTime, boolean invalidated) {
+        this.manager = manager;
         this.id = id;
         this.creationTime = creationTime;
         this.invalidated = invalidated;
     }
 
-    public static Session create(SessionManager sessionManager) {
+    public static Session create(Manager manager) {
         final var id = UUID.randomUUID().toString();
         final var creationTime = System.currentTimeMillis();
-        final var session = new Session(sessionManager, id, creationTime, false);
-        sessionManager.add(session);
+        final var session = new Session(manager, id, creationTime, false);
+        manager.add(session);
         return session;
     }
 
@@ -57,7 +58,7 @@ public class Session implements HttpSession {
     public void invalidate() {
         this.invalidated = true;
         this.attributes.clear();
-        sessionManager.remove(this);
+        manager.remove(this);
     }
 
     @Override

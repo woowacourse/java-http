@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
-    private final SessionManager sessionManager;
+    private final Manager manager;
 
-    public Http11Processor(final Socket connection, SessionManager sessionManager) {
+    public Http11Processor(final Socket connection, Manager manager) {
         this.connection = connection;
-        this.sessionManager = sessionManager;
+        this.manager = manager;
     }
 
     @Override
@@ -49,9 +50,9 @@ public class Http11Processor implements Runnable, Processor {
             final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
             final Map<String, String> responseHeaders = new HashMap<>();
 
-            var session = sessionManager.findSession(requestCookies.getCookie("JSESSIONID"));
+            var session = manager.findSession(requestCookies.getCookie("JSESSIONID"));
             if (session == null) {
-                session = Session.create(sessionManager);
+                session = Session.create(manager);
                 final var sessionCookie = new ResponseCookie("JSESSIONID", session.getId());
                 responseHeaders.put("Set-Cookie", sessionCookie.toHeaderString());
             }

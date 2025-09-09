@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -161,7 +162,10 @@ public class Http11Processor implements Runnable, Processor {
         for (final var query : queries) {
             final var keyValue = query.split("=", 2);
             if (keyValue.length == 2) {
-                paramMap.put(keyValue[0], keyValue[1]);
+                final var key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                final var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+
+                paramMap.put(key, value);
             }
         }
 
@@ -317,7 +321,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
-        
+
         return Files.readAllBytes(path);
     }
 

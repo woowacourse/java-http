@@ -34,7 +34,7 @@ public class HttpCookies {
                     .append("=")
                     .append(value)
                     .append("; ")
-                    .append("Path=/;");
+                    .append("Path=/; ");
         }
 
         if (stringBuilder.lastIndexOf(";") != -1) {

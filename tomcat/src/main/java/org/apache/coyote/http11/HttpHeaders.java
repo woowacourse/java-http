@@ -23,6 +23,14 @@ public class HttpHeaders {
         return Collections.unmodifiableMap(headers);
     }
 
+    public void setSessionId(final HttpSession session) {
+        headers.put("Set-Cookie", HttpSession.SESSION_TYPE + "=" + session.getId() + "; ");
+    }
+
+    public HttpCookies getCookies() {
+        return new HttpCookies(headers.get("Cookie"));
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

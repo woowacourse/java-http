@@ -10,11 +10,18 @@ public record HttpResponse(
         String body
 ) {
 
-    HttpResponse(
+    public HttpResponse(
             HttpProtocolVersion protocolVersion,
             HttpStatus status,
             HttpHeaders headers
     ) {
         this(protocolVersion, status, headers, null);
+    }
+
+    public HttpResponse(
+            HttpProtocolVersion protocolVersion,
+            HttpStatus status
+    ) {
+        this(protocolVersion, status, new HttpHeaders(), null);
     }
 }

@@ -32,7 +32,8 @@ public class HtmlHttpHandler extends StaticResourceHandler {
 
     public HttpResponse handle(
             final String uri,
-            final HttpProtocolVersion protocolVersion
+            final HttpProtocolVersion protocolVersion,
+            final HttpStatus status
     ) {
         final String body = readFile(uri);
         final HttpHeaders headers = new HttpHeaders();
@@ -41,7 +42,7 @@ public class HtmlHttpHandler extends StaticResourceHandler {
 
         return new HttpResponse(
                 protocolVersion,
-                HttpStatus.OK,
+                status,
                 headers,
                 body
         );

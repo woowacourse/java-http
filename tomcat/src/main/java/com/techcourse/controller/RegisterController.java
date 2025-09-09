@@ -35,6 +35,7 @@ public class RegisterController extends AbstractController {
             }
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
+            log.info("User created: {}", user);
             return "/index";
         }
         InMemoryUserRepository.save(null);

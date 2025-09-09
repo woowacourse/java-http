@@ -24,6 +24,7 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, Cookie> cookies;
     private final Map<String, String> body;
+    //TODO: 요청 메세지 파트별 클래스 분리 고려  (2025-09-9, 화, 13:43)
 
     public HttpRequest(InputStream inputStream) {
         try {
@@ -84,8 +85,9 @@ public class HttpRequest {
 
     private List<String> readStartLine(BufferedReader reader) throws IOException {
         String startLine = reader.readLine();
+        validateEmptyStartLine(startLine);
         validateStartLineFormat(startLine);
-        return List.of(startLine.split(" "));
+        return List.of(startLine.split("\\s+"));
     }
 
     private Map<String, String> readHeader(BufferedReader reader) throws IOException {
@@ -167,6 +169,12 @@ public class HttpRequest {
     private boolean hasQueryParam(String uriLine) {
         return uriLine.contains("?")
                 && uriLine.indexOf("?") != uriLine.length() - 1;
+    }
+
+    private void validateEmptyStartLine(String startLine) {
+        if (startLine == null || startLine.isEmpty()) {
+            throw new InvalidRequestException("요청 메세지의 시작라인 형식이 올바르지 않습니다.");
+        }
     }
 
     private void validateStartLineFormat(String startLine) {

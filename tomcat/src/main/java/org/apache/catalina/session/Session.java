@@ -22,26 +22,6 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public long getCreationTime() {
-        return 0;
-    }
-
-    @Override
-    public long getLastAccessedTime() {
-        return 0;
-    }
-
-    @Override
-    public ServletContext getServletContext() {
-        return null;
-    }
-
-    @Override
-    public void setMaxInactiveInterval(final int interval) {
-
-    }
-
-    @Override
     public int getMaxInactiveInterval() {
         return 0;
     }
@@ -70,12 +50,32 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void invalidate() {
+    public void setMaxInactiveInterval(final int interval) {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: setMaxInactiveInterval");
+    }
 
+    @Override
+    public void invalidate() {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: invalidate");
     }
 
     @Override
     public boolean isNew() {
-        return false;
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: isNew");
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: getServletContext");
+    }
+
+    @Override
+    public long getCreationTime() {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: getCreationTime");
+    }
+
+    @Override
+    public long getLastAccessedTime() {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: getLastAccessedTime");
     }
 }

@@ -40,7 +40,7 @@ public class Http11Request {
         }
         this.headers = map;
 
-        if (map.containsKey("Content-Length")) {
+        if (map.containsKey("Content-Length")) { // TODO: Body 파싱 최적화
             int contentLength = Integer.parseInt(map.get("Content-Length"));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);

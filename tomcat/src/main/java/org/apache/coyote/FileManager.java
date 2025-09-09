@@ -3,6 +3,7 @@ package org.apache.coyote;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class FileManager {
 
@@ -20,14 +21,10 @@ public class FileManager {
         return contents;
     }
 
-    public int getContentLength() {
-        return contents.length;
-    }
-
     private byte[] findContents() {
         byte[] contents;
 
-        if (path.equals("/")) {
+        if (Objects.equals(path, "/")) {
             contents = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
             return contents;

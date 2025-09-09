@@ -20,6 +20,9 @@ public class InMemoryUserRepository {
     }
 
     public static Optional<User> findByAccount(String account) {
+        if (account == null || account.isBlank()) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(database.get(account));
     }
 

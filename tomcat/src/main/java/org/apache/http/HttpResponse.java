@@ -44,7 +44,7 @@ public class HttpResponse {
     }
 
     public void setHeader(String key, String value) {
-        headers.put(key, value);
+        headers.put(key.toLowerCase(), value);
     }
 
     public void setCookie(Cookie cookie) {

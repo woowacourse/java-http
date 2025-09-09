@@ -72,7 +72,7 @@ public class HttpRequest {
     }
 
     public String getHeader(String key) {
-        return headers.get(key);
+        return headers.get(key.toLowerCase());
     }
 
     public Cookie getCookie(String key) {
@@ -94,9 +94,9 @@ public class HttpRequest {
         Map<String, String> headerRead = new HashMap<>();
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
-            List<String> headerLinePart = List.of(line.split(":"));
-            String key = headerLinePart.getFirst().trim();
-            String value = headerLinePart.getLast().trim();
+            int separatorIndex = line.indexOf(":");
+            String key = line.substring(0, separatorIndex).trim().toLowerCase();
+            String value = line.substring(separatorIndex + 1).trim();
             headerRead.put(key, value);
         }
         return headerRead;

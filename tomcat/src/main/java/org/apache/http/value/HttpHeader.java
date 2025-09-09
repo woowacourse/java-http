@@ -1,11 +1,11 @@
 package org.apache.http.value;
 
 public enum HttpHeader {
-    LOCATION("Location"),
-    CONTENT_LENGTH("Content-Length"),
-    SET_COOKIE("Set-Cookie"),
-    COOKIE("Cookie"),
-    CONTENT_TYPE("Content-Type");
+    LOCATION("location"),
+    CONTENT_LENGTH("content-length"),
+    SET_COOKIE("set-cookie"),
+    COOKIE("cookie"),
+    CONTENT_TYPE("content-type");
 
     private final String value;
 

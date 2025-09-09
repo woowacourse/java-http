@@ -2,6 +2,7 @@ package org.apache.coyote.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.PageRenderer;
 import org.slf4j.Logger;
@@ -17,31 +18,31 @@ public class UserRegisterHandler implements RequestHandler{
     private static final String POST_METHOD_REQUEST = "post";
 
     @Override
-    public String handle(final String method, final String path, final Map<String, String> queryParams) {
+    public String handle(final String method, final String path, final Map<String, String> queryParams, HttpCookie cookie) {
+        if (method.equals(POST_METHOD_REQUEST)) {
+            return handleRegisterPost(method, queryParams);
+        }
+        throw new IllegalArgumentException("회원가입중 문제가 발생했습니다.");
+    }
+
+    private String handleRegisterPost(String method, Map<String, String> queryParams) {
         try {
-            if (path.equals("/register")) {
-                handleRegister(method, queryParams);
+            if (method.equals(POST_METHOD_REQUEST)) {
+                validateAccountDuplicated(queryParams);
+
+                User beforeSaveUser = new User(
+                        queryParams.get(ACCOUNT),
+                        queryParams.get(PASSWORD),
+                        queryParams.get(EMAIL)
+                );
+                InMemoryUserRepository.save(beforeSaveUser);
             }
         } catch (IllegalArgumentException e) {
             return PageRenderer.createStaticFileResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "/401.html");
-
         }
         return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/");
     }
 
-    private void handleRegister(final String method, final Map<String, String> queryParams) {
-        if (method.equals(POST_METHOD_REQUEST)) {
-            validateAccountDuplicated(queryParams);
-
-            User beforeSaveUser = new User(
-                    queryParams.get(ACCOUNT),
-                    queryParams.get(PASSWORD),
-                    queryParams.get(EMAIL)
-            );
-
-            InMemoryUserRepository.save(beforeSaveUser);
-        }
-    }
 
     private void validateAccountDuplicated(final Map<String, String> queryParams) {
         if (InMemoryUserRepository.findByAccount(queryParams.get(ACCOUNT)).isPresent()) {

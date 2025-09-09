@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
@@ -39,10 +40,27 @@ public class RequestHandler {
             return responseBuilder.build(uri, HttpStatus.OK, body, null);
         }
         if (viewPaths.contains(uri) && request.queryParams() == null && request.body() == null) {
+            if (request.headers().containsKey("Cookie") && request.headers().get("Cookie").contains("JSESSIONID")) {
+                return handleRedirect(request);
+            }
             final byte[] body = ResourceLoader.get(uri + ".html");
             return responseBuilder.build(uri + ".html", HttpStatus.OK, body, null);
         }
-        return responseBuilder.build("", HttpStatus.FORBIDDEN, null, null);
+        return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
+    }
+
+    private String handleRedirect(final HttpRequest request) throws IOException {
+        HttpCookie cookie = new HttpCookie(request.headers().get("Cookie"));
+        String sessionId = cookie.getValue("JSESSIONID");
+        if (sessionId == null) {
+            final byte[] body = ResourceLoader.get(request.uri() + ".html");
+            return responseBuilder.build(request.uri() + ".html", HttpStatus.OK, body, null);
+        }
+        Manager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(sessionId);
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Location", "/index.html");
+        return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
     }
 
     private String handlePost(final HttpRequest request) {

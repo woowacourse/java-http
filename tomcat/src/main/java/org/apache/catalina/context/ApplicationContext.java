@@ -5,7 +5,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.Controller;
+import org.apache.catalina.contoller.Controller;
 import org.apache.catalina.exception.ExceptionHandler;
 import org.apache.catalina.handler.ControllerHandler;
 import org.apache.catalina.handler.HandlerMapping;

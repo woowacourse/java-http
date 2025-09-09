@@ -27,23 +27,40 @@ class SynchronizationTest {
      */
     @Test
     void testSynchronized() throws InterruptedException {
+        // 3개의 스레드를 가지는 고정 스레드 풀 생성
         var executorService = Executors.newFixedThreadPool(3);
+
+        // 동기화된 계산 메서드를 가진 인스턴스 생성
         var synchronizedMethods = new SynchronizedMethods();
 
+        // 0부터 999까지 1000번 반복하며 스레드 풀에 작업 제출
         IntStream.range(0, 1000)
-                .forEach(count -> executorService.submit(synchronizedMethods::calculate));
+                .forEach(count ->
+                        // 각 작업은 synchronizedMethods의 calculate 메서드 실행 -> 3개 스레드에서 병렬로 실행
+                        executorService.submit(synchronizedMethods::calculate)
+                );
+
+        // 새로운 작업 제출을 막고 기존 작업 종료 대기 시작
+        executorService.shutdown();
+        // 최대 500밀리초까지 작업 종료 대기 (실제 작업 모두 완료되지 않을 수 있음)
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
 
+        // 계산 결과가 1000이 맞는지 검증 (calculate가 동기화되어야 올바른 결과)
+        // 만약 SynchronizedMethods.calculate() 메서드가 실제로 synchronized 키워드로 보호되지 않았다면 여러 스레드가 공유 상태를 동기화 없이 변경하여 결과값이 틀어질 것이다.
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
 
+    /*
+    synchronized
+    한 번에 하나의 스레드만이 특정 코드 블록이나 메서드에 접근할 수 있도록 모니터 락(Monitor Lock) 을 이용하여 데이터의 일관성과 무결성을 유지
+     */
     private static final class SynchronizedMethods {
 
         private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
             setSum(getSum() + 1);
-        }
+        } // 한번에 하나의 스레드만 접근!!
 
         public int getSum() {
             return sum;

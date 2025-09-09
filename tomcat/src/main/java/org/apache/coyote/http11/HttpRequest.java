@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class HttpRequest {
 
     private final HttpStartLine startLine;
@@ -36,6 +38,10 @@ public class HttpRequest {
 
     public String getQueryParameter(String name) {
         return queryParameter.getValue(name);
+    }
+
+    public HttpRequestBody getBody() {
+        return body;
     }
 
     public HttpRequestHeader getHeader() {

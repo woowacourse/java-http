@@ -21,6 +21,7 @@ public class HttpRequestHeader {
 
     public int getBodyLength() {
         String value = headers.getOrDefault("Content-Length", "0");
-        return Integer.parseInt(value);
+        String trimmed = value.trim();
+        return Integer.parseInt(trimmed);
     }
 }

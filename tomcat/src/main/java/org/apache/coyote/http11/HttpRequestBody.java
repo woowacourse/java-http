@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpRequestBody {
     private final String body;
 
@@ -17,5 +20,16 @@ public class HttpRequestBody {
 
     public int getLength() {
         return body.length();
+    }
+
+    public Map<String, String> getFormData() {
+        HashMap<String, String> formData = new HashMap<>();
+
+        String[] split = body.split("&");
+        for (String data : split) {
+            String[] keyValue = data.split("=");
+            formData.put(keyValue[0], keyValue[1]);
+        }
+        return formData;
     }
 }

@@ -77,6 +77,37 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
             }
+
+            if (path.startsWith("/register") && request.getHttpMethod() == HttpMethod.GET) {
+                response = responseHandler.handleResponse(request, HttpStatusCode.OK);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            if (path.startsWith("/register") && request.getHttpMethod() == HttpMethod.POST) {
+                try {
+                    HttpRequestBody body = request.getBody();
+                    Map<String, String> formData = body.getFormData();
+
+                    String account = formData.get("account");
+                    String password = formData.get("password");
+                    String email = formData.get("email");
+
+                    User user = new User(account, password, email);
+                    InMemoryUserRepository.save(user);
+
+                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                    response.setLocation("/index.html");
+                    sendResponse(outputStream, response);
+                    return;
+                } catch (IllegalArgumentException e) {
+                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                    response.setLocation("/401.html");
+                    sendResponse(outputStream, response);
+                    return;
+                }
+            }
+
             response = responseHandler.handleResponse(request, HttpStatusCode.OK);
             sendResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {

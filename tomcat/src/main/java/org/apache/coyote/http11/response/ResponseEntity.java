@@ -17,6 +17,14 @@ public class ResponseEntity {
         return buildHttpResponse(body, contentType, HttpStatus.OK);
     }
 
+    public static HttpResponse found(String body) {
+        return found(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse found(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.FOUND);
+    }
+
     public static HttpResponse notFound(String body) {
         return notFound(body, "text/plain;charset=utf-8");
     }

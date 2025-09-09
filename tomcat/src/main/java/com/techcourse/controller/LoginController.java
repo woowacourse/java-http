@@ -44,10 +44,14 @@ public class LoginController implements Controller {
 
         boolean loginSuccess = loginService.login(account, password);
         if (loginSuccess) {
-            return ResponseEntity.ok("login success!");
+            String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
+
+            return ResponseEntity.found(body, "text/html;charset=utf-8");
         }
 
-        return ResponseEntity.unauthorized("login failed.");
+        String body = ResourceUtil.readStaticResource("/401.html", this.getClass());
+
+        return ResponseEntity.unauthorized(body, "text/html;charset=utf-8");
     }
 
     @Override

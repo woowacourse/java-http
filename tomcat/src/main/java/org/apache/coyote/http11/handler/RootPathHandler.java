@@ -23,4 +23,9 @@ public class RootPathHandler extends HttpRequestHandler {
                 Map.of()
         );
     }
+
+    @Override
+    protected HttpResponse handlePost(String request) {
+        return null;
+    }
 }

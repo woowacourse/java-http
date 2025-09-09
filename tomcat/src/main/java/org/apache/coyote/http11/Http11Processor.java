@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,11 +48,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequest(InputStream inputStream) throws IOException {
+    public String parseRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        return bufferedReader.lines()
-                .takeWhile(line -> !line.isEmpty())
-                .collect(Collectors.joining(System.lineSeparator()));
+        StringBuilder fullRequest = new StringBuilder();
+
+        String line;
+        int contentLength = 0;
+
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            fullRequest.append(line).append(System.lineSeparator());
+            if (line.startsWith("Content-Length")) {
+                contentLength = Integer.parseInt(line.substring(line.indexOf(":") + 1).trim());
+            }
+        }
+
+        fullRequest.append(System.lineSeparator());
+
+        if (contentLength > 0) {
+            char[] body = new char[contentLength];
+            int bytesRead = bufferedReader.read(body, 0, contentLength);
+            if (bytesRead != -1) {
+                fullRequest.append(body, 0, bytesRead);
+            }
+        }
+
+        return fullRequest.toString();
     }
 
     private HttpResponse processResponse(String request) {

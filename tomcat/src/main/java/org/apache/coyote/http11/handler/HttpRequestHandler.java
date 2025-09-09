@@ -16,11 +16,15 @@ public abstract class HttpRequestHandler {
         HttpMethod requestMethod = HttpMethod.fromHttp11Request(request);
         if (requestMethod.equals(HttpMethod.GET)) {
             return handleGet(request);
+        } else if (requestMethod.equals(HttpMethod.POST)) {
+            return handlePost(request);
         }
         return handleMethodNotAllow(request);
     }
 
     protected abstract HttpResponse handleGet(String request);
+
+    protected abstract HttpResponse handlePost(String request);
 
     private void validateSupports(String request) {
         String url = getUrl(request);

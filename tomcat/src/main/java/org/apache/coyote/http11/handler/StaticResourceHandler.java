@@ -29,6 +29,11 @@ public class StaticResourceHandler extends HttpRequestHandler {
         return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
     }
 
+    @Override
+    protected HttpResponse handlePost(String request) {
+        return null;
+    }
+
     private Resource getResource() {
         try {
             return Resource.fromPath("static" + resourcePath);

@@ -9,7 +9,7 @@ public final class ErrorResponder {
     private ErrorResponder() {}
 
     public static void send500(OutputStream outputStream) throws IOException {
-        String body = StaticResourceResolver.readAsString("500.html");
+        String body = StaticResourceResolver.read("500.html");
         if (body == null) {
             body = "<h1>500 Internal Server Error</h1>";
         }
@@ -18,7 +18,7 @@ public final class ErrorResponder {
     }
 
     public static void send404(OutputStream outputStream) throws IOException {
-        String body = StaticResourceResolver.readAsString("404.html");
+        String body = StaticResourceResolver.read("404.html");
         if (body == null) {
             body = "<h1>404 Not Found</h1>";
         }

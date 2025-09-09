@@ -95,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                 requestPath = "index.html";
             }
 
-            final var responseBody = StaticResourceResolver.readAsString(requestPath);
+            final var responseBody = StaticResourceResolver.read(requestPath);
             if (responseBody == null) {
                 ErrorResponder.send404(outputStream);
                 return;

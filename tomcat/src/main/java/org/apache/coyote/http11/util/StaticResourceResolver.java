@@ -1,10 +1,9 @@
 package org.apache.coyote.http11.util;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 public final class StaticResourceResolver {
 
@@ -12,28 +11,27 @@ public final class StaticResourceResolver {
 
     private StaticResourceResolver() {}
 
-    public static URL findResource(String path) {
+    public static String read(final String path) throws IOException {
+        final URL resourceUrl = findResource(path);
+        if (resourceUrl == null) {
+            return null;
+        }
+
+        try (final InputStream inputStream = resourceUrl.openStream()) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private static URL findResource(String path) {
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
 
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        URL resource = cl.getResource(STATIC_DIRECTORY + path);
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resource = classLoader.getResource(STATIC_DIRECTORY + path);
         if (resource == null) {
-            resource = cl.getResource(STATIC_DIRECTORY + path + ".html");
+            resource = classLoader.getResource(STATIC_DIRECTORY + path + ".html");
         }
         return resource;
-    }
-
-    public static String readAsString(String path) throws IOException {
-        URL resource = findResource(path);
-        if (resource == null) {
-            return null;
-        }
-        try {
-            return Files.readString(Paths.get(resource.toURI()));
-        } catch (URISyntaxException e) {
-            throw new IOException("유효하지 않은 resource URI: " + path, e);
-        }
     }
 }

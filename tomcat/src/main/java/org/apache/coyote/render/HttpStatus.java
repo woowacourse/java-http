@@ -31,6 +31,15 @@ public enum HttpStatus {
         this.message = message;
     }
 
+    public static String getMessageByStatusCode(int statusCode) {
+        for (HttpStatus status : HttpStatus.values()) {
+            if (status.statusCode == statusCode) {
+                return status.message;
+            }
+        }
+        return "Unknown Status";
+    }
+
     public int getStatusCode() {
         return statusCode;
     }

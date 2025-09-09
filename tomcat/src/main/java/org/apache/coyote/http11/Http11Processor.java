@@ -5,6 +5,7 @@ import org.apache.coyote.dto.RequestInfo;
 import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.PostBodyParser;
 import org.apache.coyote.util.RequestLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String response = createResponse(requestLine);
+            final String response = createResponse(requestLine, reader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -52,9 +54,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String requestLine) throws IOException {
-        final RequestInfo requestInfo = RequestLineParser.parse(requestLine);
-        return requestRouter.handleRoute(requestInfo.method(),requestInfo.path(),requestInfo.queryParams());
+    private String createResponse(final String requestLine, final BufferedReader reader) throws IOException {
+        RequestInfo requestInfo = RequestLineParser.parse(requestLine);
+        log.info(requestInfo.method());
+        if (requestInfo.method().equals("POST")) {
+            Map<String, String> postParams = PostBodyParser.parse(reader);
+            requestInfo = new RequestInfo(requestInfo.method(), requestInfo.path(), postParams);
+        }
+        return requestRouter.handleRoute(requestInfo.method(), requestInfo.path(), requestInfo.queryParams());
     }
 
 }

@@ -1,25 +1,36 @@
 package org.apache.coyote.util;
 
+import org.apache.coyote.render.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HttpResponseBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponseBuilder.class);
     private static final String STATIC_FILE_ROOT = "static";
 
+
     public static String getStaticHttpResponse(final int statusCode, final String contentType, final String content) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + getStatusCodeStatus(statusCode) + " ",
+                "HTTP/1.1 " + statusCode + " " + HttpStatus.getMessageByStatusCode(statusCode) + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " ",
                 "",
-                content);
+                content
+        );
+    }
+
+    public static String getRedirectResponseString(final int statusCode, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " " + HttpStatus.getMessageByStatusCode(statusCode) + " ",
+                "Location: " + location,
+                "Content-Length: " + 0 + " ",
+                "",
+                ""
+        );
     }
 
     public static String getErrorHttpResponse(final int statusCode) {
@@ -43,9 +54,4 @@ public class HttpResponseBuilder {
         return new String(inputStream.readAllBytes());
     }
 
-    private static String getStatusCodeStatus(int statusCode) {
-        Map<Integer, String> statusTexts = new HashMap<>();
-        statusTexts.put(200, "OK");
-        return statusTexts.getOrDefault(statusCode,"Unknown");
-    }
 }

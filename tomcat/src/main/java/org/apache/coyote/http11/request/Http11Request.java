@@ -3,8 +3,8 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.domain.HttpCookies;
 import org.apache.coyote.http11.domain.HttpMethod;
 
 public record Http11Request(
@@ -42,23 +42,23 @@ public record Http11Request(
                 .collect(Collectors.toList());
     }
 
+    public boolean isCookiesEmpty() {
+        return headers.getCookies() == null;
+    }
+
+    public String getJsessionid() {
+        final HttpCookies cookies = headers.getCookies();
+        if (cookies != null) {
+            return cookies.getJsessionid();
+        }
+        return null;
+    }
+
     public String parseResourcePath() {
         return requestLine.parseResourcePath();
     }
 
-    public Map<String, String> parseQuery() {
-        return requestLine.parseQuery();
-    }
-
     public HttpMethod getMethod() {
         return requestLine.method();
-    }
-
-    public String getRequestTarget() {
-        return requestLine.requestTarget();
-    }
-
-    public boolean isCookiesEmpty() {
-        return headers.getCookies() == null;
     }
 }

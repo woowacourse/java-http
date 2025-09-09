@@ -2,27 +2,30 @@ package org.apache.coyote.http11.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public record HttpCookies(Map<String, String> values) {
 
     private static final String JSESSIONID = "JSESSIONID";
 
     public HttpCookies() {
-        this(Map.of(JSESSIONID, UUID.randomUUID().toString()));
+        this(new HashMap<>());
     }
 
-    public static HttpCookies parse(String cookieHeader) {
-        Map<String, String> values = new HashMap<>();
-        String[] splitCookies = cookieHeader.split("; ");
-        for (String splitCookie : splitCookies) {
-            String[] keyValue = splitCookie.split("=");
-            values.put(keyValue[0], keyValue[1]);
-        }
-        return new HttpCookies(values);
+    public HttpCookies(String id) {
+        this(Map.of(JSESSIONID, id));
     }
 
     public String getJsessionid() {
-        return JSESSIONID + "=" + values.get(JSESSIONID);
+        return values.getOrDefault(JSESSIONID, null);
+    }
+
+    public void put(String key, String value) {
+        values.put(key, value);
+    }
+
+    public void getToSetCookiesHeader(StringBuilder sb) {
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            sb.append("Set-Cookie: ").append(entry.getKey()).append("=").append(entry.getValue()).append("; \r\n");
+        }
     }
 }

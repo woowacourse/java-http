@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.http11.domain.HttpCookies;
 
 public record RequestHeaders(LinkedHashMap<String, String> headers) {
@@ -28,8 +30,18 @@ public record RequestHeaders(LinkedHashMap<String, String> headers) {
         final String cookieName = "Cookie";
         if (headers.containsKey(cookieName)) {
             String cookie = headers.get(cookieName);
-            return HttpCookies.parse(cookie);
+            return parseToHttpCookies(cookie);
         }
         return null;
+    }
+
+    private static HttpCookies parseToHttpCookies(String cookieHeader) {
+        Map<String, String> values = new HashMap<>();
+        String[] splitCookies = cookieHeader.split("; ");
+        for (String splitCookie : splitCookies) {
+            String[] keyValue = splitCookie.split("=");
+            values.put(keyValue[0], keyValue[1]);
+        }
+        return new HttpCookies(values);
     }
 }

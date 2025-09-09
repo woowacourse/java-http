@@ -29,16 +29,25 @@ public class RegisterController extends AbstractController {
         final String account = request.body().getValueByKey("account");
         final String password = request.body().getValueByKey("password");
         final String email = request.body().getValueByKey("email");
+
         if (account != null && !account.isBlank()) {
-            if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-                throw new Http4xxException("이미 가입한 사용자입니다.", response, HttpStatus.BAD_REQUEST);
-            }
-            final User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-            log.info("User created: {}", user);
+            checkDuplication(response, account);
+            saveUser(account, password, email);
             return "/index";
         }
-        InMemoryUserRepository.save(null);
-        return "/register";
+
+        throw new Http4xxException("잘못된 요청입니다.", response, HttpStatus.BAD_REQUEST);
+    }
+
+    private void checkDuplication(Http11Response response, String account) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new Http4xxException("이미 가입한 사용자입니다.", response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private static void saveUser(String account, String password, String email) {
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("User created: {}", user);
     }
 }

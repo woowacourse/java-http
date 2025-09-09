@@ -5,7 +5,8 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.contoller.AbstractController;
-import org.apache.coyote.http11.domain.HttpCookies;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -19,29 +20,46 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void registerCommands() {
-        this.addCommand(HttpMethod.GET, this::getPage);
+        this.addCommand(HttpMethod.GET, this::getToLoginPage);
         this.addCommand(HttpMethod.POST, this::postToLogin);
     }
 
-    public String getPage(final Http11Request request, final Http11Response response) {
+    public String getToLoginPage(final Http11Request request, final Http11Response response) {
+        if (isSessionContinued(request)) {
+            return handleLoginSuccess(response);
+        }
         return "/login";
     }
 
     public String postToLogin(final Http11Request request, final Http11Response response) {
         final String account = request.body().getValueByKey("account");
         final String password = request.body().getValueByKey("password");
-        if (account != null && !account.isBlank()) {
-            final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-            if (user.isPresent() && user.get().checkPassword(password)) {
-                log.info("User found: {}", user.get());
-                if (request.isCookiesEmpty()) {
-                    response.addCookie(new HttpCookies());
-                }
-                response.setState(HttpStatus.Found);
-                return "/index";
-            }
-            throw new UnauthorizedException(response);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("User found: {}", user.get());
+            return handleSessionCreation(user.get(), response);
         }
-        return "/login";
+        throw new UnauthorizedException(response);
+    }
+
+    private boolean isSessionContinued(final Http11Request request) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        return !request.isCookiesEmpty() && sessionManager.findSession(request.getJsessionid()) != null;
+    }
+
+    private String handleSessionCreation(final User user, final Http11Response response) {
+        final Session session = new Session();
+        session.setAttribute(user.getClass().getName(), user);
+
+        final SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        response.addCookie("JSESSIONID", session.getId());
+
+        return handleLoginSuccess(response);
+    }
+
+    private String handleLoginSuccess(Http11Response response) {
+        response.setState(HttpStatus.Found);
+        return "/index";
     }
 }

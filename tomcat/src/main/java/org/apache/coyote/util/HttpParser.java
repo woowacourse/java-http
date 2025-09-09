@@ -32,7 +32,7 @@ public final class HttpParser {
             }
             log.info("모든 요청 헤더 파싱 완료");
 
-            String requestBody = extractRequestBody(bufferedReader, requestHeaders.get("Content-Length"));
+            RequestBody requestBody = extractRequestBody(bufferedReader, requestHeaders.get("Content-Length"));
             log.info("요청 바디 파싱 완료");
 
             return HttpRequest.of(requestLine, requestHeaders, requestBody);
@@ -41,10 +41,10 @@ public final class HttpParser {
         }
     }
 
-    private static String extractRequestBody(final BufferedReader bufferedReader, final String rawContentLength)
+    private static RequestBody extractRequestBody(final BufferedReader bufferedReader, final String rawContentLength)
             throws IOException {
         if (rawContentLength == null || Objects.equals(rawContentLength.trim(), "0")) {
-            return EMPTY_TEXT;
+            return RequestBody.createEmpty();
         }
 
         int contentLength = Integer.parseInt(rawContentLength.trim());
@@ -57,6 +57,6 @@ public final class HttpParser {
             }
             totalRead += read;
         }
-        return new String(bodyBuffers, 0, totalRead);
+        return RequestBody.createByFormData(new String(bodyBuffers, 0, totalRead));
     }
 }

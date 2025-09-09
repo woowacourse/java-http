@@ -52,7 +52,7 @@ class ThreadTest {
          thread.join();
     }
 
-    private static final class ExtendedThread extends Thread {
+    private static final class ExtendedThread extends Thread { 
 
         private String message;
 

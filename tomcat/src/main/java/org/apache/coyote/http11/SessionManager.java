@@ -9,12 +9,6 @@ public class SessionManager {
     private SessionManager() {
     }
 
-    public static Session createSession(String id) {
-        Session session = new Session(id);
-        SESSIONS.put(id, session);
-        return session;
-    }
-
     public static Session getSession(String id) {
         return SESSIONS.get(id);
     }

@@ -2,28 +2,23 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.util.ErrorResponder;
+import org.apache.coyote.http11.util.HttpRequestIO;
+import org.apache.coyote.http11.util.HttpResponseWriter;
+import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
     private final Manager manager;
@@ -43,10 +38,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final var requestLine = RequestLine.from(reader.readLine());
-            final var requestHeaders = RequestHeaders.from(reader);
+            final var headerReader = HttpRequestIO.createHeaderReader(inputStream);
+            final var requestLine = RequestLine.from(headerReader.readLine());
+            final var requestHeaders = RequestHeaders.from(headerReader);
             final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
             final Map<String, String> responseHeaders = new HashMap<>();
 
@@ -59,28 +54,24 @@ public class Http11Processor implements Runnable, Processor {
 
             //=========== POST 요청 처리 ============
             if (requestLine.getMethod() == HttpMethod.POST) {
-                final var contentLength = requestHeaders.getHeader("Content-Length");
-                final var requestBody = readRequestBody(reader, contentLength);
+                final var requestBody = HttpRequestIO.readRequestBody(requestHeaders, inputStream);
                 final Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
                 String redirectUrl = "/index.html";
 
-                if ("login".equals(requestLine.getPath())) {
-                    String account = parameters.get("account");
-                    String password = parameters.get("password");
+                if ("/login".equals(requestLine.getPath())) {
+                    final var account = parameters.get("account");
+                    final var password = parameters.get("password");
                     final Optional<User> optionalUser = findUserByAccount(account);
-                    if (optionalUser.isPresent()) {
-                        User user = optionalUser.get();
-                        if (user.checkPassword(password)) {
-                            session.setAttribute("user", user);
-                            log.info("로그인 성공 account: {}", account);
-                        }
+                    if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+                        session.setAttribute("user", optionalUser.get());
+                        log.info("로그인 성공 account: {}", account);
                     } else {
                         redirectUrl = "/401.html";
                         log.info("로그인 실패 account: {}", account);
                     }
                 }
 
-                if ("register".equals(requestLine.getPath())) {
+                if ("/register".equals(requestLine.getPath())) {
                     final var newUser = new User(
                             parameters.get("account"),
                             parameters.get("password"),
@@ -90,10 +81,8 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("Registered new user: {}", newUser.getAccount());
                 }
 
-                responseHeaders.put("Location", redirectUrl);
-                final var response = buildHttpResponse("302 Found", "text/html", "", responseHeaders);
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                final var response = HttpResponseWriter.redirect(redirectUrl, responseHeaders);
+                HttpResponseWriter.write(outputStream, response);
                 return;
             }
 
@@ -101,10 +90,8 @@ public class Http11Processor implements Runnable, Processor {
             var requestPath = requestLine.getPath();
 
             if ("/login".equals(requestPath) && session.getAttribute("user") != null) {
-                responseHeaders.put("Location", "/index.html");
-                final var response = buildHttpResponse("302 Found", "text/html", "", responseHeaders);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                final var response = HttpResponseWriter.redirect("/index.html", responseHeaders);
+                HttpResponseWriter.write(outputStream, response);
                 return;
             }
 
@@ -112,40 +99,20 @@ public class Http11Processor implements Runnable, Processor {
                 requestPath = "index.html";
             }
 
-            var statusCode = "200 OK";
-
-            var responseBody = readStaticFileContent(requestPath);
+            final var responseBody = StaticResourceResolver.readAsString(requestPath);
             if (responseBody == null) {
-                statusCode = "404 Not Found";
-                responseBody = readStaticFileContent("404.html");
-
-                if (responseBody == null) {
-                    responseBody = "<h1>404 Not Found</h1>";
-                }
+                ErrorResponder.send404(outputStream);
+                return;
             }
-
-            final var contentType = ContentType.from(requestPath);
-            final var response = buildHttpResponse(statusCode, contentType.getMimeType(), responseBody,
-                    responseHeaders);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            final var mimeType = ContentType.from(requestPath).getMimeType();
+            final var response = HttpResponseWriter.ok(mimeType, responseBody, responseHeaders);
+            HttpResponseWriter.write(outputStream, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             try (final var outputStream = connection.getOutputStream()) {
-                String responseBody;
-                URL errorResource = getResourceFrom("500.html");
-                if (errorResource != null) {
-                    responseBody = Files.readString(Paths.get(errorResource.toURI()));
-                } else {
-                    responseBody = "<h1>500 Internal Server Error</h1>";
-                }
-
-                final var response = buildHttpResponse("500 Internal Server Error", "text/html", responseBody,
-                        Collections.emptyMap());
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } catch (IOException | URISyntaxException ex) {
-                log.error("500 에러 전송 실패: " + ex.getMessage(), ex);
+                ErrorResponder.send500(outputStream);
+            } catch (IOException ioEx) {
+                log.error("500 에러 전송 실패: {}", ioEx.getMessage(), ioEx);
             }
         }
     }
@@ -155,52 +122,5 @@ public class Http11Processor implements Runnable, Processor {
             return Optional.empty();
         }
         return InMemoryUserRepository.findByAccount(account);
-    }
-
-    private URL getResourceFrom(String requestPath) {
-        var resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + requestPath);
-        if (resource == null) {
-            resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + requestPath + ".html");
-        }
-        return resource;
-    }
-
-    private String readStaticFileContent(String requestPath) throws URISyntaxException, IOException {
-        URL resource = getResourceFrom(requestPath);
-        if (resource == null) {
-            return null;
-        }
-        return Files.readString(Paths.get(resource.toURI()));
-    }
-
-    private String buildHttpResponse(String statusCode, String mimeType, String responseBody,
-                                     Map<String, String> additionalResponseHeaders) throws IOException {
-        StringBuilder response = new StringBuilder();
-
-        response.append("HTTP/1.1 ").append(statusCode).append("\r\n");
-        response.append("Content-Type: ").append(mimeType).append(";charset=utf-8\r\n");
-        byte[] bodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-        response.append("Content-Length: ").append(bodyBytes.length).append("\r\n");
-
-        for (Map.Entry<String, String> header : additionalResponseHeaders.entrySet()) {
-            response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
-        }
-
-        response.append("\r\n"); // 헤더와 본문 구분
-        response.append(responseBody);
-        return response.toString();
-    }
-
-    private String readRequestBody(BufferedReader reader, String contentLengthHeader) throws IOException {
-        if (contentLengthHeader == null || contentLengthHeader.isBlank()) {
-            return "";
-        }
-        final int contentLength = Integer.parseInt(contentLengthHeader);
-        if (contentLength <= 0) {
-            return "";
-        }
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 }

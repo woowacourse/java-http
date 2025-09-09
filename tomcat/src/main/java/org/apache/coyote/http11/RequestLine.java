@@ -37,7 +37,7 @@ public class RequestLine {
             queryParameters = extractQueryParameters(uriParts[1]);
         }
 
-        return new RequestLine(HttpMethod.valueOf(methodString), path.substring(1), queryParameters, protocolVersion);
+        return new RequestLine(HttpMethod.valueOf(methodString), path, queryParameters, protocolVersion);
     }
 
     private static Map<String, String> extractQueryParameters(final String queryString) {

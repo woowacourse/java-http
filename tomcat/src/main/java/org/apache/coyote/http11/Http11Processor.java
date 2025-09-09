@@ -60,8 +60,9 @@ public class Http11Processor implements Runnable, Processor {
                 bufferedReader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
                 Map<String, String> queryParams = QueryParamsParser.parse(requestBody);
-                HttpResponse response = handleRegister(queryParams, mimeType);
-                sendResponse(outputStream, response);
+                HttpResponse httpResponse = dispatchRequest(requestLine.getPath(), queryParams, mimeType,
+                        requestHeaders);
+                sendResponse(outputStream, httpResponse);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -105,6 +106,17 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
     }
 
+    private HttpResponse dispatchRequest(String path, Map<String, String> queryParams, MimeType mimeType,
+                                         Map<String, String> requestHeaders) {
+        if (path.equals("/login")) {
+            return handleLogin(queryParams, mimeType, requestHeaders);
+        }
+        if (path.equals("/register")) {
+            return handleRegister(queryParams, mimeType);
+        }
+        return null;
+    }
+
     private Path getFilePath(String path, MimeType mimeType) {
         if (UriParser.extractExtension(path).isEmpty()) {
             path += EXTENSION_SEPARATOR + mimeType;
@@ -119,9 +131,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = queryParams.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> {
-                    return handleLoginSuccess(account, mimeType, requestHeaders);
-                })
+                .map(user -> handleLoginSuccess(account, mimeType, requestHeaders))
                 .orElseGet(() -> {
                     log.info("login failure: account= {}", account);
                     return redirectTo("/401.html", mimeType);

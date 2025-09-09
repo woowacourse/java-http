@@ -28,10 +28,13 @@ public class Http11Processor implements Runnable, Processor {
     public static final String QUERY_PARAM = "?";
 
     private final Socket connection;
+    private final HttpCookie httpCookie = new HttpCookie();
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
+
 
     @Override
     public void run() {
@@ -52,6 +55,11 @@ public class Http11Processor implements Runnable, Processor {
 
             String method = requestLineParts[0];
             String requestPath = requestLineParts[1];
+
+            Map<String, String> headers = parseHeaders(reader);
+            if (headers.containsKey("Cookie")) {
+                validateUserCookie(headers.get("Cookie"));
+            }
 
             if (MethodType.isGetMethod(method)) {
                 if (requestPath.equals("/")) {
@@ -75,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (MethodType.isPostMethod(method)){
-                int contentLength = Integer.parseInt(parseHeaders(reader).get("Content-Length"));
+                int contentLength = Integer.parseInt(headers.get("Content-Length"));
 
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
@@ -188,6 +196,15 @@ public class Http11Processor implements Runnable, Processor {
                 + "\r\n";
     }
 
+    private String buildRedirectHeaders(String location, String cookie) {
+        return "HTTP/1.1 302 Found\r\n"
+                + "Location: " + location + "\r\n"
+                + "Content-Length: 0\r\n"
+                + "Set-Cookie: " + cookie + "; Path=/; HttpOnly\r\n"
+                + "\r\n";
+    }
+
+
     private String getRequest(BufferedReader reader) throws IOException {
         final var request = reader.readLine();
         if (request == null || request.isBlank()) {
@@ -225,7 +242,8 @@ public class Http11Processor implements Runnable, Processor {
             log.info("User: account = {}, password = {}", account, password);
 
             if (user.isPasswordCorrect(password)) {
-                sendResponse(outputStream, buildRedirectHeaders("/index.html"));
+                String cookieSession = getSession(user);
+                sendResponse(outputStream, buildRedirectHeaders("/index.html", cookieSession));
                 return;
             }
         }
@@ -278,5 +296,24 @@ public class Http11Processor implements Runnable, Processor {
                 LoginParam.ACCOUNT, account,
                 LoginParam.PASSWORD, password
         );
+    }
+
+    private void validateUserCookie(String cookieRequest) throws IOException {
+        if (sessionManager.isExistSessionId(cookieRequest)) {
+            sessionManager.findSession(cookieRequest);
+            return;
+        }
+
+        throw new IllegalArgumentException("[ERROR] no such sessionId");
+    }
+
+    private String getSession(User user) {
+        String cookieSession = httpCookie.getCookieSession();
+        Session session = new Session(cookieSession);
+
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+
+        return cookieSession;
     }
 }

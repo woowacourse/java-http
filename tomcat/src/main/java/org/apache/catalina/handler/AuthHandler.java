@@ -70,6 +70,7 @@ public class AuthHandler implements HttpHandler {
 
         UUID jSessionId = UUID.randomUUID();
         httpSessionManager.add(new HttpSession(jSessionId, registerUser));
+
         httpResponse.putHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
         httpResponse.putHeader("Content-Type", getContentType(httpRequest.getRequestPath()) + ";charset=utf-8");
         httpResponse.putHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));

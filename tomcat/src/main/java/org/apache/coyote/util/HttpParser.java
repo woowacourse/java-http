@@ -26,7 +26,7 @@ public final class HttpParser {
             String header;
             Map<String, String> requestHeaders = new HashMap<>();
             while (!Objects.equals(header = bufferedReader.readLine(), EMPTY_TEXT)) {
-                String[] keyValue = header.split(": ");
+                String[] keyValue = header.split(": ", 2);
                 requestHeaders.put(keyValue[0], keyValue[1]);
                 log.info("요청 헤더 Key = {}, Value = {} 파싱 완료", keyValue[0], keyValue[1]);
             }

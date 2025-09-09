@@ -24,6 +24,6 @@ public class ResponseCookie {
     }
 
     public Map<String, String> getCookieValues() {
-        return cookieValues;
+        return new HashMap<>(cookieValues);
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
@@ -9,6 +10,7 @@ public class HttpRequest {
     private final HttpVersion httpVersion;
     private final ContentType contentType;
     private final int contentLength;
+    private final List<HttpCookie> cookies;
     private final Map<String, String> queryParameter;
     private final Map<String, String> body;
 
@@ -16,7 +18,7 @@ public class HttpRequest {
                        String path,
                        HttpVersion httpVersion,
                        ContentType contentType,
-                       int contentLength,
+                       int contentLength, List<HttpCookie> httpCookie,
                        Map<String, String> queryParameter,
                        Map<String, String> body) {
         this.method = method;
@@ -24,6 +26,7 @@ public class HttpRequest {
         this.httpVersion = httpVersion;
         this.contentType = contentType;
         this.contentLength = contentLength;
+        this.cookies = httpCookie;
         this.queryParameter = queryParameter;
         this.body = body;
     }
@@ -46,6 +49,22 @@ public class HttpRequest {
             return "";
         }
         return value;
+    }
+
+    public boolean hasCookie(String key) {
+        HttpCookie httpCookie = cookies.stream()
+                .filter(cookie -> cookie.isKey(key))
+                .findFirst()
+                .orElse(null);
+        return httpCookie != null;
+    }
+
+    public String getCookieValue(String key) {
+        return cookies.stream()
+                .filter(cookie -> cookie.isKey(key))
+                .map(HttpCookie::getValue)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("key가 존재하지 않습니다."));
     }
 
     public Map<String, String> getBody() {

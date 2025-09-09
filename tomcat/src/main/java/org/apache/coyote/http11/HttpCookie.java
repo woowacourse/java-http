@@ -1,0 +1,43 @@
+package org.apache.coyote.http11;
+
+import java.util.Objects;
+
+public class HttpCookie {
+
+    private final String key;
+    private final String value;
+
+    public HttpCookie(String key, String value) {
+        if (key == null || key.isBlank() || value == null || value.isBlank()) {
+            throw new IllegalArgumentException("key, value는 비어있을 수 없습니다.");
+        }
+        this.key = key;
+        this.value = value;
+    }
+
+    public String getSetCookieValue() {
+        return "Set-Cookie: " + key + "=" + value + "\r\n";
+    }
+
+    public boolean isKey(String key) {
+        return this.key.equals(key);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        HttpCookie that = (HttpCookie) object;
+        return Objects.equals(key, that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(key);
+    }
+}

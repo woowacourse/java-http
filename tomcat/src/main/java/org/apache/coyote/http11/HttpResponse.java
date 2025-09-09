@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponse {
 
@@ -10,6 +12,7 @@ public class HttpResponse {
     private final ResponseStatus responseStatus;
     private final ContentType contentType;
     private final String location;
+    private final List<HttpCookie> httpCookies;
     private final long contentLength;
     private final byte[] body;
 
@@ -23,6 +26,7 @@ public class HttpResponse {
         this.responseStatus = responseStatus;
         this.contentType = contentType;
         this.location = location;
+        this.httpCookies = new ArrayList<>();
         this.contentLength = contentLength;
         this.body = body;
     }
@@ -47,6 +51,10 @@ public class HttpResponse {
                 new byte[0]);
     }
 
+    public void setCookie(String key, String value) {
+        httpCookies.add(new HttpCookie(key, value));
+    }
+
     public byte[] getBytes() {
         final var headers = getHeaders();
         final var bodyString = new String(body, StandardCharsets.UTF_8);
@@ -62,6 +70,11 @@ public class HttpResponse {
         }
         if (contentType != null) {
             sb.append(contentType.getResponseHeader()).append(CRLF);
+        }
+        if (!httpCookies.isEmpty()) {
+            for (HttpCookie httpCookie : httpCookies) {
+                sb.append(httpCookie.getSetCookieValue());
+            }
         }
         sb.append("Content-Length: ").append(contentLength).append(CRLF);
         sb.append(CRLF);

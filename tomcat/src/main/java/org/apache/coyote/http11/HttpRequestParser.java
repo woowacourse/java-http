@@ -21,6 +21,7 @@ public class HttpRequestParser {
         final var queryParameter = parseQuaryParameter(requestLine);
         final var httpVersion = parseHttpVersion(requestLine);
         final var contentType = parseAccept(httpRequestMessages);
+        final var cookies = parseCookies(httpRequestMessages);
         final var contentLength = parseContentLength(httpRequestMessages);
 
         final Map<String, String> body = new HashMap<>();
@@ -34,9 +35,27 @@ public class HttpRequestParser {
                 httpVersion,
                 contentType,
                 contentLength,
+                cookies,
                 queryParameter,
                 body
         );
+    }
+
+    private List<HttpCookie> parseCookies(List<String> httpRequestMessages) {
+        List<HttpCookie> cookies = new ArrayList<>();
+        for (String line : httpRequestMessages) {
+            if (line.startsWith("Cookie:")) {
+                String cookieHeader = line.substring("Cookie:".length()).trim();
+                String[] cookiePairs = cookieHeader.split(";");
+                for (String pair : cookiePairs) {
+                    String[] keyValue = pair.trim().split("=", 2);
+                    if (keyValue.length == 2) {
+                        cookies.add(new HttpCookie(keyValue[0], keyValue[1]));
+                    }
+                }
+            }
+        }
+        return cookies;
     }
 
     private List<String> getHttpRequestHeaders(BufferedReader reader) {

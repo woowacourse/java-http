@@ -40,6 +40,7 @@ public class HttpRequestHandler {
 
     private HttpRequestHeader readHeader(BufferedReader br) throws IOException {
         HttpRequestHeader requestHeader = new HttpRequestHeader();
+      
         String line;
         while(!"".equals((line = br.readLine()))) {
             if (line == null) {

@@ -39,7 +39,6 @@ public class HttpResponse {
             String setCookie = cookie.getSetCookie();
             builder.append(setCookie);
         }
-
         builder.append(END_OF_HEADER);
         builder.append(body.asString());
         return builder.toString();

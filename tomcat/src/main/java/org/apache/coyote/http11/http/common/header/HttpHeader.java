@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.http.common.header;
 
+import http.HttpHeaderKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
+import org.apache.coyote.http11.http.response.HttpResponseBody;
 
 public class HttpHeader {
 
@@ -23,6 +25,28 @@ public class HttpHeader {
     public static HttpHeader from(final Map<String, List<String>> httpHeaderInfo) {
         validateNotNull(httpHeaderInfo);
         return new HttpHeader(httpHeaderInfo);
+    }
+
+    public static HttpHeader createByResponseBody(
+            final HttpResponseBody responseBody,
+            final String responseReturnValue
+    ) {
+        final Map<String, List<String>> responseHeaderInfo = new HashMap<>();
+        if (responseReturnValue == null) {
+            return HttpHeader.from(responseHeaderInfo);
+        }
+
+        responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_TYPE.getValue(), k -> new ArrayList<>())
+                .add(responseBody.getContentType().getFormat() + ";charset=utf-8");
+
+        final Optional<byte[]> valueOptional = responseBody.getValue();
+
+        if (valueOptional.isPresent()) {
+            responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_LENGTH.getValue(), k -> new ArrayList<>())
+                    .add(Integer.toString(responseBody.getByteLength()));
+        }
+
+        return HttpHeader.from(responseHeaderInfo);
     }
 
     private static void validateNotNull(final List<String> headerLines) {

@@ -40,13 +40,18 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             // request
-            String request = parseRequest(inputStream);
-            String header = request.split("\r\n")[0];
-            validateHeader(header);
-            String[] words = header.split(" ");
+            Request request = parseRequest(inputStream);
+            validateHeader(request.header);
+            String[] words = request.header.split(" ");
             String requestPath = words[1].split("\\?")[0];
             HttpMethod httpMethod = HttpMethod.from(words[0]);
-            QueryParameters params = parseParameters(words[1]);
+            Parameters parameters = null;
+            if (request.header.split("\\?").length > 1) {
+                parameters = parseParameters(request.header.split("\\?")[1]);
+            }
+            if (httpMethod == HttpMethod.POST) {
+                parameters = parseParameters(request.body);
+            }
 
             // response
             ContentType contentType = ContentType.NONE;
@@ -56,11 +61,26 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 if (requestPath.equals("/login")) {
-                    if (params.isEmpty()) {
+                    if (httpMethod == HttpMethod.GET) {
                         contentType = ContentType.HTML;
                         requestPath = "/login.html";
-                    } else {
-                        login(params);
+                    }
+                    if (httpMethod == HttpMethod.POST) {
+                        login(parameters);
+                        httpStatus = HttpStatus.FOUND;
+                        contentType = ContentType.HTML;
+                        headers.put("Location", "/index.html");
+                    }
+                }
+
+                if (requestPath.equals("/register")) {
+                    if (httpMethod == HttpMethod.GET) {
+                        contentType = ContentType.HTML;
+                        requestPath = "/register.html";
+                    }
+                    if (httpMethod == HttpMethod.POST) {
+                        // var requestBody = parseRequestBody(request, LoginRequest.class);
+                        register(parameters);
                         httpStatus = HttpStatus.FOUND;
                         contentType = ContentType.HTML;
                         headers.put("Location", "/index.html");
@@ -98,6 +118,11 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    // private static <T> T parseRequestBody(String request, Class<T> type) {
+    //     String body = request.split("\r\n\r\n")[1];
+    //     return RequestBodyParser.parse(body, type);
+    // }
 
     private void validateHeader(String header) {
         if (header.split(" ").length < 3) {
@@ -139,7 +164,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(QueryParameters queryParams) {
+    // private void login(LoginRequest request) {
+    //     String account = request.account();
+    //     String password = request.password();
+    private void login(Parameters queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         User user = findUser(account, password);
@@ -160,22 +188,33 @@ public class Http11Processor implements Runnable, Processor {
         return user.get();
     }
 
-    private QueryParameters parseParameters(String url) {
-        QueryParameters queryParameters = new QueryParameters();
-        String[] words = url.split("\\?");
-        if (words.length > 1) {
-            for (var p : words[1].split("&")) {
-                queryParameters.put(p);
-            }
-        }
-        return queryParameters;
+    private void register(Parameters parameters) {
+        String account = parameters.get("account");
+        String email = parameters.get("email");
+        String password = parameters.get("password");
+        InMemoryUserRepository.findByAccount(account)
+            .ifPresent(user -> {
+                throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
+            });
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
     }
 
-    private String parseRequest(InputStream inputStream) throws IOException {
+    private Parameters parseParameters(String originalParams) {
+        Parameters parameters = new Parameters();
+        // String[] words = originalParams.split("\\?");
+        for (var p : originalParams.split("&")) {
+            parameters.put(p);
+        }
+        return parameters;
+    }
+
+    private Request parseRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         int byteSum = 0;
         String line;
+        int contentLength = 0;
         StringBuilder sb = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
@@ -186,8 +225,26 @@ public class Http11Processor implements Runnable, Processor {
             if (byteSum > MAX_REQUEST_SIZE) {
                 throw new IllegalArgumentException("최대 크기를 초과한 요청입니다.");
             }
+
+            // Content-Length 파싱
+            if (line.toLowerCase().startsWith("content-length:")) {
+                contentLength = Integer.parseInt(line.substring(15).trim());
+            }
         }
 
-        return sb.toString();
+        String body = "";
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            body = new String(buffer, 0, bytesRead);
+        }
+        return new Request(sb.toString(), body);
+    }
+
+    private record Request(
+        String header,
+        String body
+    ) {
+
     }
 }

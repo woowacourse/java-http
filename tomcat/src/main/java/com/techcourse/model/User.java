@@ -7,6 +7,13 @@ public class User {
     private final String password;
     private final String email;
 
+    public User(Long id, User o) {
+        this.id = id;
+        this.account = o.account;
+        this.password = o.password;
+        this.email = o.email;
+    }
+
     public User(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
@@ -20,6 +27,10 @@ public class User {
 
     public boolean checkPassword(String password) {
         return this.password.equals(password);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getAccount() {

@@ -22,8 +22,13 @@ public class RestController {
     }
 
     public HttpResponse signIn(Map<String, String> loginRequest) {
-        User user = service.getUser(loginRequest);
-        log.info("{}", user.toString());
-        return ResponseEntity.found(Map.of("Location", "/index.html"));
+        try {
+            User user = service.getUser(loginRequest);
+            log.info("{}", user.toString());
+            return ResponseEntity.found(Map.of("Location", "/index.html"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.found(Map.of("Location", "/401.html"));
+        }
+
     }
 }

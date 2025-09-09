@@ -6,6 +6,7 @@ public enum HttpStatus {
     NO_CONTENT(204),
     FOUND(302),
     BAD_REQUEST(400),
+    UNAUTHORIZED(401),
     NOT_FOUND(404),
     ;
 

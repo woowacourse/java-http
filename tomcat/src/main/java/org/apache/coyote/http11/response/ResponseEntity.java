@@ -33,6 +33,10 @@ public class ResponseEntity {
         return new HttpResponse(HttpStatus.FOUND, headers, null);
     }
 
+    public static HttpResponse unauthorized(Map<String, String> headers) {
+        return new HttpResponse(HttpStatus.UNAUTHORIZED, headers, null);
+    }
+
     public static HttpResponse notFound() {
         return buildResponse(HttpStatus.NOT_FOUND, null, DEFAULT_CONTENT_TYPE);
     }

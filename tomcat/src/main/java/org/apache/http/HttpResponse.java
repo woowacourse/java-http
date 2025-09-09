@@ -112,9 +112,9 @@ public class HttpResponse {
 
     private String getMessage() {
         validateCanMakeMessage();
-        String startAndHeader = String.join("\r\n", makeStartLine(), makeHeaderLines());
+        String startAndHeader = String.join("\r\n", makeStartLine(), makeHeaderLines()) + "\r\n";
         if (body != null && !body.isEmpty()) {
-            return String.join("\r\n", startAndHeader, "", body);
+            return startAndHeader + "\r\n" + body;
         }
         return startAndHeader;
     }

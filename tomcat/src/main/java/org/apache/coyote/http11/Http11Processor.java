@@ -8,7 +8,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.RequestMapping;
+import org.apache.coyote.http11.dispatcher.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -42,6 +42,13 @@ public class Http11Response {
         return new Http11Response(302, Map.of("Location", location), new byte[0]);
     }
 
+    public void addHeader(
+            final String name,
+            final String value
+    ) {
+        headers.put(name, value);
+    }
+
     public byte[] getResponseBytes() {
         final String statusText = getStatusText(this.statusCode);
         final String responseLine = "HTTP/1.1 " + this.statusCode + " " + statusText;

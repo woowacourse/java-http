@@ -217,6 +217,26 @@ class Http11ProcessorTest {
         );
     }
 
+    @DisplayName("JSESSIONID 쿠키가 없으면 Set-Cookie 헤더를 포함하여 응답한다.")
+    @Test
+    void jSessionId() {
+        // given
+        final var httpRequest = """
+                GET /index.html HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertThat(output).contains("Set-Cookie: JSESSIONID=");
+    }
+
     private byte[] readFileBytes(final String path) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(path);
         return Files.readAllBytes(new File(resource.getFile()).toPath());

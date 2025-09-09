@@ -10,6 +10,7 @@ public final class Http11Request {
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
     private final String body;
+    private final HttpCookie httpCookie;
 
     public Http11Request(
             final String method,
@@ -23,10 +24,15 @@ public final class Http11Request {
         this.queryParams = queryParams;
         this.headers = headers;
         this.body = body;
+        this.httpCookie = new HttpCookie(headers.get("Cookie"));
     }
 
     public static Http11Request createInvalid() {
         return new Http11Request("", "/", Collections.emptyMap(), Collections.emptyMap(), "");
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 
     public String getPath() {

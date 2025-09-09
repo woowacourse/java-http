@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response dispatch(final Http11Request httpRequest) {
+        final var response = getResponse(httpRequest);
+        final var cookie = httpRequest.getHttpCookie();
+        if (!cookie.hasCookie("JSESSIONID")) {
+            final var jSessionId = UUID.randomUUID().toString();
+            response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+        }
+        return response;
+    }
+
+    private Http11Response getResponse(final Http11Request httpRequest) {
         final var path = httpRequest.getPath();
         if ("/".equals(path)) {
             return new Http11Response(200, "text/html;charset=utf-8", "Hello world!");

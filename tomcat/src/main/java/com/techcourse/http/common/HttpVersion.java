@@ -27,7 +27,7 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(version -> version.toProtocolString().equals(protocolString))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 http method 입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 http version 입니다."));
     }
 
     public String toProtocolString() {

@@ -30,10 +30,10 @@ class ThreadTest {
         Thread thread = new ExtendedThread("hello thread");
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        thread.join();
     }
 
     /**

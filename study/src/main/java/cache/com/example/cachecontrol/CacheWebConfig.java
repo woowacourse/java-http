@@ -10,6 +10,7 @@ public class CacheWebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new CacheControlHandlerInterceptor())
-                .addPathPatterns("/**");
+                .addPathPatterns("/");
+
     }
 }

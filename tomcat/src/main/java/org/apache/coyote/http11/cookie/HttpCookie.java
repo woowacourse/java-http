@@ -1,10 +1,8 @@
 package org.apache.coyote.http11.cookie;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
 
@@ -17,15 +15,15 @@ public class HttpCookie {
         if (rawCookie.isBlank()) {
             return new HttpCookie(new HashMap<>());
         }
-        final String[] cookiePairs = rawCookie.split(COOKIE_SEPARATOR);
-        final Map<String, String> cookies = Arrays.stream(cookiePairs)
-                .map(param -> param.split(KEY_VALUE_SEPARATOR))
-                .collect(Collectors.toMap(
-                        param -> param[0],
-                        param -> param[1],
-                        (oldValue, newValue) -> newValue
-                ));
 
+        final String[] cookiePairs = rawCookie.split(COOKIE_SEPARATOR, 2);
+        final Map<String, String> cookies = new HashMap<>();
+        for (String cookiePair : cookiePairs) {
+            final int separatorIndex = cookiePair.indexOf(KEY_VALUE_SEPARATOR);
+            final String key = cookiePair.substring(0, separatorIndex);
+            final String value = cookiePair.substring(separatorIndex + 1);
+            cookies.put(key, value);
+        }
         return new HttpCookie(cookies);
     }
 

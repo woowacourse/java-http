@@ -61,7 +61,7 @@ public class HttpResponse {
     }
 
     private String makeStartLine() {
-        return String.format("%s %s %s ",
+        return String.format("%s %s %s",
                 httpVersion.getValue(),
                 statusCode.getCode(),
                 statusCode.getMessage());
@@ -79,7 +79,7 @@ public class HttpResponse {
         List<String> customHeaderKeys = headers.keySet().stream().toList();
         for (String key : customHeaderKeys) {
             String value = headers.get(key);
-            headerLines.add(key + ": " + value + " ");
+            headerLines.add(key + ": " + value);
         }
     }
 
@@ -87,11 +87,12 @@ public class HttpResponse {
         if (cookies.isEmpty()) {
             return;
         }
-        List<String> cookieLines = cookies.stream().map(Cookie::makeCookieLine).toList();
-        String setCookieHeader = String.format("%s: %s",
-                HttpHeader.SET_COOKIE.getValue(),
-                String.join(" ", cookieLines));
-        headerLines.add(setCookieHeader);
+        for (Cookie cookie : cookies) {
+            String setCookieHeader = String.format("%s: %s",
+                    HttpHeader.SET_COOKIE.getValue(),
+                    cookie.makeCookieLine());
+            headerLines.add(setCookieHeader);
+        }
     }
 
     private void addContentLengthHeaderLine(List<String> headerLines) {
@@ -100,7 +101,7 @@ public class HttpResponse {
         }
         String contentLengthHeader = String.format("%s: %s",
                 HttpHeader.CONTENT_LENGTH.getValue(),
-                body.getBytes(StandardCharsets.UTF_8).length + " ");
+                body.getBytes(StandardCharsets.UTF_8).length);
         headerLines.add(contentLengthHeader);
     }
 

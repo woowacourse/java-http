@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.parser;
 
+import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Session;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -15,13 +18,19 @@ public class CssParser implements HttpParser {
         return request.contains(FILE_EXTENSION) && request.length() > FILE_EXTENSION.length();
     }
 
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
+    public RequestResult parseContent(
+            String contentPath,
+            Map<String, String> query,
+            String method,
+            Map<String, String> requestBody,
+            HttpCookies cookies, Session session
+    ) throws IOException {
         URL resource = classLoader.getResource("static" + contentPath);
         if (resource == null || resource.getFile() == null) {
             throw new IllegalArgumentException("존재하지않는 파일입니다 404 " + contentPath);
         }
 
         FileInputStream fileInputStream = new FileInputStream(resource.getFile());
-        return new ContentParseResult(fileInputStream.readAllBytes(), "Content-Type: text/css; ");
+        return new RequestResult(fileInputStream.readAllBytes(), "Content-Type: text/css; ");
     }
 }

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.parser;
 
+import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Session;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -16,7 +19,13 @@ public class HtmlParser implements HttpParser {
         return request.contains(FILE_EXTENSION) && request.length() > FILE_EXTENSION.length();
     }
 
-    public ContentParseResult parseContent(String contentPath, Map<String, String> query) throws IOException {
+    public RequestResult parseContent(
+            String contentPath,
+            Map<String, String> query,
+            String method,
+            Map<String, String> requestBody,
+            HttpCookies cookies, Session session
+    ) throws IOException {
         if (!isParseAble(contentPath)) {
             throw new IllegalArgumentException("처리할 수 없는 요청입니다" + contentPath);
         }
@@ -29,6 +38,6 @@ public class HtmlParser implements HttpParser {
         FileInputStream fileInputStream = new FileInputStream(resource.getFile());
         byte[] result = fileInputStream.readAllBytes();
 
-        return new ContentParseResult(result, "Content-Type: text/html;charset=utf-8 ");
+        return new RequestResult(result, "Content-Type: text/html;charset=utf-8 ");
     }
 }

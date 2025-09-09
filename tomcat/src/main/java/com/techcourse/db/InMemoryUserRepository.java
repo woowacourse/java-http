@@ -10,6 +10,10 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
+    public static boolean existByAccount(String account) {
+        return database.get(account) != null;
+    }
+
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
@@ -19,7 +23,10 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static User findByAccountAndPassword(String account, String password) {
+    public static User getByAccountAndPassword(String account, String password) {
+        if (account == null) {
+            return null;
+        }
         Optional<User> user = Optional.ofNullable(database.get(account));
 
         User findUser = user.orElseThrow(() -> new IllegalArgumentException("인증에 실패하였습니다."));

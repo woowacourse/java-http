@@ -62,8 +62,8 @@ public class HttpResponse {
         this.headers = headers;
     }
 
-    public void setHeader(String key, String value) {
-        this.headers.put(key, value);
+    public void addCookie(String value) {
+        headers.put("Set-Cookie", value);
     }
 
     public String getBody() {

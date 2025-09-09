@@ -2,7 +2,10 @@ package com.techcourse.controller;
 
 import com.techcourse.service.LoginService;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -11,9 +14,11 @@ import org.apache.coyote.util.ResourceUtil;
 public class LoginController extends AbstractController {
 
     private final LoginService loginService;
+    private final SessionManager sessionManager;
 
-    public LoginController(LoginService loginService) {
+    public LoginController(LoginService loginService, SessionManager sessionManager) {
         this.loginService = loginService;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -45,6 +50,11 @@ public class LoginController extends AbstractController {
 
         String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
         httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
+
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("account", account);
+        sessionManager.add(session);
+        httpResponse.addCookie("JSESSIONID=" + session.getId());
     }
 
     private boolean isValidQueryParams(Map<String, String> queryParams) {

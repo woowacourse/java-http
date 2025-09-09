@@ -3,6 +3,7 @@ package org.apache.coyote.http11.cookie;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -28,8 +29,8 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public String get(final String key) {
-        return cookies.get(key);
+    public Optional<String> get(final String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 
     private HttpCookie(final Map<String, String> cookies) {

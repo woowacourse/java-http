@@ -28,7 +28,6 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        String cookie = requestHeaders.getOrDefault("Cookie", "");
-        return HttpCookie.from(cookie);
+        return HttpCookie.from(requestHeaders);
     }
 }

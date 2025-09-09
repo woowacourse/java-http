@@ -3,15 +3,19 @@ package org.apache.coyote.http11.cookie;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.httprequest.RequestHeaders;
 
 public class HttpCookie {
 
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final String REQUEST_HEADER_COOKIE_NAME = "Cookie";
 
     private final Map<String, String> cookies;
 
-    public static HttpCookie from(final String rawCookie) {
+    public static HttpCookie from(final RequestHeaders headers) {
+        final String rawCookie = headers.getOrDefault(REQUEST_HEADER_COOKIE_NAME, "");
+
         if (rawCookie.isBlank()) {
             return new HttpCookie(new HashMap<>());
         }

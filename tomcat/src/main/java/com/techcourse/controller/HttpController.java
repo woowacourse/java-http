@@ -45,6 +45,11 @@ public class HttpController {
     }
 
     public HttpResponse login(final HttpRequest httpRequest) {
+        final HttpSession oldSession = httpRequest.getSession();
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
+
         final Map<String, String> bodyElement = httpRequest.getBodyElement();
         final String account = bodyElement.get("account");
         final String password = bodyElement.get("password");

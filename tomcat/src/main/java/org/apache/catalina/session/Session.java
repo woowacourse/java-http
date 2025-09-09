@@ -22,11 +22,6 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public int getMaxInactiveInterval() {
-        return 0;
-    }
-
-    @Override
     public Object getAttribute(final String name) {
         if (!values.containsKey(name)) {
             return null;
@@ -50,13 +45,19 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(final int interval) {
-        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: setMaxInactiveInterval");
+    public void invalidate() {
+        values.clear();
+        SessionManager.INSTANCE.remove(this);
     }
 
     @Override
-    public void invalidate() {
-        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: invalidate");
+    public int getMaxInactiveInterval() {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: getMaxInactiveInterval");
+    }
+
+    @Override
+    public void setMaxInactiveInterval(final int interval) {
+        throw new UnsupportedOperationException("지원하지 않는 메서드입니다: setMaxInactiveInterval");
     }
 
     @Override

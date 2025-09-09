@@ -18,6 +18,7 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO: 중복 코드, 뎁스 줄이기  (2025-09-9, 화, 20:57)
 public class LoginServlet extends HttpServlet {
     private static final String LOGIN_PAGE = "static/login.html";
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
@@ -70,7 +71,8 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    //TODO: 요구 사항을 따르긴했는데 항상 새세션이 필요한건 아닌지 검토  (2025-09-9, 화, 3:46)
+    //TODO: 세션 발급 로직의 경계 케이스 따져보기  (2025-09-9, 화, 3:46)
+    // https://github.com/woowacourse/java-http/pull/899#discussion_r2331128229
     private void addJSessionCookie(HttpRequest request, HttpResponse response, User user) {
         if (!request.hasJSessionCookie()) {
             Session session = new Session();

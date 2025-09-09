@@ -55,22 +55,22 @@ class HttpServletTest {
     @Test
     void POST_요청_시_doPost_메소드를_호출한다() {
         // given && when
-        when(httpRequest.getMethod()).thenReturn(HttpMethod.GET);
+        when(httpRequest.getMethod()).thenReturn(HttpMethod.POST);
         testHttpServlet.service(httpRequest, null);
 
         // then
-        assertThat(testHttpServlet.doGetCalled).isTrue();
-        assertThat(testHttpServlet.doPostCalled).isFalse();
+        assertThat(testHttpServlet.doGetCalled).isFalse();
+        assertThat(testHttpServlet.doPostCalled).isTrue();
     }
 
     @Test
     void 지원하지_않는_HTTP_메소드_요청_시_아무것도_호출하지_않는다() {
         // given && when
-        when(httpRequest.getMethod()).thenReturn(HttpMethod.GET);
+        when(httpRequest.getMethod()).thenReturn(null);
         testHttpServlet.service(httpRequest, null);
 
         // then
-        assertThat(testHttpServlet.doGetCalled).isTrue();
+        assertThat(testHttpServlet.doGetCalled).isFalse();
         assertThat(testHttpServlet.doPostCalled).isFalse();
     }
 }

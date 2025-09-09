@@ -15,6 +15,7 @@ import org.apache.controller.LoginController;
 import org.apache.controller.RegisterController;
 import org.apache.controller.StaticController;
 import org.apache.coyote.Processor;
+import org.apache.http.HttpCookie;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8 ";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
 
     private static final List<Controller> controllers = List.of(
             new BasicController(),
@@ -55,14 +56,19 @@ public class Http11Processor implements Runnable, Processor {
 
             Controller processorableController = controllers.stream()
                     .filter(controller -> controller.isProcessable(path))
-                    .findFirst().orElseThrow(() -> new IOException("처리할 수 있는 컨트롤러가 없습니다."));
+                    .findFirst()
+                    .orElseThrow(() -> new IOException("처리할 수 있는 컨트롤러가 없습니다."));
 
             Map<String, Object> responseBody = processorableController.process(requests);
+
+            HttpCookie cookieToSet = (HttpCookie) responseBody.getOrDefault("cookie", null);
 
             String response = makeResponse(
                     String.valueOf(responseBody.get("responseBody")),
                     requests,
-                    (HttpStatus) responseBody.get("status"));
+                    (HttpStatus) responseBody.get("status"),
+                    cookieToSet
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -71,18 +77,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(String responseBody, Map<String, String> requests, HttpStatus httpStatus) {
+    private String makeResponse(String responseBody,
+                                Map<String, String> requests,
+                                HttpStatus httpStatus,
+                                HttpCookie httpCookie) {
 
         final String contentType = parseContentType(requests.getOrDefault("Accept", ""));
         final String protocol = requests.getOrDefault("Protocol", "");
 
         final String statusLine = protocol + " " + httpStatus.getCode() + " " + httpStatus.getCodeName() + " ";
 
+        StringBuilder headers = new StringBuilder();
+        headers.append("Content-Type: ").append(contentType).append(" \r\n");
+        headers.append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n");
+
+        if (httpCookie != null) {
+            headers.append("Set-Cookie: ").append(httpCookie.getjSessionId()).append("\r\n");
+        }
+
+        if (httpStatus == HttpStatus.FOUND) {
+            headers.append("Location: /index.html\r\n");
+        }
+
         return String.join("\r\n",
                 statusLine,
-                "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
+                headers.toString(),
                 responseBody);
     }
 

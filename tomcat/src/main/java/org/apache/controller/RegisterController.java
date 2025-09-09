@@ -59,7 +59,7 @@ public class RegisterController implements Controller {
             response.put("responseBody", new String(Files.readAllBytes(path)));
             response.put("status", HttpStatus.FOUND);
         } catch (Exception e) {
-            // TODO: 회원가입 실패 시 예외처리
+            // TODO: 회원가입 실패 시 예외처
         }
 
         return response;
@@ -84,6 +84,4 @@ public class RegisterController implements Controller {
 
         return response;
     }
-
-
 }

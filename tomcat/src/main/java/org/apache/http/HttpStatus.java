@@ -3,7 +3,8 @@ package org.apache.http;
 public enum HttpStatus {
     OK("OK", 200),
     FOUND("FOUND", 302),
-    UNAUTHORIZED("UNAUTHORIZED", 401);
+    UNAUTHORIZED("UNAUTHORIZED", 401),
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", 500);
 
     private final String codeName;
     private final int code;

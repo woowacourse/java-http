@@ -1,29 +1,25 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
     private final HttpRequestMethod method;
     private String path;
-    private final Map<String, String> queryParams;
     private final HttpCookie httpCookie;
-    private final Map<String, String> headers;
     private final Map<String, String> formParams;
     private Session session;
 
     public HttpRequest(
             HttpRequestMethod method,
             String path,
-            Map<String, String> queryParams,
-            Map<String, String> headers,
             HttpCookie httpCookie,
             Map<String, String> formParams
     ) {
         this.method = method;
         this.path = path;
-        this.queryParams = queryParams;
-        this.headers = headers;
         this.httpCookie = httpCookie;
         this.formParams = formParams;
         findSession();
@@ -46,17 +42,8 @@ public class HttpRequest {
         return null;
     }
 
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public String getQueryParam(String key) {
-        return queryParams.get(key);
     }
 
     public String getFormParam(String key) {
@@ -65,10 +52,6 @@ public class HttpRequest {
 
     public boolean hasMethod(HttpRequestMethod method) {
         return this.method == method;
-    }
-
-    public boolean isPath(String path) {
-        return this.path.equals(path);
     }
 
     public boolean endsWith(String type) {

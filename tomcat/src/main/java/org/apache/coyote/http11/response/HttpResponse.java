@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +28,10 @@ public class HttpResponse {
 
     public void setBody(byte[] body) {
         this.body = body;
+    }
+
+    public void setHttpResponseStatus(HttpResponseStatus httpResponseStatus) {
+        this.httpResponseStatus = httpResponseStatus;
     }
 
     public void sendRedirect(HttpResponseStatus httpResponseStatus, String location) throws IOException {

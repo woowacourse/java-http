@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,6 @@ public class HttpRequestParser {
         final HttpRequestMethod method = HttpRequestMethod.valueOf(requestParts[0]);
         final String uri = requestParts[1];
         final String path = parsePath(uri);
-        final Map<String, String> queryParams = parseQueryParams(uri);
 
         final Map<String, String> headers = readHeaders(bufferedReader);
         final HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
@@ -23,7 +22,7 @@ public class HttpRequestParser {
         final String body = readBody(headers, bufferedReader);
         final Map<String, String> formParams = readFormParams(headers, body);
 
-        return new HttpRequest(method, path, queryParams, headers, httpCookie, formParams);
+        return new HttpRequest(method, path, httpCookie, formParams);
     }
 
     private String readRequestLine(BufferedReader bufferedReader) throws IOException {
@@ -84,21 +83,5 @@ public class HttpRequestParser {
             return uri.substring(0, uri.indexOf("?"));
         }
         return uri;
-    }
-
-    private Map<String, String> parseQueryParams(String uri) {
-        if (!uri.contains("?")) {
-            return Collections.emptyMap();
-        }
-
-        final String queryString = uri.substring(uri.indexOf("?") + 1);
-        final Map<String, String> params = new HashMap<>();
-        for (String pair : queryString.split("&")) {
-            final String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-        return params;
     }
 }

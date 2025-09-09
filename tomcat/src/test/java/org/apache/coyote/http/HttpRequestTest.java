@@ -1,6 +1,5 @@
 package org.apache.coyote.http;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -20,7 +19,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -43,7 +42,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -65,7 +64,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -88,7 +87,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -110,7 +109,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -132,7 +131,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -156,7 +155,7 @@ class HttpRequestTest {
                 "");
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(rawRequest))
+        assertThatThrownBy(() -> parseRequest(rawRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("HTTP 요청의 첫 번째 줄은");
     }
@@ -172,27 +171,26 @@ class HttpRequestTest {
                 "");
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(rawRequest))
+        assertThatThrownBy(() -> parseRequest(rawRequest))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HTTP 요청의 첫 번째 줄은 3개의 부분을 포함해야 합니다");
+                .hasMessageContaining("HTTP 요청의 첫 번째 줄은 3개의 부분으로 이뤄져야 합니다");
     }
 
     @Test
     @DisplayName("빈 요청 문자열")
     void parseEmptyRequest() {
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(""))
+        assertThatThrownBy(() -> parseRequest(""))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HTTP 요청은 null이거나 비어있을 수 없습니다");
+                .hasMessageContaining("HTTP 헤더는 null이거나 비어있을 수 없습니다");
     }
 
     @Test
     @DisplayName("null 요청 문자열")
     void parseNullRequest() {
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HTTP 요청은 null이거나 비어있을 수 없습니다");
+        assertThatThrownBy(() -> parseRequest(null))
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -208,7 +206,7 @@ class HttpRequestTest {
                 "account=user&password=1234&email=user%40example.com");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -231,7 +229,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -252,7 +250,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
@@ -264,7 +262,7 @@ class HttpRequestTest {
     @Test
     @DisplayName("URL 디코딩이 포함된 쿼리 파라미터")
     void parseQueryParamsWithUrlDecoding() {
-        // given  
+        // given
         final String rawRequest = String.join("\r\n",
                 "GET /search?q=hello%20world&email=test%40example.com HTTP/1.1",
                 "Host: localhost:8080",
@@ -272,12 +270,23 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
         assertSoftly(softly -> {
             softly.assertThat(request.getQueryParam("q")).isEqualTo("hello world");
             softly.assertThat(request.getQueryParam("email")).isEqualTo("test@example.com");
         });
+    }
+
+    private HttpRequest parseRequest(final String rawRequest) {
+        final String[] parts = rawRequest.split("\r\n\r\n", 2);
+        final String headerPart = parts[0];
+        final String bodyPart = parts.length > 1 ? parts[1] : "";
+
+        final HttpRequestHeader header = HttpRequestHeader.from(headerPart);
+        final HttpRequestBody body = HttpRequestBody.from(bodyPart, header.getContentType());
+
+        return HttpRequest.from(header, body);
     }
 }

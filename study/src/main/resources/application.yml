@@ -3,8 +3,8 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 5 # queue size: 처리 가능한 스레드가 없을 때(= 모두 사용중), 최대 대기 가능한 작업 개수
+    max-connections: 5 # 동시 최대 활성 connection 수 (= 초과 시 이후에 들어온 요청은 accept-count 개수 만큼 대기열에 대기시킬 수 있음)
     threads:
       min-spare: 2
-      max: 2
+      max: 5

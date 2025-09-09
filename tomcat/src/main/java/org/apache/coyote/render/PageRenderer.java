@@ -1,6 +1,7 @@
 package org.apache.coyote.render;
 
 import org.apache.coyote.cookie.HttpCookie;
+
 import org.apache.coyote.util.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,5 +53,4 @@ public class PageRenderer{
     public static String sendRedirect(int statusCode,String location, String sessionId) {
         return HttpResponseBuilder.getRedirectResponseString(statusCode, location, sessionId);
     }
-
 }

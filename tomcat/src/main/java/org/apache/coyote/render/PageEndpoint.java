@@ -5,6 +5,7 @@ public enum PageEndpoint {
     LOGIN("/login","/login.html"),
     REGISTER("/register","/register.html");
 
+
     private final String endPoint;
     private final String page;
 

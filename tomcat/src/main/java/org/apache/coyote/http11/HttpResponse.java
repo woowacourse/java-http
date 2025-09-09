@@ -30,6 +30,10 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void setHttpResponseStatus(HttpResponseStatus httpResponseStatus) {
+        this.httpResponseStatus = httpResponseStatus;
+    }
+
     public void sendRedirect(HttpResponseStatus httpResponseStatus, String location) throws IOException {
         this.httpResponseStatus = httpResponseStatus;
         this.headers.put("Location", location);

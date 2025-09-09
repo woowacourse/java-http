@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 public enum HttpResponseStatus {
     OK(200, "OK"),
-    FOUND(302, "Found"),
-    ;
+    FOUND(302, "FOUND"),
+    NOT_FOUND(404, "NOT_FOUND");
 
     private final int code;
     private final String message;

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestMethod;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpResponseStatus;
 
 public abstract class AbstractController implements Controller{
 
@@ -33,6 +34,8 @@ public abstract class AbstractController implements Controller{
             response.addHeader("Content-Type", contentType);
             response.setBody(body);
         }
+
+        response.setHttpResponseStatus(HttpResponseStatus.NOT_FOUND);
         response.send();
     }
 }

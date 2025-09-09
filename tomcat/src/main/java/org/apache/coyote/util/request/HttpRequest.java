@@ -46,4 +46,22 @@ public class HttpRequest {
     public Cookie getCookie() {
         return cookie;
     }
+
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionId != null) {
+            Session session = sessionManager.findCustomSession(sessionId);
+            if (session != null) {
+                return session;
+            }
+        }
+        if (create) {
+            String newSessionId = SessionManager.generateSessionId();
+            Session newSession = new Session(newSessionId);
+            sessionManager.add(newSession);
+            return newSession;
+        }
+        return null;
+    }
 }

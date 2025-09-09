@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                     writeResponse(outputStream, httpResponse.getResponse());
                     return;
                 }
-                httpResponse = responseErrorPage("/401.html");
+                httpResponse = responseErrorPage("/401.html", StatusCode.NOT_FOUND);
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
                     writeResponse(outputStream, httpResponse.getResponse());
                     return;
                 }
-                final HttpResponse httpResponse = responseErrorPage("/register.html");
+                final HttpResponse httpResponse = responseErrorPage("/register.html", StatusCode.BAD_REQUEST);
                 writeResponse(outputStream, httpResponse.getResponse());
                 return;
             }
@@ -126,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final HttpResponse httpResponse = responseErrorPage("/404.html");
+            final HttpResponse httpResponse = responseErrorPage("/404.html", StatusCode.NOT_FOUND);
             writeResponse(outputStream, httpResponse.getResponse());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -275,12 +275,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse responseErrorPage(
-            final String errorPagePath
+            final String errorPagePath,
+            final StatusCode statusCode
     ) throws URISyntaxException, IOException {
         final String body = getStaticResponseBody("static" + errorPagePath);
         final HttpResponse httpResponse = new HttpResponse(
                 "HTTP/1.1",
-                StatusCode.UNAUTHORIZED,
+                statusCode,
                 body
         );
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");

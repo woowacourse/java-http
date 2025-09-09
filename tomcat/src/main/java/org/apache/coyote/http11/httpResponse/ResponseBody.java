@@ -31,77 +31,15 @@ public class ResponseBody {
     public ResponseContent getContent() throws IOException {
         final String path = httpRequest.getPath();
         if (path.equals("/")) {
-            return ResponseContent.success("Hello world!", null);
+            return getDefaultResponseContent();
         }
 
         if ("/login".equals(path)) {
-            try {
-                final Optional<String> cookieOfRequest = httpRequest.findCookie();
-                Session session;
-                HttpCookie httpCookie;
-
-                if (cookieOfRequest.isPresent()) {
-                    httpCookie = HttpCookie.parse(cookieOfRequest.get());
-                    final String sessionId = httpCookie.getCookies().get("JSESSIONID");
-                    if (sessionId != null) {
-                        session = SessionManager.findSession(sessionId);
-
-                        final User user = (User) session.getAttribute("user");
-                        if (user != null) {
-                            final String body = getBodyFromStaticFile("/index.html");
-                            return ResponseContent.redirect(body, "/index.html", httpCookie);
-                        }
-                    }
-                }
-
-                final String account = findValueFromParams("account");
-                final String password = findValueFromParams("password");
-
-                final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
-                if (userOrEmpty.isPresent()) {
-                    final User user = userOrEmpty.get();
-                    log.info("user: {}", user);
-
-                    if (!user.checkPassword(password)) {
-                        final String body = getBodyFromStaticFile("/401.html");
-                        return ResponseContent.redirect(body, "/401.html", null);
-                    }
-
-                    session = Session.create();
-                    session.setAttribute("user", user);
-                    SessionManager.add(session);
-                    httpCookie = HttpCookie.create(session.getSessionId());
-
-                    final String body = getBodyFromStaticFile("/index.html");
-                    return ResponseContent.redirect(body, "/index.html", httpCookie);
-                }
-            } catch (IllegalArgumentException e) {
-                final String body = getBodyFromStaticFile("/login.html");
-                return ResponseContent.redirect(body, "/login.html", null);
-            }
+            return getLoginResponseContent();
         }
 
         if ("/register".equals(path)) {
-            try {
-                final String account = findValueFromParams("account");
-                final String password = findValueFromParams("password");
-                final String email = findValueFromParams("email");
-
-                final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
-                if (userOrEmpty.isPresent()) {
-                    log.warn("id: {}", account);
-                    throw new IllegalArgumentException("이미 가입된 계정입니다.");
-                }
-
-                final User user = new User(account, password, email);
-                InMemoryUserRepository.save(user);
-
-                final String body = getBodyFromStaticFile("/index.html");
-                return ResponseContent.redirect(body, "/index.html", null);
-            } catch (IllegalArgumentException e) {
-                final String body = getBodyFromStaticFile("/register.html");
-                return ResponseContent.redirect(body, "/register.html", null);
-            }
+            return getRegisterResponseContent();
         }
 
         String filePath = DEFAULT_RESOURCE_PATH + path;
@@ -110,6 +48,83 @@ public class ResponseBody {
         }
 
         return createHttpResponseContentFrom(filePath);
+    }
+
+    private ResponseContent getDefaultResponseContent() {
+        return ResponseContent.success("Hello world!", null);
+    }
+
+    private ResponseContent getLoginResponseContent() throws IOException {
+        try {
+            final Optional<String> cookieOfRequest = httpRequest.findCookie();
+            Session session;
+            HttpCookie httpCookie;
+
+            if (cookieOfRequest.isPresent()) {
+                httpCookie = HttpCookie.parse(cookieOfRequest.get());
+                final String sessionId = httpCookie.getCookies().get("JSESSIONID");
+                if (sessionId != null) {
+                    session = SessionManager.findSession(sessionId);
+
+                    final User user = (User) session.getAttribute("user");
+                    if (user != null) {
+                        final String body = getBodyFromStaticFile("/index.html");
+                        return ResponseContent.redirect(body, "/index.html", httpCookie);
+                    }
+                }
+            }
+
+            final String account = findValueFromParams("account");
+            final String password = findValueFromParams("password");
+
+            final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
+            if (userOrEmpty.isPresent()) {
+                final User user = userOrEmpty.get();
+                log.info("user: {}", user);
+
+                if (!user.checkPassword(password)) {
+                    final String body = getBodyFromStaticFile("/401.html");
+                    return ResponseContent.redirect(body, "/401.html", null);
+                }
+
+                session = Session.create();
+                session.setAttribute("user", user);
+                SessionManager.add(session);
+                httpCookie = HttpCookie.create(session.getSessionId());
+
+                final String body = getBodyFromStaticFile("/index.html");
+                return ResponseContent.redirect(body, "/index.html", httpCookie);
+            }
+
+            final String body = getBodyFromStaticFile("/login.html");
+            return ResponseContent.redirect(body, "/login.html", null);
+        } catch (IllegalArgumentException e) {
+            final String body = getBodyFromStaticFile("/login.html");
+            return ResponseContent.redirect(body, "/login.html", null);
+        }
+    }
+
+    private ResponseContent getRegisterResponseContent() throws IOException {
+        try {
+            final String account = findValueFromParams("account");
+            final String password = findValueFromParams("password");
+            final String email = findValueFromParams("email");
+
+            final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
+            if (userOrEmpty.isPresent()) {
+                log.warn("id: {}", account);
+                throw new IllegalArgumentException("이미 가입된 계정입니다.");
+            }
+
+            final User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+
+            final String body = getBodyFromStaticFile("/index.html");
+            return ResponseContent.redirect(body, "/index.html", null);
+        } catch (IllegalArgumentException e) {
+            final String body = getBodyFromStaticFile("/register.html");
+            return ResponseContent.redirect(body, "/register.html", null);
+        }
     }
 
     private String getBodyFromStaticFile(final String fileName) throws IOException {

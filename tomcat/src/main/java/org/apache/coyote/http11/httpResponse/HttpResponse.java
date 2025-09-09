@@ -8,12 +8,12 @@ import org.apache.coyote.http11.general.ContentType;
 
 public class HttpResponse {
 
+    private final StatusLine statusLine;
     private final Map<String, String> headers;
-    private final HttpStatus httpStatus;
     private final byte[] body;
 
-    public HttpResponse(HttpStatus httpStatus, ContentType contentType, String body) {
-        this.httpStatus = httpStatus;
+    public HttpResponse(ContentType contentType, StatusLine statusLine, String body) {
+        this.statusLine = statusLine;
         if (body == null) {
             this.body = new byte[0];
         } else {
@@ -30,7 +30,7 @@ public class HttpResponse {
 
     public String toString() {
         return String.join("\r\n",
-            "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getMessage(),
+            "HTTP/1.1 " + statusLine.getStatusCode() + " " + statusLine.getStatusMessage(),
             buildHeaderMessage(),
             new String(body, StandardCharsets.UTF_8));
     }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpRequest;
 
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
 
 public class HttpRequest {
 
@@ -17,6 +18,10 @@ public class HttpRequest {
 
     public boolean pathEquals(String path) {
         return this.requestLine.pathEquals(path);
+    }
+
+    public HttpProtocolVersion getProtocolVersion() {
+        return this.requestLine.getProtocolVersion();
     }
 
     public HttpMethod getMethod() {

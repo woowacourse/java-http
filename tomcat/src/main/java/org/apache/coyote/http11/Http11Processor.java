@@ -120,10 +120,7 @@ public class Http11Processor implements Runnable, Processor {
             return "";
         }
         char[] bodyChars = new char[contentLength];
-        int readChars = bufferedReader.read(bodyChars);
-        if (readChars != contentLength) {
-            throw new IOException("Failed to read body : " + Arrays.toString(bodyChars));
-        }
+        bufferedReader.read(bodyChars);
         return new String(bodyChars);
     }
 
@@ -270,8 +267,7 @@ public class Http11Processor implements Runnable, Processor {
         sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
     }
 
-    private void handleRegister(final Map<String, String> queryMap, final OutputStream outputStream)
-            throws IOException {
+    private void handleRegister(final Map<String, String> queryMap, final OutputStream outputStream) throws IOException {
         final String account = queryMap.get("account");
         final String email = queryMap.get("email");
         final String password = queryMap.get("password");

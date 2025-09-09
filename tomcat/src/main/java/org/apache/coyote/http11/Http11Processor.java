@@ -47,7 +47,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
-        String sessionId = request.getCookies().get("JSESSIONID");
         Session session = findOrCreateSession(request, response);
         String path = request.getPath();
         if ("/".equals(path)) {

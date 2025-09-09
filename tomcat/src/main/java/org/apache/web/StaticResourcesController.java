@@ -10,12 +10,12 @@ import org.apache.coyote.http11.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticResourcesController implements Controller {
+public class StaticResourcesController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(StaticResourcesController.class);
 
     @Override
-    public Http11Response control(final Http11Request request) {
+    public Http11Response doGet(final Http11Request request) {
         try {
             String path = request.extractPath();
             if (path.equals("/")) {
@@ -37,7 +37,7 @@ public class StaticResourcesController implements Controller {
             return Http11Response.serverError();
         }
     }
-
+    
     private URL getURL(final String path) {
         return getClass().getClassLoader().getResource(path);
     }

@@ -40,8 +40,8 @@ public class RegisterRequestHandler {
     }
 
     private HttpResponse handlePostHttpMethod(final HttpRequest httpRequest) {
-        Map<String, String> requestParams = httpRequest.getRequestParams();
-        registerUser(requestParams);
+        Map<String, String> requestBodies = httpRequest.getRequestBody();
+        registerUser(requestBodies);
 
         HttpCookie responseCookie = HttpCookie.empty();
         if (httpRequest.hasEmptySessionId()) {
@@ -50,10 +50,10 @@ public class RegisterRequestHandler {
         return HttpResponse.found(httpVersion, new Location("/index.html"), responseCookie);
     }
 
-    private void registerUser(final Map<String, String> requestParams) {
-        String account = requestParams.get("account");
-        String password = requestParams.get("password");
-        String email = requestParams.get("email");
+    private void registerUser(final Map<String, String> requestBodies) {
+        String account = requestBodies.get("account");
+        String password = requestBodies.get("password");
+        String email = requestBodies.get("email");
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class RequestHandler {
 
@@ -71,6 +72,8 @@ public class RequestHandler {
             final String filePath = path.substring(0, index);
             final Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/index.html");
+            UUID uuid = UUID.randomUUID();
+            headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             return responseBuilder.build(filePath + ".html", "302 Found", responseBody, headers);
         }
 
@@ -89,6 +92,8 @@ public class RequestHandler {
             service.findUser(map);
             final Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/index.html");
+            UUID uuid = UUID.randomUUID();
+            headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
         }
 
@@ -103,6 +108,8 @@ public class RequestHandler {
             service.registerUser(map.get("account"), map.get("password"), map.get("email"));
             final Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/index.html");
+            UUID uuid = UUID.randomUUID();
+            headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
         }
 

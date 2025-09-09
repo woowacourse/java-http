@@ -16,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
+    private final SessionHandler sessionHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionHandler = new SessionHandler();
     }
 
     @Override
@@ -34,7 +36,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(outputStream);
             try {
                 HttpRequest request = new HttpRequest(inputStream);
-                String path = request.getPath();
                 dispatchRequest(request, response);
             } catch (BadRequestException e) {
                 response.sendBadRequest();
@@ -48,14 +49,33 @@ public class Http11Processor implements Runnable, Processor {
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getPath();
-
+        Session session = sessionHandler.getSession(request, response);
         if ("/".equals(path)) {
             handleRoot(response);
         } else if ("/login".equals(path)) {
-            handleLogin(request, response);
+            handleLogin(request, response, session);
+        } else if ("/register".equals(path)) {
+            handleRegister(request, response);
         } else {
             handleStaticResource(response, path);
         }
+    }
+
+    private void handleRegister(HttpRequest request, HttpResponse response) throws IOException {
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String account = request.getQueryParam("account");
+            String password = request.getQueryParam("password");
+            String email = request.getQueryParam("email");
+
+            if (account != null && password != null && email != null) {
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+                log.info("회원가입 완료: {}", user);
+                response.sendRedirect("/index.html");
+                return;
+            }
+        }
+        loadStaticResource(response, "/register.html");
     }
 
     private void handleRoot(HttpResponse response) throws IOException {
@@ -63,20 +83,26 @@ public class Http11Processor implements Runnable, Processor {
         response.sendOk("text/html;charset=utf-8", responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
-
-        if (account != null && password != null) {
-            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-            if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
-                log.info("로그인 성공: {}", userOptional.get());
-            } else {
-                log.info("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.");
-            }
+    private void handleLogin(HttpRequest request, HttpResponse response, Session session) throws IOException {
+        if ("GET".equals(request.getMethod()) && session.getAttribute("user") != null) {
+            response.sendRedirect("/index.html");
+            return;
         }
-
+        if ("POST".equals(request.getMethod())) {
+            String account = request.getQueryParam("account");
+            String password = request.getQueryParam("password");
+            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+            if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
+                log.info("로그인 실패: 아이디 또는 비밀번호 불일치");
+                response.sendRedirect("/401.html");
+                return;
+            }
+            User user = userOptional.get();
+            log.info("로그인 성공: {}", user);
+            session.setAttribute("user", user);
+            response.sendRedirect("/index.html");
+            return;
+        }
         loadStaticResource(response, "/login.html");
     }
 
@@ -91,7 +117,6 @@ public class Http11Processor implements Runnable, Processor {
                 response.sendNotFound();
                 return;
             }
-
             String contentType = determineContentType(path);
             byte[] bodyBytes = fileInputStream.readAllBytes();
             response.sendOk(contentType, bodyBytes);

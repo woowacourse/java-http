@@ -6,59 +6,70 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
 
-    private final String path;
-    private final Map<String, String> queryParams;
+    private final RequestLine requestLine;
+    private final HttpHeaders headers;
+    private final String body;
+    private final HttpCookie cookies;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String requestLine = reader.readLine();
 
-        if (requestLine == null) {
-            throw new BadRequestException("잘못된 요청 라인입니다.");
-        }
-        String[] tokens = requestLine.split(" ");
-        if (tokens.length != 3) {
-            throw new BadRequestException("잘못된 요청 라인입니다.");
-        }
-        String uri = tokens[1];
-
-        if (uri.contains("?")) {
-            int queryIndex = uri.indexOf("?");
-            this.path = uri.substring(0, queryIndex);
-            String queryString = uri.substring(queryIndex + 1);
-            this.queryParams = parseQueryString(queryString);
-        } else {
-            this.path = uri;
-            this.queryParams = Map.of();
-        }
+        this.requestLine = new RequestLine(reader.readLine());
+        this.headers = HttpHeaders.parse(reader);
+        this.body = parseBodyIfNecessary(reader);
+        this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        if (queryString == null || queryString.isEmpty()) {
-            return Map.of();
+    private String parseBodyIfNecessary(BufferedReader reader) throws IOException {
+        if (!"POST".equalsIgnoreCase(requestLine.getMethod())) {
+            return null;
         }
-        Map<String, String> params = new HashMap<>();
-        for (String pair : queryString.split("&")) {
-            String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            } else if (keyValue.length == 1) {
-                params.put(keyValue[0], "");
-            }
+        String contentLengthValue = headers.get("Content-Length");
+        if (contentLengthValue == null) {
+            return null;
         }
-        return params;
+        int contentLength = Integer.parseInt(contentLengthValue);
+        char[] buffer = new char[contentLength];
+        int read = reader.read(buffer);
+        if (read < 0) {
+            throw new BadRequestException("요청 본문을 읽을 수 없습니다.");
+        }
+        String body = new String(buffer, 0, read);
+        if ("application/x-www-form-urlencoded".equalsIgnoreCase(headers.get("Content-Type"))) {
+            requestLine.getQueryParams().putAll(HttpParamParser.parseKeyValuePairs(body, "&"));
+        }
+        return body;
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public String getQueryParam(String key) {
-        return queryParams.get(key);
+        return requestLine.getQueryParam(key);
+    }
+
+    public Map<String, String> getQueryParams() {
+        return requestLine.getQueryParams();
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

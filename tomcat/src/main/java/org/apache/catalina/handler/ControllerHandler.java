@@ -29,7 +29,7 @@ public class ControllerHandler implements RequestHandler {
         if (controller == null) {
             throw new PathNotFoundException(response);
         }
-        controller.service(request, response);
-        viewResolver.resolve(resourcePath, response);
+        String viewPath = controller.service(request, response);
+        viewResolver.resolve(viewPath, response);
     }
 }

@@ -10,17 +10,11 @@ public class DefaultController extends AbstractController {
 
     @Override
     protected void registerCommands() {
-        this.addCommand(HttpMethod.GET, this::toGet);
+        this.addCommand(HttpMethod.GET, this::getToDefault);
     }
 
-    @Override
-    public String toGet(Http11Request request, Http11Response response) {
+    public String getToDefault(Http11Request request, Http11Response response) {
         response.setBody("Hello World!".getBytes());
-        return "/";
-    }
-
-    @Override
-    public String toPost(Http11Request request, Http11Response response) {
         return "/";
     }
 }

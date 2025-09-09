@@ -2,6 +2,8 @@ package org.apache.coyote.http11.response;
 
 public enum HttpStatus {
     OK(200, "OK", "/"),
+    Found(302, "Found", "/index.html"),
+    BAD_REQUEST(400, "Bad Request", "/400.html"),
     UNAUTHORIZED(401, "Unauthorized", "/401.html"),
     NOT_FOUND(404, "Not Found", "/404.html"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed", "/4xx.html"),

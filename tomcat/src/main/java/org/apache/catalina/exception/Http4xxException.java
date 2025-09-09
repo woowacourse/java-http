@@ -14,4 +14,9 @@ public class Http4xxException extends RuntimeException {
         super(e.getMessage());
         response.setState(httpStatus);
     }
+
+    public Http4xxException(Http11Response response, HttpStatus httpStatus) {
+        super(httpStatus.toString());
+        response.setState(httpStatus);
+    }
 }

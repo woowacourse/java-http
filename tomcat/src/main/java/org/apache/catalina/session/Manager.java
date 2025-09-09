@@ -1,4 +1,4 @@
-package org.apache.catalina.servletContainer.session;
+package org.apache.catalina.session;
 
 public interface Manager {
 
@@ -6,6 +6,5 @@ public interface Manager {
 
     Session findSession(final String sessionId);
 
-    void remove(final Session session);
 }
 

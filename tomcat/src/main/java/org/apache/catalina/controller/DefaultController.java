@@ -1,11 +1,13 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseLine.HttpStatus;
 
-public class DefaultServlet extends HttpServlet {
+public class DefaultController extends AbstractController {
+
+    public static final String DEFAULT_BODY = "Hello world!";
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
@@ -14,11 +16,6 @@ public class DefaultServlet extends HttpServlet {
 
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.init("Hello world!", ContentType.PLAIN, HttpStatus.OK);
-    }
-
-    @Override
-    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.init("", ContentType.HTML, HttpStatus.METHOD_NOT_ALLOWED);
+        httpResponse.init(DEFAULT_BODY, ContentType.PLAIN, HttpStatus.OK);
     }
 }

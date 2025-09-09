@@ -1,4 +1,4 @@
-package org.apache.catalina.servletContainer.session;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +16,6 @@ public class Session {
 
     public void setAttribute(final String key, final Object value) {
         values.put(key, value);
-    }
-
-    public void removeAttribute(final String key) {
-        values.remove(key);
     }
 
     public String getId() {

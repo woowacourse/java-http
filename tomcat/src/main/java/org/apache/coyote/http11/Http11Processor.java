@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.servletContainer.ServletContainer;
+import org.apache.catalina.requestMapping.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.converter.HttpRequestConverter;
@@ -20,11 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ServletContainer servletContainer;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.servletContainer = new ServletContainer();
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequestConverter.from(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
-            servletContainer.process(httpRequest, httpResponse);
+            requestMapping.process(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.combine());
             outputStream.flush();

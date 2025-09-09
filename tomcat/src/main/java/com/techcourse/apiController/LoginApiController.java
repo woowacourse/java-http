@@ -1,13 +1,13 @@
-package com.techcourse.controller;
+package com.techcourse.apiController;
 
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class LoginController {
+public class LoginApiController {
 
     private final UserService userService;
 
-    public LoginController(final UserService userService) {
+    public LoginApiController(final UserService userService) {
         this.userService = userService;
     }
 

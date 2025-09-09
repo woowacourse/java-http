@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import org.apache.catalina.servlet.cookie.HttpCookie;
+import org.apache.catalina.cookie.HttpCookie;
 import org.apache.coyote.response.responseHeader.ContentType;
 import org.apache.coyote.response.responseHeader.ResponseHeader;
 import org.apache.coyote.response.responseLine.HttpStatus;
@@ -8,6 +8,7 @@ import org.apache.coyote.response.responseLine.ResponseLine;
 
 public class HttpResponse {
 
+    public static final String CRLF = "\r\n";
     private ResponseLine responseLine;
     private ResponseHeader responseHeader;
     private ResponseBody responseBody;
@@ -19,9 +20,9 @@ public class HttpResponse {
     }
 
     public byte[] combine() {
-        String response = String.join("\r\n",
-                responseLine.toCombine() + " ",
-                responseHeader.toCombine(),
+        String response = String.join(CRLF,
+                responseLine.combine(),
+                responseHeader.combine(),
                 "",
                 responseBody.getBody());
 

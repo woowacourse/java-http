@@ -3,9 +3,9 @@ package org.apache.coyote.util.request;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.util.Cookie;
-import org.apache.coyote.util.Session;
-import org.apache.coyote.util.SessionManager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.catalina.util.Cookie;
 
 public class HttpRequest {
 

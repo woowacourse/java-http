@@ -16,7 +16,7 @@ public class Http11Cookie {
 
         final String[] pairs = cookieHeader.split("; ");
         for (final String pair : pairs) {
-            final String[] keyAndValue = pair.split("=");
+            final String[] keyAndValue = pair.split("=", 2);
             if (keyAndValue.length != 2) {
                 throw new IllegalArgumentException(String.format("Wrong Http Request Cookies: %s", String.join("", keyAndValue)));
             }

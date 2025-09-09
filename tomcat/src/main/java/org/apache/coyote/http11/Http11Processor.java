@@ -39,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            // request
             String request = parseRequest(inputStream);
             String header = request.split("\r\n")[0];
             validateHeader(header);
@@ -46,22 +47,51 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = words[1].split("\\?")[0];
             HttpMethod httpMethod = HttpMethod.from(words[0]);
             QueryParameters params = parseParameters(words[1]);
-            ContentType contentType = ContentType.HTML;
 
-            if (requestPath.equals("/login")) {
-                requestPath = "/login.html";
-                login(params);
+            // response
+            ContentType contentType = ContentType.NONE;
+            HttpStatus httpStatus = HttpStatus.OK;
+            Headers headers = new Headers();
+            String responseBody = "";
+
+            try {
+                if (requestPath.equals("/login")) {
+                    if (params.isEmpty()) {
+                        contentType = ContentType.HTML;
+                        requestPath = "/login.html";
+                    } else {
+                        login(params);
+                        httpStatus = HttpStatus.FOUND;
+                        contentType = ContentType.HTML;
+                        headers.put("Location", "/index.html");
+                    }
+                }
+
+                if (requestPath.endsWith(".html")) {
+                    contentType = ContentType.HTML;
+                }
+                if (requestPath.endsWith(".css")) {
+                    contentType = ContentType.CSS;
+                }
+                if (requestPath.endsWith(".js")) {
+                    contentType = ContentType.JAVASCRIPT;
+                }
+            } catch (UnauthorizedException e) {
+                contentType = ContentType.HTML;
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                headers.clear();
+                requestPath = "/401.html";
+            } catch (IllegalArgumentException e) {
+                contentType = ContentType.HTML;
+                httpStatus = HttpStatus.NOT_FOUND;
+                headers.clear();
+                requestPath = "/404.html";
             }
 
-            if (requestPath.endsWith(".css")) {
-                contentType = ContentType.CSS;
+            if (contentType.isText() && !httpStatus.is3xx()) {
+                responseBody = getStaticPage(requestPath);
             }
-            if (requestPath.endsWith(".js")) {
-                contentType = ContentType.JAVASCRIPT;
-            }
-
-            final var responseBody = getStaticPage(requestPath);
-            final var response = buildResponse(contentType, responseBody);
+            final var response = buildResponse(httpStatus, contentType, headers, responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -75,15 +105,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponse(ContentType contentType, String responseBody) {
+    private String buildResponse(HttpStatus status, ContentType contentType, Headers headers, String responseBody) {
         int bodyLength = getBodyLength(responseBody);
-        final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK",
+        return String.join("\r\n",
+            "HTTP/1.1 " + status.getCode() + " " + status.getName(),
             "Content-Type: " + contentType.getType() + ";charset=utf-8",
             "Content-Length: " + bodyLength,
+            headers.toString(),
             "",
             responseBody);
-        return response;
     }
 
     private int getBodyLength(String responseBody) {
@@ -118,14 +148,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private User findUser(String account, String password) {
         if (account == null || password == null) {
-            throw new IllegalArgumentException("필수 정보가 누락되었습니다.");
+            throw new UnauthorizedException("필수 정보가 누락되었습니다.");
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+            throw new UnauthorizedException("존재하지 않는 사용자입니다.");
         }
         if (!user.get().checkPassword(password)) {
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+            throw new UnauthorizedException("비밀번호가 틀렸습니다.");
         }
         return user.get();
     }

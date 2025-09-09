@@ -18,4 +18,8 @@ public class QueryParameters {
     public String get(String key) {
         return data.get(key).value();
     }
+
+    public boolean isEmpty() {
+        return data.isEmpty();
+    }
 }

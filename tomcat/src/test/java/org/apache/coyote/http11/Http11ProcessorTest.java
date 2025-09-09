@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -38,10 +40,13 @@ class Http11ProcessorTest {
     void index() throws IOException {
         // given
         final var tomcatController = new RequestHandler();
+        User user = InMemoryUserRepository.findByAccount("gugu").get();
+        String sessionId = user.getSessionId();
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 "");
 

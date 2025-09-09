@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
@@ -29,6 +32,29 @@ public class HttpRequest {
         this.cookies = httpCookie;
         this.queryParameter = queryParameter;
         this.body = body;
+    }
+
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = getCookieValue("JSESSIONID");
+
+        if (sessionId != null) {
+            Session session = sessionManager.getAttribute(sessionId);
+            if (session != null) return session;
+        }
+
+        if (create) {
+            String newSessionId = generateSessionId();
+            Session newSession = new Session(newSessionId);
+            sessionManager.setSession(newSessionId, newSession);
+            return newSession;
+        }
+
+        return null;
+    }
+
+    private String generateSessionId() {
+        return UUID.randomUUID().toString();
     }
 
     public Method getMethod() {
@@ -64,7 +90,7 @@ public class HttpRequest {
                 .filter(cookie -> cookie.isKey(key))
                 .map(HttpCookie::getValue)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("key가 존재하지 않습니다."));
+                .orElse(null);
     }
 
     public Map<String, String> getBody() {

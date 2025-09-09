@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -32,7 +34,6 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/index", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/register.html", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/register", Method.GET), this::handleStaticResource);
-        requestMappings.put(new RequestMapping("/register", Method.POST), this::handleRegister);
         requestMappings.put(new RequestMapping("/css/styles.css", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/chart-area.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/js/scripts.js", Method.GET), this::handleStaticResource);
@@ -40,23 +41,11 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/assets/chart-pie.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/img/error-404-monochrome.svg", Method.GET),
                 this::handleStaticResource);
-
         requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/login", Method.GET), this::handleStaticResource);
-        requestMappings.put(new RequestMapping("/login", Method.POST), this::handleLogin);
-    }
 
-    private HttpResponse handleRegister(HttpRequest httpRequest) {
-        Map<String, String> requestBody = httpRequest.getBody();
-        final String account = requestBody.getOrDefault("account", "");
-        final String password = requestBody.getOrDefault("password", "");
-        final String email = requestBody.getOrDefault("email", "");
-        if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            return handleStaticResource(httpRequest);
-        }
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        requestMappings.put(new RequestMapping("/register", Method.POST), this::handleRegister);
+        requestMappings.put(new RequestMapping("/login", Method.POST), this::handleLogin);
     }
 
     public HttpResponse handleRequest(HttpRequest httpRequest) {
@@ -78,10 +67,40 @@ public class RequestHandler {
     }
 
     private HttpResponse handleStaticResource(HttpRequest httpRequest) {
+        if (httpRequest.getPath().equals("/index") || httpRequest.getPath().equals("/index.html")) {
+            if (httpRequest.getSession(false) == null) {
+                return HttpResponse.forRedirect(ResponseStatus.FOUND, "/login.html");
+            }
+        }
+        if (httpRequest.getPath().equals("/login") || httpRequest.getPath().equals("/login.html") ||
+                httpRequest.getPath().equals("/register") || httpRequest.getPath().equals("/register.html")) {
+            if (httpRequest.getSession(false) != null) {
+                Session session = httpRequest.getSession(false);
+                User user = (User) session.getAttribute("user");
+                return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+            }
+        }
         final String staticFilePath = getStaticFilePath(httpRequest);
         final byte[] body = readFile(staticFilePath);
         final var contentType = ContentType.fromFileName(staticFilePath);
         return HttpResponse.of(ResponseStatus.OK, contentType, body);
+    }
+
+    private HttpResponse handleRegister(HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getBody();
+        final String account = requestBody.getOrDefault("account", "");
+        final String password = requestBody.getOrDefault("password", "");
+        final String email = requestBody.getOrDefault("email", "");
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
+            return handleStaticResource(httpRequest);
+        }
+        final var user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        final var session = httpRequest.getSession(true);
+        session.setAttribute("user", user);
+        HttpResponse httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setCookie("JSESSIONID", session.getId());
+        return httpResponse;
     }
 
     private HttpResponse handleLogin(HttpRequest httpRequest) {
@@ -96,7 +115,11 @@ public class RequestHandler {
             throw new UnauthorizedException();
         }
         log.info("회원 조회 성공 : {}", user);
-        return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        final var session = httpRequest.getSession(true);
+        session.setAttribute("user", user);
+        HttpResponse httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setCookie("JSESSIONID", session.getId());
+        return httpResponse;
     }
 
     private HttpResponse responseNotFoundView() {

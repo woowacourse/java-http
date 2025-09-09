@@ -55,8 +55,8 @@ public class Http11Processor implements Runnable, Processor {
         final String requestLine = bufferedReader.readLine();
         final String requestMethod = extractRequestMethod(requestLine);
         final String requestUri = extractRequestUri(requestLine);
-
         final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> queryParams = extractQueryParams(requestUri);
 
         String line = bufferedReader.readLine();
         while (line != null && !line.isEmpty()) {
@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         String contentLength = headers.get("Content-Length");
 
         if (contentLength == null) {
-            return new HttpRequest(requestMethod, requestUri, headers, null);
+            return new HttpRequest(requestMethod, requestUri, headers, queryParams, null);
         }
 
         StringBuilder bodyBuilder = new StringBuilder();
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         int read = bufferedReader.read(bodyChars, 0, length);
         bodyBuilder.append(bodyChars, 0, read);
 
-        return new HttpRequest(requestMethod, requestUri, headers, bodyBuilder.toString());
+        return new HttpRequest(requestMethod, requestUri, headers, queryParams, bodyBuilder.toString());
     }
 
     private String extractRequestMethod(final String requestLine) {
@@ -88,6 +88,25 @@ public class Http11Processor implements Runnable, Processor {
 
     private String extractRequestUri(final String header) {
         return header.split(" ")[1];
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        if (!uri.contains("?")) return null;
+
+        Map<String, String> queryParams = new HashMap<>();
+
+        int index = uri.indexOf("?");
+        String queryString = uri.substring(index + 1);
+        String[] queries = queryString.split("&");
+
+        for (String query : queries) {
+            String[] keyValues = query.split("=");
+            String key = keyValues[0];
+            String value = keyValues[1];
+            queryParams.put(key, value);
+        }
+
+        return queryParams;
     }
 }
 

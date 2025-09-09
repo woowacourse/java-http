@@ -14,7 +14,7 @@ public class RequestHandler {
 
     private final ResponseBuilder responseBuilder;
     private final Service service;
-    private final List<String> views = List.of("login", "register");
+    private final List<String> viewPaths = List.of("/login", "/register");
 
     public RequestHandler() {
         this.responseBuilder = new ResponseBuilder();
@@ -22,26 +22,11 @@ public class RequestHandler {
     }
 
     public String handle(final HttpRequest request) throws IOException {
-        byte[] responseBody;
         String uri = request.uri();
-        if (uri.contains(".")) {
-            responseBody = ResourceLoader.get(uri);
-            return responseBuilder.build(request.uri(), "200 OK", responseBody, null);
-        }
-
         String path = uri.substring(1);
-        Map<String, String> queryParams = null;
-        if (uri.contains("?")) {
-            queryParams = extractQueryParams(uri);
-        }
-
-        if (views.contains(path) && queryParams == null && request.body() == null) {
-            responseBody = ResourceLoader.get(uri + ".html");
-            return responseBuilder.build(uri + ".html", "200 OK", responseBody, null);
-        }
 
         if (request.method().equals("GET")) {
-            return handleGet(path, queryParams);
+            return handleGet(request);
         }
 
         if (request.method().equals("POST")) {
@@ -51,25 +36,18 @@ public class RequestHandler {
         return null;
     }
 
-    private Map<String, String> extractQueryParams(final String uri) {
-        Map<String, String> queryParams = new HashMap<>();
+    private String handleGet(final HttpRequest request) throws IOException {
+        String uri = request.uri();
 
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
-
-        for (String query : queries) {
-            String[] keyValues = query.split("=");
-            String key = keyValues[0];
-            String value = keyValues[1];
-            queryParams.put(key, value);
+        if (uri.contains(".")) {
+            final byte[] body = ResourceLoader.get(uri);
+            return responseBuilder.build(uri, "200 OK", body, null);
         }
-
-        return queryParams;
-    }
-
-    private String handleGet(final String path, final Map<String, String> queryParams) {
-        return responseBuilder.build(path, "", new byte[0], null);
+        if (viewPaths.contains(uri) && request.queryParams() == null && request.body() == null) {
+            final byte[] body = ResourceLoader.get(uri + ".html");
+            return responseBuilder.build(uri + ".html", "200 OK", body, null);
+        }
+        return responseBuilder.build("", "403 Forbidden", null, null);
     }
 
     private String handlePost(final String path, final String body) {

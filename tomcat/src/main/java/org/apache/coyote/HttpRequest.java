@@ -6,5 +6,7 @@ public record HttpRequest(
         String method,
         String uri,
         Map<String, String> headers,
-        String body) {
+        Map<String, String> queryParams,
+        String body
+) {
 }

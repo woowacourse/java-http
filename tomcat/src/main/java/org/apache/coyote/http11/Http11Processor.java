@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.parser.HeaderParser;
 import org.apache.coyote.http11.parser.QueryParamsParser;
@@ -101,20 +103,28 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        Path filePath = getFilePath(path, mimeType);
-        String responseBody = new String(Files.readAllBytes(filePath));
+        if (path.equals("/login") && isLoggedIn(requestHeaders)) {
+            return redirectTo("/index.html", mimeType);
+        }
+
+        return serveStaticPath(path, mimeType);
+    }
+
+    private HttpResponse serveStaticPath(final String path, final MimeType mimeType) throws IOException {
+        final Path filePath = getFilePath(path, mimeType);
+        final String responseBody = new String(Files.readAllBytes(filePath));
         return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
     }
 
     private HttpResponse dispatchRequest(String path, Map<String, String> queryParams, MimeType mimeType,
-                                         Map<String, String> requestHeaders) {
+                                         Map<String, String> requestHeaders) throws IOException {
         if (path.equals("/login")) {
             return handleLogin(queryParams, mimeType, requestHeaders);
         }
         if (path.equals("/register")) {
             return handleRegister(queryParams, mimeType);
         }
-        return null;
+        return HttpResponse.of(HttpStatus.NOT_FOUND, mimeType, "Not Found");
     }
 
     private Path getFilePath(String path, MimeType mimeType) {
@@ -131,17 +141,20 @@ public class Http11Processor implements Runnable, Processor {
         String password = queryParams.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> handleLoginSuccess(account, mimeType, requestHeaders))
+                .map(user -> handleLoginSuccess(user, mimeType, requestHeaders))
                 .orElseGet(() -> {
                     log.info("login failure: account= {}", account);
                     return redirectTo("/401.html", mimeType);
                 });
     }
 
-    private HttpResponse handleLoginSuccess(String account, MimeType mimeType, Map<String, String> requestHeaders) {
-        log.info("login success: account= {}", account);
+    private HttpResponse handleLoginSuccess(User user, MimeType mimeType, Map<String, String> requestHeaders) {
+        log.info("login success: account= {}", user.getAccount());
         HttpResponse httpResponse = redirectTo("/index.html", mimeType);
-        handleCookie(requestHeaders, httpResponse);
+        String jsessionid = getOrCreateJsessionId(requestHeaders, httpResponse);
+        Session session = new Session(jsessionid);
+        session.setAttribute("user", user);
+        SessionManager.getInstance().add(session);
         return httpResponse;
     }
 
@@ -161,21 +174,28 @@ public class Http11Processor implements Runnable, Processor {
         return httpResponse;
     }
 
-    private void handleCookie(Map<String, String> requestHeaders, HttpResponse httpResponse) {
+    private String getOrCreateJsessionId(Map<String, String> requestHeaders, HttpResponse httpResponse) {
         String cookieHeader = requestHeaders.get("Cookie");
         Cookie cookie = Cookie.fromHeader(cookieHeader);
-
         String jsessionId = cookie.get("JSESSIONID");
-
         if (jsessionId == null) {
             jsessionId = UUID.randomUUID().toString();
             cookie.add("JSESSIONID", jsessionId);
             httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jsessionId);
         }
+        return jsessionId;
     }
 
     private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
         outputStream.write(response.toHttpResponseString().getBytes());
         outputStream.flush();
+    }
+
+    private boolean isLoggedIn(Map<String, String> requestHeaders) {
+        String cookieHeader = requestHeaders.get("Cookie");
+        Cookie cookie = Cookie.fromHeader(cookieHeader);
+        String jsessionId = cookie.get("JSESSIONID");
+        Session session = SessionManager.getInstance().findSession(jsessionId);
+        return session != null && session.getAttribute("user") != null;
     }
 }

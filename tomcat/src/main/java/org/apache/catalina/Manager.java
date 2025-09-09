@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import org.apache.coyote.http11.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager

@@ -37,7 +37,10 @@ public class HandlerMethod {
                 }
             }
 
-            if (queryParams.isEmpty()) {
+            if (queryParams.isEmpty() && bodyParams.isEmpty()) {
+                return method.invoke(controller);
+            }
+            else if (queryParams.isEmpty()) {
                 return method.invoke(controller, bodyParams);
             } else if (bodyParams.isEmpty()) {
                 return method.invoke(controller, queryParams);

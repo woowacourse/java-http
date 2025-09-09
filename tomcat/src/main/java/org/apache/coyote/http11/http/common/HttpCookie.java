@@ -15,28 +15,26 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final HttpHeader httpHeader) {
-        final HttpCookie httpCookie = new HttpCookie();
         final Optional<String> cookieOptional = httpHeader.getFirstValue(HttpHeaderKey.COOKIE.getValue());
+        return cookieOptional
+                .map(HttpCookie::parse)
+                .orElseGet(HttpCookie::new);
+    }
 
-        if (cookieOptional.isEmpty()) {
-            return httpCookie;
-        }
-
-        final String rawCookie = cookieOptional.get();
-        final String[] cookies = rawCookie.trim().split(HttpSplitFormat.COOKIE_ELEMENT.getValue());
-
+    private static HttpCookie parse(final String rawCookie) {
+        final HttpCookie httpCookie = new HttpCookie();
+        final String[] cookies = rawCookie.trim().split(HttpSplitFormat.COOKIE.getValue());
         for (final String cookie : cookies) {
-            parseAndAddCookie(cookie, httpCookie);
+            parseAndAddCookieElement(cookie, httpCookie);
         }
-
         return httpCookie;
     }
 
-    private static void parseAndAddCookie(final String cookieElementLine, final HttpCookie httpCookie) {
+    private static void parseAndAddCookieElement(final String cookieElementLine, final HttpCookie httpCookie) {
         if (cookieElementLine == null || cookieElementLine.isBlank()) {
             return;
         }
-        final String[] cookieElement = cookieElementLine.split("=", 2);
+        final String[] cookieElement = cookieElementLine.split(HttpSplitFormat.COOKIE_ELEMENT.getValue(), 2);
 
         if (cookieElement.length != 2) {
             return;

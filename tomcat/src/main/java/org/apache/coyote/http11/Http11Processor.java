@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8 ";
     private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8 ";
-    private static final String COOKIE_NAME = "JSESSIONID";
 
     private final Socket connection;
 
@@ -103,10 +101,10 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                final Cookie cookie = createCookie();
                 log.info("user: {}", user);
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
+                final Cookie cookie = HttpCookie.createCookie();
                 final String response = createRedirectionResponse("/index.html", cookie);
                 writeAndFlush(outputStream, response);
                 return;
@@ -145,10 +143,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Cookie createCookie() {
-        UUID uuid = UUID.randomUUID();
-        return new Cookie(COOKIE_NAME, uuid.toString());
-    }
 
     private int getContentLengthBy(String line) {
         return Integer.parseInt(line.split(":")[1].trim());

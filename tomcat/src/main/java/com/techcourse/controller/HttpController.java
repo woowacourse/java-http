@@ -59,7 +59,7 @@ public class HttpController {
         httpResponse.setCookie("JSESSIONID", sessionId);
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
-        SessionManager.getInstance().add(session);
+        SessionManager.INSTANCE.add(session);
         return httpResponse;
     }
 

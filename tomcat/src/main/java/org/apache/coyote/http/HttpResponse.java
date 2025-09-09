@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import static org.apache.coyote.http.HttpConstants.CRLF;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HttpResponse {
 
-    private static final String CRLF = "\r\n";
+    public static final String SET_COOKIE_HEADER_NAME = "Set-Cookie";
+    public static final String LOCATION_HEADER_NAME = "Location";
 
     private final String version;
     private final HttpStatus status;
@@ -23,7 +26,7 @@ public class HttpResponse {
 
     public static HttpResponse redirect(final String version, final String location) {
         final Map<String, String> headers = new HashMap<>();
-        headers.put("Location", location);
+        headers.put(LOCATION_HEADER_NAME, location);
         return new HttpResponse(version, HttpStatus.FOUND, ContentType.HTML, "", headers, new HashMap<>());
     }
 
@@ -45,26 +48,29 @@ public class HttpResponse {
     }
 
     private void appendStatusLine(final StringBuilder response) {
-        response.append("HTTP/").append(version).append(" ")
-                .append(status.getCode()).append(" ")
-                .append(status.getReasonPhrase()).append(CRLF);
+        response.append(HttpConstants.HTTP_PROTOCOL_PREFIX).append(version).append(" ")
+                .append(status.getCode()).append(" ").append(status.getReasonPhrase()).append(HttpConstants.CRLF);
     }
 
     private void appendContentHeaders(final StringBuilder response) {
         final int contentLength = body == null ? 0 : body.getBytes(StandardCharsets.UTF_8).length;
 
-        response.append("Content-Type: ").append(type.getMimeType()).append(CRLF)
-                .append("Content-Length: ").append(contentLength).append(CRLF);
+        response.append(ContentType.HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+                .append(" ").append(type.getMimeType()).append(CRLF)
+                .append(HttpConstants.CONTENT_LENGTH_HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+                .append(" ").append(contentLength).append(CRLF);
     }
 
     private void appendCustomHeaders(final StringBuilder response) {
         headers.forEach((key, value) ->
-                response.append(key).append(": ").append(value).append(CRLF));
+                response.append(key).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+                        .append(" ").append(value).append(CRLF));
     }
 
     private void appendCookies(final StringBuilder response) {
         cookies.forEach((name, value) ->
-                response.append("Set-Cookie: ").append(name).append("=").append(value).append(CRLF));
+                response.append(SET_COOKIE_HEADER_NAME).append(HttpConstants.HEADER_VALUE_SEPARATOR)
+                        .append(" ").append(name).append(HttpConstants.KEY_VALUE_SEPARATOR).append(value).append(CRLF));
     }
 
     private void appendBody(final StringBuilder response) {

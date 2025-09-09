@@ -19,7 +19,8 @@ public class CookieParser {
         Map<String, String> cookies = Arrays.stream(splittedCookie)
             .collect(Collectors.toMap(
                 (splitted -> splitted.split("=")[0]),
-                (splitted -> splitted.split("=")[1])
+                (splitted -> splitted.split("=")[1]),
+                (oldValue, newValue) -> newValue
             ));
         return new Cookies(cookies);
     }

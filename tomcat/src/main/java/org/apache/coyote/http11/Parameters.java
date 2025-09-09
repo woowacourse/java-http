@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryParameters {
+public class Parameters {
 
     private final Map<String, QueryParameter> data = new HashMap<>();
 
@@ -16,6 +16,14 @@ public class QueryParameters {
     }
 
     public String get(String key) {
-        return data.get(key).value();
+        QueryParameter queryParameter = data.get(key);
+        if (queryParameter == null) {
+            return null;
+        }
+        return queryParameter.value();
+    }
+
+    public boolean isEmpty() {
+        return data.isEmpty();
     }
 }

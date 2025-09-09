@@ -19,14 +19,6 @@ public class SessionManager {
         return SESSIONS.get(id);
     }
 
-    public static Session findSession(String id) {
-        Session session = SESSIONS.get(id);
-        if (session == null) {
-            session = createSession(id);
-        }
-        return session;
-    }
-
     public static void add(Session session) {
         SESSIONS.put(session.getId(), session);
     }

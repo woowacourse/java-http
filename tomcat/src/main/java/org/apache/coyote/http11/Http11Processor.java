@@ -48,17 +48,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
         String sessionId = request.getCookies().get("JSESSIONID");
-        Session session = SessionManager.findSession(sessionId);
-        if (session == null) {
-            String newSessionId = UUID.randomUUID().toString();
-            session = new Session(newSessionId);
-            SessionManager.add(session);
-            response.setCookie("JSESSIONID", newSessionId);
-        }
-        String newSessionId = UUID.randomUUID().toString();
-        session = new Session(newSessionId);
-        SessionManager.add(session);
-        response.setCookie("JSESSIONID", newSessionId);
+        Session session = findOrCreateSession(request, response);
         String path = request.getPath();
         if ("/".equals(path)) {
             handleRoot(response);
@@ -69,6 +59,21 @@ public class Http11Processor implements Runnable, Processor {
         } else {
             handleStaticResource(response, path);
         }
+    }
+
+    private Session findOrCreateSession(HttpRequest request, HttpResponse response) {
+        String sessionId = request.getCookies().get("JSESSIONID");
+        Session session = null;
+        if (sessionId != null) {
+            session = SessionManager.getSession(sessionId);
+        }
+        if (session == null) {
+            String newSessionId = UUID.randomUUID().toString();
+            session = new Session(newSessionId);
+            SessionManager.add(session);
+            response.setCookie("JSESSIONID", newSessionId);
+        }
+        return session;
     }
 
     private void handleRegister(HttpRequest request, HttpResponse response) throws IOException {
@@ -85,7 +90,6 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
         }
-
         loadStaticResource(response, "/register.html");
     }
 
@@ -99,11 +103,9 @@ public class Http11Processor implements Runnable, Processor {
             response.sendRedirect("/index.html");
             return;
         }
-
         if ("POST".equals(request.getMethod())) {
             String account = request.getQueryParam("account");
             String password = request.getQueryParam("password");
-
             if (account != null && password != null) {
                 Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
                 if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
@@ -119,7 +121,6 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
         }
-
         loadStaticResource(response, "/login.html");
     }
 
@@ -134,7 +135,6 @@ public class Http11Processor implements Runnable, Processor {
                 response.sendNotFound();
                 return;
             }
-
             String contentType = determineContentType(path);
             byte[] bodyBytes = fileInputStream.readAllBytes();
             response.sendOk(contentType, bodyBytes);

@@ -2,13 +2,15 @@ package org.apache.coyote.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
+import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.PageRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class UserLoginHandler implements RequestHandler{
 
@@ -18,11 +20,13 @@ public class UserLoginHandler implements RequestHandler{
     private static final String GET_METHOD_REQUEST = "GET";
     private static final String POST_METHOD_REQUEST = "POST";
 
+    private final SessionManager sessionManager = SessionManager.getInstance();
+
     @Override
     public String handle(final String method, final String path, final Map<String,String> queryParams, final HttpCookie httpCookie
     ) {
         if (method.equals(GET_METHOD_REQUEST)) {
-            return handleLoginGet(httpCookie);
+            return handleLoginGet(queryParams,httpCookie);
         }
         if (method.equals(POST_METHOD_REQUEST)) {
             return handleLoginPost(queryParams, httpCookie);
@@ -30,10 +34,16 @@ public class UserLoginHandler implements RequestHandler{
         throw new IllegalArgumentException("정의되지 않는 Method 입니다.");
     }
 
-    private String handleLoginGet(HttpCookie httpCookie) {
-        log.info("진입");
+    private String handleLoginGet(Map<String, String> queryParams, HttpCookie httpCookie) {
         if (httpCookie.hasJSESSIONID()) {
-            return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", httpCookie.getSessionId());
+            try {
+                Session session = sessionManager.findSession(httpCookie.getSessionId());
+                if (session != null && session.getAttribute("user") != null) {
+                    return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", httpCookie.getSessionId());
+                }
+            } catch (IOException e) {
+                log.warn("Invalid session: {}", httpCookie.getSessionId(), e);
+            }
         }
         return PageRenderer.createStaticFileResponse(HttpStatus.OK.getStatusCode(), "/login.html");
     }
@@ -44,8 +54,10 @@ public class UserLoginHandler implements RequestHandler{
                     .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
 
             checkUserPassword(user, queryParams.get(PASSWORD));
-
             String sessionId = httpCookie.generateJSESSIONID(user);
+            Session session = new Session(sessionId);
+            session.setAttribute("user",user);
+            sessionManager.add(session);
 
             return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", sessionId);
         } catch (IllegalArgumentException e) {

@@ -7,18 +7,18 @@ import org.apache.coyote.router.RequestRouter;
 
 public class AppConfig {
 
-    private static AppConfig instance;
     private final RequestRouter requestRouter;
 
     private AppConfig() {
         this.requestRouter = createRequestRouter();
     }
 
+    private static class SingletonHolder {
+        private static final AppConfig INSTANCE = new AppConfig();
+    }
+
     public static AppConfig getInstance() {
-        if (instance == null) {
-            instance = new AppConfig();
-        }
-        return instance;
+        return SingletonHolder.INSTANCE;
     }
 
     public RequestRouter getRequestRouter() {
@@ -26,6 +26,10 @@ public class AppConfig {
     }
 
     private RequestRouter createRequestRouter() {
-        return new RequestRouter(new UserLoginHandler(), new UserRegisterHandler(), new PageRenderer());
+        return new RequestRouter(
+                new UserLoginHandler(),
+                new UserRegisterHandler(),
+                new PageRenderer()
+        );
     }
 }

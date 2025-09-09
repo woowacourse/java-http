@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.Cookie;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8 ";
     private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8 ";
+    private static final String COOKIE_NAME = "JSESSIONID";
 
     private final Socket connection;
 
@@ -100,10 +103,11 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
+                final Cookie cookie = createCookie();
                 log.info("user: {}", user);
                 final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
                 validateNullResource(resource);
-                final String response = createRedirectionResponse("/index.html");
+                final String response = createRedirectionResponse("/index.html", cookie);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -125,7 +129,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 final User user = createUser(account, email, password);
                 InMemoryUserRepository.save(user);
-                final String response = createRedirectionResponse("/index.html");
+                final String response = createRedirectionResponse("/index.html", null);
                 writeAndFlush(outputStream, response);
                 return;
             }
@@ -139,6 +143,11 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Cookie createCookie() {
+        UUID uuid = UUID.randomUUID();
+        return new Cookie(COOKIE_NAME, uuid.toString());
     }
 
     private int getContentLengthBy(String line) {
@@ -187,9 +196,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createRedirectionResponse(final String location) {
+    private String createRedirectionResponse(final String location, final Cookie cookie) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Set-Cookie: " + cookie.getName() + "=" + cookie.getValue(),
                 "Location: " + location,
                 "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
     }

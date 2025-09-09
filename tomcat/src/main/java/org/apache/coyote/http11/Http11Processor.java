@@ -95,14 +95,14 @@ public class Http11Processor implements Runnable, Processor {
 
                 return Http11Response.createHtmlResponse(HttpStatus.OK, defaultResponseBytes);
             }
-            if (requestTarget.contains("/login")) {
+            if (requestTarget.endsWith("/login")) {
                 return handleLoginRequest(request);
             }
             if (requestTarget.endsWith("/register")) {
                 return handleRegisterRequest(request);
             }
             if (requestTarget.endsWith(".html")) {
-                return handleHtmlRequest(HttpStatus.OK, requestTarget);
+                return handleHtmlRequest(requestTarget);
             }
             if (requestTarget.endsWith(".css")) {
                 return handleCssRequest(requestTarget);
@@ -159,7 +159,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
         if (request.getMethod().equals("GET")) {
-            return handleHtmlRequest(HttpStatus.OK, "/register.html");
+            return handleHtmlRequest("/register.html");
         }
 
         final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
@@ -191,13 +191,10 @@ public class Http11Processor implements Runnable, Processor {
         return Http11Response.createRedirectResponse("/index.html", headers);
     }
 
-    private Http11Response handleHtmlRequest(
-            final HttpStatus status,
-            final String requestTarget
-    ) throws IOException {
+    private Http11Response handleHtmlRequest(final String requestTarget) throws IOException {
         final byte[] fileContent = readFile(requestTarget);
 
-        return Http11Response.createHtmlResponse(status, fileContent);
+        return Http11Response.createHtmlResponse(HttpStatus.OK, fileContent);
     }
 
     private Http11Response handleCssRequest(final String requestTarget) throws IOException {

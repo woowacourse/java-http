@@ -24,16 +24,6 @@ public class Http11Response {
     private final Map<String, String> headers;
     private final String body;
 
-    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final Map<String, String> headers, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                headers,
-                HTML_CONTENT_TYPE,
-                body
-        );
-    }
-
     public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final byte[] body) {
         return new Http11Response(
                 HTTP11_VERSION,

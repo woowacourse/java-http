@@ -1,11 +1,14 @@
 package org.apache.coyote;
 
 import com.techcourse.Service;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class RequestHandler {
 
@@ -66,17 +69,6 @@ public class RequestHandler {
     }
 
     private String handleGet(final String path, final Map<String, String> queryParams) {
-        if (path.startsWith("login")) {
-            final var responseBody = service.findUser(queryParams);
-            final int index = path.indexOf("?");
-            final String filePath = path.substring(0, index);
-            final Map<String, String> headers = new HashMap<>();
-            headers.put("Location", "/index.html");
-            UUID uuid = UUID.randomUUID();
-            headers.put("Set-Cookie", "JSESSIONID=" + uuid);
-            return responseBuilder.build(filePath + ".html", "302 Found", responseBody, headers);
-        }
-
         return responseBuilder.build(path, "", new byte[0], null);
     }
 
@@ -89,11 +81,17 @@ public class RequestHandler {
                 String value = keyValue.substring(index + 1);
                 map.put(key, value);
             }
-            service.findUser(map);
+            User user = service.findUser(map);
             final Map<String, String> headers = new HashMap<>();
-            headers.put("Location", "/index.html");
             UUID uuid = UUID.randomUUID();
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);
+            headers.put("Location", "/index.html");
+
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session loginSession = new Session(uuid.toString());
+            loginSession.setAttribute("user", user);
+            sessionManager.add(new Session(uuid.toString()));
+
             return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
         }
 
@@ -105,11 +103,17 @@ public class RequestHandler {
                 String value = keyValue.substring(index + 1);
                 map.put(key, value);
             }
-            service.registerUser(map.get("account"), map.get("password"), map.get("email"));
+            User user = service.registerUser(map.get("account"), map.get("password"), map.get("email"));
             final Map<String, String> headers = new HashMap<>();
-            headers.put("Location", "/index.html");
             UUID uuid = UUID.randomUUID();
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);
+            headers.put("Location", "/index.html");
+
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session loginSession = new Session(uuid.toString());
+            loginSession.setAttribute("user", user);
+            sessionManager.add(new Session(uuid.toString()));
+
             return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
         }
 

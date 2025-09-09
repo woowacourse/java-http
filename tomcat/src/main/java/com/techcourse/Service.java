@@ -10,19 +10,17 @@ public class Service {
 
     private static final Logger log = LoggerFactory.getLogger(Service.class);
 
-    public byte[] findUser(Map<String, String> params) {
+    public User findUser(Map<String, String> params) {
         User user = findUserByAccount(params.get("account"));
 
         log.info("Found user: " + user.toString());
 
-        return String.join("\r\n",
-                "{",
-                "account: " + user.getAccount(),
-                "}").getBytes();
+        return user;
     }
 
-    public void registerUser(final String account, final String password, final String email) {
+    public User registerUser(final String account, final String password, final String email) {
         InMemoryUserRepository.save(new User(account, password, email));
+        return findUserByAccount(account);
     }
 
     private User findUserByAccount(final String account) {

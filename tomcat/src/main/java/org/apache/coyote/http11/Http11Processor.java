@@ -1,20 +1,20 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Router router = new Router();
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -25,21 +25,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (final var inputStream = new Http11InputBuffer(connection.getInputStream());
+             final var outputStream = new Http11OutputBuffer(connection.getOutputStream())) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = new HttpRequestParser().parse(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
+            try {
+                router.handle(httpRequest, httpResponse);
+            } catch (Throwable throwable) {
+                log.error("Handler error", throwable);
+                httpResponse.setStatus(
+                        HttpStatus.INTERVAL_SERVER_ERROR.getStatusCode(),
+                        HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()
+                );
+                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
+                httpResponse.setBody(HttpResponse.bytes(HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()));
+            }
+            outputStream.commitAndWrite(httpResponse);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -49,7 +49,6 @@ public class HttpResponse {
         stringBuilder.append(statusLine.toString()).append(CRLF);
 
         for (String header : headers.getHeaders()) {
-            System.out.println(header);
             stringBuilder.append(header).append(CRLF);
         }
         stringBuilder.append(CRLF);

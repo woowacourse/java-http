@@ -7,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.MyCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +55,16 @@ public class LoginController implements Controller {
             );
         }
 
-        final String redirectPath = "http://localhost:8080/index.html";
-
         final Map<String, String> responseHeaders = new LinkedHashMap<>();
+
+        HttpCookie httpCookie = new HttpCookie(request);
+        if (!httpCookie.hasAttribute("JSESSIONID")) {
+            final UUID token = UUID.randomUUID();
+            final MyCookie cookie = new MyCookie("JSESSIONID", token.toString());
+            responseHeaders.put("Set-Cookie", cookie.getName() + "=" + cookie.getValue());
+        }
+
+        final String redirectPath = "http://localhost:8080/index.html";
         responseHeaders.put("Location", redirectPath);
         responseHeaders.put("Content-Type", "text/html;charset=utf-8");
         responseHeaders.put("Content-Length", "0");

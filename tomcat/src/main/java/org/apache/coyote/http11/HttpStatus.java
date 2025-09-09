@@ -1,17 +1,22 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.exception.CommonException;
+
 public enum HttpStatus {
 
     OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "NOT FOUND"),
-    INTERVAL_SERVER_ERROR(500, "Interval Server Error");
+    INTERVAL_SERVER_ERROR(500, "Interval Server Error"),
+    ;
 
     private final int statusCode;
     private final String reasonPhrase;
 
     HttpStatus(
-            final int statusCode,
-            final String reasonPhrase
+            int statusCode,
+            String reasonPhrase
     ) {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
@@ -23,5 +28,14 @@ public enum HttpStatus {
 
     public String getReasonPhrase() {
         return reasonPhrase;
+    }
+
+    public static HttpStatus findByStatusCode(int statusCode) {
+        for (HttpStatus httpStatus : values()) {
+            if (httpStatus.getStatusCode() == statusCode) {
+                return httpStatus;
+            }
+        }
+        throw new CommonException(HttpStatus.INTERVAL_SERVER_ERROR);
     }
 }

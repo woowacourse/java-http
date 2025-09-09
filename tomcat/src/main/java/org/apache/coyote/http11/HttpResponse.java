@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private int status = 200;
+    private int statusCode = 200;
     private String reason = "OK";
     private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body = new byte[0];
@@ -16,12 +16,11 @@ public class HttpResponse {
         return string.getBytes(StandardCharsets.UTF_8);
     }
 
-    public void setStatus(
-            int status,
-            String reason
+    public void setStatusCode(
+            HttpStatus httpStatus
     ) {
-        this.status = status;
-        this.reason = reason;
+        this.statusCode = httpStatus.getStatusCode();
+        this.reason = httpStatus.getReasonPhrase();
     }
 
     public void setHeader(
@@ -35,8 +34,8 @@ public class HttpResponse {
         this.body = body != null ? body : new byte[0];
     }
 
-    public int getStatus() {
-        return status;
+    public int getStatusCode() {
+        return statusCode;
     }
 
     public String getReason() {

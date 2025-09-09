@@ -12,17 +12,31 @@ public class StaticResourceHandler {
         final String filePath = processFilePath(httpRequest.uri());
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream("static/" + filePath)) {
             if (fileInputStream == null) {
-                httpResponse.setStatus(
-                        HttpStatus.NOT_FOUND.getStatusCode(),
-                        HttpStatus.NOT_FOUND.getReasonPhrase()
-                );
-                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
-                httpResponse.setBody(HttpResponse.bytes("Not Found"));
+                serveErrorPage(httpResponse, HttpStatus.NOT_FOUND);
                 return;
             }
             byte[] body = fileInputStream.readAllBytes();
             httpResponse.setHeader("Content-Type", ContentType.fromPath(filePath).getMimeType());
             httpResponse.setBody(body);
+        }
+    }
+
+    public void serveErrorPage(
+            HttpResponse httpResponse,
+            HttpStatus httpStatus
+    ) throws IOException {
+        String fileName = ErrorPage.getFileName(httpStatus);
+        try (InputStream errorStream = getClass().getClassLoader().getResourceAsStream("static/" + fileName)) {
+            if (errorStream != null) {
+                byte[] errorBody = errorStream.readAllBytes();
+                httpResponse.setStatusCode(httpStatus);
+                httpResponse.setHeader("Content-Type", ContentType.HTML.getMimeType());
+                httpResponse.setBody(errorBody);
+            } else {
+                httpResponse.setStatusCode(HttpStatus.NOT_FOUND);
+                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
+                httpResponse.setBody(HttpResponse.bytes("Error page not found"));
+            }
         }
     }
 

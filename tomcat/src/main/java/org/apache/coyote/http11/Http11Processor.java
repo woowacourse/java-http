@@ -35,10 +35,7 @@ public class Http11Processor implements Runnable, Processor {
                 router.handle(httpRequest, httpResponse);
             } catch (Throwable throwable) {
                 log.error("Handler error", throwable);
-                httpResponse.setStatus(
-                        HttpStatus.INTERVAL_SERVER_ERROR.getStatusCode(),
-                        HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()
-                );
+                httpResponse.setStatusCode(HttpStatus.INTERVAL_SERVER_ERROR);
                 httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
                 httpResponse.setBody(HttpResponse.bytes(HttpStatus.INTERVAL_SERVER_ERROR.getReasonPhrase()));
             }

@@ -116,6 +116,10 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.noContent(httpVersion, ContentType.IMAGE_X_ICON, HttpCookie.empty(),
                     ResponseBody.empty());
         }
+        if ("/static/.well-known/appspecific/com.chrome.devtools.json".equals(fileName)) {
+            return HttpResponse.noContent(httpVersion, ContentType.APPLICATION_JSON, HttpCookie.empty(),
+                    ResponseBody.empty());
+        }
 
         return HttpResponse.ok(httpVersion, httpRequest.getContentType(), HttpCookie.empty(),
                 ResponseBody.createBy(httpRequest));

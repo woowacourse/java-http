@@ -144,7 +144,7 @@ public class Http11Processor implements Runnable, Processor {
                 final String email = queryStringParts[1].split("=")[1];
                 final String password = queryStringParts[2].split("=")[1];
 
-                final User user = createUser(account, email, password);
+                final User user = createUser(account, password, email);
                 InMemoryUserRepository.save(user);
                 final String response = createRedirectionResponse("/index.html");
                 writeAndFlush(outputStream, response);
@@ -224,9 +224,9 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Type: " + TEXT_HTML_CHARSET_UTF_8);
     }
 
-    private User createUser(String account, String email, String password) {
+    private User createUser(String account, String password, String email) {
         Long id = 1L;
-        return new User(++id, account, email, password);
+        return new User(++id, account, password, email);
     }
 
     private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {

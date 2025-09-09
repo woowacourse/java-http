@@ -49,6 +49,14 @@ public class ResponseEntity {
         return buildHttpResponse(body, contentType, HttpStatus.UNAUTHORIZED);
     }
 
+    public static HttpResponse internalServerError(String body) {
+        return internalServerError(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse internalServerError(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private static HttpResponse buildHttpResponse(String body, String contentType, HttpStatus status) {
         byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 

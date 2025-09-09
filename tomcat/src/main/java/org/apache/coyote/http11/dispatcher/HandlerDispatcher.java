@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.dispatcher;
 
 import java.util.List;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -13,13 +13,14 @@ public class HandlerDispatcher {
         this.handlers = handlers;
     }
 
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         for (RequestHandler handler : handlers) {
             if (handler.canHandle(request)) {
-                return handler.handle(request);
+                handler.handle(request, response);
+                return;
             }
         }
 
-        return ResponseEntity.notFound("");
+        response.setHttpResponse(ResponseEntity.notFound(""));
     }
 }

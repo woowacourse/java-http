@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.dispatcher;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,12 +18,14 @@ public class StaticResourceHandler implements RequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse httpResponse) {
         String body = ResourceUtil.readStaticResource(request.getPath(), getClass());
 
-        return ResponseEntity.ok(
-                body,
-                MimeTypeResolver.getContentTypeByExtension(request.getPath())
+        httpResponse.setHttpResponse(
+                ResponseEntity.ok(
+                        body,
+                        MimeTypeResolver.getContentTypeByExtension(request.getPath())
+                )
         );
     }
 }

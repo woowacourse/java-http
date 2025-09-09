@@ -1,14 +1,11 @@
-package com.techcourse.controller;
+package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    HttpResponse handle(HttpRequest httpRequest);
+    void service(HttpRequest request, HttpResponse response);
 
     String getPath();
-
-    HttpMethod getMethod();
 }

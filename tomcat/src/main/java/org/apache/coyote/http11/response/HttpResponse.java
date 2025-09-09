@@ -80,6 +80,14 @@ public class HttpResponse {
         return new Builder();
     }
 
+    public Builder toBuilder() {
+        return new Builder()
+                .status(statusCode, statusMessage)
+                .contentType(contentType)
+                .body(body)
+                .headers(headers);
+    }
+
     public static final class Builder {
 
         private int statusCode;
@@ -110,9 +118,18 @@ public class HttpResponse {
         }
 
         public Builder header(final String name, final String value) {
-            headers.computeIfAbsent(name, k -> new ArrayList<>())
+            headers.computeIfAbsent(
+                            name, k ->
+                                    new ArrayList<>()
+                    )
                     .add(value);
             return this;
+        }
+
+        public Builder setCookie(final String name, final String value) {
+            final var cookie = name + "=" + value + "; Path=/";
+
+            return header("Set-Cookie", cookie);
         }
 
         public HttpResponse build() {

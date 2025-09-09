@@ -1,10 +1,14 @@
 package org.apache.coyote.http11.request;
 
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.session.SimpleHttpSession;
+import org.apache.catalina.session.SimpleManager;
+import org.jspecify.annotations.Nullable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +19,8 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> parameters;
     private final String body;
+    @Nullable
+    private HttpSession session;
 
     private HttpRequest(
             final RequestLine requestLine,
@@ -99,11 +105,37 @@ public class HttpRequest {
         return parameters.get(name);
     }
 
-    public Map<String, String> getParameters() {
-        return Collections.unmodifiableMap(parameters);
+    public void setSession(final HttpSession session) {
+        this.session = session;
     }
 
-    public String getBody() {
-        return body;
+    public HttpSession getSession(final boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        final var cookieHeader = getHeader("Cookie");
+        final var cookie = RequestCookie.from(cookieHeader);
+
+        if (cookie.contains("JSESSIONID")) {
+            final var sessionId = cookie.get("JSESSIONID");
+            final var existing = SimpleManager.getInstance()
+                    .findSession(sessionId);
+            if (existing != null) {
+                this.session = existing;
+                return session;
+            }
+        }
+
+        if (!create) {
+            return null;
+        }
+
+        final var newSession = SimpleHttpSession.ofGeneratedId();
+        SimpleManager.getInstance()
+                .add(newSession);
+        this.session = newSession;
+        
+        return session;
     }
 }

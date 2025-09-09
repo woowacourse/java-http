@@ -8,7 +8,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleManager implements Manager {
 
+    private static final SimpleManager INSTANCE = new SimpleManager();
+
     private final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+
+    private SimpleManager() {
+    }
+
+    public static SimpleManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void add(final HttpSession session) {
@@ -21,7 +30,12 @@ public class SimpleManager implements Manager {
             return null;
         }
 
-        return sessions.get(id);
+        final var session = sessions.get(id);
+        if (session instanceof SimpleHttpSession s) {
+            s.setNew(false);
+        }
+
+        return session;
     }
 
     @Override

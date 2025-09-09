@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpresponse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,7 @@ public class ResponseHeaders {
     private final Map<String, List<String>> headers;
 
     public ResponseHeaders(final Map<String, List<String>> headers) {
-        this.headers = headers;
+        this.headers = new HashMap<>(headers);
     }
 
     public void add(final String key, final String value) {

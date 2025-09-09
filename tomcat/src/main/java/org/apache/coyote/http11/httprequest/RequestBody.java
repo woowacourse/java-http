@@ -35,6 +35,6 @@ public class RequestBody {
     }
 
     private RequestBody(final Map<String, String> parameters) {
-        this.parameters = parameters;
+        this.parameters = new HashMap<>(parameters);
     }
 }

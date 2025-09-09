@@ -36,6 +36,6 @@ public class HttpCookie {
     }
 
     private HttpCookie(final Map<String, String> cookies) {
-        this.cookies = cookies;
+        this.cookies = new HashMap<>(cookies);
     }
 }

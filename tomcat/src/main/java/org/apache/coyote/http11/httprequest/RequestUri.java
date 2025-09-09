@@ -47,6 +47,6 @@ public class RequestUri {
 
     private RequestUri(final String requestPath, final Map<String, String> queryParameters) {
         this.requestPath = requestPath;
-        this.queryParameters = queryParameters;
+        this.queryParameters = new HashMap<>(queryParameters);
     }
 }

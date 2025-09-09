@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
+
 public class HttpResponseBody {
     private final byte[] body;
     private final MimeType mimeType;
@@ -10,7 +12,7 @@ public class HttpResponseBody {
     }
 
     public String asString() {
-        return new String(body);
+        return new String(body, StandardCharsets.UTF_8);
     }
 
     public byte[] getBody() {
@@ -23,5 +25,9 @@ public class HttpResponseBody {
 
     public String getContentType() {
         return mimeType.getContentType();
+    }
+
+    public boolean isEmpty() {
+        return body.length == 0;
     }
 }

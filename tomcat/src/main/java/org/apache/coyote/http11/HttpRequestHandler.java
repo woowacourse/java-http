@@ -1,45 +1,22 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequestHandler {
 
     public HttpRequest handleRequest(InputStream inputStream) throws IOException {
-        byte[] allBytes = inputStream.readAllBytes();
-
-        int headerBodySeparatorIndex = findHeaderBodySeparator(allBytes);
-
-        if (headerBodySeparatorIndex == -1) {
-            headerBodySeparatorIndex = allBytes.length;
-        }
-
-        byte[] headerBytes = Arrays.copyOfRange(allBytes, 0, headerBodySeparatorIndex);
-        byte[] bodyBytes = Arrays.copyOfRange(allBytes, headerBodySeparatorIndex, allBytes.length);
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(headerBytes)));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpStartLine startLine = readRequestLine(reader);
-        HttpHeader header = readHeader(reader);
-        HttpRequestBody body = new HttpRequestBody(bodyBytes);
+        HttpRequestHeader header = readHeader(reader);
+        HttpRequestBody body = readBody(header,reader);
         HttpQueryParameter queryParameter = readQueryString(startLine.getUri());
-
         return new HttpRequest(startLine, header, body,queryParameter);
-    }
-
-    private int findHeaderBodySeparator(final byte[] data) {
-        for (int i = 0; i < data.length - 3; i++) {
-            if (data[i] == 13 && data[i + 1] == 10 && data[i + 2] == 13 && data[i + 3] == 10) {
-                return i + 4;
-            }
-        }
-        return -1;
     }
 
     private HttpStartLine readRequestLine(BufferedReader br) throws IOException {
@@ -61,9 +38,8 @@ public class HttpRequestHandler {
         return new HttpStartLine(method, httpUri, protocol);
     }
 
-    private HttpHeader readHeader(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
+    private HttpRequestHeader readHeader(BufferedReader br) throws IOException {
+        HttpRequestHeader requestHeader = new HttpRequestHeader();
         String line;
         while(!"".equals((line = br.readLine()))) {
             if (line == null) {
@@ -72,9 +48,23 @@ public class HttpRequestHandler {
             int index = line.indexOf(":");
             String fieldName = line.substring(0, index);
             String value = line.substring(index + 1);
-            headers.put(fieldName, value);
+            requestHeader.addHeader(fieldName, value);
         }
-        return new HttpHeader(headers);
+        return requestHeader;
+    }
+
+    private HttpRequestBody readBody(HttpRequestHeader header, BufferedReader br) throws IOException {
+        int bodyLength = header.getBodyLength();
+
+        char[] buffer = new char[bodyLength];
+        int read = br.read(buffer, 0, buffer.length);
+
+        if  (bodyLength == 0 || read < 0) {
+            return new HttpRequestBody();
+        }
+        String body = new String(buffer);
+
+        return new HttpRequestBody(body);
     }
 
     private HttpQueryParameter readQueryString(HttpUri uri) {

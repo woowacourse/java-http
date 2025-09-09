@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -9,15 +10,14 @@ public class HttpResponseHandler {
 
     public HttpResponse handleResponse(HttpRequest request, HttpStatusCode statusCode) throws IOException {
         HttpProtocol httpProtocol = request.getHttpProtocol();
-
         String resourcePath = request.getResourcePath();
-
-        return new HttpResponse(httpProtocol, statusCode, findResource(resourcePath));
+        HttpResponseBody body = findResource(resourcePath);
+        return new HttpResponse(httpProtocol, statusCode, body);
     }
 
     private HttpResponseBody findResource(String resourcePath) throws IOException {
         if (resourcePath.equals("/")) {
-            return new HttpResponseBody("Hello world!".getBytes(), MimeType.TEXT_HTML);
+            return new HttpResponseBody("Hello world!".getBytes(StandardCharsets.UTF_8), MimeType.TEXT_HTML);
         }
 
         int index = resourcePath.lastIndexOf("/");

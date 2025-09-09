@@ -1,21 +1,21 @@
 package org.apache.coyote.http11;
 
 public class HttpRequestBody {
-    private final byte[] body;
+    private final String body;
 
-    public HttpRequestBody(byte[] body) {
+    public HttpRequestBody(String body) {
         this.body = body;
     }
 
-    public String asString() {
-        return new String(body);
+    public HttpRequestBody() {
+        this.body = "";
     }
 
-    public byte[] getBody() {
+    public String getBody() {
         return body;
     }
 
     public int getLength() {
-        return body.length;
+        return body.length();
     }
 }

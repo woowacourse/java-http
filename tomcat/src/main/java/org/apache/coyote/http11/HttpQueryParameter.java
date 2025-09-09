@@ -11,6 +11,10 @@ public class HttpQueryParameter {
         this.params = params;
     }
 
+    public boolean isEmpty() {
+        return params == null || params.isEmpty();
+    }
+
     public String getValue(String name) {
         try {
             return params.get(name);

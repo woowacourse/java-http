@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import java.io.OutputStream;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,20 +42,50 @@ public class Http11Processor implements Runnable, Processor {
             HttpUri requestUri = request.getUri();
             String path = requestUri.getPath();
 
+            HttpResponse response;
+
             if (path.startsWith("/login")) {
-                String account = request.getQueryParameter("account");
-                User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
-                if (user != null) {
-                    log.info("user: {}", user);
+                try {
+                    if (!request.hasQueryParameter()) {
+                        response = responseHandler.handleResponse(request, HttpStatusCode.OK);
+                        sendResponse(outputStream, response);
+                        return;
+                    }
+
+                    String account = request.getQueryParameter("account");
+                    String password = request.getQueryParameter("password");
+
+                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+                    boolean checkPassword = user.checkPassword(password);
+
+                    if (!checkPassword) {
+                        response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                        response.setLocation("/401.html");
+                        sendResponse(outputStream, response);
+                        return;
+                    }
+
+                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                    response.setLocation("/index.html");
+                    sendResponse(outputStream, response);
+                    return;
+
+                } catch (IllegalArgumentException e) {
+                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                    response.setLocation("/401.html");
+                    sendResponse(outputStream, response);
+                    return;
                 }
             }
-
-            HttpResponse response = responseHandler.handleResponse(request, HttpStatusCode.OK);
-
-            outputStream.write(response.asString().getBytes());
-            outputStream.flush();
+            response = responseHandler.handleResponse(request, HttpStatusCode.OK);
+            sendResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+            outputStream.write(response.asString().getBytes());
+            outputStream.flush();
     }
 }

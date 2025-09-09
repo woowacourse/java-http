@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 public class HttpRequest {
 
     private final HttpStartLine startLine;
-    private final HttpHeader header;
+    private final HttpRequestHeader header;
     private final HttpRequestBody body;
     private final HttpQueryParameter queryParameter;
 
-    public HttpRequest(HttpStartLine startLine, HttpHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
+    public HttpRequest(HttpStartLine startLine, HttpRequestHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
@@ -22,6 +22,10 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
+    public boolean hasQueryParameter() {
+        return !queryParameter.isEmpty();
+    }
+
     public String getResourcePath() {
         return startLine.getResourcePath();
     }
@@ -32,5 +36,9 @@ public class HttpRequest {
 
     public String getQueryParameter(String name) {
         return queryParameter.getValue(name);
+    }
+
+    public HttpRequestHeader getHeader() {
+        return  header;
     }
 }

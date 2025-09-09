@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -97,7 +97,7 @@ class HttpCookieTest {
     @Test
     void toHttpHeaderFormatTest() {
         // given
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values = new ConcurrentHashMap<>();
         values.put("JSESSIONID", "abc123");
         values.put("theme", "dark");
         HttpCookie httpCookie = new HttpCookie(values);

@@ -1,8 +1,8 @@
 package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public record RequestParams(
         Map<String, String> queryParameters
@@ -13,7 +13,7 @@ public record RequestParams(
     }
 
     private static Map<String, String> toQueryParameters(final String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
+        Map<String, String> queryParameters = new ConcurrentHashMap<>();
 
         if (queryString.isEmpty()) {
             return queryParameters;

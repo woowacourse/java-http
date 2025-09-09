@@ -1,11 +1,11 @@
 package com.techcourse.http.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionRepository {
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public static void save(final Session session) {
         SESSIONS.put(session.getId(), session);

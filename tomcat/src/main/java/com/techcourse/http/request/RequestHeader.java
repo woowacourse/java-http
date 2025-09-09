@@ -1,9 +1,9 @@
 package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestHeader {
 
@@ -18,7 +18,7 @@ public class RequestHeader {
     }
 
     private static Map<String, String> convertToRequestHeaderMap(List<String> requestHeaderStrings) {
-        Map<String, String> requestHeaderMap = new HashMap<>();
+        Map<String, String> requestHeaderMap = new ConcurrentHashMap<>();
 
         if (requestHeaderStrings.isEmpty()) {
             return requestHeaderMap;

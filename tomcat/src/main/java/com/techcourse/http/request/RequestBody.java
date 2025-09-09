@@ -1,8 +1,8 @@
 package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public record RequestBody(
         Map<String, String> values
@@ -13,11 +13,11 @@ public record RequestBody(
     }
 
     public static RequestBody empty() {
-        return new RequestBody(new HashMap<>());
+        return new RequestBody(new ConcurrentHashMap<>());
     }
 
     private static Map<String, String> convertToRequestBodyMap(final String requestBodyString) {
-        Map<String, String> requestBodyMap = new HashMap<>();
+        Map<String, String> requestBodyMap = new ConcurrentHashMap<>();
 
         if (requestBodyString.isEmpty()) {
             return requestBodyMap;

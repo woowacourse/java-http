@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +46,7 @@ class RequestHeaderTest {
     @Test
     void hasContentLengthKeyTest1() {
         // given
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values = new ConcurrentHashMap<>();
         values.put("Content-Length", "25");
         RequestHeader requestHeader = new RequestHeader(values);
 
@@ -58,7 +58,7 @@ class RequestHeaderTest {
     @Test
     void hasContentLengthKeyTest2() {
         // given
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values = new ConcurrentHashMap<>();
         values.put("Host", "localhost:8080");
         RequestHeader requestHeader = new RequestHeader(values);
 
@@ -70,7 +70,7 @@ class RequestHeaderTest {
     @Test
     void hasCookieKeyTest1() {
         // given
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values = new ConcurrentHashMap<>();
         values.put("Cookie", "JSESSIONID=abc123");
         RequestHeader requestHeader = new RequestHeader(values);
 
@@ -82,7 +82,7 @@ class RequestHeaderTest {
     @Test
     void hasCookieKeyTest2() {
         // given
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values = new ConcurrentHashMap<>();
         values.put("Host", "localhost:8080");
         RequestHeader requestHeader = new RequestHeader(values);
 

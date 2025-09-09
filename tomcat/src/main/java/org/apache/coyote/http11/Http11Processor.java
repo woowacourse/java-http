@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.config.AppConfig;
 import org.apache.coyote.dto.RequestInfo;
 import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
@@ -19,10 +20,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final RequestRouter requestRouter;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestRouter = new RequestRouter();
-
+        this.requestRouter = AppConfig.getInstance().getRequestRouter();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final String requestLine) throws IOException {
-        RequestInfo requestInfo = RequestLineParser.parse(requestLine);
+        final RequestInfo requestInfo = RequestLineParser.parse(requestLine);
         return requestRouter.handleRoute(requestInfo.method(),requestInfo.path(),requestInfo.queryParams());
     }
 

@@ -1,6 +1,8 @@
 package org.apache.coyote.render;
 
 import org.apache.coyote.util.HttpResponseBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 public class PageRenderer{
 
     private static final String STATIC_FILE_ROOT = "static";
+    private static final Logger log = LoggerFactory.getLogger(PageRenderer.class);
 
     public String handle(final String method, final String path) {
         if(!method.equals("GET")){
@@ -33,7 +36,7 @@ public class PageRenderer{
 
     private static String readStaticFile(final String path) throws IOException {
         String fullPath = STATIC_FILE_ROOT + path;
-
+        log.info(fullPath);
         try (InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(fullPath)) {
             if (inputStream == null) {
                 throw new IOException("파일을 찾을 수 없습니다: " + fullPath);

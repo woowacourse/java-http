@@ -23,7 +23,7 @@ public record ResponseHeaders(LinkedHashMap<String, String> headers, HttpCookies
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
-        cookies.getToSetCookiesHeader(sb);
+        cookies.appendSetCookieHeaders(sb);
 
         sb.append("\r\n");
         return sb.toString().getBytes();

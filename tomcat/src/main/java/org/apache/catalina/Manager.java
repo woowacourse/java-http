@@ -1,4 +1,6 @@
-package org.apache.catalina.session;
+package org.apache.catalina;
+
+import org.apache.catalina.session.Session;
 
 public interface Manager {
 

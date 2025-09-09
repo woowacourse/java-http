@@ -43,7 +43,8 @@ public record Http11Request(
     }
 
     public boolean isCookiesEmpty() {
-        return headers.getCookies() == null;
+        final HttpCookies cookies = headers.getCookies();
+        return cookies == null || cookies.isEmpty();
     }
 
     public String getJsessionid() {

@@ -23,9 +23,17 @@ public record HttpCookies(Map<String, String> values) {
         values.put(key, value);
     }
 
-    public void getToSetCookiesHeader(StringBuilder sb) {
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+    public void appendSetCookieHeaders(StringBuilder sb) {
         for (Map.Entry<String, String> entry : values.entrySet()) {
-            sb.append("Set-Cookie: ").append(entry.getKey()).append("=").append(entry.getValue()).append("; \r\n");
+            sb.append("Set-Cookie: ")
+                    .append(entry.getKey())
+                    .append("=")
+                    .append(entry.getValue())
+                    .append(" \r\n");
         }
     }
 }

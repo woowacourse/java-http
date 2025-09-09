@@ -2,7 +2,6 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.domain.HttpProtocol;
 
-// <protocol> <status-code> <reason-phrase>
 public record StatusLine(HttpProtocol protocol, HttpStatus status) {
 
     public StatusLine() {

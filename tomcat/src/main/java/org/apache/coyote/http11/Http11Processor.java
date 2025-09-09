@@ -25,6 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -97,7 +98,14 @@ public class Http11Processor implements Runnable, Processor {
         HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
         String existingJSessionId = cookie.getJSessionId();
 
+        Session session = (existingJSessionId != null) ? sessionManager.findSession(existingJSessionId) : null;
+        User user = (session!=null) ? (User) session.getAttribute("user") : null;
+
+
         if ("/login".equals(path)) {
+            if (user != null && "GET".equals(method)) {
+                return generateRedirectResponse("/index.html", existingJSessionId);
+            }
             return handleLogin(method, requestBody);
         }
         if("/register".equals(path)) {
@@ -127,6 +135,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if(loginSuccess) {
             final String jSessionId = UUID.randomUUID().toString();
+            final User user = InMemoryUserRepository.findByAccount(parameters.get("account")).get();
+
+            Session newSession = new Session(jSessionId);
+            newSession.setAttribute("user", user);
+            sessionManager.add(newSession);
+
             return generateRedirectResponse("/index.html", jSessionId);
         }
 

@@ -15,7 +15,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -57,13 +59,17 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String[] request = bufferedReader.readLine().split(" ");
+            final List<String> headers = getHeaders(bufferedReader);
+
+            final String[] request = headers.getFirst().split(" ");
+            final String method = request[0];
             final String requestUri = request[1];
-            final Map<String, String> queryMap = extractQueryParams(requestUri);
+            log.debug("request : {} {}", method, requestUri);
+
+            final int contentLength = getContentLengthFromHeaders(headers);
+            final String body = readRequestBody(bufferedReader, contentLength);
 
             final String path = parsePath(requestUri);
-            log.debug("resource : {}", path);
-
             final URL resource = getResourceUrl(path);
 
             if (resource == null) {
@@ -71,15 +77,88 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if ("/login.html".equals(path) && !queryMap.isEmpty()) {
-                handleLogin(queryMap, outputStream);
-                return;
+            final Map<String, String> queryParams = mergeParameters(
+                    extractQueryParams(requestUri),
+                    parseQueryString(body)
+            );
+
+            if ("POST".equals(method) && !queryParams.isEmpty()) {
+                if ("/login.html".equals(path)) {
+                    handleLogin(queryParams, outputStream);
+                    return;
+                }
+
+                if ("/register.html".equals(path)) {
+                    handleRegister(queryParams, outputStream);
+                    return;
+                }
             }
 
             sendResponse(generateResponse(200, resource), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> getHeaders(final BufferedReader bufferedReader) {
+        return bufferedReader.lines()
+                .takeWhile(line -> !line.isBlank())
+                .toList();
+    }
+
+    private int getContentLengthFromHeaders(final List<String> headers) {
+        return headers.stream()
+                .filter(h -> h.startsWith("Content-Length"))
+                .map(h -> h.split(":")[1].trim())
+                .mapToInt(Integer::parseInt)
+                .findFirst()
+                .orElse(0);
+    }
+
+    private String readRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength <= 0) {
+            return "";
+        }
+        char[] bodyChars = new char[contentLength];
+        int readChars = bufferedReader.read(bodyChars);
+        if (readChars != contentLength) {
+            throw new IOException("Failed to read body : " + Arrays.toString(bodyChars));
+        }
+        return new String(bodyChars);
+    }
+
+    private String parsePath(final String requestUri) {
+        String path = requestUri;
+        if ("/".equals(requestUri)) {
+            return path + "index.html";
+        }
+        if (path.contains("?")) {
+            path = path.split("\\?")[0];
+        }
+        if (!requestUri.contains(".")) {
+            path = path + ".html";
+        }
+        return path;
+    }
+
+    private URL getResourceUrl(String path) throws FileNotFoundException {
+        return getClass()
+                .getClassLoader()
+                .getResource("static" + path);
+    }
+
+    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private Map<String, String> mergeParameters(
+            Map<String, String> queryParams,
+            Map<String, String> bodyParams
+    ) {
+        Map<String, String> result = new HashMap<>(queryParams);
+        result.putAll(bodyParams);
+        return result;
     }
 
     private Map<String, String> extractQueryParams(final String uri) {
@@ -110,26 +189,6 @@ public class Http11Processor implements Runnable, Processor {
         return queryMap;
     }
 
-    private String parsePath(final String requestUri) {
-        String path = requestUri;
-        if ("/".equals(requestUri)) {
-            return path + "index.html";
-        }
-        if (path.contains("?")) {
-            path = path.split("\\?")[0];
-        }
-        if (!requestUri.contains(".")) {
-            path = path + ".html";
-        }
-        return path;
-    }
-
-    private URL getResourceUrl(String path) throws FileNotFoundException {
-        return getClass()
-                .getClassLoader()
-                .getResource("static" + path);
-    }
-
     private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
         final String resourceName = resource.getFile();
         final String extension = extractExtension(resourceName);
@@ -149,18 +208,18 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
             }
             final String extension = "html";
-            final URL resource = getResourceUrl("/" + httpStatusCode + "." +extension);
+            final URL resource = getResourceUrl("/" + httpStatusCode + "." + extension);
             final String responseBody = Files.readString(new File(resource.getFile()).toPath());
             final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
 
             return parseResponse(httpStatusCode, contentType, responseBody);
         } catch (IOException | NullPointerException e) {
             final String responseBody = String.format("""
-                <html>
-                    <head><title>Error</title></head>
-                    <body><h1>%s</h1></body>
-                </html>
-            """, HTTP_STATUS_CODES.get(httpStatusCode));
+                        <html>
+                            <head><title>Error</title></head>
+                            <body><h1>%s</h1></body>
+                        </html>
+                    """, HTTP_STATUS_CODES.get(httpStatusCode));
 
             return parseResponse(httpStatusCode, "text/html", responseBody);
         }
@@ -211,8 +270,27 @@ public class Http11Processor implements Runnable, Processor {
         sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
     }
 
-    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private void handleRegister(final Map<String, String> queryMap, final OutputStream outputStream)
+            throws IOException {
+        final String account = queryMap.get("account");
+        final String email = queryMap.get("email");
+        final String password = queryMap.get("password");
+
+        if (account == null || email == null || password == null
+                || account.isBlank() || password.isBlank() || email.isBlank()) {
+            sendResponse(generateErrorResponse(400), outputStream);
+            return;
+        }
+
+        final Optional<User> existingUser = InMemoryUserRepository.findByAccount(account);
+        if (existingUser.isPresent()) {
+            sendResponse(generateRedirectResponse(302, "/400.html"), outputStream);
+            return;
+        }
+
+        final User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        log.info("new user : {}", newUser);
+        sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
     }
 }

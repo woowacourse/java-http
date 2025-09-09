@@ -9,7 +9,7 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
-    public void login(final String account, final String password) {
+    public User login(final String account, final String password) {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 사용자가 존재하지 않습니다."));
 
@@ -18,5 +18,6 @@ public class LoginService {
         }
 
         log.info("user: {}", user);
+        return user;
     }
 }

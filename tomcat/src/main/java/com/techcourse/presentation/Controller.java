@@ -4,6 +4,6 @@ public interface Controller {
 
     boolean isResponsible(final String path);
 
-    ResponseWithType getResource(final ParsedResourcePath request);
+    HttpResponse getResource(final HttpRequest request);
 
 }

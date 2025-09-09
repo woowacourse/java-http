@@ -1,7 +1,11 @@
 package com.techcourse.presentation;
 
 import com.techcourse.application.LoginService;
+import com.techcourse.model.User;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +23,43 @@ public class LoginController implements Controller {
         this.staticResourceController = staticResourceController;
     }
 
-    public String login(final Map<String, String> params) {
-        if (params.size() != 2 || !params.containsKey("account") || !params.containsKey("password")) {
-            log.debug("요청 파라미터: {}", params);
-            throw new IllegalArgumentException("적절하지 않은 로그인 요청입니다.");
+    public HttpResponse login(final String protocol) {
+        return staticResourceController.getResource(
+                new HttpRequest("GET", "/login.html", protocol, new HashMap<>(), new HashMap<>(), "")
+        );
+    }
+
+    public HttpResponse login(final HttpRequest request) {
+        final String body = request.body();
+        final Map<String, String> bodyParams = new HashMap<>();
+        for (String pair : body.split("&")) {
+            final int index = pair.indexOf('=');
+            final String k = URLDecoder.decode(pair.substring(0, index), StandardCharsets.UTF_8);
+            final String v = URLDecoder.decode(pair.substring(index + 1), StandardCharsets.UTF_8);
+            bodyParams.put(k, v);
         }
 
-        loginService.login(params.get("account"), params.get("password"));
+        try {
+            if (bodyParams.size() != 2 || !bodyParams.containsKey("account") || !bodyParams.containsKey("password")) {
+                log.debug("요청 파라미터: {}", bodyParams);
+                throw new IllegalArgumentException("적절하지 않은 로그인 요청입니다.");
+            }
 
-        return "/login.html";
+            final User user = loginService.login(bodyParams.get("account"), bodyParams.get("password"));
+        } catch (IllegalArgumentException e) {
+            return staticResourceController.getResource(
+                    new HttpRequest("GET", "/401.html", request.protocol(), new HashMap<>(), new HashMap<>(), "")
+            );
+        }
+
+        final String redirectPath = "http://localhost:8080/index.html";
+
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Location", redirectPath);
+        responseHeaders.put("Content-Type", "text/html;charset=utf-8");
+        responseHeaders.put("Content-Length", "0");
+
+        return new HttpResponse(request.protocol(), "302 Found", responseHeaders, "");
     }
 
     @Override
@@ -36,13 +68,18 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public ResponseWithType getResource(final ParsedResourcePath request) {
+    public HttpResponse getResource(final HttpRequest request) {
         if (!BASE_URL.equals(request.path())) {
             log.debug("요청 경로: {}", request.path());
             throw new IllegalArgumentException("요청 경로와 일치하는 API가 존재하지 않습니다.");
         }
 
-        final String filePath = login(request.params());
-        return staticResourceController.getResource(new ParsedResourcePath(filePath, new HashMap<>()));
+        if ("GET".equals(request.method())) {
+            return login(request.protocol());
+        }
+        if ("POST".equals(request.method())) {
+            return login(request);
+        }
+        throw new IllegalArgumentException("요청 경로에 일치하는 메서드가 없습니다.");
     }
 }

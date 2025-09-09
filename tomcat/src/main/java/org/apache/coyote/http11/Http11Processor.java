@@ -183,6 +183,11 @@ public class Http11Processor implements Runnable, Processor {
         final String account = queryMap.get("account");
         final String password = queryMap.get("password");
 
+        if (account == null || password == null || account.isBlank() || password.isBlank()) {
+            sendResponse(generateErrorResponse(400), outputStream);
+            return;
+        }
+
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {

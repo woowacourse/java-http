@@ -8,12 +8,14 @@ public class HttpRequest {
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
     private final HttpQueryParameter queryParameter;
+    private final HttpCookie cookie;
 
     public HttpRequest(HttpStartLine startLine, HttpRequestHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
         this.queryParameter = queryParameter;
+        this.cookie = header.getCookie();
     }
 
     public HttpMethod getHttpMethod() {
@@ -46,5 +48,13 @@ public class HttpRequest {
 
     public HttpRequestHeader getHeader() {
         return  header;
+    }
+
+    public HttpCookie getCookies() {
+        return cookie;
+    }
+
+    public String getCookie(String name) {
+        return cookie.getCookie(name);
     }
 }

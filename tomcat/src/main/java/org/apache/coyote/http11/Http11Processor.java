@@ -5,7 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,30 +46,57 @@ public class Http11Processor implements Runnable, Processor {
 
             if (path.startsWith("/login")) {
                 try {
+                    HttpCookie cookie = request.getCookies();
+                    String sessionId = cookie.getCookie("JSESSIONID");
+
                     if (!request.hasQueryParameter()) {
+                            Session session = SessionManager.findSession(sessionId);
+                            if (session != null) {
+                                response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                                response.setLocation("/index.html");
+                                sendResponse(outputStream, response);
+                                return;
+                            }
                         response = responseHandler.handleResponse(request, HttpStatusCode.OK);
                         sendResponse(outputStream, response);
                         return;
                     }
 
-                    String account = request.getQueryParameter("account");
-                    String password = request.getQueryParameter("password");
+                    if (sessionId.isBlank()) {
+                        String account = request.getQueryParameter("account");
+                        String password = request.getQueryParameter("password");
 
-                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
-                    boolean checkPassword = user.checkPassword(password);
+                        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
 
-                    if (!checkPassword) {
+                        boolean checkPassword = user.checkPassword(password);
+                        if (!checkPassword) {
+                            response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                            response.setLocation("/401.html");
+                            sendResponse(outputStream, response);
+                            return;
+                        }
+
+                        UUID uuid = UUID.randomUUID();
+                        Session session = new Session(uuid.toString());
+                        session.setAttribute("user", user);
+                        SessionManager.add(session);
+
                         response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
-                        response.setLocation("/401.html");
+                        response.setLocation("/index.html");
+                        response.addCookie("JSESSIONID",uuid.toString());
+                        System.out.println(response.asString());
                         sendResponse(outputStream, response);
                         return;
                     }
+
+                    Session session = SessionManager.findSession(sessionId);
+                    User user = SessionManager.getUser(session);
+                    InMemoryUserRepository.save(user);
 
                     response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
                     response.setLocation("/index.html");
                     sendResponse(outputStream, response);
                     return;
-
                 } catch (IllegalArgumentException e) {
                     response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
                     response.setLocation("/401.html");

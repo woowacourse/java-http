@@ -24,4 +24,20 @@ public class HttpRequestHeader {
         String trimmed = value.trim();
         return Integer.parseInt(trimmed);
     }
+
+    public HttpCookie getCookie() {
+        String cookie = headers.getOrDefault("Cookie", "");
+        if (cookie.isBlank()) {
+            return new HttpCookie();
+        }
+        String[] split = cookie.split(";");
+
+        Map<String, String> cookies = new HashMap<>();
+        for (String value : split) {
+            String trimmed = value.trim();
+            String[] keyValue = trimmed.split("=");
+            cookies.put(keyValue[0], keyValue[1]);
+        }
+        return new HttpCookie(cookies);
+    }
 }

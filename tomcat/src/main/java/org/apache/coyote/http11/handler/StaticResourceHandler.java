@@ -31,15 +31,15 @@ public class StaticResourceHandler implements Handler {
             return defaultResponse(request);
         }
 
-        String resourcePath = "static" + path;
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        final String resourcePath = "static" + path;
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         if (resource == null) {
             return notFoundResponse(request);
         }
 
-        String body = Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8);
-        HttpHeaders headers = new HttpHeaders();
+        final String body = Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8);
+        final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", ContentType.fromPath(path));
         headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 
@@ -73,7 +73,7 @@ public class StaticResourceHandler implements Handler {
             body = "<h1>404 Not Found</h1>";
         }
 
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
         headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 

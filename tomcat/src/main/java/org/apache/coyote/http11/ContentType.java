@@ -30,7 +30,7 @@ public enum ContentType {
     }
 
     private static String getExtension(final String path) {
-        int dotIndex = path.lastIndexOf(".");
+        final int dotIndex = path.lastIndexOf(".");
         return dotIndex == -1 ? null : path.substring(dotIndex);
     }
 }

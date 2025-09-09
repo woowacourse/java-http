@@ -34,7 +34,7 @@ public class RegisterHandler implements Handler {
         }
 
         if (request.equalMethod("POST") && request.equalContentType("application/x-www-form-urlencoded")) {
-            Map<String, String> formParams = request.getFormParams();
+            final Map<String, String> formParams = request.getFormParams();
             final String account = formParams.get("account");
             final String email = formParams.get("email");
             final String password = formParams.get("password");
@@ -51,8 +51,8 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpResponse registerPageResponse(String httpVersion, String location) throws IOException {
-        String resourcePath = "static" + location;
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        final String resourcePath = "static" + location;
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         String body = "";
         if (resource != null) {

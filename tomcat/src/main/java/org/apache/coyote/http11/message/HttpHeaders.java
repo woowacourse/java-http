@@ -27,7 +27,7 @@ public class HttpHeaders {
     }
 
     public String getContentLength() {
-        List<String> values = headers.get("Content-Length");
+        final List<String> values = headers.get("Content-Length");
         if (values == null || values.isEmpty()) {
             return "0";
         }
@@ -35,7 +35,7 @@ public class HttpHeaders {
     }
 
     public String getFirst(final String name) {
-        List<String> values = headers.get(name);
+        final List<String> values = headers.get(name);
         if (values == null || values.isEmpty()) {
             return null;
         }

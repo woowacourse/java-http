@@ -37,10 +37,10 @@ public class LoginHandler implements Handler {
             return loginPageResponse(httpVersion,"/login.html");
         }
 
-        Optional<User> authenticatedUser = authenticate(account, password);
+        final Optional<User> authenticatedUser = authenticate(account, password);
 
         if (authenticatedUser.isPresent()) {
-            User user = authenticatedUser.get();
+            final User user = authenticatedUser.get();
             log.info("user : {}", user);
             return redirectResponse(httpVersion,"/index.html");
         }
@@ -54,15 +54,15 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse loginPageResponse(String httpVersion, String location) throws IOException {
-        String resourcePath = "static" + location;
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        final String resourcePath = "static" + location;
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         String body = "";
         if (resource != null) {
             body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
         }
 
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
         headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 

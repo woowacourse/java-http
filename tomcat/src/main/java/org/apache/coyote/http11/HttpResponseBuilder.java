@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponseBuilder {
-    private static HttpStatus httpStatus;
-    private static String responseBody;
-    private static String contentType;
+    private HttpStatus httpStatus;
+    private String responseBody;
     private Map<String, String> headers = new HashMap<>();
 
     public HttpResponseBuilder() {

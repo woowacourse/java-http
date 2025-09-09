@@ -24,7 +24,7 @@ public class HttpRequestParser {
             HttpHeaders headers = parseHeaders(bufferedReader);
             HttpBody body = parseBody(headers, bufferedReader);
             return new HttpRequest(requestLine, headers, body);
-        } catch (IOException | ArrayIndexOutOfBoundsException exception) {
+        } catch (IOException | ArrayIndexOutOfBoundsException | NullPointerException exception) {
             logger.error(exception.getMessage(), exception);
             return null;
         }

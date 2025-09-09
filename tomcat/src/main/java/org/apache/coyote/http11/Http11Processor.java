@@ -203,15 +203,7 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException, URISyntaxException {
         final byte[] fileBytes = readFile(path);
 
-        String jSessionId = existingJSessionId;
-        boolean shouldSetCookie = false;
-
-        if (jSessionId == null) {
-            jSessionId = UUID.randomUUID().toString();
-            shouldSetCookie = true;
-        }
-
-        return generateOkResponse(path, fileBytes, shouldSetCookie ? jSessionId : null);
+        return generateOkResponse(path, fileBytes, existingJSessionId);
     }
 
     private Map<String, String> parseFormData(final String formData) {

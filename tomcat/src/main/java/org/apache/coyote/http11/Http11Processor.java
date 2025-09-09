@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.error.ErrorMapper;
+import org.apache.coyote.http11.handler.GreetingHandler;
 import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.handler.HttpResourceHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
@@ -33,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
         this.resolver = new Resolver(httpResourceHandler)
+                .register("/", new GreetingHandler())
                 .register("/login", new LoginHandler(httpResourceLoader, queryParser))
                 .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
         ;
@@ -55,6 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpHandler handler = resolver.resolve(path);
 
             HttpResponse response = handler.handle(httpRequest);
+
             httpResponseWriter.write(outputStream, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

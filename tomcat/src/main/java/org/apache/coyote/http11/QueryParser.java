@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class QueryParser {
@@ -11,7 +11,7 @@ public class QueryParser {
     public Map<String, String> parse(final String uri) {
         String[] pairs = uri.split(AND);
 
-        Map<String, String> queries = new HashMap<>();
+        Map<String, String> queries = new LinkedHashMap<>();
         for (String pair : pairs) {
             int equalIndex = pair.indexOf(EQUAL);
             String name = pair.substring(0, equalIndex);

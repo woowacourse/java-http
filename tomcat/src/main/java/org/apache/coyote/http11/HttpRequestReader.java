@@ -4,7 +4,9 @@ import com.techcourse.exception.BadRequestException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequestReader {
@@ -24,18 +26,14 @@ public class HttpRequestReader {
         BufferedInputStream in = new BufferedInputStream(inputStream);
 
         RequestLine requestLine = readRequestLine(in);
-        Map<String, String> headers = readHeaders(in);
+        Map<String, List<String>> headers = readHeaders(in);
+
         String uri = requestLine.uri();
         String path = findPath(uri);
-
         Map<String, String> queries = parseQueryString(uri);
 
-        byte[] body = new byte[0];
-        String len = headers.get("content-length");
-        if (len != null) {
-            int contentLength = Integer.parseInt(len);
-            body = in.readNBytes(contentLength);
-        }
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", List.of("0")).getFirst());
+        byte[] body = in.readNBytes(contentLength);
 
         return new HttpRequest(requestLine, headers, path, queries, body);
     }
@@ -63,8 +61,8 @@ public class HttpRequestReader {
         return new RequestLine(method, uri, version);
     }
 
-    private Map<String, String> readHeaders(final BufferedInputStream in) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private Map<String, List<String>> readHeaders(final BufferedInputStream in) throws IOException {
+        Map<String, List<String>> headers = new HashMap<>();
         String line;
         while ((line = readLine(in)) != null && !line.isEmpty()) {
             int colon = line.indexOf(COLON);
@@ -73,10 +71,11 @@ public class HttpRequestReader {
             }
             String name = line.substring(0, colon).toLowerCase().trim();
             String value = line.substring(colon + 1).trim();
-            headers.put(name, value);
+
+            headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
         }
 
-        return Map.copyOf(headers);
+        return headers;
     }
 
     private String readLine(BufferedInputStream in) throws IOException {

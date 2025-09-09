@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.dto.ResourceResult;
 
@@ -18,9 +19,9 @@ public class HttpResourceLoader {
         ResourceResult resourceResult = getResourceResult(formattedPath);
         HttpStatus status = findStatus(resourceResult);
 
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", resourceResult.mimeType());
-        headers.put("Content-Length", String.valueOf(resourceResult.body().length));
+        Map<String, List<String>> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", List.of(resourceResult.mimeType()));
+        headers.put("Content-Length", List.of(String.valueOf(resourceResult.body().length)));
 
         return new HttpResponse(status, headers, resourceResult.body());
     }

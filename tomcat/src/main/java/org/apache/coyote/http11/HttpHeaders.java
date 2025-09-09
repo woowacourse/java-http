@@ -15,16 +15,20 @@ public class HttpHeaders {
         headers.put(name, value);
     }
 
-    public void setSessionId(final HttpSession session) {
-        headers.put("Set-Cookie", HttpSession.SESSION_TYPE + "=" + session.getId() + "; ");
-    }
-
     public String getHeader(final String name) {
         return headers.get(name);
     }
 
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
+    }
+
+    public void setSessionId(final HttpSession session) {
+        headers.put("Set-Cookie", HttpSession.SESSION_TYPE + "=" + session.getId() + "; ");
+    }
+
+    public HttpCookies getCookies() {
+        return new HttpCookies(headers.get("Cookie"));
     }
 
     @Override

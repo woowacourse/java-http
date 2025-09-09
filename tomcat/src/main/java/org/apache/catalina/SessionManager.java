@@ -19,7 +19,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public HttpSession findSession(final String id) throws IOException {
+    public HttpSession findSession(final String id) {
         return SESSIONS.get(id);
     }
 

@@ -22,6 +22,10 @@ public class HttpSession {
         values.put(key, value);
     }
 
+    public Object getValue(final String key) {
+        return values.get(key);
+    }
+
     public String getId() {
         return id;
     }

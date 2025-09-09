@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpSession;
 import org.apache.coyote.http11.handle.HttpHandlerCondition;
@@ -41,11 +42,40 @@ public class LoginHttpHandler extends MultiConditionHandler {
     }
 
     private HttpResponse handleGetLogin(final HttpRequest request) {
+        if (isAlreadyLoginSession(request)) {
+            final HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.addHeader("Location", "/index.html");
+
+            return new HttpResponse(
+                    request.protocolVersion(),
+                    HttpStatus.SEE_OTHER,
+                    responseHeaders
+            );
+        }
+
         return htmlHttpHandler.handle(
                 "/login.html",
                 request.protocolVersion(),
                 HttpStatus.OK
         );
+    }
+
+    private boolean isAlreadyLoginSession(final HttpRequest request) {
+        final HttpCookie sessionCookie = request.headers().getCookies().getCookie(HttpSession.SESSION_TYPE);
+        if (sessionCookie != null) {
+            final String sessionId = sessionCookie.value();
+            final HttpSession session = SessionManager.getInstance().findSession(sessionId);
+            if (session != null) {
+                final Object user = session.getValue("user");
+                if (user instanceof User) {
+                    log.info("로그인 된 유저입니다. {}", user);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private HttpResponse handlePostLogin(final HttpRequest request) {

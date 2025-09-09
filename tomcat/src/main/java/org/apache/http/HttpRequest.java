@@ -91,6 +91,7 @@ public class HttpRequest {
     }
 
     private Map<String, String> readHeader(BufferedReader reader) throws IOException {
+        //TODO: 헤더도 바이트 단위로 읽는 것을 고려  (2025-09-9, 화, 14:26)
         Map<String, String> headerRead = new HashMap<>();
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
@@ -137,7 +138,8 @@ public class HttpRequest {
             return queryStringRead;
         }
 
-        List<String> startLinePart = List.of(uriLine.split("\\?"));
+        String decodedUri = URLDecoder.decode(uriLine, StandardCharsets.UTF_8);
+        List<String> startLinePart = List.of(decodedUri.split("\\?"));
         String queryStringLine = startLinePart.getLast();
         List<String> queryStringParts = List.of(queryStringLine.split("&"));
         for (String queryStringPart : queryStringParts) {

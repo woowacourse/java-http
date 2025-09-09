@@ -49,13 +49,16 @@ public class Http11Processor implements Runnable, Processor {
     private void dispatchRequest(HttpRequest request, HttpResponse response) throws IOException {
         String sessionId = request.getCookies().get("JSESSIONID");
         Session session = SessionManager.findSession(sessionId);
-
         if (session == null) {
             String newSessionId = UUID.randomUUID().toString();
             session = new Session(newSessionId);
             SessionManager.add(session);
             response.setCookie("JSESSIONID", newSessionId);
         }
+        String newSessionId = UUID.randomUUID().toString();
+        session = new Session(newSessionId);
+        SessionManager.add(session);
+        response.setCookie("JSESSIONID", newSessionId);
         String path = request.getPath();
         if ("/".equals(path)) {
             handleRoot(response);

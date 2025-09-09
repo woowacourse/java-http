@@ -28,6 +28,12 @@ public class LoginController extends AbstractController {
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
 
+    private final LoginRestController loginRestController;
+
+    public LoginController() {
+        this.loginRestController = new LoginRestController(new UserService());
+    }
+
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
@@ -53,9 +59,6 @@ public class LoginController extends AbstractController {
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String requestBody = httpRequest.getRequestBody().getBody();
         Map<String, String> bodyValues = getQueryParams(requestBody);
-
-        final LoginRestController loginRestController = new LoginRestController(
-                new UserService());
 
         try {
             User user = loginRestController.login(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD));

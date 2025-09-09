@@ -23,6 +23,12 @@ public class RegisterController extends AbstractController {
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
 
+    private final RegisterRestController registerRestController;
+
+    public RegisterController() {
+        this.registerRestController = new RegisterRestController(new UserService());
+    }
+
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
@@ -42,9 +48,6 @@ public class RegisterController extends AbstractController {
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String requestBody = httpRequest.getRequestBody().getBody();
         Map<String, String> bodyValues = getQueryParams(requestBody);
-
-        final RegisterRestController registerRestController = new RegisterRestController(
-                new UserService());
 
         registerRestController.register(bodyValues.get(ACCOUNT), bodyValues.get(PASSWORD), bodyValues.get(EMAIL));
         httpResponse.sendRedirect(INDEX_RESOURCE_PATH);

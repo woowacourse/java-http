@@ -4,6 +4,7 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
+    PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED, "비밀번호가 틀렸습니다."),
     ;
 
     private final HttpStatus status;

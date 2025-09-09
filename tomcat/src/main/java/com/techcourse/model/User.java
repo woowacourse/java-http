@@ -1,21 +1,20 @@
 package com.techcourse.model;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class User {
+    private static final AtomicLong lastId = new AtomicLong(0);
 
     private final Long id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(Long id, String account, String password, String email) {
-        this.id = id;
+    public User(String account, String password, String email) {
+        this.id = lastId.incrementAndGet();
         this.account = account;
         this.password = password;
         this.email = email;
-    }
-
-    public User(String account, String password, String email) {
-        this(null, account, password, email);
     }
 
     public boolean checkPassword(String password) {

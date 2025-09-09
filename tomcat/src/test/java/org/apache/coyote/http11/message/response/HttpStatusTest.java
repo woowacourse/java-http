@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.exception.StatusCodeNotExistsException;
 import org.junit.jupiter.api.Test;
 
 class HttpStatusTest {
@@ -30,6 +29,6 @@ class HttpStatusTest {
 
         // when & then
         assertThatThrownBy(() -> HttpStatus.from(invalidCode))
-                .isInstanceOf(StatusCodeNotExistsException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

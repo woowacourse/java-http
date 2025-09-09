@@ -253,7 +253,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        log.info("user register account {} and email {}", user, password, email);
+        log.info("user register account {} and email {}", user, email);
     }
 
     private User login(Map<String, String> queryParameters) {

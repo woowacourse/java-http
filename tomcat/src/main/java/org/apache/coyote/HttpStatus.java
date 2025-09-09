@@ -5,6 +5,9 @@ public enum HttpStatus {
     // 2xx
     OK(200, "200 OK"),
 
+    // 3xx
+    FOUND(302, "302 FOUND"),
+
     // 4xx
     METHOD_NOT_ALLOWED(405, "405 METHOD_NOT_ALLOWED");
 

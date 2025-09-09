@@ -1,14 +1,17 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.Resource;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,32 +23,29 @@ public class LoginHandler extends HttpRequestHandler {
     }
 
     @Override
-    protected String handleGet(String request) {
-        service(request);
-        Resource responseBody = getResource("/login.html");
-        MimeType mimeType = MimeType.fromResource(responseBody);
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType.getMimeType(),
-                "Content-Length: " + responseBody.content().getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody.content()
-        );
+    protected HttpResponse handleGet(String request) {
+        HttpResponse httpResponse = service(request);
+        return httpResponse;
     }
 
-    private void service(String request) {
+    private HttpResponse service(String request) {
         Map<String, String> parameterMap = getParameters(request);
         String account = parameterMap.get("account");
         String password = parameterMap.get("password");
         if (account == null | password == null) {
-            return;
+            Resource responseBody = getResource("/login.html");
+            MimeType mimeType = MimeType.fromResource(responseBody);
+            return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
         }
-        InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .ifPresentOrElse(
-                        user -> System.out.println("user = " + user),
-                        () -> System.out.println("User account " + account + " not found.")
-                );
+
+        Optional<User> user = InMemoryUserRepository.findByAccountAndPassword(account, password);
+        if (user.isPresent()) {
+            return new HttpResponse(HttpStatus.FOUND, "", MimeType.ANY, Map.of("Location", "/index.html"));
+        }
+
+        Resource responseBody = getResource("/401.html");
+        MimeType mimeType = MimeType.fromResource(responseBody);
+        return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
     }
 
     private Map<String, String> getParameters(String request) {

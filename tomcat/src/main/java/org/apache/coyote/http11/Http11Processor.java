@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpRequestHandler;
 import org.apache.coyote.http11.handler.HttpRequestHandlerContainer;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,9 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             final String request = parseRequest(inputStream);
-            final String response = processResponse(request);
+            final HttpResponse response = processResponse(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -55,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
-    private String processResponse(String request) {
+    private HttpResponse processResponse(String request) {
         String url = getUrl(request);
         HttpRequestHandler httpRequestHandler = handlerContainer.getHandler(url);
         if (httpRequestHandler == null) {

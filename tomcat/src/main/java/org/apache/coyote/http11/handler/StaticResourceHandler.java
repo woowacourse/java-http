@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.Resource;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class StaticResourceHandler extends HttpRequestHandler {
 
@@ -21,17 +23,10 @@ public class StaticResourceHandler extends HttpRequestHandler {
     }
 
     @Override
-    protected String handleGet(String request) {
+    protected HttpResponse handleGet(String request) {
         Resource responseBody = getResource();
         MimeType mimeType = MimeType.fromResource(responseBody);
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: " + mimeType.getMimeType(),
-                "Content-Length: " + responseBody.content().getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody.content()
-        );
+        return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
     }
 
     private Resource getResource() {

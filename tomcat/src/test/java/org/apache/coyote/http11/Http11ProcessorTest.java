@@ -62,4 +62,33 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void malformed_request_line_results_in_400() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/400.html");
+        final String body = Files.readString(new File(resource.getFile()).toPath())
+                .replace("\r\n", "\n").replace("\n", "\r\n");
+
+        String expected = String.join("\r\n",
+                "HTTP/1.1 400 Bad Request",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

@@ -23,6 +23,7 @@ class ConcurrencyTest {
 
         // 웹서버로 동시에 2명의 유저가 gugu라는 이름으로 가입을 시도했다.
         // UserServlet의 users에 이미 가입된 회원이 있으면 중복 가입할 수 없도록 코드를 작성했다.
+        // 스레드를 start()하는 순간 userServlet.join()을 한다.
         final var firstThread = new Thread(new HttpProcessor(new User("gugu"), userServlet));
         final var secondThread = new Thread(new HttpProcessor(new User("gugu"), userServlet));
 

@@ -35,7 +35,7 @@ public class HttpRequest {
         String line;
         Map<String, String> headers = new LinkedHashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            int idx = line.indexOf(':'); // split 2
+            int idx = line.indexOf(':');
             if (idx <= 0) {
                 throw new IllegalArgumentException();
             }
@@ -98,5 +98,9 @@ public class HttpRequest {
         System.arraycopy(body, 0, result, headerBytes.length, body.length);
 
         return result;
+    }
+
+    public byte[] getBody() {
+        return body;
     }
 }

@@ -7,38 +7,42 @@ import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
-    private final HttpStatus status;
-    private final HttpHeaders headers;
-    private final HttpBody body;
+    private HttpStatus status = HttpStatus.OK;
+    private HttpHeaders headers = HttpHeaders.init();
+    private HttpBody body = HttpBody.init();
 
-    public HttpResponse(HttpStatus status, HttpHeaders headers, HttpBody body) {
+    public void init() {
+        status = HttpStatus.OK;
+        headers = HttpHeaders.init();
+        body = HttpBody.init();
+    }
+
+    public void appendToBody(byte[] additionalContent) {
+        body = body.append(additionalContent);
+    }
+
+    public void appendToBody(String additionalText) {
+        body = body.append(additionalText);
+    }
+
+    public void setContentType(ContentType contentType) {
+        headers.add("Content-Type", contentType.getMimeType());
+    }
+
+    public void setStatus(HttpStatus status) {
         this.status = status;
-        this.headers = headers;
-        this.body = body;
     }
 
-    public int getStatusCode() {
-        return status.getCode();
-    }
-
-    public String getReasonPhrase() {
-        return status.getReasonPhrase();
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
-    public HttpBody getBody() {
-        return body;
+    public void addToHeader(String name, String value) {
+        headers.add(name, value);
     }
 
     public void writeTo(OutputStream output) throws IOException {
+        headers.add("Content-Length", String.valueOf(body.length()));
         output.write(getHeaderText().getBytes(StandardCharsets.ISO_8859_1));
         output.write(getBodyBytes());
     }
 
-    // 헤더만 문자열로 변환
     private String getHeaderText() {
         StringBuilder sb = new StringBuilder();
         sb.append("HTTP/1.1 ")
@@ -52,7 +56,6 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    // 바디를 바이트 배열로 변환
     private byte[] getBodyBytes() {
         return body.getBytes();
     }

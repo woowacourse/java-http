@@ -8,6 +8,7 @@ import org.apache.catalina.session.SimpleManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestCookie;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +47,12 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    // TODO. Controller 인터페이스 추가하기
     @Override
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            
+
             final var request = HttpRequest.from(reader);
             final var cookie = RequestCookie.from(request.getHeader("Cookie"));
             final var extraHeaders = new LinkedHashMap<String, List<String>>();
@@ -235,11 +235,10 @@ public class Http11Processor implements Runnable, Processor {
     private String detectContentType(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
         final var contentType = Files.probeContentType(path);
-
+        
         return contentType != null ? contentType : "text/plain;charset=utf-8";
     }
 
-    // TODO. HttpResponse 클래스 구현하기
     private void writeResponse(
             final OutputStream outputStream,
             final int statusCode,
@@ -248,39 +247,14 @@ public class Http11Processor implements Runnable, Processor {
             final byte[] body,
             final String contentType
     ) throws IOException {
-        final var headers = new StringBuilder()
-                .append("HTTP/1.1 ")
-                .append(statusCode)
-                .append(" ")
-                .append(statusMessage)
-                .append("\r\n")
-                .append("Content-Type: ")
-                .append(contentType)
-                .append("\r\n");
+        final var response = HttpResponse.builder()
+                .status(statusCode, statusMessage)
+                .contentType(contentType)
+                .headers(extraHeaders)
+                .body(body)
+                .build();
 
-        if (body != null) {
-            headers.append("Content-Length: ")
-                    .append(body.length)
-                    .append("\r\n");
-        }
-
-        if (extraHeaders != null) {
-            extraHeaders.forEach((key, values) -> values.forEach(value ->
-                    headers.append(key)
-                            .append(": ")
-                            .append(value)
-                            .append("\r\n")));
-        }
-
-        headers.append("\r\n");
-        outputStream.write(headers.toString()
-                .getBytes(StandardCharsets.UTF_8));
-
-        if (body != null) {
-            outputStream.write(body);
-        }
-
-        outputStream.flush();
+        response.writeTo(outputStream);
     }
 
     private void sendInternalServerErrorResponse(final Socket connection) {
@@ -291,14 +265,13 @@ public class Http11Processor implements Runnable, Processor {
                     ? readResourceFile(resourceUrl)
                     : "Internal Server Error".getBytes(StandardCharsets.UTF_8);
 
-            writeResponse(
-                    connection.getOutputStream(),
-                    500,
-                    "Internal Server Error",
-                    Map.of(),
-                    body,
-                    "text/html;charset=utf-8"
-            );
+            final var response = HttpResponse.builder()
+                    .status(500, "Internal Server Error")
+                    .contentType("text/html;charset=utf-8")
+                    .body(body)
+                    .build();
+
+            response.writeTo(connection.getOutputStream());
         } catch (Exception ex) {
             log.error("Failed to send {} response: {}", 500, ex.getMessage(), ex);
         }

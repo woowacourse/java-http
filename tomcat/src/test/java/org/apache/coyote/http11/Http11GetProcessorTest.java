@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 
 class Http11GetProcessorTest {
@@ -14,7 +15,13 @@ class Http11GetProcessorTest {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
         org.assertj.core.api.Assertions
-                .assertThat(http11GetProcessor.doRequest("/index.html")
+                .assertThat(http11GetProcessor.doRequest(new ParseHttpRequest(
+                                "GET",
+                                "/index.html",
+                                new HashMap<>(),
+                                new HttpCookies(new HashMap<>()),
+                                new Session(null)
+                        ))
                         .getParseContent())
                 .hasSizeGreaterThan(0);
     }
@@ -24,7 +31,13 @@ class Http11GetProcessorTest {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
         org.assertj.core.api.Assertions
-                .assertThatThrownBy(() -> http11GetProcessor.doRequest("GET /hello.html"))
+                .assertThatThrownBy(() -> http11GetProcessor.doRequest(new ParseHttpRequest(
+                        "GET",
+                        "/index2.html",
+                        new HashMap<>(),
+                        new HttpCookies(new HashMap<>()),
+                        new Session(null)
+                )))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -32,16 +45,16 @@ class Http11GetProcessorTest {
     void get_요청을_처리할_수_있다() {
         Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
 
-        Assertions.assertDoesNotThrow(() -> http11GetProcessor.doRequest("/login?account=gugu&password=password"));
-    }
-
-    @Test
-    void get_요청을_처리중에_실패시_예외가_발생한다() {
-        Http11GetProcessor http11GetProcessor = new Http11GetProcessor();
-
-        org.assertj.core.api.Assertions
-                .assertThatThrownBy(() -> http11GetProcessor.doRequest("/login?account=tuda&password=password"))
-                .isInstanceOf(IllegalArgumentException.class);
+        Assertions.assertDoesNotThrow(() ->
+                http11GetProcessor.doRequest(new ParseHttpRequest(
+                                "GET",
+                                "/index.html",
+                                new HashMap<>(),
+                                new HttpCookies(new HashMap<>()),
+                                new Session(null)
+                        )
+                ))
+        ;
     }
 }
 

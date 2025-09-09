@@ -71,7 +71,7 @@ public class UserService implements HttpService {
             return new RequestResult(
                     getAuthorizationFailHtml(),
                     "text/html;charset=utf-8 ",
-                    "HTTP/1.1 302 Found "
+                    "HTTP/1.1 401  "
             );
         }
     }

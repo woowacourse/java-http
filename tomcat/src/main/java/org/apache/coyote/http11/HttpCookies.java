@@ -9,7 +9,6 @@ public class HttpCookies {
     private static final String SET_COOKIE_PREFIX = "Set-Cookie: ";
 
     private final Map<String, String> cookies;
-    private boolean isSetCookieNeed = false;
 
     public HttpCookies(Map<String, String> cookies) {
         createJSessionId(cookies);
@@ -18,7 +17,6 @@ public class HttpCookies {
 
     private void createJSessionId(Map<String, String> cookies) {
         if (cookies.get(JSESSIONID) == null) {
-            this.isSetCookieNeed = true;
             cookies.put(
                     JSESSIONID,
                     UUID.randomUUID()
@@ -35,13 +33,14 @@ public class HttpCookies {
             stringBuilder.append(key)
                     .append("=")
                     .append(value)
-                    .append("; ");
+                    .append("; ")
+                    .append("Path=/;");
         }
 
         if (stringBuilder.lastIndexOf(";") != -1) {
             stringBuilder.deleteCharAt(stringBuilder.lastIndexOf("; "));
         }
-        
+
         return stringBuilder.toString();
     }
 

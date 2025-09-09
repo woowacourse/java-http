@@ -81,36 +81,29 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private ParseHttpRequest readRequestFromReader(final BufferedReader bufferedReader) throws IOException {
-        String buffer = "";
-        ParseHttpRequest parseHttpRequest = null;
-        while ((buffer = bufferedReader.readLine()) != null) {
-            String[] lineSplit = buffer.split(" ");
+        String buffer = bufferedReader.readLine();
+        if (isReqeustExist(buffer)) {
+            ParseHttpRequest parseHttpRequest = new ParseHttpRequest(
+                    parseMethod(buffer),
+                    parseContentPath(buffer),
+                    new HashMap<>(),
+                    new HttpCookies(new HashMap<>()),
+                    new Session(null)
+            );
+            Map<String, String> cookies = parseCookie(bufferedReader);
+            parseHttpRequest = parseHttpRequest.addCookies(cookies);
 
-            if (isReqeustExist(buffer) && lineSplit.length >= 2) {
-                parseHttpRequest = new ParseHttpRequest(
-                        parseMethod(buffer),
-                        parseContentPath(buffer),
-                        new HashMap<>(),
-                        new HttpCookies(new HashMap<>()),
-                        new Session(null)
-                );
-                break;
+            if (AcceptableRequest.isPost(parseHttpRequest.method())) {
+                Map<String, String> requestBody = parseBody(bufferedReader);
+                return parseHttpRequest.addRequestBody(requestBody);
             }
+
+            return parseHttpRequest;
         }
-
-        Map<String, String> cookies = parseCookie(bufferedReader);
-        parseHttpRequest = parseHttpRequest.addCookies(cookies);
-
-        if (AcceptableRequest.isPost(parseHttpRequest.method())) {
-            Map<String, String> requestBody = parseBody(bufferedReader);
-            return parseHttpRequest.addRequestBody(requestBody);
-        }
-
-        return parseHttpRequest;
+        throw new IllegalArgumentException("유효하지 않은 HTTP 요청입니다.");
     }
 
     private Map<String, String> parseCookie(BufferedReader bufferedReader) throws IOException {
-
         String buffer;
         while (!(buffer = bufferedReader.readLine()).isEmpty()) {
             if (buffer.split("Content-Length: ").length != 1) {
@@ -136,7 +129,9 @@ public class Http11Processor implements Runnable, Processor {
 
         for (String cookieKeyValue : cookieKeyValues) {
             String[] splitedKeyValue = cookieKeyValue.split("=");
-            cookieKeyValueMap.put(splitedKeyValue[0], splitedKeyValue[1]);
+            if (splitedKeyValue.length == 2) {
+                cookieKeyValueMap.put(splitedKeyValue[0], splitedKeyValue[1]);
+            }
         }
 
         return cookieKeyValueMap;
@@ -158,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
         return createRequestBody(requestBody, map);
     }
 
-    private static Map<String, String> createRequestBody(String requestBody, Map<String, String> map) {
+    private Map<String, String> createRequestBody(String requestBody, Map<String, String> map) {
         String[] requestBodies = requestBody.split("&");
 
         for (String s : requestBodies) {

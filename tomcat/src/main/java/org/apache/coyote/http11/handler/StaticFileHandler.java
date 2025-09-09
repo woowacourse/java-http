@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.general.ContentType;
@@ -19,7 +20,7 @@ public class StaticFileHandler {
 
     public static HttpResponse handle(HttpRequest httpRequest, URL resourceUrl) {
         try {
-            String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
+            String responseBody = Files.readString(Path.of(resourceUrl.toURI()), StandardCharsets.UTF_8);
             if (httpRequest.getPath().endsWith(".css")) {
                 return new HttpResponse(HttpStatus.OK, ContentType.TEXT_CSS, responseBody);
             }

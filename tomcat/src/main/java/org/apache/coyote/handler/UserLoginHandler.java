@@ -1,7 +1,9 @@
-package org.apache.coyote.render;
+package org.apache.coyote.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.render.HttpStatus;
+import org.apache.coyote.render.PageRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

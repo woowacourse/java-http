@@ -1,8 +1,8 @@
 package org.apache.coyote.router;
 
 import org.apache.coyote.render.PageRenderer;
-import org.apache.coyote.render.UserLoginHandler;
-import org.apache.coyote.render.UserRegisterHandler;
+import org.apache.coyote.handler.UserLoginHandler;
+import org.apache.coyote.handler.UserRegisterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

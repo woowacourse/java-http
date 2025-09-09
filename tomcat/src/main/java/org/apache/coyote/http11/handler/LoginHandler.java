@@ -4,8 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
 import org.apache.coyote.http11.dto.HttpRequest;
 import org.apache.coyote.http11.helper.Responses;
+import org.apache.coyote.http11.util.CookieUtils;
 import org.apache.coyote.http11.util.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,14 @@ public class LoginHandler implements Handler {
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + account));
             if (user.checkPassword(password)) {
-                serveStaticResponse(request, outputStream, HttpStatus.FOUND, "index.html");
+                String sessionId = UUID.randomUUID().toString();
+                String cookie = CookieUtils.buildSetCookie("JSESSIONID", sessionId, true, "/");
+                Responses.redirectWithCookie(
+                        outputStream,
+                        request.version(),
+                        "/index.html",
+                        cookie
+                );
                 log.info("로그인 성공");
                 return;
             }

@@ -27,6 +27,23 @@ public final class Responses {
         out.flush();
     }
 
+    public static void redirectWithCookie(
+            OutputStream out,
+            String version,
+            String location,
+            String cookie
+    ) throws IOException {
+        StringBuilder sb = new StringBuilder()
+                .append(version).append(" 302 Found\r\n")
+                .append("Location: ").append(location).append("\r\n")
+                .append("Set-Cookie: ").append(cookie).append("\r\n")
+                .append("Content-Length: 0\r\n")
+                .append("\r\n");
+
+        out.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+        out.flush();
+    }
+
     private static void writeHead(OutputStream out, String version, int code, String reason, String contentType, long len) throws IOException {
         String head =
                 version + SP + code + SP + reason + CRLF +

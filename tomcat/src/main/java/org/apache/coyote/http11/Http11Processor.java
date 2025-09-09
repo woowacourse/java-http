@@ -255,6 +255,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<LoginParam, String> registerInformation = parseRequestBody(userInformation);
         if (InMemoryUserRepository.existsByAccount(registerInformation.get(LoginParam.ACCOUNT))) {
             sendResponse(outputStream, buildRedirectHeaders("/register.html"));
+            return;
         }
 
         String account = registerInformation.get(LoginParam.ACCOUNT);

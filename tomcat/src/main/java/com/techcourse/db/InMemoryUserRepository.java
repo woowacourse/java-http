@@ -1,9 +1,9 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
@@ -23,5 +23,17 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static Long getNextId() {
+        OptionalLong lastId = database.values().stream()
+                .mapToLong(User::getId)
+                .max();
+
+        if (lastId.isPresent()) {
+            return lastId.getAsLong() + 1;
+        }
+        return 1L;
+    }
+
+    private InMemoryUserRepository() {
+    }
 }

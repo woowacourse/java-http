@@ -46,14 +46,11 @@ public class Http11Processor implements Runnable, Processor {
                 respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
                 return;
             }
-            if (request.hasQueries() && handleApiRequest(request, outputStream)) {
+            if (handleApiRequest(request, outputStream)) {
                 return;
             }
             String resourcePath = StaticResourcePathGenerator.generate(request.getPath());
             if (handleStaticResourceRequest(resourcePath, outputStream)) {
-                return;
-            }
-            if (request.getQueries().isEmpty() && handleApiRequest(request, outputStream)) {
                 return;
             }
             respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
@@ -79,9 +76,20 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
         if ("/login".equals(request.getPath())) {
-            HttpResponse loginResponse = processLoginMemberInfo(request);
-            respondWithSession(loginResponse, outputStream, request);
-            return true;
+            if ("GET".equals(request.getMethod())) {
+                Session existingSession = request.getSession(false);
+                if (existingSession != null && getUser(existingSession) != null) {
+                    respond(HttpResponse.redirect("/index.html"), outputStream);
+                    return true;
+                }
+                respond(HttpResponse.of("HTTP/1.1 200 OK", "static/login.html"), outputStream);
+                return true;
+            }
+            if ("POST".equals(request.getMethod())) {
+                HttpResponse loginResponse = processLoginMemberInfo(request);
+                respondWithSession(loginResponse, outputStream, request);
+                return true;
+            }
         }
         if ("/register".equals(request.getPath()) && "POST".equals(request.getMethod())) {
             HttpResponse registerResponse = processRegisterMember(request);
@@ -92,12 +100,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processLoginMemberInfo(HttpRequest httpRequest) {
-        if ("GET".equals(httpRequest.getMethod())) {
-            Session existingSession = httpRequest.getSession(false);
-            if (existingSession != null && getUser(existingSession) != null) {
-                return HttpResponse.redirect("/index.html");
-            }
-        }
         String account = httpRequest.getQueryValue("account")
                 .orElse(null);
         String password = httpRequest.getQueryValue("password")

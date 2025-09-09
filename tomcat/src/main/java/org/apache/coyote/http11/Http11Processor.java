@@ -91,20 +91,17 @@ public class Http11Processor implements Runnable, Processor {
         if ("POST".equals(request.getMethod())) {
             String account = request.getQueryParam("account");
             String password = request.getQueryParam("password");
-            if (account != null && password != null) {
-                Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-                if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
-                    User user = userOptional.get();
-                    log.info("로그인 성공: {}", user);
-                    session.setAttribute("user", user);
-                    response.sendRedirect("/index.html");
-                    return;
-                } else {
-                    log.info("로그인 실패: 아이디 또는 비밀번호 불일치");
-                    response.sendRedirect("/401.html");
-                    return;
-                }
+            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+            if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
+                log.info("로그인 실패: 아이디 또는 비밀번호 불일치");
+                response.sendRedirect("/401.html");
+                return;
             }
+            User user = userOptional.get();
+            log.info("로그인 성공: {}", user);
+            session.setAttribute("user", user);
+            response.sendRedirect("/index.html");
+            return;
         }
         loadStaticResource(response, "/login.html");
     }

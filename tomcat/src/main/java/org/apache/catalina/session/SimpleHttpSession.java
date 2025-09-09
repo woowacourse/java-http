@@ -1,5 +1,6 @@
 package org.apache.catalina.session;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionContext;
 
@@ -25,7 +26,8 @@ public class SimpleHttpSession implements HttpSession {
     public static SimpleHttpSession ofGeneratedId() {
         return new SimpleHttpSession(
                 UUID.randomUUID()
-                        .toString(), new ConcurrentHashMap<>()
+                        .toString(),
+                new ConcurrentHashMap<>()
         );
     }
 
@@ -80,7 +82,7 @@ public class SimpleHttpSession implements HttpSession {
     }
 
     @Override
-    public jakarta.servlet.ServletContext getServletContext() {
+    public ServletContext getServletContext() {
         throw new UnsupportedOperationException();
     }
 

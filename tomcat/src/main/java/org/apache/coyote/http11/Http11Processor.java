@@ -264,6 +264,7 @@ public class Http11Processor implements Runnable, Processor {
                         .getResource("static/register.html")
         );
         final var body = readResourceFile(resourceUrl);
+
         writeResponse(outputStream, 200, "OK", extraHeaders, body, "text/html;charset=utf-8");
     }
 
@@ -316,12 +317,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private byte[] readResourceFile(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
+        
         return Files.readAllBytes(path);
     }
 
     private String detectContentType(final URL resourceUrl) throws IOException, URISyntaxException {
         final var path = Path.of(resourceUrl.toURI());
         final var contentType = Files.probeContentType(path);
+
         return contentType != null ? contentType : "text/plain;charset=utf-8";
     }
 

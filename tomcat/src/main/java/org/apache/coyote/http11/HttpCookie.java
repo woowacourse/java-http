@@ -19,10 +19,6 @@ public class HttpCookie {
     private Map<String, String> parseCookie(String cookieHeader) {
         Map<String, String> cookies = new HashMap<>();
 
-        if (cookieHeader == null || cookieHeader.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] cookie is null");
-        }
-
         String header = cookieHeader;
         if (header.startsWith("Cookie: ")) {
             header = header.substring(8);

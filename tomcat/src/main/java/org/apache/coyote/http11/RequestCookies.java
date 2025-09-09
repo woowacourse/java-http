@@ -18,11 +18,11 @@ public class RequestCookies {
         }
 
         final Map<String, String> cookies = new HashMap<>();
-        final String[] cookiePairs = cookieHeader.split("; ");
+        final String[] cookiePairs = cookieHeader.split(";");
         for (final String pair : cookiePairs) {
-            final String[] keyValue = pair.split("=");
+            final String[] keyValue = pair.trim().split("=");
             if (keyValue.length == 2) {
-                cookies.put(keyValue[0], keyValue[1]);
+                cookies.put(keyValue[0].trim(), keyValue[1].trim());
             }
         }
         return new RequestCookies(cookies);

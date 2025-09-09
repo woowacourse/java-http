@@ -17,9 +17,11 @@ public class RequestHeaders {
         final Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            final String[] headerParts = line.split(": ");
+            final String[] headerParts = line.split(":");
             if (headerParts.length == 2) {
-                headers.put(headerParts[0], headerParts[1]);
+                String key = headerParts[0].trim();
+                String value = headerParts[1].trim();
+                headers.put(key, value);
             }
         }
         return new RequestHeaders(headers);

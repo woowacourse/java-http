@@ -20,7 +20,6 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.parser.HeaderParser;
 import org.apache.coyote.http11.parser.QueryParamsParser;
-import org.apache.coyote.http11.parser.UriParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +50,10 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
             Map<String, String> requestHeaders = HeaderParser.parse(bufferedReader);
-            MimeType mimeType = resolveMimeType(requestLine.getPath(), requestHeaders);
+            MimeType mimeType = resolveMimeType(requestLine, requestHeaders);
 
             if (requestLine.getMethod().equalsIgnoreCase("GET")) {
-                HttpResponse response = buildResponse(requestLine.getPath(), mimeType, requestHeaders);
+                HttpResponse response = buildResponse(requestLine, mimeType, requestHeaders);
                 sendResponse(outputStream, response);
             }
 
@@ -74,46 +73,40 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private MimeType resolveMimeType(String requestUri, Map<String, String> requestHeaders) {
+    private MimeType resolveMimeType(RequestLine requestLine, Map<String, String> requestHeaders) {
         String acceptHeaderValue = HeaderParser.extractPrimaryMimeType(requestHeaders);
         MimeType mimeType = MimeType.fromMimeTypeString(acceptHeaderValue);
-
         if (mimeType != null) {
             return mimeType;
         }
-
-        if (UriParser.hasQuery(requestUri)) {
-            requestUri = UriParser.extractPath(requestUri);
-        }
-        String extension = UriParser.extractExtension(requestUri);
-        return MimeType.fromExtensionString(extension);
+        return MimeType.fromExtensionString(requestLine.getExtension());
     }
 
-    private HttpResponse buildResponse(String requestUri, MimeType mimeType, Map<String, String> requestHeaders)
+    private HttpResponse buildResponse(RequestLine requestLine, MimeType mimeType, Map<String, String> requestHeaders)
             throws IOException {
-        if (UriParser.isRootPath(requestUri)) {
+        if (requestLine.isRootPath()) {
             return HttpResponse.of(HttpStatus.OK, mimeType, "Hello world!");
         }
 
-        String path = requestUri;
-        if (UriParser.hasQuery(requestUri)) {
-            path = UriParser.extractPath(requestUri);
-            String queryString = UriParser.extractQueryString(requestUri);
-            Map<String, String> queryParams = QueryParamsParser.parse(queryString);
-            if (path.equals("/login")) {
+        if (requestLine.hasQuery()) {
+            Map<String, String> queryParams = QueryParamsParser.parse(requestLine.getQueryString());
+            if (requestLine.getPath().equals("/login")) {
                 return handleLogin(queryParams, mimeType, requestHeaders);
             }
         }
 
-        if (path.equals("/login") && isLoggedIn(requestHeaders)) {
+        if (requestLine.getPath().equals("/login") && isLoggedIn(requestHeaders)) {
             return redirectTo("/index.html", mimeType);
         }
 
-        return serveStaticPath(path, mimeType);
+        return serveStaticPath(requestLine, mimeType);
     }
 
-    private HttpResponse serveStaticPath(final String path, final MimeType mimeType) throws IOException {
-        final Path filePath = getFilePath(path, mimeType);
+    private HttpResponse serveStaticPath(RequestLine requestLine, MimeType mimeType) throws IOException {
+        final Path filePath = getFilePath(requestLine, mimeType);
+        if (filePath == null) {
+            return HttpResponse.of(HttpStatus.NOT_FOUND, mimeType, "");
+        }
         final String responseBody = Files.readString(filePath, StandardCharsets.UTF_8);
         return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
     }
@@ -129,11 +122,15 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.of(HttpStatus.NOT_FOUND, mimeType, "Not Found");
     }
 
-    private Path getFilePath(String path, MimeType mimeType) {
-        if (UriParser.extractExtension(path).isEmpty()) {
+    private Path getFilePath(RequestLine requestLine, MimeType mimeType) {
+        String path = requestLine.getPath();
+        if (requestLine.getExtension().isEmpty()) {
             path += EXTENSION_SEPARATOR + mimeType;
         }
         URL resource = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
+        if (resource == null) {
+            return null;
+        }
         return new File(resource.getFile()).toPath();
     }
 

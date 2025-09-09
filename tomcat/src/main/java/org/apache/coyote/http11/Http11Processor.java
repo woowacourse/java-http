@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -33,7 +32,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -56,21 +54,43 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IllegalArgumentException("invalid http request");
             }
 
+            int contentLength = 0;
+            String line;
+            HttpCookie httpCookie = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    break;
+                }
+                if (line.toLowerCase().startsWith("cookie")) {
+                    String[] keyValue = line.split(":");
+                    if (keyValue.length == 2) {
+                        httpCookie = new HttpCookie(keyValue[1].trim());
+                    }
+                }
+                if (line.toLowerCase().startsWith("content-length")) { // request body의 길이
+                    String[] keyValue = line.split(":");
+                    if (keyValue.length == 2) {
+                        contentLength = Integer.parseInt(keyValue[1].trim());
+                    }
+                }
+            }
+
+            String body = "";
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                bufferedReader.read(bodyChars, 0, contentLength);
+                body = new String(bodyChars);
+            }
+
             // 요청 헤더 파싱
+            String requestMethod = requestLine.split(" ")[0];
             String requestUri = requestLine.split(" ")[1];
             String requestUriPath = getRequestUriPath(requestUri);
             Map<String, String> queryParameters = getQueryParameters(requestUri);
 
             // 응답
-            String responseBody = getResponseBody(requestUriPath, queryParameters);
-            String contentType = getContentType(requestUriPath);
-            final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: %s;charset=utf-8 ".formatted(contentType),
-                "Content-Length: " + responseBody.getBytes(UTF_8).length + " ",
-                "",
-                responseBody);
-            outputStream.write(response.getBytes(UTF_8));
+            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters, httpCookie, body);
+            outputStream.write(response.toString().getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -91,6 +111,132 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
         String queryString = requestUri.substring(index + 1);
+        return parseQueryParameters(queryString);
+    }
+
+    private HttpResponse getHttpResponse(
+        String requestMethod,
+        String requestUriPath,
+        Map<String, String> queryParameters,
+        HttpCookie httpCookie,
+        String body
+    ) throws IOException {
+        Session session = getSession(httpCookie);
+        if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
+            String responseBody = "Hello world!";
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/html;charset=utf-8")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".css")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/css;charset=utf-8")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".html")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .body(responseBody)
+                .contentType("text/html;charset=utf-8")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.endsWith(".js")) {
+            String responseBody = readStaticFile(requestUriPath);
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/javascript;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.equals("/register")) {
+            String responseBody = readStaticFile("/register.html");
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/html;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("POST") && requestUriPath.equals("/register")) {
+            try {
+                Map<String, String> formData = parseQueryParameters(body);
+                register(formData);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            }
+            return HttpResponse.builder()
+                .status(HttpStatus.Found)
+                .header("Location", "/index.html")
+                .body("")
+                .build();
+        }
+        if (requestMethod.equals("GET") && requestUriPath.equals("/login")) {
+            if (session != null) {
+                Object user = session.getAttribute("user");
+                if (user != null) {
+                    return HttpResponse.builder()
+                        .status(HttpStatus.Found)
+                        .header("Location", "/index.html")
+                        .body("")
+                        .build();
+                }
+            }
+            String responseBody = readStaticFile("/login.html");
+            return HttpResponse.builder()
+                .status(HttpStatus.OK)
+                .contentType("text/html;charset=utf-8")
+                .body(responseBody)
+                .build();
+        }
+        if (requestMethod.equals("POST") && requestUriPath.equals("/login")) {
+            try {
+                Map<String, String> formData = parseQueryParameters(body);
+                User loginUser = login(formData);
+                if (session == null) {
+                    session = new Session();
+                    SessionManager.getInstance().add(session);
+                } else {
+                    SessionManager sessionManager = SessionManager.getInstance();
+                    sessionManager.remove(session);
+                    session.changeId();
+                    sessionManager.add(session);
+                }
+                session.addAttribute("user", loginUser);
+            } catch (UnAuthorizedException e) {
+                return HttpResponse.builder()
+                    .status(HttpStatus.Found)
+                    .header("Location", "/401.html")
+                    .body("")
+                    .build();
+            }
+            return HttpResponse.builder()
+                .status(HttpStatus.Found)
+                .header("Location", "/index.html")
+                .body("")
+                .cookie("JSESSIONID", session.getId())
+                .build();
+        }
+        throw new IllegalArgumentException("invalid request %s".formatted(requestUriPath));
+    }
+
+    private Session getSession(HttpCookie httpCookie) {
+        if (httpCookie == null) {
+            return null;
+        }
+        if (httpCookie.getCookie("JSESSIONID") == null) {
+            return null;
+        }
+        String jsessionid = httpCookie.getCookie("JSESSIONID");
+        SessionManager sessionManager = SessionManager.getInstance();
+        return sessionManager.findSession(jsessionid);
+    }
+
+    private Map<String, String> parseQueryParameters(String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
         Arrays.stream(queryString.split("&"))
             .map(parameter -> parameter.split("="))
@@ -98,30 +244,31 @@ public class Http11Processor implements Runnable, Processor {
         return Collections.unmodifiableMap(queryParameters);
     }
 
-    private String getResponseBody(String requestUriPath, Map<String, String> keyValues) throws IOException {
-        if (requestUriPath.equals("/")) {
-            return "Hello world!";
+    private void register(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+        String email = queryParameters.get("email");
+        if (account == null || password == null || email == null) {
+            throw new IllegalArgumentException("account and password and email should be not null");
         }
-        if (requestUriPath.equals("/login")) {
-            login(keyValues);
-            return readStaticFile("/login.html");
-        }
-        return readStaticFile(requestUriPath);
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("user register account {} and email {}", user, email);
     }
 
-    private void login(Map<String, String> keyValues) {
-        String account = keyValues.get("account");
-        String password = keyValues.get("password");
-        if (account != null && password != null) {
-            Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-            boolean isValidAccount = findUser.isPresent();
-            if (!isValidAccount) {
-                throw new IllegalArgumentException("Invalid account " + account);
-            }
-            User user = findUser.get();
-            log.atInfo().log("user: {}", user);
+    private User login(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+        if (account == null || password == null) {
+            throw new UnAuthorizedException("account or password should be not null");
         }
-        throw new IllegalArgumentException("account or password is required");
+        Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+        User user = findUser.orElseThrow(() -> new UnAuthorizedException("Invalid account " + account));
+        if (!user.checkPassword(password)) {
+            throw new UnAuthorizedException("Invalid password");
+        }
+        log.atInfo().log("user: {}", user);
+        return user;
     }
 
     private String readStaticFile(String filePath) throws IOException {
@@ -131,24 +278,5 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("리소스가 존재하지 않습니다. " + staticFilePath);
         }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private String getContentType(String requestUriPath) throws IOException {
-        if (requestUriPath.equals("/")) {
-            return "text/html";
-        }
-        if (requestUriPath.equals("/login")) {
-            return "text/html";
-        }
-        if (requestUriPath.endsWith(".css")) {
-            return "text/css";
-        }
-        if (requestUriPath.endsWith(".html")) {
-            return "text/html";
-        }
-        if (requestUriPath.endsWith(".js")) {
-            return "text/javascript";
-        }
-        throw new IllegalArgumentException("지원하지 않는 요청 uri 입니다. " + requestUriPath);
     }
 }

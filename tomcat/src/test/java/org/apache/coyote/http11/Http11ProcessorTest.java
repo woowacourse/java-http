@@ -22,14 +22,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String result = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(result).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(result).contains("Content-Type: text/html;charset=utf-8 \r\n");
+        assertThat(result).contains("Content-Length: 12 \r\n");
+        assertThat(result).endsWith("Hello world!");
     }
 
     @Test
@@ -49,13 +47,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        String result = socket.output();
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(result).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(result).contains("Content-Type: text/html;charset=utf-8 \r\n");
+        assertThat(result).contains("Content-Length: 5564 \r\n");
+        assertThat(result).endsWith(responseBody);
     }
 }

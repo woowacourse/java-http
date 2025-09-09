@@ -1,0 +1,109 @@
+package org.apache.coyote.http11.request;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public class HttpRequest {
+
+    private final RequestLine requestLine;
+    private final Map<String, String> headers;
+    private final Map<String, String> parameters;
+    private final String body;
+
+    private HttpRequest(
+            final RequestLine requestLine,
+            final Map<String, String> headers,
+            final Map<String, String> parameters,
+            final String body
+    ) {
+        Objects.requireNonNull(requestLine, "requestLine must not be null");
+        Objects.requireNonNull(headers, "headers must not be null");
+        Objects.requireNonNull(parameters, "parameters must not be null");
+        Objects.requireNonNull(body, "body must not be null");
+        this.requestLine = requestLine;
+        this.headers = Map.copyOf(headers);
+        this.parameters = Map.copyOf(parameters);
+        this.body = body;
+    }
+
+    public static HttpRequest from(final BufferedReader reader) throws IOException {
+        final var line = reader.readLine();
+        final var requestLine = RequestLine.from(line);
+
+        final var headers = new HashMap<String, String>();
+        while (true) {
+            final var headerLine = reader.readLine();
+            if (headerLine.isBlank()) {
+                break;
+            }
+
+            final var parts = headerLine.split(":", 2);
+            if (parts.length == 2) {
+                headers.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+
+        final var parameters = new HashMap<String, String>();
+        parseParameters(requestLine.getQueryString(), parameters);
+
+        var body = "";
+        if ("POST".equalsIgnoreCase(requestLine.getMethod())) {
+            final var contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+            if (contentLength > 0) {
+                var bodyChars = new char[contentLength];
+                reader.read(bodyChars);
+                body = new String(bodyChars);
+                parseParameters(body, parameters);
+            }
+        }
+
+        return new HttpRequest(requestLine, headers, parameters, body);
+    }
+
+    private static void parseParameters(final String queryString, final Map<String, String> parameters) {
+        if (queryString == null || queryString.isBlank()) {
+            return;
+        }
+
+        final var pairs = queryString.split("&");
+        for (final var pair : pairs) {
+            final var keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                parameters.put(
+                        URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
+                );
+            }
+        }
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getHeader(final String name) {
+        return headers.get(name);
+    }
+
+    public String getParameter(final String name) {
+        return parameters.get(name);
+    }
+
+    public Map<String, String> getParameters() {
+        return Collections.unmodifiableMap(parameters);
+    }
+
+    public String getBody() {
+        return body;
+    }
+}

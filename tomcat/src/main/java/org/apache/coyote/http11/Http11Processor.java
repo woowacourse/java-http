@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.session.SimpleHttpSession;
 import org.apache.catalina.session.SimpleManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +18,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,23 +49,18 @@ public class Http11Processor implements Runnable, Processor {
     // TODO. Controller 인터페이스 추가하기
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            final var request = parseRequest(reader);
-            if (request == null) {
-                return;
-            }
-
-            final var method = request.get("method");
-            final var path = request.get("path");
-            final var params = parseQueryString(request.get("params"));
-            final var cookieHeader = request.get("cookie");
-
-            final var cookie = RequestCookie.from(cookieHeader);
+            
+            final var request = HttpRequest.from(reader);
+            final var cookie = RequestCookie.from(request.getHeader("Cookie"));
             final var extraHeaders = new LinkedHashMap<String, List<String>>();
             final var session = resolveSession(cookie, extraHeaders);
+
+            final var method = request.getMethod();
+            final var path = request.getPath();
+            final var params = request.getParameters();
 
             if ("/login".equals(path)) {
                 handleLoginRequest(method, session, params, outputStream, extraHeaders);
@@ -82,94 +77,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error("Internal Server Error: {}", e.getMessage(), e);
             sendInternalServerErrorResponse(connection);
         }
-    }
-
-    // TODO. HttpRequest 클래스 구현하기
-    private Map<String, String> parseRequest(final BufferedReader reader) throws IOException {
-        final var requestLine = reader.readLine();
-        if (requestLine == null || requestLine.isBlank()) {
-            return null;
-        }
-
-        final var methodAndUri = extractMethodAndUri(requestLine);
-        final var method = methodAndUri.get("method");
-        final var path = methodAndUri.get("path");
-        final var query = methodAndUri.get("query");
-
-        final var headers = new HashMap<String, String>();
-        String line;
-        while (!(line = reader.readLine()).isBlank()) {
-            final var headerParts = line.split(":", 2);
-            if (headerParts.length == 2) {
-                headers.put(headerParts[0].trim(), headerParts[1].trim());
-            }
-        }
-
-        final var allParams = new StringBuilder();
-        if (query != null) {
-            allParams.append(query);
-        }
-
-        if ("POST".equalsIgnoreCase(method)) {
-            final var contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-            if (contentLength > 0) {
-                final var bodyChars = new char[contentLength];
-                reader.read(bodyChars, 0, contentLength);
-                if (!allParams.isEmpty()) {
-                    allParams.append("&");
-                }
-                allParams.append(new String(bodyChars));
-            }
-        }
-
-        final var result = new HashMap<String, String>();
-        result.put("method", method);
-        result.put("path", path);
-        result.put("params", allParams.toString());
-        result.put("cookie", headers.get("Cookie"));
-
-        return result;
-    }
-
-    private Map<String, String> extractMethodAndUri(final String requestLine) {
-        final var result = new HashMap<String, String>();
-        final var parts = requestLine.split(" ");
-        final var method = parts[0];
-        final var uri = parts[1];
-
-        result.put("method", method);
-
-        final var index = uri.indexOf("?");
-        if (index != -1) {
-            result.put("path", uri.substring(0, index));
-            result.put("query", uri.substring(index + 1));
-        } else {
-            result.put("path", uri);
-            result.put("query", null);
-        }
-
-        return result;
-    }
-
-    private Map<String, String> parseQueryString(final String queryString) {
-        final var paramMap = new HashMap<String, String>();
-
-        if (queryString == null || queryString.isBlank()) {
-            return paramMap;
-        }
-
-        final var queries = queryString.split("&");
-        for (final var query : queries) {
-            final var keyValue = query.split("=", 2);
-            if (keyValue.length == 2) {
-                final var key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                final var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-
-                paramMap.put(key, value);
-            }
-        }
-
-        return paramMap;
     }
 
     private HttpSession resolveSession(

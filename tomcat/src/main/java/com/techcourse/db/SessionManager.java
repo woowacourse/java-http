@@ -1,7 +1,6 @@
 package com.techcourse.db;
 
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String id) throws IOException {
+    public Session findSession(String id) {
         return SESSIONS.get(id);
     }
 

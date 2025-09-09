@@ -22,6 +22,7 @@ public class HandlerMethod {
         try {
             Map<String, String> queryParams = req.getMappingLine().getParameters();
             Map<String, String> bodyParams = parseFormUrlEncoded(req);
+            Map<String, String> headers = req.getHeaders();
 
             Parameter[] params = method.getParameters();
             Object[] args = new Object[params.length];
@@ -37,10 +38,11 @@ public class HandlerMethod {
                 }
             }
 
-            if (queryParams.isEmpty() && bodyParams.isEmpty()) {
+            if (queryParams.isEmpty() && bodyParams.isEmpty() && !req.getMappingLine().getUrl().equals("/login")) {
                 return method.invoke(controller);
-            }
-            else if (queryParams.isEmpty()) {
+            } else if (queryParams.isEmpty() && bodyParams.isEmpty() && req.getMappingLine().getUrl().equals("/login")) {
+                return method.invoke(controller, headers);
+            } else if (queryParams.isEmpty()) {
                 return method.invoke(controller, bodyParams);
             } else if (bodyParams.isEmpty()) {
                 return method.invoke(controller, queryParams);
@@ -57,19 +59,23 @@ public class HandlerMethod {
     private static Map<String, String> parseFormUrlEncoded(HttpRequest req) {
         byte[] bodyBytes;
         try {
-            bodyBytes = req.getBody();
+            bodyBytes = req.parsedBody();
         } catch (Exception e) {
             return Map.of();
         }
 
-        if (bodyBytes == null || bodyBytes.length == 0) return Map.of();
+        if (bodyBytes == null || bodyBytes.length == 0) {
+            return Map.of();
+        }
 
         String body = new String(bodyBytes, StandardCharsets.UTF_8);
         Map<String, String> result = new HashMap<>();
 
         String[] pairs = body.split("&");
         for (String pair : pairs) {
-            if (pair.isEmpty()) continue;
+            if (pair.isEmpty()) {
+                continue;
+            }
             int idx = pair.indexOf('=');
             String rawKey = idx < 0 ? pair : pair.substring(0, idx);
             String rawVal = idx < 0 ? "" : pair.substring(idx + 1);

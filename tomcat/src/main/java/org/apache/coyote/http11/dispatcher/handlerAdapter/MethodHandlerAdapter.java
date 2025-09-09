@@ -28,9 +28,9 @@ public class MethodHandlerAdapter implements HandlerAdapter {
         mappings.put(new RouteKey("POST", "/register"),
                 new HandlerMethod(restController, method(restController, "signIn", Map.class)));
 
-        ViewController viewController = new ViewController();
+        ViewController viewController = new ViewController(SessionManager.getInstance());
         mappings.put(new RouteKey("GET", "/login"),
-                new HandlerMethod(viewController, method(viewController, "getLoginPage")));
+                new HandlerMethod(viewController, method(viewController, "getLoginPage", Map.class)));
         mappings.put(new RouteKey("GET", "/register"),
                 new HandlerMethod(viewController, method(viewController, "getRegisterPage")));
     }

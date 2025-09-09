@@ -25,13 +25,13 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         MappingLine mappingLine = new MappingLine(bufferedReader);
-        Map<String, String> headers = getHeaders(bufferedReader);
-        byte[] body = getBody(headers, bufferedReader);
+        Map<String, String> headers = parsedHeaders(bufferedReader);
+        byte[] body = parsedBody(headers, bufferedReader);
 
         return new HttpRequest(mappingLine, headers, body);
     }
 
-    private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> parsedHeaders(BufferedReader bufferedReader) throws IOException {
         String line;
         Map<String, String> headers = new LinkedHashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
@@ -46,7 +46,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private static byte[] getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+    private static byte[] parsedBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
         String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return new byte[0];
@@ -76,6 +76,10 @@ public class HttpRequest {
         return mappingLine;
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     public byte[] toBytes() {
         StringBuilder sb = new StringBuilder();
 
@@ -100,7 +104,7 @@ public class HttpRequest {
         return result;
     }
 
-    public byte[] getBody() {
+    public byte[] parsedBody() {
         return body;
     }
 }

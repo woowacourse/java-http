@@ -25,10 +25,10 @@ public class RegisterRequestHandler {
     public HttpResponse handleRegisterRequest(final HttpRequest httpRequest) {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
 
-        if (httpMethod == HttpMethod.GET) { // 회원 가입 페이지를 보여줄 때
+        if (httpMethod == HttpMethod.GET) {
             return handleGetHttpMethod(httpRequest);
         }
-        if (httpMethod == HttpMethod.POST) { // 회원 가입 버튼을 누를 때
+        if (httpMethod == HttpMethod.POST) {
             return handlePostHttpMethod(httpRequest);
         }
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");

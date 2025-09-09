@@ -53,7 +53,23 @@ public class HttpRequest {
         }
 
         int length = Integer.parseInt(contentLength);
-        return bufferedReader.readLine().getBytes(String.valueOf(length));
+        if (length <= 0) {
+            return new byte[0];
+        }
+
+        char[] cbuf = new char[length];
+        int off = 0;
+        while (off < length) {
+            int n = bufferedReader.read(cbuf, off, length - off);
+
+            if (n == -1) {
+                break;
+            }
+            off += n;
+        }
+
+        String bodyString = new String(cbuf, 0, off);
+        return bodyString.getBytes();
     }
 
     public MappingLine getMappingLine() {

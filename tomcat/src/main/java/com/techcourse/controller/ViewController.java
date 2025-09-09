@@ -1,4 +1,4 @@
-package com.techcourse;
+package com.techcourse.controller;
 
 public class ViewController {
 

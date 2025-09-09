@@ -11,6 +11,7 @@ import org.apache.coyote.http11.handler.HttpHandler;
 import org.apache.coyote.http11.handler.HttpResourceHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.RegisterHandler;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,21 +25,23 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpResourceLoader httpResourceLoader;
     private final HttpResourceHandler httpResourceHandler;
     private final HttpResponseWriter httpResponseWriter;
+    private final HttpCookie httpCookie;
+    private final SessionManager sessionManager;
     private final Resolver resolver;
     private final ErrorMapper errorMapper;
-    private final HttpCookie httpCookie;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final HttpCookie httpCookie, final SessionManager sessionManager) {
         this.connection = connection;
         this.queryParser = new QueryParser();
         this.httpRequestReader = new HttpRequestReader(queryParser);
         this.httpResourceLoader = new HttpResourceLoader();
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
-        this.httpCookie = new HttpCookie();
+        this.httpCookie = httpCookie;
+        this.sessionManager = sessionManager;
         this.resolver = new Resolver(httpResourceHandler)
                 .register("/", new GreetingHandler())
-                .register("/login", new LoginHandler(httpResourceLoader, queryParser, httpCookie))
+                .register("/login", new LoginHandler(httpResourceLoader, queryParser, httpCookie, sessionManager))
                 .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
         ;
         this.errorMapper = new ErrorMapper(httpResourceLoader);

@@ -12,11 +12,11 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public static void login(final String account, final String password) {
+    public static User login(final String account, final String password) {
         User user = findByAccount(account);
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            return;
+            return user;
         }
         log.info("User login failed: {}, {}", account, password);
         throw new UnAuthorizedException("Login failed");

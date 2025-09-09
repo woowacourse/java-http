@@ -24,6 +24,6 @@ public class RestController {
     public HttpResponse signIn(Map<String, String> loginRequest) {
         User user = service.getUser(loginRequest);
         log.info("{}", user.toString());
-        return ResponseEntity.ok(user.toString());
+        return ResponseEntity.found(Map.of("Location", "/index.html"));
     }
 }

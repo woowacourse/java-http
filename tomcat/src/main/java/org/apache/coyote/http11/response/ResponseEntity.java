@@ -29,6 +29,10 @@ public class ResponseEntity {
         return buildResponse(body, contentType);
     }
 
+    public static HttpResponse found(Map<String, String> headers) {
+        return new HttpResponse(HttpStatus.FOUND, headers, null);
+    }
+
     public static HttpResponse notFound() {
         return buildResponse(HttpStatus.NOT_FOUND, null, DEFAULT_CONTENT_TYPE);
     }
@@ -42,12 +46,18 @@ public class ResponseEntity {
     }
 
     private static HttpResponse buildResponse(HttpStatus httpStatus, byte[] body, String contentType) {
+        return buildResponse(httpStatus, Map.of(), body, contentType);
+    }
+
+    private static HttpResponse buildResponse(HttpStatus httpStatus, Map<String, String> additionalHeaders, byte[] body, String contentType) {
         if (body == null) {
             body = new byte[0];
         }
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", contentType + ";" + DEFAULT_ENCODING_TYPE);
         headers.put("Content-Length", String.valueOf(body.length));
+
+        headers.putAll(additionalHeaders);
 
         return new HttpResponse(httpStatus, headers, body);
     }

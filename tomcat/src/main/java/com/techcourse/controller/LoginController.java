@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.service.LoginService;
 import java.util.Map;
-import org.apache.coyote.http11.controller.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -10,7 +10,7 @@ import org.apache.coyote.util.ResourceUtil;
 
 public class LoginController extends AbstractController {
 
-    private LoginService loginService;
+    private final LoginService loginService;
 
     public LoginController(LoginService loginService) {
         this.loginService = loginService;
@@ -36,16 +36,15 @@ public class LoginController extends AbstractController {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
 
-        boolean loginSuccess = loginService.login(account, password);
-        if (loginSuccess) {
-            String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
-
-            httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
+        boolean isLoginSuccess = loginService.login(account, password);
+        if (!isLoginSuccess) {
+            String body = ResourceUtil.readStaticResource("/401.html", this.getClass());
+            httpResponse.setHttpResponse(ResponseEntity.unauthorized(body, "text/html;charset=utf-8"));
             return;
         }
 
-        String body = ResourceUtil.readStaticResource("/401.html", this.getClass());
-        httpResponse.setHttpResponse(ResponseEntity.unauthorized(body, "text/html;charset=utf-8"));
+        String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
+        httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
     }
 
     private boolean isValidQueryParams(Map<String, String> queryParams) {

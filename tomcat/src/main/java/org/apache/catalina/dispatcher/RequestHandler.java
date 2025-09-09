@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.dispatcher;
+package org.apache.catalina.dispatcher;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

@@ -1,15 +1,15 @@
-package org.apache.coyote.http11.dispatcher;
+package org.apache.catalina.dispatcher;
 
-import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.util.ResourceUtil;
 
-public class ControllerAdapter implements RequestHandler {
+public class ControllerHandler implements RequestHandler {
 
     private final RequestMapping requestMapping;
 
-    public ControllerAdapter(RequestMapping requestMapping) {
+    public ControllerHandler(RequestMapping requestMapping) {
         this.requestMapping = requestMapping;
     }
 

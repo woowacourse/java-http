@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
 import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
 
@@ -26,7 +27,7 @@ public class HttpRequest {
         this.httpVersion = httpVersion;
         this.host = host;
         this.contentType = contentType;
-        this.contentLength = requestBody == null ? 0 : requestBody.length();
+        this.contentLength = requestBody == null ? 0 : requestBody.getBytes(StandardCharsets.UTF_8).length;
         this.requestBody = requestBody;
         this.cookie = cookie;
     }

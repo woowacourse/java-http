@@ -23,9 +23,6 @@ public class Session implements HttpSession {
 
     @Override
     public Object getAttribute(final String name) {
-        if (!values.containsKey(name)) {
-            return null;
-        }
         return values.get(name);
     }
 

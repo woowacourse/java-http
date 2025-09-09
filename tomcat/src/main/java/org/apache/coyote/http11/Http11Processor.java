@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         if (normalizedPath.contains("..")) {
             throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
         }
-        if (normalizedPath.equals("/")) {
+        if (normalizedPath.equals("/") || normalizedPath.equals("\\")) {
             return "Hello world!";
         }
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + normalizedPath)) {

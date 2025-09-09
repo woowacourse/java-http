@@ -3,6 +3,7 @@ package com.techcourse.web.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 
 public class Session {
@@ -10,7 +11,7 @@ public class Session {
     @Getter
     private final String id = UUID.randomUUID().toString();
 
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     public Object getAttribute(final String name) {
         validateAttributeName(name);

@@ -110,6 +110,9 @@ public class Http11Processor implements Runnable, Processor {
             if (requestTarget.endsWith(".js")) {
                 return handleJsResponse(requestTarget);
             }
+            if (requestTarget.endsWith(".svg")) {
+                return handleImgResponse(requestTarget);
+            }
         }
 
         if (requestMethod.equals("POST")) {
@@ -121,7 +124,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        throw new NoSuchFileException(requestTarget);
+        return Http11Response.createRedirectResponse("/404.html");
     }
 
     private Http11Response handleLoginRequest(final Http11Request request) throws IOException {
@@ -131,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
             if (sessionId.isPresent()) {
                 final Session session = sessionManager.findSession(sessionId.get());
                 if (session != null) {
-                    return handleHtmlRequest(HttpStatus.FOUND, "/index.html");
+                    return Http11Response.createRedirectResponse("/index.html");
                 }
             }
 
@@ -147,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final Optional<User> userOrEmpty = findUserByAccount(account, password);
         if (userOrEmpty.isEmpty()) {
-            return handleHtmlRequest(HttpStatus.BAD_REQUEST, "/401.html");
+            return Http11Response.createRedirectResponse("/401.html");
         }
 
         final User user = userOrEmpty.get();
@@ -176,8 +179,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response handleAuthorizedRequest(final User user, final Http11Request request) throws IOException {
-        final byte[] indexFileContent = readFile("/index.html");
-
         final String sessionId = generateSessionID();
 
         final Session session = new Session(sessionId);
@@ -187,7 +188,7 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Set-Cookie", String.format("JSESSIONID=%s", sessionId));
 
-        return Http11Response.createHtmlResponse(HttpStatus.FOUND, headers, indexFileContent);
+        return Http11Response.createRedirectResponse("/index.html", headers);
     }
 
     private Http11Response handleHtmlRequest(
@@ -209,6 +210,12 @@ public class Http11Processor implements Runnable, Processor {
         final byte[] fileContent = readFile(requestTarget);
 
         return Http11Response.createJsResponse(HttpStatus.OK, fileContent);
+    }
+
+    private Http11Response handleImgResponse(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return Http11Response.createSvgResponse(HttpStatus.OK, fileContent);
     }
 
     private byte[] readFile(final String location) throws IOException {

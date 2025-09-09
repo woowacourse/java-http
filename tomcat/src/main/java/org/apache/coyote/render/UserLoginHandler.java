@@ -7,13 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class UserLoginProcessor{
+public class UserLoginHandler implements RequestHandler{
 
-    private static final Logger log = LoggerFactory.getLogger(UserLoginProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(UserLoginHandler.class);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String GET_METHOD_REQUEST = "GET";
 
+    @Override
     public String handle(final String method, final String path, final Map<String,String> queryParams) {
         try {
             if (path.equals("/login")) {

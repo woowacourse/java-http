@@ -137,11 +137,6 @@ public class Http11Processor implements Runnable, Processor {
         return (User)session.getAttribute("user");
     }
 
-    // private static <T> T parseRequestBody(String request, Class<T> type) {
-    //     String body = request.split("\r\n\r\n")[1];
-    //     return RequestBodyParser.parse(body, type);
-    // }
-
     private void validateHeader(String header) {
         if (header.split(" ").length < 3) {
             throw new IllegalArgumentException("유효하지 않은 요청 포맷입니다.");
@@ -228,7 +223,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private Parameters parseParameters(String originalParams) {
         Parameters parameters = new Parameters();
-        // String[] words = originalParams.split("\\?");
         for (var p : originalParams.split("&")) {
             parameters.put(p);
         }

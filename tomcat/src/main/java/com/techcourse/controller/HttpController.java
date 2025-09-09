@@ -38,11 +38,11 @@ public class HttpController {
             return HttpResponse.ok("login.html");
         }
 
-        final User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return HttpResponse.ok("login.html");
+        final Object user = session.getAttribute("user");
+        if (user instanceof User) {
+            return HttpResponse.found("index.html");
         }
-        return HttpResponse.found("index.html");
+        return HttpResponse.ok("login.html");
     }
 
     public HttpResponse login(final String account, final String password) {

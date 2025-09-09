@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.StatusLine;
 import org.apache.coyote.http11.message.request.HttpRequest;

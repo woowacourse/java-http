@@ -14,7 +14,7 @@ public class HttpRequest {
     private final String method;
     private final String path;
     private final Map<String, String> queryParams;
-    private final Map<String, String> headers = new HashMap<>();
+    private final HttpHeaders headers;
     private final String body;
     private final HttpCookie cookies;
 
@@ -39,18 +39,11 @@ public class HttpRequest {
             this.queryParams = new HashMap<>();
         }
 
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-            if (colonIndex > 0) {
-                String key = line.substring(0, colonIndex).trim();
-                String value = line.substring(colonIndex + 1).trim();
-                headers.put(key, value);
-            }
-        }
+        this.headers = HttpHeaders.parse(reader);
 
         if ("POST".equalsIgnoreCase(method)) {
-            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+            String contentLengthValue = headers.get("Content-Length");
+            int contentLength = Integer.parseInt(contentLengthValue);
             char[] buffer = new char[contentLength];
             int read = reader.read(buffer, 0, contentLength);
             this.body = new String(buffer, 0, read);
@@ -75,14 +68,6 @@ public class HttpRequest {
 
     public String getQueryParam(String key) {
         return queryParams.get(key);
-    }
-
-    public String getHeader(String key) {
-        return headers.get(key);
-    }
-
-    public String getBody() {
-        return body;
     }
 
     public HttpCookie getCookies() {

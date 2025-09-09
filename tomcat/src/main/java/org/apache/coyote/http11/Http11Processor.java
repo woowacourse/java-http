@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -22,7 +23,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<Handler> handlers = List.of(
             new LoginHandler(),
-            new StaticResourceHandler()
+            new StaticResourceHandler(),
+            new RegisterHandler()
     );
 
     private final Socket connection;
@@ -43,8 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final HttpRequestParser httpRequestParser = new HttpRequestParser();
-            final HttpRequest request = httpRequestParser.parse(reader);
+            final HttpRequest request = HttpRequest.from(reader);
 
             HttpResponse httpResponse = null;
             for (Handler handler : handlers) {
@@ -58,7 +59,6 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
             }
-
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

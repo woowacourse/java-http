@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    public static final String HEADER_DELIMITER = "\\s+";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -36,34 +34,25 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
             final var outputStream = connection.getOutputStream();
-
             String requestLine = br.readLine();
-            String[] requestParts = requestLine.split(HEADER_DELIMITER);
-            String httpMethod = requestParts[0];
-            String requestUri = requestParts[1];
-
             Map<String, String> headers = parseHttpHeaders(br);
-            String body = "POST".equals(httpMethod) ? getBody(headers, br) : "";
-            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+            String body = "POST".equals(requestLine.split("\\s+")[0]) ? getBody(headers, br) : "";
+            HttpRequest request = HttpRequest.from(requestLine, headers, body);
 
-            if (isStaticResource(requestUri)) {
-                StaticResourceProcessor.processStatic(requestUri, outputStream);
+            if (request.isStaticResourceRequest()) {
+                StaticResourceProcessor.process(request, outputStream);
             } else {
-                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, httpCookie, outputStream);
+                DynamicRequestProcessor.process(request, outputStream);
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean isStaticResource(String requestUri) {
-        return requestUri.contains(".") && !requestUri.contains("/login") && !requestUri.contains("/register");
-    }
-
     private Map<String, String> parseHttpHeaders(BufferedReader br) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
-        while (!(line = br.readLine()).isEmpty()) {
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(":", 2);
             headers.put(headerParts[0].strip(), headerParts[1].strip());
         }

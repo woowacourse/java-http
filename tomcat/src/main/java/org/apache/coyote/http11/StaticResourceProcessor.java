@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 public class StaticResourceProcessor {
@@ -22,16 +23,24 @@ public class StaticResourceProcessor {
     public static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
     public static final String HTTP_LINE_SEPARATOR = "\r\n";
 
-    public static void processStatic(String requestUri, OutputStream outputStream) throws IOException {
-        String resourcePath = resolveResourcePath(requestUri);
+    public static void process(HttpRequest request, OutputStream outputStream) throws IOException {
+        String resourcePath = resolveResourcePath(request.getRequestUri());
         String contentType = determineContentType(resourcePath);
         
         try (InputStream inputStream = StaticResourceProcessor.class.getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                sendNotFoundResponse(outputStream);
+                HttpResponse notFoundResponse = new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, 
+                    Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", "0"), "");
+                sendResponse(outputStream, notFoundResponse);
                 return;
             }
-            String response = buildOkResponse(contentType, inputStream.readAllBytes());
+            byte[] responseBody = inputStream.readAllBytes();
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", contentType);
+            headers.put("Content-Length", String.valueOf(responseBody.length));
+            
+            HttpResponse response = new HttpResponse("HTTP/1.1", HttpStatus.OK, headers, 
+                new String(responseBody, StandardCharsets.UTF_8));
             sendResponse(outputStream, response);
         }
     }
@@ -62,27 +71,8 @@ public class StaticResourceProcessor {
         return lastDotIndex == -1 || lastDotIndex == 0 || lastDotIndex == resource.length() - 1;
     }
 
-    private static void sendNotFoundResponse(OutputStream outputStream) throws IOException {
-        String response = String.join(HTTP_LINE_SEPARATOR,
-                HttpStatus.NOT_FOUND.getStatusLine(),
-                HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
-                HEADER_CONTENT_LENGTH + "0",
-                "",
-                "");
-        sendResponse(outputStream, response);
-    }
-
-    private static String buildOkResponse(String contentType, byte[] responseBody) {
-        return String.join(HTTP_LINE_SEPARATOR,
-                HttpStatus.OK.getStatusLine(),
-                HEADER_CONTENT_TYPE + contentType,
-                HEADER_CONTENT_LENGTH + responseBody.length,
-                "",
-                new String(responseBody, StandardCharsets.UTF_8));
-    }
-
-    private static void sendResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    private static void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toHttpString().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 }

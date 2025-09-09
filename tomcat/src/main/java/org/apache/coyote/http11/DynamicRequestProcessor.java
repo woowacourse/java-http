@@ -5,42 +5,43 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DynamicRequestProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(DynamicRequestProcessor.class);
-    
-    public static final String HEADER_CONTENT_TYPE = "Content-Type: ";
-    public static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
-    public static final String HEADER_LOCATION = "Location: ";
-    public static final String HTTP_LINE_SEPARATOR = "\r\n";
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
+    public static final String HEADER_LOCATION = "Location";
     public static final String INDEX_HTML = "/index.html";
 
-    public static void processDynamic(String httpMethod, String requestUri, String body, HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
-        if ("POST".equals(httpMethod)) {
-            Map<String, String> formData = FormDataParser.parse(body);
-            if (requestUri.equals("/register")) {
-                handleRegister(formData, httpCookie, outputStream);
-            } else if (requestUri.equals("/login")) {
-                handleLogin(formData, httpCookie, outputStream);
-            }
+    public static void process(HttpRequest request, OutputStream outputStream) throws IOException, URISyntaxException {
+        if (request.isPost()) {
+            handlePostRequest(request, outputStream);
         } else {
-            if (requestUri.equals("/login") || requestUri.equals("/login.html")) {
-                handleLoginPageAccess(httpCookie, outputStream);
-            } else if (requestUri.equals("/register") || requestUri.equals("/register.html")) {
-                handleRegisterPageAccess(httpCookie, outputStream);
-            } else {
-                String resourcePath;
-                if (requestUri.equals("/")) {
-                    resourcePath = INDEX_HTML;
-                } else {
-                    resourcePath = requestUri;
-                }
-                StaticResourceProcessor.processStatic(resourcePath, outputStream);
-            }
+            handleGetRequest(request, outputStream);
+        }
+    }
+
+    private static void handlePostRequest(HttpRequest request, OutputStream outputStream) throws IOException, URISyntaxException {
+        String requestUri = request.getRequestUri();
+        Map<String, String> formData = FormDataParser.parse(request.getBody());
+        if (requestUri.equals("/register")) {
+            handleRegister(formData, request.getHttpCookie(), outputStream);
+        } else if (requestUri.equals("/login")) {
+            handleLogin(formData, request.getHttpCookie(), outputStream);
+        }
+    }
+
+    private static void handleGetRequest(HttpRequest request, OutputStream outputStream) throws IOException, URISyntaxException {
+        String requestUri = request.getRequestUri();
+        if (requestUri.equals("/login") ||  requestUri.equals("/register")) {
+            handleAuthPageAccess(requestUri, request.getHttpCookie(), outputStream);
+        } else {
+            String resourcePath = requestUri.equals("/") ? INDEX_HTML : requestUri;
+            String requestLine = "GET " + resourcePath + " HTTP/1.1";
+            HttpRequest staticRequest = HttpRequest.from(requestLine, new HashMap<>(), "");
+            StaticResourceProcessor.process(staticRequest, outputStream);
         }
     }
 
@@ -59,66 +60,58 @@ public class DynamicRequestProcessor {
     }
 
     private static void handleAuthSuccess(String sessionId, OutputStream outputStream) throws IOException {
-        String redirectResponse = buildAuthRedirectResponse(INDEX_HTML, sessionId);
+        HttpResponse redirectResponse = buildAuthRedirectResponse(INDEX_HTML, sessionId);
         sendResponse(outputStream, redirectResponse);
     }
 
-    private static String buildAuthRedirectResponse(String location, String sessionId) {
-        StringBuilder response = new StringBuilder();
-        response.append(HttpStatus.FOUND.getStatusLine()).append(HTTP_LINE_SEPARATOR);
-        response.append(HEADER_LOCATION).append(location).append(HTTP_LINE_SEPARATOR);
-
+    private static HttpResponse buildAuthRedirectResponse(String location, String sessionId) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HEADER_LOCATION, location);
+        headers.put(HEADER_CONTENT_LENGTH, "0");
+        
         if (sessionId != null) {
-            response.append("Set-Cookie: JSESSIONID=").append(sessionId).append(HTTP_LINE_SEPARATOR);
+            headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
         }
-
-        response.append(HEADER_CONTENT_LENGTH).append("0").append(HTTP_LINE_SEPARATOR);
-        response.append("").append(HTTP_LINE_SEPARATOR);
-        response.append("");
-        return response.toString();
+        return new HttpResponse("HTTP/1.1", HttpStatus.FOUND, headers, "");
     }
 
     private static void send401Page(OutputStream outputStream) throws IOException {
         try (InputStream inputStream = DynamicRequestProcessor.class.getClassLoader().getResourceAsStream("static/401.html")) {
             byte[] responseBody = inputStream.readAllBytes();
-            String response = String.join(HTTP_LINE_SEPARATOR,
-                    HttpStatus.UNAUTHORIZED.getStatusLine(),
-                    HEADER_CONTENT_TYPE + "text/html;charset=utf-8",
-                    HEADER_CONTENT_LENGTH + responseBody.length,
-                    "",
-                    new String(responseBody, StandardCharsets.UTF_8));
+            Map<String, String> headers = new HashMap<>();
+            headers.put(HEADER_CONTENT_TYPE, "text/html;charset=utf-8");
+            headers.put(HEADER_CONTENT_LENGTH, String.valueOf(responseBody.length));
+            
+            HttpResponse response = new HttpResponse(
+                    "HTTP/1.1",
+                    HttpStatus.UNAUTHORIZED,
+                    headers,
+                    new String(responseBody, StandardCharsets.UTF_8)
+            );
             sendResponse(outputStream, response);
         }
     }
 
-    private static String buildRedirectResponse(String location) {
-        return String.join(HTTP_LINE_SEPARATOR,
-                HttpStatus.FOUND.getStatusLine(),
-                HEADER_LOCATION + location,
-                HEADER_CONTENT_LENGTH + "0",
-                "",
-                "");
+    private static HttpResponse buildRedirectResponse(String location) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HEADER_LOCATION, location);
+        headers.put(HEADER_CONTENT_LENGTH, "0");
+        return new HttpResponse("HTTP/1.1", HttpStatus.FOUND, headers, "");
     }
 
-    private static void handleLoginPageAccess(HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
-        handleAuthPageAccess("/login.html", httpCookie, outputStream);
-    }
-
-    private static void handleRegisterPageAccess(HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
-        handleAuthPageAccess("/register.html", httpCookie, outputStream);
-    }
-
-    private static void handleAuthPageAccess(String pagePath, HttpCookie httpCookie, OutputStream outputStream) throws IOException, URISyntaxException {
+    private static void handleAuthPageAccess(String pagePath, HttpCookie httpCookie, OutputStream outputStream) throws IOException {
         if (AuthHandler.isLoggedIn(httpCookie)) {
-            String redirectResponse = buildRedirectResponse(INDEX_HTML);
+            HttpResponse redirectResponse = buildRedirectResponse(INDEX_HTML);
             sendResponse(outputStream, redirectResponse);
         } else {
-            StaticResourceProcessor.processStatic(pagePath, outputStream);
+            String requestLine = "GET " + pagePath + " HTTP/1.1";
+            HttpRequest request = HttpRequest.from(requestLine, new HashMap<>(), "");
+            StaticResourceProcessor.process(request, outputStream);
         }
     }
 
-    private static void sendResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    private static void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toHttpString().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 }

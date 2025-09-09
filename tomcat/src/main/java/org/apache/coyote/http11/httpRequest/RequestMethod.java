@@ -5,7 +5,7 @@ import java.util.Arrays;
 public enum RequestMethod {
 
     GET,
-    POST
+    POST,
     ;
 
     public static RequestMethod parse(final String value) {

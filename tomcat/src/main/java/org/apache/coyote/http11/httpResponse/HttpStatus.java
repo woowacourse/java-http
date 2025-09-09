@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httpResponse;
 
 public enum HttpStatus {
 
     OK(200),
     FOUND(302),
-    NOT_FOUND(404)
+    NOT_FOUND(404),
     ;
 
     private final int statusCode;

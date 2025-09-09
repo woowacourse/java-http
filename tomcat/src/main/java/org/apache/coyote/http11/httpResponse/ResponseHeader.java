@@ -20,7 +20,7 @@ public class ResponseHeader {
     ) {
         final List<String> headers = new ArrayList<>();
 
-        headers.add("Content-Type: " + getContentType(httpRequest) + ";charset=utf-8");
+        headers.add("Content-Type: " + ContentType.getContentType(httpRequest.getPath()) + ";charset=utf-8");
         headers.add("Content-Length: " + responseContent.body().getBytes(StandardCharsets.UTF_8).length);
 
         if (responseContent.location() != null) {
@@ -35,19 +35,6 @@ public class ResponseHeader {
         }
 
         return new ResponseHeader(headers);
-    }
-
-    private static String getContentType(final HttpRequest httpRequest) {
-        if (httpRequest.getPath().endsWith(".css")) {
-            return "text/css";
-        }
-        if (httpRequest.getPath().equals(".js")) {
-            return "text/javascript";
-        }
-        if (httpRequest.getPath().equals("svg")) {
-            return "image/svg+xml";
-        }
-        return "text/html";
     }
 
     public List<String> getHeaders() {

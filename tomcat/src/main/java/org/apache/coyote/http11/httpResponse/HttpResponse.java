@@ -2,7 +2,6 @@ package org.apache.coyote.http11.httpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class HttpResponse {

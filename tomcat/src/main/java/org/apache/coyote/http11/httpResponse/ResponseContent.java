@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpResponse;
 
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.httpRequest.HttpCookie;
 
 public record ResponseContent(

@@ -113,6 +113,9 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestMethod.equals("POST")) {
+            if (requestTarget.contains("/login")) {
+                return handleLoginRequest(request);
+            }
             if (requestTarget.endsWith("/register")) {
                 return handleRegisterRequest(request);
             }
@@ -122,24 +125,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response handleLoginRequest(final Http11Request request) throws IOException {
-        final Optional<String> account = request.findQueryParam("account");
-        final Optional<String> password = request.findQueryParam("password");
-        final Optional<String> sessionId = request.findCookie("JSESSIONID");
+        if (request.getMethod().equals("GET")) {
+            final Optional<String> sessionId = request.findCookie("JSESSIONID");
 
-        if (sessionId.isPresent()) {
-            final Session session = sessionManager.findSession(sessionId.get());
-            if (session != null) {
-                return handleHtmlRequest(HttpStatus.FOUND, "/index.html");
+            if (sessionId.isPresent()) {
+                final Session session = sessionManager.findSession(sessionId.get());
+                if (session != null) {
+                    return handleHtmlRequest(HttpStatus.FOUND, "/index.html");
+                }
             }
-        }
 
-        if (account.isEmpty() || password.isEmpty()) {
             final byte[] fileContent = readFile("/login.html");
 
             return Http11Response.createHtmlResponse(HttpStatus.OK, fileContent);
         }
 
-        final Optional<User> userOrEmpty = findUserByAccount(account.get(), password.get());
+        final Map<String, String> body = request.getBodyByContentType("application/x-www-form-urlencoded");
+
+        final String account = body.get("account");
+        final String password = body.get("password");
+
+        final Optional<User> userOrEmpty = findUserByAccount(account, password);
         if (userOrEmpty.isEmpty()) {
             return handleHtmlRequest(HttpStatus.BAD_REQUEST, "/401.html");
         }

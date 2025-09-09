@@ -31,16 +31,8 @@ public class HttpRequest {
         return path;
     }
 
-    public Map<String, String> getQueries() {
-        return queries;
-    }
-
     public Optional<String> getQueryValue(String key) {
         return Optional.ofNullable(queries.get(key));
-    }
-
-    public boolean hasQueries() {
-        return !queries.isEmpty();
     }
 
     public Cookie getCookie() {

@@ -1,11 +1,11 @@
 package org.apache.coyote.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public void add(Session session) {
         if (session == null || session.getId() == null) {

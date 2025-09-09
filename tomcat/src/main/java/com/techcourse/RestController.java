@@ -21,7 +21,7 @@ public class RestController {
         return ResponseEntity.ok("Hello world!");
     }
 
-    public HttpResponse signIn(Map<String, String> loginRequest) {
+    public HttpResponse login(Map<String, String> loginRequest) {
         try {
             User user = service.getUser(loginRequest);
             log.info("{}", user.toString());
@@ -29,6 +29,10 @@ public class RestController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.found(Map.of("Location", "/401.html"));
         }
+    }
 
+    public HttpResponse signIn(Map<String, String> signInRequest) {
+        service.create(signInRequest);
+        return ResponseEntity.found(Map.of("Location", "/index.html"));
     }
 }

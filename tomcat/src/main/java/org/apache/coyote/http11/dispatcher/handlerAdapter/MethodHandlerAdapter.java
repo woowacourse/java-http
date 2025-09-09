@@ -23,16 +23,15 @@ public class MethodHandlerAdapter implements HandlerAdapter {
         mappings.put(new RouteKey("GET", "/"),
                 new HandlerMethod(restController, method(restController, "hello")));
         mappings.put(new RouteKey("POST", "/login"),
-                new HandlerMethod(restController, method(restController, "signIn", Map.class))
-        );
+                new HandlerMethod(restController, method(restController, "login", Map.class)));
+        mappings.put(new RouteKey("POST", "/register"),
+                new HandlerMethod(restController, method(restController, "signIn", Map.class)));
 
         ViewController viewController = new ViewController();
         mappings.put(new RouteKey("GET", "/login"),
-                new HandlerMethod(viewController, method(viewController, "getLoginPage"))
-        );
+                new HandlerMethod(viewController, method(viewController, "getLoginPage")));
         mappings.put(new RouteKey("GET", "/register"),
-                new HandlerMethod(viewController, method(viewController, "getRegisterPage"))
-        );
+                new HandlerMethod(viewController, method(viewController, "getRegisterPage")));
     }
 
     private static Method method(Object object, String name, Class<?>... p) {

@@ -79,41 +79,18 @@ public class Http11Processor implements Runnable, Processor {
         }
         final var headers = getHeaders(headerLines);
 
-        final String contentLengthValue = headers.get("Content-Length");
-        if (contentLengthValue == null) {
-            return new HttpRequest(
-                    firstLine.getFirst(),
-                    firstLine.get(1),
-                    getHeaders(headerLines),
-                    ""
-            );
-        }
-
-        final int contentLength = Integer.parseInt(contentLengthValue.trim());
-        if (contentLength == 0) {
-            return new HttpRequest(
-                    firstLine.getFirst(),
-                    firstLine.get(1),
-                    getHeaders(headerLines),
-                    ""
-            );
-        }
-
-        int offset = 0;
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];
-        while (offset < contentLength) {
-            final int readCount = reader.read(buffer, offset, contentLength - offset);
-            if (readCount == -1) {
-                throw new EOFException();
-            }
-            offset += readCount;
+        if (reader.read(buffer, 0, contentLength) == -1) {
+            throw new EOFException();
         }
+        final String body = new String(buffer);
 
         return new HttpRequest(
                 firstLine.getFirst(),
                 firstLine.get(1),
                 getHeaders(headerLines),
-                new String(buffer)
+                body
         );
     }
 

@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,15 +10,16 @@ import lombok.RequiredArgsConstructor;
 public enum ContentType {
 
     // Text
-    HTML("text/html;charset=utf-8"),
-    CSS("text/css"),
-    JAVASCRIPT("application/javascript"),
-    FORM_URLENCODED("application/x-www-form-urlencoded"),
+    HTML("text/html", StandardCharsets.UTF_8),
+    CSS("text/css", StandardCharsets.UTF_8),
+    JAVASCRIPT("application/javascript", StandardCharsets.UTF_8),
+    FORM_URLENCODED("application/x-www-form-urlencoded", StandardCharsets.UTF_8),
     ;
 
     public static final String HEADER_NAME = "content-type";
 
     private final String mimeType;
+    private final Charset defaultCharset;
 
     public static ContentType from(final String path) {
         final String lowerPath = path.toLowerCase();

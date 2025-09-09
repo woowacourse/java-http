@@ -19,7 +19,6 @@ public class HttpHeader {
                 ));
     }
 
-
     public HttpHeader() {
         this.headers = new HashMap<>();
     }
@@ -33,7 +32,6 @@ public class HttpHeader {
         values.add(value);
         headers.put(normalizedName, values);
     }
-
 
     public void add(String name, String value) {
         if(name == null || value == null){

@@ -65,6 +65,10 @@ public class HttpResponse {
         headers.put(key, value);
     }
 
+    public void addCookie(String name, String value) {
+        addHeader("Set-Cookie", name + "=" + value);
+    }
+
     public byte[] getBody() {
         return body;
     }

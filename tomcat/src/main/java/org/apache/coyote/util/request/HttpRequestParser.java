@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.util.Cookie;
 
 public class HttpRequestParser {
 
@@ -26,10 +27,13 @@ public class HttpRequestParser {
         }
         String version = httpLine[2];
         int contentLength = 0;
+        String cookieHeader = null;
         String line;
         while (!(line = br.readLine()).isEmpty()) {
             if (line.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
+            } else if (line.startsWith("Cookie:")) {
+                cookieHeader = line.substring(7).trim();
             }
         }
         if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
@@ -39,7 +43,8 @@ public class HttpRequestParser {
             Map<String, String> postQueries = parseQueryString(body);
             queries.putAll(postQueries);
         }
-        return new HttpRequest(method, path, version, queries);
+        Cookie cookie = Cookie.parse(cookieHeader);
+        return new HttpRequest(method, path, version, queries, cookie);
     }
 
     private static String[] readHttpLine(BufferedReader br) throws IOException {

@@ -17,8 +17,4 @@ public class SessionRepository {
         }
         return Optional.empty();
     }
-
-    public static void removeById(final String id) {
-        SESSIONS.remove(id);
-    }
 }

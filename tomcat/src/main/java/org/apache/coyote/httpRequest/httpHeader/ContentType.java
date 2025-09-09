@@ -15,7 +15,7 @@ public enum ContentType {
 
     public static ContentType findContentType(final String input) {
         return Arrays.stream(ContentType.values())
-                .filter(type -> type.contentType.equals(input))
+                .filter(type -> input.contains(type.contentType))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않은 형식입니다."));
     }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
@@ -67,6 +68,11 @@ public class HttpRequest {
             return parseUrlEncoded(body);
         }
         return Collections.emptyMap();
+    }
+
+    public boolean hasSessionCookie() {
+        HttpCookie cookie = HttpCookie.from(headers);
+        return cookie.contains("JSESSIONID");
     }
 
     private static HttpRequest parse(final BufferedReader reader) throws IOException {

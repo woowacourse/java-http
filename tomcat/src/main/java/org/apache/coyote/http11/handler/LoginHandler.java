@@ -8,8 +8,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.StatusLine;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -22,19 +24,19 @@ public class LoginHandler implements Handler {
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     @Override
-    public boolean canHandle(HttpRequest request) {
+    public boolean canHandle(final HttpRequest request) {
         return "/login".equals(request.getPath());
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public HttpResponse handle(final HttpRequest request) throws IOException {
         final String httpVersion = request.getVersion();
 
         final String account = request.getQueryParams().get("account");
         final String password = request.getQueryParams().get("password");
 
         if (account == null || password == null) {
-            return loginPageResponse(httpVersion,"/login.html");
+            return loginPageResponse(httpVersion, "/login.html");
         }
 
         final Optional<User> authenticatedUser = authenticate(account, password);
@@ -42,10 +44,10 @@ public class LoginHandler implements Handler {
         if (authenticatedUser.isPresent()) {
             final User user = authenticatedUser.get();
             log.info("user : {}", user);
-            return redirectResponse(httpVersion,"/index.html");
+            return loginRedirectResponse(request, "/index.html");
         }
 
-        return redirectResponse(httpVersion,"/401.html");
+        return redirectResponse(httpVersion, "/401.html");
     }
 
     private Optional<User> authenticate(final String account, final String password) {
@@ -53,7 +55,7 @@ public class LoginHandler implements Handler {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private HttpResponse loginPageResponse(String httpVersion, String location) throws IOException {
+    private HttpResponse loginPageResponse(final String httpVersion, final String location) throws IOException {
         final String resourcePath = "static" + location;
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
@@ -73,6 +75,20 @@ public class LoginHandler implements Handler {
         );
     }
 
+    private HttpResponse loginRedirectResponse(final HttpRequest request, final String location) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("location", location);
+        headers.addHeader("Content-Length", "0");
+
+        addSessionCookie(request, headers);
+
+        return new HttpResponse(
+                new StatusLine(request.getVersion(), StatusCode.FOUND),
+                headers,
+                new byte[0]
+        );
+    }
+
     private HttpResponse redirectResponse(final String httpVersion, final String location) {
         final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("location", location);
@@ -83,5 +99,13 @@ public class LoginHandler implements Handler {
                 headers,
                 new byte[0]
         );
+    }
+
+    private void addSessionCookie(final HttpRequest request, final HttpHeaders headers) {
+        if (!request.hasSessionCookie()) {
+            final String sessionId = UUID.randomUUID().toString();
+            final HttpCookie cookie = HttpCookie.of("JSESSIONID", sessionId);
+            headers.addHeader("Set-Cookie", cookie.toHeaderCookie());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.render;
 
+import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.util.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,9 @@ public class PageRenderer{
     private static final String STATIC_FILE_ROOT = "static";
     private static final Logger log = LoggerFactory.getLogger(PageRenderer.class);
 
-    public String handle(final String method, final String path) {
+    public String handle(final String method, final String path, HttpCookie httpCookie) {
         if(!method.equals("GET")){
-            throw new IllegalArgumentException("정적 응답 생성중 에러 발생");
+            throw new IllegalArgumentException("정적 응답 생성중 부적절한 Method가 들어왔습니다.");
         }
         return createStaticFileResponse(HttpStatus.OK.getStatusCode(), path);
     }
@@ -36,7 +37,6 @@ public class PageRenderer{
 
     private static String readStaticFile(final String path) throws IOException {
         String fullPath = STATIC_FILE_ROOT + path;
-        log.info(fullPath);
         try (InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(fullPath)) {
             if (inputStream == null) {
                 throw new IOException("파일을 찾을 수 없습니다: " + fullPath);
@@ -46,7 +46,11 @@ public class PageRenderer{
     }
 
     public static String sendRedirect(int statusCode,String location) {
-        return HttpResponseBuilder.getRedirectResponseString(statusCode, location);
+        return HttpResponseBuilder.getRedirectResponseString(statusCode, location, null);
+    }
+
+    public static String sendRedirect(int statusCode,String location, String sessionId) {
+        return HttpResponseBuilder.getRedirectResponseString(statusCode, location, sessionId);
     }
 
 }

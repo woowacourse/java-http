@@ -22,16 +22,21 @@ public class HttpResponseBuilder {
                 content
         );
     }
+    public static String getRedirectResponseString(int statusCode, String location, String sessionId) {
+        StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 ").append(statusCode)
+                .append(" ").append(HttpStatus.getMessageByStatusCode(statusCode))
+                .append("\r\n");
+        response.append("Location: ").append(location).append("\r\n");
 
-    public static String getRedirectResponseString(final int statusCode, final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + HttpStatus.getMessageByStatusCode(statusCode) + " ",
-                "Location: " + location,
-                "Content-Length: " + 0 + " ",
-                "",
-                ""
-        );
+        if (sessionId != null) {
+            response.append("Set-Cookie: JSESSIONID=").append(sessionId).append("; Path=/; HttpOnly\r\n");
+        }
+
+        response.append("Content-Length: 0\r\n\r\n");
+        return response.toString();
     }
+
 
     public static String getErrorHttpResponse(final int statusCode) {
         try {

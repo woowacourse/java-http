@@ -254,7 +254,7 @@ public class Http11Processor implements Runnable, Processor {
     private void registerUser(String userInformation, OutputStream outputStream) throws IOException {
         Map<LoginParam, String> registerInformation = parseRequestBody(userInformation);
         if (InMemoryUserRepository.existsByAccount(registerInformation.get(LoginParam.ACCOUNT))) {
-            throw new IllegalArgumentException("[ERROR] already register account");
+            sendResponse(outputStream, buildRedirectHeaders("/register.html"));
         }
 
         String account = registerInformation.get(LoginParam.ACCOUNT);
@@ -301,10 +301,7 @@ public class Http11Processor implements Runnable, Processor {
     private void validateUserCookie(String cookieRequest) throws IOException {
         if (sessionManager.isExistSessionId(cookieRequest)) {
             sessionManager.findSession(cookieRequest);
-            return;
         }
-
-        throw new IllegalArgumentException("[ERROR] no such sessionId");
     }
 
     private String getSession(User user) {

@@ -1,19 +1,21 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.NoSuchUserException;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import com.techcourse.model.LoginParam;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String QUERY_PARAM = "?";
 
     private final Socket connection;
 
@@ -50,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             String method = requestLineParts[0];
             String requestPath = requestLineParts[1];
 
-            if (isGetMethod(method)) {
+            if (MethodType.isGetMethod(method)) {
                 if (requestPath.equals("/")) {
                     final var response = getResponse();
 
@@ -59,7 +62,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (requestPath.startsWith("/login")) {
-                    authenticateUserFromRequestPath(requestPath);
+                    if (requestPath.contains(QUERY_PARAM)) {
+                        authenticateUserFromRequestPath(requestPath, outputStream);
+                        return;
+                    }
 
                     serveStaticFile(requestPath, outputStream);
                     return;
@@ -67,6 +73,17 @@ public class Http11Processor implements Runnable, Processor {
 
                 serveStaticFile(requestPath, outputStream);
             }
+
+            if (MethodType.isPostMethod(method)){
+                int contentLength = Integer.parseInt(parseHeaders(reader).get("Content-Length"));
+
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                registerUser(requestBody, outputStream);
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -96,12 +113,35 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
 
+        if (requestPath.startsWith("/register")) {
+            return Path.of(
+                    Objects.requireNonNull(
+                            getClass().getClassLoader().getResource("static/register.html")).getPath()
+            );
+        }
+
         var resource = getClass().getClassLoader().getResource("static/" + requestPath);
         return Path.of(Objects.requireNonNullElseGet(
                 resource, () -> Objects.requireNonNull(
                         getClass().getClassLoader().getResource("static/404.html")
                 )
         ).getPath());
+    }
+
+    private Map<String, String> parseHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while((line = reader.readLine()) != null && !line.isEmpty()) {
+            int index = line.indexOf(":");
+            if (index > 0) {
+                String key = line.substring(0, index).trim();
+                String value = line.substring(index+1).trim();
+                headers.put(key, value);
+            }
+        }
+
+        return headers;
     }
 
     private String getResponse() {
@@ -128,10 +168,24 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 404 Not Found",
                 "Content-Type: text/plain; charset=utf-8",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Length: " + body.getBytes(UTF_8).length,
                 "",
                 body
         );
+    }
+
+    private String getUnauthorizedRedirectHeaders(String location) {
+        return "HTTP/1.1 302 Unauthorized\r\n"
+                + "Location: " + location + "\r\n"
+                + "Content-Length: 0\r\n"
+                + "\r\n";
+    }
+
+    private String buildRedirectHeaders(String location) {
+        return "HTTP/1.1 302 Found\r\n"
+                + "Location: " + location + "\r\n"
+                + "Content-Length: 0\r\n"
+                + "\r\n";
     }
 
     private String getRequest(BufferedReader reader) throws IOException {
@@ -153,12 +207,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(response.getBytes(UTF_8));
         outputStream.flush();
     }
 
-    private void authenticateUserFromRequestPath(String requestPath) {
-        int index = requestPath.indexOf("?");
+    private void authenticateUserFromRequestPath(String requestPath, OutputStream outputStream) throws IOException {
+        int index = requestPath.indexOf(QUERY_PARAM);
         String queryString = requestPath.substring(index + 1);
 
         Map<LoginParam, String> accountAndPassword = queryParser(queryString);
@@ -166,11 +220,50 @@ public class Http11Processor implements Runnable, Processor {
         String account = accountAndPassword.get(LoginParam.ACCOUNT);
         String password = accountAndPassword.get(LoginParam.PASSWORD);
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchUserException("[ERROR] no such user"));
+        if (InMemoryUserRepository.existsByAccount(account)) {
+            User user = InMemoryUserRepository.findByAccount(account).get();
+            log.info("User: account = {}, password = {}", account, password);
 
-        user.validatePasswordAndLog(password);
-        log.info(user.toString());
+            if (user.isPasswordCorrect(password)) {
+                sendResponse(outputStream, buildRedirectHeaders("/index.html"));
+                return;
+            }
+        }
+
+        sendResponse(outputStream, getUnauthorizedRedirectHeaders("/401.html"));
+    }
+
+    private void registerUser(String userInformation, OutputStream outputStream) throws IOException {
+        Map<LoginParam, String> registerInformation = parseRequestBody(userInformation);
+        if (InMemoryUserRepository.existsByAccount(registerInformation.get(LoginParam.ACCOUNT))) {
+            throw new IllegalArgumentException("[ERROR] already register account");
+        }
+
+        String account = registerInformation.get(LoginParam.ACCOUNT);
+        String email = registerInformation.get(LoginParam.EMAIL);
+        String password = registerInformation.get(LoginParam.PASSWORD);
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        sendResponse(outputStream, buildRedirectHeaders("/index.html"));
+    }
+
+    private Map<LoginParam, String> parseRequestBody(String requestBody) {
+        Map<LoginParam, String> userInformation = new HashMap<>();
+        String[] keyValuePairs = requestBody.split("&");
+
+        for (String pair : keyValuePairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String encodedValue = keyValue[1];
+
+            LoginParam loginParam = LoginParam.getLoginParam(key);
+            String decodedValue = URLDecoder.decode(encodedValue, UTF_8);
+
+            userInformation.put(loginParam, decodedValue);
+        }
+
+        return userInformation;
     }
 
     private Map<LoginParam, String> queryParser(String queryString) {
@@ -185,9 +278,5 @@ public class Http11Processor implements Runnable, Processor {
                 LoginParam.ACCOUNT, account,
                 LoginParam.PASSWORD, password
         );
-    }
-
-    private boolean isGetMethod(String method) {
-        return method.equals("GET");
     }
 }

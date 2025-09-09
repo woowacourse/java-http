@@ -20,7 +20,11 @@ public class InMemoryUserRepository {
     }
 
     public static Optional<User> findByAccount(String account) {
-        return Optional.of(database.get(account));
+        return Optional.ofNullable(database.get(account));
+    }
+
+    public static boolean existsByAccount(String account) {
+        return database.containsKey(account);
     }
 
     private InMemoryUserRepository() {}

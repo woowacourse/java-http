@@ -23,15 +23,7 @@ public class User {
         this(null, account, password, email);
     }
 
-    public void validatePasswordAndLog(String password) {
-        if (checkPassword(password)) {
-            return;
-        }
-
-        throw new NoSuchUserException("[ERROR] invalid password");
-    }
-
-    public boolean checkPassword(String password) {
+    public boolean isPasswordCorrect(String password) {
         return this.password.equals(password);
     }
 

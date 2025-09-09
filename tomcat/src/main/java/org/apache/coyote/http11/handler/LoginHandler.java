@@ -73,7 +73,7 @@ public class LoginHandler implements Handler {
         );
     }
 
-    private HttpResponse redirectResponse(final String httpVersion, final String location) throws IOException {
+    private HttpResponse redirectResponse(final String httpVersion, final String location) {
         final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("location", location);
         headers.addHeader("Content-Length", "0");

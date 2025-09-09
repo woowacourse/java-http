@@ -8,13 +8,14 @@ public class SessionHandler {
 
     public Session getSession(HttpRequest request, HttpResponse response) {
         String sessionId = request.getCookies().get(SESSION_COOKIE_NAME);
-        if (sessionId != null) {
-            Session session = SessionManager.getSession(sessionId);
-            if (session != null) {
-                return session;
-            }
+        if (sessionId == null) {
+            return createNewSession(response);
         }
-        return createNewSession(response);
+        Session session = SessionManager.getSession(sessionId);
+        if (session == null) {
+            return createNewSession(response);
+        }
+        return session;
     }
 
     private Session createNewSession(HttpResponse response) {
